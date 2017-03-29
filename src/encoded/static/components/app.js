@@ -469,7 +469,11 @@ var App = React.createClass({
         var userInfo = JWT.getUserInfo();
         if (userInfo){
             userActions = userInfo.user_actions;
-            session = true;
+            var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.
+            if (currentToken) session = true;
+            else if (this.state.session === true) {
+                Alerts.queue(Alerts.LoggedOut);
+            }
         }
 
         var stateChange = {};

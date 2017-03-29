@@ -447,7 +447,7 @@ var ViewContainer = module.exports = React.createClass({
                     }
 
                     var xCoordOverride = null;
-                    /*
+                    ///*
                     if (this.refs && this.refs.container){
                         xCoordOverride = (
                             layout.getElementOffset(this.refs.container).left
@@ -456,7 +456,7 @@ var ViewContainer = module.exports = React.createClass({
                             + (node.parent || node).attr.x)
                         );
                     }
-                    */
+                    //*/
 
 
                     var newCursorDetailState = {

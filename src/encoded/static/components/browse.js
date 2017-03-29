@@ -164,7 +164,11 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     );
                 } else {
                     return(
-                        <td key={key+this.props.href} className="expset-table-cell">{this.props.columns[key]}</td>
+                        <td key={key+this.props.href} className="expset-table-cell">
+                            <div>
+                                {this.props.columns[key]}
+                            </div>
+                        </td>
                     );
                 }
             });
@@ -202,8 +206,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 <ExperimentsTable
                     key='experiments-table'
                     columnHeaders={[
-                        { className: 'file-detail', title : 'File Type'},
-                        { className: 'file-detail', title : 'File Info'}
+                        { columnClass: 'file-detail', title : 'File Type'},
+                        { columnClass: 'file-detail', title : 'File Info'}
                     ]}
                     experimentArray={[...this.props.passExperiments] /* Convert set to array */}
                     replicateExpsArray={this.props.replicateExpsArray}

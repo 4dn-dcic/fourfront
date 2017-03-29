@@ -26,16 +26,16 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             switch (expSetType){
                 case 'replicate' :
                     return [
-                        { className: 'biosample', title: 'Biosample Accession' },
-                        { className: 'experiment', title: 'Experiment Accession' },
-                        { className: 'file-pair', title: 'File Pair', visibleTitle : <i className="icon icon-download"></i> },
-                        { className: 'file', title: 'File Accession' },
+                        { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample'  },
+                        { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment' },
+                        { columnClass: 'file-pair',                                 title: 'File Pair',     visibleTitle : <i className="icon icon-download"></i> },
+                        { columnClass: 'file',                                      title: 'File'       },
                     ];
                 default:
                     return [
-                        { className: 'biosample', title: 'Biosample Accession' },
-                        { className: 'experiment', title: 'Experiment Accession'},
-                        { className: 'file', title: 'File Accession' },
+                        { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample'  },
+                        { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment' },
+                        { columnClass: 'file',                                      title: 'File'       },
                     ];
             }
 
@@ -212,11 +212,11 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                             }
 
                             function subtitleElement(){
-                                if (!subtitle) return null;
+                                if (!accession && !subtitle) return null;
                                 return React.createElement(
                                     inline ? 'span' : 'div',
-                                    { className : "ext" },
-                                    subtitle
+                                    { className : "ext" + (accession ? ' is-accession' : '') },
+                                    accession || subtitle
                                 );
                             }
 
@@ -265,7 +265,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                             this.props.expTable.state &&
                             Array.isArray(this.props.expTable.state.columnWidths)
                         ){
-                            var colWidthIndex = _.findIndex(this.props.expTable.columnHeaders(), { 'className' : this.props.columnClass });
+                            var colWidthIndex = _.findIndex(this.props.expTable.columnHeaders(), { 'columnClass' : this.props.columnClass });
                             if (colWidthIndex > -1) return { 'width' : this.props.expTable.state.columnWidths[colWidthIndex] };
                         }
 
@@ -409,6 +409,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                             if (this.props.colWidthStyles && !c.props.colWidthStyles){
                                 addedProps.colWidthStyles = this.props.colWidthStyles;
                             }
+                            if (this.props.experimentSetType && !c.props.experimentSetType){
+                                addedProps.experimentSetType = this.props.experimentSetType;
+                            }
                             if (Object.keys(addedProps).length > 0){
                                 return React.cloneElement(c, addedProps, c.props.children);
                             }
@@ -483,10 +486,12 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 return React.Children.map(this.props.children, (c) => {
                     if (c === null) return null;
                     var addedProps = {};
+
                     if (!c.props.columnClass && this.props.columnClass) addedProps.columnClass = this.props.columnClass;
                     if (!c.props.colWidthStyles && this.props.colWidthStyles) addedProps.colWidthStyles = this.props.colWidthStyles;
                     if (!c.props.label && this.props.label) addedProps.label = this.props.label;
                     if (!c.props.expTable && this.props.expTable) addedProps.expTable = this.props.expTable;
+                    if (!c.props.experimentSetType && this.props.experimentSetType) addedProps.experimentSetType = this.props.experimentSetType;
                     if (!c.props.currentlyCollapsing && this.props.currentlyCollapsing) addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
 
                     if (c.props.children){
@@ -561,9 +566,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return {
             keepCounts : false,
             columnHeaders : [
-                { className: 'biosample', title : 'Biosample Accession'},
-                { className: 'experiment', title : 'Experiment Accession'},
-                { className: 'file-detail', title : 'File Info'}
+                { columnClass: 'biosample',     className: 'text-left',     title : 'Biosample'     },
+                { columnClass: 'experiment',    className: 'text-left',     title : 'Experiment'    },
+                { columnClass: 'file-detail',                               title : 'File Info'     }
             ]
         };
     },
@@ -572,9 +577,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     getInitialState: function() {
         this.cache = {
-            origColumnWidths : null,
-            staticColumnHeaders : null,
-            customColumnHeaders : null
+        //    origColumnWidths : null,
+        //    staticColumnHeaders : null,
+        //    customColumnHeaders : null
+            oddExpRow : true
         };
         var initialState = {
             checked: true,
@@ -649,7 +655,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     staticColumnHeaders : function(){
         if (this.cache.staticColumnHeaders) return this.cache.staticColumnHeaders;
         this.cache.staticColumnHeaders = ExperimentsTable.builtInHeaders(this.props.experimentSetType).map((staticCol) => {
-            return _.extend(_.clone(staticCol), _.findWhere(this.props.columnHeaders, { title : staticCol.title }) || {});
+            return _.extend(
+                _.clone(staticCol),
+                _.findWhere(this.props.columnHeaders, { title : staticCol.title }) || {}
+            );
         });
         return this.cache.staticColumnHeaders;
     },
@@ -681,7 +690,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         if (Array.isArray(this.state.columnWidths)){
             Object.keys(colWidthStyles).forEach((cn) => {
                 colWidthStyles[cn] = {
-                    width : this.state.columnWidths[_.findIndex(this.columnHeaders(), { 'className' : cn })]
+                    width : this.state.columnWidths[_.findIndex(this.columnHeaders(), { 'columnClass' : cn })]
                 }
             });
         }
@@ -730,6 +739,11 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         this.cache.oddExpRow = !this.cache.oddExpRow;
 
         var contentsClassName = Array.isArray(exp.file_pairs) ? 'file-pairs' : 'files';
+        var columnHeaders = this.columnHeaders();
+        var experimentVisibleName = (
+            exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
+                exp.experiment_type ? exp.experiment_type : exp.accession
+        );
 
         return (
             <ExperimentsTable.StackedBlock
@@ -739,20 +753,14 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 label={{
                     accession : exp.accession,
                     title : 'Experiment',
-                    subtitle : (
-                        exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
-                            exp.experiment_type ? exp.experiment_type : null
-                    ),
+                    subtitle : experimentVisibleName,
                     subtitleVisible: true
                 }}
                 stripe={this.cache.oddExpRow}
                 id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || exp['@id']}
             >
                 <ExperimentsTable.StackedBlock.Name relativePosition={expFxn.fileCount(exp) > 6}>
-                    <a href={ exp['@id'] || '#' } className="name-title">{
-                        exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
-                            exp.experiment_type ? exp.experiment_type : null
-                    }</a>
+                    <a href={ exp['@id'] || '#' } className="name-title">{ experimentVisibleName }</a>
                 </ExperimentsTable.StackedBlock.Name>
                 <ExperimentsTable.StackedBlock.List
                     className={contentsClassName}
@@ -764,7 +772,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                                 key={i}
                                 selectedFiles={this.selectedFiles()}
                                 files={filePair}
-                                columnHeaders={this.customColumnHeaders()}
+                                columnHeaders={columnHeaders}
                                 handleFileUpdate={this.handleFileUpdate}
                                 label={ exp.file_pairs.length > 1 ?
                                     { title : "Pair " + (i + 1) } : { title : "Pair" }
@@ -777,7 +785,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                             hideNameOnHover={false}
                             columnClass="file-pair"
                         >
-                            { _.pluck(this.columnHeaders(), 'title').indexOf('File Pair') > -1 ?
+                            { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ?
                                 <ExperimentsTable.StackedBlock.Name/>
                             : null }
                             <ExperimentsTable.StackedBlock.List title="Files" className="files">
@@ -786,17 +794,17 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                                         <FileEntryBlock
                                             key={file['@id']}
                                             file={file}
-                                            columnHeaders={this.customColumnHeaders()}
+                                            columnHeaders={columnHeaders}
                                             handleFileUpdate={this.handleFileUpdate}
                                             selectedFiles={this.selectedFiles()}
-                                            hideNameOnHover={true}
+                                            hideNameOnHover={false}
                                             isSingleItem={exp.files.length < 2 ? true : false}
                                         />
                                     )
                                     : /* No Files Exist */
                                     <FileEntryBlock
                                         file={null}
-                                        columnHeaders={this.customColumnHeaders()}
+                                        columnHeaders={columnHeaders}
                                     />
                                 }
                             </ExperimentsTable.StackedBlock.List>
@@ -809,6 +817,14 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     renderBiosampleStackedBlockOfExperiments : function(expsWithBiosample,i){
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
+
+        var visibleBiosampleTitle = (
+            expsWithBiosample[0].biosample.bio_rep_no ?
+                'Bio Replicate ' + expsWithBiosample[0].biosample.bio_rep_no
+                :
+                expsWithBiosample[0].biosample.biosource_summary
+        );
+
         return (
             <ExperimentsTable.StackedBlock
                 columnClass="biosample"
@@ -817,11 +833,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 id={'bio-' + (expsWithBiosample[0].biosample.bio_rep_no || i + 1)}
                 label={{
                     title : 'Biosample',
-                    subtitle : expsWithBiosample[0].biosample.bio_rep_no ?
-                        'Bio Replicate ' + expsWithBiosample[0].biosample.bio_rep_no
-                        :
-                        expsWithBiosample[0].biosample.biosource_summary,
-                    subtitleVisible : true
+                    subtitle : visibleBiosampleTitle,
+                    subtitleVisible : true,
+                    accession : expsWithBiosample[0].biosample.accession
                 }}
             >
                 <ExperimentsTable.StackedBlock.Name
@@ -829,8 +843,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6
                     }
                 >
-                    <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title mono-text">
-                        { expsWithBiosample[0].biosample.accession }
+                    <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title">
+                        { visibleBiosampleTitle }
                     </a>
                 </ExperimentsTable.StackedBlock.Name>
                 <ExperimentsTable.StackedBlock.List
@@ -929,7 +943,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     render : function(){
 
-        var renderHeader = function(h, i, arr){
+        var renderHeaderItem = function(h, i, arr){
             if (h.visible === false) return null;
             var visibleTitle = typeof h.visibleTitle !== 'undefined' ? h.visibleTitle : h.title;
             var style = null;
@@ -937,7 +951,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 style = { 'width' : this.state.columnWidths[i] };
             }
             return (
-                <div className={"heading-block col-" + h.className} key={'header-' + i} style={style} data-column-class={h.className}>
+                <div className={"heading-block col-" + h.columnClass + (h.className ? ' ' + h.className : '')} key={'header-' + i} style={style} data-column-class={h.columnClass}>
                     { visibleTitle }
                 </div>
             );
@@ -950,7 +964,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     <h6 className="text-center text-400"><em>No experiments</em></h6>
                     :
                     <div className="headers expset-headers" ref="header">
-                        { this.columnHeaders().map(renderHeader) }
+                        { this.columnHeaders().map(renderHeaderItem) }
                     </div>
                 }
 
@@ -1036,7 +1050,7 @@ var FilePairBlock = React.createClass({
         function nameColumn(){
             if (this.props.colVisible === false) return null;
             return (
-                <div className="name col-file-pair" style={this.props.colWidthStyles ? this.props.colWidthStyles['file-pair'] : null}>
+                <div className="name col-file-pair" style={this.props.colWidthStyles ? _.clone(this.props.colWidthStyles['file-pair']) : null}>
                     { label.call(this) }
                     <span className="name-title">
                         { this.renderCheckBox() }
@@ -1088,34 +1102,38 @@ var FileEntryBlock  = React.createClass({
     },
 
     filledFileRow : function (file = this.props.file){
+
         var row = [];
-        var cols = this.props.columnHeaders;
+        var cols = _.filter(this.props.columnHeaders, (col)=>{
+            if (_.pluck(ExperimentsTable.builtInHeaders(this.props.experimentSetType), 'columnClass').indexOf(col.columnClass) > -1) return false;
+            return true;
+        });
         var baseClassName = (this.props.className || '') + " col-file-detail item";
         var baseStyle = this.props.colWidthStyles ? this.props.colWidthStyles['file-detail'] : null;
         for (var i = 0; i < cols.length; i++){
 
-            var className = baseClassName + ' col-' + cols[i].className + ' detail-col-' + i;
+            var className = baseClassName + ' col-' + cols[i].columnClass + ' detail-col-' + i;
             var title = cols[i].valueTitle || cols[i].title;
 
             if (!file || !file['@id']) {
-                row.push(<div key={"file-detail-empty-" + i} className={className + i} style={baseStyle}></div>);
+                row.push(<div key={"file-detail-empty-" + i} className={className} style={baseStyle}></div>);
                 continue;
             }
 
             if (title == 'File Type'){
-                row.push(<div key="file-type" className={className + i} style={baseStyle}>{file.file_format}</div>);
+                row.push(<div key="file-type" className={className} style={baseStyle}>{file.file_format}</div>);
                 continue;
             }
 
             if (title == 'File Info'){
                 if (typeof file.paired_end !== 'undefined') {
-                    row.push(<div key="file-info" className={className + i} style={baseStyle}>
+                    row.push(<div key="file-info" className={className} style={baseStyle}>
                         Paired end {file.paired_end}
                     </div>);
                 } else if (file.file_format === 'fastq' || file.file_format === 'fasta') {
-                    row.push(<div key="file-info" className={className + i} style={baseStyle}>Unpaired</div>);
+                    row.push(<div key="file-info" className={className} style={baseStyle}>Unpaired</div>);
                 } else {
-                    row.push(<div key="file-info" className={className + i} style={baseStyle}></div>);
+                    row.push(<div key="file-info" className={className} style={baseStyle}></div>);
                 }
                 continue;
             }
@@ -1175,7 +1193,7 @@ var FileEntryBlock  = React.createClass({
                 }));
             } else if (this.props.type === 'paired-end') {
                 return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
-                    subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
+                    //subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
                 }));
             }
 
@@ -1216,7 +1234,7 @@ var FileEntryBlock  = React.createClass({
 
     render : function(){
         var sBlockClassName = "s-block file";
-        if (this.props.type || this.props.hideNameOnHover) sBlockClassName += ' hide-name-on-block-hover';
+        if (this.props.hideNameOnHover) sBlockClassName += ' hide-name-on-block-hover';
         if (this.props.isSingleItem) sBlockClassName += ' single-item';
         return (
             <div className={sBlockClassName}>

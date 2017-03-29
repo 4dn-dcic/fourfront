@@ -617,9 +617,11 @@ var ChartDataController = module.exports = {
                 experiments = null;
                 cb();
 
-                // If received a 403, we're likely logged out, so reload current href / context
+                // If received a 403 or a 404 (no expsets returned) we're likely logged out, so reload current href / context
                 // Reload/navigation will also receive 403 and then trigger JWT unset, logged out alert, & refresh.
-                if (errResp && typeof errResp === 'object' && errResp.code === 403){
+                if (errResp && typeof errResp === 'object' &&
+                    (errResp.code === 403 || errResp.total === 0)
+                ){
                     navigate('', { inPlace : true });
                 }
             }

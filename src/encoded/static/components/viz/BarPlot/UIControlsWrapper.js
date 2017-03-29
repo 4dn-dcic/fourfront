@@ -2,6 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
+var url = require('url');
 var vizUtil = require('./../utilities');
 var { RotatedLabel, Legend } = require('./../components');
 var { console, object, isServerSide, expFxn, Filters, layout } = require('./../../util');
@@ -211,6 +212,41 @@ var UIControlsWrapper = module.exports = React.createClass({
         }
     },
 
+    renderShowTypeToggle : function(windowGridSize){
+
+        if (this.props.href){
+            // Hide on homepage.
+            var hrefParts = url.parse(this.props.href);
+            if (hrefParts.pathname === '/' || hrefParts.pathname === '/home'){
+                return null;
+            }
+        }
+
+        return (
+            <div className={"toggle-zoom" + (/*filterObjExistsAndNoFiltersSelected ? ' no-click' : */'')} onClick={(e)=>{
+                e.preventDefault();
+                this.handleExperimentsShowType(this.state.showState === 'all' ? 'filtered' : 'all')
+            }} 
+                data-tip="Toggle between <span class='text-600'>all</span> data <em>or</em> data <span class='text-600'>selected via filters</span> below."
+                data-place={ windowGridSize === 'xs' ? 'bottom' : "left" } data-html data-delay-show={600}
+            >
+            {/*
+                <div className="text">
+                    <small>Viewing</small><br/>
+                    {this.state.showState === 'all' ? 'All' : 'Selected'}
+                </div>
+                */}
+                
+                <i className="icon icon-filter"/>
+                <span className="text">View Selected</span>
+                <span className="inline-block toggle-container">
+                    <Toggle checked={this.state.showState === 'filtered'} />
+                </span>
+                
+            </div>
+        );
+    },
+
     /**
      * @ignore
      * @memberof module:viz/BarPlot.UIControlsWrapper
@@ -250,24 +286,7 @@ var UIControlsWrapper = module.exports = React.createClass({
                         />
                     </div>
 
-                    <div className={"toggle-zoom" + (/*filterObjExistsAndNoFiltersSelected ? ' no-click' : */'')} onClick={(e)=>{
-                        e.preventDefault();
-                        this.handleExperimentsShowType(this.state.showState === 'all' ? 'filtered' : 'all')
-                    }}>
-                    {/*
-                        <div className="text">
-                            <small>Viewing</small><br/>
-                            {this.state.showState === 'all' ? 'All' : 'Selected'}
-                        </div>
-                        */}
-                        
-                        <i className="icon icon-filter"/>
-                        <span className="text">View Selected</span>
-                        <span className="inline-block toggle-container">
-                            <Toggle checked={this.state.showState === 'filtered'} />
-                        </span>
-                       
-                    </div>
+                    { this.renderShowTypeToggle(windowGridSize) }
 
                 </div>
 

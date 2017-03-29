@@ -202,11 +202,11 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
         /* In addition to built-in headers for experimentSetType defined by ExperimentsTable */
         var expTableColumnHeaders = [
-            { className: 'file-detail', title : 'File Info'}
+            { columnClass: 'file-detail', title : 'File Info'}
         ];
 
         if (this.props.context.experimentset_type === 'replicate') {
-            expTableColumnHeaders.unshift({ className: 'file-detail', title : 'File Type'});
+            expTableColumnHeaders.unshift({ columnClass: 'file-detail', title : 'File Type'});
         }
 
         return (
