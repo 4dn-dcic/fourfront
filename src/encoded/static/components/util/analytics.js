@@ -11,7 +11,8 @@ var navigate = require('./navigate');
 var state = null;
 
 var GADimensionMap = {
-    'currentFilters' : 'dimension1'
+    'currentFilters' : 'dimension1',
+    'name' : 'dimension2'
 };
 
 
@@ -74,6 +75,35 @@ var analytics = module.exports = {
         var parts = url.parse(href);
 
         href = parts.pathname; // Clear query from HREF.
+
+        var pathParts = href.split('/').filter(function(pathPart){ // Gen path array to adjust href further if needed.
+            return pathPart.length > 0;
+        });
+
+        // Remove Accession, UUID, and Name from URL and save it to 'name' dimension instead.
+        if (typeof context.accession === 'string'){
+            // We gots an accessionable Item. Lets remove its Accession from the path to get nicer Behavior Flows in GA.
+            // And let product tracking / Shopping Behavior handle Item details.
+            if (pathParts[1] === context.accession){
+                pathParts[1] = 'accession';
+                href = '/' + pathParts.join('/') + '/';
+                opts[GADimensionMap.name] = context.accession;
+            }
+        } else if ((context.last_name && context.first_name) || (context['@type'] && context['@type'].indexOf('User') > -1)){
+            if (pathParts[0] === 'users' && (context.uuid && pathParts[1] === context.uuid)){
+                pathParts[1] = 'uuid';
+                href = '/' + pathParts.join('/') + '/';
+                opts[GADimensionMap.name] = context.title || context.uuid;
+            }
+        } else if (typeof context.uuid === 'string' && pathParts[1] === context.uuid){
+            pathParts[1] = 'uuid';
+            href = '/' + pathParts.join('/') + '/';
+            opts[GADimensionMap.name] = context.display_title || context.uuid;
+        } else if (typeof context.name === 'string' && pathParts[1] === context.name){
+            pathParts[1] = 'name';
+            href = '/' + pathParts.join('/') + '/';
+            opts[GADimensionMap.name] = context.display_title || context.name;
+        }
 
         // Set it as current page
         ga('set', 'page', href);
