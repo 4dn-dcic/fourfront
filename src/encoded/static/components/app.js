@@ -408,22 +408,31 @@ var App = React.createClass({
         //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
 
         // Load up analytics
-        analytics.initializeGoogleAnalytics(analytics.getTrackingId(this.props.href));
+        analytics.initializeGoogleAnalytics(
+            analytics.getTrackingId(this.props.href),
+            this.props.context,
+            this.props.expSetFilters
+        );
     },
 
     componentDidUpdate: function (prevProps, prevState) {
         var key;
         if (this.props) {
+
+            if (this.props.href !== prevProps.href){ // We navigated somewhere else.
+
+                // Register google analytics pageview event.
+                analytics.registerPageView(this.props.href, this.props.context, this.props.expSetFilters);
+
+                // We need to rebuild tooltips after navigation to a different page.
+                ReactTooltip.rebuild();
+
+            }
+
+
             for (key in this.props) {
                 if (this.props[key] !== prevProps[key]) {
                     console.log('changed props: %s', key);
-                    if (key === 'href'){
-                        // We need to rebuild tooltips after navigation to a different page.
-                        ReactTooltip.rebuild();
-
-                        // Register google analytics pageview event.
-                        analytics.registerPageView(this.props[key]);
-                    }
                 }
             }
         }
