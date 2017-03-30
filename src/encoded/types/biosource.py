@@ -47,7 +47,19 @@ class Biosource(Item):
             "KBM-7": ['Unclassified', 'EFO_0005903'],
             "192627": ['Unclassified', None],
             "CC-2517": ['Unclassified', 'EFO:0002795'],
-            "HeLa-S3": ['Unclassified', 'EFO:0002791']
+            "HeLa-S3": ['Unclassified', 'EFO:0002791'],
+            "SK-N-DZ": ['Unclassified', 'EFO:0005721'],
+            "A549": ['Unclassified', 'EFO:0001086'],
+            "NCI-H460": ['Unclassified', 'EFO:0003044'],
+            "SK-N-MC": ['Unclassified', 'EFO:0002860'],
+            "T47D": ['Unclassified', 'EFO:0001247'],
+            "SK-MEL-5": ['Unclassified', 'EFO:0005720'],
+            "G401": ['Unclassified', 'EFO:0002179'],
+            "Panc1": ['Unclassified', 'EFO:0002713'],
+            "Caki2": ['Unclassified', 'EFO:0002150'],
+            "LNCaP clone FGC": ['Unclassified', 'EFO:0005726'],
+            "RPMI-7951": ['Unclassified', 'EFO:0005712'],
+            "SJCRH30": ['Unclassified', 'EFO:0005722']
         }
         if 'cell_line' in properties:
             if properties['cell_line'] in name2info:
