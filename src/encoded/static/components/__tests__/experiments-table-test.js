@@ -54,7 +54,7 @@ describe('Testing experiments-table.js', function() {
     });
 
     it('Has proper built-in headers (at least)', function() {
-        var checkIfHaveHeaders = ['Experiment Accession', 'Biosample Accession', 'File Accession'].sort(); // Sort b/c indices matter
+        var checkIfHaveHeaders = ['Experiment', 'Biosample', 'File'].sort(); // Sort b/c indices matter
         
         // Check if built-in header definitions match headers to be checked in rendered table.
         expect(
