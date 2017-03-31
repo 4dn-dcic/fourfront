@@ -13,8 +13,9 @@ var { Button } = require('react-bootstrap');
  * @ignore
  * @private
  */
-var updateFxns = { 'default' : null },
-    resetFxns  = { 'default' : null };
+var updateFxns   = { 'default' : null },
+    resetFxns    = { 'default' : null },
+    getStateFxns = { 'default' : null };
 
 /**
  * A plain JS object which contains at least 'title' and 'function' properties.
@@ -93,21 +94,39 @@ var ChartDetailCursor = module.exports = React.createClass({
         };
     },
 
+    /** Prevent updates when stickied. Unless it's to unsticky. */
+    shouldComponentUpdate : function(nextProps, nextState){
+        return true;
+        if (this.state.sticky === true){
+            if (nextState.sticky === false || this.overrideSticky){
+                this.overrideSticky = false;
+                return true;
+            }
+            return false;
+        }
+        return true;
+    },
+
     componentDidMount : function(){
         console.log('Mounted MouseDetailCursor');
 
         // Alias this.update so we can call it statically.
-        updateFxns[this.props.id] = this.update;
-        resetFxns[this.props.id]  = this.reset;
+        updateFxns[this.props.id]   = this.update;
+        resetFxns[this.props.id]    = this.reset;
+        getStateFxns[this.props.id] = this.getState;
         this.setState({'mounted' : true});
     },
 
     componentWillUnmount : function(){
         // Cleanup.
-        updateFxns[this.props.id] = null;
-        resetFxns[this.props.id] = null;
-        if (this.props.id !== 'default') delete updateFxns[this.props.id];
-        if (this.props.id !== 'default') delete resetFxns[this.props.id];
+        updateFxns[this.props.id]   = null;
+        resetFxns[this.props.id]    = null;
+        getStateFxns[this.props.id] = null;
+        if (this.props.id !== 'default') {
+            delete   updateFxns[this.props.id];
+            delete    resetFxns[this.props.id];
+            delete getStateFxns[this.props.id];
+        };
     },
 
     /**
@@ -119,7 +138,8 @@ var ChartDetailCursor = module.exports = React.createClass({
      * @param {function} [cb] - Optional callback function. Takes updated state as argument.
      * @returns {undefined} Nothing
      */
-    update : function(state = {}, cb = null){
+    update : function(state = {}, cb = null, overrideSticky = false){
+        if (overrideSticky) this.overrideSticky = true; // Unset this on subsequent update.
         if (state.field) state.field = Filters.Field.toName(state.field);
         else if (Array.isArray(state.path) && state.path.length > 0 && state.path[state.path.length - 1].field){
             state.field = Filters.Field.toName(state.path[state.path.length - 1].field);
@@ -143,6 +163,10 @@ var ChartDetailCursor = module.exports = React.createClass({
         }
         this.setState(_.omit(this.getInitialState(), 'mounted'), cb);
         return true;
+    },
+
+    getState : function(){
+        return _.clone(this.state);
     },
 
     render : function(){
@@ -216,9 +240,9 @@ var ChartDetailCursor = module.exports = React.createClass({
          * @param {string} [id] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
          * @param {function} [cb] - Optional callback function.
          */
-        update : function(state, id = "default", cb = null){
+        update : function(state, id = "default", cb = null, overrideSticky = false){
             if (typeof updateFxns[id] === 'function'){
-                return updateFxns[id](state, cb);
+                return updateFxns[id](state, cb, overrideSticky);
             } else {
                 throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
             }
@@ -236,6 +260,14 @@ var ChartDetailCursor = module.exports = React.createClass({
         reset : function(overrideSticky = true, id = "default", cb = null){
             if (typeof resetFxns[id] === 'function'){
                 return resetFxns[id](overrideSticky, cb);
+            } else {
+                throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
+            }
+        },
+
+        getState : function(id = 'default'){
+            if (typeof getStateFxns[id] === 'function'){
+                return getStateFxns[id]();
             } else {
                 throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
             }

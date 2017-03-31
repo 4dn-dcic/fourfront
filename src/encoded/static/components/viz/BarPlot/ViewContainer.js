@@ -341,8 +341,8 @@ var ViewContainer = module.exports = React.createClass({
     handleClickAnywhere : function(evt){
         // Don't do anything if clicked on DetailCursor. UNLESS it's a button.
         if (
-            evt.target.className &&
-            evt.target.className.split(' ').indexOf('btn') === -1 &&
+            //evt.target.className &&
+            //evt.target.className.split(' ').indexOf('btn') === -1 &&
             ChartDetailCursor.isTargetDetailCursor(evt.target)
         ){
             return false;
@@ -352,6 +352,29 @@ var ViewContainer = module.exports = React.createClass({
             'selectedBarSectionParentTerm' : null,
             'selectedBarSectionTerm' : null
         });
+    },
+
+    handleMouseMoveToUnsticky : function(evt){
+        if (this.refs && this.refs.container){
+            
+            var containerOffset = layout.getElementOffset(this.refs.container);
+
+            if (
+                (evt.pageY || evt.clientY) < containerOffset.top ||
+                (evt.pageY || evt.clientY) > containerOffset.top + this.refs.container.clientHeight ||
+                (evt.pageX || evt.clientX) < containerOffset.left ||
+                (evt.pageX || evt.clientX) > containerOffset.left + this.refs.container.clientWidth
+            ){
+                this.setState({
+                    'selectedBarSectionParentTerm' : null,
+                    'selectedBarSectionTerm' : null
+                });
+                return true;
+            }
+            return false;
+        } else {
+            return false;
+        }
     },
 
     /**
@@ -375,9 +398,11 @@ var ViewContainer = module.exports = React.createClass({
             if (typeof this.state.selectedBarSectionTerm === 'string'){
                 ChartDetailCursor.update({ 'sticky' : true });
                 setTimeout(window.addEventListener, 100, 'click', this.handleClickAnywhere);
+                setTimeout(window.addEventListener, 100, 'mousemove', this.handleMouseMoveToUnsticky);
                 //window.addEventListener('click', this.handleClickAnywhere);
             } else {
                 window.removeEventListener('click', this.handleClickAnywhere);
+                window.removeEventListener('mousemove', this.handleMouseMoveToUnsticky);
                 if (!this.state.hoverBarSectionTerm){
                     ChartDetailCursor.reset();
                 } else {
@@ -386,6 +411,21 @@ var ViewContainer = module.exports = React.createClass({
             }
 
         }
+    },
+
+    updateDetailCursorFromNode : function(node, overrideSticky = false, cursorId = 'default'){
+        var newCursorDetailState = {
+            'path' : [],
+            'includeTitleDescendentPrefix' : false,
+            'actions' : this.props.actions || this.cursorDetailActions() || null,
+        };
+        
+        if (node.parent) newCursorDetailState.path.push(node.parent);
+        if (typeof this.props.aggregateType === 'string') {
+            newCursorDetailState.primaryCount = this.props.aggregateType;
+        }
+        newCursorDetailState.path.push(node);
+        ChartDetailCursor.update(newCursorDetailState, cursorId, null, overrideSticky);
     },
 
     /**
@@ -446,8 +486,13 @@ var ViewContainer = module.exports = React.createClass({
                         return false;
                     }
 
-                    var xCoordOverride = null;
-                    ///*
+                    console.log(this.state, ChartDetailCursor.getState());
+
+                    // Cancel if any node still selected
+                    //if (this.state.selectedBarSectionTerm !== null) return false;
+
+                    //var xCoordOverride = null;
+                    /*
                     if (this.refs && this.refs.container){
                         xCoordOverride = (
                             layout.getElementOffset(this.refs.container).left
@@ -456,33 +501,22 @@ var ViewContainer = module.exports = React.createClass({
                             + (node.parent || node).attr.x)
                         );
                     }
-                    //*/
+                    */
 
 
-                    var newCursorDetailState = {
-                        'path' : [],
-                        'includeTitleDescendentPrefix' : false,
-                        'actions' : this.props.actions || this.cursorDetailActions() || null,
-                        'xCoordOverride' : xCoordOverride
-                    };
-                    
-                    if (node.parent) newCursorDetailState.path.push(node.parent);
-                    if (typeof this.props.aggregateType === 'string') {
-                        newCursorDetailState.primaryCount = this.props.aggregateType;
+                    if (this.state.selectedBarSectionTerm === null){
+                        this.updateDetailCursorFromNode(node, false);
                     }
-                    newCursorDetailState.path.push(node);
-                    ChartDetailCursor.update(newCursorDetailState);
-
 
                     var newOwnState = {};
 
                     // Unset selected nodes.
-                    if (this.state.selectedBarSectionTerm !== null){
-                        _.extend(newOwnState, {
-                            'selectedBarSectionTerm' : null,
-                            'selectedBarSectionParentTerm' : null
-                        });
-                    }
+                    //if (this.state.selectedBarSectionTerm !== null){
+                    //    _.extend(newOwnState, {
+                    //        'selectedBarSectionTerm' : null,
+                    //        'selectedBarSectionParentTerm' : null
+                    //    });
+                    //}
 
                     // Update hover state
                     _.extend(newOwnState, {
@@ -509,14 +543,18 @@ var ViewContainer = module.exports = React.createClass({
                     }
                 }}
                 onBarPartClick={(node, evt)=>{
+                    evt.preventDefault();
+                    evt.stopPropagation(); // Prevent this event from being captured by this.handleClickAnywhere() listener.
                     // If this section already selected:
                     if (ViewContainer.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
                         this.setState({
                             'selectedBarSectionTerm' : null,
                             'selectedBarSectionParentTerm' : null
                         });
-                    // If not:
                     } else {
+                        if (this.state.selectedBarSectionTerm) {
+                            this.updateDetailCursorFromNode(node, true);
+                        }
                         this.setState({
                             'selectedBarSectionTerm' : node.term || null,
                             'selectedBarSectionParentTerm' : (node.parent && node.parent.term) || null
@@ -538,6 +576,23 @@ var ViewContainer = module.exports = React.createClass({
                 data-field={this.props.topLevelField}
                 style={{ height : this.props.height, width: this.props.width }}
                 ref="container"
+                /*
+                onMouseLeave={(evt)=>{
+                    if (ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
+                        return false;
+                    }
+                    var newState = {};
+                    if (this.state.hoverBarSectionTerm) {
+                        newState.hoverBarSectionParentTerm = newState.hoverBarSectionTerm = null;
+                    }
+                    if (this.state.selectedBarSectionTerm) {
+                        newState.selectedBarSectionParentTerm = newState.selectedBarSectionTerm = null;
+                    }
+                    if (_.keys(newState).length > 0){
+                        this.setState(newState);
+                    }
+                }}
+                */
             >
                 { this.props.leftAxis }
                 {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}
