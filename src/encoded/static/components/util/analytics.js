@@ -129,13 +129,12 @@ var analytics = module.exports = {
         ){
             opts[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(currentExpSetFilters || pastHref);
             if (Array.isArray(context['@graph'])){
-                analytics.impressionListOfItems(context['@graph'], pastHref, currentExpSetFilters);
+                analytics.impressionListOfItems(context['@graph'], pastHref, currentExpSetFilters, 'Browse Results');
             }
         } else if (state.enhancedEcommercePlugin && typeof context.accession === 'string'){
             // We got an Item, lets track some details about it.
-            console.info("Item with an accession. Will track.");
             var productObj = analytics.createProductObjectFromItem(context);
-
+            console.info("Item with an accession. Will track as product:", productObj);
             if (currentExpSetFilters && typeof currentExpSetFilters === 'object'){
                 opts[GADimensionMap.currentFilters] = productObj[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(currentExpSetFilters);
             }
@@ -149,7 +148,7 @@ var analytics = module.exports = {
         return true;
     },
 
-    impressionListOfItems : function(itemList, origHref = null, currentExpSetFilters = {}){
+    impressionListOfItems : function(itemList, origHref = null, currentExpSetFilters = {}, listName = null){
         var from = 0;
         if (typeof origHref === 'string'){
             var urlParts = url.parse(origHref, true);
@@ -159,7 +158,8 @@ var analytics = module.exports = {
         itemList.forEach(function(expSet, i){
             var pObj = analytics.createProductObjectFromItem(expSet);
             if (currentExpSetFilters && typeof currentExpSetFilters === 'object'){
-                pObj[GADimensionMap.currentFilters] = pObj.list = analytics.getStringifiedCurrentFilters(currentExpSetFilters);
+                pObj[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(currentExpSetFilters);
+                pObj.list = listName;
             }
             pObj.position = from + i + 1;
             ga('ec:addImpression', pObj);
