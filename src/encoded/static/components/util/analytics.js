@@ -15,13 +15,25 @@ var GADimensionMap = {
     'name' : 'dimension2'
 };
 
+var defaultOptions = {
+    isAnalyticsScriptOnPage : true,
+    enhancedEcommercePlugin : true
+};
+
 
 var analytics = module.exports = {
 
-    initializeGoogleAnalytics : function(trackingID = null, context = {}, currentExpSetFilters = {}, options = {
-        isAnalyticsScriptOnPage : true,
-        enhancedEcommercePlugin : true
-    }){
+    /**
+     * Initialize Google Analytics tracking. Call this from app.js on initial mount perhaps.
+     * 
+     * @param {string} [trackingID] - Google Analytics ID.
+     * @param {Object} [context] - Current page content / JSON, to get details about Item, etc.
+     * @param {Object} [currentExpSetFilters] - Currently-set expSetFilters, e.g. from Redux. For tracking browse page and how an Item was found.
+     * @param {Object} [options] - Extra options.
+     * @returns {boolean} true if initialized.
+     * @see analytics.getTrackingID()
+     */
+    initializeGoogleAnalytics : function(trackingID = null, context = {}, currentExpSetFilters = {}, options = {}){
 
         if (trackingID === null){
             trackingID = analytics.getTrackingId();
@@ -29,6 +41,8 @@ var analytics = module.exports = {
         if (typeof trackingID !== 'string') return false;
 
         if (isServerSide()) return false;
+
+        options = _.extend({}, defaultOptions, options);
 
         if (!options.isAnalyticsScriptOnPage){
             // If true, we already have <script src="...analytics.js">, e.g. in app.js so should skip this.

@@ -574,8 +574,8 @@ $open-expset-table-side-border-color : #e4e4e4;
 				border-top: 0px solid transparent;
 			}
 		}
-		&.closed:last-child td.dropdown-button-cell {
-			border-bottom: 1px solid $expset-table-border-color;
+		&.closed:last-child > tr > td {
+			border-bottom: 1px solid #ddd;
 		}
 	}
 
