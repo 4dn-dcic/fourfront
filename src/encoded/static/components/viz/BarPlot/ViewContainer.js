@@ -269,8 +269,15 @@ var ViewContainer = module.exports = React.createClass({
         };
     },
 
+    getDefaultProps : function(){
+        return { 
+            'cursorContainerMargin' : 100,
+            'cursorDetailActions' : []
+        };
+    },
+
     cursorDetailActions : function(){
-        return [
+        return this.props.cursorDetailActions.concat([
             {
                 'title' : function(cursorProps){
                     if (navigate.isBrowseHref(cursorProps.href)){
@@ -335,7 +342,7 @@ var ViewContainer = module.exports = React.createClass({
                     return false;
                 }
             }
-        ];
+        ]);
     },
 
     handleClickAnywhere : function(evt){
@@ -356,14 +363,19 @@ var ViewContainer = module.exports = React.createClass({
 
     handleMouseMoveToUnsticky : function(evt){
         if (this.refs && this.refs.container){
-            
+
             var containerOffset = layout.getElementOffset(this.refs.container);
+            var marginTop   = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.top) || this.props.cursorContainerMargin || 0,
+                marginBottom= (this.props.cursorContainerMargin && this.props.cursorContainerMargin.bottom) || marginTop || 0,
+                marginLeft  = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.left) || marginTop || 0,
+                marginRight = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.right) || marginLeft || 0;
+
 
             if (
-                (evt.pageY || evt.clientY) < containerOffset.top ||
-                (evt.pageY || evt.clientY) > containerOffset.top + this.refs.container.clientHeight ||
-                (evt.pageX || evt.clientX) < containerOffset.left ||
-                (evt.pageX || evt.clientX) > containerOffset.left + this.refs.container.clientWidth
+                (evt.pageY || evt.clientY) < containerOffset.top - marginTop ||
+                (evt.pageY || evt.clientY) > containerOffset.top + this.refs.container.clientHeight + marginBottom ||
+                (evt.pageX || evt.clientX) < containerOffset.left - marginLeft ||
+                (evt.pageX || evt.clientX) > containerOffset.left + this.refs.container.clientWidth + marginRight
             ){
                 this.setState({
                     'selectedBarSectionParentTerm' : null,
@@ -486,8 +498,6 @@ var ViewContainer = module.exports = React.createClass({
                         return false;
                     }
 
-                    console.log(this.state, ChartDetailCursor.getState());
-
                     // Cancel if any node still selected
                     //if (this.state.selectedBarSectionTerm !== null) return false;
 
@@ -553,7 +563,38 @@ var ViewContainer = module.exports = React.createClass({
                         });
                     } else {
                         if (this.state.selectedBarSectionTerm) {
-                            this.updateDetailCursorFromNode(node, true);
+                            console.log(node);
+
+                            var containerPos = layout.getElementOffset(this.refs.container);
+                            var bottomOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
+                            var leftOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
+
+                            var mouseXInContainer = evt.pageX || evt.clientX - containerPos.left;
+                            var barYPos = node.attr.height;
+                            var isPopoverOnRightSide = mouseXInContainer > (this.refs.container.clientWidth / 2);
+
+                            if (node.parent){
+                                var done = false;
+                                barYPos = _.reduce(
+                                    _.sortBy(node.parent.bars, 'term').reverse(),
+                                    function(m, siblingNode){
+                                        if (done) return m;
+                                        if (siblingNode.term === node.term){
+                                            done = true;
+                                        }
+                                        return m + siblingNode.attr.height;
+                                    },
+                                    0
+                                );
+                            }
+
+
+                            // Manually update popover coords then update its contents
+                            ChartDetailCursor.setCoords({
+                                x : containerPos.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
+                                y : containerPos.top + this.refs.container.clientHeight - bottomOffset - barYPos,
+                                onRightSide : isPopoverOnRightSide
+                            }, this.updateDetailCursorFromNode.bind(this, node, true, 'default'));
                         }
                         this.setState({
                             'selectedBarSectionTerm' : node.term || null,

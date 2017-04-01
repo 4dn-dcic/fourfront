@@ -13,9 +13,10 @@ var { Button } = require('react-bootstrap');
  * @ignore
  * @private
  */
-var updateFxns   = { 'default' : null },
-    resetFxns    = { 'default' : null },
-    getStateFxns = { 'default' : null };
+var updateFxns    = { 'default' : null },
+    resetFxns     = { 'default' : null },
+    getStateFxns  = { 'default' : null },
+    setCoordsFxns = { 'default' : null };
 
 /**
  * A plain JS object which contains at least 'title' and 'function' properties.
@@ -111,21 +112,24 @@ var ChartDetailCursor = module.exports = React.createClass({
         console.log('Mounted MouseDetailCursor');
 
         // Alias this.update so we can call it statically.
-        updateFxns[this.props.id]   = this.update;
-        resetFxns[this.props.id]    = this.reset;
-        getStateFxns[this.props.id] = this.getState;
+        updateFxns[this.props.id]    = this.update;
+        resetFxns[this.props.id]     = this.reset;
+        getStateFxns[this.props.id]  = this.getState;
+        setCoordsFxns[this.props.id] = this.setCoords;
         this.setState({'mounted' : true});
     },
 
     componentWillUnmount : function(){
         // Cleanup.
-        updateFxns[this.props.id]   = null;
-        resetFxns[this.props.id]    = null;
-        getStateFxns[this.props.id] = null;
+        updateFxns[this.props.id]    = null;
+        resetFxns[this.props.id]     = null;
+        getStateFxns[this.props.id]  = null;
+        setCoordsFxns[this.props.id] = null;
         if (this.props.id !== 'default') {
-            delete   updateFxns[this.props.id];
-            delete    resetFxns[this.props.id];
-            delete getStateFxns[this.props.id];
+            delete    updateFxns[this.props.id];
+            delete     resetFxns[this.props.id];
+            delete  getStateFxns[this.props.id];
+            delete setCoordsFxns[this.props.id];
         };
     },
 
@@ -169,6 +173,14 @@ var ChartDetailCursor = module.exports = React.createClass({
         return _.clone(this.state);
     },
 
+    setCoords : function(coords, cb){
+        if (!this.refs || !this.refs.cursorComponent) {
+            console.error("Cursor component not available.");
+            return false;
+        }
+        this.refs.cursorComponent.setState(coords, cb);
+    },
+
     render : function(){
         var containDims = {};
         if (!this.props.containingElement){
@@ -208,6 +220,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                     top: -10
                 }}
                 debugStyle={this.props.debugStyle}
+                ref="cursorComponent"
                 sticky={this.state.sticky}
                 children={React.createElement(
                     this.state.bodyComponent,
@@ -268,6 +281,14 @@ var ChartDetailCursor = module.exports = React.createClass({
         getState : function(id = 'default'){
             if (typeof getStateFxns[id] === 'function'){
                 return getStateFxns[id]();
+            } else {
+                throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
+            }
+        },
+
+        setCoords : function(coords = {x : 0, y : 0}, callback = null, id = 'default'){
+            if (typeof setCoordsFxns[id] === 'function'){
+                return setCoordsFxns[id](coords, callback);
             } else {
                 throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
             }
