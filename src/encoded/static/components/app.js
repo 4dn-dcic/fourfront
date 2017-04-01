@@ -442,7 +442,7 @@ var App = React.createClass({
                     // Delay 100ms.
                     console.log("SYNCING CHART DATA");
                     ChartDataController.sync();
-                }, 100);   
+                }, 100);
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
@@ -949,6 +949,8 @@ var App = React.createClass({
                     actionList.push('edit');
                 }else if (value == '#!create'){
                     actionList.push('create');
+                }else if (value == '#!clone'){
+                    actionList.push('clone');
                 }else{
                     lowerList.push(value.toLowerCase());
                 }
@@ -1004,6 +1006,7 @@ var App = React.createClass({
                             navigate={this.navigate}
                             href={this.props.href}
                             edit={actionList[0] == 'edit'}
+                            create={actionList[0] == 'create'}
                         />
                     );
                     title = makeTitle({'context': context});
