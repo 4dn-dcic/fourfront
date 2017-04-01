@@ -123,13 +123,16 @@ var StaticPageBase = module.exports = {
             }
 
             if (href !== elem.props.href || href.charAt(0) === '#'){
-                return React.cloneElement(elem, _.extend(_.omit(elem.props, 'children'), {
+                return React.cloneElement(
+                    elem,
+                    _.extend(_.omit(elem.props, 'children'), {
                         'href' : href,
                         'onClick' : href.charAt(0) !== '#' ? null : function(e){
                             e.preventDefault();
                             layout.animateScrollTo(href.slice(1));
                         }
-                    }), elem.props.children || null
+                    }),
+                    elem.props.children || null
                 );
             } else {
                 return elem;

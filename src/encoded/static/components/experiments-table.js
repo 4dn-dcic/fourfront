@@ -605,7 +605,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 //    typeof c.offsetWidth !== 'number' ||
                 //    Number.isNaN(c.offsetWidth)
                 //){
-                    return ExperimentsTable.initialColumnWidths(c.getAttribute('data-column-class'));
+                return ExperimentsTable.initialColumnWidths(c.getAttribute('data-column-class'));
                 //}
                 //return c.offsetWidth;
             });

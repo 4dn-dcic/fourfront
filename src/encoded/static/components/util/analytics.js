@@ -153,7 +153,7 @@ var analytics = module.exports = {
         var from = 0;
         if (typeof origHref === 'string'){
             var urlParts = url.parse(origHref, true);
-            if (!isNaN(parseInt(urlParts.query['from']))) from = parseInt(urlParts.query['from']);
+            if (!isNaN(parseInt(urlParts.query.from))) from = parseInt(urlParts.query['from']);
         }
         console.info("Will impression " + itemList.length + ' items.');
         itemList.forEach(function(expSet, i){
