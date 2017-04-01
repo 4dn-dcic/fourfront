@@ -178,7 +178,7 @@ var analytics = module.exports = {
 
     getStringifiedCurrentFilters : function(filters){
         if (typeof filters === 'string'){
-            filters = Filters.hrefToFilters(href);
+            filters = Filters.hrefToFilters(filters);
         }
         return JSON.stringify(filters, _.keys(filters).sort());
     },
