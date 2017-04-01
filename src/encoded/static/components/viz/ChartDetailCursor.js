@@ -130,7 +130,7 @@ var ChartDetailCursor = module.exports = React.createClass({
             delete     resetFxns[this.props.id];
             delete  getStateFxns[this.props.id];
             delete setCoordsFxns[this.props.id];
-        };
+        }
     },
 
     /**
