@@ -117,9 +117,19 @@ class User(Item):
             curr_subs = properties['subscriptions'] if 'subscriptions' in properties else []
             if my_uuid:
                 submission_creds = {}
-                submission_creds['url'] = 'submitted_by.link_id=~users~' + my_uuid + '~'
+                submission_creds['url'] = 'submitted_by.link_id=~users~' + my_uuid + '~&limit=all&sort=-date_created'
                 submission_creds['title'] = 'My submissions'
                 curr_subs.append(submission_creds)
+                ### TEST code
+                submission_creds2 = {}
+                submission_creds2['url'] = 'lab.link_id=~labs~test-4dn-lab~&limit=all&sort=-date_created'
+                submission_creds2['title'] = '4DN testing lab'
+                curr_subs.append(submission_creds2)
+                submission_creds3 = {}
+                submission_creds3['url'] = 'award.link_id=~awards~1U01CA200059-01~&limit=all&sort=-date_created'
+                submission_creds3['title'] = '4DN project'
+                curr_subs.append(submission_creds3)
+                ###
                 properties['subscriptions'] = curr_subs
         super(User, self)._update(properties, sheets)
 

@@ -612,7 +612,7 @@ var BuildField = React.createClass({
         return(
             <dl className="key-value row extra-footspace">
                 <dt className="col-sm-3">
-                        <span style={{'display':'inlineBlock', 'width':'80px'}}>
+                        <span style={{'display':'inline-block', 'width':'120px'}}>
                             {field_title}
                         </span>
                         {!_.contains(cannot_delete,this.props.label) ?
@@ -1087,14 +1087,15 @@ var S3FileInput = React.createClass({
 
     render: function(){
         var edit_tip;
+        var previous_status = this.props.getFieldValue('status');
         var filename_text = this.props.value ? this.props.value : "No file chosen";
         var md5sum = this.props.getFieldValue('md5sum');
-        if(this.props.value && !md5sum){
+        if(this.props.value && !md5sum && previous_status){
             // edit tip to show that there is filename metadata but no actual file
             // selected (i.e. no file held in state)
             edit_tip = "Previous file: " + this.props.value;
             // inform them if the upload failed previously
-            if(this.props.getFieldValue('status') == 'upload failed'){
+            if(previous_status == 'upload failed'){
                 edit_tip += ' (upload FAILED)';
             }
             filename_text = "No file chosen";
