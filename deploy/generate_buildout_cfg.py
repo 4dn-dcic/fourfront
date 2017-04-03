@@ -40,7 +40,7 @@ def build_cfg_file():
         data['load_function'] = 'load_prod_data'
 
     file_dir, _ = os.path.split(os.path.abspath(__file__))
-    filename = os.path.join(file_dir, '..','beanstalk.ini')
+    filename = os.path.join(file_dir, '..','beanstalk.cfg')
     print (filename)
 
     with open(filename, 'w') as bs_ini:
