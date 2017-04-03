@@ -115,8 +115,12 @@
             "type": "array",
             "default": [],
             "items": {
-                "type": "string",
-                "title": "Subscription"
+                "type": "object",
+                "title": "Subscription",
+                "properties": {
+                    "url": {"type": "string"},
+                    "title": {"type": "string"}
+                }
             }
         },
         "google": {
