@@ -90,7 +90,19 @@
                   "CC-2517",
                   "HeLa-S3",
                   "HFF",
-                  "HFFc6"
+                  "HFFc6",
+                  "SK-N-DZ",
+                  "A549",
+                  "NCI-H460",
+                  "SK-N-MC",
+                  "T47D",
+                  "SK-MEL-5",
+                  "G401",
+                  "Panc1",
+                  "Caki2",
+                  "LNCaP clone FGC",
+                  "RPMI-7951",
+                  "SJCRH30"
               ]
           },
           "cell_line_termid": {
