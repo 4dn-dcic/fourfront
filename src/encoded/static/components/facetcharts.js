@@ -412,7 +412,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             <div className={"facet-charts show-" + show} key="facet-charts">
 
                 <ChartDataController.Provider id="barplot1">
-                    <BarPlot.UIControlsWrapper legend chartHeight={height}>
+                    <BarPlot.UIControlsWrapper legend chartHeight={height} href={this.props.href}>
                         <BarPlot.Aggregator>
                             <BarPlot.Chart
                                 width={this.width(1) - 20}
