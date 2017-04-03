@@ -119,7 +119,8 @@ class User(Item):
                 submission_creds = {}
                 submission_creds['url'] = 'submitted_by.link_id=~users~' + my_uuid + '~'
                 submission_creds['title'] = 'My submissions'
-                properties['subscriptions'] = curr_subs.append(submission_creds)
+                curr_subs.append(submission_creds)
+                properties['subscriptions'] = curr_subs
         super(User, self)._update(properties, sheets)
 
 @view_config(context=User, permission='view', request_method='GET', name='page')
