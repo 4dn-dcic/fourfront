@@ -138,6 +138,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                         target_bs.properties['biosample_relation'].append(relationship_entry)
                         target_bs.update(target_bs.properties)
 
+
 @calculated_property(context=Biosample, category='action')
 def clone(context, request):
     """If the user submits for any lab, allow them to clone

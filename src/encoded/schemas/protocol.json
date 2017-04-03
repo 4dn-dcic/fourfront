@@ -14,21 +14,12 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
-        },
-        "protocol_documents": {
-          "title": "Protocol Documents",
-          "type": "array",
-          "items": {
-            "title": "Protocol Document",
-            "description": "A protocol specific document.",
-            "type": "string",
-            "linkTo": "Document"
-          }
         },
         "description": {
             "title": "Description",
