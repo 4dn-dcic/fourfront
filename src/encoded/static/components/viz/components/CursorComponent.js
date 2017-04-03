@@ -130,6 +130,9 @@ var CursorComponent = module.exports = React.createClass({
             var hoverComponentDimensions = this.getHoverComponentDimensions();
             var isVisible = this.isVisible();
 
+            var state = _.clone(this.state);
+            if (typeof this.props.xCoordOverride === 'number') state.x = this.props.xCoordOverride;
+
             ReactDOM.render(React.createElement(CursorComponent.CursorContent, _.extend({
                 width: hoverComponentDimensions.width,
                 height : hoverComponentDimensions.height,
@@ -142,7 +145,7 @@ var CursorComponent = module.exports = React.createClass({
                 style : this.props.style,
                 children : this.props.children,
                 sticky : this.props.sticky
-            }, this.state)), this.portalElement);
+            }, state)), this.portalElement);
 
         });
     },

@@ -408,22 +408,31 @@ var App = React.createClass({
         //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
 
         // Load up analytics
-        analytics.initializeGoogleAnalytics(analytics.getTrackingId(this.props.href));
+        analytics.initializeGoogleAnalytics(
+            analytics.getTrackingId(this.props.href),
+            this.props.context,
+            this.props.expSetFilters
+        );
     },
 
     componentDidUpdate: function (prevProps, prevState) {
         var key;
         if (this.props) {
+
+            if (this.props.href !== prevProps.href){ // We navigated somewhere else.
+
+                // Register google analytics pageview event.
+                analytics.registerPageView(this.props.href, this.props.context, this.props.expSetFilters);
+
+                // We need to rebuild tooltips after navigation to a different page.
+                ReactTooltip.rebuild();
+
+            }
+
+
             for (key in this.props) {
                 if (this.props[key] !== prevProps[key]) {
                     console.log('changed props: %s', key);
-                    if (key === 'href'){
-                        // We need to rebuild tooltips after navigation to a different page.
-                        ReactTooltip.rebuild();
-
-                        // Register google analytics pageview event.
-                        analytics.registerPageView(this.props[key]);
-                    }
                 }
             }
         }
@@ -469,7 +478,11 @@ var App = React.createClass({
         var userInfo = JWT.getUserInfo();
         if (userInfo){
             userActions = userInfo.user_actions;
-            session = true;
+            var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.
+            if (currentToken) session = true;
+            else if (this.state.session === true) {
+                Alerts.queue(Alerts.LoggedOut);
+            }
         }
 
         var stateChange = {};

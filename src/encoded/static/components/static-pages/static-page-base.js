@@ -5,6 +5,7 @@ var _ = require('underscore');
 var Markdown = require('markdown-to-jsx');
 var TableOfContents = require('./table-contents');
 var globals = require('./../globals');
+var { layout } = require('./../util');
 
 /**
  * These are a set of 'mixin' functions which can be used directly on Static Page components.
@@ -47,7 +48,11 @@ var StaticPageBase = module.exports = {
                 return a.order - b.order;
             })
             .map(function(contentPair){
-                return renderMethod(contentPair[0] /* = key for section */, contentPair[1] /* = content */);
+                return renderMethod(
+                    contentPair[0] /* = key for section */,
+                    contentPair[1] /* = content */,
+                    context /* = full content */
+                );
             })
             .value();
     },
@@ -63,7 +68,7 @@ var StaticPageBase = module.exports = {
                     .map(function(sectionPair){
                         var s = sectionPair[1];
                         if (s.filetype === 'md'){
-                            return [sectionPair[0], _.extend(
+                            s =  _.extend(
                                 {}, s, {
                                     'content' : Markdown.compiler(s.content, {
                                         'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
@@ -77,15 +82,73 @@ var StaticPageBase = module.exports = {
                                             .value()
                                         })
                                 }
-                            )];
-                        } else {
-                            return [sectionPair[0], s];
+                            );
                         }
+                        return [sectionPair[0], s];
                     })
                     .object()
                     .value()
             }
         );
+    },
+
+    /**
+     * Converts links to other files into links to sections from a React element and its children.
+     * 
+     * @param {Element} content - A high-level React element representation of some content which might have relative links.
+     * 
+     */
+    correctRelativeLinks : function(elem, context, depth = 0){
+        if (typeof elem !== 'object' || !elem) return elem; // Could be a string, or null.
+        if (elem.type === 'a'){
+            var href = elem.props.href;
+            if (
+                typeof href === 'string' && 
+                href.charAt(0) !== '#' &&
+                href.charAt(0) !== '/' &&
+                href.slice(0,4) !== 'http' && 
+                href.slice(0,7) !== 'mailto:'
+            ){ // We have a relative href link.
+                if (href.indexOf('#') > -1){ // It references a title on some other page or section. Likely, this is section is on same page, so we can just use that.
+                    var parts = href.split('#');
+                    if (parts.length > 1){
+                        href = '#' + parts[1];
+                    }
+                } else { // Check if is name of a section, and if so, correct.
+                    var filenameWithoutExtension = href.split('.').slice(0, -1).join('.');
+                    if (typeof context.content[filenameWithoutExtension] !== 'undefined'){
+                        href = '#' + filenameWithoutExtension;
+                    }
+                }
+            }
+
+            if (href !== elem.props.href || href.charAt(0) === '#'){
+                return React.cloneElement(
+                    elem,
+                    _.extend(_.omit(elem.props, 'children'), {
+                        'href' : href,
+                        'onClick' : href.charAt(0) !== '#' ? null : function(e){
+                            e.preventDefault();
+                            layout.animateScrollTo(href.slice(1));
+                        }
+                    }),
+                    elem.props.children || null
+                );
+            } else {
+                return elem;
+            }
+            
+        } else if (elem.props.children && typeof elem.type === 'string') {
+            return React.cloneElement(
+                elem,
+                _.omit(elem.props, 'children'),
+                React.Children.map(elem.props.children, function(child){
+                    return StaticPageBase.correctRelativeLinks(child, context, depth + 1);
+                })
+            );
+        } else {
+            return elem;
+        }
     },
 
     // TODO: fix ugly hack, wherein I set id in the h3 above actual spot because the usual way of doing anchors cut off entries
@@ -233,6 +296,8 @@ var StaticPageBase = module.exports = {
 
             var className = "fourDN-content" + (baseClassName? ' ' + baseClassName : '');
             if (placeholder || filetype === 'md'){
+                content = StaticPageBase.correctRelativeLinks(content, this.props.context);
+                console.log(this.props.section, content, this.props.context);
                 return <div className={className}>{ content }</div>;
             } else {
                 return <div className={className} dangerouslySetInnerHTML={{__html: content }}></div>;
@@ -293,8 +358,8 @@ var StaticPageExample = React.createClass({
         }).isRequired
     },
 
-    entryRenderFxn : function(key, content){
-        return <StaticPageExample.Entry key={key} section={key} content={content} />;
+    entryRenderFxn : function(key, content, context){
+        return <StaticPageExample.Entry key={key} section={key} content={content} context={context} />;
     },
 
     /** Use common funcs for rendering body. Create own for more custom behavior/layouts, using these funcs as base. */
