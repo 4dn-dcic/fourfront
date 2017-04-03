@@ -296,6 +296,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .item-page-container {
     .info-area {
 	    margin-top: 17px;
+		border-bottom: 1px solid #ddd;
+		padding-bottom: 7px;
     }
     .item-info-area {
         margin-bottom: 20px;
@@ -709,8 +711,8 @@ $download-button-width : 100px;
 
 	&.single-item {
 		ul {
-			margin-bottom: -10px;
-			margin-top: 5px;
+			margin-bottom: 1px;
+    		margin-top: 7px;
 		}
 	}
 
@@ -729,7 +731,7 @@ $download-button-width : 100px;
 	h3 {
 		font-weight: 300;
 		margin: 0;
-		border-top: 1px solid #eee;
+		//border-top: 1px solid #eee;
 		padding: 16px 0 16px;
 
 		span.exp-number {
@@ -741,6 +743,7 @@ $download-button-width : 100px;
 	.exp-table-container {
 		overflow-x: auto;
 		display: block;
+		border-bottom: 1px solid #888;
 	}
 
 	/*
