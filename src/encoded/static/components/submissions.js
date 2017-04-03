@@ -8,13 +8,35 @@ var { ajax, console, object, isServerSide } = require('./util');
 */
 var Submissions = module.exports = React.createClass({
 
+    contextTypes: {
+        fetch: React.PropTypes.func,
+        contentTypeIsJSON: React.PropTypes.func,
+    },
+
+    loadSubscriptionData: function(url){
+        this.context.fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!this.context.contentTypeIsJSON(response) || !response['@graph']) throw response;
+            return response;
+        },
+        error => {
+            return null;
+        });
+    },
+
     render: function(){
         return(
             <div>
-                <h1 className="page-title">Your submissions</h1>
+                <h1 className="page-title">Submission tracking</h1>
                     <div className="flexible-description-box item-page-heading">
                         <p className="text-larger">
-                            Your submissions to 4DN appear here.
+                            View your 4DN submissions and track those you've subscribed to.
                         </p>
                     </div>
             </div>

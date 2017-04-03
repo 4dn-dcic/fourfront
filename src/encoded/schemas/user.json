@@ -108,6 +108,17 @@
             "title": "Skype ID",
             "type": "string"
         },
+        "subscriptions": {
+            "title": "Subscriptions",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "description": "URLs and matching titles for this user's submission subscriptions",
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "string",
+                "title": "Subscription"
+            }
+        },
         "google": {
             "title": "Google ID",
             "type": "string"

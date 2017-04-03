@@ -110,6 +110,17 @@ class User(Item):
         objects = (request.embed('/', str(uuid), '@@object') for uuid in uuids)
         return [obj for obj in objects if obj['status'] not in ('deleted', 'replaced')]
 
+    def _update(self, properties, sheets=None):
+        # fill your own submission entry (for "My submissions")
+        if 'submits_for' in properties and len(properties['submits_for']) > 0:
+            my_uuid = properties.get('uuid', None)
+            curr_subs = properties['subscriptions'] if 'subscriptions' in properties else []
+            if my_uuid:
+                submission_creds = {}
+                submission_creds['url'] = 'submitted_by.link_id=~users~' + my_uuid + '~'
+                submission_creds['title'] = 'My submissions'
+                properties['subscriptions'] = curr_subs.append(submission_creds)
+        super(User, self)._update(properties, sheets)
 
 @view_config(context=User, permission='view', request_method='GET', name='page')
 def user_page_view(context, request):

@@ -39,7 +39,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         'facets': [],
         '@graph': [],
         'notification': '',
-        'sort': {}  # probably could eliminate
+        'sort': {}
     }
     principals = effective_principals(request)
 
@@ -73,9 +73,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # schemas = [types[doc_type].schema for doc_type in doc_types]
 
     ### Set sort order
-    # has_sort = set_sort_order(request, search_term, types, doc_types, query, result)
-    # TODO: implement BOOST here? For now, don't set a sort order
-    has_sort = False
+    set_sort_order(request, prepared_terms, types, doc_types, query, result)
+    # TODO: implement BOOST here?
 
     ### Set filters
     used_filters = set_filters(request, query, result)
@@ -85,7 +84,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Adding facets to the query
     query['aggs'] = set_facets(facets, used_filters, principals, doc_types)
-
     ### Execute the query
     if size == 'all':
         es_results = get_all_results(request, query)
@@ -382,6 +380,55 @@ def get_filtered_query(prepared_terms, result_fields, principals, doc_types):
         },
         '_source': list(result_fields),
     }
+
+
+def set_sort_order(request, search_term, types, doc_types, query, result):
+    """
+    sets sort order for elasticsearch results
+    example: /search/?type=Biosource&sort_by=display_title
+    will sort by display_title in ascending order. To set descending order,
+    use the "-" flag: sort_by=-date_created.
+    Sorting is done alphatbetically, case sensitive by default.
+    TODO: add a schema flag for case sensitivity/insensitivity?
+    """
+    sort = OrderedDict()
+    result_sort = OrderedDict()
+    # Prefer sort order specified in request, if any
+    requested_sort = request.params.get('sort')
+    if requested_sort:
+        if requested_sort.startswith('-'):
+            name = requested_sort[1:]
+            order = 'desc'
+        else:
+            name = requested_sort
+            order = 'asc'
+        sort['embedded.' + name + '.lower_case_sort'] = result_sort[name] = {
+            'order': order,
+            'ignore_unmapped': True,
+        }
+    # Otherwise we use a default sort only when there's no text search to be ranked
+    if not sort and search_term == '*':
+        # If searching for a single type, look for sort options in its schema
+        if len(doc_types) == 1:
+            type_schema = types[doc_types[0]].schema
+            if 'sort_by' in type_schema:
+                for k, v in type_schema['sort_by'].items():
+                    # Should always sort on raw field rather than analyzed field
+                    # OR search on lower_case_sort for case insensitive results
+                    sort['embedded.' + k + '.lower_case_sort'] = result_sort[k] = v
+        # Default is most recent first, then alphabetical by label
+        if not sort:
+            sort['embedded.date_created.raw'] = result_sort['date_created'] = {
+                'order': 'desc',
+                'ignore_unmapped': True,
+            }
+            sort['embedded.label.raw'] = result_sort['label'] = {
+                'order': 'asc',
+                'missing': '_last',
+                'ignore_unmapped': True,
+            }
+    query['sort'] = sort
+    result['sort'] = result_sort
 
 
 def set_filters(request, query, result):
