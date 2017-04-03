@@ -14,7 +14,7 @@ system_bucket = elasticbeanstalk-{env_name}-system
 region_search_instance = 172.31.49.128:9872
 elasticsearch_instance = 172.31.49.128:9872
 elasticsearch_index = {env_name}
-sqlalchemy.url = {dbconn}
+sqlalchemy_url = {dbconn}
 
 create_tables = true
 load_test_data = encoded.loadxl:{load_function}
