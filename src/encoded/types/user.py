@@ -113,7 +113,7 @@ class User(Item):
     def _update(self, properties, sheets=None):
         # fill your own submission entry (for "My submissions")
         if 'submits_for' in properties and len(properties['submits_for']) > 0:
-            my_uuid = properties.get('uuid', None)
+            my_uuid = self.uuid.__str__()
             curr_subs = properties['subscriptions'] if 'subscriptions' in properties else []
             if my_uuid:
                 submission_creds = {}
