@@ -26,6 +26,16 @@
             "description": "A short description of the protocol",
             "type": "string",
             "default": ""
-        }
+        },
+        "protocol_documents": {
+          "title": "This Field Will be Deleted After Update",
+          "type": "array",
+          "items": {
+            "title": "Protocol Document",
+            "description": "A protocol specific document.",
+            "type": "string",
+            "linkTo": "Document"
+          }
+       }
     }
 }
