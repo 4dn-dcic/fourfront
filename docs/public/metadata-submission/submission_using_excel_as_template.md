@@ -1,7 +1,7 @@
 
-### Overview
+## Overview
 
-Metadata and data can be submitted to our platform using Microsoft Excel WorkBooks which describe related items in separate sheets. This section provides detailed information on how to fill the WorkBooks. You can check out the [example WorkBook](https://github.com/hms-dbmi/Submit4DN/blob/master/Data_Files/Rao_et_al_2014/fieldsRao.xls?raw=true) we prepared for the data from Rao et. al. 2014 to familiarize yourself with the general structure.
+Metadata and data can be submitted to our platform using Microsoft Excel WorkBooks that describe related items in separate sheets. This section provides detailed information on how to use the WorkBooks. You can check out the [example WorkBook](https://github.com/hms-dbmi/Submit4DN/blob/master/Data_Files/Rao_et_al_2014/fieldsRao.xls?raw=true) we prepared for the data from Rao et. al. 2014 to familiarize yourself with the general structure.
 
 
 Based on the type of experiment(s) for which you plan to submit data, the data wranglers can provide you with an Excel WorkBook containing several WorkSheets.  Each sheet corresponds to an Item type in our metadata database. The workbook provided should contain all the sheets that you may need for your submission. You can refer to [this table](#schema_info) for information on all the Item types available in the database.  Each sheet should also contain all the data fields that can be submitted for that Item type. Depending on if you have submitted data before or if you are using shared reagents that have been submitted by other labs, you may not need to provide information on every sheet or in every field.
@@ -224,6 +224,11 @@ The second category includes the data files that are the results of experiments,
 
 #### File upload
 To upload your files, use the file submission excel sheet provided, and copy paste all your file (FileFastq) aliases from your metadata excel sheet to the aliases field of the file submission sheet. Under filename enter the full paths to your files. Once completed use import_data with the ```--patchall``` argument to start upload. The DCIC automatically checks file md5sums to confirm successful upload and to ensure that there are no duplicate files in the database.
+
+
+Upload using ftp is also supported, however the process currently transfers the files to your hard drive, uploads them to our system, and then deletes the copy from your local hard drive.  The files are processed sequentially so you need to have at least the amount of free space on your hard drive as the size of the largest file you wish to upload.  In addition, you must include your ftp login credentials in the ftp url, **which is definitely not a security best practice**.  For these reasons, if at all possible, it is recommended to install the Submit4DN package onto the server hosting the files to be submitted and use import_data as described above.  However, if that is not an option then your ftp urls should be formatted as follows: 
+
+    ftp://username:password@hostname/path/to/filename 
 
 
 To replace a file that has already been uploaded to 4DN - that is to associate a different file with existing metadata, associate the file path for the new file with an existing alias. **NOTE that every time you patch with a filename (even if it is the same filename) the file will be uploaded. Please use care when including a filename in your File metadata to avoid unnecessary uploads.** We plan to avoid this issue in future releases by pre-checking md5sums.
