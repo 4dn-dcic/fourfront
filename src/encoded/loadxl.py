@@ -633,10 +633,7 @@ PHASE2_PIPELINES = {
 
 def load_all(testapp, filename, docsdir, test=False):
     """smth."""
-    #  Probably if I set check_first then I can loop through everything in order
-    #  and check if it exists on the database first, if it does don't build the pipeline
-    #  or process it
-    #  further I could keep this list around and filter it out of phase2 as well
+    # exclude_list is for items that fail phase1 to be excluded from phase2
     exclude_list = []
     for item_type in ORDER:
         try:
