@@ -143,7 +143,6 @@ def skip_rows_with_all_key_value(**kw):
 def skip_rows_in_excludes(**kw):
     def component(dictrows):
         for row in dictrows:
-            # import pdb; pdb.set_trace()
             excludes = kw.get('excludes')
             if excludes is None:
                 excludes = []
@@ -651,8 +650,6 @@ def load_all(testapp, filename, docsdir, test=False):
             if result.get('_response') and result.get('_response').status_code not in [200, 201]:
                 exclude_list.append(result['uuid'])
 
-
-    import pdb; pdb.set_trace()
     for item_type in ORDER:
         if item_type not in PHASE2_PIPELINES:
             continue
