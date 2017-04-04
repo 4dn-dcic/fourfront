@@ -114,15 +114,24 @@ class User(Item):
         # fill default submission entries. There are two possible:
         # 1. if user has submits_for, subscribe to yourself
         # 2. if user has lab, subscribe to all lab submissions
+        # if these are already present, don't add them again
         my_uuid = self.uuid.__str__()
+        needs_sub = True
+        needs_lab = True
         curr_subs = properties['subscriptions'] if 'subscriptions' in properties else []
-        if 'submits_for' in properties and len(properties['submits_for']) > 0:
+        for sub in curr_subs:
+            if 'title' in sub:
+                if sub['title'] == 'My submissions':
+                    needs_sub = False
+                if sub['title'] == 'My lab':
+                    needs_sub = False
+        if needs_sub and 'submits_for' in properties and len(properties['submits_for']) > 0:
             if my_uuid:
                 submission_creds = {}
                 submission_creds['url'] = '?submitted_by.link_id=~users~' + my_uuid + '~&sort=-date_created'
                 submission_creds['title'] = 'My submissions'
                 curr_subs.append(submission_creds)
-        if 'lab' in properties:
+        if needs_lab and 'lab' in properties:
             lab_obj = self.collection.get(properties['lab'])
             if lab_obj:
                 lab_props = lab_obj.properties
@@ -136,7 +145,7 @@ class User(Item):
                 submission_creds2['url'] = '?lab.link_id=~labs~' + lab_id + '~&sort=-date_created'
                 submission_creds2['title'] = 'My lab'
                 curr_subs.append(submission_creds2)
-        if len(curr_subs) > 0:
+        if len(curr_subs) > 0 and (needs_sub or needs_lab):
             properties['subscriptions'] = curr_subs
         super(User, self)._update(properties, sheets)
 
