@@ -23,8 +23,6 @@
         "protocol_documents": {
           "title": "Protocol Documents",
           "type": "array",
-          "additionalProperties": false,
-          "uniqueItems": true,
           "items": {
             "title": "Protocol Document",
             "description": "A protocol specific document.",

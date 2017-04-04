@@ -46,8 +46,8 @@ var HelpPage = module.exports = React.createClass({
         }).isRequired
     },
 
-    entryRenderFxn : function(key, content){
-        return (<HelpPage.Entry key={key} section={key} content={content} />);
+    entryRenderFxn : function(key, content, context){
+        return (<HelpPage.Entry key={key} section={key} content={content} context={context} />);
     },
 
     getDefaultProps : StaticPageBase.getDefaultProps,
