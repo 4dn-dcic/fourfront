@@ -8,6 +8,6 @@ The 4DN Consortium is strongly encouraging that chromatin conformation capture g
 
 You may also have multiple sequencing runs performed at different times using a library prepared from the same Biosample and the same methods up until the sample is sent to the sequencer - i.e. technical replicates.
 
-The replicate information is stored and represented as a set of experiments that includes labels indicating the replicate type and replicate number of each experiement in the set.
+The replicate information is stored and represented as a set of experiments that includes labels indicating the replicate type and replicate number of each experiment in the set.
 
 The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with, though in the database the information will always end up directly associated with ExperimentSetReplicate objects.  Specific details on formatting information regarding replicates is given below for the [Excel Work Book](#excel_reps) submission.  When submitting using the REST API you should format your json according to the specifications in the schema as described [below](#rest).
