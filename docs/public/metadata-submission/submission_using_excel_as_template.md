@@ -37,7 +37,7 @@ Most field values are strings - either a term with controlled vocabulary, i.e. f
 ![Basic fields examples](/static/img/docs/submitting-metadata/basic_field_eg.png)
 There are some fields values that require specific formatting. These cases and how to identify them are described below.
 
-#### When the string must conform to a certain format
+### Required string formatting
 In some cases a field value must be formatted in a certain way or the Item will fail validation. In most cases tips on formatting requirements will be included in the *Additional Info* row of the spreadsheet. Examples of these are _Date_ fields (YYYY-MM-DD format) and _URLs_ (checked for proper URI syntax).
 
 In other cases a field value must match a certain pattern. For example, if a field requires a DNA sequence then the submitted value must contain only the characters A, T, G, C or N.
