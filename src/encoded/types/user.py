@@ -111,26 +111,33 @@ class User(Item):
         return [obj for obj in objects if obj['status'] not in ('deleted', 'replaced')]
 
     def _update(self, properties, sheets=None):
-        # fill your own submission entry (for "My submissions")
+        # fill default submission entries. There are two possible:
+        # 1. if user has submits_for, subscribe to yourself
+        # 2. if user has lab, subscribe to all lab submissions
+        my_uuid = self.uuid.__str__()
+        curr_subs = properties['subscriptions'] if 'subscriptions' in properties else []
         if 'submits_for' in properties and len(properties['submits_for']) > 0:
-            my_uuid = self.uuid.__str__()
-            curr_subs = properties['subscriptions'] if 'subscriptions' in properties else []
             if my_uuid:
                 submission_creds = {}
-                submission_creds['url'] = 'submitted_by.link_id=~users~' + my_uuid + '~&limit=all&sort=-date_created'
+                submission_creds['url'] = '?submitted_by.link_id=~users~' + my_uuid + '~&sort=-date_created'
                 submission_creds['title'] = 'My submissions'
                 curr_subs.append(submission_creds)
-                ### TEST code
+        if 'lab' in properties:
+            lab_obj = self.collection.get(properties['lab'])
+            if lab_obj:
+                lab_props = lab_obj.properties
+                if 'name' in lab_props:
+                    lab_id = lab_props['name']
+                elif 'uuid' in lab_props:
+                    lab_id = lab_props['uuid']
+                else:
+                    lab_id = lab_props['title']
                 submission_creds2 = {}
-                submission_creds2['url'] = 'lab.link_id=~labs~test-4dn-lab~&limit=all&sort=-date_created'
-                submission_creds2['title'] = '4DN testing lab'
+                submission_creds2['url'] = '?lab.link_id=~labs~' + lab_id + '~&sort=-date_created'
+                submission_creds2['title'] = 'My lab'
                 curr_subs.append(submission_creds2)
-                submission_creds3 = {}
-                submission_creds3['url'] = 'award.link_id=~awards~1U01CA200059-01~&limit=all&sort=-date_created'
-                submission_creds3['title'] = '4DN project'
-                curr_subs.append(submission_creds3)
-                ###
-                properties['subscriptions'] = curr_subs
+        if len(curr_subs) > 0:
+            properties['subscriptions'] = curr_subs
         super(User, self)._update(properties, sheets)
 
 @view_config(context=User, permission='view', request_method='GET', name='page')

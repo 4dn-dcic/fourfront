@@ -16,7 +16,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		margin-top: -27px;
 	}
 	*/
-	
+
 }
 
 .item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
@@ -120,7 +120,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.flexcol-heading, .item-page-heading {
+.flexcol-heading, .item-page-heading, .submission-page-heading {
     position: relative;
     margin-right: -10px;
     margin-left: -10px;
@@ -311,14 +311,14 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	margin-bottom: 12px;
 
 	.list-item {
-		
+
 		/* Equalize Height of Columns, unsupported for IE9 and below: */
 		display: -webkit-box;
 		display: -webkit-flex;
 		display: -ms-flexbox;
 		display: flex;
-		
-		.item-label, .item-value {		
+
+		.item-label, .item-value {
 			> div {
 				min-height: 20px;
 				height: 100%;
@@ -399,7 +399,7 @@ $download-button-width : 100px;
 
 	.row {
 
-		
+
 
 		> div {
 			padding-top: 5px;
@@ -503,7 +503,7 @@ $download-button-width : 100px;
 					min-width: $download-button-width;
 				}
 			}
-			
+
 		}
 
 	}
@@ -543,7 +543,7 @@ $download-button-width : 100px;
 				text-align: right;
 			}
 
-			
+
 
 			> .title {
 				padding-top: 5px;

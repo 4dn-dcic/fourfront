@@ -341,7 +341,7 @@
         "sop_mapping": {
             "title": "SOP mappping",
             "permission": "import-items",
-            "exclude_from" : "submit4dn",
+            "exclude_from" : ["submit4dn", "FFedit-create"],
             "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",
             "type": "object",
             "additionalProperties": false,

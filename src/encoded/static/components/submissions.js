@@ -3,9 +3,11 @@ var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide, DateUtility } = require('./util');
-var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
+var { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} = require('react-bootstrap');
 
 /*
+Container component for the submissions page. Fetches the user info and
+coordinates individual subscriptions.
 */
 var Submissions = module.exports = React.createClass({
 
@@ -15,7 +17,10 @@ var Submissions = module.exports = React.createClass({
     },
 
     getInitialState: function(){
-        return({'subscriptions': null});
+        return({
+            'subscriptions': null,
+            'initialized': false
+        });
     },
 
     componentDidMount: function(){
@@ -33,31 +38,37 @@ var Submissions = module.exports = React.createClass({
         })
         .then(response => {
             if (!this.context.contentTypeIsJSON(response) || !response['subscriptions']) throw response;
-            this.setState({'subscriptions': response['subscriptions']});
-        },
-        error => {
-            this.setState({'subscriptions': null});
+            return response;
+        })
+        .then(response => {
+            this.setState({'subscriptions': response['subscriptions'],'initialized': true});
+        }, error => {
+            this.setState({'subscriptions': null,'initialized': true});
         });
     },
 
     generateSubscription: function(scrip){
         return(
-            <SubscriptionEntry url={scrip.url} title={scrip.title} />
+            <SubscriptionEntry key={scrip.url} url={scrip.url} title={scrip.title} />
         );
     },
 
     render: function(){
         var subscrip_list;
+        var main_message;
         if(this.state.subscriptions){
             subscrip_list = this.state.subscriptions.map((scrip) => this.generateSubscription(scrip));
+            main_message = "View your 4DN submissions and track those you're associated with.";
+        }else if(this.state.initialized){
+            main_message = "No submissions to track; you are not a submitter nor associated with any labs."
+        }else{
+            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}></i>
         }
         return(
             <div>
                 <h1 className="page-title">Submission tracking</h1>
-                <div className="flexible-description-box item-page-heading">
-                    <p className="text-larger">
-                        View your 4DN submissions and track those you've subscribed to.
-                    </p>
+                <div className="flexible-description-box item-page-heading" style={{'marginBottom':'25px'}}>
+                    <p className="text-larger">{main_message}</p>
                 </div>
                 {subscrip_list}
             </div>
@@ -65,6 +76,11 @@ var Submissions = module.exports = React.createClass({
     }
 });
 
+/*
+Main submission/subscription component. One component per subscription.
+Hold data from the search result from the subscription and organizes
+it into a paginated table. Also allows filtering on item type
+*/
 var SubscriptionEntry = React.createClass({
 
     contextTypes: {
@@ -81,8 +97,11 @@ var SubscriptionEntry = React.createClass({
         return({
             'data': null,
             'types': null,
-            'selected_type': null,
-            'open': is_open
+            'selected_type': 'Item',
+            'open': is_open,
+            'page': 1,
+            'changing_page': false,
+            'num_pages': null
         });
     },
 
@@ -90,7 +109,7 @@ var SubscriptionEntry = React.createClass({
         // make async call to get first subscription data
         // only call this if open to improve performance
         if(this.state.open){
-            this.loadSubscriptionData('/search/?' + this.props.url);
+            this.loadSubscriptionData(this.props.url, this.state.page, this.state.selected_type);
         }
     },
 
@@ -98,14 +117,22 @@ var SubscriptionEntry = React.createClass({
         e.preventDefault();
         // load data if it hasn't been already
         if(!this.state.data){
-            this.loadSubscriptionData('/search/?' + this.props.url);
+            this.loadSubscriptionData(this.props.url, this.state.page, this.state.selected_type);
         }
         this.setState({'open':!this.state.open});
     },
 
-    loadSubscriptionData: function(url){
+    loadSubscriptionData: function(url, page, type){
         // search sorts by date_created as default. Thus, @graph results will be sorted
-        this.context.fetch(url, {
+        // use page number to implement pagination
+        var no_type_in_url = url.indexOf("?type=") == -1 && url.indexOf("&type=") == -1;
+        var fromInt = (page-1) * 25;
+        var pagination = '&limit=25&from=' + fromInt.toString();
+        var fetch_url = '/search/' + url + pagination;
+        if(no_type_in_url){
+            fetch_url = fetch_url + '&type=' + type;
+        }
+        this.context.fetch(fetch_url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -115,54 +142,60 @@ var SubscriptionEntry = React.createClass({
         .then(response => {
             if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['facets']) throw response;
             var types;
-            var selected_type;
             // no specified item type, so set the types state
-            if(url.indexOf("?type=") == -1 && url.indexOf("&type=") == -1){
-                types = this.findTypesFromFacets(response['facets']);
-                selected_type = 'Item';
+            // only want to run this once, with type=Item
+            if(no_type_in_url && !this.state.types){
+                this.findTypesFromFacets(response['facets']);
             }
-            this.setState({'data': response['@graph'], 'types': types, 'selected_type': selected_type});
+            // use 25 items per page. Change when types change
+            var num_pages = Math.ceil(response['total']/25);
+            this.setState({
+                'data': response['@graph'],
+                'changing_page': false,
+                'num_pages': num_pages
+            });
         },
         error => {
-            this.setState({'data': null, 'types': null, 'selected_type': null});
+            this.setState({
+                'data': null,
+                'types': null,
+                'changing_page':false,
+                'num_pages': null,
+                'page': 1,
+                'type': 'Item'
+            });
         });
     },
 
-    // find all item types represented in this result
+    // find all item types represented in this result by parsing @graph
+    // can't use facets because they ignore pagination
     findTypesFromFacets: function(facets){
         var types = [];
         for(var i=0; i<facets.length; i++){
             if(facets[i]['field'] == 'type'){
                 for(var j=0; j<facets[i]['terms'].length; j++){
-                    if(facets[i]['terms'][j]['doc_count'] > 0){
+                    if(facets[i]['terms'][j]['doc_count'] > 0 && facets[i]['terms'][j]['key'] != 'Item'){
                         types.push(facets[i]['terms'][j]['key']);
                     }
                 }
                 break;
             }
         }
-        return types;
+        types.sort();
+        types.unshift('Item'); // add Item to front of the array
+        this.setState({'types':types});
     },
 
     displayToggle: function(){
-        if(this.state.open){
-            if(!this.state.data){
-                // still loading
-                return(
-                    <i className="icon icon-spin icon-circle-o-notch" style={{'paddingLeft': '5px','opacity': '0.5' }}></i>
-                );
-            }else{
-                return(
-                    <a className='array-contract' style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Close">
-                        <i className="icon icon-toggle-up icon-fw"></i>
-                    </a>
-                );
-            }
+        if(this.state.open && !this.state.data){
+            return(
+                <i className="icon icon-spin icon-circle-o-notch" style={{'marginLeft': '5px','opacity': '0.5' }}></i>
+            );
         }else{
             return(
-                <a className='array-expand' style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Expand">
-                    <i className="icon icon-toggle-down icon-fw"></i>
-                </a>
+                <Button bsSize="xsmall" className="icon-container submission-btn" onClick={this.toggleOpen}>
+                    <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
+                </Button>
             );
         }
     },
@@ -170,14 +203,19 @@ var SubscriptionEntry = React.createClass({
     generateEntry: function(entry){
         if(!entry['@type'] || !entry.date_created || !entry.status || !entry.display_title || !entry.link_id){
             return;
-        }else if(this.state.selected_type && !_.contains(entry['@type'], this.state.selected_type)){
-            return;
         }
         var format_id = entry.link_id.replace(/~/g, "/");
         return(
             <tr key={entry.date_created}>
                 <td>
                     <a href={format_id}>{entry.display_title}</a>
+                </td>
+                <td>
+                    {(entry.aliases && entry.aliases.length > 0) ?
+                    <div style={{'wordWrap':'break-word','overflowWrap':'break-word'}}>
+                        {entry.aliases.join(', ')}
+                    </div>
+                    :""}
                 </td>
                 <td>{entry['@type'][0]}</td>
                 <td>{entry.status}</td>
@@ -188,16 +226,35 @@ var SubscriptionEntry = React.createClass({
         );
     },
 
-    generateTypeDropdown: function(){
-        if(!this.state.types || !this.state.open){
+    generateButtonToolbar: function(){
+        if(!this.state.open){
             return null;
         }
         return(
-            <div style={{'float':'right','marginBottom':'10px','display':'inline-block','marginTop':'25px'}}>
-                <DropdownButton id="dropdown-size-extra-small" title={this.filterEnumTitle(this.state.selected_type)} >
-                    {this.state.types.map((type) => this.buildEnumEntry(type))}
-                </DropdownButton>
-            </div>
+            <ButtonToolbar className="pull-right" style={{'marginTop':'-5px'}}>
+                {this.state.types ?
+                    <DropdownButton id="dropdown-size-extra-small" title={this.filterEnumTitle(this.state.selected_type)} >
+                        {this.state.types.map((type) => this.buildEnumEntry(type))}
+                    </DropdownButton>
+                : null}
+                <ButtonGroup>
+                    <Button disabled={this.state.changing_page || !this.state.num_pages  || this.state.page === 1} onClick={this.state.changing_page === true ? null : (e)=>{
+                        this.changePage(this.state.page - 1);
+                    }}><i className="icon icon-angle-left icon-fw"></i></Button>
+
+                    <Button disabled style={{'minWidth': 120 }}>
+                        { this.state.changing_page === true || !this.state.num_pages ?
+                            <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': 0.5 }}></i>
+                            : 'Page ' + this.state.page + ' of ' + this.state.num_pages
+                        }
+                    </Button>
+
+                    <Button disabled={this.state.changing_page || !this.state.num_pages || this.state.page === this.state.num_pages} onClick={this.state.changing_page === true ? null : (e)=>{
+                        this.changePage(this.state.page + 1);
+                    }}><i className="icon icon-angle-right icon-fw"></i></Button>
+
+                </ButtonGroup>
+            </ButtonToolbar>
         );
     },
 
@@ -210,7 +267,9 @@ var SubscriptionEntry = React.createClass({
     },
 
     submitEnumVal: function(eventKey){
-        this.setState({'selected_type': eventKey});
+        // reset page to 1 on a type change
+        this.loadSubscriptionData(this.props.url, 1, eventKey);
+        this.setState({'page':1, 'selected_type': eventKey});
     },
 
     // very simple. If title == Item, return 'All'
@@ -222,6 +281,14 @@ var SubscriptionEntry = React.createClass({
         }
     },
 
+    changePage : _.throttle(function(page){
+        if(page > this.state.num_pages || page < 1){
+            return;
+        }
+        this.loadSubscriptionData(this.props.url, page, this.state.selected_type);
+        this.setState({'page':page, 'changing_page':true});
+    }, 250),
+
     render: function(){
         var submissions;
         if(this.state.data){
@@ -229,10 +296,10 @@ var SubscriptionEntry = React.createClass({
         }
         return(
             <div>
-                <div>
+                <div className='submission-page-heading'>
                     <h3 className='submission-subtitle'>{this.props.title}</h3>
                     <h3 className='submission-subtitle'>{this.displayToggle()}</h3>
-                    {this.generateTypeDropdown()}
+                    {this.generateButtonToolbar()}
                 </div>
                 {this.state.open ?
                     <div className="sub-panel panel-body-with-header" style={{'maxHeight':'300px', 'overflowY':'auto'}}>
@@ -240,6 +307,7 @@ var SubscriptionEntry = React.createClass({
                             <thead>
                                 <tr>
                                     <th>Item</th>
+                                    <th>Aliases</th>
                                     <th>Type</th>
                                     <th>Status</th>
                                     <th>Date submitted</th>
