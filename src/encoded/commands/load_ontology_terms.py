@@ -37,7 +37,7 @@ def main():
 
     load_term_data = 'encoded.loadxl:load_ontology_terms'
     print("****** load test data is %s" % (load_term_data))
-    load_test_data = DottedNameResolver().resolve(load_term_data)
+    load_term_data = DottedNameResolver().resolve(load_term_data)
     load_term_data(app)
     end = datetime.now()
     print("FINISHED - START: ", str(start), "\tEND: ", str(end))
