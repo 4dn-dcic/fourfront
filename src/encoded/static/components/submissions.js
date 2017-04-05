@@ -37,11 +37,11 @@ var Submissions = module.exports = React.createClass({
             }
         })
         .then(response => {
-            if (!this.context.contentTypeIsJSON(response) || !response['subscriptions']) throw response;
+            if (!this.context.contentTypeIsJSON(response) || !response.subscriptions) throw response;
             return response;
         })
         .then(response => {
-            this.setState({'subscriptions': response['subscriptions'],'initialized': true});
+            this.setState({'subscriptions': response.subscriptions,'initialized': true});
         }, error => {
             this.setState({'subscriptions': null,'initialized': true});
         });
@@ -60,9 +60,9 @@ var Submissions = module.exports = React.createClass({
             subscrip_list = this.state.subscriptions.map((scrip) => this.generateSubscription(scrip));
             main_message = "View your 4DN submissions and track those you're associated with.";
         }else if(this.state.initialized){
-            main_message = "No submissions to track; you are not a submitter nor associated with any labs."
+            main_message = "No submissions to track; you are not a submitter nor associated with any labs.";
         }else{
-            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}></i>
+            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}></i>;
         }
         return(
             <div>
@@ -275,7 +275,7 @@ var SubscriptionEntry = React.createClass({
     // very simple. If title == Item, return 'All'
     filterEnumTitle: function(title){
         if(title == 'Item'){
-            return 'All'
+            return 'All';
         }else{
             return title;
         }
@@ -292,7 +292,7 @@ var SubscriptionEntry = React.createClass({
     render: function(){
         var submissions;
         if(this.state.data){
-            submissions = this.state.data.map((entry) => this.generateEntry(entry))
+            submissions = this.state.data.map((entry) => this.generateEntry(entry));
         }
         return(
             <div>
