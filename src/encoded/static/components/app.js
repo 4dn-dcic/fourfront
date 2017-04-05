@@ -223,7 +223,15 @@ var App = React.createClass({
             return portal.user_section;
         }
         if (category === 'user') {
-            return this.state.user_actions || [];
+            var temp_actions;
+            // remove uploads from dropdown if there aren't any current uploads
+            if(this.state.user_actions){
+                temp_actions = this.state.user_actions.slice();
+                if(Object.keys(this.state.uploads).length === 0){
+                    temp_actions = temp_actions.filter(action => action.id !== 'uploads');
+                }
+            }
+            return temp_actions || [];
         }
         if (category === 'global_sections') {
             return portal.global_sections;
@@ -959,9 +967,9 @@ var App = React.createClass({
         var currRoute = lowerList.slice(1); // eliminate http
         // check error status
         var status;
+        var route = currRoute[currRoute.length-1];
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
-            var route = currRoute[currRoute.length-1];
             if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads' && route != 'submissions'){
                 status = 'not_found';
             }
@@ -971,6 +979,12 @@ var App = React.createClass({
             }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
             }
+        }else if(route == 'uploads' && !_.contains(this.state.user_actions.map(action => action.id), 'uploads')){
+            console.log(this.state.user_actions);
+            status = 'forbidden'; // attempting to view uploads but it's not in users actions
+        }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+            console.log(this.state.user_actions);
+            status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
         // first case is fallback
         if (canonical === "about:blank"){
