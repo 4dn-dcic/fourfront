@@ -36,7 +36,9 @@ def build_cfg_file():
     data['dbconn'] = dbconn_from_env()
     data['env_name'] = os.environ.get("ENV_NAME", "")
     data['load_function'] = 'load_test_data'
-    if 'prod' in data['env_name'].lower():
+    # this is temporary while we have environments switched, change back later
+    # if 'prod' in data['env_name'].lower():
+    if 'web-dev' in data['env_name'].lower():
         data['load_function'] = 'load_prod_data'
 
     file_dir, _ = os.path.split(os.path.abspath(__file__))
