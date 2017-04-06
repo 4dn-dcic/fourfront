@@ -909,7 +909,7 @@ var App = React.createClass({
     // there doesn't seem to be any way to remove the default alert...
     handleBeforeUnload: function(e){
         if(Object.keys(this.state.uploads).length > 0){
-            return 'You have current uploads running. Please wait until they are finished to leave.'
+            return 'You have current uploads running. Please wait until they are finished to leave.';
         }
     },
 
