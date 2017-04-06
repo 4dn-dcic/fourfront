@@ -13,7 +13,7 @@ snovault.app_version = ${encoded_version}
 snovault.elasticsearch.index = ${elasticsearch_index}
 
 snovault.load_test_data = ${load_test_data}
-
+sqlalchemy.url = ${sqlalchemy_url}
 [composite:indexer]
 use = config:base.ini#indexer
 
