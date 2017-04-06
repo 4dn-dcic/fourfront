@@ -149,7 +149,7 @@ class Organism(Item):
         'title': 'Protocols',
         'description': 'Listing of protocols',
     })
-class Protocol(Item):
+class Protocol(Item, ItemWithAttachment):
     """Protocol class."""
 
     item_type = 'protocol'
