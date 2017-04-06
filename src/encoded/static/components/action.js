@@ -33,6 +33,7 @@ var Action = module.exports = React.createClass({
             'newContext': {},
             'requiredFields': reqFields,
             'validated': 0, // 0 = not validated, 1 = validated, 2 = error
+            'processingFetch': false,
             'thisType': contType[0],
             'thisSchema': thisSchema,
             'errorCount': 0,
@@ -178,6 +179,12 @@ var Action = module.exports = React.createClass({
                     {'Validated'}
                 </Button>
             );
+        }else if(this.state.processingFetch){
+            return(
+                <Button bsStyle="info" style={style} disabled>
+                    <i className="icon icon-spin icon-circle-o-notch"></i>
+                </Button>
+            );
         }else if (this.state.validated == 0){
             return(
                 <Button bsStyle="info" style={style} onClick={this.testPostNewContext}>
@@ -195,10 +202,16 @@ var Action = module.exports = React.createClass({
 
     generatePostButton: function(){
         var style={'marginLeft':'30px','width':'160px'};
-        if(this.state.validated == 1){
+        if(this.state.validated == 1 && !this.state.processingFetch){
             return(
                 <Button bsStyle="success" style={style} onClick={this.realPostNewContext}>
                     {this.props.edit ? 'Edit object' : 'Create object'}
+                </Button>
+            );
+        }else if(this.state.validated == 1 && this.state.processingFetch){
+            return(
+                <Button bsStyle="success" style={style} disabled>
+                    <i className="icon icon-spin icon-circle-o-notch"></i>
                 </Button>
             );
         }else{
@@ -224,6 +237,8 @@ var Action = module.exports = React.createClass({
         // function to test a POST of the data or actually POST it.
         // validates if test=true, POSTs if test=false.
         var stateToSet = {}; // hold state
+        // this will always be reset when stateToSet is implemented
+        stateToSet.processingFetch = false;
         // get rid of any hanging errors
         for(var i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Object validation error " + parseInt(i + 1)});
@@ -234,11 +249,13 @@ var Action = module.exports = React.createClass({
         var award;
         var finalizedContext = this.contextSift(this.state.newContext, this.state.thisSchema);
         console.log('contextToPOST:', finalizedContext);
+        this.setState({'processingFetch': true});
         ajax.promise('/me?frame=embedded').then(data => {
             if (this.context.contentTypeIsJSON(data)){
                 if(!data.submits_for || data.submits_for.length == 0){
                     console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
-                    this.setState({'validated': 2});
+                    stateToSet.validated = 2;
+                    this.setState(stateToSet);
                     return;
                 }
                 // use first lab for now
@@ -249,7 +266,8 @@ var Action = module.exports = React.createClass({
                 if (this.context.contentTypeIsJSON(lab_data)){
                     if(!lab_data.awards || lab_data.awards.length == 0){
                         console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
-                        this.setState({'validated': 2});
+                        stateToSet.validated = 2;
+                        this.setState(stateToSet);
                         return;
                     }
                     // should we really always use the first award?
@@ -1001,6 +1019,7 @@ var AttachmentInput = React.createClass({
         var types = [
             "application/pdf",
             "application/zip",
+            "application/msword",
             "text/plain",
             "text/tab-separated-values",
             "image/jpeg",
