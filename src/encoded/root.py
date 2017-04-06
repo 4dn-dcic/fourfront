@@ -20,6 +20,7 @@ from pyramid.security import (
 def includeme(config):
     config.include(static_pages)
     config.include(uploads_page)
+    config.include(submissions_page)
     config.scan(__name__)
 
 
@@ -160,6 +161,32 @@ def uploads_page(config):
         return responseDict
 
     config.add_view(upload_page_view, route_name='uploads-page')
+
+
+def submissions_page(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'submissions-page',
+        '/submissions'
+    )
+    def submissions_page_view(request):
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+
+        responseDict = {
+            "title" : "Submissions",
+            "notification" : "success",
+            "@type" : [ "Submissions", "Portal" ],
+            "@context" : "/submissions",
+            "@id" : "/submissions",
+            "content" : None
+        }
+
+        return responseDict
+
+    config.add_view(submissions_page_view, route_name='submissions-page')
 
 
 def acl_from_settings(settings):

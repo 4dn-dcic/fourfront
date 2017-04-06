@@ -67,10 +67,8 @@ var Action = module.exports = React.createClass({
             return response;
         })
         .then(response => {
-            // if cloning, clear all clear_create tagged fields
-            if(!this.props.edit){
-                response = this.clearFields(response, this.state.thisSchema);
-            }
+            // clear fields based off of action method and ff_clear values in schema
+            response = this.clearFields(response, this.state.thisSchema);
             this.setState({'newContext': response});
         }, error => {
             // something went wrong with fetch context. Just use an empty object
@@ -79,14 +77,19 @@ var Action = module.exports = React.createClass({
     },
 
     // Loop through fields in new context. If schema for field has
-    // "clear_create": "clear", then clear the value
+    // "ff_clear": "clone", then clear the value on clone
+    // if "ff_clear": "edit" then clear on edit
     clearFields: function(context, schema){
         var contextKeys = Object.keys(context);
         for(var i=0; i<contextKeys.length; i++){
             if(schema.properties[contextKeys[i]]){
                 var fieldSchema = schema.properties[contextKeys[i]];
-                if (fieldSchema.clear_create && fieldSchema.clear_create == "clear"){
-                    delete context[contextKeys[i]];
+                if (fieldSchema.ff_clear){
+                    if(this.props.edit && fieldSchema.ff_clear == "edit"){
+                        delete context[contextKeys[i]];
+                    }else if(!this.props.create && fieldSchema.ff_clear == "clone"){
+                        delete context[contextKeys[i]];
+                    }
                 }
             }
         }
@@ -151,6 +154,14 @@ var Action = module.exports = React.createClass({
     modifyMD5Progess: function(progress){
         // set this.state.md5Progress to passed in progress value (should be int)
         this.setState({'md5Progress':progress});
+    },
+
+    getFieldValue: function(field){
+        if(this.state.newContext.hasOwnProperty(field)){
+            return this.state.newContext[field];
+        }else{
+            return null;
+        }
     },
 
     generateValidationButton: function(){
@@ -371,7 +382,7 @@ var Action = module.exports = React.createClass({
             <div className={itemClass}>
                 <h2>{actionTitle}</h2>
                 <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
-                <FieldPanel thisType={thisType} context={context} baseContext={baseContext} schema={schema} modifyNewContext={this.modifyNewContext} modifyFile={this.modifyFile} modifyMD5Progess={this.modifyMD5Progess} md5Progress={this.state.md5Progress} reqFields={reqFields} edit={this.props.edit}/>
+                <FieldPanel thisType={thisType} context={context} baseContext={baseContext} schema={schema} modifyNewContext={this.modifyNewContext} modifyFile={this.modifyFile} modifyMD5Progess={this.modifyMD5Progess} md5Progress={this.state.md5Progress} getFieldValue={this.getFieldValue} reqFields={reqFields} edit={this.props.edit}/>
                 <div>
                     {this.generateValidationButton()}
                     {this.generatePostButton()}
@@ -443,7 +454,7 @@ var FieldPanel = React.createClass({
             }
         }
         return(
-            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} modifyMD5Progess={this.props.modifyMD5Progess} md5Progress={this.props.md5Progress} required={required}/>
+            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} modifyMD5Progess={this.props.modifyMD5Progess} md5Progress={this.props.md5Progress} getFieldValue={this.props.getFieldValue} required={required}/>
         );
     },
 
@@ -526,19 +537,19 @@ var BuildField = React.createClass({
                 </span>
             );
             case 'linked object' : return (
-                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext}/>
+                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
             );
             case 'array' : return (
-                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
+                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
             );
             case 'object' : return (
-                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
+                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
             );
             case 'attachment' : return (
-                <AttachmentInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
+                <AttachmentInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
             );
             case 'file upload' : return (
-                <S3FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} modifyMD5Progess={this.props.modifyMD5Progess} md5Progress={this.props.md5Progress} schema={this.props.schema}/>
+                <S3FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} modifyMD5Progess={this.props.modifyMD5Progess} md5Progress={this.props.md5Progress} schema={this.props.schema} getFieldValue={this.props.getFieldValue}/>
             );
         }
         // Fallback
@@ -601,7 +612,7 @@ var BuildField = React.createClass({
         return(
             <dl className="key-value row extra-footspace">
                 <dt className="col-sm-3">
-                        <span style={{'display':'inlineBlock', 'width':'80px'}}>
+                        <span style={{'display':'inline-block', 'width':'120px'}}>
                             {field_title}
                         </span>
                         {!_.contains(cannot_delete,this.props.label) ?
@@ -1075,14 +1086,34 @@ var S3FileInput = React.createClass({
     },
 
     render: function(){
+        var edit_tip;
+        var previous_status = this.props.getFieldValue('status');
+        var filename_text = this.props.value ? this.props.value : "No file chosen";
+        var md5sum = this.props.getFieldValue('md5sum');
+        if(this.props.value && !md5sum && previous_status){
+            // edit tip to show that there is filename metadata but no actual file
+            // selected (i.e. no file held in state)
+            edit_tip = "Previous file: " + this.props.value;
+            // inform them if the upload failed previously
+            if(previous_status == 'upload failed'){
+                edit_tip += ' (upload FAILED)';
+            }
+            filename_text = "No file chosen";
+        }
         return(
             <div>
                 <input id={this.props.field} type='file' onChange={this.handleChange} disabled={this.props.md5Progress ? true : false} style={{'display':'none'}}/>
                 <Button disabled={this.props.md5Progress ? true : false} style={{'padding':'0px'}}>
                     <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
-                        {this.props.value ? this.props.value : "No file chosen"}
+                        {filename_text}
                     </label>
                 </Button>
+                {edit_tip ?
+                    <span style={{'color':'#a94442','paddingBottom':'6px', 'paddingLeft':'10px'}}>
+                        {edit_tip}
+                    </span>
+                    :
+                    null}
                 {this.props.md5Progress ?
                     <div style={{'paddingTop':'10px','paddingBottom':'6px'}}>
                         <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}></i>

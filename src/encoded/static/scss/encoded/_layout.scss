@@ -121,6 +121,33 @@ h1.page-title + .page-subtitle {
 	font-weight: 400;
 }
 
+// For submissions page headers
+h3.submission-subtitle {
+	font-weight: 400;
+	display: inline-block;
+}
+
+.submission-page-heading {
+    /** Extends .flexible-description-box **/
+	border-radius: 2px;
+	border: 1px solid #ddd;
+	min-height: 42px;
+	padding: 10px 15px 8px;
+}
+
+.submission-btn {
+	background-color: #f4f4f4;
+	border-color: #f4f4f4;
+	margin-left: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
+	box-shadow: none;
+}
+
+.submission-btn:hover, .submission-btn:focus{
+	background-color: #ddd;
+	border-color: #f4f4f4;
+}
 
 /* *********************************************************
 		FOOTER
