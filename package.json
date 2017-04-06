@@ -72,6 +72,7 @@
     "react-cookie": "^0.4.8",
     "react-dom": "^15.3.2",
     "react-redux": "^4.4.5",
+    "react-tab-panel": "^2.2.7",
     "react-tooltip": "^3.2.7",
     "redux": "^3.5.2",
     "scriptjs": "^2.5.7",

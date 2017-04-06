@@ -1,14 +1,15 @@
 'use strict';
 
 var React = require('react');
-var globals = require('./../globals');
-var Panel = require('react-bootstrap').Panel;
-var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
+var Panel = require('react-bootstrap').Panel;
+var { TabPanel } = require('react-tab-panel');
+var { ajax, console, DateUtility, object } = require('./../util');
+var globals = require('./../globals');
+var { ExperimentsTable } = require('./../experiments-table');
 var { DescriptorField, Detail } = require('./item-view');
 var { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemFooterRow, PublicationsBlock } = require('./components');
 var FacetList = require('./../facetlist');
-var { ajax, console, DateUtility, object } = require('./../util');
 
 /**
  * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
