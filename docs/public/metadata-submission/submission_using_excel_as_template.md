@@ -129,7 +129,7 @@ Then when entering information about individual experiments on the specific Expe
 The 4DN DCIC website has an REST API for fetching and submitting data. In our **Submit4DN** package the ```import_data``` script utilizes an organized bundle of REST API commands that parse the Excel workbook and submit the metadata to the database for you. The ```get_field_info``` script that is also part of the package can be used to generate the Excel workbook templates used for submission for all or a selected set of worksheets.
 The package can be installed from pypi.
 
-### Installing the package
+### Installing the Submit4DN software
 The Submit4DN package is registered with Pypi so installation is as simple as:
 
 
@@ -142,7 +142,7 @@ If it is already installed upgrade to the latest version:
     pip3 install submit4dn --upgrade
 
 
-### Source code
+### Submit4DN Source code
 The source code for the submission scripts is available on [github](https://github.com/4dn-dcic/Submit4DN).
 
 
@@ -184,7 +184,7 @@ If in the file, the key is not called “default” you can use the --key parame
 
     import_data --keyfile Path/name_of_file.json --key NotDefault
 
-### Using import_data for metadata
+### Using import_data script for submission
 You can use `import_data` either to upload new items or to modify metadata fields of existing items. This script will accept the excel workbook you prepared, and will upload every new item in the sheets.  This script is also used to upload data files to the 4DN data store - this is done in a separate step after your File metadata has been successfully uploaded.
 
 
