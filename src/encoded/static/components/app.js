@@ -413,7 +413,7 @@ var App = React.createClass({
         } else {
             window.onhashchange = this.onHashChange;
         }
-        //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
+        window.onbeforeunload = this.handleBeforeUnload;
 
         // Load up analytics
         analytics.initializeGoogleAnalytics(
@@ -902,6 +902,14 @@ var App = React.createClass({
             window.location.replace(hash);
         } else {
             window.scrollTo(0, 0);
+        }
+    },
+
+    // catch user navigating away from page if there are current uploads running
+    // there doesn't seem to be any way to remove the default alert...
+    handleBeforeUnload: function(e){
+        if(Object.keys(this.state.uploads).length > 0){
+            return 'You have current uploads running. Please wait until they are finished to leave.'
         }
     },
 
