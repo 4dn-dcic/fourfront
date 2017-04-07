@@ -223,7 +223,15 @@ var App = React.createClass({
             return portal.user_section;
         }
         if (category === 'user') {
-            return this.state.user_actions || [];
+            var temp_actions;
+            // remove uploads from dropdown if there aren't any current uploads
+            if(this.state.user_actions){
+                temp_actions = this.state.user_actions.slice();
+                if(Object.keys(this.state.uploads).length === 0){
+                    temp_actions = temp_actions.filter(action => action.id !== 'uploads');
+                }
+            }
+            return temp_actions || [];
         }
         if (category === 'global_sections') {
             return portal.global_sections;
@@ -405,7 +413,7 @@ var App = React.createClass({
         } else {
             window.onhashchange = this.onHashChange;
         }
-        //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
+        window.onbeforeunload = this.handleBeforeUnload;
 
         // Load up analytics
         analytics.initializeGoogleAnalytics(
@@ -897,6 +905,14 @@ var App = React.createClass({
         }
     },
 
+    // catch user navigating away from page if there are current uploads running
+    // there doesn't seem to be any way to remove the default alert...
+    handleBeforeUnload: function(e){
+        if(Object.keys(this.state.uploads).length > 0){
+            return 'You have current uploads running. Please wait until they are finished to leave.';
+        }
+    },
+
     render: function() {
         console.log('render app');
         var context = this.props.context;
@@ -959,10 +975,10 @@ var App = React.createClass({
         var currRoute = lowerList.slice(1); // eliminate http
         // check error status
         var status;
+        var route = currRoute[currRoute.length-1];
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
-            var route = currRoute[currRoute.length-1];
-            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads'){
+            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads' && route != 'submissions'){
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
@@ -971,6 +987,12 @@ var App = React.createClass({
             }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
             }
+        }else if(route == 'uploads' && !_.contains(this.state.user_actions.map(action => action.id), 'uploads')){
+            console.log(this.state.user_actions);
+            status = 'forbidden'; // attempting to view uploads but it's not in users actions
+        }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+            console.log(this.state.user_actions);
+            status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
         // first case is fallback
         if (canonical === "about:blank"){
