@@ -20,6 +20,7 @@ from pyramid.security import (
 def includeme(config):
     config.include(static_pages)
     config.include(uploads_page)
+    config.include(health_check)
     config.include(submissions_page)
     config.scan(__name__)
 
@@ -161,6 +162,43 @@ def uploads_page(config):
         return responseDict
 
     config.add_view(upload_page_view, route_name='uploads-page')
+
+
+
+def health_check(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'health-check',
+        '/health'
+    )
+    def health_page_view(request):
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+
+        settings = request.registry.settings
+        db = request.registry['dbsession']
+        count = db.scalar("""SELECT count(*) FROM "propsheets";""")
+        responseDict = {
+            "file_upload_bucket" : settings.get('file_upload_bucket'),
+            "blob_bucket" : settings.get('blob_bucket'),
+            "system_bucket" : settings.get('system_bucket'),
+            "elasticserach" : settings.get('elasticsearch.server') + '/' +
+            settings.get('snovault.elasticsearch.index'),
+            "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
+            "load_data": settings.get('snovault.load_test_data'),
+            'es_count': request.registry['elasticsearch'].count(),
+            'db_count': count,
+            "@type" : [ "Health", "Portal" ],
+            "@context" : "/health",
+            "@id" : "/health",
+            "content" : None
+        }
+
+        return responseDict
+
+    config.add_view(health_page_view, route_name='health-check')
 
 
 def submissions_page(config):
