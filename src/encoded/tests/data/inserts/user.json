@@ -9,7 +9,8 @@
         "status": "current",
         "submits_for": ["4dn-dcic-lab"],
         "timezone": "US/Pacific",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "viewing_groups": ["4DN"]
     },
     {
         "email": "burak_alver@hms.harvard.edu",
@@ -17,7 +18,8 @@
         "job_title": "4DN staff",
         "lab": "4dn-dcic-lab",
         "last_name": "Alver",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139"
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139",
+        "viewing_groups": ["4DN"]
     },
     {
         "email": "andrew_schroeder@hms.harvard.edu",
@@ -25,7 +27,8 @@
         "job_title": "4DN staff",
         "lab": "4dn-dcic-lab",
         "last_name": "Schroeder",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267227777"
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267227777",
+        "viewing_groups": ["4DN"]
     },
     {
         "email": "johnsonjp@gmail.com",
@@ -33,7 +36,8 @@
         "job_title": "4DN staff",
         "lab": "4dn-dcic-lab",
         "last_name": "Johnson",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267216788"
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267216788",
+        "viewing_groups": ["4DN"]
     },
     {
         "email": "duplexa@gmail.com",
@@ -41,7 +45,8 @@
         "job_title": "4DN staff",
         "lab": "4dn-dcic-lab",
         "last_name": "Lee",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267998888"
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267998888",
+        "viewing_groups": ["4DN"]
     },
     {
         "email": "koray_kirli@hms.harvard.edu",
@@ -49,7 +54,8 @@
         "job_title": "4DN staff",
         "lab": "4dn-dcic-lab",
         "last_name": "Kirli",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267111888"
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267111888",
+        "viewing_groups": ["4DN"]
     },
     {
         "email": "alexander_balashov@hms.harvard.edu",
@@ -57,7 +63,8 @@
         "job_title": "4DN staff",
         "lab": "4dn-dcic-lab",
         "last_name": "Balashov",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab245628888"
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab245628888",
+        "viewing_groups": ["4DN"]
     },
     {
         "email": "carl_vitzthum@hms.harvard.edu",
@@ -65,7 +72,8 @@
         "job_title": "4DN staff",
         "lab": "4dn-dcic-lab",
         "last_name": "Vitzthum",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267226988"
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267226988",
+        "viewing_groups": ["4DN"]
     },
     {
         "email": "wrangler@wrangler.com",
