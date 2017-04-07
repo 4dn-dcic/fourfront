@@ -267,6 +267,6 @@ def test_impersonate_user(anontestapp, admin, submitter):
 
 
     # and we should be able to use that token as the new user
-    headers = {'Accept': 'applicatin/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + res.json['id_token']}
+    headers = {'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + res.json['id_token']}
     res2 = anontestapp.get('/users/?format=json', headers=headers)
     assert '@id' in res2.json['@graph'][0]

@@ -129,7 +129,7 @@ def test_json_basic_auth(anonhtmltestapp):
     from pyramid.compat import ascii_native_
     url = '/'
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
-    res = anonhtmltestapp.get(url, headers={'Authorization': value}, status=403)
+    res = anonhtmltestapp.get(url, headers={'Authorization': value, 'Accept': 'application/json'}, status=403)
     assert res.content_type == 'application/json'
 
 
