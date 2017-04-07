@@ -38,7 +38,7 @@ def build_cfg_file():
     data['load_function'] = 'load_test_data'
     # this is temporary while we have environments switched, change back later
     # if 'prod' in data['env_name'].lower():
-    if 'web-dev' in data['env_name'].lower():
+    if data['env_name'].lower() in ['4dn-web-dev', 'fourfront-webdev']:
         data['load_function'] = 'load_prod_data'
 
     file_dir, _ = os.path.split(os.path.abspath(__file__))
