@@ -152,7 +152,6 @@ def security_tween_factory(handler, registry):
             #try:
             return handler(request)
             #except Exception as e:
-            #    import pdb; pdb.set_trace()
             #    print(e)
 
         if request.content_type != 'application/json':
@@ -189,19 +188,16 @@ def should_transform(request, response):
     if format is None:
         original_vary = response.vary or ()
         response.vary = original_vary + ('Accept', 'Authorization')
-        if request.authorization is not None:
+        mime_type = request.accept.best_match(
+            [
+                'text/html',
+                'application/ld+json',
+                'application/json',
+            ],
+            'text/html')
+        format = mime_type.split('/', 1)[1]
+        if format == 'ld+json':
             format = 'json'
-        else:
-            mime_type = request.accept.best_match(
-                [
-                    'text/html',
-                    'application/ld+json',
-                    'application/json',
-                ],
-                'text/html')
-            format = mime_type.split('/', 1)[1]
-            if format == 'ld+json':
-                format = 'json'
     else:
         format = format.lower()
         if format not in ('html', 'json'):

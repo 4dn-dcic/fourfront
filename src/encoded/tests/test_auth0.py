@@ -176,14 +176,8 @@ def test_404_keeps_auth_info(testapp, anontestapp, headers,
     )
 
     assert str(res.status_int) == "404"
-    try:
-        assert res.headers.get('X-Request-JWT', None) is not None
-        assert res.headers.get('X-User-Info', None) is not None
-    except Exception as e:
-        if os.environ.get('TRAVIS', False):
-            print("this don't work on travis do to access issues to Auth-0")
-        else:
-            raise e
+    assert res.headers.get('X-Request-JWT', None) is not None
+    assert res.headers.get('X-User-Info', None) is not None
 
 
 def test_login_logout_redirect(testapp, anontestapp, headers,
@@ -273,8 +267,6 @@ def test_impersonate_user(anontestapp, admin, submitter):
 
 
     # and we should be able to use that token as the new user
-    headers = {'Accept': 'applicatin/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' +
-     res.json['id_token']}
-    res2 = anontestapp.get('/users/', headers=headers)
+    headers = {'Accept': 'applicatin/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + res.json['id_token']}
+    res2 = anontestapp.get('/users/?format=json', headers=headers)
     assert '@id' in res2.json['@graph'][0]
-
