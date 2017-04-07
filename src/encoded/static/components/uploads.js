@@ -87,6 +87,7 @@ var Uploads = module.exports = React.createClass({
                     if(this._isMounted){
                         this.modifyRunningUploads(upload_key, 101, null);
                     }
+                    this.props.updateUploads(upload_key, null, true);
                     alert("File uploaded successfully for " + upload_key);
                 }
             }.bind(this));
