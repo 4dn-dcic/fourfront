@@ -186,10 +186,10 @@ def health_check(config):
             "system_bucket" : settings.get('system_bucket'),
             "elasticserach" : settings.get('elasticsearch.server') + '/' +
             settings.get('snovault.elasticsearch.index'),
-            "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password 
+            "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
             'es_count': request.registry['elasticsearch'].count(),
-            'db_count': count, 
+            'db_count': count,
             "@type" : [ "Health", "Portal" ],
             "@context" : "/health",
             "@id" : "/health",
