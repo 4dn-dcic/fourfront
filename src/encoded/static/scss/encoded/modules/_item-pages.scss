@@ -296,9 +296,17 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .item-page-container {
     .info-area {
 	    margin-top: 17px;
-		border-bottom: 1px solid #ddd;
+		//border-bottom: 1px solid #ddd;
 		padding-bottom: 7px;
     }
+
+	.rc-tabs-tabpane {
+		.info-area {
+			overflow: hidden;
+			border-bottom: none;
+		}
+	}
+
     .item-info-area {
         margin-bottom: 20px;
         min-height: 120px;
@@ -310,6 +318,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	margin-bottom: 12px;
 
+	.expandable-list {
+		overflow: hidden;
+	}
+
 	.list-item {
 
 		/* Equalize Height of Columns, unsupported for IE9 and below: */
@@ -317,6 +329,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		display: -webkit-flex;
 		display: -ms-flexbox;
 		display: flex;
+
+		
 
 		.item-label, .item-value {
 			> div {
