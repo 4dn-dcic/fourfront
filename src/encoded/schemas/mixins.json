@@ -258,6 +258,11 @@
                 "height": {
                     "title": "Image height",
                     "type": "integer"
+                },
+                "blob_id":{
+                    "title": "Blob ID",
+                    "type": "string",
+                    "internal_comment": "blob storage ID. Use to like with s3/rds"
                 }
             }
         }
