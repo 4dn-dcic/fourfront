@@ -350,9 +350,38 @@ $navbar-transition-length: .75s;
 
 .test-warning {
     position: relative;
-    padding: 6px 0 5px;
+    padding: 8px 0 15px;
     color: #fff;
     background-color: #7e4544;
+    height: 52px;
+    line-height: 17px;
+    overflow: hidden;
+
+    > .container > div > span {
+    
+        position: relative;
+
+        &:before {
+            content: ' ';
+            display: block;
+            position: absolute;
+            left: -729px;
+            top: -270px;
+            height: 600px;
+            width: 600px;
+            transform: rotate(-40deg);
+            background: rgba(255,255,255,0.08);
+            background: #4e2828;
+            box-shadow: 0 0 200px rgba(0,0,0,0.5);
+        }
+    }
+
+    @media screen and (min-width: $screen-sm-min){
+        padding-top: 11px;
+        line-height: 28px;
+        padding-bottom: 12px;
+    }
+
     //@include background-image(linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%));
     //background-image: -ms-linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%);
 
@@ -368,6 +397,16 @@ $navbar-transition-length: .75s;
     }
 }
 
+.icon-fw.icon-info.circle-icon {
+    font-size: 20px;
+    vertical-align: middle;
+    text-align: center;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    height: 27px;
+    line-height: 25px;
+    width: 27px;
+}
 
 .test-warning-close {
     position: absolute;
@@ -389,16 +428,22 @@ $navbar-transition-length: .75s;
 
     @media screen and (min-width: $screen-md-min) {
         position: static;
-        display: inline;
-        margin-top: 0;
+        margin-top: -4px;
         margin-left: 10px;
     }
 }
 
 @media (min-width: $screen-md-min) {
-	.navbar-container.test-warning-visible {
-		padding-bottom: 34px;
-	}
+    .navbar-container {
+
+        &.scrolled-at-top {
+            transition: padding-bottom .5s ease-out;
+        }
+
+        &.test-warning-visible {
+            padding-bottom: 52px;
+        }
+    }
 }
 
 @media (max-width: $screen-xs-max) {
