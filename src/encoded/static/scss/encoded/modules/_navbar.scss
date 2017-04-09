@@ -365,15 +365,27 @@ $navbar-transition-length: .75s;
             content: ' ';
             display: block;
             position: absolute;
-            left: -729px;
+            left: -772px;
             top: -270px;
             height: 600px;
             width: 600px;
-            transform: rotate(-40deg);
+            transform: rotate3d(0,0,1,-40deg);
             background: rgba(255,255,255,0.08);
             background: #4e2828;
             box-shadow: 0 0 200px rgba(0,0,0,0.5);
+            border-right: 7px solid rgba(255, 255, 255, 0.45);
+            outline-offset: -14px;
+            outline-color: rgba(255, 255, 255, 0.2);
+            outline-width: 4px;
+            outline-style: solid;
+            transition: outline-color .5s ease-out, border-color .5s ease-out, transform 1s ease-out;
         }
+    }
+
+    &:hover > .container > div > span:before {
+        border-color: #f4f4f4;
+        outline-color: rgba(245,245,245, 0.76);
+        //transform: rotate3d(0, 0, 1, -45deg) translate3d(25px,-5px,0);
     }
 
     @media screen and (min-width: $screen-sm-min){
