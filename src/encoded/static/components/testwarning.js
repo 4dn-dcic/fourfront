@@ -39,7 +39,7 @@ var TestWarning = module.exports = React.createClass({
                         <a 
                             className="test-warning-close icon icon-times"
                             data-tip="Hide"
-                            data-place="right"
+                            data-place="left"
                             data-delay-hide="0"
                             onClick={function(e){
                                 e.preventDefault();
