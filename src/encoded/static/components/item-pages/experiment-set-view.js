@@ -351,9 +351,6 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
 });
 
-globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
-globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
-
 
 /**
  * Renders ItemHeader parts wrapped in ItemHeader.Wrapper, with appropriate values.
@@ -363,9 +360,14 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
  * @prop {Object} context - Same context prop as available on parent component.
  * @prop {string} href - Current page href, passed down from app or Redux store.
  */
-var ExperimentSetHeader = React.createClass({
+class ExperimentSetHeader extends React.Component {
 
-    render: function() {
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
+    render() {
         console.log('render ExperimentSetHeader');
         return (
             <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href} schemas={this.props.schemas}>
@@ -375,12 +377,17 @@ var ExperimentSetHeader = React.createClass({
             </ItemHeader.Wrapper>
         );
     }
-});
+}
 
 
-var ExperimentSetLabAwardInfo = React.createClass({
+class ExperimentSetLabAwardInfo extends React.Component {
 
-    render : function(){
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
+    render(){
         return (
             <div className="row info-area">
                 <div className="col-sm-12">
@@ -409,5 +416,9 @@ var ExperimentSetLabAwardInfo = React.createClass({
         );
     }
 
-});
+};
+
+// Register ExperimentSetView to be the view for these @types.
+globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
+globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 
