@@ -7,6 +7,7 @@ var ReactTooltip = require('react-tooltip');
 var { console, object, Filters } = require('./../../util');
 var globals = require('./../../globals');
 var PartialList = require('./PartialList');
+var FilesInSetTable = require('./FilesInSetTable');
 var itemTitle = require('./../item').title;
 
 /**

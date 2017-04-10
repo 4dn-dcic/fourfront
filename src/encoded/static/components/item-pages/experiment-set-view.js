@@ -327,10 +327,13 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
-
+                        { this.props.context.produced_in_pub ?
                         <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
-                            <div className="more-details">{ this.props.context.produced_in_pub.authors }</div>
+                            <div className="more-details">{ 
+                                this.props.context.produced_in_pub.authors || this.props.context.produced_in_pub.abstract || this.props.context.produced_in_pub.date_published || null
+                            }</div>
                         </Publications.DetailBlock>
+                        : null }
 
                         <br/>
 
