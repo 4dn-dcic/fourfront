@@ -6,7 +6,7 @@ var Panel = require('react-bootstrap').Panel;
 var { ajax, console, DateUtility, object } = require('./../util');
 var globals = require('./../globals');
 var { ExperimentsTable } = require('./../experiments-table');
-var { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, PublicationsBlock, TabbedView, AuditView } = require('./components');
+var { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditView } = require('./components');
 var FacetList = require('./../facetlist');
 
 /**
@@ -215,11 +215,6 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             expTableColumnHeaders.unshift({ columnClass: 'file-detail', title : 'File Type'});
         }
 
-        var auditIconClass = 'warning';
-        if (this.props.context.audit && this.props.context.audit.ERROR && this.props.context.audit.ERROR.length){
-            auditIconClass = 'exclamation-circle';
-        }
-
         return [
             {
                 tab : <span><i className="icon icon-th icon-fw"/> Experiments</span>,
@@ -288,10 +283,11 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             {
                 tab : (
                     <span className={this.props.context.audit && _.keys(this.props.context.audit).length ? 'active' : null}>
-                        <i className={"icon icon-fw icon-" + auditIconClass}/> Audits
+                        <i className={"icon icon-fw icon-" + AuditView.getItemIndicatorIcon(this.props.context)}/> Audits
                     </span>
                 ),
                 key : "audits",
+                disabled : !AuditView.doAnyAuditsExist(this.props.context),
                 content : <AuditView audits={this.props.context.audit} />
             }
         ];
@@ -332,7 +328,9 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
 
-                        <PublicationsBlock publications={this.props.context.publications_of_set} />
+                        <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
+                            <div className="more-details">{ this.props.context.produced_in_pub.authors }</div>
+                        </Publications.DetailBlock>
 
                         <br/>
 
@@ -384,6 +382,12 @@ var ExperimentSetLabAwardInfo = React.createClass({
             <div className="row info-area">
                 <div className="col-sm-12">
                     <div className="row">
+
+                        <div className="col-sm-12 col-md-12 col-sm-float-right">
+                            <Publications context={this.props.context} />
+                        </div>
+
+                        <hr/>
 
                         <div className="col-sm-12 col-md-12 col-sm-float-right">
                             { FormattedInfoBlock.User(this.props.userInfo) }

@@ -3,7 +3,7 @@
 var React = require('react');
 var globals = require('./../globals');
 var _ = require('underscore');
-var { ItemPageTitle, ItemHeader, ItemDetailList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, DateUtility, Filters } = require('./../util');
 
@@ -46,6 +46,37 @@ var ItemView = module.exports = React.createClass({
         return r;
     },
 
+    getTabViewContents : function(){
+
+        var auditIconClass = AuditView.getItemIndicatorIcon(this.props.context);
+
+        return [
+            {
+                tab : <span><i className="icon icon-list-ul icon-fw"/> Details</span>,
+                key : 'details',
+                content : (
+                    <div>
+                        <h3 className="tab-section-title">
+                            <span>Details</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider"/>
+                        <ItemDetailList context={this.props.context} schemas={this.props.schemas} />
+                    </div>
+                )
+            },
+            {
+                tab : (
+                    <span className={this.props.context.audit && _.keys(this.props.context.audit).length ? 'active' : null}>
+                        <i className={"icon icon-fw icon-" + auditIconClass}/> Audits
+                    </span>
+                ),
+                key : "audits",
+                disabled : !AuditView.doAnyAuditsExist(this.props.context),
+                content : <AuditView audits={this.props.context.audit} />
+            }
+        ];
+    },
+
     /** @ignore */
     render: function() {
         var schemas = this.props.schemas || {};
@@ -64,11 +95,11 @@ var ItemView = module.exports = React.createClass({
 
                 <div className="row">
 
-                    <div className="col-xs-12 col-md-8">
+                    <div className="col-xs-12 col-md-8 tab-view-container">
 
-                        <hr/>
+                        <TabbedView contents={this.getTabViewContents()} />
 
-                        <ItemDetailList context={context} schemas={schemas} />
+                        {/*<ItemDetailList context={context} schemas={schemas} />*/}
 
                     </div>
 

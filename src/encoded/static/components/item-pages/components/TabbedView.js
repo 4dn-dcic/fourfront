@@ -37,6 +37,7 @@ var TabView = module.exports = React.createClass({
                                 tab={<span className="tab">{ t.tab || t.title }</span>}
                                 children={t.content}
                                 placeholder={t.placeholder}
+                                disabled={t.disabled}
                             />
                         );
                     })

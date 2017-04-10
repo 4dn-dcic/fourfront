@@ -9,6 +9,39 @@ var AuditView = module.exports = React.createClass({
     statics : {
 
         /**
+         * @static
+         * @public
+         * @param {Object} context - Item object representation containing 'audit' property.
+         * @returns {string} Classname suffix for FontAwesome icon to use as indicator icon.
+         */
+        getItemIndicatorIcon : function(context){
+            var auditIconClass = 'warning';
+            if (context.audit && context.audit.ERROR && context.audit.ERROR.length){
+                auditIconClass = 'exclamation-circle';
+            } else if (context.audit && context.audit.WARNING && context.audit.WARNING.length){
+
+            } else if (!AuditView.doAnyAuditsExist(context)){
+                auditIconClass = 'check';
+            }
+            return auditIconClass;
+        },
+
+        /**
+         * @static
+         * @public
+         * @param {Object} context - Item object representation containing 'audit' property.
+         * @returns {boolean} True if any audits exist.
+         */
+        doAnyAuditsExist : function(context){
+            if (typeof context.audit === 'undefined') return false;
+            if (_.keys(context.audit).length === 0 || _.reduce(context.audit, function(m,v){ return m + v.length; }, 0) === 0){
+                return false;
+            } else {
+                return true;
+            }
+        },
+
+        /**
          * Returns string broken into parts with a JSON segment in it.
          * 
          * @param {string} String with potential JSON string.
@@ -56,6 +89,39 @@ var AuditView = module.exports = React.createClass({
             return result;
         },
 
+        convertJSONToTable : function(jsonString){
+            var jsonObj;
+            if (typeof jsonString === 'string' && jsonString.charAt(0) === '{' && jsonString.charAt(jsonString.length - 1) === '}'){
+                try {
+                    try {
+                        jsonObj = JSON.parse(jsonString);
+                    } catch (e){
+                        jsonString = jsonString.replace(/'/g, '"');
+                        jsonObj = JSON.parse(jsonString);
+                    }
+                } catch (e){
+                    return <code>{ jsonString }</code>;
+                }
+            } else if (typeof jsonString === 'object' && jsonString){
+                jsonObj = jsonString;
+            } else {
+                console.error("Invalid JSON supplied. Returning original: " + jsonString);
+                return <code>{ jsonString }</code>;
+            }
+            return (
+                <ul>
+                { _.pairs(jsonObj).map(function(r, i){
+                    return (
+                        <li key={i}>
+                            <span className="pull-right">({ r[1] })</span>
+                            <code>{ r[0] }</code>
+                        </li>
+                    );
+                }) }
+                </ul>
+            );
+        },
+
         AuditItem : React.createClass({
 
             propTypes : {
@@ -68,7 +134,9 @@ var AuditView = module.exports = React.createClass({
                 return (
                     <div className="row audit-item">
                         <div className="col-xs-12 col-sm-12 audit-category">
-                            <h4 className="text-500">{ audit.category }</h4>
+                            <span>
+                                <h4 className="text-500">{ audit.category }</h4>
+                            </span>
                         </div>
                         <div className="col-xs-12 col-sm-12 audit-detail">
                             <ul>{
@@ -80,7 +148,7 @@ var AuditView = module.exports = React.createClass({
                                                 <div>{ detailParts[0] }</div>
                                             : null }
                                             { detailParts[1] ? 
-                                                <div><code>{ detailParts[1] }</code></div>
+                                                <div>{ AuditView.convertJSONToTable(detailParts[1]) }</div>
                                             : null }
                                             { detailParts[2] ? 
                                                 <div>{ detailParts[2] }</div>

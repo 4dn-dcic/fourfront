@@ -260,6 +260,8 @@ $audit-types:
 
 .audits-view {
 
+    overflow: hidden;
+
     > div > div h3 {
         margin-top: 7px;
     }
@@ -278,7 +280,7 @@ $audit-types:
         overflow: hidden;
         .audit-item {
 
-            > div > h4,
+            > div > span > h4,
             > div > h5 {
                 margin-top: 5px;
             }
@@ -290,6 +292,7 @@ $audit-types:
             .audit-detail {
                 ul {
                     //padding-left: 20px;
+                    margin-bottom: 5px;
                     li {
                         padding: 10px 0;
                         &:not(:last-child){

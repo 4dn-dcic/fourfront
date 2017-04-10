@@ -542,7 +542,7 @@
 .rc-tabs-bar .tab i.icon {
     margin-right: 3px;
 
-    &.icon-warning {
+    &.icon-warning, &.icon-check {
         opacity: 0.25;
     }
 }

@@ -432,18 +432,20 @@ $navbar-transition-length: .75s;
     color: #fff;
     vertical-align: middle;
     cursor: pointer;
+    transform: scale3d(1,1,1);
+    transition: transform .3s;
 
-    &:hover {
+    &:hover, .test-warning:hover & {
         color: #fff;
         text-decoration: none;
+        transform: scale3d(1.5,1.5,1.5) translate3d(0, 0, 0);
     }
 
     @media screen and (min-width: $screen-md-min) {
         position: static;
-        margin-top: 3px;
-        margin-left: 10px;
+        margin-top: -4px;
+        margin-left: 30px;
         margin-right: 3px;
-        float: right;
     }
 }
 
