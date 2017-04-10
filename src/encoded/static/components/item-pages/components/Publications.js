@@ -20,39 +20,44 @@ var testData = [ // Use this to test list view(s) as none defined in test data.
     { 'link_id' : '~something~here~6', 'display_title' : "Hello 1123456 123456" }
 ];
 
-var ListBlock = React.createClass({
 
-    statics : {
+/**
+ * Display list of publications in a FormattedInfoBlock-styled block.
+ * 
+ * @memberof Publications
+ * @class ListBlock
+ * @extends {React.Component}
+ */
+class ListBlock extends React.Component {
 
-        Publication : React.createClass({
-            render: function(){
-                var atId = this.props.atId || object.atIdFromObject(this.props);
-                return (
-                    <li className="publication" key={atId}>
-                        <a className="text-500" href={atId}>{ this.props.display_title || this.props.title }</a>
-                    </li>
-                );
-            }
-        })
+    static defaultProps = {
+        'persistentCount' : 3,
+        'publications' : [],
+        'singularTitle' : 'Publication'
+    }
 
-    },
+    static Publication = class Publication extends React.Component {
+        render(){
+            var atId = this.props.atId || object.atIdFromObject(this.props);
+            return (
+                <li className="publication" key={atId}>
+                    <a className="text-500" href={atId}>{ this.props.display_title || this.props.title }</a>
+                </li>
+            );
+        }
+    }
 
-    getDefaultProps : function(){
-        return {
-            'persistentCount' : 3,
-            'publications' : [],
-            'singularTitle' : 'Publication'
-        };
-    },
+    state = {
+        'open' : false
+    }
 
-    getInitialState : function(){
-        if (this.props.publications.length < 4) return null;
-        return {
-            'open' : false
-        };
-    },
+    constructor(props){
+        super(props);
+        this.publicationListItems = this.publicationListItems.bind(this);
+        this.render = this.render.bind(this);
+    }
 
-    publicationListItems : function(publications = this.props.publications){
+    publicationListItems(publications = this.props.publications){
 
         /**
          *  Maps an array of publications to ListBlock.Publication React elements.
@@ -84,9 +89,9 @@ var ListBlock = React.createClass({
             );
         }
         return null;
-    },
+    }
 
-    render : function(){
+    render(){
         var publications = this.props.publications;
         // publications = testData; // Uncomment to test listview.
 
@@ -110,91 +115,112 @@ var ListBlock = React.createClass({
         );
     }
 
-});
+};
 
 
-var Publications = module.exports = React.createClass({
+/**
+ * Display a FormattedInfoBlock-style block with custom detail (defined via props.children).
+ * 
+ * @memberof Publications
+ * @class DetailBlock
+ * @extends {React.Component}
+ */
+class DetailBlock extends React.Component {
 
-    statics : {
-        
-        ListBlock : ListBlock,
+    static defaultProps = {
+        'singularTitle' : 'Publication'
+    }
 
-        DetailBlock : React.createClass({
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
 
-            getDefaultProps : function(){
-                return {
-                    'singularTitle' : 'Publication'
-                };
-            },
+    render(){
+        var publication = this.props.publication;
+        return (
+            <Publications.FormattedInfoWrapper singularTitle={this.props.singularTitle} isSingleItem={true}>
+                <h5 className="block-title">
+                    <a href={object.atIdFromObject(publication)}>{ publication.display_title }</a>
+                </h5>
+                <div className="details">
+                    { this.props.children }
+                </div>
+            </Publications.FormattedInfoWrapper>
+        );
+    }
 
-            render : function(){
-                var publication = this.props.publication;
-                return (
-                    <Publications.FormattedInfoWrapper singularTitle={this.props.singularTitle} isSingleItem={true}>
-                        <h5 className="block-title">
-                            <a href={object.atIdFromObject(publication)}>{ publication.display_title }</a>
-                        </h5>
-                        <div className="details">
-                            { this.props.children }
-                        </div>
-                    </Publications.FormattedInfoWrapper>
-                );
-            }
+}
 
-        }),
+/**
+ * Wraps some React elements, such as a list or title, in a FormattedInfoBlock-styled wrapper.
+ * 
+ * @memberof Publications
+ * @class FormattedInfoWrapper
+ * @extends {React.Component}
+ * @prop {boolean} isSingleItem - Whether there is only 1 item or not.
+ * @prop {Element[]} children - React Elements or Components to be wrapped.
+ * @prop {string} [singularTitle] - Optional. Title displayed in top left label. Defaults to 'Publication'.
+ */
+class FormattedInfoWrapper extends React.Component {
 
-        /**
-         * Wraps some React elements, such as a list or title, in a FormattedInfoBlock-styled wrapper.
-         * 
-         * @prop {boolean} isSingleItem - Whether there is only 1 item or not.
-         * @prop {Element[]} children - React Elements or Components to be wrapped.
-         * @prop {string} [singularTitle] - Optional. Title displayed in top left label. Defaults to 'Publication'.
-         */
-        FormattedInfoWrapper : React.createClass({
+    static defaultProps = {
+        isSingleItem : false,
+        singularTitle : 'Publication',
+        iconClass : 'book',
+        className : null
+    }
 
-            getDefaultProps : function(){
-                return {
-                    isSingleItem : false,
-                    singularTitle : 'Publication',
-                    iconClass : 'book',
-                    className : null
-                };
-            },
-            
-            render : function(){
-                return (
-                    <div className={
-                        "publications-block formatted-info-panel" +
-                        (this.props.isSingleItem ? ' single-item' : '') +
-                        (this.props.className ? ' ' + this.props.className : '')
-                    }>
-                        <h6 className="publication-label">{ this.props.singularTitle }{ this.props.isSingleItem ? '' : 's' }</h6>
-                        <div className="row">
-                            <div className="icon-container col-xs-2 col-lg-1">
-                                <i className={"icon icon-" + this.props.iconClass} />
-                            </div>
-                            <div className="col-xs-10 col-lg-11">
-                                { this.props.children }
-                            </div>
-                        </div>
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
+    render(){
+        return (
+            <div className={
+                "publications-block formatted-info-panel" +
+                (this.props.isSingleItem ? ' single-item' : '') +
+                (this.props.className ? ' ' + this.props.className : '')
+            }>
+                <h6 className="publication-label">{ this.props.singularTitle }{ this.props.isSingleItem ? '' : 's' }</h6>
+                <div className="row">
+                    <div className="icon-container col-xs-2 col-lg-1">
+                        <i className={"icon icon-" + this.props.iconClass} />
                     </div>
-                );
-            }
-        }),
+                    <div className="col-xs-10 col-lg-11">
+                        { this.props.children }
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
-    },
+}
 
-    getInitialState : function(){
-        return {
-            'abstractCollapsed' : true
-        };
-    },
+class Publications extends React.Component {
 
-    componentDidMount : function(){
+    static ListBlock = ListBlock;
+    static DetailBlock = DetailBlock;
+    static FormattedInfoWrapper = FormattedInfoWrapper;
+
+    state = {
+        'abstractCollapsed' : true
+    }
+
+    constructor(props){
+        super(props);
+        this.shortAbstract = this.shortAbstract.bind(this);
+        this.toggleAbstractIcon = this.toggleAbstractIcon.bind(this);
+        this.detailRows = this.detailRows.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    componentDidMount(){
         ReactTooltip.rebuild();
-    },
+    }
 
-    shortAbstract : function(){
+    shortAbstract(){
         var abstract = this.props.context.produced_in_pub.abstract;
         if (!abstract || typeof abstract !== 'string') return null;
         if (!this.state.abstractCollapsed) return abstract;
@@ -203,9 +229,9 @@ var Publications = module.exports = React.createClass({
         } else {
             return abstract;
         }
-    },
+    }
 
-    toggleAbstractIcon : function(publication = this.props.context.produced_in_pub){
+    toggleAbstractIcon(publication = this.props.context.produced_in_pub){
         if (!publication || !publication.abstract) return null;
         if (publication && publication.abstract && publication.abstract.length <= 240){
             return null;
@@ -219,9 +245,9 @@ var Publications = module.exports = React.createClass({
                 }}
             />
         );
-    },
+    }
 
-    detailRows : function(publication = this.props.context.produced_in_pub){
+    detailRows(publication = this.props.context.produced_in_pub){
         var details = [];
         if (typeof publication.date_published === 'string'){
             details.push({
@@ -249,9 +275,9 @@ var Publications = module.exports = React.createClass({
         }
 
         return details;
-    },
+    }
 
-    render : function(){
+    render(){
         var context = this.props.context;
         var usedInPublications = [];
         if (Array.isArray(context.publications_of_set) && context.publications_of_set.length > 0){
@@ -286,5 +312,7 @@ var Publications = module.exports = React.createClass({
         );
     }
 
-});
+}
+
+module.exports = Publications;
 

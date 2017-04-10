@@ -754,6 +754,7 @@ $download-button-width : 100px;
 
 	.icon.abstract-toggle {
 		cursor : pointer;
+		color : #888;
 	}
 
 	@include icon-container-child();
