@@ -13,8 +13,47 @@ function defaultStyle(data, maxValue = 10) {
     var val = (data && data.value) || data;
 	return {
 		backgroundColor: 'rgba(65, 65, 138, '+ val/maxValue + ')',
-		border: val >= 1 ? 'none' : '1px solid #eee'
+		border: val >= 1 ? 'none' : '1px dotted #eee'
 	}
+}
+
+
+class Label extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
+    static defaultProps = {
+        'className' : 'y-axis-matrix-label',
+        'cellSize' : 40,
+        'label' : ['Label', 'Sub-Label', 'More Info...']
+    }
+
+    render(){
+        var displayLabel = this.props.label;
+        if (Array.isArray(displayLabel)){
+            displayLabel = (
+                <div className="label-container">
+                    { displayLabel.map(function(labelPart, i){
+                        return <div key={i} className={"part-" + (i + 1)}>{ labelPart }</div>;
+                    }) }
+                </div>
+            );
+        }
+        return (
+            <div className={this.props.className} key={this.props.label || i} style={{ height : this.props.height, width : this.props.width }}>
+                <div className="inner" ref={function(r){
+                    if (!r) return null;
+                    r.style.top = Math.max(layout.verticalCenterOffset(r) - 3, 0) + 'px';
+                }}>
+                    { displayLabel }
+                </div>
+            </div>
+        );
+    }
+
 }
 
 /**
@@ -35,28 +74,14 @@ class YAxis extends React.Component {
         return (
             <div className="matrix-y-axis" style={{ width : this.props.width }}>
             {
-                this.props.labels.map((label, i)=>{
-                    var displayLabel = label;
-                    if (Array.isArray(displayLabel)){
-                        displayLabel = (
-                            <div className="label-container">
-                                { displayLabel.map(function(labelPart, i){
-                                    return <div key={i} className={"part-" + (i + 1)}>{ labelPart }</div>;
-                                }) }
-                            </div>
-                        );
-                    }
-                    return (
-                        <div className="y-axis-matrix-label" key={label || i} style={{ height : this.props.cellSize }}>
-                            <div className="inner" ref={function(r){
-                                if (!r) return null;
-                                r.style.top = Math.max(layout.verticalCenterOffset(r) - 3, 0) + 'px';
-                            }}>
-                                { displayLabel }
-                            </div>
-                        </div>
-                    );
-                })
+                this.props.labels.map((label, i)=>
+                    <Label
+                        label={label}
+                        key={label || i}
+                        className="y-axis-matrix-label"
+                        height={this.props.cellSize}
+                    />
+                )
             }
             </div>
         );
@@ -64,10 +89,42 @@ class YAxis extends React.Component {
 
 }
 
+class XAxis extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
+    render(){
+        // These will be drawn at same dimension as Y Axis labels, and rotated (hence width=this.props.height on Label).
+        return (
+            <div className="matrix-x-axis clearfix" style={{
+                height : Math.sqrt((this.props.height * this.props.height) / 2),
+                marginLeft : this.props.leftOffset + this.props.cellSize
+            }}>
+            {
+                this.props.labels.map((label, i)=>
+                    <div className="x-axis-matrix-label-container" style={{ width : this.props.cellSize }} key={label || i}>
+                        <Label
+                            label={label}
+                            className="x-axis-matrix-label"
+                            height={this.props.cellSize}
+                            width={this.props.height}
+                        />
+                    </div>
+                )
+            }
+            </div>
+        );
+    }
+}
+
 
 export class MatrixContainer extends React.Component {
 
     static YAxis = YAxis
+    static XAxis = XAxis
 
     static defaultProps = {
         'grid' : [
@@ -77,6 +134,7 @@ export class MatrixContainer extends React.Component {
         'fitTilesToWidth' : true,
         'cellSize' : null,
         'yLabelsWidth' : 200,
+        'xLabelsHeight' : 200,
         'maxCellSize' : 64,
         'minCellSize' : 20
     }
@@ -139,6 +197,7 @@ export class MatrixContainer extends React.Component {
 				<div className="matrix-view-container-wrapper">
 					{ this.props.title ? <h4 className="matrix-title">{ this.props.title }</h4> : null }
                     <div className="matrix-view-container clearfix">
+                        <MatrixContainer.XAxis labels={this.props.xAxisLabels} height={this.props.xLabelsHeight} cellSize={this.cellSize()} leftOffset={this.props.yLabelsWidth} />
                         <MatrixContainer.YAxis labels={this.props.yAxisLabels} width={this.props.yLabelsWidth} cellSize={this.cellSize()} />
                         <div className="matrix-grid-container" style={{ width : this.gridWidth() }}>
                             <Matrix data={_.zip.apply(_, this.props.grid)} setStyle={this.cellStyle} />

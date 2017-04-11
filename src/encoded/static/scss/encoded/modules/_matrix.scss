@@ -44,6 +44,25 @@
             }
         }
 
+        .matrix-x-axis {
+            display: flex;
+            flex-direction: row;
+            
+            .x-axis-matrix-label-container {
+                position: relative;
+                margin: 0 1px;
+                .x-axis-matrix-label {
+                    position: absolute;
+                    bottom: 0;
+                    transform-origin: 0 100%;
+                    transform: rotate(-45deg);
+                    > .inner {
+                        position: relative;
+                    }
+                }
+            }
+        }
+
         .matrix-grid-container {
             float: left;
             .rm-cell {

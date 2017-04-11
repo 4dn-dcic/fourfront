@@ -350,6 +350,10 @@ def get_filtered_query(prepared_terms, result_fields, principals, doc_types):
     # prepare the query from prepared_terms
     bool_query = {"should":[]}
     for field, terms in prepared_terms.items():
+        print('\n\n\n')
+        print(field)
+        print('\n\n\n\n')
+        print(terms)
         # Replaces query_search (text search?) w/ specific tests for field/term.
         this_query = {"query_string":{ "default_operator" : "OR" }}
         this_query["query_string"]["fields"] = [field]
