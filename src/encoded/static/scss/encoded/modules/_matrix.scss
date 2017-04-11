@@ -6,3 +6,51 @@
 .hubs-controls-button {
     display: inline-block;
 }
+
+
+/*** UPDATED MATRIX ***/
+
+.matrix-view-container-wrapper {
+
+    .matrix-title {
+        font-weight: 500;
+    }
+
+    .matrix-view-container {
+
+        .matrix-y-axis {
+            float: left;
+            display: flex;
+            flex-direction: column;
+            .y-axis-matrix-label {
+                display: block;
+                position: relative;
+                margin: 1px 0;
+                margin-right: 10px;
+                border-bottom: 1px dotted #ddd;
+                border-top: 1px dotted #ddd;
+                > .inner {
+                    position: relative;
+                    .label-container {
+                        > .part-1 {
+                            font-weight: 500;
+                        }
+                        > .part-2 {
+                            //font-weight: 300;
+                            font-size: 0.85rem;
+                        }
+                    }
+                }
+            }
+        }
+
+        .matrix-grid-container {
+            float: left;
+            .rm-cell {
+                border-radius: 4px;
+            }
+        }
+
+    }
+
+}

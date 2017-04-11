@@ -20,18 +20,38 @@ class Cell extends Component {
 		if (!onMouseOut) return false;
 		return () => onMouseOut(data);
 	}
+
+	getMouseEnterHandler(data) {
+		var { onMouseOver } = this.props;
+		if (!onMouseOver) return false;
+		return () => onMouseOver(data);
+	}
+
+	getMouseLeaveHandler(data) {
+		var { onMouseOut } = this.props;
+		if (!onMouseOut) return false;
+		return () => onMouseOut(data);
+	}
 	
 	render() {
 		var {data, style, className} = this.props;
-		return (
-			<div
-				className={className}
-				style={style}
-				onClick={this.getClickHandler(data)}
-				onMouseOver={this.getMouseOverHandler(data)}
-				onMouseOut={this.getMouseOutHandler(data)}>
-			</div>
-		);
+		var divProps = {
+			'className' 	: className,
+			'style' 		: style,
+			'onClick' 		: this.getClickHandler(data),
+			'onMouseOver' 	: this.getMouseOverHandler(data),
+			'onMouseOut' 	: this.getMouseOutHandler(data),
+			'onMouseEnter' 	: this.getMouseEnterHandler(data),
+			'onMouseLeave' 	: this.getMouseLeaveHandler(data)
+		};
+		if (typeof data.tooltip !== 'undefined'){
+			divProps['data-tip'] = data.tooltip;
+			divProps['data-html'] = true;
+		}
+		if (typeof data.content !== 'undefined'){
+			divProps.children = data.content;
+		}
+		return <div {...divProps} />;
 	}
 }
 

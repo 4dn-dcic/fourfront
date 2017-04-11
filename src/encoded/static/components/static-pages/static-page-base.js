@@ -4,7 +4,7 @@ var React = require('react');
 var _ = require('underscore');
 var Markdown = require('markdown-to-jsx');
 var TableOfContents = require('./table-contents');
-import CSVMatrixView from './CSVMatrixView';
+var { CSVMatrixView } = require('./components');
 var globals = require('./../globals');
 var { layout, console } = require('./../util');
 
@@ -200,7 +200,7 @@ var StaticPageBase = module.exports = {
 
         getDefaultProps : function(){
             return {
-                'contentColSize' : 9,
+                'contentColSize' : 12,
                 'tableOfContents' : false,
                 'tocListStyles' : ['decimal', 'lower-alpha', 'lower-roman']
             };

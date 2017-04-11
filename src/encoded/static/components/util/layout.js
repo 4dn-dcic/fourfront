@@ -225,6 +225,14 @@ var layout = module.exports = {
         return textLineWidth;
     },
 
+    verticalCenterOffset : function(innerElem, outerElem = null){
+        if (!outerElem) {
+            outerElem = innerElem.offsetParent || innerElem.parentElement;
+        }
+        if (!outerElem || !innerElem.offsetHeight || !outerElem.offsetHeight) return 0;
+        return (outerElem.offsetHeight - innerElem.offsetHeight) / 2;
+    },
+
     /**
      * 
      * @param {string|number|HTMLElement} to - Where to scroll to.
