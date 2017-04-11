@@ -59,6 +59,30 @@
                 "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
                 "include-top-link" : false
             }
+        },
+
+        "csv-matrix"  : {
+            "title"     : "CSV Matrix",
+            "directory" : "/src/encoded/static/data",
+            "sections"  : [
+                {
+                    "id" : "introduction",
+                    "title" : "Introduction",
+                    "content" : "Some introduction text"
+                },
+                {
+                    "filename" : "nofic-collab.csv",
+                    "title" : "Matrix",
+                    "options" : {
+                        "yaxisCols" : [1,2],
+                        "xaxisRows" : [3],
+                        "titleCell" : [1,1],
+                        "skipRows"  : [22,23,24],
+                        "startCell" : [3,5],
+                        "endCell"   : [8,32]
+                    }
+                }
+            ]
         }
 
     }

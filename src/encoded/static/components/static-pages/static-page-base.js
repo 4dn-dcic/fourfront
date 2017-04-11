@@ -4,8 +4,9 @@ var React = require('react');
 var _ = require('underscore');
 var Markdown = require('markdown-to-jsx');
 var TableOfContents = require('./table-contents');
+import CSVMatrixView from './CSVMatrixView';
 var globals = require('./../globals');
-var { layout } = require('./../util');
+var { layout, console } = require('./../util');
 
 /**
  * These are a set of 'mixin' functions which can be used directly on Static Page components.
@@ -286,16 +287,20 @@ var StaticPageBase = module.exports = {
 
         renderEntryContent : function(baseClassName){
             var content  = (this.props.content && this.props.content.content)  || null;
-            var filetype = (this.props.content && this.props.content.filetype) || null;
             if (!content) return null;
+
+            var filetype = this.props.content.filetype || null;
             var placeholder = false;
+
             if (typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
                 placeholder = true;
                 content = this.replacePlaceholder(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
             }
 
             var className = "fourDN-content" + (baseClassName? ' ' + baseClassName : '');
-            if (placeholder || filetype === 'md'){
+            if (filetype === 'csv'){
+                return <CSVMatrixView csv={content} options={this.props.content.options} />;
+            } else if (placeholder || filetype === 'md'){
                 content = StaticPageBase.correctRelativeLinks(content, this.props.context);
                 console.log(this.props.section, content, this.props.context);
                 return <div className={className}>{ content }</div>;

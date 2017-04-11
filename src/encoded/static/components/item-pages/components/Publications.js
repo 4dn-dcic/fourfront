@@ -10,7 +10,7 @@ var { console, DateUtility, object } = require('./../../util');
 var { FlexibleDescriptionBox } = require('./../../experiment-common');
 var PartialList = require('./PartialList');
 
-
+/*
 var testData = [ // Use this to test list view(s) as none defined in test data.
     { 'link_id' : '~something~here~1', 'display_title' : "Sample Publicstion One which involces this experiment set and other things" },
     { 'link_id' : '~something~here~2', 'display_title' : "Something else wich references this set and has data and many words" },
@@ -19,17 +19,25 @@ var testData = [ // Use this to test list view(s) as none defined in test data.
     { 'link_id' : '~something~here~5', 'display_title' : "Hello 112345" },
     { 'link_id' : '~something~here~6', 'display_title' : "Hello 1123456 123456" }
 ];
+*/
 
 
 /**
  * Display list of publications in a FormattedInfoBlock-styled block.
  * 
- * @memberof Publications
+ * @memberof module:item-pages/components.Publications
+ * @type {Component}
  * @class ListBlock
  * @extends {React.Component}
  */
 class ListBlock extends React.Component {
 
+    /**
+     * Default props.
+     * 
+     * @static
+     * @memberof ListBlock
+     */
     static defaultProps = {
         'persistentCount' : 3,
         'publications' : [],
@@ -121,12 +129,16 @@ class ListBlock extends React.Component {
 /**
  * Display a FormattedInfoBlock-style block with custom detail (defined via props.children).
  * 
- * @memberof Publications
+ * @memberof module:item-pages/components.Publications
  * @class DetailBlock
  * @extends {React.Component}
  */
 class DetailBlock extends React.Component {
 
+    /**
+     * @member
+     * @static
+     */
     static defaultProps = {
         'singularTitle' : 'Publication'
     }
@@ -136,6 +148,10 @@ class DetailBlock extends React.Component {
         this.render = this.render.bind(this);
     }
 
+    /**
+     * @member
+     * @instance
+     */
     render(){
         var publication = this.props.publication;
         return (
@@ -155,15 +171,21 @@ class DetailBlock extends React.Component {
 /**
  * Wraps some React elements, such as a list or title, in a FormattedInfoBlock-styled wrapper.
  * 
- * @memberof Publications
+ * @memberof module:item-pages/components.Publications
  * @class FormattedInfoWrapper
  * @extends {React.Component}
+ * @type {Component}
  * @prop {boolean} isSingleItem - Whether there is only 1 item or not.
  * @prop {Element[]} children - React Elements or Components to be wrapped.
  * @prop {string} [singularTitle] - Optional. Title displayed in top left label. Defaults to 'Publication'.
  */
 class FormattedInfoWrapper extends React.Component {
 
+    /**
+     * @member
+     * @type {Object}
+     * @static
+     */
     static defaultProps = {
         isSingleItem : false,
         singularTitle : 'Publication',
@@ -176,6 +198,11 @@ class FormattedInfoWrapper extends React.Component {
         this.render = this.render.bind(this);
     }
 
+    /**
+     * @member
+     * @method
+     * @instance
+     */
     render(){
         return (
             <div className={
@@ -198,7 +225,18 @@ class FormattedInfoWrapper extends React.Component {
 
 }
 
-class Publications extends React.Component {
+/**
+ * Shows publications for current Item.
+ * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/experiment-set-view .
+ * 
+ * @memberof module:item-pages/components
+ * @export
+ * @class Publications
+ * @type {Component}
+ * @extends {React.Component}
+ * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
+ */
+export default class Publications extends React.Component {
 
     static ListBlock = ListBlock;
     static DetailBlock = DetailBlock;
@@ -216,10 +254,16 @@ class Publications extends React.Component {
         this.render = this.render.bind(this);
     }
 
+    /**
+     * @memberof Publications
+     */
     componentDidMount(){
         ReactTooltip.rebuild();
     }
 
+    /**
+     * @memberof module:item-pages/components.Publications
+     */
     shortAbstract(){
         var abstract = this.props.context.produced_in_pub.abstract;
         if (!abstract || typeof abstract !== 'string') return null;
@@ -313,6 +357,4 @@ class Publications extends React.Component {
     }
 
 }
-
-module.exports = Publications;
 
