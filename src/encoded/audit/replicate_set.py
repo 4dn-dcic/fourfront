@@ -114,6 +114,7 @@ def audit_replicate_sets_consistency_check(value, system):
         'date_created',
         'dbxrefs',
         'description',
+        'notes',
         'documents',
         'experiment_sets',
         'external_references',
