@@ -47,6 +47,27 @@
         .matrix-x-axis {
             display: flex;
             flex-direction: row;
+
+            .prefix {
+                position: relative;
+
+                .matrix-x-axis-title,
+                .matrix-y-axis-title {
+                    position: absolute;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    font-weight: 600;
+                }
+
+                .matrix-x-axis-title {
+                    bottom: 25px;
+                    right: 5px;
+                }
+
+                .matrix-y-axis-title {
+                    bottom: 5px;
+                }
+            }
             
             .x-axis-matrix-label-container {
                 position: relative;

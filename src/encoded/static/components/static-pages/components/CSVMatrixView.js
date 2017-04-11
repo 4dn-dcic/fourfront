@@ -184,7 +184,14 @@ export default class CSVMatrixView extends MatrixView {
 
         var { grid, title, xAxisLabels, yAxisLabels } = CSVParsingUtilities.CSVStringTo2DArraySet(this.props.csv, options);
 
-        return MatrixView.prototype.render.call(this, grid, xAxisLabels, yAxisLabels, title);
+        return MatrixView.prototype.render.call(this, 
+            grid,
+            xAxisLabels,
+            yAxisLabels,
+            options.xaxisTitle,
+            options.yaxisTitle,
+            title
+        );
 
     }
 

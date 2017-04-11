@@ -61,14 +61,14 @@
             }
         },
 
-        "csv-matrix"  : {
-            "title"     : "NOFIC Planning Matrix",
+        "nofic-matrix"  : {
+            "title"     : "NOFIC Matrix",
             "directory" : "/src/encoded/static/data",
             "sections"  : [
                 {
                     "id" : "introduction",
                     "title" : "Introduction",
-                    "content" : "This page contains a matrix view of submitted & planned data for the NOFICS project."
+                    "content" : "This matrix shows a cross-section of experiment methods & groups vs cell lines. "
                 },
                 {
                     "id" : "nofic-matrix-1",
