@@ -39,6 +39,23 @@
                             //font-weight: 300;
                             font-size: 0.85rem;
                         }
+
+                        /* Height increments are 0, 30, 45, 64 */
+
+                        &:not(.height-at-least-64){
+                            > .part-1 {
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            }
+                        }
+
+                        &.height-at-least-0,
+                        &.height-at-least-30 {
+                            > .part-2 {
+                                display: none;
+                            }
+                        }
                     }
                 }
             }
@@ -57,15 +74,28 @@
                     white-space: nowrap;
                     overflow: hidden;
                     font-weight: 600;
+                    small > i.icon {
+                        font-size: 0.75rem;
+                        color: rgba(0,0,0,0.33);
+                    }
                 }
 
                 .matrix-x-axis-title {
-                    bottom: 25px;
-                    right: 5px;
+                    //bottom: 25px;
+                    //right: 5px;
+                    position: relative;
+                    float: right;
+                    margin-right: 5px;
+                    small > i.icon {
+                        margin-left: 5px;
+                    }
                 }
 
                 .matrix-y-axis-title {
                     bottom: 5px;
+                    small > i.icon {
+                        margin-left: 5px;
+                    }
                 }
             }
             
@@ -87,7 +117,7 @@
         .matrix-grid-container {
             float: left;
             .rm-cell {
-                border-radius: 4px;
+                border-radius: 0px;
             }
         }
 

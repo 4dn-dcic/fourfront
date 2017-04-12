@@ -7,6 +7,7 @@ var { Fade } = require('react-bootstrap');
 var d3 = require('d3');
 var vizUtil = require('./../viz/utilities');
 var { layout, console, isServerSide } = require('./../util');
+var ReactTooltip = require('react-tooltip');
 
 
 
@@ -24,20 +25,28 @@ class Label extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.heightIncrement = this.heightIncrement.bind(this);
     }
 
     static defaultProps = {
         'className' : 'y-axis-matrix-label',
-        'cellSize' : 40,
         'label' : ['Label', 'Sub-Label', 'More Info...'],
         'style' : {}
     }
 
+    heightIncrement(){
+        if (this.props.height >= 64) return 64;
+        if (this.props.height >= 45) return 45;
+        if (this.props.height >= 30) return 30;
+        return 0;
+    }
+
     render(){
         var displayLabel = this.props.label;
+        var heightIncrClass = (' height-at-least-' + this.heightIncrement());
         if (Array.isArray(displayLabel)){
             displayLabel = (
-                <div className="label-container">
+                <div className={"label-container" + heightIncrClass}>
                     { displayLabel.map(function(labelPart, i){
                         return <div key={i} className={"part-" + (i + 1)}>{ labelPart }</div>;
                     }) }
@@ -51,7 +60,7 @@ class Label extends React.Component {
             >
                 <div className="inner" ref={function(r){
                     if (!r) return null;
-                    r.style.top = Math.max(layout.verticalCenterOffset(r) - 3, 0) + 'px';
+                    r.style.top = Math.max(layout.verticalCenterOffset(r, 2) - 3, 0) + 'px';
                 }}>
                     { displayLabel }
                 </div>
@@ -112,8 +121,18 @@ class XAxis extends React.Component {
             }}>
                 <div className="prefix" style={{ width : this.props.leftOffset, height : '100%' }}>
                     { this.props.prefixContent }
-                    { this.props.yAxisTitle ? <div className="matrix-y-axis-title">{ this.props.yAxisTitle }</div> : null }
-                    { this.props.xAxisTitle ? <div className="matrix-x-axis-title">{ this.props.xAxisTitle }</div> : null }
+                    { this.props.yAxisTitle ?
+                        <div className="matrix-y-axis-title">
+                            <div><small className="text-300">Row<i className="icon icon-arrow-down"/></small></div>
+                            { this.props.yAxisTitle }
+                        </div>
+                    : null }
+                    { this.props.xAxisTitle ?
+                        <div className="matrix-x-axis-title text-right">
+                            <div><small className="text-300">Column<i className="icon icon-arrow-right"/></small></div>
+                            { this.props.xAxisTitle }
+                        </div>
+                    : null }
                 </div>
             {
                 this.props.labels.map((label, i)=>
@@ -161,16 +180,12 @@ export class MatrixContainer extends React.Component {
         this.gridWidth = this.gridWidth.bind(this);
         this.cellSize = this.cellSize.bind(this);
         this.cellStyle = this.cellStyle.bind(this);
-		this.state = {
-            in : false
-		}
+        this.body = this.body.bind(this);
     }
 
 	componentDidUpdate(pastProps, pastState){
 		if (pastProps.mounted === false && this.props.mounted === true){
-            setTimeout(()=>{
-                this.setState({ 'in' : true })
-            }, 100);
+            ReactTooltip.rebuild();
         }
     }
 
@@ -204,27 +219,37 @@ export class MatrixContainer extends React.Component {
             this.props.defaultStyleFxn(data, this.props.maxValue)
         );
     }
-    
-    render(){
+
+    body(){
         if (!this.props.mounted) return null;
         return (
-            <Fade in={this.state.in}>
-				<div className="matrix-view-container-wrapper">
-                    <div className="matrix-view-container clearfix">
-                        <MatrixContainer.XAxis
-                            labels={this.props.xAxisLabels}
-                            height={this.props.xLabelsHeight}
-                            cellSize={this.cellSize()}
-                            leftOffset={this.props.yLabelsWidth}
-                            prefixContent={this.props.title ? <h4 className="matrix-title">{ this.props.title }</h4> : null}
-                            yAxisTitle={this.props.yAxisTitle}
-                            xAxisTitle={this.props.xAxisTitle}
-                        />
-                        <MatrixContainer.YAxis labels={this.props.yAxisLabels} width={this.props.yLabelsWidth} cellSize={this.cellSize()} />
-                        <div className="matrix-grid-container" style={{ width : this.gridWidth() }}>
-                            <Matrix data={_.zip.apply(_, this.props.grid)} setStyle={this.cellStyle} />
-                        </div>
-                    </div>
+            <div className="matrix-view-container clearfix">
+                <MatrixContainer.XAxis
+                    labels={this.props.xAxisLabels}
+                    height={this.props.xLabelsHeight}
+                    cellSize={this.cellSize()}
+                    leftOffset={this.props.yLabelsWidth}
+                    prefixContent={this.props.title ? <h4 className="matrix-title">{ this.props.title }</h4> : null}
+                    yAxisTitle={this.props.yAxisTitle}
+                    xAxisTitle={this.props.xAxisTitle}
+                />
+                <MatrixContainer.YAxis labels={this.props.yAxisLabels} width={this.props.yLabelsWidth} cellSize={this.cellSize()} />
+                <div className="matrix-grid-container" style={{ width : this.gridWidth() }}>
+                    <Matrix data={_.zip.apply(_, this.props.grid)} setStyle={this.cellStyle} />
+                </div>
+            </div>
+        );
+    }
+    
+    render(){
+        var totalHeight = (
+            this.props.xLabelsHeight + 
+            (this.props.grid.length * this.cellSize())
+        );
+        return (
+            <Fade in={true} transitionAppear={true}>
+				<div className="matrix-view-container-wrapper" style={{ minHeight : totalHeight }}>
+                    { this.body() }
                 </div>
             </Fade>
         );

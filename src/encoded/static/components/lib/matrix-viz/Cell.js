@@ -64,4 +64,4 @@ Cell.propTypes = {
 	className: PropTypes.string, // Cell's class
 };
 
-export default Radium(Cell); // Wraps Cell in Radium, which extends React's inline CSS capabilities
+export default Cell;//Radium(Cell); // Wraps Cell in Radium, which extends React's inline CSS capabilities
