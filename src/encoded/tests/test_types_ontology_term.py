@@ -24,42 +24,6 @@ and also change the json to use uuid rather than the info included in the post (
 as an identifying property if the term validates.
 '''
 
-
-@pytest.fixture
-def ontology(testapp):
-    data = {
-            "uuid": "530006bc-8535-4448-903e-854af460b254",
-            "ontology_name": "Experimental Factor Ontology",
-            "ontology_url": "http://www.ebi.ac.uk/efo/",
-            "download_url": "http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw",
-            "namespace_url": "http://www.ebi.ac.uk/efo/",
-            "ontology_prefix": "EFO",
-            "description": "The description",
-            "notes": "The download",
-        }
-    return testapp.post_json('/ontology', data).json['@graph'][0]
-
-
-@pytest.fixture
-def oterm(ontology):
-    return {
-        "uuid": "530036bc-8535-4448-903e-854af460b254",
-        "preferred_name": "GM12878",
-        "term_name": "GM12878",
-        "term_id": "EFO:0002784",
-        "term_url": "http://www.ebi.ac.uk/efo/EFO_0002784",
-        "source_ontology": ontology['@id']
-    }
-
-
-'''
-ontology terms have uuid or term_id as unique ID keys
-and if neither of those are included in post, try to 
-use prefered_name such that:
-No - fail load with non-existing term message
-Multiple - fail load with ‘ambiguous name - more than 1 term with that name exist use ID’
-Single result - get uuid and use that for post/patch
-'''
 def test_store_ontology_term_by_uuid(testapp, oterm):
     oterm.pop('preferred_name')
     res = testapp.post_json('/ontology_term', oterm)
