@@ -5,8 +5,9 @@ var url = require('url');
 var { isServerSide } = require('./misc');
 var console = require('./patched-console');
 var Filters = require('./experiments-filters');
-var navigate = require('./navigate');
+var navigate = require('./navigate').default;
 var object = require('./object');
+var JWT = require('./json-web-token');
 
 
 var state = null;
@@ -22,7 +23,7 @@ var defaultOptions = {
 };
 
 
-var analytics = module.exports = {
+var analytics = {
 
     /**
      * Initialize Google Analytics tracking. Call this from app.js on initial mount perhaps.
@@ -73,10 +74,7 @@ var analytics = module.exports = {
     },
 
     registerPageView : function(href = null, context = {}, currentExpSetFilters = {}){
-        if (isServerSide() || typeof window.ga === 'undefined') {
-            console.error("Google Analytics is not initialized. Fine if this appears in a test.");
-            return false;
-        }
+        if (!analytics.shouldTrack()) return false;
 
         // Set href from window if not provided. Safe to use because we're not server-side.
         if (!href) href = window.location && window.location.href;
@@ -95,7 +93,6 @@ var analytics = module.exports = {
          * separate GA dimension.
          * 
          * @param {string} pathName - Path part of href being navigated to. Use url.parse to get.
-         * @param {Object} opts - Options object sent across with GA pageview event. Modified in place.
          * @return {string} Adjusted pathName.
          */
          function adjustPageViewPath(pathName){
@@ -197,6 +194,71 @@ var analytics = module.exports = {
     },
 
     /**
+     * Primarily for UI interaction events.
+     * 
+     * Rough Guidelines:
+     * - For category, try to use name of React Component by which are grouping events by.
+     * - For action, try to standardize name to existing ones (search through files for instances of `analytics.event(`).
+     *   - For example, "Set Filter", "Unset Filter" for UI interactions which change one or more filters (even if multiple, use '.. Filter')
+     * - For fields.eventLabel, try to standardize similarly to action.
+     * - For fields.eventValue - do whatever makes sense I guess. Perhaps time vector from previous interaction.
+     * 
+     * @see analytics.eventLabelFromChartNode()
+     *   
+     * 
+     * @param {string} category - Event Category
+     * @param {string} action - Event Action
+     * @param {Object} fields - Additional fields.
+     * @param {string} fields.eventLabel - Event Label, e.g. 'play'.
+     * @param {number} fields.eventValue - Event Value, must be an integer.
+     */
+    event : function(category, action, fields = {}){
+        if (!analytics.shouldTrack()) return false;
+
+        var eventObj = _.extend(fields, {
+            hitType : 'event',
+            eventCategory : category,
+            eventAction : action
+        });
+
+        // Convert internal dimension names to Google Analytics ones.
+        _.pairs(eventObj).forEach(function(kvPair){
+            if (typeof GADimensionMap[kvPair[0]] !== 'undefined'){
+                eventObj[GADimensionMap[kvPair[0]]] = kvPair[1];
+                delete eventObj[kvPair[0]];
+            }
+        });
+
+        // Add current expSetFilters if not present in 'fields' already.
+        if (typeof eventObj[GADimensionMap.currentFilters] === 'undefined'){
+            eventObj[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters());
+        }
+
+        ga('send', eventObj);
+        console.info("Sent UI event", eventObj);
+    },
+
+    shouldTrack : function(){
+        // 1. Ensure we're initialized
+        if (isServerSide() || typeof window.ga === 'undefined') {
+            console.error("Google Analytics is not initialized. Fine if this appears in a test.");
+            return false;
+        }
+
+        // 2. TODO: Make sure not logged in as admin on a production site.
+        var userDetails = JWT.getUserDetails();
+        if (userDetails && userDetails.email === '4dndcic@gmail.com'){
+            var urlParts = url.parse(window.location.href);
+            if (urlParts.host.indexOf('4dnucleome.org') > -1){
+                console.warn("Logged in as 4DNDCIC on 4dnucleome.org - will NOT track.");
+                return false;
+            }
+        }
+
+        return true;
+    },
+
+    /**
      * @returns {Object[]} Representation of what was sent.
      */
     impressionListOfItems : function(itemList, origHref = null, currentExpSetFilters = null, listName = null, context = null){
@@ -231,9 +293,27 @@ var analytics = module.exports = {
         return productObj;
     },
 
+    /**
+     * Given a 'node' object with a field, term, and potential parent node, generate a descriptive string to use as event label.
+     * 
+     * @param {Object} node - Node object.
+     * @returns {string} Label for analytics event.
+     */
+    eventLabelFromChartNode : function(node){
+        if (!node || typeof node !== 'object') return null;
+        var labelData = [];
+        if (node.field)     labelData.push('Field: ' + node.field);
+        if (node.term)      labelData.push('Term: ' + node.term);
+        if (node.parent && node.parent.field)   labelData.push('Parent Field: ' + node.parent.field);
+        if (node.parent && node.parent.term)    labelData.push('Parent Term: ' + node.parent.term);
+        return labelData.join(', ');
+    },
+
     getStringifiedCurrentFilters : function(filters, contextFilters = null){
         if (typeof filters === 'string'){
             filters = Filters.hrefToFilters(filters, contextFilters);
+        } else if (typeof filters === 'undefined'){ // Allow filters to be blank.
+            filters = Filters.currentExpSetFilters();
         }
         return JSON.stringify(filters, _.keys(filters).sort());
     },
@@ -258,8 +338,29 @@ var analytics = module.exports = {
         return null;
     },
 
+    getGoogleAnalyticsTrackingData : function(key = null){
+        var allData = null;
+        try {
+            allData = ga.getAll()[0].b.data.values;
+        } catch (e){
+            console.error('Could not get data from current GA tracker.');
+            return null;
+        }
+        if (allData !== null && key === null) return allData;
+        if (typeof key === 'string' && typeof allData === 'object' && allData){
+            try {
+                return allData[':' + key];
+            } catch (e) {
+                console.error(e);
+                return null;
+            }
+        }  
+    }
+
 };
 
 if (!isServerSide()) {
     window.analytics = analytics;
 }
+
+export default analytics;

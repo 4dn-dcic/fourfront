@@ -37,4 +37,4 @@ navigate.isSearchHref = function(href){
     return false;
 };
 
-module.exports = navigate;
+export default navigate;

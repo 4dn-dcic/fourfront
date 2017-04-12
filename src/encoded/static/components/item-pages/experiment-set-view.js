@@ -393,11 +393,12 @@ class ExperimentSetLabAwardInfo extends React.Component {
                 <div className="col-sm-12">
                     <div className="row">
 
-                        <div className="col-sm-12 col-md-12 col-sm-float-right">
-                            <Publications context={this.props.context} />
-                        </div>
-
-                        <hr/>
+                        { this.props.context.produced_in_pub || Array.isArray(this.props.context.publications_of_set) ? 
+                            <div className="col-sm-12 col-md-12 col-sm-float-right">
+                                <Publications context={this.props.context} />
+                                <hr/>
+                            </div>
+                        : null }
 
                         <div className="col-sm-12 col-md-12 col-sm-float-right">
                             { FormattedInfoBlock.User(this.props.userInfo) }

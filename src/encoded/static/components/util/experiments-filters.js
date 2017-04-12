@@ -6,7 +6,7 @@ var ajax = require('./ajax');
 var Alerts = null; //require('./../alerts');
 var store = null;
 var object = require('./object');
-var navigate = require('./navigate');
+var navigate = require('./navigate').default;
 
 
 var expFilters = module.exports = {

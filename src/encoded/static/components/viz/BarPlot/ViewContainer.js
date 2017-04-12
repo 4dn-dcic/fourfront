@@ -6,7 +6,7 @@ var d3 = require('d3');
 var store = require('./../../../store');
 var vizUtil = require('./../utilities');
 var ChartDetailCursor = require('./../ChartDetailCursor');
-var { console, object, isServerSide, expFxn, Filters, layout, navigate } = require('./../../util');
+var { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } = require('./../../util');
 var { unhighlightTerms, highlightTerm } = require('./../../facetlist');
 
 // Used for transitioning
@@ -294,30 +294,38 @@ var ViewContainer = module.exports = React.createClass({
                     // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
                     var currentExpSetFilters = this.props.showType === 'all' ? {} : Filters.currentExpSetFilters();
 
+                    var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
+                        // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
+                        if (
+                            expSetFilters && expSetFilters[node.field] &&
+                            expSetFilters[node.field].has(node.term)
+                        ){
+                            return expSetFilters;
+                        }
+                        return Filters.changeFilter(
+                            node.field,
+                            node.term,
+                            'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
+                            expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
+                            null,               // Callback
+                            true,               // Only return new expSetFilters vs saving them == set to TRUE
+                        );
+                    }, currentExpSetFilters);
+
+                    // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
+                    analytics.event('BarPlot', 'Set Filter', {
+                        'eventLabel' : analytics.eventLabelFromChartNode(cursorProps.path[cursorProps.path.length - 1]), // 'New' filters logged here.
+                        'currentFilters' : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()) // 'Existing' filters, or filters at time of action, go here.
+                    });
+
                     Filters.saveChangedFilters(
-                        _.reduce(cursorProps.path, function(expSetFilters, node){
-                            // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
-                            if (
-                                expSetFilters && expSetFilters[node.field] &&
-                                expSetFilters[node.field].has(node.term)
-                            ){
-                                return expSetFilters;
-                            }
-                            return Filters.changeFilter(
-                                node.field,
-                                node.term,
-                                'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
-                                expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
-                                null,               // Callback
-                                true,               // Only return new expSetFilters vs saving them == set to TRUE
-                            );
-                        }, currentExpSetFilters),
+                        newExpSetFilters,
                         true,
                         href,
                         function(){
+                            // Scroll to top of page after navigation is complete.
                             setTimeout(layout.animateScrollTo, 100, 360, Math.abs(document.body.scrollTop - 360) * 2, 0);
                         }
-                        
                     );
 
                 },
@@ -535,7 +543,12 @@ var ViewContainer = module.exports = React.createClass({
                     });
 
                     if (_.keys(newOwnState).length > 0){
-                        this.setState(newOwnState);
+                        this.setState(newOwnState, function(){
+                            analytics.event('BarPlot', 'Hover Bar Section', {
+                                eventLabel : analytics.eventLabelFromChartNode(node),
+                                currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters())
+                            });
+                        });
                     }
 
                     highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
@@ -562,6 +575,7 @@ var ViewContainer = module.exports = React.createClass({
                             'selectedBarSectionParentTerm' : null
                         });
                     } else {
+                        // Manually adjust popover position if a different bar section is already selected.
                         if (this.state.selectedBarSectionTerm) {
 
                             var containerPos = layout.getElementOffset(this.refs.container);
@@ -595,10 +609,18 @@ var ViewContainer = module.exports = React.createClass({
                             }, this.updateDetailCursorFromNode.bind(this, node, true, 'default'));
 
                         }
+                        // Set new selected bar part.
                         this.setState({
                             'selectedBarSectionTerm' : node.term || null,
                             'selectedBarSectionParentTerm' : (node.parent && node.parent.term) || null
+                        }, function(){
+                            // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
+                            analytics.event('BarPlot', 'Select Bar Section', {
+                                eventLabel : analytics.eventLabelFromChartNode(node),
+                                currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters())
+                            });
                         });
+
                     }
                     if (typeof oldOnClickFxn === 'function') return oldOnClickFxn(node, evt);
                     return false;

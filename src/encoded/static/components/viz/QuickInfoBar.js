@@ -6,7 +6,7 @@ var _ = require('underscore');
 var url = require('url');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide, layout,  } = require('../util');
+var { expFxn, Filters, console, object, isServerSide, layout, analytics } = require('../util');
 var ActiveFiltersBar = require('./components/ActiveFiltersBar');
 var MosaicChart = require('./MosaicChart');
 var ChartDataController = require('./chart-data-controller');
@@ -288,6 +288,10 @@ var QuickInfoBar = module.exports = React.createClass({
                         onMouseEnter={_.debounce(()=>{
                             if (this.timeout) clearTimeout(this.timeout);
                             if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
+                            analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
+                                'eventLabel' : ( areAnyFiltersSet ? "No filters set" : "Some filters are set" ),
+                                'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
+                            });
                         },100)}
                     >
                         <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
