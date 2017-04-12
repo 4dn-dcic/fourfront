@@ -752,6 +752,11 @@ tr.expset-addinfo-row {
 
 .above-chart-row {
 	height: 38px;
+	@media screen and (min-width: $screen-sm-min){
+		.browse-page-container .expset-result-table-fix & {
+			margin-top: -38px;
+		}
+	}
 }
 
 // Column Widths - these are also set & used from JS, but these override.

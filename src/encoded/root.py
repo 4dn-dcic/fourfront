@@ -176,19 +176,18 @@ def health_check(config):
     def health_page_view(request):
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
-
         settings = request.registry.settings
         db = request.registry['dbsession']
         count = db.scalar("""SELECT count(*) FROM "propsheets";""")
+        es_index = settings.get('snovault.elasticsearch.index')
         responseDict = {
             "file_upload_bucket" : settings.get('file_upload_bucket'),
             "blob_bucket" : settings.get('blob_bucket'),
             "system_bucket" : settings.get('system_bucket'),
-            "elasticserach" : settings.get('elasticsearch.server') + '/' +
-            settings.get('snovault.elasticsearch.index'),
+            "elasticserach" : settings.get('elasticsearch.server') + '/' +es_index,
             "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
-            'es_count': request.registry['elasticsearch'].count(),
+            'es_count': request.registry['elasticsearch'].count(index=es_index),
             'db_count': count,
             "@type" : [ "Health", "Portal" ],
             "@context" : "/health",

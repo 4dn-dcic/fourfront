@@ -21,6 +21,10 @@ $modal-backdrop-opacity : 0.8;
 
 $facetlist-selected-term-color : #248bac;
 
+$audit-color-warning : #e29302;
+$audit-color-error : #bd0000;
+$audit-color-internal-action: #d0d0d0;
+
 // Pass value with CSS units and get just the value back
 @function strip-units($value) {
     @return $value / ($value * 0 + 1);

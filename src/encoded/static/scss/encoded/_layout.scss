@@ -273,6 +273,10 @@ h3.submission-subtitle {
 	display: inline-block;
 }
 
+.overflow-hidden {
+	overflow: hidden;
+}
+
 @media screen and (max-width: $screen-xs-max){
 
 	.text-left-xs {
