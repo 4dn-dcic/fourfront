@@ -324,7 +324,9 @@ var expFilters = module.exports = {
             .pairs() // Object to [key, val] pairs.
             .filter(function(queryPair){ // Get only facet fields query args.
                 if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
-                if (contextFilters && _.findWhere(contextFilters,  {'field' : queryPair[0]})) return true; // See if in context.filters, if is available.
+                if (Array.isArray(contextFilters) && typeof _.findWhere(contextFilters,  {'field' : queryPair[0]}) !== 'undefined'){
+                    return true; // See if in context.filters, if is available.
+                }
 
                 // These happen to all start w/ 'experiments_in_set.' currently.
                 if (queryPair[0].indexOf('experiments_in_set.') > -1) return true;
