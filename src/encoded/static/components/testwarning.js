@@ -38,9 +38,7 @@ var TestWarning = module.exports = React.createClass({
                         </span>
                         <a 
                             className="test-warning-close icon icon-times"
-                            data-tip="Hide"
-                            data-place="left"
-                            data-delay-hide="0"
+                            title="Hide"
                             onClick={function(e){
                                 e.preventDefault();
                                 e.stopPropagation();

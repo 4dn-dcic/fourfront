@@ -26,8 +26,11 @@ var Aggregator = module.exports = React.createClass({
             !_.isEqual(nextProps.experiments, this.props.experiments) ||
             nextProps.showType !== this.props.showType ||
             (nextProps.children && nextProps.children.props && 
-            this.props.children && this.props.children.props && 
-            this.props.children.props.height !== nextProps.children.props.height)
+            this.props.children && this.props.children.props &&
+            (
+                this.props.children.props.height !== nextProps.children.props.height ||
+                this.props.children.props.width !== nextProps.children.props.width
+            ))
 
         ) {
             if (this.props.debug) console.log("Aggregator > WILL UPDATE");
