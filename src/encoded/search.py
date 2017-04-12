@@ -525,7 +525,6 @@ def set_facets(facets, used_filters, principals, doc_types):
     :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
     :param used_filters: Dict of filters which are set for the ES query. Key is field type, e.g. 'experiments_in_set.award.project', and value is list of terms (strings).
     """
-
     aggs = {}
     facetFields = dict(facets).keys() # List of first entry of tuples in facets list.
     # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
@@ -543,8 +542,6 @@ def set_facets(facets, used_filters, principals, doc_types):
         aggregation = {
             'terms': {
                 'field': query_field,
-                'min_doc_count': 0,
-                'size': 100
             }
         }
 
@@ -582,7 +579,13 @@ def set_facets(facets, used_filters, principals, doc_types):
             'filter': termFilter,
         }
 
-    return aggs
+    final_aggs = {
+        'all_items': {
+            'global': {},
+            'aggs': aggs
+        }
+    }
+    return final_aggs
 
 
 def format_facets(es_results, facets, used_filters, schemas, total):
@@ -595,7 +598,7 @@ def format_facets(es_results, facets, used_filters, schemas, total):
     if 'aggregations' not in es_results:
         return result
 
-    aggregations = es_results['aggregations']
+    aggregations = es_results['aggregations']['all_items']
     used_facets = set()
     for field, facet in facets:
         resultFacet = {

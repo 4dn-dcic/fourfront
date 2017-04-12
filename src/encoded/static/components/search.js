@@ -5,51 +5,6 @@ var url = require('url');
 var _ = require('underscore');
 var globals = require('./globals');
 var search = module.exports;
-var audit = require('./audit');
-
-var AuditIndicators = audit.AuditIndicators;
-var AuditDetail = audit.AuditDetail;
-var AuditMixin = audit.AuditMixin;
-
-// Should really be singular...
-var types = {
-    annotation: {title: 'Annotation file set'},
-    antibody_lot: {title: 'Antibodies'},
-    biosample: {title: 'Biosamples'},
-    experiment: {title: 'Experiments'},
-    target: {title: 'Targets'},
-    dataset: {title: 'Datasets'},
-    image: {title: 'Images'},
-    matched_set: {title: 'Matched set series'},
-    organism_development_series: {title: 'Organism development series'},
-    publication: {title: 'Publications'},
-    page: {title: 'Web page'},
-    pipeline: {title: 'Pipeline'},
-    project: {title: 'Project file set'},
-    publication_data: {title: 'Publication file set'},
-    reference: {title: 'Reference file set'},
-    reference_epigenome: {title: 'Reference epigenome series'},
-    replication_timing_series: {title: 'Replication timing series'},
-    software: {title: 'Software'},
-    treatment_concentration_series: {title: 'Treatment concentration series'},
-    treatment_time_series: {title: 'Treatment time series'},
-    ucsc_browser_composite: {title: 'UCSC browser composite file set'}
-};
-
-var datasetTypes = {
-    'Annotation': types['annotation'].title,
-    'Dataset': types['dataset'].title,
-    'MatchedSet': types['matched_set'].title,
-    'OrganismDevelopmentSeries': types['organism_development_series'].title,
-    'Project': types['project'].title,
-    'PublicationData': types['publication_data'].title,
-    'Reference': types['reference'].title,
-    'ReferenceEpigenome': types['reference_epigenome'].title,
-    'ReplicationTimingSeries': types['replication_timing_series'].title,
-    'TreatmentConcentrationSeries': types['treatment_concentration_series'].title,
-    'TreatmentTimeSeries': types['treatment_time_series'].title,
-    'UcscBrowserComposite': types['ucsc_browser_composite'].title
-};
 
 var Listing = module.exports.Listing = function (props) {
     // XXX not all panels have the same markup
@@ -78,7 +33,7 @@ var PickerActionsMixin = module.exports.PickerActionsMixin = {
 };
 
 var Item = module.exports.Item = React.createClass({
-    mixins: [PickerActionsMixin, AuditMixin],
+    mixins: [PickerActionsMixin],
     render: function() {
         var result = this.props.context;
         var title = globals.listing_titles.lookup(result)({context: result});
@@ -90,7 +45,6 @@ var Item = module.exports.Item = React.createClass({
                     {result.accession ?
                         <div className="pull-right type sentence-case search-meta">
                             <p>{item_type}: {' ' + result['accession']}</p>
-                            <AuditIndicators audits={result.audit} id={this.props.context['@id']} search />
                         </div>
                     : null}
                     <div className="accession">
@@ -100,7 +54,6 @@ var Item = module.exports.Item = React.createClass({
                         {result.description}
                     </div>
                 </div>
-                <AuditDetail context={result} id={this.props.context['@id']} forcedEditLink />
             </li>
         );
     }
@@ -243,7 +196,8 @@ var Term = search.Term = React.createClass({
         };
         var selected = termSelected(term, field, filters);
         var href = this.getHref(selected);
-        
+        console.log('-', term,'-',href);
+
         return (
             <li className={selected ? 'selected-facet' : ""} id={selected ? "selected" : null} key={term}>
                 <span className="bar" style={barStyle}></span>
@@ -264,14 +218,8 @@ var TypeTerm = search.TypeTerm = React.createClass({
     render: function () {
         var term = this.props.term['key'];
         var filters = this.props.filters;
-        var title;
-        try {
-            title = types[term];
-        } catch (e) {
-            title = term;
-        }
         var total = this.props.total;
-        return <Term {...this.props} title={title} filters={filters} total={total} />;
+        return <Term {...this.props} title={term} filters={filters} total={total} />;
     }
 });
 
@@ -346,58 +294,10 @@ var Facet = search.Facet = React.createClass({
     }
 });
 
-var TextFilter = search.TextFilter = React.createClass({
-
-    getValue: function(props) {
-        var filter = this.props.filters.filter(function(f) {
-            return f.field == 'searchTerm';
-        });
-        return filter.length ? filter[0].term : '';
-    },
-
-    shouldUpdateComponent: function(nextProps) {
-        return (this.getValue(this.props) != this.getValue(nextProps));
-    },
-
-    render: function() {
-        return (
-            <div className="facet">
-                <input ref="input" type="search" className="form-control search-query"
-                        placeholder="Enter search term(s)"
-                        defaultValue={this.getValue(this.props)}
-                        onChange={this.onChange} onBlur={this.onBlur} onKeyDown={this.onKeyDown} />
-            </div>
-        );
-    },
-
-    onChange: function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-    },
-
-    onBlur: function(e) {
-        var search = this.props.searchBase.replace(/&?searchTerm=[^&]*/, '');
-        var value = e.target.value;
-        if (value) {
-            search += 'searchTerm=' + e.target.value;
-        } else {
-            search = search.substring(0, search.length - 1);
-        }
-        this.props.onChange(search);
-    },
-
-    onKeyDown: function(e) {
-        if (e.keyCode == 13) {
-            this.onBlur(e);
-            e.preventDefault();
-        }
-    }
-});
 
 var FacetList = search.FacetList = React.createClass({
     contextTypes: {
         session: React.PropTypes.bool,
-        hidePublicAudits: React.PropTypes.bool
     },
 
     getDefaultProps: function() {
@@ -453,9 +353,8 @@ var FacetList = search.FacetList = React.createClass({
                 :   <div className="clear-filters-control placeholder">
                         <a>Clear Filters</a>
                     </div>}
-                {this.props.mode === 'picker' && !this.props.hideTextFilter ? <TextFilter {...this.props} filters={filters} /> : ''}
                 {facets.map(facet => {
-                    if ((hideTypes && facet.field == 'type') || (!loggedIn && this.context.hidePublicAudits && facet.field.substring(0, 6) === 'audit.')) {
+                    if ((hideTypes && facet.field == 'type') || (!loggedIn && facet.field.substring(0, 6) === 'audit.')) {
                         return <span key={facet.field} />;
                     } else {
                         return <Facet {...this.props} key={facet.field} facet={facet} filters={filters}
@@ -550,34 +449,6 @@ var ResultTable = search.ResultTable = React.createClass({
                     onClick={this.onFilter}>View 25</a>
                 : null}
             </span>);
-
-            //Table controls, removed for now. To implement, put the following div in the
-            //same row as the h4 element in the render function below
-
-            /*<div className="pull-left results-table-control">
-                {context.views ?
-                    <div className="btn-attached">
-                        {context.views.map((view, i) =>
-                            <a key={i} className="btn btn-info btn-sm btn-svgicon" href={view.href} title={view.title}>{SvgIcon(view2svg[view.icon])}</a>
-                        )}
-                    </div>
-                : null}
-                {context['batch_download'] ?
-                    <BatchDownload context={context} />
-                : null}
-            </div>
-            <div className="pull-right results-table-control placeholder">
-                {context.views ?
-                    <div className="btn-attached">
-                        {context.views.map((view, i) =>
-                            <a key={i} className="btn btn-info btn-sm btn-svgicon" href={view.href} title={view.title}>{SvgIcon(view2svg[view.icon])}</a>
-                        )}
-                    </div>
-                : null}
-                {context['batch_download'] ?
-                    <BatchDownload context={context} />
-                : null}
-            </div>*/
 
         return (
             <div>
