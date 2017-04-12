@@ -93,6 +93,7 @@ module.exports.FilesInSetTable = require('./FilesInSetTable');
  */
 module.exports.ItemFooterRow = require('./ItemFooterRow');
 
+
 module.exports.Publications = require('./Publications').default;
 
 /**

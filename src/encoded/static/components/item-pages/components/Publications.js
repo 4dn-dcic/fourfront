@@ -132,6 +132,10 @@ class ListBlock extends React.Component {
  * @memberof module:item-pages/components.Publications
  * @class DetailBlock
  * @extends {React.Component}
+ * 
+ * @prop {string} singularTitle         - Title to show in top left of block. 'S' gets added to end of title if more than 1 item.
+ * @prop {Object} publication           - Publication whose link and display_title to display.
+ * @prop {Element|Element[]} children   - React Element(s) to display in detail area under title.
  */
 class DetailBlock extends React.Component {
 
@@ -169,6 +173,7 @@ class DetailBlock extends React.Component {
 
 }
 
+
 /**
  * Wraps some React elements, such as a list or title, in a FormattedInfoBlock-styled wrapper.
  * 
@@ -176,9 +181,12 @@ class DetailBlock extends React.Component {
  * @class FormattedInfoWrapper
  * @extends {React.Component}
  * @type {Component}
- * @prop {boolean} isSingleItem - Whether there is only 1 item or not.
- * @prop {Element[]} children - React Elements or Components to be wrapped.
- * @prop {string} [singularTitle] - Optional. Title displayed in top left label. Defaults to 'Publication'.
+ * 
+ * @prop {boolean} isSingleItem     - Whether there is only 1 item or not.
+ * @prop {Element[]} children       - React Elements or Components to be wrapped.
+ * @prop {string} [singularTitle]   - Optional. Title displayed in top left label. Defaults to 'Publication'.
+ * @prop {string} [className]       - Additional className to be added to wrapper element. 
+ * @prop {string} [iconClass='book']- CSS class for icon to be displayed. Defaults to 'book'.
  */
 class FormattedInfoWrapper extends React.Component {
 
@@ -235,6 +243,7 @@ class FormattedInfoWrapper extends React.Component {
  * @class Publications
  * @type {Component}
  * @extends {React.Component}
+ * 
  * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
  */
 export default class Publications extends React.Component {
