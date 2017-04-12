@@ -248,8 +248,11 @@ class Publications extends React.Component {
     }
 
     detailRows(publication = this.props.context.produced_in_pub){
+        if (!publication || typeof publication === 'undefined'){
+            return [];
+        }
         var details = [];
-        if (typeof publication.date_published === 'string'){
+        if (publication && typeof publication.date_published === 'string'){
             details.push({
                 'label' : 'Published',
                 'content' : DateUtility.format(publication.date_published)
