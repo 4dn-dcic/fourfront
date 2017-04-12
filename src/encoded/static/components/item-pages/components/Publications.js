@@ -138,6 +138,7 @@ class DetailBlock extends React.Component {
 
     render(){
         var publication = this.props.publication;
+        if (typeof publication !== 'object' || !publication) return null;
         return (
             <Publications.FormattedInfoWrapper singularTitle={this.props.singularTitle} isSingleItem={true}>
                 <h5 className="block-title">
