@@ -129,7 +129,8 @@ class AbstractCollection(snovault.AbstractCollection):
                     return default
                 return resource
         if getattr(self, 'kinda_unique_key', None) is not None:
-            resource = self.connection.get_by_json(self.kinda_unique_key, name)
+            item_type = self.type_info.item_type
+            resource = self.connection.get_by_json(self.kinda_unique_key, name, item_type)
             if resource is not None:
                 if not self._allow_contained(resource):
                     return default

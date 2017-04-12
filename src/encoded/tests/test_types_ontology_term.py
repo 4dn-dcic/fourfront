@@ -75,7 +75,6 @@ def test_store_ontology_term_by_term_id(testapp, oterm):
     assert res.json['@graph'][0]['term_id'] == oterm['term_id']
     assert res.json['@graph'][0].get('preferred_name', None) is None
     res2 = testapp.get('/ontology_term/' + oterm['term_id'])
-    import pdb; pdb.set_trace()
 
 
 def test_store_ontology_no_required_keys(testapp, oterm):
@@ -95,7 +94,7 @@ def test_linkto_ontology_term_by_preffered_name(testapp, lab, award, oterm):
         'tissue': oterm['preferred_name']
     }
 
-    res = testapp.post_json('/ontology_term', oterm)
+    res = testapp.post_json('/ontology_term', oterm).json['@graph'][0]
     res_biosource = testapp.post_json('/biosource', item).json['@graph'][0]
-    import pdb; pdb.set_trace()
+    assert res['@id'] == res_biosource['tissue']
 
