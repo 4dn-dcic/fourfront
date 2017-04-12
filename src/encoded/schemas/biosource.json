@@ -102,7 +102,16 @@
                   "Caki2",
                   "LNCaP clone FGC",
                   "RPMI-7951",
-                  "SJCRH30"
+                  "SJCRH30",
+                  "GM19238",
+                  "GM19239",
+                  "GM19240",
+                  "HG00731",
+                  "HG00732",
+                  "HG00733",
+                  "HG00512",
+                  "HG00513",
+                  "HG00514"
               ]
           },
           "cell_line_termid": {
