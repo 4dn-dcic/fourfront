@@ -569,7 +569,7 @@ var ViewContainer = module.exports = React.createClass({
                             var bottomOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
                             var leftOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
 
-                            var mouseXInContainer = evt.pageX || evt.clientX - containerPos.left;
+                            var mouseXInContainer = (evt.pageX || evt.clientX) - containerPos.left;
                             var barYPos = node.attr.height;
                             var isPopoverOnRightSide = mouseXInContainer > (this.refs.container.clientWidth / 2);
 

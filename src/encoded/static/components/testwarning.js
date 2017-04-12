@@ -29,16 +29,28 @@ var TestWarning = module.exports = React.createClass({
             <div className="test-warning">
                 <div className="container">
                     <div>
-                        The data displayed on this page is not official and only for testing purposes.
-                        <a className="test-warning-close icon icon-times-circle-o" onClick={function(e){
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (this.props.setHidden){
-                                this.props.setHidden(e);
-                                return;
-                            }
-                            this.hideTestWarning();
-                        }.bind(this)}></a>
+                        <span style={{ fontSize : '13.5px' }}>
+                            <i className="icon icon-fw icon-info circle-icon hidden-xs" style={{
+                                marginRight : 10,
+                                marginTop : -2
+                            }}/>
+                            The data displayed on this page is not official and only for testing purposes.
+                        </span>
+                        <a 
+                            className="test-warning-close icon icon-times"
+                            data-tip="Hide"
+                            data-place="left"
+                            data-delay-hide="0"
+                            onClick={function(e){
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (this.props.setHidden){
+                                    this.props.setHidden(e);
+                                    return;
+                                }
+                                this.hideTestWarning();
+                            }.bind(this)}
+                        />
                     </div>
                 </div>
             </div>

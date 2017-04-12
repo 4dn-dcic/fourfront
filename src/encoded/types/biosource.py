@@ -59,7 +59,16 @@ class Biosource(Item):
             "Caki2": ['Unclassified', 'EFO:0002150'],
             "LNCaP clone FGC": ['Unclassified', 'EFO:0005726'],
             "RPMI-7951": ['Unclassified', 'EFO:0005712'],
-            "SJCRH30": ['Unclassified', 'EFO:0005722']
+            "SJCRH30": ['Unclassified', 'EFO:0005722'],
+            "GM19238": ['Unclassified', 'EFO:0002788'],
+            "GM19239": ['Unclassified', 'EFO:0002789'],
+            "GM19240": ['Unclassified', 'EFO:0002790'],
+            "HG00731": ['Unclassified', None],
+            "HG00732": ['Unclassified', None],
+            "HG00733": ['Unclassified', None],
+            "HG00512": ['Unclassified', None],
+            "HG00513": ['Unclassified', None],
+            "HG00514": ['Unclassified', None],
         }
         if 'cell_line' in properties:
             if properties['cell_line'] in name2info:
