@@ -101,7 +101,7 @@ module.exports.ItemFooterRow = require('./ItemFooterRow');
  * @type {Component}
  * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
  */
-module.exports.Publications = require('./Publications');
+module.exports.Publications = require('./Publications').default;
 
 /**
  * @namespace
