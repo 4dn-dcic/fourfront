@@ -979,6 +979,14 @@ def ont_terms(matches):
 
 
 @pytest.fixture
+def ontology_list():
+    return [
+        {'uuid': '1', 'ontology_name': 'ont1'},
+        {'uuid': '2', 'ontology_name': 'ont2'}
+    ]
+
+
+@pytest.fixture
 def db_terms(ont_terms):
     db_terms = ont_terms.copy()
     db_terms['t1']['uuid'] = '1234'
@@ -988,8 +996,8 @@ def db_terms(ont_terms):
     return db_terms
 
 
-def test_id_post_and_patch_filter(ont_terms, db_terms):
-    result = go.id_post_and_patch(ont_terms, db_terms)
+def test_id_post_and_patch_filter(ont_terms, db_terms, ontology_list):
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
     assert len(result['post']) == 1
     assert 't3' in result['post']
     assert not result['patch']
@@ -999,8 +1007,8 @@ def test_id_post_and_patch_filter(ont_terms, db_terms):
         assert v in ['1234', '5678']
 
 
-def test_id_post_and_patch_no_filter(ont_terms, db_terms):
-    result = go.id_post_and_patch(ont_terms, db_terms, False)
+def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, False)
     assert len(result['post']) == 1
     assert 't3' in result['post']
     assert len(result['patch']) == 2
