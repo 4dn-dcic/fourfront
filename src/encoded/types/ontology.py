@@ -11,6 +11,7 @@ from .base import (
 @collection(
     name='ontology-terms',
     unique_key='ontology_term:term_id',
+    kinda_unique_key = 'preferred_name',
     properties={
         'title': 'Ontology Terms',
         'description': 'Listing of Ontology Terms',
@@ -22,7 +23,6 @@ class OntologyTerm(Item):
     schema = load_schema('encoded:schemas/ontology_term.json')
     embedded = []
     name_key = 'term_id'
-
 
 @collection(
     name='ontologys',

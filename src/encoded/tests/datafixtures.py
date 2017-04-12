@@ -113,7 +113,6 @@ def mboI(testapp, worthington_biochemical, lab, award):
 def lung_biosource(testapp, lab, award):
     item = {
         "biosource_type": "tissue",
-        "tissue": "lung",
         'award': award['@id'],
         'lab': lab['@id'],
     }

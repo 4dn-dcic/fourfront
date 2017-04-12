@@ -109,6 +109,14 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 class AbstractCollection(snovault.AbstractCollection):
     """smth."""
 
+    def __init__(self, *args, **kw):
+        try:
+            self.kinda_unique_key = kw.pop('kinda_unique_key')
+        except KeyError:
+            pass
+        return super(AbstractCollection, self).__init__(*args, **kw)
+
+
     def get(self, name, default=None):
         """smth."""
         resource = super(AbstractCollection, self).get(name, None)
@@ -116,6 +124,12 @@ class AbstractCollection(snovault.AbstractCollection):
             return resource
         if ':' in name:
             resource = self.connection.get_by_unique_key('alias', name)
+            if resource is not None:
+                if not self._allow_contained(resource):
+                    return default
+                return resource
+        if getattr(self, 'kinda_unique_key', None) is not None:
+            resource = self.connection.get_by_json(self.kinda_unique_key, name)
             if resource is not None:
                 if not self._allow_contained(resource):
                     return default
