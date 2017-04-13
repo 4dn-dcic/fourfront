@@ -279,7 +279,9 @@ def prepare_search_term(request):
     prepared_terms = {}
     prepared_vals = []
     for field, val in request.params.iteritems():
-        if field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
+        if field[0:6] == 'audit.' and field[-9:] == '.category':
+            prepared_terms[field] = [val]
+        elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
             prepared_terms['embedded.' + field].append(val)
@@ -332,16 +334,19 @@ def list_result_fields(request, doc_types):
     Note that you must provide the full fieldname with embeds, such as:
     'field=biosample.biosource.individual.organism.name' and not just
     'field=name'
+    Add audit to this so we can look at that as well
     """
     frame = request.params.get('frame')
     fields_requested = request.params.getall('field')
     if fields_requested:
-        fields = {'embedded.@id', 'embedded.@type'}
-        fields.update('embedded.' + field for field in fields_requested)
+        fields = ['embedded.@id', 'embedded.@type']
+        for field in fields_requested:
+            fields.append('embedded.' + field)
     elif frame in ['embedded', 'object']:
         fields = [frame + '.*']
     else:
         fields = ['embedded.*']
+    fields.append('audit.*')
     return fields
 
 
@@ -579,6 +584,10 @@ def set_facets(facets, used_filters, principals, doc_types):
             'filter': termFilter,
         }
 
+    # to achieve OR behavior within facets, search among GLOBAL results,
+    # not just returned ones. to do this, wrap aggs in ['all_items']
+    # and add "global": {} to top level aggs query
+    # see elasticsearch global aggs for documentation (should be ES5 compliant)
     final_aggs = {
         'all_items': {
             'global': {},
@@ -641,6 +650,7 @@ def format_facets(es_results, facets, used_filters, schemas, total):
 def format_results(request, hits):
     """
     Loads results to pass onto UI
+    For now, add audits to the results so we can facet/not facet on audits
     """
     fields_requested = request.params.getall('field')
     if fields_requested:
@@ -650,9 +660,12 @@ def format_results(request, hits):
     else:
         frame = 'embedded'
 
-    if frame in ['embedded', 'object']:
+    if frame in ['embedded', 'object', ]:
         for hit in hits:
-            yield hit['_source'][frame]
+            frame_result = hit['_source'][frame]
+            if 'audit' in hit['_source'] and 'audit' not in frame_result:
+                frame_result['audit'] = hit['_source']['audit']
+            yield frame_result
         return
 
 ### stupid things to remove; had to add because of other fxns importing

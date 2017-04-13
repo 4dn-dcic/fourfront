@@ -5,6 +5,8 @@ var url = require('url');
 var _ = require('underscore');
 var globals = require('./globals');
 var search = module.exports;
+var ReactTooltip = require('react-tooltip');
+var { ajax, console, object, isServerSide, Filters, layout } = require('./util');
 
 var Listing = module.exports.Listing = function (props) {
     // XXX not all panels have the same markup
@@ -188,26 +190,19 @@ var Term = search.Term = React.createClass({
         var count = this.props.term['doc_count'];
         var title = this.props.title || term;
         var field = this.props.facet['field'];
-        var em = field === 'target.organism.scientific_name' ||
-                    field === 'organism.scientific_name' ||
-                    field === 'replicates.library.biosample.donor.organism.scientific_name';
-        var barStyle = {
-            width:  Math.ceil( (count/this.props.total) * 100) + "%"
-        };
         var selected = termSelected(term, field, filters);
         var href = this.getHref(selected);
-        console.log('-', term,'-',href);
 
         return (
-            <li className={selected ? 'selected-facet' : ""} id={selected ? "selected" : null} key={term}>
-                <span className="bar" style={barStyle}></span>
-                {field === 'lot_reviews.status' ? <span className={globals.statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
-                <a id={selected ? "selected" : null} href={href} onClick={href ? this.props.onFilter : null}>
-                    <span className="pull-left facet-selector">{selected && this.props.canDeselect ? <i className="icon icon-times-circle-o"></i> : ''}</span>
-                    <span className="facet-item">
-                        {em ? <em>{title}</em> : <span>{title}</span>}
+            <li className={"facet-list-element" + (selected ? " selected" : '')} id={selected ? "selected" : null} key={term}>
+                <a className="term" data-selected={selected} href={href} onClick={href ? this.props.onFilter : null}>
+                    <span className="pull-left facet-selector">
+                        {selected ? <i className="icon icon-times-circle icon-fw"></i> : '' }
                     </span>
-                    <span className="pull-right">{count}</span>
+                    <span className="facet-item">
+                        {title}
+                    </span>
+                    <span className="facet-count">{count}</span>
                 </a>
             </li>
         );
@@ -223,8 +218,22 @@ var TypeTerm = search.TypeTerm = React.createClass({
     }
 });
 
+class InfoIcon extends React.Component{
+    render() {
+        if (!this.props.children) return null;
+        return (
+            <i className="icon icon-info-circle" data-tip={this.props.children}/>
+        );
+    }
+}
+
 
 var Facet = search.Facet = React.createClass({
+
+    statics : {
+
+    },
+
     getDefaultProps: function() {
         return {width: 'inherit'};
     },
@@ -265,9 +274,21 @@ var Facet = search.Facet = React.createClass({
         var canDeselect = (!facet.restrictions || selectedTermCount >= 2);
         var moreSecClass = 'collapse' + ((moreTermSelected || this.state.facetOpen) ? ' in' : '');
         var seeMoreClass = 'btn btn-link' + ((moreTermSelected || this.state.facetOpen) ? '' : ' collapsed');
+        // get type of this object for getSchemaProperty (if type="Item", no tooltips)
+        var thisType = 'Item';
+        var searchBits = this.props.searchBase.split(/[\?&]+/);
+        var filteredBits = searchBits.filter(bit => bit.slice(0,5) === 'type=' && bit.slice(5,9) !== 'Item');
+        if (filteredBits.length == 1){ // if multiple types, don't use any tooltips
+            thisType = filteredBits[0].slice(5);
+        }
+        var schemaProperty = Filters.Field.getSchemaProperty(field, this.props.schemas, thisType, true);
+        var description = schemaProperty && schemaProperty.description;
         return (
             <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}}>
-                <h5>{title}</h5>
+                <h5 className="facet-title">
+                    <span className="inline-block">{ title || field }</span>
+                    <InfoIcon children={description}/>
+                </h5>
                 <ul className="facet-list nav">
                     <div>
                         {terms.slice(0, 5).map(function (term) {
@@ -345,22 +366,30 @@ var FacetList = search.FacetList = React.createClass({
         }
 
         return (
-            <div className={"box facets " + this.props.orientation}>
-                {clearButton ?
-                    <div className="clear-filters-control">
-                        <a href={context.clear_filters}>Clear Filters <i className="icon icon-times-circle"></i></a>
+
+            <div>
+                <div className={"facets-container facets " + this.props.orientation}>
+                    <div className="row facets-header">
+                        <div className="col-xs-6 facets-title-column">
+                            <i className="icon icon-fw icon-filter"></i>
+                            &nbsp;
+                            <h4 className="facets-title">Properties</h4>
+                        </div>
+                        <div className={"col-xs-6 clear-filters-control" + (clearButton ? '' : ' placeholder')}>
+                            <a href={context.clear_filters} className={"btn btn-xs rounded btn-outline-default"}>
+                                <i className="icon icon-times"></i> Clear All
+                            </a>
+                        </div>
                     </div>
-                :   <div className="clear-filters-control placeholder">
-                        <a>Clear Filters</a>
-                    </div>}
-                {facets.map(facet => {
-                    if ((hideTypes && facet.field == 'type') || (!loggedIn && facet.field.substring(0, 6) === 'audit.')) {
-                        return <span key={facet.field} />;
-                    } else {
-                        return <Facet {...this.props} key={facet.field} facet={facet} filters={filters}
-                                        width={width} />;
-                    }
-                })}
+                    {facets.map(facet => {
+                        if ((hideTypes && facet.field == 'type') || (!loggedIn && facet.field.substring(0, 6) === 'audit.')) {
+                            return <span key={facet.field} />;
+                        } else {
+                            return <Facet {...this.props} key={facet.field} facet={facet} filters={filters}
+                                            width={width} />;
+                        }
+                    })}
+                </div>
             </div>
         );
     }
