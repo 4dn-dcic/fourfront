@@ -4,8 +4,15 @@ from snovault import (
     collection,
     load_schema,
 )
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_put,
+    validate_item_content_put,
+)
+from pyramid.view import view_config
 from .base import (
-    Item
+    Item,
+    collection_add
     # paths_filtered_by_status,
 )
 
@@ -107,3 +114,22 @@ class Biosource(Item):
     def display_title(self, request, biosource_type, individual=None,
                       cell_line=None, cell_line_tier=None, tissue=None):
         return self.biosource_name(request, biosource_type, individual, cell_line, cell_line_tier, tissue)
+
+    class Collection(Item.Collection):
+        pass
+
+# validator for tissue field
+def validate_biosource_tissue(context, request):
+    data = request.json
+    if 'tissue' not in data:
+        return
+    tissue = data['tissue']
+    registry = context.registry
+    print(registry)
+    return
+
+
+@view_config(context=Biosource.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_biosource_tissue])
+def biosource_add(context, request, render=None):
+    return collection_add(context, request, render)
