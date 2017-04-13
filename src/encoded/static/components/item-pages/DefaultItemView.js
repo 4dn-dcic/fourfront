@@ -11,17 +11,17 @@ var { console, object, DateUtility, Filters } = require('./../util');
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
  * Item page template associated with them.
  *
- * @module {Component} item-pages/item-view
+ * @module {Component} item-pages/DefaultItemView
  */
 
 
 /**
- * @alias module:item-pages/item-view
+ * @alias module:item-pages/DefaultItemView
  */
-var ItemView = module.exports = React.createClass({
+var DefaultItemView = module.exports = React.createClass({
 
     /**
-     * @memberof module:item-pages/item-view
+     * @memberof module:item-pages/DefaultItemView
      * @private
      * @instance
      * @returns {Object} collapsed : false
@@ -151,4 +151,4 @@ var ItemView = module.exports = React.createClass({
 });
 
 
-globals.panel_views.register(ItemView, 'Item');
+globals.panel_views.register(DefaultItemView, 'Item');

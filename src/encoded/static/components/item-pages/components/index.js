@@ -26,7 +26,9 @@ module.exports.FormattedInfoBlock = require('./FormattedInfoBlock');
  * @prop {boolean} [showAccessionTitles] - If true, will render title if it is the accession. Otherwise, beyond Item type, the title will be hidden.
  * @prop {Object} context - JSON representation of current Item page/view.
  */
-module.exports.ItemPageTitle = require('./ItemPageTitle');
+import ItemPageTitle, { getBaseItemType, getTitleStringFromContext, getBaseItemTypeTitle, isDisplayTitleAccession } from './ItemPageTitle';
+module.exports.ItemPageTitle = ItemPageTitle;
+
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -49,20 +51,8 @@ module.exports.ItemPageTitle = require('./ItemPageTitle');
  */
 module.exports.ItemHeader = require('./ItemHeader');
 
-/**
- * Renders a list using elements along the Bootstrap grid.
- * Takes two lists as props: 'persistent' and 'collapsible'. 
- * Persistent items are always visible, while collapsible are only shown if props.open is true.
- * 
- * @namespace
- * @type {Component}
- * @prop {Component[]|Element[]|string[]} persistent    - React elements or components to always render. 
- * @prop {Component[]|Element[]|string[]} collapsible   - React elements or components to render conditionally.
- * @prop {boolean} open          - Show collapsed items or not.
- * @prop {string}  className     - Class name for outermost element.
- * @prop {string}  containerType - Type of element to use as container for the two lists. Defaults to 'div'.
- */
-module.exports.PartialList = require('./PartialList');
+
+module.exports.PartialList = require('./PartialList').default;
 
 /**
  * Used in Component module:item-pages/components.ItemFooterRow to display an external reference link.
@@ -83,15 +73,8 @@ module.exports.ExternalReferenceLink = require('./ExternalReferenceLink');
  */
 module.exports.FilesInSetTable = require('./FilesInSetTable');
 
-/**
- * Component for showing Aliases, External References, etc.
- * Shown at bottom of Item pages.
- * 
- * @namespace
- * @type {Component}
- * @prop {Object} context - JSON representation of current Item object. Should be available through Redux store's context.
- */
-module.exports.ItemFooterRow = require('./ItemFooterRow');
+
+module.exports.ItemFooterRow = require('./ItemFooterRow').default;
 
 
 module.exports.Publications = require('./Publications').default;
@@ -101,7 +84,7 @@ module.exports.Publications = require('./Publications').default;
  * @type {Component}
  * @prop {Object[]} contents - List of objects for tabs containing 'tab', 'content', and maybe 'key'.
  */
-module.exports.TabbedView = require('./TabbedView');
+module.exports.TabbedView = require('./TabbedView').default;
 
 /**
  * A list of properties which belong to Item shown by ItemView.

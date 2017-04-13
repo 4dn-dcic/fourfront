@@ -47,7 +47,7 @@ describe('Testing item-view.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        ItemView = require('./../item-pages/item-view');
+        ItemView = require('./../item-pages/ItemView');
         var { Item } = require('./../item-pages/item');
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');

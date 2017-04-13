@@ -8,7 +8,7 @@ var { Button } = require('react-bootstrap');
 var ReactTooltip = require('react-tooltip');
 var { console, DateUtility, object } = require('./../../util');
 var { FlexibleDescriptionBox } = require('./../../experiment-common');
-var PartialList = require('./PartialList');
+import PartialList from './PartialList';
 
 /*
 var testData = [ // Use this to test list view(s) as none defined in test data.

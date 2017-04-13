@@ -3,28 +3,23 @@
 var React = require('react');
 var _ = require('underscore');
 
-var Tabs = require('rc-tabs/lib/Tabs');
-var TabContent = require('rc-tabs/lib/TabContent');
-var ScrollableInkTabBar = require('rc-tabs/lib/ScrollableInkTabBar');
+import Tabs, { TabPane } from 'rc-tabs';
+import TabContent from 'rc-tabs/lib/TabContent';
+import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
-var TabView = module.exports = React.createClass({
+export default class TabView extends React.Component {
 
-    getDefaultProps : function(){
-        return {
-            'contents' : [
-                { tab : "Tab 1", content : <span>Test1</span> },
-                { tab : "Tab 2", content : <span>Test2</span> }
-            ],
-            'animated' : false
-        };
-    },
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
 
-    render : function(){
+    render(){
         var tabsProps = {
-            renderTabBar     : ()=><ScrollableInkTabBar onTabClick={this.props.onTabClick} extraContent={this.props.extraTabContent} />,
-            renderTabContent : ()=><TabContent animated={this.props.animated} />,
-            onChange         : this.props.onChange,
-            destroyInactiveTabPane : this.props.destroyInactiveTabPane
+            'renderTabBar'          : () => <ScrollableInkTabBar onTabClick={this.props.onTabClick} extraContent={this.props.extraTabContent} />,
+            'renderTabContent'      : () => <TabContent animated={this.props.animated} />,
+            'onChange'              : this.props.onChange,
+            'destroyInactiveTabPane': this.props.destroyInactiveTabPane
         };
         if (this.props.activeKey) tabsProps.activeKey = this.props.activeKey;
         return (
@@ -46,4 +41,12 @@ var TabView = module.exports = React.createClass({
         );
     }
 
-});
+}
+
+TabView.defaultProps = {
+    'contents' : [
+        { tab : "Tab 1", content : <span>Test1</span> },
+        { tab : "Tab 2", content : <span>Test2</span> }
+    ],
+    'animated' : false
+}

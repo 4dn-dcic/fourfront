@@ -6,7 +6,7 @@ var Collapse = require('react-bootstrap').Collapse;
 var ReactTooltip = require('react-tooltip');
 var { console, object, Filters } = require('./../../util');
 var globals = require('./../../globals');
-var PartialList = require('./PartialList');
+import PartialList from './PartialList';
 var FilesInSetTable = require('./FilesInSetTable');
 var itemTitle = require('./../item').title;
 

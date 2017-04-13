@@ -6,7 +6,7 @@ var url = require('url');
 var querystring = require('querystring');
 var { console, DateUtility, Filters } = require('./../../util');
 var { FlexibleDescriptionBox } = require('./../../experiment-common');
-var ItemPageTitle = require('./ItemPageTitle');
+import { getBaseItemType } from './../item';
 
 
 var ItemHeader = module.exports = {
@@ -37,7 +37,7 @@ var ItemHeader = module.exports = {
      */
     moreDetailedItemType : function(context){
         var specificType = ItemHeader.itemType(context);
-        var baseType = ItemPageTitle.getBaseItemType(context);
+        var baseType = getBaseItemType(context);
         if (specificType !== baseType) return specificType;
         return null;
     },
