@@ -279,8 +279,8 @@ def prepare_search_term(request):
     prepared_terms = {}
     prepared_vals = []
     for field, val in request.params.iteritems():
-        if field[0:6] == 'audit.' and field[-9:] == '.category':
-            prepared_terms[field] = [val]
+        if field.startswith('audit'):
+            continue
         elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
@@ -346,7 +346,6 @@ def list_result_fields(request, doc_types):
         fields = [frame + '.*']
     else:
         fields = ['embedded.*']
-    fields.append('audit.*')
     return fields
 
 
