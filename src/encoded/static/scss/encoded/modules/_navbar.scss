@@ -3,6 +3,7 @@
 $navbar-full-height : 80px;
 $navbar-small-height : 40px; /* Bootstrap navbar default */
 $navbar-transition-length: .75s;
+$navbar-transition-easing: ease-out;
 
 #top-nav {
     background: #ffffff;
@@ -32,8 +33,8 @@ $navbar-transition-length: .75s;
                 -moz-backface-visibility: hidden;
                 backface-visibility: hidden;
                 transform: translate3d(0,0,0);
-                transition: height $navbar-transition-length, 
-                    line-height $navbar-transition-length;
+                transition: height $navbar-transition-length $navbar-transition-easing, 
+                    line-height $navbar-transition-length $navbar-transition-easing;
                     /* box-shadow $navbar-transition-length, 
                     border-color $navbar-transition-length */;
             }
@@ -356,6 +357,11 @@ $navbar-transition-length: .75s;
     height: 52px;
     line-height: 17px;
     overflow: hidden;
+    transition: margin-top .5s ease-out;
+
+    body.scrolled-past-80 & {
+        margin-top: -52px;
+    }
 
     > .container > div > span {
     

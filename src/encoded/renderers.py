@@ -361,6 +361,6 @@ debug_page_or_json = SubprocessTween(
     should_transform=should_transform_callable,
     after_transform=after_transform,
     reload_process=reload_process,
-    args=['node', resource_filename(__name__, 'static/build/renderer.js')],
+    args=['node', resource_filename(__name__, 'static/server.js')],
     env=node_env,
 )
