@@ -366,8 +366,8 @@ table.matrix {
 			padding: 8px;
 		}
 
-	} 
-	
+	}
+
 	> tbody.expset-section {
 		/*
 		&:nth-child(odd) > tr.expset-table-row {
@@ -524,11 +524,11 @@ $open-expset-table-side-border-color : #e4e4e4;
 					//height: 54px;
 					border-top-color: #808080;
 					position: relative;
-    				
+
 					&:not(.mono-text):not(.accession){
 						font-weight: 500;
 					}
-					
+
 					&.dropdown-button-cell {
 						//border-bottom-color: #fff;
 						//background-color: #fff;
@@ -685,7 +685,7 @@ tr.expset-addinfo-row {
 			}
 
 			@media screen and (min-width: $screen-sm-min){
-				
+
 				.addinfo-properties-section.col-sm-6 {
 				//border-left: 1px solid #eee;
 					padding-left : 18px;
@@ -753,7 +753,7 @@ tr.expset-addinfo-row {
 .above-chart-row {
 	height: 38px;
 	@media screen and (min-width: $screen-sm-min){
-		.browse-page-container .expset-result-table-fix & {
+		.expset-result-table-fix & {
 			margin-top: -38px;
 		}
 	}
@@ -800,11 +800,11 @@ $small-label-accession-font-size : 0.75rem;
 			display: block;
 			text-align: right;
             height: 42px;
-			
+
             text-overflow: ellipsis;
             white-space: nowrap;
 			//background: #f8f8f8;
-            
+
 			> .heading-block {
 				text-align: center;
                 overflow: hidden;
@@ -821,7 +821,7 @@ $small-label-accession-font-size : 0.75rem;
 				//	border-right: 1px solid #ddd;
 				//}
 
-				&.text-left 	{ 
+				&.text-left 	{
 					text-align: left;
 					padding-left: 0;
 				}
@@ -852,7 +852,7 @@ $small-label-accession-font-size : 0.75rem;
 				display: inline-block;
 				vertical-align: middle;
 			}
-			
+
 			.collapsible-s-block-ext {
 				transform: translate3d(0,0,0);
 				&.transition-med {
@@ -894,7 +894,7 @@ $small-label-accession-font-size : 0.75rem;
 				padding: 7px 12px;
 				text-align: center;
 				line-height: 20px;
-				
+
 				> .name-title.mono-text {
 					font-size: 0.85rem;
 				}
@@ -920,7 +920,7 @@ $small-label-accession-font-size : 0.75rem;
 			.label-ext-info {
 				text-align: left;
 				line-height: 9px;
-				
+
 				> .ext {
 					font-weight: 400;
 					opacity: 0.1;
@@ -969,7 +969,7 @@ $small-label-accession-font-size : 0.75rem;
 				display: inline-block;
 				transform: translate3d(0px,0,0);
 			}
-			
+
 			.s-block.hide-name-on-block-hover > .name > .name-title {
 				opacity: 1;
 				transition: opacity .4s;
@@ -1001,7 +1001,7 @@ $small-label-accession-font-size : 0.75rem;
 			.s-block:hover > .name > .label-ext-info > .ext {
 				opacity: 0.75;
 			}
-			
+
 			.s-block:hover > .name > .label-ext-info > div.ext,
 			.s-block:hover .s-block > .name > .label-ext-info > div.ext {
 				transform: translate3d(0px,0px,0);

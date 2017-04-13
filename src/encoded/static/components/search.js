@@ -2,11 +2,13 @@
 var React = require('react');
 var queryString = require('query-string');
 var url = require('url');
+var querystring = require('querystring');
 var _ = require('underscore');
 var globals = require('./globals');
 var search = module.exports;
 var ReactTooltip = require('react-tooltip');
 var { ajax, console, object, isServerSide, Filters, layout } = require('./util');
+var { Button, ButtonToolbar, ButtonGroup, Panel, Table} = require('react-bootstrap');
 
 var Listing = module.exports.Listing = function (props) {
     // XXX not all panels have the same markup
@@ -19,23 +21,7 @@ var Listing = module.exports.Listing = function (props) {
     return <ListingView {...props} />;
 };
 
-var PickerActionsMixin = module.exports.PickerActionsMixin = {
-    contextTypes: {actions: React.PropTypes.array},
-    renderActions: function() {
-        if (this.context.actions && this.context.actions.length) {
-            return (
-                <div className="pull-right">
-                    {this.context.actions.map(action => React.cloneElement(action, {id: this.props.context['@id']}))}
-                </div>
-            );
-        } else {
-            return <span/>;
-        }
-    }
-};
-
 var Item = module.exports.Item = React.createClass({
-    mixins: [PickerActionsMixin],
     render: function() {
         var result = this.props.context;
         var title = globals.listing_titles.lookup(result)({context: result});
@@ -43,7 +29,6 @@ var Item = module.exports.Item = React.createClass({
         return (
             <li>
                 <div className="clearfix">
-                    {this.renderActions()}
                     {result.accession ?
                         <div className="pull-right type sentence-case search-meta">
                             <p>{item_type}: {' ' + result['accession']}</p>
@@ -274,14 +259,7 @@ var Facet = search.Facet = React.createClass({
         var canDeselect = (!facet.restrictions || selectedTermCount >= 2);
         var moreSecClass = 'collapse' + ((moreTermSelected || this.state.facetOpen) ? ' in' : '');
         var seeMoreClass = 'btn btn-link' + ((moreTermSelected || this.state.facetOpen) ? '' : ' collapsed');
-        // get type of this object for getSchemaProperty (if type="Item", no tooltips)
-        var thisType = 'Item';
-        var searchBits = this.props.searchBase.split(/[\?&]+/);
-        var filteredBits = searchBits.filter(bit => bit.slice(0,5) === 'type=' && bit.slice(5,9) !== 'Item');
-        if (filteredBits.length == 1){ // if multiple types, don't use any tooltips
-            thisType = filteredBits[0].slice(5);
-        }
-        var schemaProperty = Filters.Field.getSchemaProperty(field, this.props.schemas, thisType, true);
+        var schemaProperty = Filters.Field.getSchemaProperty(field, this.props.schemas, this.props.thisType, true);
         var description = schemaProperty && schemaProperty.description;
         return (
             <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}}>
@@ -404,11 +382,22 @@ var ResultTable = search.ResultTable = React.createClass({
         };
     },
 
-    childContextTypes: {actions: React.PropTypes.array},
-    getChildContext: function() {
-        return {
-            actions: this.props.actions
-        };
+    getInitialState: function(){
+        var urlParts = url.parse(this.props.searchBase, true);
+        var urlFrom = parseInt(urlParts.query.from || 0);
+        var urlLimit = parseInt(urlParts.query.limit || 25);
+        var page = 1 + Math.ceil(urlFrom/urlLimit);
+        return({
+            'page': page,
+            'changing_page': false
+        });
+    },
+
+    componentWillReceiveProps: function(nextProps){
+        // go back to first page if items change
+        if(this.props.context.total !== nextProps.context.total){
+            this.changePage(1, nextProps.searchBase);
+        }
     },
 
     getSearchType: function(facets){
@@ -429,6 +418,36 @@ var ResultTable = search.ResultTable = React.createClass({
         }
     },
 
+    changePage : _.throttle(function(page, urlBase=this.props.searchBase){
+
+        if (typeof this.props.onChange !== 'function') throw new Error("Search doesn't have props.onChange");
+        if (typeof urlBase !== 'string') throw new Error("Search doesn't have props.searchBase");
+
+        var urlParts = url.parse(urlBase, true);
+        var urlLimit = parseInt(urlParts.query.limit || 25);
+
+        // Check page from URL and state to see if same and if so, cancel navigation.
+        if (page === this.state.page){
+            console.warn("Already on page " + page);
+            return;
+        }
+        var newFrom = urlLimit * (page - 1);
+        urlParts.query.from = newFrom + '';
+        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        this.setState({ 'changingPage' : true }, ()=>{
+            this.props.navigate(
+                url.format(urlParts),
+                { 'replace' : true },
+                ()=>{
+                    this.setState({
+                        'changingPage' : false,
+                        'page' : page
+                    }
+                );
+            });
+        });
+    }, 250),
+
     render: function() {
         const batchHubLimit = 100;
         var context = this.props.context;
@@ -436,9 +455,7 @@ var ResultTable = search.ResultTable = React.createClass({
         var total = context['total'];
         var batch_hub_disabled = total > batchHubLimit;
         var filters = context['filters'];
-        var label = 'results. ';
         var searchBase = this.props.searchBase;
-        var trimmedSearchBase = searchBase.replace(/[\?|\&]limit=all/, "");
         var show_link;
         var facets = context['facets'].map(function(facet) {
             if (this.props.restrictions[facet.field] !== undefined) {
@@ -449,50 +466,52 @@ var ResultTable = search.ResultTable = React.createClass({
             return facet;
         }.bind(this));
 
-        // get type of search for building the page title
-        var specificSearchType = this.getSearchType(facets);
-
-        // Get a sorted list of batch hubs keys with case-insensitive sort
-        var batchHubKeys = [];
-        if (context.batch_hub && Object.keys(context.batch_hub).length) {
-            batchHubKeys = Object.keys(context.batch_hub).sort((a, b) => {
-                var aLower = a.toLowerCase();
-                var bLower = b.toLowerCase();
-                return (aLower > bLower) ? 1 : ((aLower < bLower) ? -1 : 0);
-            });
+        // get type of this object for getSchemaProperty (if type="Item", no tooltips)
+        var thisType = 'Item';
+        var searchBits = this.props.searchBase.split(/[\?&]+/);
+        var filteredBits = searchBits.filter(bit => bit.slice(0,5) === 'type=' && bit.slice(5,9) !== 'Item');
+        if (filteredBits.length == 1){ // if multiple types, don't use any tooltips
+            thisType = filteredBits[0].slice(5);
         }
-
-        // Map view icons to svg icons
-        var view2svg = {
-            'table': 'table',
-            'th': 'matrix'
-        };
-
-        // Create "show all" or "show 25" links if necessary
-        show_link = ((total > results.length && searchBase.indexOf('limit=all') === -1) ?
-            <a href={searchBase ? searchBase + '&limit=all' : '?limit=all'}
-                    onClick={this.onFilter}>View All</a>
-            :
-            <span>{results.length > 25 ?
-                <a href={trimmedSearchBase ? trimmedSearchBase : "/search/"}
-                    onClick={this.onFilter}>View 25</a>
-                : null}
-            </span>);
+        var urlParts = url.parse(this.props.searchBase, true);
+        var urlLimit = parseInt(urlParts.query.limit || 25);
+        var num_pages = Math.ceil(this.props.context.total/urlLimit);
 
         return (
             <div>
-                <div className="row search-title">
-                    <h3>{specificSearchType ? specificSearchType : 'Unresolved type'} search</h3>
-                    <div className="row">
-                        <h4 className='inline-subheader'>Showing {results.length} of {total} {label} {show_link}</h4>
-                    </div>
+                <div className="row">
+                    <h1 className="page-title">{thisType + ' Search'}</h1>
+                    <h4 className="page-subtitle">Filter & sort results</h4>
                 </div>
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList {...this.props} facets={facets} filters={filters}
+                        <FacetList {...this.props} facets={facets} filters={filters} thisType={thisType}
                                     searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} />
                     </div> : ''}
-                    <div className="col-sm-7 col-md-8 col-lg-9">
+                    <div className="col-sm-7 col-md-8 col-lg-9 expset-result-table-fix">
+                        <div className="row above-chart-row">
+                            <div className="col-sm-5 col-xs-12">
+                                <h5 className='browse-title'>{results.length} of {total} results</h5>
+                            </div>
+                            <div className="col-sm-7 col-xs-12">
+                                <ButtonToolbar className="pull-right">
+                                    <ButtonGroup>
+                                        <Button disabled={this.state.changing_page || this.state.page === 1} onClick={this.state.changing_page === true ? null : (e)=>{
+                                            this.changePage(this.state.page - 1);
+                                        }}><i className="icon icon-angle-left icon-fw"></i></Button>
+                                        <Button disabled style={{'minWidth': 120 }}>
+                                            { this.state.changing_page === true ?
+                                                <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': 0.5 }}></i>
+                                                : 'Page ' + this.state.page + ' of ' + num_pages
+                                            }
+                                        </Button>
+                                        <Button disabled={this.state.changing_page || this.state.page === num_pages} onClick={this.state.changing_page === true ? null : (e)=>{
+                                            this.changePage(this.state.page + 1);
+                                        }}><i className="icon icon-angle-right icon-fw"></i></Button>
+                                    </ButtonGroup>
+                                </ButtonToolbar>
+                            </div>
+                        </div>
                         <ul className="nav result-table" id="result-table">
                             {results.length ?
                                 results.map(function (result) {
@@ -532,7 +551,7 @@ var Search = search.Search = React.createClass({
             <div>
                 {facetdisplay ?
                     <div className="panel data-display main-panel">
-                        <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.context.navigate} />
+                        <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.props.navigate || this.context.navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
             </div>
