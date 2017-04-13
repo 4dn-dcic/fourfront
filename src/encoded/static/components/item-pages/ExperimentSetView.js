@@ -6,7 +6,7 @@ var Panel = require('react-bootstrap').Panel;
 var { ajax, console, DateUtility, object } = require('./../util');
 var globals = require('./../globals');
 var { ExperimentsTable } = require('./../experiments-table');
-var { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditView } = require('./components');
+import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditView } from './components';
 var FacetList = require('./../facetlist');
 
 /**

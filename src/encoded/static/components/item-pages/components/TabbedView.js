@@ -3,9 +3,8 @@
 var React = require('react');
 var _ = require('underscore');
 
-import Tabs, { TabPane } from 'rc-tabs';
-import TabContent from 'rc-tabs/lib/TabContent';
-import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
+import Tabs, { TabPane, TabContent } from './../../lib/rc-tabs';
+import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
 
 export default class TabView extends React.Component {
 
