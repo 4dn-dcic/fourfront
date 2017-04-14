@@ -191,7 +191,7 @@ You can use `import_data` either to upload new items or to modify metadata field
 ### Testing your metadata
 When you run the import_data  script on your metadata excel workbook without any arguments the system will test your data for compatibility with our metadata structure and report back to you any problems (in effect a dry run). The metadata will not be submitted, so you can take advantage of this feature to test your excel workbook.
 
-```import_data My_metadata.xls``` (Not yet implemented)
+```import_data My_metadata.xls```
 
 
 ### Uploading (posting) & Modifying (patching) Metadata
@@ -210,7 +210,7 @@ If for some reason the script fails in the middle of the upload process or error
 
 	import_data My_metadata.xls --patchall --update
 
-Please note that a delete feature is not yet implemented. Neither items nor fields in items can be deleted; they can only be patched, i.e. overwritten.
+Functionality that will allow the deletion of all the data in a single field of an existing Item exists - however this can be a potentially dangerous operation.  If you determine that you need this functionality please contact us at the DCIC for more information.
 
 ### Uploading files with import_data
 The 4DN databased distinguishes two main categories of files: (1) files that support the metadata, such as Documents or Images, and (2) data files for which metadata is gathered and are specified in specific File items/sheets (eg. FileFastq).
@@ -226,9 +226,9 @@ The second category includes the data files that are the results of experiments,
 To upload your files, use the file submission excel sheet provided, and copy paste all your file (FileFastq) aliases from your metadata excel sheet to the aliases field of the file submission sheet. Under filename enter the full paths to your files. Once completed use import_data with the ```--patchall``` argument to start upload. The DCIC automatically checks file md5sums to confirm successful upload and to ensure that there are no duplicate files in the database.
 
 
-Upload using ftp is also supported, however the process currently transfers the files to your hard drive, uploads them to our system, and then deletes the copy from your local hard drive.  The files are processed sequentially so you need to have at least the amount of free space on your hard drive as the size of the largest file you wish to upload.  In addition, you must include your ftp login credentials in the ftp url, **which is definitely not a security best practice**.  For these reasons, if at all possible, it is recommended to install the Submit4DN package onto the server hosting the files to be submitted and use import_data as described above.  However, if that is not an option then your ftp urls should be formatted as follows: 
+Upload using ftp is also supported, however the process currently transfers the files to your hard drive, uploads them to our system, and then deletes the copy from your local hard drive.  The files are processed sequentially so you need to have at least the amount of free space on your hard drive as the size of the largest file you wish to upload.  In addition, you must include your ftp login credentials in the ftp url, **which is definitely not a security best practice**.  For these reasons, if at all possible, it is recommended to install the Submit4DN package onto the server hosting the files to be submitted and use import_data as described above.  However, if that is not an option then your ftp urls should be formatted as follows:
 
-    ftp://username:password@hostname/path/to/filename 
+    ftp://username:password@hostname/path/to/filename
 
 
 To replace a file that has already been uploaded to 4DN - that is to associate a different file with existing metadata, associate the file path for the new file with an existing alias. **NOTE that every time you patch with a filename (even if it is the same filename) the file will be uploaded. Please use care when including a filename in your File metadata to avoid unnecessary uploads.** We plan to avoid this issue in future releases by pre-checking md5sums.
