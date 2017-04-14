@@ -441,65 +441,136 @@
 },
 {
     "accession": "4DNWFSOZLMGE",
-    "uuid": "02d636b9-d82d-4da9-950c-2ca994a0943e",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
     "title": "Hi-C processing part A",
     "name": "hi-c-processing-parta",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
+    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
     "arguments": [
         {
             "workflow_argument_name": "fastq1",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [],
-            "description": ""
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa_mem", 
+                    "step_argument_name": "fastq1", 
+                    "step_argument_type": "Input file"
+                }
+            ] 
         },
         {
             "workflow_argument_name": "fastq2",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [],
-            "description": ""
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa_mem", 
+                    "step_argument_name": "fastq2", 
+                    "step_argument_type": "Input file"
+                }
+            ]
         },
         {
             "workflow_argument_name": "bwa_index",
             "argument_type": "Input file",
             "argument_format": "bwaIndex",
-            "argument_mapping": [],
-            "description": ""
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa_mem", 
+                    "step_argument_name": "bwa_index", 
+                    "step_argument_type": "Input file"
+                }
+            ]
         },
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa_mem", 
+                    "step_argument_name": "nThreads", 
+                    "step_argument_type": "parameter"
+                }
+            ], 
+            "workflow_argument_name": "nThreads", 
+            "argument_type": "parameter"
+        }, 
         {
             "workflow_argument_name": "out_sorted_bam",
             "argument_type": "Output processed file",
             "argument_format": "bam",
-            "argument_mapping": [],
-            "description": ""
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "sort_bam", 
+                    "step_argument_name": "out_sorted_bam", 
+                    "step_argument_type": "Output file"
+                },
+                {
+                    "workflow_step": "bam2pairs", 
+                    "step_argument_name": "input_bam", 
+                    "step_argument_type": "Input file"
+                }
+            ]
+        },
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa_mem", 
+                    "step_argument_name": "out_bam", 
+                    "step_argument_type": "Output file"
+                },
+                {
+                    "workflow_step": "sort_bam", 
+                    "step_argument_name": "input_bam", 
+                    "step_argument_type": "Input file"
+                }
+            ]
         },
         {
             "workflow_argument_name": "out_sorted_bam_index",
             "argument_type": "Output processed file",
             "argument_format": "bai",
-            "argument_mapping": [],
-            "description": ""
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "sort_bam", 
+                    "step_argument_name": "out_sorted_bam_index", 
+                    "step_argument_type": "Output file"
+                }
+            ]
         },
         {
             "workflow_argument_name": "out_pairs",
             "argument_type": "Output processed file",
             "argument_format": "pairs",
-            "argument_mapping": [],
-            "description": ""
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "bam2pairs", 
+                    "step_argument_name": "out_pairs", 
+                    "step_argument_type": "Output file"
+                }
+            ]
         },
         {
             "workflow_argument_name": "out_pairs_index",
             "argument_type": "Output processed file",
             "argument_format": "pairs_px2",
-            "argument_mapping": [],
-            "description": ""
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "bam2pairs", 
+                    "step_argument_name": "out_pairs_index", 
+                    "step_argument_type": "Output file"
+                }
+            ]
         }
     ],
     "description": "Creating a bam and pairs files from a pair of fastq files"
 }
-
 ]
