@@ -7,8 +7,8 @@ var _ = require('underscore');
 var globals = require('./globals');
 var search = module.exports;
 var ReactTooltip = require('react-tooltip');
-var { ajax, console, object, isServerSide, Filters, layout } = require('./util');
-var { Button, ButtonToolbar, ButtonGroup, Panel, Table} = require('react-bootstrap');
+var { ajax, console, object, isServerSide, Filters, layout, DateUtility } = require('./util');
+var { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} = require('react-bootstrap');
 var { Detail } = require('./item-pages/components');
 
 var Listing = function (result, schemas) {
@@ -24,30 +24,81 @@ var Listing = function (result, schemas) {
 
 };
 
-var ResultTableEntry = React.createClass({
-    render: function() {
+class ResultTableEntry extends React.Component{
+    constructor(props){
+        super(props);
+    }
+
+    state = {
+        'open': false
+    }
+
+    handleToggle = (e) => {
+        this.setState({'open': !this.state.open});
+    }
+
+    render() {
         var result = this.props.context;
         var item_type = result['@type'][0];
         var processed_link = result.link_id.replace(/~/g, "/");
         return (
-            <li className="result-table-result">
-                <div className="clearfix">
-                    <div>
+            <div className="result-table-result">
+                <div className="row">
+                    <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
+                        <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle} style={{"marginRight":"3px"}}>
+                            <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
+                        </Button>
                         <a href={processed_link}>{result.display_title}</a>
                     </div>
-                    {result.description ?
-                        <div className="data-row flexible-description-box result-table-result-heading">
-                            {result.description}
-                        </div>
+                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
+                        {result.lab ? result.lab.display_title : ""}
+                    </div>
+                    <div className="col-xs-12 col-md-2 col-lg-2 result-table-entry-div">
+                        {result.submitted_by ? result.submitted_by.display_title : ""}
+                    </div>
+                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
+                        {result.date_created ?
+                            <DateUtility.LocalizedTime timestamp={result.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
                         : null}
-                    <div className="item-page-detail">
-                        <Detail context={result} schemas={this.props.schemas} open={false}/>
                     </div>
                 </div>
-            </li>
+                <Collapse in={this.state.open}>
+                    <div>
+                        <ResultDetail result={result} schemas={this.props.schemas} />
+                    </div>
+                </Collapse>
+            </div>
         );
     }
-});
+}
+
+// Uses Detail from item-pages/components to provide item summary panel
+class ResultDetail extends React.Component{
+    static propTypes = {
+        result: React.PropTypes.array.isRequired,
+        schemas: React.PropTypes.object.isRequired,
+    }
+
+    constructor(props){
+        super(props);
+    }
+
+    render(){
+        var result = this.props.result;
+        return(
+            <div className="result-table-detail">
+                {result.description ?
+                    <div className="data-row flexible-description-box result-table-result-heading">
+                        {result.description}
+                    </div>
+                    : null}
+                <div className="item-page-detail">
+                    <Detail context={result} schemas={this.props.schemas} open={false}/>
+                </div>
+            </div>
+        );
+    }
+}
 
 // If the given term is selected, return the href for the term
 function termSelected(term, field, filters) {
@@ -304,13 +355,35 @@ class TabularTableResults extends React.Component{
         var results = this.props.results;
         var schemas = this.props.schemas || {};
         return(
-            <ul className="nav result-table" id="result-table">
-                {results.length ?
-                    results.map(function (result) {
-                        return Listing(result, schemas);
-                    })
-                : null}
-            </ul>
+            <div>
+                <div className="row hidden-xs hidden-sm result-table-header-row">
+                    <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
+                        <Button style={{'visibility':'hidden', "marginRight":"3px"}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
+                            <i className="icon icon-plus"></i>
+                        </Button>
+                        <div>Title</div>
+                    </div>
+                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
+                        Lab
+                    </div>
+                    <div className="col-xs-12 col-md-2 col-lg-2 result-table-entry-div">
+                        Submitter
+                    </div>
+                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
+                        Date created
+                    </div>
+                    <div className="col-xs-12 col-md-12 divider-column">
+                        <div className="divider"/>
+                    </div>
+                </div>
+                <div className="nav result-table row" id="result-table">
+                    {results.length ?
+                        results.map(function (result) {
+                            return Listing(result, schemas);
+                        })
+                    : null}
+                </div>
+            </div>
         );
     }
 }
