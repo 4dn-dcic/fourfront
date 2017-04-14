@@ -175,10 +175,10 @@ describe('Testing item.js', function() {
         var warnButtons = TestUtils.scryRenderedDOMComponentsWithClass(testCreate, 'btn-info');
         expect(warnButtons.length).toEqual(1);
         expect(warnButtons[0].innerHTML.toLowerCase()).toEqual('test object validity');
-        // click, but nothing should change because validation shouldn't be passed
+        // click, which should trigger the spinning icon (this.state.processingFetch)
         TestUtils.Simulate.click(warnButtons[0]);
         expect(warnButtons.length).toEqual(1);
-        expect(warnButtons[0].innerHTML.toLowerCase()).toEqual('test object validity');
+        expect(warnButtons[0].innerHTML.toLowerCase()).toEqual('<i class="icon icon-spin icon-circle-o-notch"></i>');
     });
 
 });

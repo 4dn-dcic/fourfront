@@ -56,7 +56,7 @@
             "comment": "Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).",
             "default": [],
             "uniqueItems": true,
-            "clear_create": "clear",
+            "ff_clear": "clone",
             "items": {
                 "uniqueKey": "alias",
                 "title": "Lab alias",
@@ -209,12 +209,12 @@
     },
     "attachment": {
         "attachment": {
-            "title": "Attached Document",
+            "title": "Attach File",
             "type": "object",
             "additionalProperties": false,
             "formInput": "file",
             "attachment": true,
-            "clear_create": "clear",
+            "ff_clear": "clone",
             "properties": {
                 "download": {
                     "title": "File Name",
@@ -258,6 +258,11 @@
                 "height": {
                     "title": "Image height",
                     "type": "integer"
+                },
+                "blob_id":{
+                    "title": "Blob ID",
+                    "type": "string",
+                    "internal_comment": "blob storage ID. Use to like with s3/rds"
                 }
             }
         }
@@ -286,7 +291,7 @@
             "description": "Unique identifiers from external resources.",
             "type": "array",
             "default": [],
-            "clear_create": "clear",
+            "ff_clear": "clone",
             "uniqueItems": true,
             "items": {
                 "title": "External identifier",
@@ -341,7 +346,7 @@
         "sop_mapping": {
             "title": "SOP mappping",
             "permission": "import-items",
-            "exclude_from" : "submit4dn",
+            "exclude_from" : ["submit4dn", "FFedit-create"],
             "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",
             "type": "object",
             "additionalProperties": false,

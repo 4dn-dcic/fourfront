@@ -1,4 +1,6 @@
 
+/************** Styles for FacetList ***************/
+
 .facets-container {
     padding-top: 0;
     padding-bottom: 2px;
@@ -7,6 +9,12 @@
     border: 1px solid rgba(0, 0, 0, 0.125);
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     //border-radius: 3px;
+
+    /*
+    .browse-page-container & {
+        margin-top: 38px;
+    }
+    */
 
     .facets-header {
         padding-top: ($grid-gutter-width / 2);
@@ -26,7 +34,7 @@
     }
 
     &.with-header-bg .facets-header {
-        background-color: #388a92;
+        background-color: #22656d; //#388a92;
         border-top: inherit;
         border-left: inherit;
         border-right: inherit;

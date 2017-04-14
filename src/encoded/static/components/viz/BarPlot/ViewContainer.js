@@ -269,8 +269,15 @@ var ViewContainer = module.exports = React.createClass({
         };
     },
 
+    getDefaultProps : function(){
+        return { 
+            'cursorContainerMargin' : 100,
+            'cursorDetailActions' : []
+        };
+    },
+
     cursorDetailActions : function(){
-        return [
+        return this.props.cursorDetailActions.concat([
             {
                 'title' : function(cursorProps){
                     if (navigate.isBrowseHref(cursorProps.href)){
@@ -335,14 +342,14 @@ var ViewContainer = module.exports = React.createClass({
                     return false;
                 }
             }
-        ];
+        ]);
     },
 
     handleClickAnywhere : function(evt){
         // Don't do anything if clicked on DetailCursor. UNLESS it's a button.
         if (
-            evt.target.className &&
-            evt.target.className.split(' ').indexOf('btn') === -1 &&
+            //evt.target.className &&
+            //evt.target.className.split(' ').indexOf('btn') === -1 &&
             ChartDetailCursor.isTargetDetailCursor(evt.target)
         ){
             return false;
@@ -352,6 +359,34 @@ var ViewContainer = module.exports = React.createClass({
             'selectedBarSectionParentTerm' : null,
             'selectedBarSectionTerm' : null
         });
+    },
+
+    handleMouseMoveToUnsticky : function(evt){
+        if (this.refs && this.refs.container){
+
+            var containerOffset = layout.getElementOffset(this.refs.container);
+            var marginTop   = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.top) || this.props.cursorContainerMargin || 0,
+                marginBottom= (this.props.cursorContainerMargin && this.props.cursorContainerMargin.bottom) || marginTop || 0,
+                marginLeft  = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.left) || marginTop || 0,
+                marginRight = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.right) || marginLeft || 0;
+
+
+            if (
+                (evt.pageY || evt.clientY) < containerOffset.top - marginTop ||
+                (evt.pageY || evt.clientY) > containerOffset.top + this.refs.container.clientHeight + marginBottom ||
+                (evt.pageX || evt.clientX) < containerOffset.left - marginLeft ||
+                (evt.pageX || evt.clientX) > containerOffset.left + this.refs.container.clientWidth + marginRight
+            ){
+                this.setState({
+                    'selectedBarSectionParentTerm' : null,
+                    'selectedBarSectionTerm' : null
+                });
+                return true;
+            }
+            return false;
+        } else {
+            return false;
+        }
     },
 
     /**
@@ -375,9 +410,11 @@ var ViewContainer = module.exports = React.createClass({
             if (typeof this.state.selectedBarSectionTerm === 'string'){
                 ChartDetailCursor.update({ 'sticky' : true });
                 setTimeout(window.addEventListener, 100, 'click', this.handleClickAnywhere);
+                setTimeout(window.addEventListener, 100, 'mousemove', this.handleMouseMoveToUnsticky);
                 //window.addEventListener('click', this.handleClickAnywhere);
             } else {
                 window.removeEventListener('click', this.handleClickAnywhere);
+                window.removeEventListener('mousemove', this.handleMouseMoveToUnsticky);
                 if (!this.state.hoverBarSectionTerm){
                     ChartDetailCursor.reset();
                 } else {
@@ -386,6 +423,21 @@ var ViewContainer = module.exports = React.createClass({
             }
 
         }
+    },
+
+    updateDetailCursorFromNode : function(node, overrideSticky = false, cursorId = 'default'){
+        var newCursorDetailState = {
+            'path' : [],
+            'includeTitleDescendentPrefix' : false,
+            'actions' : this.props.actions || this.cursorDetailActions() || null,
+        };
+        
+        if (node.parent) newCursorDetailState.path.push(node.parent);
+        if (typeof this.props.aggregateType === 'string') {
+            newCursorDetailState.primaryCount = this.props.aggregateType;
+        }
+        newCursorDetailState.path.push(node);
+        ChartDetailCursor.update(newCursorDetailState, cursorId, null, overrideSticky);
     },
 
     /**
@@ -446,35 +498,40 @@ var ViewContainer = module.exports = React.createClass({
                         return false;
                     }
 
+                    // Cancel if any node still selected
+                    //if (this.state.selectedBarSectionTerm !== null) return false;
 
-                    var newCursorDetailState = {
-                        'path' : [],
-                        'includeTitleDescendentPrefix' : false,
-                        'actions' : this.props.actions || this.cursorDetailActions() || null
-                    };
-                    
-                    if (node.parent) newCursorDetailState.path.push(node.parent);
-                    if (typeof this.props.aggregateType === 'string') {
-                        newCursorDetailState.primaryCount = this.props.aggregateType;
+                    //var xCoordOverride = null;
+                    /*
+                    if (this.refs && this.refs.container){
+                        xCoordOverride = (
+                            layout.getElementOffset(this.refs.container).left
+                            + this.props.styleOptions.offset.left
+                            + ((node.attr.width / 2)
+                            + (node.parent || node).attr.x)
+                        );
                     }
-                    newCursorDetailState.path.push(node);
-                    ChartDetailCursor.update(newCursorDetailState);
+                    */
 
+
+                    if (this.state.selectedBarSectionTerm === null){
+                        this.updateDetailCursorFromNode(node, false);
+                    }
 
                     var newOwnState = {};
 
                     // Unset selected nodes.
-                    if (this.state.selectedBarSectionTerm !== null){
-                        _.extend(newOwnState, {
-                            'selectedBarSectionTerm' : null,
-                            'selectedBarSectionParentTerm' : null
-                        });
-                    }
+                    //if (this.state.selectedBarSectionTerm !== null){
+                    //    _.extend(newOwnState, {
+                    //        'selectedBarSectionTerm' : null,
+                    //        'selectedBarSectionParentTerm' : null
+                    //    });
+                    //}
 
                     // Update hover state
                     _.extend(newOwnState, {
                         'hoverBarSectionTerm' : node.term || null,
-                        'hoverBarSectionParentTerm' : (node.parent && node.parent.term) || null
+                        'hoverBarSectionParentTerm' : (node.parent && node.parent.term) || null,
                     });
 
                     if (_.keys(newOwnState).length > 0){
@@ -496,14 +553,48 @@ var ViewContainer = module.exports = React.createClass({
                     }
                 }}
                 onBarPartClick={(node, evt)=>{
+                    evt.preventDefault();
+                    evt.stopPropagation(); // Prevent this event from being captured by this.handleClickAnywhere() listener.
                     // If this section already selected:
                     if (ViewContainer.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
                         this.setState({
                             'selectedBarSectionTerm' : null,
                             'selectedBarSectionParentTerm' : null
                         });
-                    // If not:
                     } else {
+                        if (this.state.selectedBarSectionTerm) {
+
+                            var containerPos = layout.getElementOffset(this.refs.container);
+                            var bottomOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
+                            var leftOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
+
+                            var mouseXInContainer = (evt.pageX || evt.clientX) - containerPos.left;
+                            var barYPos = node.attr.height;
+                            var isPopoverOnRightSide = mouseXInContainer > (this.refs.container.clientWidth / 2);
+
+                            if (node.parent){
+                                var done = false;
+                                barYPos = _.reduce(
+                                    _.sortBy(node.parent.bars, 'term').reverse(),
+                                    function(m, siblingNode){
+                                        if (done) return m;
+                                        if (siblingNode.term === node.term){
+                                            done = true;
+                                        }
+                                        return m + siblingNode.attr.height;
+                                    },
+                                    0
+                                );
+                            }
+
+                            // Manually update popover coords then update its contents
+                            ChartDetailCursor.setCoords({
+                                x : containerPos.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
+                                y : containerPos.top + this.refs.container.clientHeight - bottomOffset - barYPos,
+                                onRightSide : isPopoverOnRightSide
+                            }, this.updateDetailCursorFromNode.bind(this, node, true, 'default'));
+
+                        }
                         this.setState({
                             'selectedBarSectionTerm' : node.term || null,
                             'selectedBarSectionParentTerm' : (node.parent && node.parent.term) || null
@@ -524,6 +615,24 @@ var ViewContainer = module.exports = React.createClass({
                 className="bar-plot-chart chart-container no-highlight"
                 data-field={this.props.topLevelField}
                 style={{ height : this.props.height, width: this.props.width }}
+                ref="container"
+                /*
+                onMouseLeave={(evt)=>{
+                    if (ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
+                        return false;
+                    }
+                    var newState = {};
+                    if (this.state.hoverBarSectionTerm) {
+                        newState.hoverBarSectionParentTerm = newState.hoverBarSectionTerm = null;
+                    }
+                    if (this.state.selectedBarSectionTerm) {
+                        newState.selectedBarSectionParentTerm = newState.selectedBarSectionTerm = null;
+                    }
+                    if (_.keys(newState).length > 0){
+                        this.setState(newState);
+                    }
+                }}
+                */
             >
                 { this.props.leftAxis }
                 {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}

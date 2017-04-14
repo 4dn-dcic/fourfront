@@ -1,14 +1,13 @@
 'use strict';
 
 var React = require('react');
-var globals = require('./../globals');
-var Panel = require('react-bootstrap').Panel;
-var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
-var { DescriptorField, Detail } = require('./item-view');
-var { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemFooterRow, PublicationsBlock } = require('./components');
-var FacetList = require('./../facetlist');
+var Panel = require('react-bootstrap').Panel;
 var { ajax, console, DateUtility, object } = require('./../util');
+var globals = require('./../globals');
+var { ExperimentsTable } = require('./../experiments-table');
+var { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditView } = require('./components');
+var FacetList = require('./../facetlist');
 
 /**
  * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
@@ -117,6 +116,19 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 }
             }
         }
+        if (!this.state.details_submitted_by) {
+            if (
+                this.props.context.submitted_by && typeof this.props.context.submitted_by === 'object' &&
+                this.props.context.submitted_by.title && this.props.context.submitted_by.first_name
+            ){
+                newState.details_submitted_by = this.props.context.submitted_by;
+            } else {
+                var submittedByDetails = this.getEmbeddedPropertyDetailsFromExperiments('submitted_by', fallbackToAjax);
+                if (submittedByDetails !== null){
+                    newState.details_submitted_by = submittedByDetails;
+                }
+            }
+        }
         if (typeof callback == 'function') {
             callback(newState);
         } else if (Object.keys(newState).length > 0) {
@@ -140,7 +152,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
         // If we have property already embedded as object, lets use it.
 
-        if (typeof this.props.context[propertyName] == 'object') return this.props.context[propertyName];
+        //if (typeof this.props.context[propertyName] == 'object') return this.props.context[propertyName];
 
 
         // Else, grab from experiment(s) and make sure it is a match.
@@ -182,15 +194,103 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         // Uh-oh! ExperimentSet award exists but doesn't match that of any experiments'.
         // Perhaps fallback to using AJAX.
         if (!propertyInfo && propertyID){
-            console.warn("ExperimentSetView > details_" + propertyName + " could not be gotten from available data.");
+            //console.warn("ExperimentSetView > details_" + propertyName + " could not be gotten from available data.");
             if (typeof window != 'undefined' && allowAjaxFallback) {
-                console.warn("ExperimentSetView > Reverting to AJAX.");
-                FormattedInfoBlock.onMountMaybeFetch.call(this, propertyName, this.props.context[propertyName])
+                console.warn("ExperimentSetView > Reverting to AJAX for " + propertyName);
+                FormattedInfoBlock.onMountMaybeFetch.call(this, propertyName, this.props.context[propertyName]);
                 //FormattedInfoBlock.ajaxPropertyDetails.call(this, propertyID, propertyName);
             }
         }
 
         return propertyInfo;
+    },
+
+    getTabViewContents : function(){
+        /* In addition to built-in headers for experimentSetType defined by ExperimentsTable */
+        var expTableColumnHeaders = [
+            { columnClass: 'file-detail', title : 'File Info'}
+        ];
+
+        if (this.props.context.experimentset_type === 'replicate') {
+            expTableColumnHeaders.unshift({ columnClass: 'file-detail', title : 'File Type'});
+        }
+
+        return [
+            {
+                tab : <span><i className="icon icon-th icon-fw"/> Experiments</span>,
+                key : 'experiments',
+                content : (
+                    <div className="exp-table-section">
+                        { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ? 
+                        <h3 className="tab-section-title">
+                            <span>Experiments</span>
+                            { Array.isArray(this.state.passExperiments) ? 
+                            <span className="exp-number small right">
+                                <span className="hidden-xs">Showing </span>
+                                { this.state.passExperiments.length } of { this.props.context.experiments_in_set.length }
+                                <span className="hidden-xs"> Experiments</span>
+                            </span>
+                            : null }
+                        </h3>
+                        : null }
+                        <div className="exp-table-container">
+                            <ExperimentsTable
+                                ref="experimentsTable"
+                                parentController={this}
+                                experimentSetType={this.props.context.experimentset_type}
+                                expSetFilters={this.props.expSetFilters}
+                                facets={ this.props.facets }
+                                experimentArray={this.props.context.experiments_in_set}
+                                replicateExpsArray={this.props.context.replicate_exps}
+                                keepCounts={false}
+                                columnHeaders={expTableColumnHeaders}
+                            />
+                        </div>
+                    </div>
+                )
+            },
+            {
+                tab : <span><i className="icon icon-users icon-fw"/> Attribution</span>,
+                key : "attribution",
+                content : (
+                    <div className="overflow-hidden">
+                        <h3 className="tab-section-title">
+                            <span>Attribution</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider"/>
+                        <ExperimentSetLabAwardInfo
+                            labInfo={ this.state.details_lab }
+                            awardInfo={ this.state.details_award }
+                            userInfo={this.state.details_submitted_by}
+                            {...this.props}
+                        />
+                    </div>
+                )
+            },
+            {
+                tab : <span><i className="icon icon-list-ul icon-fw"/> Details</span>,
+                key : 'details',
+                content : (
+                    <div>
+                        <h3 className="tab-section-title">
+                            <span>Details</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider"/>
+                        <ItemDetailList context={this.props.context} schemas={this.props.schemas} />
+                    </div>
+                )
+            },
+            {
+                tab : (
+                    <span className={this.props.context.audit && _.keys(this.props.context.audit).length ? 'active' : null}>
+                        <i className={"icon icon-fw icon-" + AuditView.getItemIndicatorIcon(this.props.context)}/> Audits
+                    </span>
+                ),
+                key : "audits",
+                disabled : !AuditView.doAnyAuditsExist(this.props.context),
+                content : <AuditView audits={this.props.context.audit} />
+            }
+        ];
     },
 
     render: function() {
@@ -199,15 +299,6 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
 
         console.log('render ExperimentSet view');
-
-        /* In addition to built-in headers for experimentSetType defined by ExperimentsTable */
-        var expTableColumnHeaders = [
-            { className: 'file-detail', title : 'File Info'}
-        ];
-
-        if (this.props.context.experimentset_type === 'replicate') {
-            expTableColumnHeaders.unshift({ className: 'file-detail', title : 'File Type'});
-        }
 
         return (
             <div className={itemClass}>
@@ -236,42 +327,17 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
+                        { this.props.context.produced_in_pub ?
+                        <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
+                            <div className="more-details">{ 
+                                this.props.context.produced_in_pub.authors || this.props.context.produced_in_pub.abstract || this.props.context.produced_in_pub.date_published || null
+                            }</div>
+                        </Publications.DetailBlock>
+                        : null }
 
-                        <PublicationsBlock publications={this.props.context.publications_of_set} />
+                        <br/>
 
-                        <div className="exp-table-section">
-                            { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ? 
-                            <h3>
-                                <span>Experiments</span>
-                                { Array.isArray(this.state.passExperiments) ? 
-                                <span className="exp-number small right">
-                                    <span className="hidden-xs">Showing </span>
-                                    { this.state.passExperiments.length } of { this.props.context.experiments_in_set.length }
-                                    <span className="hidden-xs"> Experiments</span>
-                                </span>
-                                : null }
-                            </h3>
-                            : null }
-                            <div className="exp-table-container">
-                                <ExperimentsTable
-                                    ref="experimentsTable"
-                                    parentController={this}
-                                    experimentSetType={this.props.context.experimentset_type}
-                                    expSetFilters={this.props.expSetFilters}
-                                    facets={ this.props.facets }
-                                    experimentArray={this.props.context.experiments_in_set}
-                                    replicateExpsArray={this.props.context.replicate_exps}
-                                    keepCounts={false}
-                                    columnHeaders={expTableColumnHeaders}
-                                />
-                            </div>
-                        </div>
-
-                        <ExperimentSetLabAwardInfo
-                            labInfo={ this.state.details_lab }
-                            awardInfo={ this.state.details_award }
-                            {...this.props}
-                        />
+                        <TabbedView contents={this.getTabViewContents()} />
 
                     </div>
 
@@ -285,9 +351,6 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
 });
 
-globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
-globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
-
 
 /**
  * Renders ItemHeader parts wrapped in ItemHeader.Wrapper, with appropriate values.
@@ -297,9 +360,14 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
  * @prop {Object} context - Same context prop as available on parent component.
  * @prop {string} href - Current page href, passed down from app or Redux store.
  */
-var ExperimentSetHeader = React.createClass({
+class ExperimentSetHeader extends React.Component {
 
-    render: function() {
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
+    render() {
         console.log('render ExperimentSetHeader');
         return (
             <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href} schemas={this.props.schemas}>
@@ -309,21 +377,35 @@ var ExperimentSetHeader = React.createClass({
             </ItemHeader.Wrapper>
         );
     }
-});
+}
 
 
-var ExperimentSetLabAwardInfo = React.createClass({
+class ExperimentSetLabAwardInfo extends React.Component {
 
-    render : function(){
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
+    render(){
         return (
             <div className="row info-area">
                 <div className="col-sm-12">
                     <div className="row">
 
-                        <div className="col-sm-12 col-md-6 col-sm-float-right">
+                        <div className="col-sm-12 col-md-12 col-sm-float-right">
+                            <Publications context={this.props.context} />
+                        </div>
+
+                        <hr/>
+
+                        <div className="col-sm-12 col-md-12 col-sm-float-right">
+                            { FormattedInfoBlock.User(this.props.userInfo) }
+                        </div>
+                        <div className="col-sm-12 col-md-12 col-sm-float-right">
                             { FormattedInfoBlock.Lab(this.props.labInfo) }
                         </div>
-                        <div className="col-sm-12 col-md-6 col-sm-float-right">
+                        <div className="col-sm-12 col-md-12 col-sm-float-right">
                             { FormattedInfoBlock.Award(this.props.awardInfo) }
                         </div>
 
@@ -334,5 +416,9 @@ var ExperimentSetLabAwardInfo = React.createClass({
         );
     }
 
-});
+};
+
+// Register ExperimentSetView to be the view for these @types.
+globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
+globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 

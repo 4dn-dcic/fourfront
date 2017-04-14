@@ -140,6 +140,18 @@ def skip_rows_with_all_key_value(**kw):
     return component
 
 
+def skip_rows_in_excludes(**kw):
+    def component(dictrows):
+        for row in dictrows:
+            excludes = kw.get('excludes')
+            if excludes is None:
+                excludes = []
+            if row.get('uuid') in excludes:
+                row['_skip'] = True
+            yield row
+
+    return component
+
 def skip_rows_without_all_key_value(**kw):
     def component(dictrows):
         for row in dictrows:
@@ -486,11 +498,12 @@ def process(rows):
         pass
 
 
-def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None):
+def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None, exclude=None):
     """smth."""
     pipeline = [
         skip_rows_with_all_key_value(test='skip'),
         skip_rows_with_all_key_value(_test='skip'),
+        skip_rows_in_excludes(excludes=exclude),
         skip_rows_with_all_falsey_value('test') if test_only else noop,
         skip_rows_with_all_falsey_value('_test') if test_only else noop,
         remove_keys_with_empty_value,
@@ -620,6 +633,8 @@ PHASE2_PIPELINES = {
 
 def load_all(testapp, filename, docsdir, test=False):
     """smth."""
+    # exclude_list is for items that fail phase1 to be excluded from phase2
+    exclude_list = []
     for item_type in ORDER:
         try:
             source = read_single_sheet(filename, item_type)
@@ -627,7 +642,10 @@ def load_all(testapp, filename, docsdir, test=False):
             logger.error('Opening %s %s failed.', filename, item_type)
             continue
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=1)
-        process(combine(source, pipeline))
+        processed_data = combine(source, pipeline)
+        for result in processed_data:
+            if result.get('_response') and result.get('_response').status_code not in [200, 201]:
+                exclude_list.append(result['uuid'])
 
     for item_type in ORDER:
         if item_type not in PHASE2_PIPELINES:
@@ -636,7 +654,7 @@ def load_all(testapp, filename, docsdir, test=False):
             source = read_single_sheet(filename, item_type)
         except ValueError:
             continue
-        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2)
+        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2, exclude=exclude_list)
         process(combine(source, pipeline))
 
 

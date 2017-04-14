@@ -87,6 +87,7 @@ var Uploads = module.exports = React.createClass({
                     if(this._isMounted){
                         this.modifyRunningUploads(upload_key, 101, null);
                     }
+                    this.props.updateUploads(upload_key, null, true);
                     alert("File uploaded successfully for " + upload_key);
                 }
             }.bind(this));
@@ -140,7 +141,7 @@ var Uploads = module.exports = React.createClass({
         var use_percent = info.percent_done == 101 ? 100 : info.percent_done;
         return(
             <li key={key} className="row" style={{"listStyle":"none"}}>
-                <div className="col-sm-3" style={{'float':'left',"fontSize":"150%"}}>
+                <div className="col-sm-3" style={{'float':'left'}}>
                     <a href={info.id}>{info.display_title}</a>
                     {info.percent_done !== 101 ?
                         <a href="#" style={{'color':'#a94442','paddingLeft':'10px'}} onClick={function(e){

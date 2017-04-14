@@ -101,4 +101,27 @@ module.exports.ItemFooterRow = require('./ItemFooterRow');
  * @type {Component}
  * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
  */
-module.exports.PublicationsBlock = require('./PublicationsBlock');
+module.exports.Publications = require('./Publications').default;
+
+/**
+ * @namespace
+ * @type {Component}
+ * @prop {Object[]} contents - List of objects for tabs containing 'tab', 'content', and maybe 'key'.
+ */
+module.exports.TabbedView = require('./TabbedView');
+
+/**
+ * A list of properties which belong to Item shown by ItemView.
+ * Shows 'persistentKeys' fields & values stickied near top of list,
+ * 'excludedKeys' never, and 'hiddenKeys' only when "See More Info" button is clicked.
+ *
+ * @namespace
+ * @type {Component}
+ */
+module.exports.ItemDetailList = require('./ItemDetailList');
+
+/**
+ * @namespace
+ * @type {Component}
+ */
+module.exports.AuditView = require('./AuditView');

@@ -5,7 +5,7 @@ var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
-var { ajax, console, object, isServerSide, Filters } = require('./util');
+var { ajax, console, object, isServerSide, Filters, layout } = require('./util');
 var vizUtil = require('./viz/utilities');
 var ReactTooltip = require('react-tooltip');
 
@@ -239,6 +239,7 @@ var Facet = React.createClass({
             'total' : React.PropTypes.number,               // Total experiments (or terms??) w/ field
             'terms' : React.PropTypes.array.isRequired      // Possible terms
         }),
+        defaultFacetOpen : React.PropTypes.bool,
         experimentSetListJSON : React.PropTypes.array,
         expSetFilters : React.PropTypes.object.isRequired,
         ignoredFilters : React.PropTypes.object,
@@ -263,8 +264,18 @@ var Facet = React.createClass({
             () => false;
 
         return {
-            facetOpen: true // Potential ToDo: store list of open or closed facet field IDs in localstorage.
+            facetOpen: typeof this.props.defaultFacetOpen === 'boolean' ? this.props.defaultFacetOpen : true // Potential ToDo: store list of open or closed facet field IDs in localstorage.
         };
+    },
+
+    componentWillReceiveProps : function(nextProps){
+        // We might want to change defaultFacetOpen right after mount, so let us re-do getInitialState.
+        if (
+            (nextProps.mounted && !this.props.mounted) &&
+            (typeof nextProps.defaultFacetOpen === 'boolean' && nextProps.defaultFacetOpen !== this.props.defaultFacetOpen)
+        ){
+            this.setState({ facetOpen : nextProps.defaultFacetOpen });
+        }
     },
 
     isStatic: function(props = this.props){ return !!(props.facet.terms.length === 1); },
@@ -752,7 +763,8 @@ var FacetList = module.exports = React.createClass({
     getInitialState : function(){
 
         var initState = {
-            facetsLoaded : false
+            facetsLoaded : false,
+            mounted : false
         };
 
         if (!this.isUsingProvidedFacets()) {
@@ -801,12 +813,15 @@ var FacetList = module.exports = React.createClass({
                     this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
                 }
                 if (Array.isArray(facets) && facets.length > 0){
-                    this.setState({ 'facets' : facets, 'facetsLoaded' : true }, function(){
+                    this.setState({ 'facets' : facets, 'facetsLoaded' : true, 'mounted' : true }, function(){
                         ReactTooltip.rebuild();
                     });
                 }
             });
-        } // else @see getInitialState
+        } else {
+            // @see getInitialState
+            this.setState({ 'mounted' : true });
+        }
     },
 
     /**
@@ -817,6 +832,7 @@ var FacetList = module.exports = React.createClass({
      */
     shouldComponentUpdate : function(nextProps, nextState){
         if (
+            this.state.mounted !== nextState.mounted ||
             !this.isUsingProvidedFacets() ||
             this.props.useAjax ||
             this.props.expSetFilters !== nextProps.expSetFilters ||
@@ -924,6 +940,7 @@ var FacetList = module.exports = React.createClass({
     },
 
     renderFacets : function(facets = this.state.facets || this.props.facets || []){
+        console.log(layout.responsiveGridState(), this.state.mounted);
         var extClass = this.checkIfAllSingleTerm() ? ' all-single-term' : null;
         return facets.map(facet =>
             <FacetList.Facet
@@ -939,6 +956,8 @@ var FacetList = module.exports = React.createClass({
                 href={this.props.href}
                 useAjax={this.props.useAjax}
                 schemas={this.props.schemas}
+                defaultFacetOpen={ !this.state.mounted ? false : !!(layout.responsiveGridState() !== 'xs') }
+                mounted={this.state.mounted}
             />
         )
     },
@@ -979,9 +998,11 @@ var FacetList = module.exports = React.createClass({
 
         return (
             <div>
+                {/*
                 <div className="exptype-box">
                     { exptypeDropdown }
                 </div>
+                */}
                 <div className={
                     "facets-container facets " +
                     this.props.orientation +

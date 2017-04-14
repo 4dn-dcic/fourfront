@@ -223,7 +223,15 @@ var App = React.createClass({
             return portal.user_section;
         }
         if (category === 'user') {
-            return this.state.user_actions || [];
+            var temp_actions;
+            // remove uploads from dropdown if there aren't any current uploads
+            if(this.state.user_actions){
+                temp_actions = this.state.user_actions.slice();
+                if(Object.keys(this.state.uploads).length === 0){
+                    temp_actions = temp_actions.filter(action => action.id !== 'uploads');
+                }
+            }
+            return temp_actions || [];
         }
         if (category === 'global_sections') {
             return portal.global_sections;
@@ -405,25 +413,34 @@ var App = React.createClass({
         } else {
             window.onhashchange = this.onHashChange;
         }
-        //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
+        window.onbeforeunload = this.handleBeforeUnload;
 
         // Load up analytics
-        analytics.initializeGoogleAnalytics(analytics.getTrackingId(this.props.href));
+        analytics.initializeGoogleAnalytics(
+            analytics.getTrackingId(this.props.href),
+            this.props.context,
+            this.props.expSetFilters
+        );
     },
 
     componentDidUpdate: function (prevProps, prevState) {
         var key;
         if (this.props) {
+
+            if (this.props.href !== prevProps.href){ // We navigated somewhere else.
+
+                // Register google analytics pageview event.
+                analytics.registerPageView(this.props.href, this.props.context, this.props.expSetFilters);
+
+                // We need to rebuild tooltips after navigation to a different page.
+                ReactTooltip.rebuild();
+
+            }
+
+
             for (key in this.props) {
                 if (this.props[key] !== prevProps[key]) {
                     console.log('changed props: %s', key);
-                    if (key === 'href'){
-                        // We need to rebuild tooltips after navigation to a different page.
-                        ReactTooltip.rebuild();
-
-                        // Register google analytics pageview event.
-                        analytics.registerPageView(this.props[key]);
-                    }
                 }
             }
         }
@@ -469,7 +486,11 @@ var App = React.createClass({
         var userInfo = JWT.getUserInfo();
         if (userInfo){
             userActions = userInfo.user_actions;
-            session = true;
+            var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.
+            if (currentToken) session = true;
+            else if (this.state.session === true) {
+                Alerts.queue(Alerts.LoggedOut);
+            }
         }
 
         var stateChange = {};
@@ -884,6 +905,14 @@ var App = React.createClass({
         }
     },
 
+    // catch user navigating away from page if there are current uploads running
+    // there doesn't seem to be any way to remove the default alert...
+    handleBeforeUnload: function(e){
+        if(Object.keys(this.state.uploads).length > 0){
+            return 'You have current uploads running. Please wait until they are finished to leave.';
+        }
+    },
+
     render: function() {
         console.log('render app');
         var context = this.props.context;
@@ -946,10 +975,10 @@ var App = React.createClass({
         var currRoute = lowerList.slice(1); // eliminate http
         // check error status
         var status;
+        var route = currRoute[currRoute.length-1];
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
-            var route = currRoute[currRoute.length-1];
-            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads'){
+            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads' && route != 'submissions'){
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
@@ -958,6 +987,12 @@ var App = React.createClass({
             }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
             }
+        }else if(route == 'uploads' && !_.contains(this.state.user_actions.map(action => action.id), 'uploads')){
+            console.log(this.state.user_actions);
+            status = 'forbidden'; // attempting to view uploads but it's not in users actions
+        }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+            console.log(this.state.user_actions);
+            status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
         // first case is fallback
         if (canonical === "about:blank"){

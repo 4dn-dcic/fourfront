@@ -16,7 +16,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		margin-top: -27px;
 	}
 	*/
-	
+
 }
 
 .item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
@@ -120,7 +120,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.flexcol-heading, .item-page-heading {
+.flexcol-heading, .item-page-heading, .submission-page-heading {
     position: relative;
     margin-right: -10px;
     margin-left: -10px;
@@ -296,7 +296,25 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .item-page-container {
     .info-area {
 	    margin-top: 17px;
+		//border-bottom: 1px solid #ddd;
+		padding-bottom: 7px;
     }
+
+	.rc-tabs-tabpane {
+		.info-area {
+			overflow: hidden;
+			border-bottom: none;
+		}
+	}
+
+	.tab-view-container {
+		.rc-tabs {
+			@media screen and (min-width: $screen-sm-min){
+				margin-top: -17px;
+			}
+		}
+	}
+
     .item-info-area {
         margin-bottom: 20px;
         min-height: 120px;
@@ -308,15 +326,21 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	margin-bottom: 12px;
 
+	.expandable-list {
+		overflow: hidden;
+	}
+
 	.list-item {
-		
+
 		/* Equalize Height of Columns, unsupported for IE9 and below: */
 		display: -webkit-box;
 		display: -webkit-flex;
 		display: -ms-flexbox;
 		display: flex;
+
 		
-		.item-label, .item-value {		
+
+		.item-label, .item-value {
 			> div {
 				min-height: 20px;
 				height: 100%;
@@ -397,7 +421,7 @@ $download-button-width : 100px;
 
 	.row {
 
-		
+
 
 		> div {
 			padding-top: 5px;
@@ -501,7 +525,7 @@ $download-button-width : 100px;
 					min-width: $download-button-width;
 				}
 			}
-			
+
 		}
 
 	}
@@ -541,7 +565,7 @@ $download-button-width : 100px;
 				text-align: right;
 			}
 
-			
+
 
 			> .title {
 				padding-top: 5px;
@@ -592,7 +616,7 @@ $download-button-width : 100px;
 		text-align: center;
 		padding-top: 4px;
 		font-size: 20px;
-		margin-bottom: -10px;
+		//margin-bottom: -10px;
 
 		&.col-xs-2 {
 			padding-right: 0px;
@@ -700,22 +724,37 @@ $download-button-width : 100px;
 /************** Publications Block ****************/
 
 .publications-block {
-	margin-bottom: 17px;
 
 	ul {
 		margin-bottom: 0;
-		padding-left: 0;
+		padding-left: 10px;
 	}
 
 	&.single-item {
 		ul {
-			margin-bottom: -10px;
-			margin-top: 5px;
+			margin-bottom: 1px;
+    		margin-top: 7px;
+		}
+	}
+
+	.details {
+		padding-top: 3px;
+		> .details-row {
+			margin-top: 7px;
 		}
 	}
 
 	h6.publication-label {
 		@include small-block-label();
+	}
+
+	.label-col {
+		user-select: none;
+	}
+
+	.icon.abstract-toggle {
+		cursor : pointer;
+		color : #888;
 	}
 
 	@include icon-container-child();
@@ -729,7 +768,7 @@ $download-button-width : 100px;
 	h3 {
 		font-weight: 300;
 		margin: 0;
-		border-top: 1px solid #eee;
+		//border-top: 1px solid #eee;
 		padding: 16px 0 16px;
 
 		span.exp-number {
@@ -741,6 +780,7 @@ $download-button-width : 100px;
 	.exp-table-container {
 		overflow-x: auto;
 		display: block;
+		border-bottom: 1px solid #888;
 	}
 
 	/*

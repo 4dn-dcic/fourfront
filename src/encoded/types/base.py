@@ -20,6 +20,7 @@ import snovault
 # import snovalut default post / patch stuff so we can overwrite it in this file
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.crud_views import item_edit as sno_item_edit
+from snovault.fourfront_utils import add_default_embeds
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
@@ -108,13 +109,39 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 class AbstractCollection(snovault.AbstractCollection):
     """smth."""
 
+    def __init__(self, *args, **kw):
+        try:
+            self.lookup_key = kw.pop('lookup_key')
+        except KeyError:
+            pass
+        super(AbstractCollection, self).__init__(*args, **kw)
+
+
     def get(self, name, default=None):
-        """smth."""
+        '''
+        heres' and example of why this is the way it is:
+        ontology terms have uuid or term_id as unique ID keys
+        and if neither of those are included in post, try to
+        use prefered_name such that:
+        No - fail load with non-existing term message
+        Multiple - fail load with ‘ambiguous name - more than 1 term with that name exist use ID’
+        Single result - get uuid and use that for post/patch
+        '''
         resource = super(AbstractCollection, self).get(name, None)
         if resource is not None:
             return resource
         if ':' in name:
             resource = self.connection.get_by_unique_key('alias', name)
+            if resource is not None:
+                if not self._allow_contained(resource):
+                    return default
+                return resource
+        if getattr(self, 'lookup_key', None) is not None:
+            # lookup key translates to query json by key / value and return if only one of the
+            # item type was found... so for keys that are mostly unique, but do to whatever
+            # reason (bad data mainly..) can be defined as unique keys
+            item_type = self.type_info.item_type
+            resource = self.connection.get_by_json(self.lookup_key, name, item_type)
             if resource is not None:
                 if not self._allow_contained(resource):
                     return default
@@ -194,6 +221,8 @@ class Item(snovault.Item):
         self.STATUS_ACL = self.__class__.STATUS_ACL
         # update self.embedded here
         self.update_embeds()
+        # update registry embedded
+        self.registry.embedded = self.embedded;
 
     @property
     def __name__(self):
@@ -380,34 +409,3 @@ def create(context, request):
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
             'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
         }
-
-
-def add_default_embeds(embeds, schema={}):
-    """Perform default processing on the embeds list.
-    This adds display_title to any non-fully embedded linkTo field and defaults
-    to using the @id and display_title of non-embedded linkTo's
-    """
-    if 'properties' in schema:
-        schema = schema['properties']
-    processed_fields = embeds[:] if len(embeds) > 0 else []
-    already_processed = []
-    # find pre-existing fields
-    for field in embeds:
-        split_field = field.strip().split('.')
-        if len(split_field) > 1:
-            embed_path = '.'.join(split_field[:-1])
-            if embed_path not in processed_fields and embed_path not in already_processed:
-                already_processed.append(embed_path)
-                if embed_path + '.link_id' not in processed_fields:
-                    processed_fields.append(embed_path + '.link_id')
-                if embed_path + '.display_title' not in processed_fields:
-                    processed_fields.append(embed_path + '.display_title')
-    # automatically embed top level linkTo's not already embedded
-    for key, val in schema.items():
-        check_linkTo = 'linkTo' in val or ('items' in val and 'linkTo' in val['items'])
-        if key not in processed_fields and check_linkTo:
-            if key + '.link_id' not in processed_fields:
-                processed_fields.append(key + '.link_id')
-            if key + '.display_title' not in processed_fields:
-                processed_fields.append(key + '.display_title')
-    return processed_fields
