@@ -1,5 +1,3 @@
-import pytest
-
 '''
 FF-701
 Multiple ontologies get imported to form each of the three ontologies that we are currently using
@@ -21,8 +19,8 @@ This can be determined by info that will be stored with the term in the system.
 So basically what I’m looking for is validation that can get the  json from the request and also get
 info on existing terms that are in the system and do some checks prior to post or patch of the item
 and also change the json to use uuid rather than the info included in the post (eg. preferred_name)
-as an identifying property if the term validates.
-'''
+as an identifying property if the term validates.'''
+
 
 def test_store_ontology_term_by_uuid(testapp, oterm):
     oterm.pop('preferred_name')
@@ -38,14 +36,14 @@ def test_store_ontology_term_by_term_id(testapp, oterm):
     res = testapp.post_json('/ontology_term', oterm)
     assert res.json['@graph'][0]['term_id'] == oterm['term_id']
     assert res.json['@graph'][0].get('preferred_name', None) is None
-    res2 = testapp.get('/ontology_term/' + oterm['term_id'])
+    testapp.get('/ontology_term/' + oterm['term_id'])
 
 
 def test_store_ontology_no_required_keys(testapp, oterm):
     oterm.pop('preferred_name')
     oterm.pop('uuid')
     oterm.pop('term_id')
-    res = testapp.post_json('/ontology_term', oterm, status=422)
+    testapp.post_json('/ontology_term', oterm, status=422)
 
 
 def test_linkto_ontology_term_by_preffered_name(testapp, lab, award, oterm):
@@ -55,7 +53,7 @@ def test_linkto_ontology_term_by_preffered_name(testapp, lab, award, oterm):
         "cell_line": "GM12878",
         'award': award['@id'],
         'lab': lab['@id'],
-        'tissue': oterm['preferred_name']
+        'tissue': oterm['term_name']
     }
 
     res = testapp.post_json('/ontology_term', oterm).json['@graph'][0]

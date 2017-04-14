@@ -998,9 +998,11 @@ var FacetList = module.exports = React.createClass({
 
         return (
             <div>
+                {/*
                 <div className="exptype-box">
                     { exptypeDropdown }
                 </div>
+                */}
                 <div className={
                     "facets-container facets " +
                     this.props.orientation +
