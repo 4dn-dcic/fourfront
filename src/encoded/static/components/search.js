@@ -38,7 +38,7 @@ class ResultTableEntry extends React.Component{
     }
 
     render() {
-        var result = this.props.context;
+        var result = this.props.context || null;
         var item_type = result['@type'][0];
         var processed_link = result.link_id.replace(/~/g, "/");
         return (
@@ -550,6 +550,7 @@ var Search = search.Search = React.createClass({
 
     render: function() {
         var context = this.props.context;
+        console.log(JSON.stringify(this.props.context));
         var results = context['@graph'];
         var notification = context['notification'];
         var searchBase = url.parse(this.context.location_href).search || '';
