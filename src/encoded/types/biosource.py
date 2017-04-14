@@ -130,13 +130,17 @@ class Biosource(Item):
 
 # validator for tissue field
 def validate_biosource_tissue(context, request):
+    # import pdb; pdb.set_trace()
     data = request.json
     if 'tissue' not in data:
         return
     term_ok = False
     tissue = data['tissue']
+    # print(tissue)
     res = request.embed(tissue)
+    # print(res)
     ont = res.get('source_ontology')
+    print(ont)
     if ont is not None:
         try:
             ontname = ont.get('ontology_name')
