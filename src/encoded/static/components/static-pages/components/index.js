@@ -6,6 +6,19 @@
  * @module static-pages/components
  */
 
+
+/**
+ * Component which takes in a CSV string as a prop, transforms it into a 2D array, and plots on a matrix.
+ * See src/encoded/static/data/static_pages.json to see options which may be configured (pass as 'options' prop).
+ * 
+ * @member
+ * @namespace
+ * @type {Component}
+ * @prop {Object} options - Options for parsing CSV.
+ * @prop {string} csv - CSV string to parse & plot.
+ */
+module.exports.CSVMatrixView = require('./CSVMatrixView').default;
+
 /**
  * Component which shows currents announcements.
  * Announcements are (temporarily) currently stored in src/encoded/static/data/announcements_data.js.

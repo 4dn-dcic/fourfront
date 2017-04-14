@@ -563,7 +563,6 @@ var ViewContainer = module.exports = React.createClass({
                         });
                     } else {
                         if (this.state.selectedBarSectionTerm) {
-                            console.log(node);
 
                             var containerPos = layout.getElementOffset(this.refs.container);
                             var bottomOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
@@ -588,13 +587,13 @@ var ViewContainer = module.exports = React.createClass({
                                 );
                             }
 
-
                             // Manually update popover coords then update its contents
                             ChartDetailCursor.setCoords({
                                 x : containerPos.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
                                 y : containerPos.top + this.refs.container.clientHeight - bottomOffset - barYPos,
                                 onRightSide : isPopoverOnRightSide
                             }, this.updateDetailCursorFromNode.bind(this, node, true, 'default'));
+
                         }
                         this.setState({
                             'selectedBarSectionTerm' : node.term || null,
