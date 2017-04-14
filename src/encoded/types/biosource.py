@@ -138,7 +138,12 @@ def validate_biosource_tissue(context, request):
     res = request.embed(tissue)
     ont = res.get('source_ontology')
     if ont is not None:
-        ontname = ont.get('ontology_name')
+        try:
+            ontname = ont.get('ontology_name')
+        except AttributeError:
+            ont = request.embed(ont)
+            ontname = ont.get('ontology_name')
+
         if ontname is not None and (ontname == 'Uberon' or ontname == '4DN Controlled Vocabulary'):
             term_ok = True
     if not term_ok:
