@@ -132,6 +132,10 @@ class ListBlock extends React.Component {
  * @memberof module:item-pages/components.Publications
  * @class DetailBlock
  * @extends {React.Component}
+ * 
+ * @prop {string} singularTitle         - Title to show in top left of block. 'S' gets added to end of title if more than 1 item.
+ * @prop {Object} publication           - Publication whose link and display_title to display.
+ * @prop {Element|Element[]} children   - React Element(s) to display in detail area under title.
  */
 class DetailBlock extends React.Component {
 
@@ -154,6 +158,7 @@ class DetailBlock extends React.Component {
      */
     render(){
         var publication = this.props.publication;
+        if (typeof publication !== 'object' || !publication) return null;
         return (
             <Publications.FormattedInfoWrapper singularTitle={this.props.singularTitle} isSingleItem={true}>
                 <h5 className="block-title">
@@ -168,16 +173,19 @@ class DetailBlock extends React.Component {
 
 }
 
+
 /**
  * Wraps some React elements, such as a list or title, in a FormattedInfoBlock-styled wrapper.
  * 
  * @memberof module:item-pages/components.Publications
  * @class FormattedInfoWrapper
  * @extends {React.Component}
- * @type {Component}
- * @prop {boolean} isSingleItem - Whether there is only 1 item or not.
- * @prop {Element[]} children - React Elements or Components to be wrapped.
- * @prop {string} [singularTitle] - Optional. Title displayed in top left label. Defaults to 'Publication'.
+ * 
+ * @prop {boolean} isSingleItem     - Whether there is only 1 item or not.
+ * @prop {Element[]} children       - React Elements or Components to be wrapped.
+ * @prop {string} [singularTitle]   - Optional. Title displayed in top left label. Defaults to 'Publication'.
+ * @prop {string} [className]       - Additional className to be added to wrapper element. 
+ * @prop {string} [iconClass='book']- CSS class for icon to be displayed. Defaults to 'book'.
  */
 class FormattedInfoWrapper extends React.Component {
 
@@ -224,6 +232,7 @@ class FormattedInfoWrapper extends React.Component {
     }
 
 }
+
 
 /**
  * Shows publications for current Item.
@@ -292,8 +301,11 @@ export default class Publications extends React.Component {
     }
 
     detailRows(publication = this.props.context.produced_in_pub){
+        if (!publication || typeof publication === 'undefined'){
+            return [];
+        }
         var details = [];
-        if (typeof publication.date_published === 'string'){
+        if (publication && typeof publication.date_published === 'string'){
             details.push({
                 'label' : 'Published',
                 'content' : DateUtility.format(publication.date_published)
