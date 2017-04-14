@@ -59,3 +59,32 @@ def test_calculated_biosource_name(biosources):
             assert name == 'lung'
         if biotype == 'whole organisms':
             assert name == 'whole human'
+
+
+def test_validate_biosource_tissue_no_tissue(testapp, award, lab):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'immortalized cell line',
+                 'cell_line': 'GM12878'}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_biosource_tissue_invalid(testapp, award, lab, lung_oterm, ontology):
+    testapp.patch_json(lung_oterm['@id'], {'source_ontology': ontology['@id']}, status=200)
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'tissue',
+                 'tissue': lung_oterm['@id']}
+    res = testapp.post_json('/biosource', biosource, status=422)
+    errors = res.json['errors']
+    assert 'not found in UBERON' in errors[0]['description']
+
+
+def test_validate_biosource_tissue_valid(testapp, award, lab, lung_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'tissue',
+                 'tissue': lung_oterm['@id']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')

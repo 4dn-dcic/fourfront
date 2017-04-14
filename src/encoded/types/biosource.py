@@ -118,15 +118,24 @@ class Biosource(Item):
     class Collection(Item.Collection):
         pass
 
+
 # validator for tissue field
 def validate_biosource_tissue(context, request):
     data = request.json
     if 'tissue' not in data:
         return
+    term_ok = False
     tissue = data['tissue']
-    registry = context.registry
-    print(registry)
-    return
+    res = request.embed(tissue)
+    ont = res.get('source_ontology')
+    if ont is not None:
+        ontname = ont.get('ontology_name')
+        if ontname is not None and (ontname == 'Uberon' or ontname == '4DN Controlled Vocabulary'):
+            term_ok = True
+    if not term_ok:
+        request.errors.add('body', None, 'Term: ' + tissue + ' is not found in UBERON')
+    else:
+        request.validated.update({})
 
 
 @view_config(context=Biosource.Collection, permission='add', request_method='POST',
