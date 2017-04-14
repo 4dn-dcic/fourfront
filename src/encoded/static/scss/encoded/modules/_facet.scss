@@ -211,7 +211,7 @@
 
             span:hover {
                 text-shadow: 0 0 0;
-                i.icon { 
+                i.icon {
                     opacity: 0.5;
                 }
             }
@@ -238,9 +238,9 @@
         }
     }
 
-    .facet-list { 
+    .facet-list {
         margin: 0;
-    
+
         li {
             margin-bottom: 1px;
             position: relative;
@@ -475,10 +475,10 @@ div.meta-status {
     padding: 0;
     overflow: hidden;
 
-    li {
-        margin-top: 7px;
+    .result-table-result {
+        margin-top: 10px;
         border-bottom: 1px solid #E8E8E8;
-        margin-bottom: 7px;
+        margin-bottom: 10px;
         @include font-size(0.9);
 
         &:first {
@@ -488,6 +488,13 @@ div.meta-status {
             @include font-size(0.9);
         }
 
+    }
+
+    .result-table-result-heading {
+        background-color: #f4f4f4;
+        border: 1px solid #eee;
+        border-radius: 2px;
+        padding: 5px 15px 5px 15px;
     }
 
     &:before {

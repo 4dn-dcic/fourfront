@@ -9,130 +9,45 @@ var search = module.exports;
 var ReactTooltip = require('react-tooltip');
 var { ajax, console, object, isServerSide, Filters, layout } = require('./util');
 var { Button, ButtonToolbar, ButtonGroup, Panel, Table} = require('react-bootstrap');
+var { Detail } = require('./item-pages/components');
 
-var Listing = module.exports.Listing = function (props) {
-    // XXX not all panels have the same markup
-    var context;
-    if (props['@id']) {
-        context = props;
-        props = {context: context,  key: context['@id']};
+var Listing = function (result, schemas) {
+    var props;
+    if (result['@id']) {
+        props = {'context': result,  'key': result['@id'], 'schemas': schemas};
     }
-    var ListingView = globals.listing_views.lookup(props.context);
-    return <ListingView {...props} />;
+    if(props){
+        return <ResultTableEntry {...props} />;
+    }else{
+        return null;
+    }
+
 };
 
-var Item = module.exports.Item = React.createClass({
+var ResultTableEntry = React.createClass({
     render: function() {
         var result = this.props.context;
-        var title = globals.listing_titles.lookup(result)({context: result});
         var item_type = result['@type'][0];
+        var processed_link = result.link_id.replace(/~/g, "/");
         return (
-            <li>
+            <li className="result-table-result">
                 <div className="clearfix">
-                    {result.accession ?
-                        <div className="pull-right type sentence-case search-meta">
-                            <p>{item_type}: {' ' + result['accession']}</p>
+                    <div>
+                        <a href={processed_link}>{result.display_title}</a>
+                    </div>
+                    {result.description ?
+                        <div className="data-row flexible-description-box result-table-result-heading">
+                            {result.description}
                         </div>
-                    : null}
-                    <div className="accession">
-                        <a href={result['@id']}>{title}</a>
-                    </div>
-                    <div className="data-row">
-                        {result.description}
+                        : null}
+                    <div className="item-page-detail">
+                        <Detail context={result} schemas={this.props.schemas} open={false}/>
                     </div>
                 </div>
             </li>
         );
     }
 });
-globals.listing_views.register(Item, 'Item');
-
-var Biosample = module.exports.Biosample = React.createClass({
-    render: function() {
-        var result = this.props.context;
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">Biosample</p>
-                        <p className="type">{' ' + result['accession']}</p>
-                    </div>
-                    <div className="accession">
-                        <a href={result['@id']}>
-                            {result['biosource_summary']}
-                        </a>
-                    </div>
-                    <div className="data-row">
-                        <div><strong>Modifications: </strong>{result['modifications_summary']}</div>
-                        <div><strong>Treatments: </strong>{result['treatments_summary']}</div>
-                    </div>
-                </div>
-            </li>
-        );
-    }
-});
-globals.listing_views.register(Biosample, 'Biosample');
-
-
-var Biosource = module.exports.Biosource = React.createClass({
-    render: function() {
-        var result = this.props.context;
-        var organism;
-        if (result['individual']){
-            organism = result['individual']['organism']['name'];
-        }
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">Biosource</p>
-                        <p className="type">{' ' + result['accession']}</p>
-                    </div>
-                    <div className="accession">
-                        <a href={result['@id']}>
-                            {result['biosource_name']}
-                        </a>
-                    </div>
-                    <div className="data-row">
-                        <div><strong>{result['biosource_type']}</strong></div>
-                        <div><strong>{organism}</strong></div>
-                    </div>
-                </div>
-            </li>
-        );
-    }
-});
-globals.listing_views.register(Biosource, 'Biosource');
-
-
-var Experiment = module.exports.Experiment = React.createClass({
-    render: function() {
-        var result = this.props.context;
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">Experiment</p>
-                        <p className="type">{' ' + result['accession']}</p>
-                        <p className="type">{' ' + result['award']['project']}</p>
-                    </div>
-                    <div className="accession">
-                        <a href={result['@id']}>
-                            {result['experiment_summary']}
-                        </a>
-                    </div>
-                    <div className="data-row">
-                        <div><strong>Modifications: </strong>{result['biosample']['modifications_summary']}</div>
-                        <div><strong>Treatments: </strong>{result['biosample']['treatments_summary']}</div>
-                        <div><strong>Lab: </strong>{result['lab']['title']}</div>
-                    </div>
-                </div>
-            </li>
-        );
-    }
-});
-globals.listing_views.register(Experiment, 'Experiment');
-
 
 // If the given term is selected, return the href for the term
 function termSelected(term, field, filters) {
@@ -331,14 +246,14 @@ var FacetList = search.FacetList = React.createClass({
             // Convert search query string to a query object for easy parsing
             var terms = queryString.parse(searchQuery);
 
-            // See if there are terms in the query string aside from `searchTerm`. We have a Clear
-            // Filters button if we do
-            var nonPersistentTerms = _(Object.keys(terms)).any(term => term !== 'searchTerm');
+            // See if there are terms in the query string aside from searchTerm, from, and limit
+            // We have Clear Filters button if so
+            var nonPersistentTerms = _(Object.keys(terms)).any(term => !_.contains(['searchTerm', 'from', 'limit'], term));
             clearButton = nonPersistentTerms && terms['searchTerm'];
 
-            // If no Clear Filters button yet, do the same check with `type` in the query string
+            // If no Clear Filters button yet, do the same check with type instead of searchTerm
             if (!clearButton) {
-                nonPersistentTerms = _(Object.keys(terms)).any(term => term !== 'type');
+                nonPersistentTerms = _(Object.keys(terms)).any(term => !_.contains(['type', 'from', 'limit'], term));
                 clearButton = nonPersistentTerms && terms['type'];
             }
         }
@@ -372,6 +287,33 @@ var FacetList = search.FacetList = React.createClass({
         );
     }
 });
+
+// the old Search tabular-style result display
+class TabularTableResults extends React.Component{
+
+    static propTypes = {
+        results: React.PropTypes.array.isRequired,
+        schemas: React.PropTypes.object,
+    }
+
+    constructor(props){
+        super(props);
+    }
+
+    render(){
+        var results = this.props.results;
+        var schemas = this.props.schemas || {};
+        return(
+            <ul className="nav result-table" id="result-table">
+                {results.length ?
+                    results.map(function (result) {
+                        return Listing(result, schemas);
+                    })
+                : null}
+            </ul>
+        );
+    }
+}
 
 var ResultTable = search.ResultTable = React.createClass({
 
@@ -512,13 +454,7 @@ var ResultTable = search.ResultTable = React.createClass({
                                 </ButtonToolbar>
                             </div>
                         </div>
-                        <ul className="nav result-table" id="result-table">
-                            {results.length ?
-                                results.map(function (result) {
-                                    return Listing({context:result, key: result['@id']});
-                                })
-                            : null}
-                        </ul>
+                        <TabularTableResults results={results} schemas={this.props.schemas}/>
                     </div>
                 </div>
             </div>
