@@ -55,7 +55,7 @@ def test_linkto_ontology_term_by_preffered_name(testapp, lab, award, oterm):
         "cell_line": "GM12878",
         'award': award['@id'],
         'lab': lab['@id'],
-        'tissue': oterm['preferred_name']
+        'tissue': oterm['term_name']
     }
 
     res = testapp.post_json('/ontology_term', oterm).json['@graph'][0]

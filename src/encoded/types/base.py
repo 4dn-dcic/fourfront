@@ -111,7 +111,7 @@ class AbstractCollection(snovault.AbstractCollection):
 
     def __init__(self, *args, **kw):
         try:
-            self.kinda_unique_key = kw.pop('kinda_unique_key')
+            self.lookup_key = kw.pop('lookup_key')
         except KeyError:
             pass
         return super(AbstractCollection, self).__init__(*args, **kw)
@@ -136,9 +136,12 @@ class AbstractCollection(snovault.AbstractCollection):
                 if not self._allow_contained(resource):
                     return default
                 return resource
-        if getattr(self, 'kinda_unique_key', None) is not None:
+        if getattr(self, 'lookup_key', None) is not None:
+            # lookup key translates to query json by key / value and return if only one of the
+            # item type was found... so for keys that are mostly unique, but do to whatever
+            # reason (bad data mainly..) can be defined as unique keys
             item_type = self.type_info.item_type
-            resource = self.connection.get_by_json(self.kinda_unique_key, name, item_type)
+            resource = self.connection.get_by_json(self.lookup_key, name, item_type)
             if resource is not None:
                 if not self._allow_contained(resource):
                     return default
