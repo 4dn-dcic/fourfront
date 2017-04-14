@@ -14,13 +14,25 @@ export default class TabView extends React.Component {
     }
 
     render(){
+        if (!Array.isArray(this.props.contents)) {
+            return null;
+        }
         var tabsProps = {
-            'renderTabBar'          : () => <ScrollableInkTabBar onTabClick={this.props.onTabClick} extraContent={this.props.extraTabContent} />,
+            'renderTabBar'          : () => 
+                <ScrollableInkTabBar
+                    onTabClick={this.props.onTabClick}
+                    extraContent={this.props.extraTabContent}
+                    className="extra-style-2"
+                />,
             'renderTabContent'      : () => <TabContent animated={this.props.animated} />,
             'onChange'              : this.props.onChange,
             'destroyInactiveTabPane': this.props.destroyInactiveTabPane
         };
         if (this.props.activeKey) tabsProps.activeKey = this.props.activeKey;
+        var defaultActiveTab = _.findWhere(this.props.contents, { 'isDefault' : true });
+        if (typeof defaultActiveTab !== 'undefined' && typeof defaultActiveTab.key !== 'undefined'){
+            tabsProps.defaultActiveKey = defaultActiveTab.key;
+        }
         return (
             <Tabs {...tabsProps} >
                 {
@@ -32,6 +44,7 @@ export default class TabView extends React.Component {
                                 children={t.content}
                                 placeholder={t.placeholder}
                                 disabled={t.disabled}
+                                style={t.style}
                             />
                         );
                     })

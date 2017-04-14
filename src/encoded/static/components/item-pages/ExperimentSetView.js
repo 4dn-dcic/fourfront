@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var Panel = require('react-bootstrap').Panel;
-var { ajax, console, DateUtility, object } = require('./../util');
+var { ajax, console, DateUtility, object, isServerSide } = require('./../util');
 var globals = require('./../globals');
 var { ExperimentsTable } = require('./../experiments-table');
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditView } from './components';
@@ -53,7 +53,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             'checked' : true,
             'details_award' : null,
             'details_lab' : null,
-            'passExperiments' : ExperimentsTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term')
+            'passExperiments' : ExperimentsTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term'),
+            'mounted' : false
         };
     },
 
@@ -68,7 +69,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     },
 
     componentDidMount : function(){
-        this.setLinkedDetails(true);
+        this.setLinkedDetails(true, null, { mounted : true });
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -276,7 +277,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             <span>Details</span>
                         </h3>
                         <hr className="tab-section-title-horiz-divider"/>
-                        <ItemDetailList context={this.props.context} schemas={this.props.schemas} />
+                        <ItemDetailList context={this.props.context} schemas={this.props.schemas} showJson={true} />
                     </div>
                 )
             },
@@ -288,9 +289,17 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 ),
                 key : "audits",
                 disabled : !AuditView.doAnyAuditsExist(this.props.context),
-                content : <AuditView audits={this.props.context.audit} />
+                content : <AuditView audits={this.props.context.audit} />,
+                //isDefault : (
+                //        this.props.context && this.props.context.audit &&
+                //        Array.isArray(this.props.context.audit.ERROR) && this.props.context.audit.ERROR.length > 0
+                //    ) || false
             }
-        ];
+        ].map((tabObj)=>{ // Common properties
+            return _.extend(tabObj, { 
+                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && window.innerHeight - 180, 100) || 650 }
+            });
+        });
     },
 
     render: function() {

@@ -4,7 +4,7 @@ var React = require('react');
 var globals = require('./../../globals');
 var { Filters } = require('./../../util');
 var _ = require('underscore');
-import { getTitleStringFromContext, isDisplayTitleAccession, getBaseItemTypeTitle } from './../item';
+import { getTitleStringFromContext, isDisplayTitleAccession, getItemTypeTitle } from './../item';
 
 
 export default class ItemPageTitle extends React.Component {
@@ -25,7 +25,7 @@ export default class ItemPageTitle extends React.Component {
         var titleIsAccession = isDisplayTitleAccession(this.props.context, title);
         return (
             <h1 className="page-title">
-                { getBaseItemTypeTitle(this.props.context, this.props.schemas) } <span className="subtitle prominent">
+                { getItemTypeTitle(this.props.context, this.props.schemas) } <span className="subtitle prominent">
                     { !titleIsAccession || this.props.showAccessionTitles ? title : null }
                 </span>
             </h1>

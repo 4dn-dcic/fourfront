@@ -163,7 +163,6 @@ globals.listing_titles.fallback = function () {
 /**
  * Get Item title string from a context object (JSON representation of Item).
  * 
- * @memberof module:item-pages/components.ItemPageTitle
  * @public
  * @export
  * @param {Object} context - JSON representation of an Item object.
@@ -177,7 +176,6 @@ export function getTitleStringFromContext(context){
  * Determine whether the title which is displayed is an accession or not.
  * Use for determining whether to include accession in ItemHeader.TopRow.
  * 
- * @memberof module:item-pages/components.ItemPageTitle
  * @export
  * @public
  * @param {Object} context - JSON representation of an Item object.
@@ -189,6 +187,20 @@ export function isDisplayTitleAccession(context, displayTitle = null){
     if (context.accession && context.accession === displayTitle) return true;
     return false;
 }
+
+/**
+ * Returns the leaf type from the Item's types array.
+ *
+ * @public
+ * @throws {Error} Throws error if no types array ('@type') or it is empty.
+ * @param {Object} context - JSON representation of current Item.
+ * @returns {string} Most specific type's name.
+ */
+export function getItemType(context){
+    if (!Array.isArray(context['@type']) || context['@type'].length < 1) throw new Error("No @type on Item object (context).");
+    return context['@type'][0];
+}
+
 
 export function getBaseItemType(context){
     var types = context['@type'];
@@ -204,23 +216,57 @@ export function getBaseItemType(context){
 }
 
 
-export function getBaseItemTypeTitle(context, schemas = null){
-    var baseType = getBaseItemType(context);
+/**
+ * Returns schema for the specific type of Item we're on.
+ *
+ * @public
+ * @static
+ * @param {string} itemType - The type for which to get schema.
+ * @param {Object} [schemas] - Mapping of schemas, by type.
+ * @returns {Object} Schema for itemType.
+ */
+export function getSchemaForItemType(itemType, schemas = null){
+    if (typeof itemType !== 'string') return null;
+    if (!schemas){
+        schemas = (Filters.getSchemas && Filters.getSchemas()) || null;
+    }
+    if (!schemas) return null;
+    return schemas[itemType] || null;
+}
 
+/**
+ * Lookup the title for an Item type, given the entire schemas object.
+ * 
+ * @export
+ * @param {string} atType - Item type.
+ * @param {Object} [schemas=null] - Entire schemas object, e.g. as stored in App state.
+ * @returns {string} Human-readable title.
+ */
+export function getTitleForType(atType, schemas = null){
     // Grab schemas from Filters if we don't have them but they've been cached into there from App.
     schemas = schemas || (Filters.getSchemas && Filters.getSchemas());
 
-    if (schemas && schemas[baseType] && schemas[baseType].title){
-        return schemas[baseType].title;
+    if (schemas && schemas[atType] && schemas[atType].title){
+        return schemas[atType].title;
     }
 
     // Correct baseType to title if not in schemas.
-    switch (baseType){
+    switch (atType){
         case 'ExperimentSet':
             return 'Experiment Set';
         default:
-            return baseType;
+            return atType;
     }
+}
+
+
+export function getItemTypeTitle(context, schemas = null){
+    return getTitleForType(getItemType(context));
+}
+
+
+export function getBaseItemTypeTitle(context, schemas = null){
+    return getTitleForType(getBaseItemType(context));
 }
 
 

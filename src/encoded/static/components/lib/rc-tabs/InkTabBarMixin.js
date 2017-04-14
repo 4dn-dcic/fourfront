@@ -85,8 +85,10 @@ function componentDidUpdate(component, init) {
 
 export default {
 
-  defaultProps : {
-    inkBarAnimated: true,
+  getDefaultProps() {
+    return {
+      inkBarAnimated: true,
+    };
   },
 
   componentDidUpdate() {
@@ -98,14 +100,15 @@ export default {
   },
 
   getInkBarNode() {
-    const { prefixCls, styles, inkBarAnimated } = this.props;
-    const className = `${prefixCls}-ink-bar`;
+    const { prefixCls, styles, inkBarAnimated, className } = this.props;
+    const internalClassName = `${prefixCls}-ink-bar`;
     const classes = classnames({
-      [className]: true,
+      [internalClassName]: true,
+      [className] : !!(className),
       [
         inkBarAnimated ?
-          `${className}-animated` :
-          `${className}-no-animated`
+          `${internalClassName}-animated` :
+          `${internalClassName}-no-animated`
         ]: true,
     });
     return (
