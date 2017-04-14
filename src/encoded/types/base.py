@@ -114,7 +114,7 @@ class AbstractCollection(snovault.AbstractCollection):
             self.lookup_key = kw.pop('lookup_key')
         except KeyError:
             pass
-        return super(AbstractCollection, self).__init__(*args, **kw)
+        super(AbstractCollection, self).__init__(*args, **kw)
 
 
     def get(self, name, default=None):
