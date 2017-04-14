@@ -93,14 +93,6 @@ module.exports.FilesInSetTable = require('./FilesInSetTable');
  */
 module.exports.ItemFooterRow = require('./ItemFooterRow');
 
-/**
- * Shows publications for current Item.
- * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/experiment-set-view .
- * 
- * @namespace
- * @type {Component}
- * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
- */
 module.exports.Publications = require('./Publications').default;
 
 /**

@@ -252,6 +252,8 @@ var Detail = React.createClass({
                 '@id', 'link_id', 'display_title'
             ],
             'stickyKeys' : [
+                // Experiment Set
+                'experimentset_type', 'date_released',
                 // Experiment
                 'experiment_type', 'experiment_summary', 'experiment_sets', 'files', 'filesets',
                 'protocol', 'biosample', 'digestion_enzyme', 'digestion_temperature',
@@ -267,10 +269,12 @@ var Detail = React.createClass({
                 // Award
                 'end_date', 'project', 'uri',
                 // Document
-                'attachment'
+                'attachment',
+                // Things to go at bottom consistently
+                'aliases', 
             ],
             'alwaysCollapsibleKeys' : [
-                '@type', 'accession', 'schema_version', 'uuid', 'replicate_exps', 'dbxrefs', 'status', 'external_references', 'aliases', 'date_created'
+                '@type', 'accession', 'schema_version', 'uuid', 'replicate_exps', 'dbxrefs', 'status', 'external_references', 'date_created'
             ],
             'open' : null
         };
@@ -326,7 +330,7 @@ var ItemDetailList = module.exports = React.createClass({
         return (
             <h5 className="item-page-detail-toggle-button btn btn-info btn-block" onClick={()=>{
                 this.setState({ collapsed : !this.state.collapsed });
-            }}>{ this.state.collapsed ? "See more information" : "Hide" }</h5>
+            }}>{ this.state.collapsed ? "See advanced information" : "Hide" }</h5>
         );
     },
 

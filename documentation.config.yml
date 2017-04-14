@@ -13,7 +13,7 @@ project_name : "4D Nucleome Portal"  # Project Name
 output_directory : "../4dn_portal_gh_pages/"         # Save output here
 
 python_project_directory : "./src/encoded"
-javascript_root_directory : "./src/encoded/static/components" # Fourfront JS directory
+javascript_root_directory : "./src/encoded/static/components/item-pages" # Fourfront JS directory
 
 # Define what each section in nav-menu contains.
 sections : [
