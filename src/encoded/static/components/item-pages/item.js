@@ -8,11 +8,25 @@ var { console, object, Filters } = require('./../util');
 var url = require('url');
 
 
+/********************/
+/**** Components ****/
+/********************/
+
+/**
+ * Acts as a "controller". This is the 'content_view' for all 'Items'.
+ * Looks up best panel_view to use for the detailed Item type and renders it with props passed down
+ * from App.
+ * 
+ * @export
+ * @class Item
+ * @extends {React.Component}
+ */
 export default class Item extends React.Component {
 
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        console.log(props);
     }
 
     //getChildContext     : AuditMixin.getChildContext,
@@ -35,49 +49,12 @@ export default class Item extends React.Component {
     }
 };
 
-Item.contextTypes = {
-    schemas: React.PropTypes.object
-}
+//Item.contextTypes = {
+//    schemas: React.PropTypes.object
+//}
 
 globals.content_views.register(Item, 'Item');
 
-
-export class Fallback extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
-    render() {
-        var context = this.props.context;
-        var title = typeof context.title == "string" ? context.title : url.parse(this.context.location_href).path;
-        return (
-            <div className="view-item">
-                <header className="row">
-                    <div className="col-sm-12">
-                        <h2>{title}</h2>
-                    </div>
-                </header>
-                {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
-                <section className="view-detail panel">
-                    <div className="container">
-                        <pre>{JSON.stringify(context, null, 4)}</pre>
-                    </div>
-                </section>
-            </div>
-        );
-    }
-};
-
-Fallback.contextTypes = {
-    location_href: React.PropTypes.string
-}
-
-// Use this view as a fallback for anything we haven't registered
-globals.content_views.fallback = function () {
-    return Fallback;
-};
 
 
 // **** Deprecated when fetch was removed.
@@ -189,9 +166,9 @@ export function isDisplayTitleAccession(context, displayTitle = null){
 }
 
 /**
- * Returns the leaf type from the Item's types array.
+ * Returns the leaf type from the Item's '@type' array.
  *
- * @public
+ * @export
  * @throws {Error} Throws error if no types array ('@type') or it is empty.
  * @param {Object} context - JSON representation of current Item.
  * @returns {string} Most specific type's name.
@@ -201,7 +178,14 @@ export function getItemType(context){
     return context['@type'][0];
 }
 
-
+/**
+ * Returns base Item type from Item's '@type' array. This is the type right before 'Item'.
+ * 
+ * @export
+ * @param {Object} context - JSON representation of current Item.
+ * @param {string[]} context['@type] - List of types for the Item. 
+ * @returns 
+ */
 export function getBaseItemType(context){
     var types = context['@type'];
     if (!Array.isArray(types) || types.length === 0) return "Unknown";
@@ -219,8 +203,7 @@ export function getBaseItemType(context){
 /**
  * Returns schema for the specific type of Item we're on.
  *
- * @public
- * @static
+ * @export
  * @param {string} itemType - The type for which to get schema.
  * @param {Object} [schemas] - Mapping of schemas, by type.
  * @returns {Object} Schema for itemType.
@@ -259,14 +242,28 @@ export function getTitleForType(atType, schemas = null){
     }
 }
 
-
+/**
+ * Get title for leaf Item type from Item's context + schemas.
+ * 
+ * @export
+ * @param {Object} context - JSON representation of Item.
+ * @param {Object} [schemas=null] - Schemas object passed down from App.
+ * @returns {string} Human-readable Item detailed type title.
+ */
 export function getItemTypeTitle(context, schemas = null){
-    return getTitleForType(getItemType(context));
+    return getTitleForType(getItemType(context), schemas);
 }
 
-
+/**
+ * Get title for base Item type from Item's context + schemas.
+ * 
+ * @export
+ * @param {Object} context - JSON representation of Item.
+ * @param {Object} [schemas=null] - Schemas object passed down from App.
+ * @returns {string} Human-readable Item base type title.
+ */
 export function getBaseItemTypeTitle(context, schemas = null){
-    return getTitleForType(getBaseItemType(context));
+    return getTitleForType(getBaseItemType(context), schemas);
 }
 
 

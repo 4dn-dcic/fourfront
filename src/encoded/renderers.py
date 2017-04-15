@@ -107,7 +107,7 @@ def fix_request_method_tween_factory(handler, registry):
         if 'X_REQUEST_METHOD' in environ:
             environ['REQUEST_METHOD'] = environ['X_REQUEST_METHOD']
         return handler(request)
-
+        
     return fix_request_method_tween
 
 
@@ -267,7 +267,6 @@ def set_response_headers_tween_factory(handler, registry):
             and hasattr(request, 'auth0_expired')
             and not response.headers.get('X-Request-JWT', None)
         ):
-
             response = add_x_user_info_header(response, request)
 
         return response

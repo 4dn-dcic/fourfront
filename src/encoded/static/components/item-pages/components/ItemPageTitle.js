@@ -6,7 +6,15 @@ var { Filters } = require('./../../util');
 var _ = require('underscore');
 import { getTitleStringFromContext, isDisplayTitleAccession, getItemTypeTitle } from './../item';
 
-
+/**
+ * Renders page title appropriately for a provided props.context.
+ * 
+ * @export
+ * @memberof module:item-pages/components
+ * @class ItemPageTitle
+ * @prop {boolean} [showAccessionTitles] - If true, will render title if it is the accession. Otherwise, beyond Item type, the title will be hidden.
+ * @prop {Object} context - JSON representation of current Item page/view.
+ */
 export default class ItemPageTitle extends React.Component {
 
     constructor(props){
@@ -23,15 +31,36 @@ export default class ItemPageTitle extends React.Component {
     render(){
         var title = getTitleStringFromContext(this.props.context);
         var titleIsAccession = isDisplayTitleAccession(this.props.context, title);
-        return (
-            <h1 className="page-title">
-                { getItemTypeTitle(this.props.context, this.props.schemas) } <span className="subtitle prominent">
+
+        var itemTypeTitle;
+        if (this.props.showType){
+            itemTypeTitle = <span>{ getItemTypeTitle(this.props.context, this.props.schemas) }</span>;
+        }
+
+        console.log('SCHEMAS', this.props.schemas, getItemTypeTitle(this.props.context, this.props.schemas), this.props.context);
+
+        var subtitle;
+        if (this.props.showTitle){
+            subtitle = (
+                <span className="subtitle prominent" style={{ marginLeft : !this.props.showType ? 0 : null }}>
                     { !titleIsAccession || this.props.showAccessionTitles ? title : null }
                 </span>
+            );
+        }
+
+        return (
+            <h1 className="page-title">
+                { itemTypeTitle } { subtitle }
             </h1>
         );
     }
 
+}
+
+ItemPageTitle.defaultProps = {
+    'showAccessionTitles' : false,
+    'showTitle' : true,
+    'showType' : true
 }
 
 

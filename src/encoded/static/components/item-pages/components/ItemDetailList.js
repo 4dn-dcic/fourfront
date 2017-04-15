@@ -2,13 +2,14 @@
 
 var React = require('react');
 var _ = require('underscore');
-var Collapse = require('react-bootstrap').Collapse;
+import { Collapse, Button } from 'react-bootstrap';
 var ReactTooltip = require('react-tooltip');
 var { console, object, Filters } = require('./../../util');
 var globals = require('./../../globals');
 import PartialList from './PartialList';
 var FilesInSetTable = require('./FilesInSetTable');
-var itemTitle = require('./../item').title;
+import { getTitleStringFromContext } from './../item';
+import JSONTree from 'react-json-tree';
 
 /**
  * @memberof module:item-pages/components.ItemDetailList
@@ -61,7 +62,9 @@ var Detail = React.createClass({
          * @param {Object|Array|string} item - Item(s) to render recursively.
          */
         formValue : function (schemas, item, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
-            if(Array.isArray(item)) {
+            if (item === null){
+                return <span>No Value</span>;
+            } else if (Array.isArray(item)) {
 
                 if (keyPrefix === 'files_in_set'){
                     return (
@@ -78,8 +81,8 @@ var Detail = React.createClass({
                         }
                     </ul>
                 );
-            } else if (typeof item === 'object') {
-                var title = itemTitle({ 'context' : item});
+            } else if (typeof item === 'object' && item !== null) {
+                var title = getTitleStringFromContext(item);
 
                 // if the following is true, we have an embedded object
                 if (item.display_title && item.link_id){
@@ -178,6 +181,9 @@ var Detail = React.createClass({
              */
             toggleLink : function(title = this.props.title, isOpen = this.state.isOpen){
                 var iconType = isOpen ? 'icon-minus' : 'icon-plus';
+                if (title.toLowerCase() === 'no title found'){
+                    title = isOpen ? "Collapse" : "Expand";
+                }
                 return (
                     <span className="subitem-toggle">
                         <a href="#" className="link" onClick={this.handleToggle}>
@@ -322,20 +328,43 @@ var ItemDetailList = module.exports = React.createClass({
     },
 
     getInitialState : function(){
-        return { 'collapsed' : true };
+        return {
+            'collapsed' : true,
+            'showingJSON' : false
+        };
     },
 
     seeMoreButton : function(){
         if (typeof this.props.collapsed === 'boolean') return null;
         return (
-            <h5 className="item-page-detail-toggle-button btn btn-info btn-block" onClick={()=>{
+            <button className="item-page-detail-toggle-button btn btn-default btn-block" onClick={()=>{
                 this.setState({ collapsed : !this.state.collapsed });
-            }}>{ this.state.collapsed ? "See advanced information" : "Hide" }</h5>
+            }}>{ this.state.collapsed ? "See advanced information" : "Hide" }</button>
         );
     },
 
     componentDidMount : function(){
         ReactTooltip.rebuild();
+    },
+
+    componentDidUpdate : function(pastProps, pastState){
+        if (this.state.showingJSON === false && pastState.showingJSON === true){
+            ReactTooltip.rebuild();
+        }
+    },
+
+    toggleJSONButton : function(){
+        return (
+            <button type="button" className="btn btn-block btn-default" onClick={()=>{
+                this.setState({ 'showingJSON' : !this.state.showingJSON });
+            }}>
+                { this.state.showingJSON ?
+                    <span><i className="icon icon-fw icon-list"/> View as List</span>
+                    :
+                    <span><i className="icon icon-fw icon-code"/> View as JSON</span>
+                }
+            </button>
+        );
     },
     
     render : function(){
@@ -344,12 +373,30 @@ var ItemDetailList = module.exports = React.createClass({
         else collapsed = this.state.collapsed;
         return (
             <div className="item-page-detail">
-                <Detail
-                    context={this.props.context}
-                    schemas={this.props.schemas}
-                    open={!collapsed}
-                />
-                { this.seeMoreButton() }
+                { !this.state.showingJSON ?
+                    <div className="overflow-hidden">
+                        <Detail
+                            context={this.props.context}
+                            schemas={this.props.schemas}
+                            open={!collapsed}
+                        />
+                        <div className="row">
+                            <div className="col-xs-6">{ this.seeMoreButton() }</div>
+                            <div className="col-xs-6">{ this.toggleJSONButton() }</div>
+                        </div>
+                    </div>
+                    :
+                    <div className="overflow-hidden">
+                        <div className="json-tree-wrapper">
+                            <JSONTree data={this.props.context} />
+                        </div>
+                        <br/>
+                        <div className="row">
+                            <div className="col-xs-12 col-sm-6 pull-right">{ this.toggleJSONButton() }</div>
+                        </div>
+                    </div>
+                }
+                
             </div>
         );
     }

@@ -87,7 +87,12 @@ export class TopRow extends React.Component {
         var viewUrl = url.format(urlParts);
         return (
             <div className="expset-indicator right view-ajax-button">
-                <a href={viewUrl} target="_blank" onClick={(e)=>{
+                <i className="icon icon-fw icon-file-code-o"/> <a 
+                    href={viewUrl}
+                    className="inline-block"
+                    target="_blank"
+                    data-tip="Open raw JSON in new window"
+                    onClick={(e)=>{
                     if (window && window.open){
                         e.preventDefault();
                         window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');

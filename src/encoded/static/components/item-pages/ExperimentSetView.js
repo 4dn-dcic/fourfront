@@ -312,7 +312,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         return (
             <div className={itemClass}>
 
-                <ItemPageTitle context={this.props.context} />
+                <ItemPageTitle context={this.props.context} schemas={this.props.schemas} />
                 <ExperimentSetHeader {...this.props} />
 
                 <div className="row">

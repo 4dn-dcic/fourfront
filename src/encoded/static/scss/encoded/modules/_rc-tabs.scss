@@ -567,10 +567,14 @@
       border-right: 1px solid #f8f8f8;
     }
 
-    &:hover:not(.rc-tabs-tab-active) {
+    &:hover:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled) {
       transition: none;
       background-color: #fafafa;
       border-color: rgba(34, 101, 109, 0.33);
+    }
+
+    &.rc-tabs-tab-disabled {
+      cursor: none;
     }
 
     &:hover.rc-tabs-tab-active {

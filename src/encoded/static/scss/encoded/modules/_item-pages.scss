@@ -342,12 +342,12 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 		.item-label, .item-value {
 			> div {
-				min-height: 20px;
+				min-height: 26px;
 				height: 100%;
 				word-break: break-all;
 				border-bottom: 1px solid #eee;
-				padding-top: 5px;
-				padding-bottom: 5px;
+				padding-top: 8px;
+				padding-bottom: 8px;
 			}
 		}
 		.item-label {
@@ -390,6 +390,17 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	}
 
+}
+
+/** JSON Tree Wrapper (e.g. fallback view) **/
+
+.json-tree-wrapper {
+	border-radius: 4px;
+	overflow: hidden;
+	> ul {
+		padding: 8px 16px 16px !important;
+		margin: 0 !important;
+	}
 }
 
 /*** Partial or Expandable Lists ***/

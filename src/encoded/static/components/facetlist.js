@@ -355,8 +355,7 @@ var Facet = React.createClass({
                 >
                     <div className="facet-static-row clearfix">
                         <h5 className="facet-title">
-                            <span className="inline-block">{ facet.title || facet.field }</span>
-                            <FacetList.Facet.InfoIcon children={description}/>
+                            <span className="inline-block" data-tip={description} data-place="right">{ facet.title || facet.field }</span>
                         </h5>
                         <div className={
                             "facet-item term" +
@@ -402,8 +401,7 @@ var Facet = React.createClass({
                             (this.state.facetOpen ? "icon-angle-down" : "icon-angle-right")
                         }></i>
                     </span>
-                    <span className="inline-block">{ facet.title || facet.field }</span>
-                    <FacetList.Facet.InfoIcon children={description}/>
+                    <span className="inline-block" data-tip={description} data-place="right">{ facet.title || facet.field }</span>
                 </h5>
                 { this.state.facetOpen ?
                 <div className="facet-list nav">

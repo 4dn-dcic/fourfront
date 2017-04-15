@@ -17,15 +17,7 @@
  */
 module.exports.FormattedInfoBlock = require('./FormattedInfoBlock');
 
-/**
- * Renders page title appropriately for a provided props.context.
- * 
- * @memberof module:item-pages/item-view
- * @type {Component}
- * @namespace
- * @prop {boolean} [showAccessionTitles] - If true, will render title if it is the accession. Otherwise, beyond Item type, the title will be hidden.
- * @prop {Object} context - JSON representation of current Item page/view.
- */
+
 import ItemPageTitle, { getBaseItemType, getTitleStringFromContext, getBaseItemTypeTitle, isDisplayTitleAccession } from './ItemPageTitle';
 module.exports.ItemPageTitle = ItemPageTitle;
 
@@ -100,4 +92,4 @@ module.exports.ItemDetailList = require('./ItemDetailList');
  * @namespace
  * @type {Component}
  */
-module.exports.AuditView = require('./AuditView');
+module.exports.AuditView = require('./AuditView').default;
