@@ -3,12 +3,15 @@
 var React = require('react');
 var d3 = require('d3');
 var _ = require('underscore');
+import { Collapse } from 'react-bootstrap';
 var globals = require('./../globals');
 var { getElementTop, animateScrollTo } = require('./../util/layout');
+var { isServerSide } = require('./../util');
 
 var TableOfContents = module.exports = React.createClass({
 
     statics : {
+
         TableEntry : React.createClass({
 
             getDefaultProps : function(){
@@ -27,10 +30,19 @@ var TableOfContents = module.exports = React.createClass({
                 };
             },
 
+            getInitialState : function(){
+                if (this.props.collapsible){
+                    return {
+                        open : false
+                    };
+                } else return null;
+            },
+
             shouldComponentUpdate : function(nextProps, nextState){
                 if (
                     nextProps.mounted !== this.props.mounted ||
-                    nextProps.pageScrollTop !== this.props.pageScrollTop
+                    nextProps.pageScrollTop !== this.props.pageScrollTop ||
+                    nextState.open !== this.state.open
                     //this.determineIfActive(nextProps) !== this.determineIfActive(this.props)
                 ){
                     return true;
@@ -62,9 +74,6 @@ var TableOfContents = module.exports = React.createClass({
             },
 
             handleClick : _.throttle(function(){
-
-
-                
 
                 var elementTop;
                 if (this.props.link === "top") {
@@ -185,17 +194,35 @@ var TableOfContents = module.exports = React.createClass({
                     subtitle = title;
                     title = "Top of Page";
                 }
+
+                var childHeaders = this.props.content.props.children.filter((child,i,a) =>
+                    TableOfContents.isHeaderComponent(child, this.props.maxHeaderDepth || 6) && child.props.type === 'h' + (this.props.depth + 1)
+                );
                 
+                var collapsibleButton;
+                if (this.props.collapsible && childHeaders.length > 0){
+                    collapsibleButton = <i
+                        className={"inline-block icon icon-fw icon-" + (this.state.open ? 'minus' : 'plus')}
+                        onClick={(e)=> {
+                            console.log(e);
+                            console.log(this.state);
+                            this.setState({ open : !this.state.open });
+                        }}
+                    />;
+                }
 
                 if (typeof this.props.link === 'string' && this.props.link.length > 0){
                     title = (
-                        <a href={'#' + this.props.link} onClick={(e)=>{ 
-                            e.preventDefault(); 
-                            //e.target.blur();
-                            this.handleClick();
-                        }}>
-                            { title }
-                        </a>
+                        <div className="title-link-wrapper">
+                            { collapsibleButton }
+                            <a href={'#' + this.props.link} onClick={(e)=>{ 
+                                e.preventDefault(); 
+                                //e.target.blur();
+                                this.handleClick();
+                            }}>
+                                { title }
+                            </a>
+                        </div>
                     );
                 }
 
@@ -216,19 +243,27 @@ var TableOfContents = module.exports = React.createClass({
                         (active ? ' active' : '')
                     } data-depth={this.props.depth} ref="listItem">
                         { title }
-                        <TableOfContents.EntryChildren
-                            active={active}
-                            content={this.props.content}
-                            depth={this.props.depth}
-                            mounted={this.props.mounted}
-                            listStyleTypes={this.props.listStyleTypes}
-                            pageScrollTop={this.props.pageScrollTop}
-                            nextHeader={this.props.nextHeader}
-                            children={this.props.children}
-                            navigate={this.props.navigate}
-                            link={this.props.link}
-                            maxHeaderDepth={this.props.maxHeaderDepth}
-                        />
+                       
+                        <Collapse in={this.state === null || this.state.open === true} transitionAppear>
+                            <div>
+                                <TableOfContents.EntryChildren
+                                    active={active}
+                                    content={this.props.content}
+                                    childHeaders={childHeaders}
+                                    depth={this.props.depth}
+                                    mounted={this.props.mounted}
+                                    listStyleTypes={this.props.listStyleTypes}
+                                    pageScrollTop={this.props.pageScrollTop}
+                                    nextHeader={this.props.nextHeader}
+                                    children={this.props.children}
+                                    navigate={this.props.navigate}
+                                    link={this.props.link}
+                                    maxHeaderDepth={this.props.maxHeaderDepth}
+                                    parentClosed={this.state && !this.state.open}
+                                />
+                            </div>
+                        </Collapse>
+
                     </li>
                 );
             }
@@ -241,11 +276,12 @@ var TableOfContents = module.exports = React.createClass({
                 if (nextProps.depth === 0) return true;
                 if (nextProps.mounted !== this.props.mounted) return true;
                 if (nextProps.active !== this.props.active) return true;
+                if (nextProps.parentClosed !== this.props.parentClosed) return true;
                 return false;
             },
 
             getHeadersFromContent : function(){
-                //if (Array.isArray(this.childHeaders) && this.childHeaders.length > 0) return this.childHeaders;
+                if (Array.isArray(this.childHeaders) && this.childHeaders.length > 0) return this.childHeaders;
                 if (!TableOfContents.isContentJSX(this.props.content)) return [];
                 return this.props.content.props.children.filter((child,i,a) =>
                     TableOfContents.isHeaderComponent(child, this.props.maxHeaderDepth || 6) && child.props.type === 'h' + (this.props.depth + 1)
@@ -287,10 +323,12 @@ var TableOfContents = module.exports = React.createClass({
             children : function(){
                 var childHeaders = this.getHeadersFromContent();
                 if (childHeaders && childHeaders.length){
+                    console.log(this.props.depth, childHeaders);
                     return childHeaders.map((h, index) =>{
                         var hString = TableOfContents.textFromReactChildren(h.props.children);
                         var childContent = this.getSubsequentChildHeaders(h);
                         var link = TableOfContents.slugify(hString);
+                        var collapsible = this.props.depth >= 1;
                         return (
                             <TableOfContents.TableEntry 
                                 link={link}
@@ -304,6 +342,7 @@ var TableOfContents = module.exports = React.createClass({
                                 nextHeader={childContent.nextMajorHeader || this.props.nextHeader || null}
                                 navigate={this.props.navigate}
                                 maxHeaderDepth={this.props.maxHeaderDepth}
+                                collapsible={collapsible}
                             />
                         );
                     });
@@ -490,6 +529,13 @@ var TableOfContents = module.exports = React.createClass({
             content = sectionEntries.call(this);
         }
 
+        var marginTop = 0; // Account for test warning
+        if (this.state.mounted && !isServerSide()){
+            var testWarningElem = document.getElementsByClassName('navbar-container test-warning-visible');
+            marginTop = (testWarningElem[0] && testWarningElem[0].offsetHeight) || marginTop;
+        }
+
+
         return (
             <div className="table-of-contents" ref="container" style={{
                 width : this.state.mounted ?
@@ -502,7 +548,8 @@ var TableOfContents = module.exports = React.createClass({
                             ( this.props.maxHeight ||
                               this.state.scrollTop >= 40 ? window.innerHeight - 70 : window.innerHeight - 115 ) :
                             null
-                    : 1000)
+                    : 1000),
+                marginTop : marginTop
             }}>
                 <h4 className="toc-title">{ this.props.title }</h4>
                 <ol className="inner" style={{ 
