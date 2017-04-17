@@ -1,9 +1,9 @@
 'use strict';
 
-/** 
- * Written by Alex, based on Carl's homepage test, to test the 'Help' page 
+/**
+ * Written by Alex, based on Carl's homepage test, to test the 'Help' page
  * rendered by help.js.
- * 
+ *
  * Includes check for 1+ help section, for current 4 section titles,
  * and for functionality of .slide-display slider.
  */
@@ -44,9 +44,9 @@ describe('Testing help.js', function() {
 
         // Check that there's titles.
         expect(
-            helpEntries.filter(function(el){ 
+            helpEntries.filter(function(el){
                 return (
-                    el && el.children.length && 
+                    el && el.children.length &&
                     el.children[0].className.indexOf('fourDN-header') > -1
                 );
             }).length
@@ -54,9 +54,9 @@ describe('Testing help.js', function() {
 
         // Check that there's paragraphs.
         expect(
-            helpEntries.filter(function(el){ 
+            helpEntries.filter(function(el){
                 return (
-                    el && el.children.length && 
+                    el && el.children.length &&
                     (
                         el.children[0].className.indexOf('fourDN-content') > -1 ||
                         (el.children[1] && el.children[1].className.indexOf('fourDN-content') > -1)
@@ -107,16 +107,13 @@ describe('Testing help.js', function() {
         TestUtils.Simulate.click(prevButton); // Slide 1 -> Slide 0
         expect(originalSlideImage.src == originalSlideImageURL).toBe(true);
 
-        // Check to make sure slide deck loops (going out of index bounds)
-        TestUtils.Simulate.click(prevButton); // Slide 0 -> Slide N-1
+        // Check to make sure slide deck doesn't loop
+        TestUtils.Simulate.click(prevButton); // Slide 0 -> Slide 0
         expect(originalSlideImage.src.length).toBeGreaterThan(0); // Img URL is a string w/ length
-        expect(originalSlideImage.src == originalSlideImageURL).toBe(false);
-        TestUtils.Simulate.click(nextButton); // Slide N-1 -> Slide 0
         expect(originalSlideImage.src == originalSlideImageURL).toBe(true);
-
     });
 
-    
+
 
 
 
