@@ -117,7 +117,7 @@
 .rc-tabs-tab:hover {
   //color: #23c0fa;
   color: #000;
-  text-shadow: 0 0 0;
+  //text-shadow: 0 0 0;
 }
 .rc-tabs-tab-active,
 .rc-tabs-tab-active:hover {
@@ -533,25 +533,33 @@
     margin-bottom: 10px;
 }
 
+.rc-tabs-top {
+  box-shadow: 0 -4px 5px -5px rgba(0,0,0,0.33);
+}
+
 .rc-tabs-top .rc-tabs-bar {
   border-bottom : 1px solid #bbb;
   border-bottom-color: #22656d;
   border-top: 1px solid #ccc;
   border-top-color: #22656d;
-  box-shadow : 0 2px 4px -2px rgba(0,0,0,0.33);
+  //box-shadow : 0 2px 4px -2px rgba(0,0,0,0.33);
   //border-left: 1px solid #ddd;
   //border-right: 1px solid #ddd;
   //border-radius: 4px;
+  border-top: none;
+  border-bottom: none;
+  background: #22656d;
   .rc-tabs-nav {
-    padding: 5px 0;
+    padding: 4px 0px 4px;
   }
+  //border-radius: 2px;
 }
 
 .rc-tabs-bar {
 
   .rc-tabs-tab {
-    padding-left: 24px;
-    padding-right: 24px;
+    padding-left: 18px;
+    padding-right: 18px;
     margin-right: 0px;
     height: 38px;
     line-height: 36px;
@@ -561,28 +569,42 @@
     position: relative;
     z-index: 10;
     transition : border-color .1s ease-out;
-    border-left: 1px solid #f8f8f8;
+    color : #fff;
 
-    &:last-child {
-      border-right: 1px solid #f8f8f8;
+    &:not(:nth-child(1)):not(:nth-child(2)){
+      border-left: 1px solid rgba(255,255,255,0.33);
     }
+
+    //&:last-child {
+    //  border-right: 1px solid rgba(255,255,255,0.2);
+    //}
 
     &:hover:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled) {
       transition: none;
-      background-color: #fafafa;
-      border-color: rgba(34, 101, 109, 0.33);
+      //background-color: #fafafa;
+      border-color: rgba(255, 255, 255, 0.33);
+      border-bottom-color: transparent;
+      border-top-color: transparent;
+      //border-bottom-color: rgba(255, 255, 255, 0.2);
+      background-color: rgba(255,255,255,0.1);
     }
 
     &.rc-tabs-tab-disabled {
-      cursor: none;
+      color: rgba(255,255,255,0.66) !important;
+      //cursor: none;
     }
 
     &:hover.rc-tabs-tab-active {
-      transition: border-color .6s ease-out;
+      transition: border-color .6s ease-out, color .3s .1s ease-out, background-color .3s .2s ease-out;
     }
 
     &.rc-tabs-tab-active {
       border-color: transparent;
+      color: #000;
+    }
+
+    &:hover + .rc-tabs-tab:not(.rc-tabs-tab-active) {
+      border-left-color: transparent;
     }
 
     &.rc-tabs-tab-active + .rc-tabs-tab:not(:hover) {
@@ -617,7 +639,8 @@
       }
 
       &.icon-ban, &.icon-exclamation-circle {
-          color : $audit-color-error;
+          //color : $audit-color-error;
+          color: #ff5757;
       }
 
     }
@@ -637,6 +660,8 @@
   height: 48px;
   background: none;
   border: 2px solid #22656d;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  border-bottom: none;
   border-left: none;
   border-right: none;
   background-color: #fcfcfc;

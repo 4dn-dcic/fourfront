@@ -316,6 +316,19 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 <ExperimentSetHeader {...this.props} />
 
                 <div className="row">
+                    <div className="col-sm-12">
+                    { this.props.context.produced_in_pub ?
+                        <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
+                            <div className="more-details">{ 
+                                this.props.context.produced_in_pub.authors || this.props.context.produced_in_pub.abstract || this.props.context.produced_in_pub.date_published || null
+                            }</div>
+                            <br/>
+                        </Publications.DetailBlock>
+                        : null }
+                    </div>
+                </div>
+
+                <div className="row">
 
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ?
@@ -336,18 +349,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
-                        { this.props.context.produced_in_pub ?
-                        <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
-                            <div className="more-details">{ 
-                                this.props.context.produced_in_pub.authors || this.props.context.produced_in_pub.abstract || this.props.context.produced_in_pub.date_published || null
-                            }</div>
-                        </Publications.DetailBlock>
-                        : null }
-
-                        <br/>
-
                         <TabbedView contents={this.getTabViewContents()} />
-
                     </div>
 
                 </div>

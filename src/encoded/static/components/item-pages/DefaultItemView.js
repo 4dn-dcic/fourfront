@@ -110,26 +110,27 @@ var DefaultItemView = module.exports = React.createClass({
                         <hr/>
                         : null }
 
-                        { typeof context.submitted_by !== 'undefined' ?
+                        { typeof context.submitted_by !== 'undefined' && ((this.state && typeof this.state.details_submitted_by !== 'undefined') || context.submitted_by) ?
                         <div>
                             { FormattedInfoBlock.User(
                                 this.state && typeof this.state.details_submitted_by !== 'undefined' ?
                                 this.state.details_submitted_by : context.submitted_by
                             ) }
+                            { typeof context.lab !== 'undefined' ? <hr/> : null }
                         </div>
                         : null }
 
-                        { typeof context.lab !== 'undefined' ? <hr/> : null }
+                        
                         { typeof context.lab !== 'undefined' ?
                         <div className>
                             { FormattedInfoBlock.Lab(
                                 this.state && typeof this.state.details_lab !== 'undefined' ?
                                 this.state.details_lab : context.lab
                             ) }
+                            { typeof context.award !== 'undefined' ? <hr/> : null }
                         </div>
                         : null }
 
-                        { typeof context.award !== 'undefined' ? <hr/> : null }
                         { typeof context.award !== 'undefined' ?
                         <div className>
                             { FormattedInfoBlock.Award(

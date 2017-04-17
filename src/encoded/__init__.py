@@ -224,6 +224,27 @@ def app_version(config):
         config.registry.settings['snovault.app_version'] = version
 
 
+def add_schemas_to_html_responses(config):
+
+    from pyramid.events import subscriber
+    from pyramid.events import BeforeRender
+
+    def add_schemas(event):
+        request = event.get('request')
+        if request is not None:
+            if 'text/html' in request.accept or 'application/html' in request.accept:
+                if event.rendering_val.get('@type') is not None:
+                    #print(dir(event.get('renderer_info')))
+                    #print('\n\n\n')
+                    #print(event.rendering_val)
+                    #print(event.rendering_val.get('@type'))
+                    #print(request.accept)
+                    event.rendering_val['schemas'] = 'test'
+
+    config.add_subscriber(add_schemas, BeforeRender)
+
+
+
 def main(global_config, **local_config):
     """ This function returns a Pyramid WSGI application.
     """
@@ -254,6 +275,7 @@ def main(global_config, **local_config):
     config.commit()  # commit so search can override listing
 
     # Render an HTML page to browsers and a JSON document for API clients
+    config.include(add_schemas_to_html_responses)
     config.include('.renderers')
     config.include('.authentication')
     config.include('.server_defaults')

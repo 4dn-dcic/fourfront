@@ -85,7 +85,7 @@ var Detail = React.createClass({
                 var title = getTitleStringFromContext(item);
 
                 // if the following is true, we have an embedded object
-                if (item.display_title && item.link_id){
+                if (item.display_title && typeof item.link_id === 'string'){
                     var format_id = item.link_id.replace(/~/g, "/")
                     return (
                         <a href={format_id}>
@@ -181,7 +181,7 @@ var Detail = React.createClass({
              */
             toggleLink : function(title = this.props.title, isOpen = this.state.isOpen){
                 var iconType = isOpen ? 'icon-minus' : 'icon-plus';
-                if (title.toLowerCase() === 'no title found'){
+                if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
                     title = isOpen ? "Collapse" : "Expand";
                 }
                 return (
@@ -310,10 +310,14 @@ var Detail = React.createClass({
         return (
             <PartialList
                 persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
-                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key, context['@type'][0]) }</PartialList.Row>
+                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
+                        { Detail.formValue(this.props.schemas,context[key], key, context['@type'] && context['@type'][0]) }
+                    </PartialList.Row>
                 )}
                 collapsible={ collapsibleKeys.map((key,i) =>
-                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key, context['@type'][0]) }</PartialList.Row>
+                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
+                        { Detail.formValue(this.props.schemas,context[key], key, context['@type'] && context['@type'][0]) }
+                    </PartialList.Row>
                 )}
                 open={this.props.open}
             />

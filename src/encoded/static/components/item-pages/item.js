@@ -108,7 +108,6 @@ globals.content_views.register(Item, 'Item');
 /**** Utility & Helper Functions ****/
 /************************************/
 
-
 /**
  * Function to determine title for each Item object.
  * 
@@ -125,8 +124,9 @@ export function title(props) {
         context.download        ||
         context.accession       ||
         context.uuid            ||
-        (typeof context['@id'] === 'string' ? context['@id'] :
-        'No title found')
+        ( typeof context['@id'] === 'string' ? context['@id'] : 
+            null //: 'No title found'
+        )
     );
 };
 
@@ -174,7 +174,10 @@ export function isDisplayTitleAccession(context, displayTitle = null){
  * @returns {string} Most specific type's name.
  */
 export function getItemType(context){
-    if (!Array.isArray(context['@type']) || context['@type'].length < 1) throw new Error("No @type on Item object (context).");
+    if (!Array.isArray(context['@type']) || context['@type'].length < 1){
+        return null;
+        //throw new Error("No @type on Item object (context).");
+    }
     return context['@type'][0];
 }
 
@@ -188,7 +191,7 @@ export function getItemType(context){
  */
 export function getBaseItemType(context){
     var types = context['@type'];
-    if (!Array.isArray(types) || types.length === 0) return "Unknown";
+    if (!Array.isArray(types) || types.length === 0) return null;
     var i = 0;
     while (i < types.length){
         if (types[i + 1] === 'Item'){
@@ -226,6 +229,8 @@ export function getSchemaForItemType(itemType, schemas = null){
  * @returns {string} Human-readable title.
  */
 export function getTitleForType(atType, schemas = null){
+    if (!atType) return null;
+
     // Grab schemas from Filters if we don't have them but they've been cached into there from App.
     schemas = schemas || (Filters.getSchemas && Filters.getSchemas());
 
