@@ -204,8 +204,6 @@ var TableOfContents = module.exports = React.createClass({
                     collapsibleButton = <i
                         className={"inline-block icon icon-fw icon-" + (this.state.open ? 'minus' : 'plus')}
                         onClick={(e)=> {
-                            console.log(e);
-                            console.log(this.state);
                             this.setState({ open : !this.state.open });
                         }}
                     />;
