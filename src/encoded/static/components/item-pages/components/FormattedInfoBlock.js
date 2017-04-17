@@ -307,7 +307,6 @@ var FormattedInfoBlock = module.exports = React.createClass({
          */
         User : function(details_user, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
             if (details_user && typeof details_user.error !== 'undefined' && details_user.error) {
-                console.log(details_user);
                 return null;
                 //return FormattedInfoBlock.Error.apply(this, arguments);
             }

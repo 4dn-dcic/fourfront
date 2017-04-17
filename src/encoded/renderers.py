@@ -107,7 +107,7 @@ def fix_request_method_tween_factory(handler, registry):
         if 'X_REQUEST_METHOD' in environ:
             environ['REQUEST_METHOD'] = environ['X_REQUEST_METHOD']
         return handler(request)
-        
+
     return fix_request_method_tween
 
 
