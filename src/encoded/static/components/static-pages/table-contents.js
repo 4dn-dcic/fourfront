@@ -195,9 +195,9 @@ var TableOfContents = module.exports = React.createClass({
                     title = "Top of Page";
                 }
 
-                var childHeaders = this.props.content.props.children.filter((child,i,a) =>
+                var childHeaders = TableOfContents.isContentJSX(this.props.content) ? this.props.content.props.children.filter((child,i,a) =>
                     TableOfContents.isHeaderComponent(child, this.props.maxHeaderDepth || 6) && child.props.type === 'h' + (this.props.depth + 1)
-                );
+                ) : [];
                 
                 var collapsibleButton;
                 if (this.props.collapsible && childHeaders.length > 0){
