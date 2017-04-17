@@ -23,7 +23,7 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
-    embedded = ["individual", "individual.organism"]
+    embedded = ["individual", "individual.organism", "tissue", "tissue.name"]
 
     def _update(self, properties, sheets=None):
         name2info = {
@@ -92,7 +92,7 @@ class Biosource(Item):
                            'induced pluripotent stem cell line', 'stem cell']
         if biosource_type == "tissue":
             if tissue:
-                return tissue
+                return request.embed(tissue, '@@object').get('term_name')
         elif biosource_type in cell_line_types:
             if cell_line:
                 if cell_line_tier:

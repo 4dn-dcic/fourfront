@@ -110,10 +110,10 @@ def mboI(testapp, worthington_biochemical, lab, award):
 
 
 @pytest.fixture
-def lung_biosource(testapp, lab, award):
+def lung_biosource(testapp, lab, award, lung_oterm):
     item = {
         "biosource_type": "tissue",
-        "tissue": "lung",
+        'tissue': lung_oterm['@id'],
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -467,3 +467,34 @@ def basic_genomic_region(testapp, lab, award):
         'lab': lab['@id'],
     }
     return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def ontology(testapp):
+    data = {
+            "uuid": "530006bc-8535-4448-903e-854af460b254",
+            "ontology_name": "Experimental Factor Ontology",
+            "ontology_url": "http://www.ebi.ac.uk/efo/",
+            "download_url": "http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw",
+            "namespace_url": "http://www.ebi.ac.uk/efo/",
+            "ontology_prefix": "EFO",
+            "description": "The description",
+            "notes": "The download",
+        }
+    return testapp.post_json('/ontology', data).json['@graph'][0]
+
+
+@pytest.fixture
+def oterm(ontology):
+    return {
+        "uuid": "530036bc-8535-4448-903e-854af460b254",
+        "preferred_name": "preferred lung name",
+        "term_name": "lung",
+        "term_id": "UBERON:0002048",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0002048",
+        "source_ontology": ontology['@id']
+    }
+
+@pytest.fixture
+def lung_oterm(oterm, testapp):
+    return testapp.post_json('/ontology_term', oterm).json['@graph'][0]

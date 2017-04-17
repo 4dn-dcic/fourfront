@@ -135,7 +135,8 @@
           "tissue": {
               "title": "Tissue name",
               "description": "Anatomy (UBERON) Ontology term for the tissue used.",
-              "type":  "string"
+              "type":  "string",
+              "linkTo": "OntologyTerm"
           },
           "biosource_vendor": {
                 "title": "Biosource Vendor",
