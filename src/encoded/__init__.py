@@ -223,7 +223,7 @@ def app_version(config):
 
         config.registry.settings['snovault.app_version'] = version
 
-
+'''
 def add_schemas_to_html_responses(config):
 
     from pyramid.events import BeforeRender
@@ -274,7 +274,7 @@ def add_schemas_to_html_responses(config):
                     event.rendering_val['schemas'] = schemasDict
 
     config.add_subscriber(add_schemas, BeforeRender)
-
+'''
 
 
 def main(global_config, **local_config):
