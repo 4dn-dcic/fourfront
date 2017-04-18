@@ -12,7 +12,8 @@ from snovault.validators import (
 from pyramid.view import view_config
 from .base import (
     Item,
-    collection_add
+    collection_add,
+    embed_if_you_can,
     # paths_filtered_by_status,
 )
 
@@ -137,21 +138,30 @@ def validate_biosource_tissue(context, request):
     term_ok = False
     tissue = data['tissue']
     # print(tissue)
-    res = request.embed(tissue)
-    # print(res)
-    ont = res.get('source_ontology')
-    print(ont)
-    if ont is not None:
-        try:
-            ontname = ont.get('ontology_name')
-        except AttributeError:
-            ont = request.embed(ont)
-            ontname = ont.get('ontology_name')
+    tissue = embed_if_you_can(request, tissue)
+    ontology = None
+    ontology_name = None
+    try:
+        ontology = tissue.get('source_ontology')
+    except AttributeError:
+        pass
 
-        if ontname is not None and (ontname == 'Uberon' or ontname == '4DN Controlled Vocabulary'):
-            term_ok = True
+    if ontology is not None:
+        ontology = embed_if_you_can(request, ontology)
+        try:
+            ontology_name = ontology.get('ontology_name')
+        except AttributeError:
+            pass
+
+    if ontology_name is not None and (
+            ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
+        term_ok = True
     if not term_ok:
-        request.errors.add('body', None, 'Term: ' + tissue + ' is not found in UBERON')
+        try:
+            tissuename = tissue.get('term_name')
+        except AttributeError:
+            tissuename = str(tissue)
+        request.errors.add('body', None, 'Term: ' + tissuename + ' is not found in UBERON')
     else:
         request.validated.update({})
 

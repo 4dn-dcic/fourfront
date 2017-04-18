@@ -81,10 +81,19 @@ def test_validate_biosource_tissue_invalid(testapp, award, lab, lung_oterm, onto
     assert 'not found in UBERON' in errors[0]['description']
 
 
-def test_validate_biosource_tissue_valid(testapp, award, lab, lung_oterm):
+def test_validate_biosource_tissue_valid_atid(testapp, award, lab, lung_oterm):
     biosource = {'award': award['@id'],
                  'lab': lab['@id'],
                  'biosource_type': 'tissue',
                  'tissue': lung_oterm['@id']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_biosource_tissue_valid_uuid(testapp, award, lab, lung_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'tissue',
+                 'tissue': lung_oterm['uuid']}
     res = testapp.post_json('/biosource', biosource, status=201)
     assert not res.json.get('errors')
