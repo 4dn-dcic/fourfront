@@ -17,7 +17,7 @@ var Listing = function (result, schemas) {
         props = {'context': result,  'key': result['@id'], 'schemas': schemas};
     }
     if(props){
-        return <ResultTableEntry {...props} />;
+        return(<ResultTableEntry {...props} />);
     }else{
         return null;
     }
@@ -45,7 +45,7 @@ class ResultTableEntry extends React.Component{
             <div className="result-table-result">
                 <div className="row">
                     <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
-                        <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle} style={{"marginRight":"3px"}}>
+                        <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle} style={{"marginRight":"3px", "border":"none"}}>
                             <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                         </Button>
                         <a href={processed_link}>{result.display_title}</a>
