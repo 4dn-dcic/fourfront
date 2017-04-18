@@ -7,8 +7,14 @@ import json
 import logging
 import os.path
 import boto3
-# from pyramid.settings import asbool
-# from snovault.storage import User
+
+import argparse
+
+from pyramid.path import DottedNameResolver
+from pyramid.paster import get_app
+from encoded import configure_dbsession
+import sys
+import os
 
 text = type(u'')
 
@@ -211,8 +217,8 @@ def read_single_sheet(path, name=None):
     """
     from zipfile import ZipFile
     from . import xlreader
-
-    if name is None:
+    # import pdb; pdb.set_trace()
+    if name is None or path.endswith('.json'):
         root, ext = os.path.splitext(path)
         stream = open(path, 'r')
 
@@ -498,7 +504,7 @@ def process(rows):
         pass
 
 
-def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None, exclude=None):
+def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, exclude=None):
     """smth."""
     pipeline = [
         skip_rows_with_all_key_value(test='skip'),
@@ -520,7 +526,10 @@ def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None
         ),
         add_attachments(docsdir),
     ]
-    if phase == 1:
+    # special case for incremental ontology updates
+    if phase == 'patch_ontology':
+        method = 'PATCH'
+    elif phase == 1:
         method = 'POST'
         pipeline.extend(PHASE1_PIPELINES.get(item_type, []))
     elif phase == 2:
@@ -631,23 +640,37 @@ PHASE2_PIPELINES = {
 }
 
 
-def load_all(testapp, filename, docsdir, test=False):
+def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
     """smth."""
     # exclude_list is for items that fail phase1 to be excluded from phase2
+    # import pdb; pdb.set_trace()
     exclude_list = []
-    for item_type in ORDER:
+    order = list(ORDER)
+    if itype is not None:
+        order = [itype]
+    for item_type in order:
         try:
             source = read_single_sheet(filename, item_type)
         except ValueError:
             logger.error('Opening %s %s failed.', filename, item_type)
             continue
-        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=1)
+
+        # special case for patching ontology terms
+        if item_type == 'ontology_term' and phase == 'patch_ontology':
+            force_return = True
+        else:
+            force_return = False
+            phase = 1
+
+        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=phase)
         processed_data = combine(source, pipeline)
         for result in processed_data:
             if result.get('_response') and result.get('_response').status_code not in [200, 201]:
                 exclude_list.append(result['uuid'])
+    if force_return:
+        return
 
-    for item_type in ORDER:
+    for item_type in order:
         if item_type not in PHASE2_PIPELINES:
             continue
         try:
@@ -659,7 +682,7 @@ def load_all(testapp, filename, docsdir, test=False):
 
 
 def generate_access_key(testapp, store_access_key=None,
-                        server='http://localhost:8000',  email='4dndcic@gmail.com'):
+                        server='http://localhost:8000', email='4dndcic@gmail.com'):
 
     # get admin user and generate access keys
     if store_access_key:
@@ -730,9 +753,9 @@ def load_test_data(app, access_key_loc=None):
         'REMOTE_USER': 'TEST',
     }
     testapp = TestApp(app, environ)
-
     from pkg_resources import resource_filename
     inserts = resource_filename('encoded', 'tests/data/inserts/')
+    print(inserts)
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
@@ -756,3 +779,22 @@ def load_prod_data(app, access_key_loc=None):
     keys = generate_access_key(testapp, access_key_loc,
                                server="https://testportal.4dnucleome.org")
     store_keys(app, access_key_loc, keys, s3_file_name='illnevertell_prod')
+
+
+def load_ontology_terms(app):
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+    # import pdb; pdb.set_trace()
+
+    from pkg_resources import resource_filename
+    posts = resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_post.json')
+    print(posts)
+    patches = resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_patch.json')
+    print(patches)
+    docsdir = []
+    load_all(testapp, posts, docsdir, itype='ontology_term')
+    load_all(testapp, patches, docsdir, itype='ontology_term', phase='patch_ontology')
