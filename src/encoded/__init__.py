@@ -226,7 +226,6 @@ def app_version(config):
 
 def add_schemas_to_html_responses(config):
 
-    from pyramid.events import subscriber
     from pyramid.events import BeforeRender
     from snovault.schema_views import schemas
     from .renderers import should_transform
@@ -242,13 +241,37 @@ def add_schemas_to_html_responses(config):
     def add_schemas(event):
         request = event.get('request')
         if request is not None:
-            #print('\n\n\n\n')
-            #print(request.response.content_type)
-            if should_transform(request, request.response):
-                if event.rendering_val.get('@type') is not None and event.rendering_val.get('schemas') is None:
-                    event.rendering_val['schemas'] = {
+            
+            if event.get('renderer_name') != 'null_renderer' and ('application/html' in request.accept or 'text/html' in request.accept):
+                #print('\n\n\n\n')
+                #print(event.keys())
+                #print(event.get('renderer_name'))
+                #print(should_transform(request, request.response))
+                #print(request.response.content_type)
+
+                if event.rendering_val.get('@type') is not None and event.rendering_val.get('@id') is not None and event.rendering_val.get('schemas') is None:
+                    schemasDict = {
                         k:v for k,v in schemas(None, request).items() if k not in exclude_schema_keys
                     }
+                    for schema in schemasDict.values():
+                        if schema.get('@type') is not None:
+                            del schema['@type']
+                        if schema.get('mixinProperties') is not None:
+                            del schema['mixinProperties']
+                        if schema.get('properties') is not None:
+                            if schema['properties'].get('@id') is not None:
+                                del schema['properties']['@id']
+                            if schema['properties'].get('@type') is not None:
+                                del schema['properties']['@type']
+                            if schema['properties'].get('display_title') is not None:
+                                del schema['properties']['display_title']
+                            if schema['properties'].get('link_id') is not None:
+                                del schema['properties']['link_id']
+                            if schema['properties'].get('schema_version') is not None:
+                                del schema['properties']['schema_version']
+                            if schema['properties'].get('uuid') is not None:
+                                del schema['properties']['uuid']
+                    event.rendering_val['schemas'] = schemasDict
 
     config.add_subscriber(add_schemas, BeforeRender)
 
