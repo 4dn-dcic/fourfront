@@ -55,7 +55,7 @@
             ],
             "table-of-contents" : {
                 "enabled"       : true,
-                "header-depth"  : 3,
+                "header-depth"  : 4,
                 "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
                 "include-top-link" : false
             }
