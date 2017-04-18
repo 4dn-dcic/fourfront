@@ -40,7 +40,7 @@ describe('Testing item.js', function() {
             }
         });
         testSearch = TestUtils.renderIntoDocument(
-            <Wrapper href='/search/?type=Experiment'>
+            <Wrapper href='/search/?type=ExperimentHiC'>
                 <Search context={context} />
             </Wrapper>
         );
@@ -49,26 +49,26 @@ describe('Testing item.js', function() {
 
     it('has the correct number of facets and experiment accessions listed', function() {
         var facets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'facet');
-        var accessions = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'accession');
-        expect(facets.length).toEqual(7);
-        expect(accessions.length).toEqual(5);
+        var results = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'result-table-result');
+        expect(facets.length).toEqual(8);
+        expect(results.length).toEqual(5);
     });
 
     it('has a good title', function() {
-        var titleLine = TestUtils.findRenderedDOMComponentWithTag(testSearch, 'h3');
-        expect(titleLine.textContent).toEqual('Experiment search');
+        var titleLine = TestUtils.findRenderedDOMComponentWithTag(testSearch, 'h1');
+        expect(titleLine.textContent).toEqual('ExperimentHiC Search');
     });
 
-    it('facets properly (biosource = GM12878)', function() {
-        context = require('../testdata/expt_search_GM12878');
+    it('facets properly (digestion_enzyme=hindIII)', function() {
+        context = require('../testdata/expt_search_hindIII');
         testSearch = TestUtils.renderIntoDocument(
-            <Wrapper href='/search/?type=Experiment&biosample.biosource.individual.organism.name=mouse'>
+            <Wrapper href='/search/?type=ExperimentHiC&digestion_enzyme.name=HindIII'>
                 <Search context={context} />
             </Wrapper>
         );
-        var accessions = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'accession');
-        var selectedFacets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'selected-facet');
-        expect(accessions.length).toEqual(3);
+        var results = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'result-table-result');
+        var selectedFacets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'selected');
+        expect(results.length).toEqual(2);
         expect(selectedFacets.length).toEqual(1);
     });
 });
