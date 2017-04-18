@@ -59,5 +59,35 @@
         "input_file_info": [{"input_file_type": "reads", "input_file_format": "fastq"} ],
         "output_file_info": [{"output_file_type": "QC report", "output_file_format": "zip"}],
         "uuid": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3"
+    },
+    {
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a3625a",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "sort_bam",
+        "name": "sort_bam",
+        "version": "3",
+        "analysis_step_types": ["alignment"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a06735"
+    },
+    {
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a1330c",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "bam2pairs",
+        "name": "bam2pairs",
+        "version": "2",
+        "analysis_step_types": ["alignment"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547"
+    },
+    {
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a73514",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "bwa_mem",
+        "name": "bwa_mem",
+        "version": "8",
+        "analysis_step_types": ["alignment"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a13209"
     }
 ]
