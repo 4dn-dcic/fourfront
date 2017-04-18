@@ -229,6 +229,7 @@ def add_schemas_to_html_responses(config):
     from pyramid.events import subscriber
     from pyramid.events import BeforeRender
     from snovault.schema_views import schemas
+    from .renderers import should_transform
 
     # Exclude some keys, to make response smaller.
     exclude_schema_keys = [
@@ -241,7 +242,9 @@ def add_schemas_to_html_responses(config):
     def add_schemas(event):
         request = event.get('request')
         if request is not None:
-            if 'text/html' in request.accept or 'application/html' in request.accept:
+            #print('\n\n\n\n')
+            #print(request.response.content_type)
+            if should_transform(request, request.response):
                 if event.rendering_val.get('@type') is not None and event.rendering_val.get('schemas') is None:
                     event.rendering_val['schemas'] = {
                         k:v for k,v in schemas(None, request).items() if k not in exclude_schema_keys
