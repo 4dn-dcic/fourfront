@@ -228,18 +228,24 @@ def add_schemas_to_html_responses(config):
 
     from pyramid.events import subscriber
     from pyramid.events import BeforeRender
+    from snovault.schema_views import schemas
+
+    # Exclude some keys, to make response smaller.
+    exclude_schema_keys = [
+        'AccessKey', 'Image', 'ImagingPath', 'OntologyTerm', 'PublicationTracking', 'Modification',
+        'QualityMetricBamqc', 'QualityMetricFastqc', 'QualityMetricFlag', 'QualityMetricPairsqc',
+        'TestingDependencies', 'TestingDownload', 'TestingKey', 'TestingLinkSource', 'TestingPostPutPatch',
+        'TestingServerDefault'
+    ]
 
     def add_schemas(event):
         request = event.get('request')
         if request is not None:
             if 'text/html' in request.accept or 'application/html' in request.accept:
-                if event.rendering_val.get('@type') is not None:
-                    #print(dir(event.get('renderer_info')))
-                    #print('\n\n\n')
-                    #print(event.rendering_val)
-                    #print(event.rendering_val.get('@type'))
-                    #print(request.accept)
-                    event.rendering_val['schemas'] = 'test'
+                if event.rendering_val.get('@type') is not None and event.rendering_val.get('schemas') is None:
+                    event.rendering_val['schemas'] = {
+                        k:v for k,v in schemas(None, request).items() if k not in exclude_schema_keys
+                    }
 
     config.add_subscriber(add_schemas, BeforeRender)
 
