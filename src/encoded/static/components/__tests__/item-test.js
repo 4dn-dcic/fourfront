@@ -47,8 +47,8 @@ describe('Testing item-view.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        ItemView = require('./../item-pages/ItemView');
-        var { Item } = require('./../item-pages/item');
+        ItemView = require('./../item-pages/DefaultItemView');
+        var Item = require('./../item-pages/item').default;
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');
         Wrapper = React.createClass({
