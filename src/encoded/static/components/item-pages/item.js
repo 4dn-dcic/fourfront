@@ -5,6 +5,7 @@ var Panel = require('react-bootstrap').Panel;
 var Table = require('./../collection').Table;
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, Filters } = require('./../util');
+import AuditTabView from './components/AuditTabView';
 var url = require('url');
 
 
@@ -270,5 +271,3 @@ export function getItemTypeTitle(context, schemas = null){
 export function getBaseItemTypeTitle(context, schemas = null){
     return getTitleForType(getBaseItemType(context), schemas);
 }
-
-

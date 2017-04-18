@@ -6,7 +6,21 @@ import PropTypes from 'prop-types';
 var ReactTooltip = require('react-tooltip');
 
 
-export default class AuditView extends React.Component {
+export default class AuditTabView extends React.Component {
+
+    static getTabObject(context){
+        var auditIconClass = AuditTabView.getItemIndicatorIcon(context);
+        return {
+            tab : (
+                <span className={context.audit && _.keys(context.audit).length ? 'active' : null}>
+                    <i className={"icon icon-fw icon-" + auditIconClass}/> Audits
+                </span>
+            ),
+            key : "audits",
+            disabled : !AuditTabView.doAnyAuditsExist(context),
+            content : <AuditTabView audits={context.audit} />
+        };
+    }
 
     /**
      * @static
@@ -20,7 +34,7 @@ export default class AuditView extends React.Component {
             auditIconClass = 'exclamation-circle';
         } else if (context.audit && context.audit.WARNING && context.audit.WARNING.length){
 
-        } else if (!AuditView.doAnyAuditsExist(context)){
+        } else if (!AuditTabView.doAnyAuditsExist(context)){
             auditIconClass = 'check';
         }
         return auditIconClass;
@@ -147,7 +161,7 @@ export default class AuditView extends React.Component {
                         key={auditLevelPair[0]}
                         level={auditLevelPair[0]}
                         audits={this.props.audits}
-                        title={AuditView.levelTitleMap[auditLevelPair[0]]}
+                        title={AuditTabView.levelTitleMap[auditLevelPair[0]]}
                         categoriesDefaultOpen={i === 0}
                     />
                 )}
@@ -304,14 +318,14 @@ class AuditItem extends React.Component {
                 <div className="col-xs-12 col-sm-12 audit-detail">
                     <ul>{
                         details.map(function(d,i){
-                            var detailParts = AuditView.findJSONinString(d);
+                            var detailParts = AuditTabView.findJSONinString(d);
                             return (
                                 <li key={i}>
                                     { detailParts[0] ? 
                                         <div>{ detailParts[0] }</div>
                                     : null }
                                     { detailParts[1] ? 
-                                        <div>{ AuditView.convertJSONToTable(detailParts[1]) }</div>
+                                        <div>{ AuditTabView.convertJSONToTable(detailParts[1]) }</div>
                                     : null }
                                     { detailParts[2] ? 
                                         <div>{ detailParts[2] }</div>

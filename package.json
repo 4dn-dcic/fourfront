@@ -79,6 +79,7 @@
     "react-dom": "^15.3.2",
     "react-json-tree": "^0.10.7",
     "react-matrix-viz": "^0.2.2",
+    "react-network-diagrams": "^0.6.0",
     "react-redux": "^4.4.5",
     "react-tooltip": "^3.2.7",
     "redux": "^3.5.2",

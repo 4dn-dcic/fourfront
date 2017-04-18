@@ -353,7 +353,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		.item-label {
 			font-weight: 500;
 		}
-		ul {
+		ol {
 			padding-left: 20px;
 			margin-bottom: 0;
 			//margin-top: 3px;
@@ -364,8 +364,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			display: inline-block;
 			> .link {
 				color: #00cca3; // temporary?
-				&:hover,&:focus {
+				cursor:pointer;
+				&:hover {
 					color: #00cca3;
+					text-shadow : 0 0 0;
 				}
 			}
 			> i.icon {

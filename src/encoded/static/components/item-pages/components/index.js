@@ -92,4 +92,7 @@ module.exports.ItemDetailList = require('./ItemDetailList');
  * @namespace
  * @type {Component}
  */
-module.exports.AuditView = require('./AuditView').default;
+module.exports.AuditTabView = require('./AuditTabView').default;
+
+
+module.exports.AttributionTabView = require('./AttributionTabView').default;

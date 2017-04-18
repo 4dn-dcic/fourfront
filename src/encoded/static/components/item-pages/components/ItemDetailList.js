@@ -73,13 +73,13 @@ var Detail = React.createClass({
                 }
 
                 return (
-                    <ul>
+                    <ol>
                         {   item.length === 0 ? <li><em>None</em></li>
                             :   item.map(function(it, i){
                                     return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, atType, depth + 1) }</li>;
                                 })
                         }
-                    </ul>
+                    </ol>
                 );
             } else if (typeof item === 'object' && item !== null) {
                 var title = getTitleStringFromContext(item);
@@ -186,10 +186,10 @@ var Detail = React.createClass({
                 }
                 return (
                     <span className="subitem-toggle">
-                        <a href="#" className="link" onClick={this.handleToggle}>
-                            <i style={{'color':'black', 'paddingRight':'10px'}} className={"icon " + iconType}/>
+                        <span className="link" onClick={this.handleToggle}>
+                            <i style={{'color':'black', 'paddingRight': 10, 'paddingLeft' : 5}} className={"icon " + iconType}/>
                             { title }
-                        </a>
+                        </span>
                     </span>
                 );
             },
@@ -252,7 +252,7 @@ var Detail = React.createClass({
     getDefaultProps : function(){
         return {
             'excludedKeys' : [
-                '@context', 'actions', 'audit' /* audit currently not embedded (empty obj) */,
+                '@context', 'actions', 'audit',
                 // Visible elsewhere on page
                 'lab', 'award', 'description',
                 '@id', 'link_id', 'display_title'
@@ -311,12 +311,12 @@ var Detail = React.createClass({
             <PartialList
                 persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
-                        { Detail.formValue(this.props.schemas,context[key], key, context['@type'] && context['@type'][0]) }
+                        { Detail.formValue(this.props.schemas, context[key], key, context['@type'] && context['@type'][0]) }
                     </PartialList.Row>
                 )}
                 collapsible={ collapsibleKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
-                        { Detail.formValue(this.props.schemas,context[key], key, context['@type'] && context['@type'][0]) }
+                        { Detail.formValue(this.props.schemas, context[key], key, context['@type'] && context['@type'][0]) }
                     </PartialList.Row>
                 )}
                 open={this.props.open}
@@ -328,7 +328,24 @@ var Detail = React.createClass({
 var ItemDetailList = module.exports = React.createClass({
 
     statics : {
-        Detail : Detail
+        Detail : Detail,
+
+        getTabObject : function(context, schemas){
+            return {
+                tab : <span><i className="icon icon-list-ul icon-fw"/> Details</span>,
+                key : 'details',
+                content : (
+                    <div>
+                        <h3 className="tab-section-title">
+                            <span>Details</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider"/>
+                        <ItemDetailList context={context} schemas={schemas} />
+                    </div>
+                )
+            };
+        }
+
     },
 
     getInitialState : function(){
