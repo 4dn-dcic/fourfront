@@ -58,13 +58,6 @@ var loaders = [
         loader: 'babel',
     },
     {
-        test: /\.jsx$/,
-        include: [
-            path.resolve(__dirname, 'src/encoded/static'),
-        ],
-        loader: 'babel',
-    },
-    {
         test: /\.json$/,
         loader: 'json',
     }
