@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+import PropTypes from 'prop-types';
 var queryString = require('query-string');
 var url = require('url');
 var querystring = require('querystring');
@@ -45,7 +46,7 @@ class ResultTableEntry extends React.Component{
             <div className="result-table-result">
                 <div className="row">
                     <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
-                        <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle} style={{"marginRight":"3px", "border":"none"}}>
+                        <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
                             <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                         </Button>
                         <a href={processed_link}>{result.display_title}</a>
@@ -75,8 +76,8 @@ class ResultTableEntry extends React.Component{
 // Uses Detail from item-pages/components to provide item summary panel
 class ResultDetail extends React.Component{
     static propTypes = {
-        result: React.PropTypes.array.isRequired,
-        schemas: React.PropTypes.object.isRequired,
+        result: PropTypes.object.isRequired,
+        schemas: PropTypes.object.isRequired,
     }
 
     constructor(props){
@@ -93,6 +94,7 @@ class ResultDetail extends React.Component{
                     </div>
                     : null}
                 <div className="item-page-detail">
+                    <h4 className="text-300">Details</h4>
                     <Detail context={result} schemas={this.props.schemas} open={false}/>
                 </div>
             </div>
@@ -356,24 +358,28 @@ class TabularTableResults extends React.Component{
         var schemas = this.props.schemas || {};
         return(
             <div>
-                <div className="row hidden-xs hidden-sm result-table-header-row">
-                    <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
-                        <Button style={{'visibility':'hidden', "marginRight":"3px"}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
-                            <i className="icon icon-plus"></i>
-                        </Button>
-                        <div>Title</div>
-                    </div>
-                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                        Lab
-                    </div>
-                    <div className="col-xs-12 col-md-2 col-lg-2 result-table-entry-div">
-                        Submitter
-                    </div>
-                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                        Date created
-                    </div>
-                    <div className="col-xs-12 col-md-12 divider-column">
-                        <div className="divider"/>
+                <div className="result-table-header-row-container">
+                    <div className="row hidden-xs hidden-sm result-table-header-row">
+                        <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
+                            {/*
+                            <Button style={{'visibility':'hidden', "marginRight":"3px"}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
+                                <i className="icon icon-plus"></i>
+                            </Button>
+                            */}
+                            <div style={{ paddingLeft : 44 }}>Title</div>
+                        </div>
+                        <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
+                            <div>Lab</div>
+                        </div>
+                        <div className="col-xs-12 col-md-2 col-lg-2 result-table-entry-div">
+                            <div>Submitter</div>
+                        </div>
+                        <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
+                            <div>Date Created</div>
+                        </div>
+                        <div className="col-xs-12 col-md-12 divider-column">
+                            <div className="divider"/>
+                        </div>
                     </div>
                 </div>
                 <div className="nav result-table row" id="result-table">
@@ -494,10 +500,10 @@ var ResultTable = search.ResultTable = React.createClass({
 
         return (
             <div>
-                <div className="row">
-                    <h1 className="page-title">{thisType + ' Search'}</h1>
-                    <h4 className="page-subtitle">Filter & sort results</h4>
-                </div>
+
+                <h1 className="page-title">{thisType + ' Search'}</h1>
+                <h4 className="page-subtitle">Filter & sort results</h4>
+
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList {...this.props} facets={facets} filters={filters} thisType={thisType}
@@ -560,7 +566,7 @@ var Search = search.Search = React.createClass({
         return (
             <div>
                 {facetdisplay ?
-                    <div className="panel data-display main-panel">
+                    <div className="browse-page-container">
                         <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.props.navigate || this.context.navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
