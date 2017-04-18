@@ -1260,14 +1260,16 @@ $small-label-accession-font-size : 0.75rem;
 	background-color: #22656d;
 	.result-table-header-row{
 		font-weight: 400;
-		.result-table-entry-div > div {
-			margin-bottom: 0px;
-			padding-top: 10px;
-			padding-bottom: 10px;
-			color: #fff;
-			height: 46px;
-			line-height: 26px;
-			&:not(:first-child){
+		.result-table-entry-div {
+			> div {
+				margin-bottom: 0px;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				color: #fff;
+				height: 46px;
+				line-height: 26px;
+			}
+			&:not(:first-child) > div {
 				text-align: center;
 			}
 		}
