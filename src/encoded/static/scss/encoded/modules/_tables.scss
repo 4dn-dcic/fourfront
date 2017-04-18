@@ -1201,7 +1201,7 @@ $small-label-accession-font-size : 0.75rem;
     overflow: hidden;
 
     .result-table-result {
-        margin-top: 12px;
+        padding-top: 12px;
         border-bottom: 1px solid #E8E8E8;
         @include font-size(0.9);
 
@@ -1222,7 +1222,8 @@ $small-label-accession-font-size : 0.75rem;
 
 			.icon-container.btn {
 				margin: 0;
-				width: 44px;
+				width: 40px;
+				margin-right: 4px;
 				border: none;
 			}
 		}
@@ -1266,6 +1267,9 @@ $small-label-accession-font-size : 0.75rem;
 			color: #fff;
 			height: 46px;
 			line-height: 26px;
+			&:not(:first-child){
+				text-align: center;
+			}
 		}
 	}
 }

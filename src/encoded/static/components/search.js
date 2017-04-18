@@ -366,7 +366,7 @@ class TabularTableResults extends React.Component{
                                 <i className="icon icon-plus"></i>
                             </Button>
                             */}
-                            <div style={{ paddingLeft : 44 }}>Title</div>
+                            <div className="text-left" style={{ paddingLeft : 44 }}>Title</div>
                         </div>
                         <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
                             <div>Lab</div>
