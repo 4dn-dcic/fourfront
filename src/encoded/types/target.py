@@ -31,8 +31,12 @@ class Target(Item):
                        targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         value = ""
         for target_info in [targeted_genes, targeted_proteins, targeted_rnas]:
-            value += ', '.join(target_info)
-        value += targeted_structure
+            try:
+                value += ', '.join(target_info)
+            except:
+                pass
+        if targeted_structure:
+            value += targeted_structure
 
         if value:
             return value
@@ -58,12 +62,17 @@ class Target(Item):
         "description": "Shortened version of target summary.",
         "type": "string",
     })
-    def target_summary_short(self, request, targeted_genes=None, targeted_genome_regions=None, description=None,
+    def target_summary_short(self, request, targeted_genes=None, description=None,
                              targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         value = ""
         for target_info in [targeted_genes, targeted_proteins, targeted_rnas]:
-            value += ', '.join(target_info)
-        value += targeted_structure
+            try:
+                value += ', '.join(target_info)
+            except:
+                pass
+        if targeted_structure:
+            value += targeted_structure
+
         if value:
             return value
         elif description:
@@ -75,8 +84,8 @@ class Target(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, targeted_genes=None, targeted_genome_regions=None, description=None,
+    def display_title(self, request, targeted_genes=None, description=None,
                       targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         # biosample = '/biosample/'+ self.properties['biosample']
-        return self.target_summary_short(request, targeted_genes, targeted_genome_regions, description,
+        return self.target_summary_short(request, targeted_genes, description,
                                          targeted_proteins, targeted_rnas, targeted_structure)
