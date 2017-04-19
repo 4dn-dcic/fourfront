@@ -303,7 +303,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
                 details_user,
                 typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user" : null),
                 includeLabel ? (typeof includeLabel === 'string' ? includeLabel : "Submitted By") : null,
-                details_user && includeDetail ? details_user.lab : null,
+                details_user && includeDetail ? details_user.lab && details_user.lab.display_title : null,
                 'award',
                 'project',
                 key

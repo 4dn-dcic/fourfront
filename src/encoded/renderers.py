@@ -261,7 +261,13 @@ def set_response_headers_tween_factory(handler, registry):
         #print(response.status_code)
 
         # Possible TODO: Make sure is not a application/json request (use should_transform(req, resp))
-        if should_transform(request, response) and str(response.status_code) == '404' and hasattr(request, 'auth0_expired') and not response.headers.get('X-Request-JWT', None):
+        if (
+            should_transform(request, response)
+            and (str(response.status_code) == '404' or str(response.status_code) == '403')
+            and hasattr(request, 'auth0_expired')
+            and not response.headers.get('X-Request-JWT', None)
+        ):
+
             response = add_x_user_info_header(response, request)
 
         return response
