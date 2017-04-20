@@ -24,10 +24,10 @@ module.exports.object       = require('./object');
  * var { navigate } = require('./util');
  * navigate('/a/different/page', options);
  */
-module.exports.navigate     = require('./navigate');
+module.exports.navigate     = require('./navigate').default;
 
 /** Analytics utilities */
-module.exports.analytics    = require('./analytics');
+module.exports.analytics    = require('./analytics').default;
 
 /** Layout utilities */
 module.exports.layout       = require('./layout');

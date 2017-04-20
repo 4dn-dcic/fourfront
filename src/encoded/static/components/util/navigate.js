@@ -27,8 +27,14 @@ navigate.getBrowseHref = function(href){
 
 navigate.isBrowseHref = function(href){
     if (typeof href === 'string') href = url.parse(href);
-    if (href.pathname.indexOf('/browse/') > -1) return true;
+    if (href.pathname.slice(0,8) === '/browse/') return true;
     return false;
 };
 
-module.exports = navigate;
+navigate.isSearchHref = function(href){
+    if (typeof href === 'string') href = url.parse(href);
+    if (href.pathname.slice(0,8) === '/search/') return true;
+    return false;
+};
+
+export default navigate;
