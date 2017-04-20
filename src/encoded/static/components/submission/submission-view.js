@@ -101,7 +101,7 @@ class SubmissionView extends React.Component{
             }
         }
         if(del){
-            delete contextCopy[splitField[splitField.length-1]];
+            contextCopy[splitField[splitField.length-1]] = null;
         }else{
             contextCopy[splitField[splitField.length-1]] = value;
         }
@@ -386,7 +386,7 @@ var RoundOneObject = React.createClass({
             }
         }
         if(del){
-            delete pointer[splitField[splitField.length-1]];
+            pointer[splitField[splitField.length-1]] = null;
         }else{
             pointer[splitField[splitField.length-1]] = value;
         }
