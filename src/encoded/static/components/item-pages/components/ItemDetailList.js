@@ -15,7 +15,7 @@ import JSONTree from 'react-json-tree';
  * @memberof module:item-pages/components.ItemDetailList
  * @namespace
  */
-var Detail = React.createClass({
+var Detail = module.exports.Detail = React.createClass({
 
     statics: {
 
@@ -325,7 +325,7 @@ var Detail = React.createClass({
     }
 });
 
-var ItemDetailList = module.exports = React.createClass({
+var ItemDetailList = module.exports.ItemDetailList = React.createClass({
 
     statics : {
         Detail : Detail,
@@ -387,7 +387,7 @@ var ItemDetailList = module.exports = React.createClass({
             </button>
         );
     },
-    
+
     render : function(){
         var collapsed;
         if (typeof this.props.collapsed === 'boolean') collapsed = this.props.collapsed;

@@ -1,7 +1,7 @@
 branch-defaults:
-  FF-697:
+  FF-687:
     ec2_keyname: alexkb
-    environment: 4dn-web-alex
+    environment: 4dn-web-alex-2
   aws_beanstalk:
     environment: 4dn-web-prod
     group_suffix: null

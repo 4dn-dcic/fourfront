@@ -2,16 +2,16 @@
 
 /**
  * A directory of methods and maybe a mini-component or two for common use.
- * 
+ *
  * @module item-pages/components
  */
 
-/** 
+/**
  * Formats a lab, award, or potentially other object to appear in a small rectangle that can be included in a sidebar.
  * Also offers mix-in functions to help AJAX in the required details to the parent component's state.
- * 
+ *
  * Also contains FormattedInfoBlock.List which is meant to display a list of FormattedInfoBlocks, and potentially AJAX in details for them.
- * 
+ *
  * @namespace
  * @type {Component}
  */
@@ -25,9 +25,9 @@ module.exports.ItemPageTitle = ItemPageTitle;
 /**
  * Object containing components required to build header shown on Item pages.
  * Includes title, description, date created, status, action buttons, [...].
- * 
+ *
  * Use by combining other components together within an ItemHeader.Wrapper component. See example.
- * 
+ *
  * @namespace
  * @type {Object}
  * @example
@@ -43,12 +43,11 @@ module.exports.ItemPageTitle = ItemPageTitle;
  */
 module.exports.ItemHeader = require('./ItemHeader');
 
-
 module.exports.PartialList = require('./PartialList').default;
 
 /**
  * Used in Component module:item-pages/components.ItemFooterRow to display an external reference link.
- * 
+ *
  * @namespace
  * @type {Component}
  * @prop {Component[]|Element[]|string[]} children - Inner contents or title of link.
@@ -58,17 +57,23 @@ module.exports.ExternalReferenceLink = require('./ExternalReferenceLink');
 
 /**
  * Component for displaying Files from a list.
- * 
+ *
  * @namespace
  * @type {Component}
  * @prop {Object[]} files - List of file objects, e.g. a FileCalbirationSet's 'files_in_set' property.
  */
 module.exports.FilesInSetTable = require('./FilesInSetTable');
 
-
 module.exports.ItemFooterRow = require('./ItemFooterRow').default;
 
-
+/**
+ * Shows publications for current Item.
+ * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/experiment-set-view .
+ *
+ * @namespace
+ * @type {Component}
+ * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
+ */
 module.exports.Publications = require('./Publications').default;
 
 /**
@@ -86,7 +91,16 @@ module.exports.TabbedView = require('./TabbedView').default;
  * @namespace
  * @type {Component}
  */
-module.exports.ItemDetailList = require('./ItemDetailList');
+module.exports.ItemDetailList = require('./ItemDetailList').ItemDetailList;
+
+/**
+ * The list of properties contained within ItemDetailList.
+ * Isolated to allow use without existing in ItemDetailList parent.
+ *
+ * @namespace
+ * @type {Component}
+ */
+module.exports.Detail = require('./ItemDetailList').Detail;
 
 /**
  * @namespace

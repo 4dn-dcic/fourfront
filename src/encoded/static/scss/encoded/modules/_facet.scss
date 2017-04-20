@@ -211,7 +211,7 @@
 
             span:hover {
                 text-shadow: 0 0 0;
-                i.icon { 
+                i.icon {
                     opacity: 0.5;
                 }
             }
@@ -238,9 +238,9 @@
         }
     }
 
-    .facet-list { 
+    .facet-list {
         margin: 0;
-    
+
         li {
             margin-bottom: 1px;
             position: relative;
@@ -466,41 +466,6 @@ div.meta-status {
     margin: auto;
     display: block;
 }
-
-.result-table {
-    position: relative;
-    z-index: 10;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-
-    li {
-        margin-top: 7px;
-        border-bottom: 1px solid #E8E8E8;
-        margin-bottom: 7px;
-        @include font-size(0.9);
-
-        &:first {
-            margin-top: 0px;
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 10px;
-            @include font-size(0.9);
-        }
-
-    }
-
-    &:before {
-        content: none;
-        display: block;
-    }
-
-    .pull-right {
-        position: relative;
-        z-index: 2;
-    }
-}
-
 
 .main-panel {
     position: relative;

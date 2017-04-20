@@ -158,7 +158,7 @@ var App = React.createClass({
             'content': undefined,
             'session': session,
             'user_actions': user_actions,
-            'schemas': null,
+            'schemas': this.props.context.schemas || null,
             'uploads': {}
         };
     },

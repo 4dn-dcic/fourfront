@@ -120,7 +120,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.flexcol-heading, .item-page-heading, .submission-page-heading {
+.flexcol-heading, .item-page-heading, .submission-page-heading{
     position: relative;
     //margin-right: -10px;
     //margin-left: -10px;
@@ -338,7 +338,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		display: -ms-flexbox;
 		display: flex;
 
-		
+
 
 		.item-label, .item-value {
 			> div {
