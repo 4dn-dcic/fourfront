@@ -34,6 +34,11 @@
                 "hic",
                 "other"
             ]
+        },
+        "object_key": {
+            "title": "S3 object key",
+            "type": "string",
+            "description": "key of the processed file object on S3 bucket; may contain subdirectories and '/'"
         }
      },
      "file_format_file_extension": {

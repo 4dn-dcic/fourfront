@@ -11,128 +11,128 @@ var TestWarning = require('./testwarning');
 var productionHost = require('./globals').productionHost;
 
 
-var Navigation = module.exports = React.createClass({
 
-    statics : {
+export function getCurrentHeight(){
+    if (!isServerSide() && document){
+        return parseInt(document.getElementById('top-nav').offsetHeight);
+    }
+    return null;
+}
 
-        getCurrentHeight : function(){
-            if (!isServerSide() && document){
-                return parseInt(document.getElementById('top-nav').offsetHeight);
-            }
-            return null;
-        },
 
-        /** May be bound to access this.props.href (if available) as fallback */
-        getWindowPath : function(mounted){
-            var href = Navigation.getWindowLocation.call(this, mounted);
-            if (!href) return null;
-            return (href.pathname || '/') + (href.search || '') + (href.hash || '');
-        },
+/** May be bound to access this.props.href (if available) as fallback */
+export function getWindowPath(mounted){
+    var href = getWindowLocation.call(this, mounted);
+    if (!href) return null;
+    return (href.pathname || '/') + (href.search || '') + (href.hash || '');
+}
 
-        getWindowURL : function(mounted){
-            var href = Navigation.getWindowLocation.call(this, mounted);
-            return href.href;
-        },
 
-        getWindowLocation : function(mounted){
-            if (this && this.props && this.props.href) {
-                return url.parse(this.props.href);
-            }
-            if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
-                return window.location;
-            }
-            return null;
-        },
+export function getWindowURL(mounted){
+    var href = getWindowLocation.call(this, mounted);
+    return href.href;
+}
 
-        isMenuItemActive : function(action, mounted){
+
+/** May be bound to access this.props.href (if available) as fallback */
+export function getWindowLocation(mounted){
+    if (this && this.props && this.props.href) {
+        return url.parse(this.props.href);
+    }
+    if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
+        return window.location;
+    }
+    return null;
+}
+
+
+export default class Navigation extends React.Component {
+
+
+    static isMenuItemActive(action, mounted){
+        return (
+            (typeof action.active === 'function' && action.active(getWindowPath.call(this, mounted))) ||
+            (Navigation.getMenuItemURL(action, mounted) === getWindowPath.call(this, mounted))
+        );
+    }
+
+    static getMenuItemURL(action, mounted = false){
+        if (typeof action.url === 'string') return action.url;
+        if (typeof action.url === 'function') return action.url(getWindowLocation.call(this, mounted));
+        if (typeof action.href === 'string') return action.href;
+        if (typeof action.href === 'function') return action.href(getWindowLocation.call(this, mounted));
+        return '#';
+    }
+
+    /** Can be bound to access this.props.href for getWindowPath (if available) */
+    static buildMenuItem(action, mounted, extraProps){
+        return (
+            <MenuItem
+                key={action.id}
+                id={action.sid || action.id}
+                href={Navigation.getMenuItemURL(action, mounted)}
+                onClick={function(e){ return e.target && typeof e.target.blur === 'function' && e.target.blur(); }}
+                className="global-entry"
+                active={Navigation.isMenuItemActive.call(this, action, mounted)}
+                {...extraProps}
+            >
+                {action.title}
+            </MenuItem>
+        );
+    }
+
+    /** Can be bound to access this.props.href for getWindowPath (if available) */
+    static buildDropdownMenu(action, mounted){
+        if (action.children){
             return (
-                (typeof action.active === 'function' && action.active(Navigation.getWindowPath.call(this, mounted))) ||
-                (Navigation.getMenuItemURL(action, mounted) === Navigation.getWindowPath.call(this, mounted))
+                <NavDropdown key={action.id} id={action.sid || action.id} label={action.id} title={action.title}>
+                    {action.children.map((a) => Navigation.buildMenuItem(a, mounted) )}
+                </NavDropdown>
             );
-        },
-
-        getMenuItemURL : function(action, mounted = false){
-            if (typeof action.url === 'string') return action.url;
-            if (typeof action.url === 'function') return action.url(Navigation.getWindowLocation.call(this, mounted));
-            if (typeof action.href === 'string') return action.href;
-            if (typeof action.href === 'function') return action.href(Navigation.getWindowLocation.call(this, mounted));
-            return '#';
-        },
-
-        /** Can be bound to access this.props.href for getWindowPath (if available) */
-        buildMenuItem : function(action, mounted, extraProps){
+        } else {
             return (
-                <MenuItem
+                <NavItem 
                     key={action.id}
                     id={action.sid || action.id}
                     href={Navigation.getMenuItemURL(action, mounted)}
-                    onClick={function(e){ return e.target && typeof e.target.blur === 'function' && e.target.blur(); }}
-                    className="global-entry"
                     active={Navigation.isMenuItemActive.call(this, action, mounted)}
-                    {...extraProps}
                 >
-                    {action.title}
-                </MenuItem>
+                        {action.title}
+                </NavItem>
             );
-        },
-
-        /** Can be bound to access this.props.href for getWindowPath (if available) */
-        buildDropdownMenu : function(action, mounted){
-            if (action.children){
-                return (
-                    <NavDropdown key={action.id} id={action.sid || action.id} label={action.id} title={action.title}>
-                        {action.children.map((a) => Navigation.buildMenuItem(a, mounted) )}
-                    </NavDropdown>
-                );
-            } else {
-                return (
-                    <NavItem 
-                        key={action.id}
-                        id={action.sid || action.id}
-                        href={Navigation.getMenuItemURL(action, mounted)}
-                        active={Navigation.isMenuItemActive.call(this, action, mounted)}
-                    >
-                            {action.title}
-                    </NavItem>
-                );
-            }
         }
-    },
+    }
 
-    propTypes : {
-        href : React.PropTypes.string,
-        session : React.PropTypes.bool
-    },
-
-    contextTypes: {
-        portal: React.PropTypes.object,
-        listActionsFor : React.PropTypes.func
-    },
-
-    getInitialState: function() {
-        return {
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.setupScrollHandler = this.setupScrollHandler.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
+        this.closeDropdowns = this.closeDropdowns.bind(this);
+        this.hideTestWarning = this.hideTestWarning.bind(this);
+        this.state = {
             testWarning: this.props.visible || !productionHost[url.parse(this.props.href).hostname] || false,
             mounted : false,
             mobileDropdownOpen : false,
             scrolledPastTop : false,
             navInitialized : false
-        };
-    },
+        }
+    }
 
-    componentDidMount : function(){
+    componentDidMount(){
         this.setState({ mounted : true });
         if (!isServerSide()) this.setupScrollHandler();
-    },
+    }
 
-    setupScrollHandler : function(){
+    setupScrollHandler(){
         if (!(typeof window !== 'undefined' && window && document && document.body && typeof document.body.scrollTop !== 'undefined')){
             return null;
         }
 
         var lastScrollTop = 0;
 
-        // We add as property of class instance so we can remove event listener on unmount, for example.
-        this.throttledScrollHandler = _.throttle((e) => {
+        function handleScroll(e){
             var stateChange = {};
             if (!this.state.navInitialized){
                 stateChange.navInitialized = true;
@@ -154,21 +154,31 @@ var Navigation = module.exports = React.createClass({
                         if (document.body.className.indexOf(' scrolled-past-top') === -1) document.body.className += ' scrolled-past-top';
                     });
                 }
+                if (document.body.scrollTop > 80 && document.body.className.indexOf(' scrolled-past-80') === -1){
+                    document.body.className += ' scrolled-past-80';
+                }
             } else {
                 if (this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = false;
                     this.setState(stateChange, function(){
-                        if (document.body.className.indexOf(' scrolled-past-top') !== -1) document.body.className = document.body.className.replace(' scrolled-past-top', '');
+                        if (document.body.className.indexOf(' scrolled-past-top') !== -1){
+                            var newClassName = document.body.className.replace(' scrolled-past-top', '').replace(' scrolled-past-80','');
+                            document.body.className = newClassName;
+                        }
                     });
                 }
             }
-        }, 100);
+        }
+
+        // We add as property of class instance so we can remove event listener on unmount, for example.
+        this.throttledScrollHandler = _.throttle(handleScroll.bind(this), 10);
 
         // Save logo/brand element's 'full width' before any height transitions.
         // Ideally wait until logo/brand image has loaded before doing so.
         var navBarBrandImg = document.getElementsByClassName('navbar-logo-image')[0];
         if (typeof navBarBrandImg === 'undefined') return;
 
+        // Window resize & logo img load handler
         function saveWidth(){
             var navBarBrandImgContainer = navBarBrandImg.parentElement;
             var navBarBrand = navBarBrandImgContainer.parentElement.parentElement;
@@ -178,7 +188,7 @@ var Navigation = module.exports = React.createClass({
             navBarBrand.style.width = navBarBrand.offsetWidth + 'px';
         };
 
-         this.throttledResizeHandler = _.throttle(saveWidth, 300);
+        this.throttledResizeHandler = _.throttle(saveWidth, 300);
 
         navBarBrandImg.addEventListener('load', saveWidth);
         // Execute anyway in case image is loaded, in addition to the 1 time on-img-load if any (some browsers do not support img load event; it's not part of W3 spec).
@@ -188,26 +198,26 @@ var Navigation = module.exports = React.createClass({
         window.addEventListener("scroll", this.throttledScrollHandler);
         window.addEventListener("resize", this.throttledResizeHandler);
         setTimeout(this.throttledScrollHandler, 100, null, { 'navInitialized' : true });
-    },
+    }
 
-    componentWillUnmount : function(){
+    componentWillUnmount(){
         // Unbind events | probably not needed but lets be safe & cleanup.
         window.removeEventListener("resize", this.throttledResizeHandler);
         window.removeEventListener("scroll", this.throttledScrollHandler);
         delete this.throttledResizeHandler;
         delete this.throttledScrollHandler;
-    },
+    }
 
-    closeMobileMenu : function(){
+    closeMobileMenu(){
         if (this.state.mobileDropdownOpen) this.setState({ mobileDropdownOpen : false });
-    },
+    }
 
-    closeDropdowns : function(){
+    closeDropdowns(){
         if (!this.state.mounted) return;
         //this.
-    },
+    }
 
-    hideTestWarning: function(e) {
+    hideTestWarning(e) {
         // Remove the warning banner because the user clicked the close icon
         this.setState({testWarning: false});
 
@@ -218,9 +228,9 @@ var Navigation = module.exports = React.createClass({
             window.scrollBy(0,-1);
             window.scrollBy(0,1);
         }
-    },
+    }
 
-    render: function() {
+    render() {
         var portal = this.context.portal;
 
         var navClass = "navbar-container";
@@ -267,12 +277,27 @@ var Navigation = module.exports = React.createClass({
             </div>
         );
     }
-});
+};
+
+Navigation.propTypes = {
+    href : React.PropTypes.string,
+    session : React.PropTypes.bool
+};
+
+Navigation.contextTypes = {
+    portal: React.PropTypes.object,
+    listActionsFor : React.PropTypes.func
+};
 
 
-var Search = React.createClass({
+class Search extends React.Component{
 
-    render: function() {
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
+    render() {
         var id = url.parse(this.props.href, true);
         var searchTerm = id.query['searchTerm'] || '';
         return (
@@ -282,20 +307,17 @@ var Search = React.createClass({
             </form>
         );
     }
-});
+};
 
 
-var UserActions = React.createClass({
+class UserActions extends React.Component {
 
-    propTypes : {
-        session: React.PropTypes.bool
-    },
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
 
-    contextTypes: {
-        listActionsFor: React.PropTypes.func
-    },
-
-    render: function() {
+    render() {
         var session = this.props.session;
         var acctTitle = "Account";
 
@@ -346,7 +368,15 @@ var UserActions = React.createClass({
             </Nav>
         );
     }
-});
+};
+
+UserActions.propTypes = {
+    session: React.PropTypes.bool
+}
+
+UserActions.contextTypes = {
+    listActionsFor: React.PropTypes.func
+}
 
 
 
@@ -358,13 +388,14 @@ var UserActions = React.createClass({
 //     tip: Text to display as part of uri tooltip.
 //     wholeTip: Alternative to 'tip' property. The complete tooltip to display
 // }
-var Breadcrumbs = module.exports.Breadcrumbs = React.createClass({
-    propTypes: {
-        root: React.PropTypes.string, // Root URI for searches
-        crumbs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired // Object with breadcrumb contents
-    },
+export class Breadcrumbs extends React.Component {
 
-    render: function() {
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
+    render() {
         var accretingQuery = '';
         var accretingTip = '';
 
@@ -395,4 +426,9 @@ var Breadcrumbs = module.exports.Breadcrumbs = React.createClass({
             </ol>
         );
     }
-});
+};
+
+Breadcrumbs.propTypes = {
+    root: React.PropTypes.string, // Root URI for searches
+    crumbs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired // Object with breadcrumb contents
+};

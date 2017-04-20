@@ -5,7 +5,7 @@ var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
-var { ajax, console, object, isServerSide, Filters, layout } = require('./util');
+var { ajax, console, object, isServerSide, Filters, layout, analytics } = require('./util');
 var vizUtil = require('./viz/utilities');
 var ReactTooltip = require('react-tooltip');
 
@@ -167,6 +167,7 @@ var ExpTerm = React.createClass({
 
     handleClick: function(e) {
         e.preventDefault();
+        var existingFilters = _.clone(this.props.expSetFilters);
         //this.setState(
         //    { filtering : true },
         //    () => {
@@ -175,6 +176,18 @@ var ExpTerm = React.createClass({
                     this.props.term.key,
                     //() => this.setState({ filtering : false })
                 );
+
+                var isUnset = false;
+                if (
+                    existingFilters &&
+                    existingFilters[this.props.facet.field] &&
+                    existingFilters[this.props.facet.field].has(this.props.term.key)
+                ) isUnset = true;
+
+                analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
+                    'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.term.key,
+                    'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
+                });
         //    }
         //);
     },
@@ -289,6 +302,7 @@ var Facet = React.createClass({
     handleStaticClick: function(e) {
         e.preventDefault();
         if (!this.isStatic()) return false;
+        var existingFilters = _.clone(this.props.expSetFilters);
         this.setState(
             { filtering : true },
             () => {
@@ -296,7 +310,17 @@ var Facet = React.createClass({
                     this.props.facet.field,
                     this.props.facet.terms[0].key,
                     ()=> {
-                        this.setState({ filtering : false })
+                        this.setState({ filtering : false });
+                        var isUnset = false;
+                        if (
+                            existingFilters &&
+                            existingFilters[this.props.facet.field] &&
+                            existingFilters[this.props.facet.field].has(this.props.facet.terms[0].key)
+                        ) isUnset = true;
+                        analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
+                            'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.facet.terms[0].key,
+                            'dimension1' : analytics.getStringifiedCurrentFilters(existingFilters)
+                        });
                     }
                 )
             }
@@ -331,8 +355,7 @@ var Facet = React.createClass({
                 >
                     <div className="facet-static-row clearfix">
                         <h5 className="facet-title">
-                            <span className="inline-block">{ facet.title || facet.field }</span>
-                            <FacetList.Facet.InfoIcon children={description}/>
+                            <span className="inline-block" data-tip={description} data-place="right">{ facet.title || facet.field }</span>
                         </h5>
                         <div className={
                             "facet-item term" +
@@ -378,8 +401,7 @@ var Facet = React.createClass({
                             (this.state.facetOpen ? "icon-angle-down" : "icon-angle-right")
                         }></i>
                     </span>
-                    <span className="inline-block">{ facet.title || facet.field }</span>
-                    <FacetList.Facet.InfoIcon children={description}/>
+                    <span className="inline-block" data-tip={description} data-place="right">{ facet.title || facet.field }</span>
                 </h5>
                 { this.state.facetOpen ?
                 <div className="facet-list nav">

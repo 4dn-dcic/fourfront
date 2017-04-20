@@ -36,7 +36,7 @@
         },
         "version": {
             "title": "Version",
-            "description": "The software version number.",
+            "description": "The step version number.",
             "type": "string"
         },
         "description": {

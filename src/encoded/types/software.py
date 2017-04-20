@@ -28,7 +28,7 @@ class Software(Item):
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'software_relation' are stored in self.properties
-        properties['tile'] = properties['name'].replace(' ', '-').lower() + '_' + properties['version']
+        properties['title'] = properties['name'].replace(' ', '-').lower() + '_' + properties['version']
         super(Software, self)._update(properties, sheets)
 
         DicRefRelation = {

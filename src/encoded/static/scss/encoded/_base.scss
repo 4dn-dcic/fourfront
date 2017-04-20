@@ -61,7 +61,11 @@ html {
     }
 }
 
-body { background: #f8f8f8 !important; @include font-size(1); }
+body {
+    text-rendering: optimizeLegibility;
+    background: #f8f8f8 !important;
+    @include font-size(1);
+}
 
 .float-wrap { overflow: hidden; }
 

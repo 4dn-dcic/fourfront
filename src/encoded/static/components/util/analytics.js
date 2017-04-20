@@ -5,7 +5,9 @@ var url = require('url');
 var { isServerSide } = require('./misc');
 var console = require('./patched-console');
 var Filters = require('./experiments-filters');
-var navigate = require('./navigate');
+var navigate = require('./navigate').default;
+var object = require('./object');
+var JWT = require('./json-web-token');
 
 
 var state = null;
@@ -21,7 +23,7 @@ var defaultOptions = {
 };
 
 
-var analytics = module.exports = {
+var analytics = {
 
     /**
      * Initialize Google Analytics tracking. Call this from app.js on initial mount perhaps.
@@ -72,103 +74,218 @@ var analytics = module.exports = {
     },
 
     registerPageView : function(href = null, context = {}, currentExpSetFilters = {}){
-        if (isServerSide() || typeof window.ga === 'undefined') {
-            console.error("Google Analytics is not initialized. Fine if this appears in a test.");
-            return false;
-        }
+        if (!analytics.shouldTrack()) return false;
 
+        // Set href from window if not provided. Safe to use because we're not server-side.
         if (!href) href = window.location && window.location.href;
 
-        var opts = {};
-
+        // Take heed of this notice if it is visible somewhere.
         if (!href) {
             console.error("No HREF defined, check.. something. Will still send pageview event.");
         }
 
-        var pastHref = href;
+        // Options to send with GA pageview event.
+        var opts = {};
+
+        /**
+         * Convert pathname with a 'UUID', 'Accession', or 'name' to having a 
+         * literal "uuid", "accession", or "name" and track the display_title, title, or accession as a
+         * separate GA dimension.
+         * 
+         * @param {string} pathName - Path part of href being navigated to. Use url.parse to get.
+         * @return {string} Adjusted pathName.
+         */
+         function adjustPageViewPath(pathName){
+            var pathParts = pathName.split('/').filter(function(pathPart){ // Gen path array to adjust href further if needed.
+                return pathPart.length > 0;
+            });
+
+            var newPathName = null;
+
+            // Remove Accession, UUID, and Name from URL and save it to 'name' dimension instead.
+            if (typeof context.accession === 'string'){
+                // We gots an accessionable Item. Lets remove its Accession from the path to get nicer Behavior Flows in GA.
+                // And let product tracking / Shopping Behavior handle Item details.
+                if (pathParts[1] === context.accession){
+                    pathParts[1] = 'accession';
+                    newPathName = '/' + pathParts.join('/') + '/';
+                    opts[GADimensionMap.name] = context.accession;
+                }
+            } else if ((context.last_name && context.first_name) || (context['@type'] && context['@type'].indexOf('User') > -1)){
+                // Save User name.
+                if (pathParts[0] === 'users' && (context.uuid && pathParts[1] === context.uuid)){
+                    pathParts[1] = 'uuid';
+                    newPathName = '/' + pathParts.join('/') + '/';
+                    opts[GADimensionMap.name] = context.title || context.uuid;
+                }
+            } else if (typeof context.uuid === 'string' && pathParts[1] === context.uuid){
+                pathParts[1] = 'uuid';
+                newPathName = '/' + pathParts.join('/') + '/';
+                opts[GADimensionMap.name] = context.display_title || context.uuid;
+            } else if (typeof context.name === 'string' && pathParts[1] === context.name){
+                pathParts[1] = 'name';
+                newPathName = '/' + pathParts.join('/') + '/';
+                opts[GADimensionMap.name] = context.display_title || context.name;
+            } else {
+                newPathName = pathName;
+            }
+            return newPathName;
+        }
+
+        /**
+         * Check for Items (aka Products) - either a results graph on /browse/, /search/, or collections pages, or an Item page.
+         * If any are present, impression list views or detail view accordingly.
+         * 
+         * @returns {boolean|Object|Object[]} Representation of what was tracked, or false if nothing was.
+         */
+        function registerProductView(){
+            if (state.enhancedEcommercePlugin !== true){
+                console.warn("Enhanced ECommerce is not enabled. Will -not- register product views.");
+                return false;
+            }
+            if (Array.isArray(context['@graph'])){ // We have a results page of some kind. Likely, browse, search, or collection.
+                // If browse page, get current filters and add to pageview event for 'dimension1'.
+                opts[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(
+                    origHref || currentExpSetFilters,
+                    (context && context.filters) || null
+                );
+                if (context['@graph'].length > 0){
+                    // We have some results, lets impression them as product list views.
+                    if (navigate.isBrowseHref(href)){
+                        return analytics.impressionListOfItems(context['@graph'], origHref, currentExpSetFilters, 'Browse Results', context);
+                    } else if (navigate.isSearchHref(href)){
+                        return analytics.impressionListOfItems(context['@graph'], origHref, null, 'Search Results', context);
+                    } else {
+                        // Probably a collection page
+                        return analytics.impressionListOfItems(context['@graph'], origHref, null, 'Collection View', context);
+                    }
+                }
+                return false;
+            } else if (typeof context.accession === 'string'){ // We got an Item view, lets track some details about it.
+                var productObj = analytics.createProductObjectFromItem(context);
+                console.info("Item with an accession. Will track as product:", productObj);
+                if (currentExpSetFilters && typeof currentExpSetFilters === 'object'){
+                    opts[GADimensionMap.currentFilters] = productObj[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(currentExpSetFilters);
+                }
+
+                ga('ec:addProduct', productObj);
+                ga('ec:setAction', 'detail', productObj);
+                return productObj;
+            }
+        }
+
+
+
+        // Store orig href in case we need it later
+        var origHref = href;
         var parts = url.parse(href);
 
-        href = parts.pathname; // Clear query from HREF.
-
-        var pathParts = href.split('/').filter(function(pathPart){ // Gen path array to adjust href further if needed.
-            return pathPart.length > 0;
-        });
-
-        // Remove Accession, UUID, and Name from URL and save it to 'name' dimension instead.
-        if (typeof context.accession === 'string'){
-            // We gots an accessionable Item. Lets remove its Accession from the path to get nicer Behavior Flows in GA.
-            // And let product tracking / Shopping Behavior handle Item details.
-            if (pathParts[1] === context.accession){
-                pathParts[1] = 'accession';
-                href = '/' + pathParts.join('/') + '/';
-                opts[GADimensionMap.name] = context.accession;
-            }
-        } else if ((context.last_name && context.first_name) || (context['@type'] && context['@type'].indexOf('User') > -1)){
-            if (pathParts[0] === 'users' && (context.uuid && pathParts[1] === context.uuid)){
-                pathParts[1] = 'uuid';
-                href = '/' + pathParts.join('/') + '/';
-                opts[GADimensionMap.name] = context.title || context.uuid;
-            }
-        } else if (typeof context.uuid === 'string' && pathParts[1] === context.uuid){
-            pathParts[1] = 'uuid';
-            href = '/' + pathParts.join('/') + '/';
-            opts[GADimensionMap.name] = context.display_title || context.uuid;
-        } else if (typeof context.name === 'string' && pathParts[1] === context.name){
-            pathParts[1] = 'name';
-            href = '/' + pathParts.join('/') + '/';
-            opts[GADimensionMap.name] = context.display_title || context.name;
-        }
+        // Clear query & hostname from HREF & convert accessions, uuids, and certain names to literals.
+        href = adjustPageViewPath(parts.pathname);
 
         // Set it as current page
         ga('set', 'page', href);
 
-        if ( // If browse page, get current filters and add to pageview event for 'dimension1'.
-            typeof parts.search === 'string' &&
-            parts.search.length > 1 &&
-            navigate.isBrowseHref(href) 
-        ){
-            opts[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(currentExpSetFilters || pastHref);
-            if (Array.isArray(context['@graph'])){
-                analytics.impressionListOfItems(context['@graph'], pastHref, currentExpSetFilters, 'Browse Results');
-            }
-        } else if (state.enhancedEcommercePlugin && typeof context.accession === 'string'){
-            // We got an Item, lets track some details about it.
-            var productObj = analytics.createProductObjectFromItem(context);
-            console.info("Item with an accession. Will track as product:", productObj);
-            if (currentExpSetFilters && typeof currentExpSetFilters === 'object'){
-                opts[GADimensionMap.currentFilters] = productObj[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(currentExpSetFilters);
-            }
-
-            ga('ec:addProduct', productObj);
-            ga('ec:setAction', 'detail', productObj);
-        }
+        registerProductView();
         
         ga('send', 'pageview', opts);
         console.info('Sent pageview event.', href, opts);
         return true;
     },
 
-    impressionListOfItems : function(itemList, origHref = null, currentExpSetFilters = {}, listName = null){
+    /**
+     * Primarily for UI interaction events.
+     * 
+     * Rough Guidelines:
+     * - For category, try to use name of React Component by which are grouping events by.
+     * - For action, try to standardize name to existing ones (search through files for instances of `analytics.event(`).
+     *   - For example, "Set Filter", "Unset Filter" for UI interactions which change one or more filters (even if multiple, use '.. Filter')
+     * - For fields.eventLabel, try to standardize similarly to action.
+     * - For fields.eventValue - do whatever makes sense I guess. Perhaps time vector from previous interaction.
+     * 
+     * @see analytics.eventLabelFromChartNode()
+     *   
+     * 
+     * @param {string} category - Event Category
+     * @param {string} action - Event Action
+     * @param {Object} fields - Additional fields.
+     * @param {string} fields.eventLabel - Event Label, e.g. 'play'.
+     * @param {number} fields.eventValue - Event Value, must be an integer.
+     */
+    event : function(category, action, fields = {}){
+        if (!analytics.shouldTrack()) return false;
+
+        var eventObj = _.extend(fields, {
+            hitType : 'event',
+            eventCategory : category,
+            eventAction : action
+        });
+
+        // Convert internal dimension names to Google Analytics ones.
+        _.pairs(eventObj).forEach(function(kvPair){
+            if (typeof GADimensionMap[kvPair[0]] !== 'undefined'){
+                eventObj[GADimensionMap[kvPair[0]]] = kvPair[1];
+                delete eventObj[kvPair[0]];
+            }
+        });
+
+        // Add current expSetFilters if not present in 'fields' already.
+        if (typeof eventObj[GADimensionMap.currentFilters] === 'undefined'){
+            eventObj[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters());
+        }
+
+        ga('send', eventObj);
+        console.info("Sent UI event", eventObj);
+    },
+
+    shouldTrack : function(){
+        // 1. Ensure we're initialized
+        if (isServerSide() || typeof window.ga === 'undefined') {
+            console.error("Google Analytics is not initialized. Fine if this appears in a test.");
+            return false;
+        }
+
+        // 2. TODO: Make sure not logged in as admin on a production site.
+        var userDetails = JWT.getUserDetails();
+        if (userDetails && userDetails.email === '4dndcic@gmail.com'){
+            var urlParts = url.parse(window.location.href);
+            if (urlParts.host.indexOf('4dnucleome.org') > -1){
+                console.warn("Logged in as 4DNDCIC on 4dnucleome.org - will NOT track.");
+                return false;
+            }
+        }
+
+        return true;
+    },
+
+    /**
+     * @returns {Object[]} Representation of what was sent.
+     */
+    impressionListOfItems : function(itemList, origHref = null, currentExpSetFilters = null, listName = null, context = null){
         var from = 0;
         if (typeof origHref === 'string'){
             var urlParts = url.parse(origHref, true);
             if (!isNaN(parseInt(urlParts.query.from))) from = parseInt(urlParts.query['from']);
         }
         console.info("Will impression " + itemList.length + ' items.');
-        itemList.forEach(function(expSet, i){
+        return itemList.map(function(expSet, i){
             var pObj = analytics.createProductObjectFromItem(expSet);
-            if (currentExpSetFilters && typeof currentExpSetFilters === 'object'){
-                pObj[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(currentExpSetFilters);
+            pObj[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(
+                currentExpSetFilters || origHref || {},
+                (context && context.filters) || null
+            );
+            if (typeof listName === 'string'){
                 pObj.list = listName;
             }
             pObj.position = from + i + 1;
             ga('ec:addImpression', pObj);
+            return pObj;
         });
     },
 
     createProductObjectFromItem : function(item){
         var productObj = {
-            'id' : item.accession,
+            'id' : item.accession || item['@id'] || object.atIdFromObject(item) || item.uuid,
             'name' : item.display_title || item.title || null,
             'category' : item['@type'].slice().reverse().slice(1).join('/'),
             'brand' : (item.lab && item.lab.display_title) || (item.submitted_by && item.submitted_by.display_title) || item.lab || item.submitted_by || null,
@@ -176,9 +293,27 @@ var analytics = module.exports = {
         return productObj;
     },
 
-    getStringifiedCurrentFilters : function(filters){
+    /**
+     * Given a 'node' object with a field, term, and potential parent node, generate a descriptive string to use as event label.
+     * 
+     * @param {Object} node - Node object.
+     * @returns {string} Label for analytics event.
+     */
+    eventLabelFromChartNode : function(node){
+        if (!node || typeof node !== 'object') return null;
+        var labelData = [];
+        if (node.field)     labelData.push('Field: ' + node.field);
+        if (node.term)      labelData.push('Term: ' + node.term);
+        if (node.parent && node.parent.field)   labelData.push('Parent Field: ' + node.parent.field);
+        if (node.parent && node.parent.term)    labelData.push('Parent Term: ' + node.parent.term);
+        return labelData.join(', ');
+    },
+
+    getStringifiedCurrentFilters : function(filters, contextFilters = null){
         if (typeof filters === 'string'){
-            filters = Filters.hrefToFilters(filters);
+            filters = Filters.hrefToFilters(filters, contextFilters);
+        } else if (typeof filters === 'undefined'){ // Allow filters to be blank.
+            filters = Filters.currentExpSetFilters();
         }
         return JSON.stringify(filters, _.keys(filters).sort());
     },
@@ -197,14 +332,35 @@ var analytics = module.exports = {
         if (host.indexOf('localhost') > -1){
             return 'UA-86655305-3';
         }
-        if (host.indexOf('4dn-web-alex.us-east') > -1){
+        if (host.indexOf('4dn-web-alex') > -1){
             return 'UA-86655305-4';
         }
         return null;
     },
+
+    getGoogleAnalyticsTrackingData : function(key = null){
+        var allData = null;
+        try {
+            allData = ga.getAll()[0].b.data.values;
+        } catch (e){
+            console.error('Could not get data from current GA tracker.');
+            return null;
+        }
+        if (allData !== null && key === null) return allData;
+        if (typeof key === 'string' && typeof allData === 'object' && allData){
+            try {
+                return allData[':' + key];
+            } catch (e) {
+                console.error(e);
+                return null;
+            }
+        }  
+    }
 
 };
 
 if (!isServerSide()) {
     window.analytics = analytics;
 }
+
+export default analytics;

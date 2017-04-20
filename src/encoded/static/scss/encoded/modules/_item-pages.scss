@@ -122,8 +122,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .flexcol-heading, .item-page-heading, .submission-page-heading{
     position: relative;
-    margin-right: -10px;
-    margin-left: -10px;
+    //margin-right: -10px;
+    //margin-left: -10px;
     background-color: #f4f4f4;
 
     h1, h2, h3, h4, h5, h6 {
@@ -310,7 +310,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	.tab-view-container {
 		.rc-tabs {
 			@media screen and (min-width: $screen-sm-min){
-				margin-top: -17px;
+				//margin-top: -17px;
 			}
 		}
 	}
@@ -342,12 +342,12 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 		.item-label, .item-value {
 			> div {
-				min-height: 20px;
+				min-height: 26px;
 				height: 100%;
 				word-break: break-all;
 				border-bottom: 1px solid #eee;
-				padding-top: 5px;
-				padding-bottom: 5px;
+				padding-top: 8px;
+				padding-bottom: 8px;
 			}
 		}
 		.item-label {
@@ -390,6 +390,17 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	}
 
+}
+
+/** JSON Tree Wrapper (e.g. fallback view) **/
+
+.json-tree-wrapper {
+	border-radius: 4px;
+	overflow: hidden;
+	> ul {
+		padding: 8px 16px 16px !important;
+		margin: 0 !important;
+	}
 }
 
 /*** Partial or Expandable Lists ***/
@@ -766,10 +777,6 @@ $download-button-width : 100px;
 .exp-table-section {
 
 	h3 {
-		font-weight: 300;
-		margin: 0;
-		//border-top: 1px solid #eee;
-		padding: 16px 0 16px;
 
 		span.exp-number {
 			padding-top: 5px;
