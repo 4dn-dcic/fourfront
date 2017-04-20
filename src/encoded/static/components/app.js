@@ -4,7 +4,7 @@ var ReactDOM = require('react-dom');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var ErrorPage = require('./error');
-var Navigation = require('./navigation');
+import Navigation from './navigation';
 var Action = require('./action');
 var Footer = require('./footer');
 var url = require('url');
@@ -158,7 +158,7 @@ var App = React.createClass({
             'content': undefined,
             'session': session,
             'user_actions': user_actions,
-            'schemas': null,
+            'schemas': this.props.context.schemas || null,
             'uploads': {}
         };
     },
@@ -735,6 +735,8 @@ var App = React.createClass({
 
             var promise = request.then((response)=>{
                 // Check/handle server-provided error code/message(s).
+
+                console.info("Fetched new context", response);
 
                 if (response.code === 403){
 
