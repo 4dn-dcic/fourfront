@@ -338,13 +338,11 @@ class Item(snovault.Item):
     },)
     def link_id(self, request):
         """create the link_id field, which is a copy of @id using ~ instead of /"""
-        obj_str = str(self) # in form <Object at @id>
-        id_str = obj_str.split(' at ')
+        id_str = str(self).split(' at ')
         path_str = id_str[-1].strip('>')
-        if path_str:
-            path_split = path_str.split('/')
-            path_str = '~'.join(path_split) + '~'
-            return path_str
+        path_split = path_str.split('/')
+        path_str = '~'.join(path_split) + '~'
+        return path_str
 
     def update_embeds(self):
         """
