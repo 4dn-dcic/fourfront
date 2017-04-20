@@ -241,6 +241,17 @@ class File(Item):
         filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
 
+    @calculated_property(schema={
+        "title": "Upload key",
+        "type": "string",
+    })
+    def upload_key(self, request):
+        properties = self.properties
+        external = self.propsheets.get('external', {})
+        if not external:
+            external = self.build_external_creds(self.registry, self.uuid, properties)
+        return external['key']
+
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
     })

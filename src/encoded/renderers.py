@@ -267,7 +267,6 @@ def set_response_headers_tween_factory(handler, registry):
             and hasattr(request, 'auth0_expired')
             and not response.headers.get('X-Request-JWT', None)
         ):
-
             response = add_x_user_info_header(response, request)
 
         return response
