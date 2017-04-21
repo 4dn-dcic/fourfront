@@ -27,7 +27,6 @@ def main():
     )
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('config_uri', help="path to configfile")
-    parser.add_argument('--access-key', help="store local or copy to s3, will generate and store access key for admin user")
     args = parser.parse_args()
 
     # get the pyramids app

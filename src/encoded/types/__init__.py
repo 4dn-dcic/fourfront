@@ -155,3 +155,19 @@ class Protocol(Item, ItemWithAttachment):
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
     embedded = []
+
+
+@collection(
+    name='sysinfos',
+    unique_key='sysinfo:name',
+    properties={
+        'title': 'System Info',
+        'description': 'Just for internal use',
+    })
+class SysInfo(Item):
+    """sysinfo class."""
+
+    item_type = 'sysinfo'
+    schema = load_schema('encoded:schemas/sysinfo.json')
+    name_key = 'name'
+    embedded = []

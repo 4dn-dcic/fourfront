@@ -588,12 +588,11 @@ def download_and_process_owl(ontology, connection, terms):
     synonym_terms = get_synonym_term_uris(connection, ontology)
     definition_terms = get_definition_term_uris(connection, ontology)
     data = Owler(ontology['download_url'])
+    terms = {}
     for class_ in data.allclasses:
         if isBlankNode(class_):
             terms = process_blank_node(class_, data, terms)
         else:
-            if not terms:
-                terms = {}
             termid = get_termid_from_uri(class_)
             if terms.get(termid) is None:
                 terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])

@@ -10,6 +10,7 @@ import boto3
 
 import argparse
 
+from snovault.elasticsearch.interfaces import ELASTIC_SEARCH
 from pyramid.path import DottedNameResolver
 from pyramid.paster import get_app
 from encoded import configure_dbsession
@@ -796,5 +797,8 @@ def load_ontology_terms(app):
     patches = resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_patch.json')
     print(patches)
     docsdir = []
-    load_all(testapp, posts, docsdir, itype='ontology_term')
-    load_all(testapp, patches, docsdir, itype='ontology_term', phase='patch_ontology')
+    es = app.registry[ELASTIC_SEARCH]
+    import pdb; pdb.set_trace()
+    posts_json = json.load(open(posts))
+    #load_all(testapp, posts, docsdir, itype='ontology_term')
+    #load_all(testapp, patches, docsdir, itype='ontology_term', phase='patch_ontology')
