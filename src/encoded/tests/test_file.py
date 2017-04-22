@@ -9,6 +9,7 @@ def test_reference_file_by_md5(testapp, file):
     assert res.json['@id'] == file['@id']
 
 
+@pytest.mark.slow
 def test_replaced_file_not_uniqued(testapp, file):
     testapp.patch_json('/{uuid}'.format(**file), {'status': 'replaced'}, status=200)
     testapp.get('/md5:{md5sum}'.format(**file), status=404)
