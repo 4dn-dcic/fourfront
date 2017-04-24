@@ -27,7 +27,7 @@ module.exports.object       = require('./object');
 module.exports.navigate     = require('./navigate').default;
 
 /** Analytics utilities */
-module.exports.analytics    = require('./analytics').default;
+module.exports.analytics    = require('./analytics');
 
 /** Layout utilities */
 module.exports.layout       = require('./layout');
