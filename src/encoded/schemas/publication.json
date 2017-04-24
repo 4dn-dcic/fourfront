@@ -113,6 +113,11 @@
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
+        "journal": {
+            "title": "Journal",
+            "type": "string",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
         "authors": {
             "title": "Authors",
             "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
