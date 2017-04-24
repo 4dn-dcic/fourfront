@@ -782,8 +782,12 @@ def load_prod_data(app, access_key_loc=None):
     store_keys(app, access_key_loc, keys, s3_file_name='illnevertell_prod')
 
 
-def load_ontology_terms(app):
+def load_ontology_terms(app,
+                        post_json='tests/data/ontology-term-inserts/ontology_post.json',
+                        patch_json='tests/data/ontology-term-inserts/ontology_patch.json',):
+
     from webtest import TestApp
+    from webtest.app import AppError
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
@@ -792,13 +796,20 @@ def load_ontology_terms(app):
     # import pdb; pdb.set_trace()
 
     from pkg_resources import resource_filename
-    posts = resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_post.json')
+    posts = resource_filename('encoded', post_json)
     print(posts)
-    patches = resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_patch.json')
+    patches = resource_filename('encoded',patch_json)
     print(patches)
     docsdir = []
     es = app.registry[ELASTIC_SEARCH]
+    #posts_json = json.load(open(posts))
+    load_all(testapp, posts, docsdir, itype='ontology_term')
+    load_all(testapp, patches, docsdir, itype='ontology_term', phase='patch_ontology')
+
+    # now keep track of the last time we loaded these suckers
+    data = {"name" : "ffsysinfo", "ontology_updated":datetime.today().isoformat()}
     import pdb; pdb.set_trace()
-    posts_json = json.load(open(posts))
-    #load_all(testapp, posts, docsdir, itype='ontology_term')
-    #load_all(testapp, patches, docsdir, itype='ontology_term', phase='patch_ontology')
+    try:
+        testapp.post_json("/sysinfo", data)
+    except AppError:
+        testapp.patch_json("/sysinfo/%s" % data[name], data)

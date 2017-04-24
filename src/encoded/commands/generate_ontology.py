@@ -2,6 +2,7 @@ import os
 import json
 import sys
 import argparse
+from encoded.loadxl import load_ontology_terms
 from dateutil.relativedelta import relativedelta
 import datetime
 import boto3
@@ -652,14 +653,18 @@ def parse_args(args):
                         default='all',
                         help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
                         all retrieves all ontologies that exist in db")
-    parser.add_argument('--outfile',
-                        default='ontology.json',
-                        help="The name of the output file.  \
-                        Default is --outfile=ontology.json")
+    parser.add_argument('--outdir',
+                        default='tests/data/ontology-term-inserts/',
+                        help="the directory (relative to src/encoded)  for the output files default is.  \
+                        Default is tests/data/ontology-term-inserts/")
     parser.add_argument('--s3upload',
                         default=False,
                         action='store_true',
                         help="set to upload to system defined s3.")
+    parser.add_argument('--load',
+                        default=False,
+                        action='store_true',
+                        help="also load the ontology stuff into the database")
     parser.add_argument('--force',
                         default=False,
                         action='store_true',
@@ -696,24 +701,48 @@ def owl_runner(value):
     return download_and_process_owl(*value)
 
 
+def last_ontology_load(app):
+    from webtest import TestApp
+    from webtest.app import AppError
+    import dateutil
+
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+    try:
+        sysinfo = testapp.get("/sysinfo/ffsysinfo").follow().json
+        return dateutil.parser.parse(sysinfo['ontology_updated'])
+    except AppError:
+        return datetime.datetime.min
+
+
 def main():
     ''' Downloads latest Ontology OWL files for Ontologies in the database
         and Updates Terms by generating json inserts
     '''
 
     args = parse_args(sys.argv[1:])  # to facilitate testing
-    postfile = 'ontology_post.json'
-    patchfile = 'ontology_patch.json'
+
+    s3_postfile = 'ontology_post.json'
+    s3_patchfile = 'ontology_post.json'
+    from pkg_resources import resource_filename
+    outdir = resource_filename('encoded', args.outdir)
+
+    postfile = outdir + s3_postfile
+    patchfile = outdir + s3_patchfile
 
     # pyramids app
     app = get_app(args.config_uri, args.app_name)
+
     if args.s3upload and not args.force:
         # first check and see if we are more than 3 months past date
         adjust = relativedelta(months=3)
         # aws gives back dates with tz info, datetime.today no got
-        import pytz
-        last_modified = s3_check_last_modified(postfile, app).replace(tzinfo=None)
-        if last_modified + adjust > datetime.datetime.today():
+        # import pytz
+        # last_modified = s3_check_last_modified(s3_postfile, app).replace(tzinfo=None)
+        if last_ontology_load(app) + adjust > datetime.datetime.now():
             print("it hasn't been three months skipping for now")
             return
 
@@ -733,14 +762,18 @@ def main():
         data = [(o, connection, {}) for o in ontologies if o['download_url'] is not None]
         for term in runner.run(data):
             print("*********GOT a term*********")
+            print("before terms count is", len(terms))
             terms.update(term)
+            print("after terms count is", len(terms))
     else:
         for ontology in ontologies:
             print('Processing: ', ontology['ontology_name'])
             if ontology['download_url'] is not None:
                 # get all the terms for an ontology
-                terms.update(download_and_process_owl(ontology, connection, terms))
                 print("*******GOT a term********")
+                print("before terms count is", len(terms))
+                terms = download_and_process_owl(ontology, connection, terms)
+                print("after terms count is", len(terms))
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
@@ -753,21 +786,17 @@ def main():
         partitioned_terms = id_post_and_patch(terms, db_terms, filter_unchanged)
         terms2write = add_uuids(partitioned_terms)
 
-        name, ext = args.outfile.split('.', -1)
-        postfile = name + '_post.' + ext
-        patchfile = name + '_patch.' + ext
         write_outfile(terms2write[0], postfile)
         write_outfile(terms2write[1], patchfile)
 
+        if args.load:
+            load_ontology_terms(app, args.outdir + s3_postfile,  args.outdir + s3_patchfile)
+
         if args.s3upload:
-            s3_put(terms2write[0], postfile, app)
-            s3_put(terms2write[0], patchfile, app)
-        '''
-        with open(postfile, 'rb') as postedfile:
+            with open(postfile, 'rb') as postedfile:
+                s3_put(postedfile, s3_postfile, app)
             with open(patchfile, 'rb') as patchedfile:
-                s3_put(postedfile, postfile, app)
-                s3_put(patchedfile, patchfile, app)
-        '''
+                s3_put(patchedfile, s3_patchfile, app)
 
 
 def s3_check_last_modified(key, app):
@@ -787,10 +816,11 @@ def s3_put(obj, filename, app):
 
     s3bucket = app.registry.settings['system_bucket']
     s3 = boto3.client('s3')
-    s3.put_object(Bucket=s3bucket,
+    resp = s3.put_object(Bucket=s3bucket,
                   Key=filename,
                   Body=obj,
                   )
+    import pdb; pdb.set_trace()
 
 
 if __name__ == '__main__':

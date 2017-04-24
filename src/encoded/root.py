@@ -174,12 +174,16 @@ def health_check(config):
         '/health'
     )
     def health_page_view(request):
+
+        import pdb; pdb.set_trace()
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
         settings = request.registry.settings
         db = request.registry['dbsession']
         count = db.scalar("""SELECT count(*) FROM "propsheets";""")
         es_index = settings.get('snovault.elasticsearch.index')
+        reg = request.registry
+        import pdb; pdb.set_trace()
         responseDict = {
             "file_upload_bucket" : settings.get('file_upload_bucket'),
             "blob_bucket" : settings.get('blob_bucket'),
