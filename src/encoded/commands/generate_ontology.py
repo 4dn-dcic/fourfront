@@ -1,7 +1,10 @@
 import os
+import json
 import sys
 import argparse
-import json
+from dateutil.relativedelta import relativedelta
+import datetime
+import boto3
 from rdflib.collection import Collection
 from encoded.commands.owltools import (
     Namespace,
@@ -21,7 +24,12 @@ from wranglertools.fdnDCIC import (
     FDN_Connection,
     get_FDN
 )
+import mimetypes
+from pyramid.paster import get_app
 
+# multiprocess this badboy
+from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import Pool, cpu_count  # pylint:disable=no-name-in-module
 
 EPILOG = __doc__
 
@@ -348,7 +356,7 @@ def get_syndef_terms_as_uri(connection, ontology, termtype, as_rdf=True):
         if as_rdf=False.
     '''
     sdterms = ontology.get(termtype)
-    uris = [term['term_url'] for term in sdterms]
+    uris = [term['term_url'] for term in sdterms if term is not None]
     if as_rdf:
         uris = [convert2namespace(uri) for uri in uris]
     return uris
@@ -648,6 +656,18 @@ def parse_args(args):
                         default='ontology.json',
                         help="The name of the output file.  \
                         Default is --outfile=ontology.json")
+    parser.add_argument('--s3upload',
+                        default=False,
+                        action='store_true',
+                        help="set to upload to system defined s3.")
+    parser.add_argument('--force',
+                        default=False,
+                        action='store_true',
+                        help="force overwritting of existing file in s3.")
+    parser.add_argument('--parallel',
+                        default=False,
+                        action='store_true',
+                        help="set to run things in parallel")
     parser.add_argument('--pretty',
                         default=False,
                         action='store_true',
@@ -664,28 +684,63 @@ def parse_args(args):
                         default=os.path.expanduser("~/keypairs.json"),
                         help="The keypair file.  Default is --keyfile=%s" %
                              (os.path.expanduser("~/keypairs.json")))
+
+    parser.add_argument('--app-name', help="Pyramid app name in configfile")
+    parser.add_argument('config_uri', help="path to configfile")
+
     return parser.parse_args(args)
+
+
+def owl_runner(value):
+    print('Processing: ', value[0]['ontology_name'])
+    return download_and_process_owl(*value)
 
 
 def main():
     ''' Downloads latest Ontology OWL files for Ontologies in the database
         and Updates Terms by generating json inserts
     '''
-    # setup
+
     args = parse_args(sys.argv[1:])  # to facilitate testing
+    postfile = 'ontology_post.json'
+    patchfile = 'ontology_patch.json'
+
+    # pyramids app
+    app = get_app(args.config_uri, args.app_name)
+    if args.s3upload and not args.force:
+        # first check and see if we are more than 3 months past date
+        adjust = relativedelta(months=3)
+        # aws gives back dates with tz info, datetime.today no got
+        import pytz
+        last_modified = s3_check_last_modified(postfile, app).replace(tzinfo=None)
+        if last_modified + adjust > datetime.datetime.today():
+            print("it hasn't been three months skipping for now")
+            return
+
+    # fourfront connection 
     connection = connect2server(args.keyfile, args.key)
     ontologies = get_ontologies(connection, args.ontologies)
     slim_terms = get_slim_terms(connection)
     db_terms = get_existing_ontology_terms(connection)
     db_terms = {t['term_id']: t for t in db_terms}
-
-    # start iteratively downloading and processing ontologies
     terms = {}
-    for ontology in ontologies:
-        print('Processing: ', ontology['ontology_name'])
-        if ontology['download_url'] is not None:
-            # get all the terms for an ontology
-            terms = download_and_process_owl(ontology, connection, terms)
+
+    if args.parallel:
+        # TODO: this seems to generate different parents
+        from .parallel import ParallelTask
+        # start iteratively downloading and processing ontologies
+        runner = ParallelTask(owl_runner)
+        data = [(o, connection, {}) for o in ontologies if o['download_url'] is not None]
+        for term in runner.run(data):
+            print("*********GOT a term*********")
+            terms.update(term)
+    else:
+        for ontology in ontologies:
+            print('Processing: ', ontology['ontology_name'])
+            if ontology['download_url'] is not None:
+                # get all the terms for an ontology
+                terms.update(download_and_process_owl(ontology, connection, terms))
+                print("*******GOT a term********")
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
@@ -703,6 +758,39 @@ def main():
         patchfile = name + '_patch.' + ext
         write_outfile(terms2write[0], postfile)
         write_outfile(terms2write[1], patchfile)
+
+        if args.s3upload:
+            s3_put(terms2write[0], postfile, app)
+            s3_put(terms2write[0], patchfile, app)
+        '''
+        with open(postfile, 'rb') as postedfile:
+            with open(patchfile, 'rb') as patchedfile:
+                s3_put(postedfile, postfile, app)
+                s3_put(patchedfile, patchfile, app)
+        '''
+
+
+def s3_check_last_modified(key, app):
+    s3bucket = app.registry.settings['system_bucket']
+    s3 = boto3.resource('s3')
+    obj = s3.Object(s3bucket, key)
+    return obj.last_modified
+
+
+def s3_put(obj, filename, app):
+    '''
+    try to guess content type
+    '''
+    content_type = mimetypes.guess_type(filename)[0]
+    if content_type is None:
+        content_type = 'binary/octet-stream'
+
+    s3bucket = app.registry.settings['system_bucket']
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket=s3bucket,
+                  Key=filename,
+                  Body=obj,
+                  )
 
 
 if __name__ == '__main__':
