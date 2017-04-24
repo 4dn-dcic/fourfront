@@ -198,7 +198,7 @@ class Publication(Item):
         if date:
             properties['date_published'] = date
         if journal:
-            properties['journal'] = date
+            properties['journal'] = journal
         super(Publication, self)._update(properties, sheets)
         if 'exp_sets_prod_in_pub' in properties:
             invalidate_linked_items(self, 'exp_sets_prod_in_pub')
