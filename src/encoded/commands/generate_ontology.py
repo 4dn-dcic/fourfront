@@ -527,11 +527,10 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         for tid, term in dbterms.items():
             if tid not in terms:
                 if not term.get('source_ontology') or term['source_ontology'] not in ontids:
+                    # don't obsolete terms that aren't in one of the ontologies being processed
                     continue
                 dbuid = term['uuid']
                 # add simple term with only status and uuid to to_patch
-                # a little worried about obsolete terms getting left as
-                # parents or slims so need to test that
                 to_patch[dbuid] = {'status': 'obsolete', 'uuid': dbuid}
                 tid2uuid[term['term_id']] = dbuid
 
