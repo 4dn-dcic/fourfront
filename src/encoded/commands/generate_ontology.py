@@ -669,10 +669,6 @@ def parse_args(args):
                         default=False,
                         action='store_true',
                         help="force overwritting of existing file in s3.")
-    parser.add_argument('--parallel',
-                        default=False,
-                        action='store_true',
-                        help="set to run things in parallel")
     parser.add_argument('--pretty',
                         default=False,
                         action='store_true',
@@ -751,23 +747,11 @@ def main():
     db_terms = {t['term_id']: t for t in db_terms}
     terms = {}
 
-    if args.parallel:
-        # TODO: this seems to generate different parents
-        from .parallel import ParallelTask
-        # start iteratively downloading and processing ontologies
-        runner = ParallelTask(owl_runner)
-        data = [(o, connection, {}) for o in ontologies if o['download_url'] is not None]
-        for term in runner.run(data):
-            print("*********GOT a term*********")
-            print("before terms count is", len(terms))
-            terms.update(term)
-            print("after terms count is", len(terms))
-    else:
-        for ontology in ontologies:
-            print('Processing: ', ontology['ontology_name'])
-            if ontology['download_url'] is not None:
-                # get all the terms for an ontology
-                terms = download_and_process_owl(ontology, connection, terms)
+    for ontology in ontologies:
+        print('Processing: ', ontology['ontology_name'])
+        if ontology['download_url'] is not None:
+            # get all the terms for an ontology
+            terms = download_and_process_owl(ontology, connection, terms)
 
     # at this point we've processed the rdf of all the ontologies
     if terms:

@@ -175,7 +175,6 @@ def health_check(config):
     )
     def health_page_view(request):
 
-        import pdb; pdb.set_trace()
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
         settings = request.registry.settings
@@ -184,6 +183,12 @@ def health_check(config):
         es_index = settings.get('snovault.elasticsearch.index')
         reg = request.registry
         import pdb; pdb.set_trace()
+        try:
+            si =  request.embed('/sysinfo/ffsysinfo')
+            ont_date = si.json['ontology_updated']
+        except:
+            ont_date = "Never Generated"
+
         responseDict = {
             "file_upload_bucket" : settings.get('file_upload_bucket'),
             "blob_bucket" : settings.get('blob_bucket'),
@@ -193,6 +198,7 @@ def health_check(config):
             "load_data": settings.get('snovault.load_test_data'),
             'es_count': request.registry['elasticsearch'].count(index=es_index),
             'db_count': count,
+            'ontology_updated': ont_date,
             "@type" : [ "Health", "Portal" ],
             "@context" : "/health",
             "@id" : "/health",
