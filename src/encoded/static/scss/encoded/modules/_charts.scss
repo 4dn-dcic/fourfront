@@ -1008,6 +1008,134 @@
 }
 
 
+
+
+/************************/
+/**** Workflow Chart ****/
+/************************/
+
+$workflow-io-node-height : 28px;
+$workflow-io-node-lineheight: 18px;
+$workflow-step-node-height: 40px;
+$workflow-step-node-lineheight: 18px;
+
+.worfklow-chart-outer-container {
+
+    .workflow-chart-inner-container {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        overflow-y: hidden;
+        overflow-x: visible;
+
+        .scroll-container {
+
+            overflow: hidden;
+
+            .nodes-layer-wrapper,
+            .edges-layer-wrapper {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+
+            .nodes-layer-wrapper {
+                .nodes-layer {
+                    position: relative;
+                    
+                    .node {
+                        position: absolute;
+
+                        > .inner {
+                            background-color: #ddd;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            padding-left: 2px;
+                            padding-right: 5px;
+                            
+                            i.icon.icon-fw {
+                                margin-right: 5px;
+                                margin-left: 1px;
+                            }
+                        }
+
+                        &.node-type-step {
+                            margin-top: - ($workflow-step-node-height / 2);
+                            > .inner {
+                                height : $workflow-step-node-height;
+                                line-height: $workflow-step-node-lineheight;
+                                padding-top: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2;
+                                padding-bottom: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2;
+                                padding-left: 10px;
+                                padding-right: 4px;
+                                background-color: #b0c4da;
+                            }
+                        }
+
+                        &.node-type-input,
+                        &.node-type-output {
+                            
+                            margin-top: - ($workflow-io-node-height / 2);
+
+                            &:before, &:after {
+                                display: inline-block;
+                                content: '';
+                                width: 10px;
+                                height: $workflow-io-node-height;
+                                background: transparent;
+                                vertical-align: middle;
+                            }
+                            &:before {
+                                border-right: 10px solid #ddd;
+                                border-top: $workflow-io-node-height solid transparent;
+                            }
+                            &:after {
+                                border-left: 10px solid #ddd;
+                                border-bottom: $workflow-io-node-height solid transparent;
+                            }
+                            > .inner {
+                                height : $workflow-io-node-height;
+                                line-height: $workflow-io-node-lineheight;
+                                padding-top: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
+                                padding-bottom: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
+                                display: inline-block;
+                                vertical-align: middle;
+                                position: relative;
+                                z-index: 5;
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            .edges-layer-wrapper {
+                .edges-layer {
+
+                    marker#Triangle {
+                        fill: #333;
+                    }
+
+                    path {
+                        stroke: #555;
+                        fill: none;
+                        stroke-width: 1px;
+                        stroke-width: 1.5px;
+                    }
+
+                }
+            }
+
+        }
+
+    }
+
+}
+
+
+
+
 /**** Cursor Component(s) ****/
 
 .cursor-component-container {
