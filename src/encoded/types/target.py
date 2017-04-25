@@ -41,6 +41,8 @@ class Target(Item):
             except:
                 pass
         if targeted_structure:
+            if value:
+                value += " & "
             value += targeted_structure
 
         if value:
@@ -81,6 +83,8 @@ class Target(Item):
             except:
                 pass
         if targeted_structure:
+            if value:
+                value += " & "
             value += targeted_structure
 
         if value:
