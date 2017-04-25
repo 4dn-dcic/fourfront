@@ -182,7 +182,6 @@ def health_check(config):
         count = db.scalar("""SELECT count(*) FROM "propsheets";""")
         es_index = settings.get('snovault.elasticsearch.index')
         reg = request.registry
-        import pdb; pdb.set_trace()
         try:
             si =  request.embed('/sysinfo/ffsysinfo')
             ont_date = si.json['ontology_updated']
