@@ -113,11 +113,20 @@
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
+        "journal": {
+            "title": "Journal",
+            "type": "string",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
         "authors": {
             "title": "Authors",
             "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
-            "type": "string",
-            "exclude_from": ["submit4dn", "FFedit-create"]
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Author",
+                "type": "string"
+            }
         },
         "date_published": {
             "title": "Publication date",
