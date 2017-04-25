@@ -84,21 +84,37 @@ def static_pages(config):
             try:
                 content = {}
                 for s in sections:
-                    filenameParts = s['filename'].split('.')
-                    content[filenameParts[0]] = {
-                        'content' : s.get('content', False) or getStaticFileContent(
-                            s['filename'],
-                            pageMeta['directory'],
-                            contentFilesLocation
-                        ),
-                        'title'   : s.get('title', None),
-                        'order'   : s['order'],
-                        'filetype': filenameParts[len(filenameParts) - 1]
-                    }
+                    sectionID = s.get('id') # use section 'id', or 'filename' minus extension ('.*')
+                    if sectionID is None:
+                        sectionID = s['filename'].split('.')[0]
+                    if s.get('content', None) is not None:
+                        content[sectionID] = {
+                            'content' : s['content'],
+                            'title'   : s.get('title', None),
+                            'order'   : s['order'],
+                            'filetype': 'txt'
+                        }
+                    else:
+                        filenameParts = s['filename'].split('.')
+                        content[sectionID] = {
+                            'content' : getStaticFileContent(
+                                s['filename'],
+                                pageMeta['directory'],
+                                contentFilesLocation
+                            ),
+                            'title'   : s.get('title', None),
+                            'order'   : s['order'],
+                            'filetype': filenameParts[len(filenameParts) - 1]
+                        }
                     if s.get('title', None):
-                        content[filenameParts[0]]['title'] = s['title']
+                        content[sectionID]['title'] = s['title']
                     if s.get('toc-title', None):
-                        content[filenameParts[0]]['toc-title'] = s['toc-title']
+                        content[sectionID]['toc-title'] = s['toc-title']
+
+                    content[sectionID].update({
+                        k : v for k,v in s.items() if k not in ['id', 'title', 'toc-title', 'order', 'filetype', 'filename']
+                    })
+
             except Exception as e:
                 print(e)
                 print('Could not get contents from ' + contentFilesLocation)
@@ -200,7 +216,8 @@ def health_check(config):
             "@type" : [ "Health", "Portal" ],
             "@context" : "/health",
             "@id" : "/health",
-            "content" : None
+            "content" : None,
+            "display_title" : "Health Status"
         }
 
         return responseDict

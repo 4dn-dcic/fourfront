@@ -279,7 +279,9 @@ def prepare_search_term(request):
     prepared_terms = {}
     prepared_vals = []
     for field, val in request.params.iteritems():
-        if field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
+        if field.startswith('audit'):
+            continue
+        elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
             prepared_terms['embedded.' + field].append(val)
@@ -332,12 +334,14 @@ def list_result_fields(request, doc_types):
     Note that you must provide the full fieldname with embeds, such as:
     'field=biosample.biosource.individual.organism.name' and not just
     'field=name'
+    Add audit to this so we can look at that as well
     """
     frame = request.params.get('frame')
     fields_requested = request.params.getall('field')
     if fields_requested:
-        fields = {'embedded.@id', 'embedded.@type'}
-        fields.update('embedded.' + field for field in fields_requested)
+        fields = ['embedded.@id', 'embedded.@type']
+        for field in fields_requested:
+            fields.append('embedded.' + field)
     elif frame in ['embedded', 'object']:
         fields = [frame + '.*']
     else:
@@ -525,7 +529,6 @@ def set_facets(facets, used_filters, principals, doc_types):
     :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
     :param used_filters: Dict of filters which are set for the ES query. Key is field type, e.g. 'experiments_in_set.award.project', and value is list of terms (strings).
     """
-
     aggs = {}
     facetFields = dict(facets).keys() # List of first entry of tuples in facets list.
     # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
@@ -543,8 +546,6 @@ def set_facets(facets, used_filters, principals, doc_types):
         aggregation = {
             'terms': {
                 'field': query_field,
-                'min_doc_count': 0,
-                'size': 100
             }
         }
 
@@ -582,7 +583,17 @@ def set_facets(facets, used_filters, principals, doc_types):
             'filter': termFilter,
         }
 
-    return aggs
+    # to achieve OR behavior within facets, search among GLOBAL results,
+    # not just returned ones. to do this, wrap aggs in ['all_items']
+    # and add "global": {} to top level aggs query
+    # see elasticsearch global aggs for documentation (should be ES5 compliant)
+    final_aggs = {
+        'all_items': {
+            'global': {},
+            'aggs': aggs
+        }
+    }
+    return final_aggs
 
 
 def format_facets(es_results, facets, used_filters, schemas, total):
@@ -595,7 +606,7 @@ def format_facets(es_results, facets, used_filters, schemas, total):
     if 'aggregations' not in es_results:
         return result
 
-    aggregations = es_results['aggregations']
+    aggregations = es_results['aggregations']['all_items']
     used_facets = set()
     for field, facet in facets:
         resultFacet = {
@@ -638,6 +649,7 @@ def format_facets(es_results, facets, used_filters, schemas, total):
 def format_results(request, hits):
     """
     Loads results to pass onto UI
+    For now, add audits to the results so we can facet/not facet on audits
     """
     fields_requested = request.params.getall('field')
     if fields_requested:
@@ -647,9 +659,12 @@ def format_results(request, hits):
     else:
         frame = 'embedded'
 
-    if frame in ['embedded', 'object']:
+    if frame in ['embedded', 'object', ]:
         for hit in hits:
-            yield hit['_source'][frame]
+            frame_result = hit['_source'][frame]
+            if 'audit' in hit['_source'] and 'audit' not in frame_result:
+                frame_result['audit'] = hit['_source']['audit']
+            yield frame_result
         return
 
 ### stupid things to remove; had to add because of other fxns importing

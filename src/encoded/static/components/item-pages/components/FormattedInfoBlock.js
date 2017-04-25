@@ -2,7 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
-var { ajax, console, isServerSide } = require('./../../util');
+var { ajax, console, isServerSide, analytics } = require('./../../util');
 
 /**
  * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.
@@ -218,6 +218,14 @@ var FormattedInfoBlock = module.exports = React.createClass({
                     'body' : error
                 };
                 this.setState(newStateAddition);
+                analytics.event('FormattedInfoBlock', 'ERROR', {
+                    eventLabel : (
+                        "AJAX Error: "  + (error.title       || 'N/A') + ' | ' +
+                        'Detail: '      + (error.detail      || 'N/A') + ' | ' +
+                        'Description: ' + (error.description || 'N/A')
+                    ),
+                    eventValue : error.code || null
+                });
             }.bind(this));
         },
 
@@ -254,7 +262,8 @@ var FormattedInfoBlock = module.exports = React.createClass({
          */
         Lab : function(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
             if (details_lab && typeof details_lab.error !== 'undefined' && details_lab.error) {
-                return FormattedInfoBlock.Error.apply(this, arguments);
+                return null;
+                //return FormattedInfoBlock.Error.apply(this, arguments);
             }
             return FormattedInfoBlock.generate(
                 details_lab,
@@ -278,7 +287,8 @@ var FormattedInfoBlock = module.exports = React.createClass({
          */
         Award : function(details_award, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
             if (details_award && typeof details_award.error !== 'undefined' && details_award.error) {
-                return FormattedInfoBlock.Error.apply(this, arguments);
+                return null;
+                //return FormattedInfoBlock.Error.apply(this, arguments);
             }
             return FormattedInfoBlock.generate(
                 details_award,
@@ -297,7 +307,8 @@ var FormattedInfoBlock = module.exports = React.createClass({
          */
         User : function(details_user, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
             if (details_user && typeof details_user.error !== 'undefined' && details_user.error) {
-                return FormattedInfoBlock.Error.apply(this, arguments);
+                return null;
+                //return FormattedInfoBlock.Error.apply(this, arguments);
             }
             return FormattedInfoBlock.generate(
                 details_user,

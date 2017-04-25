@@ -1,7 +1,7 @@
 
-### Overview
+## Overview
 
-Metadata and data can be submitted to our platform using Microsoft Excel WorkBooks which describe related items in separate sheets. This section provides detailed information on how to fill the WorkBooks. You can check out the [example WorkBook](https://github.com/hms-dbmi/Submit4DN/blob/master/Data_Files/Rao_et_al_2014/fieldsRao.xls?raw=true) we prepared for the data from Rao et. al. 2014 to familiarize yourself with the general structure.
+Metadata and data can be submitted to our platform using Microsoft Excel WorkBooks that describe related items in separate sheets. This section provides detailed information on how to use the WorkBooks. You can check out the [example WorkBook](https://github.com/hms-dbmi/Submit4DN/blob/master/Data_Files/Rao_et_al_2014/fieldsRao.xls?raw=true) we prepared for the data from Rao et. al. 2014 to familiarize yourself with the general structure.
 
 
 Based on the type of experiment(s) for which you plan to submit data, the data wranglers can provide you with an Excel WorkBook containing several WorkSheets.  Each sheet corresponds to an Item type in our metadata database. The workbook provided should contain all the sheets that you may need for your submission. You can refer to [this table](#schema_info) for information on all the Item types available in the database.  Each sheet should also contain all the data fields that can be submitted for that Item type. Depending on if you have submitted data before or if you are using shared reagents that have been submitted by other labs, you may not need to provide information on every sheet or in every field.
@@ -37,7 +37,7 @@ Most field values are strings - either a term with controlled vocabulary, i.e. f
 ![Basic fields examples](/static/img/docs/submitting-metadata/basic_field_eg.png)
 There are some fields values that require specific formatting. These cases and how to identify them are described below.
 
-#### When the string must conform to a certain format
+### Required string formatting
 In some cases a field value must be formatted in a certain way or the Item will fail validation. In most cases tips on formatting requirements will be included in the *Additional Info* row of the spreadsheet. Examples of these are _Date_ fields (YYYY-MM-DD format) and _URLs_ (checked for proper URI syntax).
 
 In other cases a field value must match a certain pattern. For example, if a field requires a DNA sequence then the submitted value must contain only the characters A, T, G, C or N.
@@ -45,14 +45,14 @@ In other cases a field value must match a certain pattern. For example, if a fie
 
 _Database Cross Reference (DBxref) fields_, which contain identifiers that refer to external databases, are another case requiring special formatting. In many cases the values of these fields need to be in database\_name:ID format. For example, an SRA experiment identifier would need to be submitted in the form ‘SRA:SRX1234567’ (see also [Basic fields example](#basic-field) above). Note that in a few cases where the field takes only identifiers for one or two specific databases the ID alone can be entered - for example, when entering gene symbols in the *'targeted\_genes’* field of the Target Item you can enter only the gene symbols i.e. PARK2, DLG1.
 
-#### When a field specifies a linked item
+### Linked item fields
 Some fields in a Sheet for an Item may contain references to another Item. These may be of the same type or different types. Examples of this type of field include the *‘biosource’* field in Biosample or the *‘files’* field in the ExperimentHiC. Note that the latter is also an example of a list field that can take multiple values.
 
 
 You can reference an item in the excel workbooks using one of four possible ways: UUID, accession, lab-specific alias, or item-type-specific identifier. More information about these four identifiers is provided in the [Using aliases](#using-aliases) section below.
 
 
-#### When field(s) indicate an embedded object
+### Field(s) with subobjects
 Some Items can contain embedded sub-objects that are stored under a single Item field name but that contain multiple sub-fields that remain grouped together. These are indicated in the Item spreadsheet using a ‘.’ (dot) notation. For example the *"experiment_relations"* field has 2 sub-fields called *"relationship_type"*, and *"experiment"*. In the spreadsheet field names you will see *experiment\_relations.relationship_type* and *experiment\_relations.experiment*.
 
 
@@ -79,12 +79,12 @@ and enter a valid *relationship\_type* term and *experiment* identifier to each 
 
 <span id="existing-items"></span>
 
-#### Using aliases
+### Using aliases
 An **alias** is a lab specific identifier that you can assign to an item. Aliases take the form of *lab:id\_string* eg. ```parklab:myalias```. An alias must be unique within all items. Once you submit an alias for an Item then that alias can be used as an identifier for that Item in the current submission as well as in any subsequent submission.
 
 You don't need to use an alias if you are referencing an item that already exists in the database.
 
-#### Referencing existing items
+### Referencing existing items
 Every item in our database is assigned a “uuid” upon its creation, e.g. “44d3cdd1-a842-408e-9a60-7afadca11575”. Items from some item types (Files, Experiments, Biosamples, Biosources, Individuals...) also get a shorter “accession” assigned, e.g. 4DNEX4723419. These two are the default identifying terms of any item. Besides these two, there can also be object specific identifying terms, like award number for awards, or lab name for labs.
 
 
@@ -109,11 +109,11 @@ In some cases information for existing items will be present in the Excel Work S
 
 <span id="excel_reps"></span>
 
-#### Submitting supplementary metadata files
+### Supplementary metadata files
 To submit supplementary metadata files, such as pdfs or images, use the **Image** or **Document** schemas, and include the path of the files in the _*attachment*_ column.
 The path should be the full path to the supplementary file.
 
-#### Replicate information submitted with Experiments
+### Experimental Replicate information
 All experiments must be part of a replicate set - even if it is a set containing only a single experiment.  When preparing your submission you should determine how many replicate sets you will be submitting and create an entry - with an alias and preferably an informative description - for each set in the ExperimentSetReplicate sheet.
 
 ![ExperimentSetReplicate example](/static/img/docs/submitting-metadata/repsets_w_desc.png)
@@ -129,7 +129,7 @@ Then when entering information about individual experiments on the specific Expe
 The 4DN DCIC website has an REST API for fetching and submitting data. In our **Submit4DN** package the ```import_data``` script utilizes an organized bundle of REST API commands that parse the Excel workbook and submit the metadata to the database for you. The ```get_field_info``` script that is also part of the package can be used to generate the Excel workbook templates used for submission for all or a selected set of worksheets.
 The package can be installed from pypi.
 
-#### Installing the package
+### Installing the Submit4DN software
 The Submit4DN package is registered with Pypi so installation is as simple as:
 
 
@@ -142,7 +142,7 @@ If it is already installed upgrade to the latest version:
     pip3 install submit4dn --upgrade
 
 
-#### Source code
+### Submit4DN Source code
 The source code for the submission scripts is available on [github](https://github.com/4dn-dcic/Submit4DN).
 
 
@@ -153,7 +153,7 @@ Note if you are attempting to run the scripts in the wranglertools directory wit
 ```python3 -m wranglertools.import_data  filename.xls```
 
 
-#### Establishing a Connection to the 4DN-DCIC servers
+### Getting Connection Keys for the 4DN-DCIC servers
 An access key and a secret key are required to establish a connection to the 4DN database and to fetch, upload (post), or change (patch) data. Please follow these steps to get your keys.
 
 1. Log in to the 4DN website with your username (email) and password.
@@ -184,17 +184,17 @@ If in the file, the key is not called “default” you can use the --key parame
 
     import_data --keyfile Path/name_of_file.json --key NotDefault
 
-#### Uploading metadata with import_data
+### Using import_data script for submission
 You can use `import_data` either to upload new items or to modify metadata fields of existing items. This script will accept the excel workbook you prepared, and will upload every new item in the sheets.  This script is also used to upload data files to the 4DN data store - this is done in a separate step after your File metadata has been successfully uploaded.
 
 
-#### Testing your metadata (_WARNING Not yet implemented_)
+### Testing your metadata
 When you run the import_data  script on your metadata excel workbook without any arguments the system will test your data for compatibility with our metadata structure and report back to you any problems (in effect a dry run). The metadata will not be submitted, so you can take advantage of this feature to test your excel workbook.
 
-```import_data My_metadata.xls``` (Not yet implemented)
+```import_data My_metadata.xls```
 
 
-#### Uploading (posting) & Modifying (patching) Metadata
+### Uploading (posting) & Modifying (patching) Metadata
 When you submit your metadata, if a row in any sheet corresponds to a new item that has not previously been submitted to the 4DN database you will be POSTing that data via the REST API. Most of your entries in the first submission will be POSTs. To activate posting you need to include the ```--update``` argument to ```import_data```.
 
 
@@ -205,14 +205,14 @@ If you need to modify an existing item, you can use the patch function. To be ab
 
 	import_data My_metadata.xls --patchall
 
-#### When your upload is aborted
+### When your upload is aborted
 If for some reason the script fails in the middle of the upload process or errors are encountered for certain items, some items will have been posted while others will have not. When you fix the problem that caused the process to terminate, you can rerun the script using both the ```--patchall``` and ```--update``` arguments. Those items that had already been posted will be ‘patched’ using the data in the sheet and the items that had not been posted yet will be loaded.
 
 	import_data My_metadata.xls --patchall --update
 
-Please note that a delete feature is not yet implemented. Neither items nor fields in items can be deleted; they can only be patched, i.e. overwritten.
+Functionality that will allow the deletion of all the data in a single field of an existing Item exists - however this can be a potentially dangerous operation.  If you determine that you need this functionality please contact us at the DCIC for more information.
 
-#### Uploading files with import_data
+### Uploading files with import_data
 The 4DN databased distinguishes two main categories of files: (1) files that support the metadata, such as Documents or Images, and (2) data files for which metadata is gathered and are specified in specific File items/sheets (eg. FileFastq).
 
 
@@ -222,14 +222,19 @@ The first category can be uploaded along with the metadata by using the “attac
 The second category includes the data files that are the results of experiments, eg. fastq files from HiC experiments. These data files are bound to a File item with a specific type eg, FileFastq that contains relevant metadata about the specific result file. Metadata for a file should be submitted as part of your experiment metadata submission as described above. The actual file upload to the 4DN file store in the cloud will happen in a subsequent submission step. **NOTE that the filename is not part of the initial File metadata submission.** This second step will be triggered by a successful metadata submission that passes review by the 4DN DCIC.
 
 
-#### File upload
+#### Data File upload
 To upload your files, use the file submission excel sheet provided, and copy paste all your file (FileFastq) aliases from your metadata excel sheet to the aliases field of the file submission sheet. Under filename enter the full paths to your files. Once completed use import_data with the ```--patchall``` argument to start upload. The DCIC automatically checks file md5sums to confirm successful upload and to ensure that there are no duplicate files in the database.
+
+
+Upload using ftp is also supported, however the process currently transfers the files to your hard drive, uploads them to our system, and then deletes the copy from your local hard drive.  The files are processed sequentially so you need to have at least the amount of free space on your hard drive as the size of the largest file you wish to upload.  In addition, you must include your ftp login credentials in the ftp url, **which is definitely not a security best practice**.  For these reasons, if at all possible, it is recommended to install the Submit4DN package onto the server hosting the files to be submitted and use import_data as described above.  However, if that is not an option then your ftp urls should be formatted as follows:
+
+    ftp://username:password@hostname/path/to/filename
 
 
 To replace a file that has already been uploaded to 4DN - that is to associate a different file with existing metadata, associate the file path for the new file with an existing alias. **NOTE that every time you patch with a filename (even if it is the same filename) the file will be uploaded. Please use care when including a filename in your File metadata to avoid unnecessary uploads.** We plan to avoid this issue in future releases by pre-checking md5sums.
 
 
-## Generate Template Excel Workbook
+## Generate a new Template Workbook
 To create the data submission xls forms, you can use get\_field\_info, which is part of the Submit4DN package.
 
 The scripts accepts the following parameters:.
@@ -263,7 +268,7 @@ The 4DN-DCIC metadata database can be accessed using a Hypertext-Transfer-Protoc
 
 [encode]: https://www.encodeproject.org/
 
-#### Connecting to the server
+### Connecting to the server
 Your script will need to use an access key and secret that you can obtain by following [these instructions](./excel_submission.md#access) to connect with either the test or production server.  Exactly how you format and pass the connection information to the server depends on your scripting language and the libraries that you use with it.
 
 **Base URLs for submitting and fetching data are:**
@@ -272,13 +277,13 @@ Your script will need to use an access key and secret that you can obtain by fol
 
 You can refer to the ```FDN_key``` and ```FDN_connection``` classes in [the ```fdnDCIC.py``` library](https://github.com/4dn-dcic/Submit4DN/blob/master/wranglertools/fdnDCIC.py) in Submit4DN for an example of how to generate the necessary information that will be passed to the server with each request.
 
-#### Identifying specific items
+### Identifying specific items
 Your script will need to add a uniquely identifying token to the Base URL in order to GET, POST or PATCH metadata for that item. IDs that can be used include: uuids, accessions, certain type specific identifiers and aliases.  See the sections on ['Using Aliases' and 'Referencing existing items'](./excel_submission.md#using-aliases) for the types of identifiers that can be used in your requests.
 
-#### Ordering of POST requests
+### Ordering of POST requests
 Because in many cases fields in one Item may refer to another Item eg. the ```biosample``` field in the ```experiment_hi_c``` schema it is necessary to POST the referenced item prior to POSTing the item that refers to it.  A sensible POSTing order is specified in the ```sheet_order``` array located around line 144 in the [```fdnDCIC.py```](https://github.com/4dn-dcic/Submit4DN/blob/master/wranglertools/fdnDCIC.py) library.
 
-#### JSON formatting
+### JSON formatting
 The most important component of your submission is the proper formatting of the data into json so it will map correctly onto the 4DN metadata schemas.  The details of the schemas for all object types in the database can be viewed at <https://data.4dnucleome.org/profiles/>.  Individual schemas can be viewed and/or retrieved via GET by appending the schema file name to the above URL (eg. for the Hi-C experiment schema <https://data.4dnucleome.org/profiles/experiment_hi_c.json>). For a listing of all schema files and associated resource names see [this table](schema_info.md), which is up to date with the current schemas in the database.
 
 Depending on the Item type that you are submitting there may be fields that require values (eg. *experiment_type* for experiments), fields for which values should never be submitted (eg. ‘date_created’ as this is an automatically generated value) and fields with specific formatting and fields that accept values of specific types.  In many cases the values must be selected from a list of constrained choices.  The documentation on field values [described in detail above](#values) and the annotated json document below can be used as a guide on formatting your json.  In addition, the unordered and unfiltered excel workbooks produced by ```get_field_info``` can be a useful reference for determining exactly what fields are associated with what object types.  The processed workbook that is actually used for data submission does not reflect the exact schema structure **should not** be used as a direct reference for API submission.
