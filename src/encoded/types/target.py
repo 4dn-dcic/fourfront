@@ -29,20 +29,25 @@ class Target(Item):
     })
     def target_summary(self, request, targeted_genes=None, targeted_genome_regions=None,
                        targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
-        if targeted_genes:
-            value = ""
-            value += ' and '.join(targeted_genes)
+        value = ""
+        for target_info, name in [[targeted_genes, "Gene"], [targeted_proteins, "Protein"], [targeted_rnas, "RNA"]]:
+            try:
+                add = name + ':' + ', '.join(target_info)
+                # if there are multiple species of targets combine them with &
+                if value and add:
+                    value += " & "
+                if add:
+                    value += add
+            except:
+                pass
+        if targeted_structure:
+            if value:
+                value += " & "
+            value += targeted_structure
+
+        if value:
             return value
-        elif targeted_proteins:
-            value = ""
-            value += ' and '.join(targeted_proteins)
-            return value
-        elif targeted_rnas:
-            value = ""
-            value += ' and '.join(targeted_rnas)
-            return value
-        elif targeted_structure:
-            return targeted_structure
+
         elif targeted_genome_regions:
             values = []
             # since targetted region is a list, go through each item and get summary elements
@@ -64,10 +69,25 @@ class Target(Item):
         "description": "Shortened version of target summary.",
         "type": "string",
     })
-    def target_summary_short(self, request, targeted_genes=None, description=None):
-        if targeted_genes:
-            value = ""
-            value += ' and '.join(targeted_genes)
+    def target_summary_short(self, request, targeted_genes=None, description=None,
+                             targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
+        value = ""
+        for target_info, name in [[targeted_genes, "Gene"], [targeted_proteins, "Protein"], [targeted_rnas, "RNA"]]:
+            try:
+                add = name + ':' + ', '.join(target_info)
+                # if there are multiple species of targets combine them with &
+                if value and add:
+                    value += " & "
+                if add:
+                    value += add
+            except:
+                pass
+        if targeted_structure:
+            if value:
+                value += " & "
+            value += targeted_structure
+
+        if value:
             return value
         elif description:
             return description
@@ -78,6 +98,8 @@ class Target(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, targeted_genes=None, description=None):
+    def display_title(self, request, targeted_genes=None, description=None,
+                      targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         # biosample = '/biosample/'+ self.properties['biosample']
-        return self.target_summary_short(request, targeted_genes, description)
+        return self.target_summary_short(request, targeted_genes, description,
+                                         targeted_proteins, targeted_rnas, targeted_structure)
