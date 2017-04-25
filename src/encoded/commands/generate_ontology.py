@@ -381,7 +381,7 @@ def get_slim_terms(connection):
     # currently need to hard code the categories of slims but once the ability
     # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
-    slim_categories = ['developmental', 'assay', 'organ', 'system']
+    slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
     search_suffix = 'search/?type=OntologyTerm&is_slim_for='
     slim_terms = []
     for cat in slim_categories:

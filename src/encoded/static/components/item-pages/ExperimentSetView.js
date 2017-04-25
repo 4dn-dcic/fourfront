@@ -3,10 +3,10 @@
 var React = require('react');
 var _ = require('underscore');
 var Panel = require('react-bootstrap').Panel;
-var { ajax, console, DateUtility, object } = require('./../util');
+var { ajax, console, DateUtility, object, isServerSide } = require('./../util');
 var globals = require('./../globals');
 var { ExperimentsTable } = require('./../experiments-table');
-var { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditView } = require('./components');
+import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditView } from './components';
 var FacetList = require('./../facetlist');
 
 /**
@@ -53,7 +53,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             'checked' : true,
             'details_award' : null,
             'details_lab' : null,
-            'passExperiments' : ExperimentsTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term')
+            'passExperiments' : ExperimentsTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term'),
+            'mounted' : false
         };
     },
 
@@ -68,7 +69,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     },
 
     componentDidMount : function(){
-        this.setLinkedDetails(true);
+        this.setLinkedDetails(true, null, { mounted : true });
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -276,7 +277,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             <span>Details</span>
                         </h3>
                         <hr className="tab-section-title-horiz-divider"/>
-                        <ItemDetailList context={this.props.context} schemas={this.props.schemas} />
+                        <ItemDetailList context={this.props.context} schemas={this.props.schemas} showJson={true} />
                     </div>
                 )
             },
@@ -288,9 +289,17 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 ),
                 key : "audits",
                 disabled : !AuditView.doAnyAuditsExist(this.props.context),
-                content : <AuditView audits={this.props.context.audit} />
+                content : <AuditView audits={this.props.context.audit} />,
+                //isDefault : (
+                //        this.props.context && this.props.context.audit &&
+                //        Array.isArray(this.props.context.audit.ERROR) && this.props.context.audit.ERROR.length > 0
+                //    ) || false
             }
-        ];
+        ].map((tabObj)=>{ // Common properties
+            return _.extend(tabObj, { 
+                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && window.innerHeight - 180, 100) || 650 }
+            });
+        });
     },
 
     render: function() {
@@ -303,8 +312,21 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         return (
             <div className={itemClass}>
 
-                <ItemPageTitle context={this.props.context} />
+                <ItemPageTitle context={this.props.context} schemas={this.props.schemas} />
                 <ExperimentSetHeader {...this.props} />
+
+                <div className="row">
+                    <div className="col-sm-12">
+                    { this.props.context.produced_in_pub ?
+                        <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
+                            <div className="more-details">{ 
+                                this.props.context.produced_in_pub.authors || this.props.context.produced_in_pub.abstract || this.props.context.produced_in_pub.date_published || null
+                            }</div>
+                            <br/>
+                        </Publications.DetailBlock>
+                        : null }
+                    </div>
+                </div>
 
                 <div className="row">
 
@@ -327,18 +349,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
-                        { this.props.context.produced_in_pub ?
-                        <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
-                            <div className="more-details">{ 
-                                this.props.context.produced_in_pub.authors || this.props.context.produced_in_pub.abstract || this.props.context.produced_in_pub.date_published || null
-                            }</div>
-                        </Publications.DetailBlock>
-                        : null }
-
-                        <br/>
-
                         <TabbedView contents={this.getTabViewContents()} />
-
                     </div>
 
                 </div>
@@ -393,11 +404,12 @@ class ExperimentSetLabAwardInfo extends React.Component {
                 <div className="col-sm-12">
                     <div className="row">
 
-                        <div className="col-sm-12 col-md-12 col-sm-float-right">
-                            <Publications context={this.props.context} />
-                        </div>
-
-                        <hr/>
+                        { this.props.context.produced_in_pub || Array.isArray(this.props.context.publications_of_set) ? 
+                            <div className="col-sm-12 col-md-12 col-sm-float-right">
+                                <Publications context={this.props.context} />
+                                <hr/>
+                            </div>
+                        : null }
 
                         <div className="col-sm-12 col-md-12 col-sm-float-right">
                             { FormattedInfoBlock.User(this.props.userInfo) }
