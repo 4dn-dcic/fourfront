@@ -7,8 +7,6 @@ import json
 import logging
 import os.path
 import boto3
-from snovault.elasticsearch.interfaces import ELASTIC_SEARCH
-import sys
 import os
 
 text = type(u'')
