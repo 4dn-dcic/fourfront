@@ -5,10 +5,24 @@ var _ = require('underscore');
 var ExternalReferenceLink = require('./ExternalReferenceLink');
 
 /**
- * Produces a Bootstrap row div element with 3 columns containing External References, Aliases, & Alternate Accessions.
- * Use at the bottom of Item pages.
+ * Component for showing Aliases, External References, etc.
+ * Shown at bottom of Item pages.
+ * 
+ * @class ItemFooterRow
+ * @type {Component}
+ * @exports
+ * @prop {Object} context - JSON representation of current Item object. Should be available through Redux store's context.
+ * @prop {Object} schemas - JSON representation of sitewide schemas.
  */
-var ItemFooterRow = module.exports = React.createClass({
+export default class ItemFooterRow extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.render                 = this.render.bind(this);
+        this.aliases                = this.aliases.bind(this);
+        this.alternateAccessions    = this.alternateAccessions.bind(this);
+        this.externalReferences     = this.externalReferences.bind(this);
+    }
 
     /**
      * Render list of aliases for this item, wrapped in a <div>.
@@ -19,7 +33,7 @@ var ItemFooterRow = module.exports = React.createClass({
      * @private
      * @returns {Element|null} Div React element containing aliases list or null.
      */
-    aliases : function(){
+    aliases(){
         if (
             !this.props.context
             || !Array.isArray(this.props.context.aliases)
@@ -43,9 +57,9 @@ var ItemFooterRow = module.exports = React.createClass({
                 </div>
             </div>
         );
-    },
+    }
 
-    alternateAccessions : function(){
+    alternateAccessions(){
         if (
             !this.props.context
             || !Array.isArray(this.props.context.alternate_accessions)
@@ -66,9 +80,9 @@ var ItemFooterRow = module.exports = React.createClass({
                 </div>
             </div>
         );
-    },
+    }
 
-    externalReferences : function(schemas){
+    externalReferences(schemas){
         if (
             !this.props.context
             || !Array.isArray(this.props.context.external_references)
@@ -96,9 +110,9 @@ var ItemFooterRow = module.exports = React.createClass({
                 </div>
             </div>
         );
-    },
+    }
 
-    render: function() {
+    render() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
 
@@ -111,19 +125,19 @@ var ItemFooterRow = module.exports = React.createClass({
             <div className="row">
 
                 { externalReferences ?
-                <div className="col-xs-12 col-md-4">
+                <div className="col-xs-12 col-md-6">
                     { externalReferences }
                 </div>
                 : null }
 
-                { aliases ?
+                {/* aliases ?
                 <div className="col-xs-12 col-md-4">
                     { aliases }
                 </div>
-                : null }
+                : null */}
 
                 { alternateAccessions ?
-                <div className="col-xs-12 col-md-4">
+                <div className="col-xs-12 col-md-6">
                     { alternateAccessions }
                 </div>
                 : null }
@@ -133,5 +147,4 @@ var ItemFooterRow = module.exports = React.createClass({
         
 
     }
-
-});
+}

@@ -55,8 +55,8 @@ $audit-group-height: 40px;
 // Icon names are for font-awesome and are suffixed to 'icon-'.
 // BG colors automatically generated from the FG colors set here.
 $audit-types:
-    (error, warning, #cc0700),
-    (warning, exclamation-circle, #e0e000),
+    (error, warning, $audit-color-error),
+    (warning, exclamation-circle, $audit-color-warning),
     (not_compliant, file-text, #ff8000),
     (dcc_action, ambulance, #a0a0a0),
     (ok, check, #4C994C);
@@ -255,3 +255,77 @@ $audit-types:
         }
     }
 }
+
+/***** AuditView & AuditItem Components for Item Pages ******/
+
+.audits-view {
+
+    overflow: hidden;
+
+    > div > div h3 {
+        margin-top: 7px;
+    }
+
+    .audits-view-ERROR h3 i.icon {
+        color : $audit-color-error;
+    }
+    .audits-view-WARNING h3 i.icon {
+        color : $audit-color-warning;
+    }
+    .audits-view-INTERNAL_ACTION h3 i.icon {
+        color : $audit-color-internal-action;
+    }
+    
+    .audits-container {
+
+        > .audit-grouping:last-child {
+            margin-bottom: 20px;
+        }
+
+        .audit-category {
+            text-transform: capitalize;
+            display: block;
+
+            i.toggle-open.icon {
+                font-size: 1.1rem;
+                margin-right: 5px;
+                cursor : pointer;
+            }
+
+        }
+
+        overflow: hidden;
+        .audit-item {
+
+            > div > span > h4,
+            > div > h5 {
+                margin-top: 5px;
+            }
+
+            .audit-detail {
+                ul {
+                    //padding-left: 20px;
+                    margin-bottom: 0px;
+                    li {
+                        padding: 10px 0;
+                        &:not(:last-child){
+                            border-bottom: 1px solid #eee;
+                        }
+
+                        &:first-child {
+                            padding-top: 5px;
+                        }
+
+                        code {
+                            white-space: normal;
+                        }
+
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+

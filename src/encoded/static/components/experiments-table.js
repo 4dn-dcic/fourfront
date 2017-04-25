@@ -599,6 +599,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         // Scale/expand width of columns to fit available width, if any.
         var origColumnWidths;
         if (!this.refs.header) return null;
+        if (this.refs.header && this.refs.header.clientWidth === 0) return null;
         if (!this.cache.origColumnWidths){
             origColumnWidths = _.map(this.refs.header.children, function(c){
                 //if ( // For tests/server-side

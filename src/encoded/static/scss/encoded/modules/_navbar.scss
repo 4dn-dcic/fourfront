@@ -2,7 +2,8 @@
 
 $navbar-full-height : 80px;
 $navbar-small-height : 40px; /* Bootstrap navbar default */
-$navbar-transition-length: .75s;
+$navbar-transition-length: .3s;
+$navbar-transition-easing: ease-out;
 
 #top-nav {
     background: #ffffff;
@@ -32,8 +33,8 @@ $navbar-transition-length: .75s;
                 -moz-backface-visibility: hidden;
                 backface-visibility: hidden;
                 transform: translate3d(0,0,0);
-                transition: height $navbar-transition-length, 
-                    line-height $navbar-transition-length;
+                transition: height $navbar-transition-length $navbar-transition-easing, 
+                    line-height $navbar-transition-length $navbar-transition-easing;
                     /* box-shadow $navbar-transition-length, 
                     border-color $navbar-transition-length */;
             }
@@ -217,7 +218,7 @@ $navbar-transition-length: .75s;
             text-align: left;
             display: block;
             height : 38px;
-            transition: height .75s;
+            transition: height .3s;
             overflow: hidden;
             &.showing {
                 &.showing-filters {
@@ -356,6 +357,12 @@ $navbar-transition-length: .75s;
     height: 52px;
     line-height: 17px;
     overflow: hidden;
+    transition: margin-top $navbar-transition-length $navbar-transition-easing;
+    transform: translate3d(0,0,0);
+
+    body.scrolled-past-80 & {
+        margin-top: -52px;
+    }
 
     > .container > div > span {
     
@@ -432,18 +439,20 @@ $navbar-transition-length: .75s;
     color: #fff;
     vertical-align: middle;
     cursor: pointer;
+    transform: scale3d(1,1,1);
+    transition: transform .3s;
 
-    &:hover {
+    &:hover, .test-warning:hover & {
         color: #fff;
         text-decoration: none;
+        transform: scale3d(1.5,1.5,1.5) translate3d(0, 0, 0);
     }
 
     @media screen and (min-width: $screen-md-min) {
         position: static;
-        margin-top: 3px;
-        margin-left: 10px;
+        margin-top: -4px;
+        margin-left: 30px;
         margin-right: 3px;
-        float: right;
     }
 }
 

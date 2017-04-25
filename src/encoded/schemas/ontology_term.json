@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["term_id"],
-    "identifyingProperties": ["uuid", "term_id", "preferred_name"],
+    "identifyingProperties": ["uuid", "term_id", "term_name"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -113,7 +113,7 @@
             "title": "Slim Branch",
             "description": "If the term is a slim term the value is the slot that the slim is for",
             "type": "string",
-            "enum": ["developmental", "organ", "system", "assay"]
+            "enum": ["developmental", "organ", "system", "assay", "cell"]
         }
     }
 }

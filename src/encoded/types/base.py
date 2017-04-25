@@ -109,13 +109,39 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 class AbstractCollection(snovault.AbstractCollection):
     """smth."""
 
+    def __init__(self, *args, **kw):
+        try:
+            self.lookup_key = kw.pop('lookup_key')
+        except KeyError:
+            pass
+        super(AbstractCollection, self).__init__(*args, **kw)
+
+
     def get(self, name, default=None):
-        """smth."""
+        '''
+        heres' and example of why this is the way it is:
+        ontology terms have uuid or term_id as unique ID keys
+        and if neither of those are included in post, try to
+        use prefered_name such that:
+        No - fail load with non-existing term message
+        Multiple - fail load with ‘ambiguous name - more than 1 term with that name exist use ID’
+        Single result - get uuid and use that for post/patch
+        '''
         resource = super(AbstractCollection, self).get(name, None)
         if resource is not None:
             return resource
         if ':' in name:
             resource = self.connection.get_by_unique_key('alias', name)
+            if resource is not None:
+                if not self._allow_contained(resource):
+                    return default
+                return resource
+        if getattr(self, 'lookup_key', None) is not None:
+            # lookup key translates to query json by key / value and return if only one of the
+            # item type was found... so for keys that are mostly unique, but do to whatever
+            # reason (bad data mainly..) can be defined as unique keys
+            item_type = self.type_info.item_type
+            resource = self.connection.get_by_json(self.lookup_key, name, item_type)
             if resource is not None:
                 if not self._allow_contained(resource):
                     return default
@@ -312,12 +338,11 @@ class Item(snovault.Item):
     },)
     def link_id(self, request):
         """create the link_id field, which is a copy of @id using ~ instead of /"""
-        path_str = request.path if request.path else self.properties.get('accession', None)
-        if path_str:
-            path_split = path_str.split('/')
-            if len(path_split) == 4 and '@@' in path_split[-1]:
-                path_str = '~'.join(path_split[:-1]) + '~'
-            return path_str
+        id_str = str(self).split(' at ')
+        path_str = id_str[-1].strip('>')
+        path_split = path_str.split('/')
+        path_str = '~'.join(path_split) + '~'
+        return path_str
 
     def update_embeds(self):
         """

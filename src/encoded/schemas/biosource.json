@@ -83,6 +83,7 @@
                   "WTC-11",
                   "H9",
                   "F123-CASTx129",
+                  "HCT116",
                   "CC-2551",
                   "CH12-LX",
                   "KBM-7",
@@ -135,7 +136,8 @@
           "tissue": {
               "title": "Tissue name",
               "description": "Anatomy (UBERON) Ontology term for the tissue used.",
-              "type":  "string"
+              "type":  "string",
+              "linkTo": "OntologyTerm"
           },
           "biosource_vendor": {
                 "title": "Biosource Vendor",

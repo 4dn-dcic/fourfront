@@ -110,7 +110,8 @@ def test_load_schema(schema, master_mixins, registry):
                 'submitted_by',
                 'status'
             ]
-            no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json', 'ontology.json', 'ontology_term.json']
+            no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json',
+                                       'ontology.json', 'ontology_term.json', 'sysinfo.json']
             for prop in shared_properties:
                 if schema == 'experiment.json':
                     # currently experiment is abstract and has no mixin properties

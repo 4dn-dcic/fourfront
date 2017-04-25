@@ -6,7 +6,7 @@ pytestmark = pytest.mark.working
 
 
 def test_parse_args_defaults():
-    args = ''
+    args = ['development.ini', '--app-name', 'app']
     args = go.parse_args(args)
     assert args.ontologies == 'all'
     assert args.keyfile == os.path.expanduser('~/keypairs.json')
@@ -167,6 +167,7 @@ def slim_terms_by_ont(slim_term_list):
          slim_term_list[1]],
         [slim_term_list[2]],
         {'notification': 'No result found'},
+        {'notification': 'No result found'},
         {'notification': 'No result found'}
     ]
 
@@ -281,7 +282,7 @@ def syn_uris_as_URIRef(syn_uris):
 
 def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
     present = ['developmental', 'assay']
-    absent = ['organ', 'system']
+    absent = ['organ', 'system', 'cell']
     test_slim_terms = slim_terms_by_ont
     with mocker.patch('encoded.commands.generate_ontology.get_FDN',
                       side_effect=test_slim_terms):
