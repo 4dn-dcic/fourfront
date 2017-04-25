@@ -4,7 +4,6 @@ var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
 import { Fade } from 'react-bootstrap';
-import { TrafficMap } from './../lib/react-network-diagrams';
 var store = require('./../../store');
 var vizUtil = require('./utilities');
 import { console, object, isServerSide, expFxn, Filters, layout, navigate, ajax } from './../util';
@@ -106,7 +105,13 @@ export class Graph extends React.Component {
         var widthAndHeightSet = !isNaN(width) && width && !isNaN(height) && height;
 
         if (!widthAndHeightSet && !this.state.mounted){
-            return <div ref="outerContainer">&nbsp;</div>;
+            return (
+                <div ref="outerContainer">
+                    <Fade transitionAppear in>
+                        <div>&nbsp;</div>
+                    </Fade>
+                </div>
+            );
         }
 
         var nodes = this.nodesWithCoordinates();
