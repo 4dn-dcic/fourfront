@@ -111,6 +111,7 @@ export default class Navigation extends React.Component {
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.closeDropdowns = this.closeDropdowns.bind(this);
         this.hideTestWarning = this.hideTestWarning.bind(this);
+        this.closeMobileMenu = this.closeMobileMenu.bind(this);
         this.state = {
             testWarning: this.props.visible || !productionHost[url.parse(this.props.href).hostname] || false,
             mounted : false,
