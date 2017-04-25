@@ -30,9 +30,14 @@ class Target(Item):
     def target_summary(self, request, targeted_genes=None, targeted_genome_regions=None,
                        targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         value = ""
-        for target_info in [targeted_genes, targeted_proteins, targeted_rnas]:
+        for target_info, name in [[targeted_genes, "Gene"], [targeted_proteins, "Protein"], [targeted_rnas, "RNA"]]:
             try:
-                value += ', '.join(target_info)
+                add = name + ':' + ', '.join(target_info)
+                # if there are multiple species of targets combine them with &
+                if value and add:
+                    value += " & "
+                if add:
+                    value += add
             except:
                 pass
         if targeted_structure:
@@ -65,9 +70,14 @@ class Target(Item):
     def target_summary_short(self, request, targeted_genes=None, description=None,
                              targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         value = ""
-        for target_info in [targeted_genes, targeted_proteins, targeted_rnas]:
+        for target_info, name in [[targeted_genes, "Gene"], [targeted_proteins, "Protein"], [targeted_rnas, "RNA"]]:
             try:
-                value += ', '.join(target_info)
+                add = name + ':' + ', '.join(target_info)
+                # if there are multiple species of targets combine them with &
+                if value and add:
+                    value += " & "
+                if add:
+                    value += add
             except:
                 pass
         if targeted_structure:
