@@ -97,4 +97,17 @@ $tooltip-color: desaturate(lighten(#0a253d,30%),30%);
     @media screen and (max-width: $screen-md-max){
         max-width : 600px;
     }
+
+    h1,h2,h3,h4,h5,h6 {
+        color: #fff;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    small + h2, small + h3,
+    small + h4, small + h5,
+    small + h6 {
+        margin-top: 0;
+    }
+
 }

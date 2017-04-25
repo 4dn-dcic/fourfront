@@ -1,7 +1,7 @@
 """The type file for the workflow related items.
 """
 from snovault import (
-    # calculated_property,
+    calculated_property,
     collection,
     load_schema,
 )
@@ -23,6 +23,31 @@ class Workflow(Item):
     schema = load_schema('encoded:schemas/workflow.json')
     embedded = ['workflow_steps.step',
                 'workflow_steps.step_name']
+
+
+    @calculated_property(schema={
+        "title": "CWL Data",
+        "type": "object",
+        "description" : "Data of cwl_pointer"
+    }, category='page')
+    def cwl_data(self, request):
+        """smth."""
+        if not request.has_permission('view_details'):
+            return
+
+        if self.properties.get('cwl_pointer') is None:
+            return
+
+        import requests
+
+        r = requests.get(self.properties['cwl_pointer'])
+
+        try:
+            return r.json()
+        except Exception as e:
+            print('\n\n\n\n\n')
+            print('Error parsing CWL data')
+            return
 
 
 @collection(

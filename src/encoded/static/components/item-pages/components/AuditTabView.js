@@ -156,7 +156,9 @@ export default class AuditTabView extends React.Component {
         return (
             <div className="audits-view">
                 <h3 className="tab-section-title">Audits</h3>
-                { _.pairs(this.props.audits).map((auditLevelPair, i) =>
+                { _.sortBy(_.pairs(this.props.audits), function(auditLevelPair){
+                    return -auditLevelPair[1][0].level;
+                }).map((auditLevelPair, i) =>
                     <AuditLevelGrouping
                         key={auditLevelPair[0]}
                         level={auditLevelPair[0]}

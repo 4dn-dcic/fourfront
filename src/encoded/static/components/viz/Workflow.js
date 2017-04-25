@@ -8,162 +8,7 @@ import { TrafficMap } from './../lib/react-network-diagrams';
 var store = require('./../../store');
 var vizUtil = require('./utilities');
 import { console, object, isServerSide, expFxn, Filters, layout, navigate, ajax } from './../util';
-var cwl_sbg_test_data = require('./../testdata/cwl_sbg');
-
-
-export function cwlToGraphData(cwlJSON, spacing){
-
-    // Outputs
-    var nodes = [];
-    var edges = [];
-
-    // Functions
-    function generateStepNode(step, column){
-        return {
-            id : step.id,
-            type : 'step',
-            name : step.id && step.id.charAt(0) === '#' ? step.id.slice(1) : step.id,
-            description : (step.run && step.run.description),
-            column : column
-        };
-    }
-
-    function getFullStepInput(stepInput, step){
-        var inputID = stepInput.id.replace(step.id + '.', '');
-        var fullStepInput = _.find(step.run.inputs, function(runInput){
-            if (inputID === runInput.id.replace('#', '')) return true;
-            return false;
-        });
-        if (fullStepInput){
-            stepInput = _.extend({}, stepInput, fullStepInput);
-        }
-        return stepInput;
-    }
-
-    function generateOutputNodes(step, column, stepNode){
-        var outputNodes = [];
-        step.outputs.forEach(function(stepOutput, j){
-            var outputID = stepOutput.id.replace(step.id + '.');
-            var fullStepOutput = _.find(step.run.outputs, function(runOutput){
-                if (outputID === runOutput.id.replace('#', '')) return true;
-                return false;
-            });
-            if (fullStepOutput){
-                stepOutput = _.extend({}, stepOutput, fullStepOutput);
-            }
-
-            var typeStr = '';
-            if (Array.isArray(stepOutput.type)) typeStr = ' {' + stepOutput.type.join('|')  + '}';
-
-            outputNodes.push({
-                column      : column,
-                id          : stepOutput.id || null,
-                format      : stepOutput.type,
-                name        : stepOutput.id + typeStr, 
-                type        : 'output',
-                required    : stepOutput.required || false,
-                meta        : _.omit(stepOutput, 'type', 'required', 'id'),
-                outputOf    : stepNode
-            });
-
-        });
-
-        outputNodes.forEach(function(n){
-            edges.push({
-                'source' : stepNode,
-                'target' : n,
-                'capacity' : 'Output',
-            });
-        });
-
-        nodes = nodes.concat(outputNodes);
-    }
-
-    cwlJSON.steps.forEach(function(step, i){ // Each step will be a node.
-
-        var stepNode = generateStepNode(step, (i + 1) * 2 - 1);
-
-        // Each input on the first step will be a node.
-        if (i === 0){
-            step.inputs.forEach(function(stepInput, j){
-                var inputID = stepInput.id.replace(step.id + '.', '');
-
-                var fullStepInput = _.find(step.run.inputs, function(runInput){
-                    if (inputID === runInput.id.replace('#', '')) return true;
-                    return false;
-                });
-
-                if (fullStepInput){
-                    fullStepInput = _.extend({}, fullStepInput, stepInput);
-                } else {
-                    fullStepInput = _.clone(stepInput);
-                }
-                nodes.push({
-                    column      : (i + 1) * 2 - 2,
-                    id          : fullStepInput.id || null,
-                    format      : fullStepInput.type,
-                    name        : fullStepInput.id, 
-                    type        : 'input',
-                    inputOf     : stepNode,
-                    required    : fullStepInput.required || false,
-                    meta        : _.omit(fullStepInput, 'type', 'required', 'id')
-                });
-            });
-
-            nodes.forEach(function(inputNode){
-                if (inputNode.type !== 'input') return;
-                edges.push({
-                    'source' : inputNode,
-                    'target' : stepNode,
-                    'capacity' : 'Original Input'
-                });
-            });
-
-            
-            generateOutputNodes(step, (i + 1) * 2, stepNode);
-            nodes.push(stepNode);
-
-        } else if (i < cwlJSON.steps.length){
-            var prevStepNodeIndex = _.findLastIndex(nodes, { type : 'step' });//nodes[nodes.length - 1];
-            var prevStepNode = nodes[prevStepNodeIndex];
-            var allInputOutputNodes = _.filter(nodes, function(n){
-                if (n.type === 'output' || n.type === 'input') return true;
-                return false;
-            });
-
-            step.inputs.forEach(function(stepInput){
-                var fullStepInput = getFullStepInput(stepInput, step);
-                if (!Array.isArray(fullStepInput.source)) return;
-                var matchedInputNode = _.find(allInputOutputNodes, function(n){
-                    if (fullStepInput.source.indexOf(n.id) > -1){
-                        return true;
-                    }
-                    return false;
-                });
-                if (matchedInputNode){
-                    console.log('MATCHEDINPUTNODE', matchedInputNode);
-                    edges.push({
-                        'source' : matchedInputNode,
-                        'target' : stepNode,
-                        'capacity' : 'Input'
-                    });
-                }
-            });
-
-            generateOutputNodes(step, (i + 1) * 2, stepNode);
-            nodes.push(stepNode);
-        }
-
-    });
-
-    console.log(nodes, edges);
-
-    return {
-        'nodes' : nodes,
-        'edges' : edges
-    };
-}
-
+var ReactTooltip = require('react-tooltip');
 
 
 export class Graph extends React.Component {
@@ -308,12 +153,15 @@ class Node extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.icon = this.icon.bind(this);
+        this.title = this.title.bind(this);
+        this.tooltip = this.tooltip.bind(this);
     }
 
     innerStyle(){
         if (this.props.node.type === 'input' || this.props.node.type === 'output'){
             return {
-                width : (this.props.columnWidth || 100) - 20
+                width : (this.props.columnWidth || 100)
             };
         }
     }
@@ -325,7 +173,10 @@ class Node extends React.Component {
             if (typeof formats === 'undefined'){
                 iconClass = 'question';
             } else if (Array.isArray(formats)) {
-                if (formats[0] === 'File'){
+                if (
+                    formats[0] === 'File' ||
+                    (formats[0] === 'null' && formats[1] === 'File')
+                ){
                     iconClass = 'file-text-o';
                 } else if (
                     (formats[0] === 'int' || formats[0] === 'string') ||
@@ -342,7 +193,7 @@ class Node extends React.Component {
         return <i className={"icon icon-fw icon-" + iconClass}/>;
     }
 
-    render(){
+    title(){
         var node = this.props.node;
         var title = node.title || node.name;
 
@@ -357,6 +208,73 @@ class Node extends React.Component {
                 }
             }
         }
+        return title;
+    }
+
+    tooltip(){
+        var node = this.props.node;
+        var output = '';
+
+        // Node Type
+        if (node.type === 'step'){
+            output += '<small>Step ' + ((node.column - 1) / 2 + 1) + '</small>';
+        } else {
+            var nodeType = node.type;
+            nodeType = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
+            output += '<small>' + nodeType + '</small>';
+        }
+
+        // Required
+        if (node.required){
+            output+= ' <small style="opacity: 0.66;"> - <em>Required</em></small>';
+        }
+
+        
+
+        // Title
+        output += '<h5 class="text-600 tooltip-title">' +
+            this.title() +
+            '</h5>';
+
+        // Argument Type
+        if (node.type === 'input' || node.type === 'output'){
+            output += '<div><small>';
+            
+            if (Array.isArray(node.format) && node.format.length > 0){
+                var formats = node.format.map(function(f){
+                    if (f === 'File'){
+                        if (node.meta && node.meta['sbg:fileTypes']){
+                            var fileTypes = node.meta['sbg:fileTypes'].split(',').map(function(fType){
+                                return '.' + fType.trim();
+                            }).join(' | ');
+                            return fileTypes;
+                        }
+                    }
+                    return f;
+                });
+                output += 'Type: ' + formats.join(' | ') + '';
+            } else {
+                output += '<em>Unknown Type</em>';
+            }
+            output += '</small></div>';
+        }
+
+        if (node.type === 'input'){
+            if (node.meta && node.meta['sbg:toolDefaultValue']){
+                output += '<div><small>Default: "' + node.meta['sbg:toolDefaultValue'] + '"</small></div>';
+            }
+        }
+
+        // Description
+        if (typeof node.description === 'string'){
+            output += '<div>' + node.description + '</div>';
+        }
+
+        return output; 
+    }
+
+    render(){
+        var node = this.props.node;
 
         return (
             <div className={"node node-type-" + node.type} data-node-id={node.id} style={{
@@ -364,8 +282,16 @@ class Node extends React.Component {
                 'left' : node.x,
                 'width' : this.props.columnWidth || 100
             }}>
-                <div className="inner" style={this.innerStyle()} data-tip={node.description || null} data-place="top">
-                    <span className="node-name">{ this.icon() }{ title }</span>
+                <div
+                    className="inner"
+                    style={this.innerStyle()}
+                    onMouseEnter={this.props.onMouseEnter}
+                    onMouseLeave={this.props.onMouseLeave}
+                    data-tip={this.tooltip()}
+                    data-place="top"
+                    data-html
+                >
+                    <span className="node-name">{ this.icon() }{ this.title() }</span>
                 </div>
             </div>
         );
@@ -373,23 +299,108 @@ class Node extends React.Component {
 
 }
 
-
-class NodesLayer extends React.Component {
+/*
+class NodesLayerChartCursorController extends React.Component {
 
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.handleMouseEnter = this.handleMouseEnter.bind(this);
+        this.handleMouseLeave = this.handleMouseLeave.bind(this);
+        this.updateDetailCursorFromNode = this.updateDetailCursorFromNode.bind(this);
+        this.state = {
+            'hoverNode' : null,
+            'selectedNode' : null
+        };
+    }
+
+    updateDetailCursorFromNode(node, overrideSticky = false, cursorId = 'default'){
+        var newCursorDetailState = {
+            'path' : [node],
+            'includeTitleDescendentPrefix' : false,
+            //'actions' : this.props.actions || this.cursorDetailActions() || null,
+        };
+        
+        ChartDetailCursor.update(newCursorDetailState, cursorId, null, overrideSticky);
+    }
+    
+    handleMouseEnter(node, evt){
+        // Cancel if same node as selected.
+        if (this.state.selectedNode === node.id){
+            return false;
+        }
+
+
+        if (this.state.selectedNode === null){
+            this.updateDetailCursorFromNode(node, false);
+        }
+
+        var newOwnState = {};
+
+        // Update hover state
+        _.extend(newOwnState, {
+            'hoverNode' : node.id || null,
+        });
+
+        if (_.keys(newOwnState).length > 0){
+            this.setState(newOwnState);
+        }
+    }
+
+    handleMouseLeave(node, evt){
+        this.setState({
+            'hoverNode' : null
+        });
     }
 
     render(){
-        var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
+        return (
+            <NodesLayer
+                {..._.extend({}, this.props, {
+                    'onNodeMouseEnter' : this.handleMouseEnter,
+                    'onNodeMouseLeave' : this.handleMouseLeave,
+                    'selectedNode' : this.state.selectedNode,
+                    'hoverNode' : this.state.hoverNode
+                })}
+            />
+        );
+    }
+
+}
+*/
+
+
+class NodesLayer extends React.Component {
+
+    static defaultProps = {
+        onNodeMouseEnter : null,
+        onNodeMouseLeave : null
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+    }
+
+    componentDidMount(){
+        ReactTooltip.rebuild();
+    }
+
+    render(){
         var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
         return (
             <div className="nodes-layer-wrapper" style={{ width : this.props.contentWidth, height : fullHeight }}>
                 <div className="nodes-layer" style={{ width : this.props.contentWidth, height : fullHeight }}>
                     {
                         this.props.nodes.map((node, i) =>
-                            <Node node={node} {..._.omit(this.props, 'children', 'nodes')} key={node.id} />
+                            <Node
+                                {..._.omit(this.props, 'children', 'nodes')}
+                                node={node}
+                                onMouseEnter={this.props.onNodeMouseEnter && this.props.onNodeMouseEnter.bind(this.props.onNodeMouseEnter, node)}
+                                onMouseLeave={this.props.onNodeMouseLeave && this.props.onNodeMouseLeave.bind(this.props.onNodeMouseLeave, node)}
+                                key={node.id}
+                            />
                         )
                     }
                 </div>
@@ -409,8 +420,8 @@ class EdgesLayer extends React.Component {
     }
 
     generatePathDimension(edge, edgeStyle = 'curve', radius = 12){
-        var startOffset = (edge.source.type === 'input' || edge.source.type === 'output') ? 0 : 5;
-        var endOffset = (edge.target.type === 'input' || edge.target.type === 'output') ? 0 : -5;
+        var startOffset = 5;//(edge.source.type === 'input' || edge.source.type === 'output') ? 0 : 5;
+        var endOffset = -5; //(edge.target.type === 'input' || edge.target.type === 'output') ? 0 : -5;
         if (this.props.pathArrows){
             endOffset -= 8;
         }
@@ -479,7 +490,7 @@ class EdgesLayer extends React.Component {
             <defs>
                 <marker
                     id="Triangle"
-                    viewBox="0 0 10 10" refX="0" refY="5" 
+                    viewBox="0 0 15 15" refX="0" refY="5" 
                     markerUnits="strokeWidth"
                     markerWidth="6" markerHeight="5"
                     orient="auto"
@@ -491,10 +502,8 @@ class EdgesLayer extends React.Component {
     }
 
     render(){
-        var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
         var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
         var edges = this.props.edges;
-        console.log(edges);
         return (
             <div className="edges-layer-wrapper" style={{ width : this.props.contentWidth, height : fullHeight }}>
                 <svg className="edges-layer" width={ this.props.contentWidth } height={ fullHeight }>
@@ -513,43 +522,6 @@ class EdgesLayer extends React.Component {
                     }
                 </svg>
             </div>
-        );
-    }
-
-}
-
-
-export class CWLGraph extends React.Component {
-
-    static defaultProps = {
-        'CWLURI' : 'https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl',
-    }
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.state = {
-            'mounted' : false,
-            'cwl_json' : cwl_sbg_test_data
-        };
-    }
-
-    componentDidMount(){
-        //ajax.load(this.props.CWLURI, (resp)=>{
-        //    console.log(resp);
-        //});
-        this.setState({ 'mounted' : true });
-    }
-
-    render(){
-        //console.log(cwlToGraphData(this.state.cwl_json));
-        var graphData = cwlToGraphData(this.state.cwl_json);
-        return (
-            <Graph
-                nodes={graphData.nodes}
-                edges={graphData.edges}
-            />
         );
     }
 

@@ -916,7 +916,7 @@ var App = React.createClass({
     },
 
     render: function() {
-        console.log('render app');
+        console.log('render app', this.state);
         var context = this.props.context;
         var content;
         var href_url = url.parse(this.props.href);
