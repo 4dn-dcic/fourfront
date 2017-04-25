@@ -8,7 +8,7 @@ var { Button } = require('react-bootstrap');
 var ReactTooltip = require('react-tooltip');
 var { console, DateUtility, object } = require('./../../util');
 var { FlexibleDescriptionBox } = require('./../../experiment-common');
-var PartialList = require('./PartialList');
+import PartialList from './PartialList';
 
 /*
 var testData = [ // Use this to test list view(s) as none defined in test data.
@@ -180,6 +180,7 @@ class DetailBlock extends React.Component {
  * @memberof module:item-pages/components.Publications
  * @class FormattedInfoWrapper
  * @extends {React.Component}
+ * @type {Component}
  * 
  * @prop {boolean} isSingleItem     - Whether there is only 1 item or not.
  * @prop {Element[]} children       - React Elements or Components to be wrapped.
@@ -243,6 +244,7 @@ class FormattedInfoWrapper extends React.Component {
  * @class Publications
  * @type {Component}
  * @extends {React.Component}
+ * 
  * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
  */
 export default class Publications extends React.Component {

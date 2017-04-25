@@ -208,7 +208,8 @@ def health_check(config):
             "@type" : [ "Health", "Portal" ],
             "@context" : "/health",
             "@id" : "/health",
-            "content" : None
+            "content" : None,
+            "display_title" : "Health Status"
         }
 
         return responseDict

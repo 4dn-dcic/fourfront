@@ -3,30 +3,36 @@
 var React = require('react');
 var _ = require('underscore');
 
-var Tabs = require('rc-tabs/lib/Tabs');
-var TabContent = require('rc-tabs/lib/TabContent');
-var ScrollableInkTabBar = require('rc-tabs/lib/ScrollableInkTabBar');
+import Tabs, { TabPane, TabContent } from './../../lib/rc-tabs';
+import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
 
-var TabView = module.exports = React.createClass({
+export default class TabView extends React.Component {
 
-    getDefaultProps : function(){
-        return {
-            'contents' : [
-                { tab : "Tab 1", content : <span>Test1</span> },
-                { tab : "Tab 2", content : <span>Test2</span> }
-            ],
-            'animated' : false
-        };
-    },
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
 
-    render : function(){
+    render(){
+        if (!Array.isArray(this.props.contents)) {
+            return null;
+        }
         var tabsProps = {
-            renderTabBar     : ()=><ScrollableInkTabBar onTabClick={this.props.onTabClick} extraContent={this.props.extraTabContent} />,
-            renderTabContent : ()=><TabContent animated={this.props.animated} />,
-            onChange         : this.props.onChange,
-            destroyInactiveTabPane : this.props.destroyInactiveTabPane
+            'renderTabBar'          : () => 
+                <ScrollableInkTabBar
+                    onTabClick={this.props.onTabClick}
+                    extraContent={this.props.extraTabContent}
+                    className="extra-style-2"
+                />,
+            'renderTabContent'      : () => <TabContent animated={this.props.animated} />,
+            'onChange'              : this.props.onChange,
+            'destroyInactiveTabPane': this.props.destroyInactiveTabPane
         };
         if (this.props.activeKey) tabsProps.activeKey = this.props.activeKey;
+        var defaultActiveTab = _.findWhere(this.props.contents, { 'isDefault' : true });
+        if (typeof defaultActiveTab !== 'undefined' && typeof defaultActiveTab.key !== 'undefined'){
+            tabsProps.defaultActiveKey = defaultActiveTab.key;
+        }
         return (
             <Tabs {...tabsProps} >
                 {
@@ -38,6 +44,7 @@ var TabView = module.exports = React.createClass({
                                 children={t.content}
                                 placeholder={t.placeholder}
                                 disabled={t.disabled}
+                                style={t.style}
                             />
                         );
                     })
@@ -46,4 +53,12 @@ var TabView = module.exports = React.createClass({
         );
     }
 
-});
+}
+
+TabView.defaultProps = {
+    'contents' : [
+        { tab : "Tab 1", content : <span>Test1</span> },
+        { tab : "Tab 2", content : <span>Test2</span> }
+    ],
+    'animated' : false
+}
