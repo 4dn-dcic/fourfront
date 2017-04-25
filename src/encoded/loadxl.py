@@ -218,7 +218,6 @@ def read_single_sheet(path, name=None):
     """
     from zipfile import ZipFile
     from . import xlreader
-    # import pdb; pdb.set_trace()
     if name is None or path.endswith('.json'):
         root, ext = os.path.splitext(path)
         stream = open(path, 'r')
@@ -644,7 +643,6 @@ PHASE2_PIPELINES = {
 def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
     """smth."""
     # exclude_list is for items that fail phase1 to be excluded from phase2
-    # import pdb; pdb.set_trace()
     exclude_list = []
     order = list(ORDER)
     if itype is not None:
@@ -793,7 +791,6 @@ def load_ontology_terms(app,
         'REMOTE_USER': 'TEST',
     }
     testapp = TestApp(app, environ)
-    # import pdb; pdb.set_trace()
 
     from pkg_resources import resource_filename
     posts = resource_filename('encoded', post_json)
@@ -808,7 +805,6 @@ def load_ontology_terms(app,
 
     # now keep track of the last time we loaded these suckers
     data = {"name" : "ffsysinfo", "ontology_updated":datetime.today().isoformat()}
-    import pdb; pdb.set_trace()
     try:
         testapp.post_json("/sysinfo", data)
     except AppError:

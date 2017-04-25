@@ -739,9 +739,6 @@ def main():
     if args.s3upload and not args.force:
         # first check and see if we are more than 3 months past date
         adjust = relativedelta(months=3)
-        # aws gives back dates with tz info, datetime.today no got
-        # import pytz
-        # last_modified = s3_check_last_modified(s3_postfile, app).replace(tzinfo=None)
         if last_ontology_load(app) + adjust > datetime.datetime.now():
             print("it hasn't been three months skipping for now")
             return
@@ -770,10 +767,7 @@ def main():
             print('Processing: ', ontology['ontology_name'])
             if ontology['download_url'] is not None:
                 # get all the terms for an ontology
-                print("*******GOT a term********")
-                print("before terms count is", len(terms))
                 terms = download_and_process_owl(ontology, connection, terms)
-                print("after terms count is", len(terms))
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
@@ -789,10 +783,12 @@ def main():
         write_outfile(terms2write[0], postfile)
         write_outfile(terms2write[1], patchfile)
 
-        if args.load:
-            load_ontology_terms(app, args.outdir + s3_postfile,  args.outdir + s3_patchfile)
+        if args.load:  # load em into the database
+            load_ontology_terms(app,
+                                args.outdir + s3_postfile,
+                                args.outdir + s3_patchfile)
 
-        if args.s3upload:
+        if args.s3upload: # upload file to s3
             with open(postfile, 'rb') as postedfile:
                 s3_put(postedfile, s3_postfile, app)
             with open(patchfile, 'rb') as patchedfile:
@@ -800,6 +796,10 @@ def main():
 
 
 def s3_check_last_modified(key, app):
+    '''
+    get last updated date for s3 ky
+    '''
+
     s3bucket = app.registry.settings['system_bucket']
     s3 = boto3.resource('s3')
     obj = s3.Object(s3bucket, key)
@@ -820,7 +820,6 @@ def s3_put(obj, filename, app):
                   Key=filename,
                   Body=obj,
                   )
-    import pdb; pdb.set_trace()
 
 
 if __name__ == '__main__':

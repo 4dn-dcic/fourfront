@@ -5,13 +5,15 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["name"],
-    "identifyingProperties": ["uuid", "name"],
+    "identifyingProperties": ["uuid", "name", "alias"],
     "additionalProperties": true,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/status" }
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/aliases" }
     ],
     "properties": {
         "schema_version": {

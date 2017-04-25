@@ -161,10 +161,10 @@ class Protocol(Item, ItemWithAttachment):
     name='sysinfos',
     unique_key='sysinfo:name',
     properties={
-        'title': 'System Info',
+        'title': 'Sysinfo',
         'description': 'Just for internal use',
     })
-class SysInfo(Item):
+class Sysinfo(Item):
     """sysinfo class."""
 
     item_type = 'sysinfo'
