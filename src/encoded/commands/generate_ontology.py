@@ -788,7 +788,7 @@ def main():
                                 args.outdir + s3_postfile,
                                 args.outdir + s3_patchfile)
 
-        if args.s3upload: # upload file to s3
+        if args.s3upload:  # upload file to s3
             with open(postfile, 'rb') as postedfile:
                 s3_put(postedfile, s3_postfile, app)
             with open(patchfile, 'rb') as patchedfile:
