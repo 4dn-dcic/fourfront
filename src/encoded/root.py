@@ -181,11 +181,10 @@ def health_check(config):
         db = request.registry['dbsession']
         count = db.scalar("""SELECT count(*) FROM "propsheets";""")
         es_index = settings.get('snovault.elasticsearch.index')
-        reg = request.registry
         try:
             si =  request.embed('/sysinfo/ffsysinfo')
             ont_date = si.json['ontology_updated']
-        except:
+        except:  # pylint:disable
             ont_date = "Never Generated"
 
         responseDict = {

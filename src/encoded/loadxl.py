@@ -7,13 +7,7 @@ import json
 import logging
 import os.path
 import boto3
-
-import argparse
-
 from snovault.elasticsearch.interfaces import ELASTIC_SEARCH
-from pyramid.path import DottedNameResolver
-from pyramid.paster import get_app
-from encoded import configure_dbsession
 import sys
 import os
 
@@ -794,12 +788,8 @@ def load_ontology_terms(app,
 
     from pkg_resources import resource_filename
     posts = resource_filename('encoded', post_json)
-    print(posts)
     patches = resource_filename('encoded',patch_json)
-    print(patches)
     docsdir = []
-    es = app.registry[ELASTIC_SEARCH]
-    #posts_json = json.load(open(posts))
     load_all(testapp, posts, docsdir, itype='ontology_term')
     load_all(testapp, patches, docsdir, itype='ontology_term', phase='patch_ontology')
 

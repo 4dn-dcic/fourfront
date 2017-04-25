@@ -5,7 +5,6 @@ import logging
 from pyramid.path import DottedNameResolver
 from pyramid.paster import get_app
 from encoded import configure_dbsession
-import sys
 import os
 from datetime import datetime
 

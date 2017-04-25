@@ -28,10 +28,6 @@ from wranglertools.fdnDCIC import (
 import mimetypes
 from pyramid.paster import get_app
 
-# multiprocess this badboy
-from concurrent.futures import ThreadPoolExecutor
-from multiprocessing import Pool, cpu_count  # pylint:disable=no-name-in-module
-
 EPILOG = __doc__
 
 PART_OF = "http://purl.obolibrary.org/obo/BFO_0000050"
@@ -739,7 +735,7 @@ def main():
             print("it hasn't been three months skipping for now")
             return
 
-    # fourfront connection 
+    # fourfront connection
     connection = connect2server(args.keyfile, args.key)
     ontologies = get_ontologies(connection, args.ontologies)
     slim_terms = get_slim_terms(connection)
@@ -800,7 +796,7 @@ def s3_put(obj, filename, app):
 
     s3bucket = app.registry.settings['system_bucket']
     s3 = boto3.client('s3')
-    resp = s3.put_object(Bucket=s3bucket,
+    s3.put_object(Bucket=s3bucket,
                   Key=filename,
                   Body=obj,
                   )

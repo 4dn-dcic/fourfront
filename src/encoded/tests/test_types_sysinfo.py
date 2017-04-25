@@ -13,6 +13,4 @@ def test_insert_and_get_sys_info(testapp, sys_info):
 
     res2 = testapp.get('/sysinfos/' + sys_info['name']).follow()
     assert res2.json['name'] == sys_info['name']
-
-
-# TODO: test for admin only access to this bad boy 
+    # TODO: test for admin only access to this bad boy 
