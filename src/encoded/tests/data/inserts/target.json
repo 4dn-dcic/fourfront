@@ -49,5 +49,37 @@
         "description": "A sample RNA target",
         "targeted_rnas": ["NM_003529.2"],
         "status": "in review by lab"
+    },
+    {
+        "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb97",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "targeted_genes": ["RSP3", "RLP15"],
+        "targeted_proteins": ["GFP_HUMAN"],
+        "aliases": ["dcic:test_targ6"],
+        "description": "Target for a DNA-protein probe that recognizes ribosomal RNA genes occupied by GFP",
+        "status": "in review by lab"
+    },
+    {
+        "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb98",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "aliases": ["dcic:test_targ7"],
+        "description": "targeting rough ER by a special ribosomal RNA probe",
+        "targeted_rnas": ["NM_003529.2"],
+        "targeted_structure": "Endoplasmic reticulum",
+        "status": "in review by lab"
+    },
+    {
+        "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb99",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "targeted_structure": "Cell membrane",
+        "aliases": ["dcic:test_targ8"],
+        "description": "Target of lipophilic probes for drawing cell perimenter",
+        "status": "in review by lab"
     }
 ]
