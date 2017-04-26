@@ -1040,10 +1040,13 @@ $workflow-step-node-lineheight: 18px;
             }
 
             .nodes-layer-wrapper {
+                pointer-events: none;
                 .nodes-layer {
+                    pointer-events: inherit;
                     position: relative;
                     
                     .node {
+                        pointer-events: all;
                         position: absolute;
 
                         > .inner {
@@ -1130,17 +1133,24 @@ $workflow-step-node-lineheight: 18px;
             }
 
             .edges-layer-wrapper {
+                pointer-events: none;
                 .edges-layer {
+                    pointer-events: inherit;
 
                     marker#Triangle {
                         fill: #333;
                     }
 
                     path {
+                        pointer-events: all;
                         stroke: #555;
                         fill: none;
                         stroke-width: 1px;
                         stroke-width: 1.5px;
+                        &:hover {
+                            stroke: #000;
+                            stroke-width: 2px;
+                        }
                     }
 
                 }

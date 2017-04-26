@@ -8,6 +8,7 @@ import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 var { console, object, DateUtility, Filters } = require('./../util');
 import { Graph } from './../viz/Workflow';
+var { DropdownButton, MenuItem } = require('react-bootstrap');
 
 
 
@@ -30,15 +31,7 @@ export class WorkflowView extends React.Component {
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
-                content : (
-                    <div>
-                        <h3 className="tab-section-title">
-                            <span>Graph</span>
-                        </h3>
-                        <hr className="tab-section-title-horiz-divider"/>
-                        <GraphSection {...this.props} />
-                    </div>
-                )
+                content : <GraphSection {...this.props} />
             },
             AttributionTabView.getTabObject(this.props.context),
             ItemDetailList.getTabObject(this.props.context, this.props.schemas),
@@ -104,13 +97,6 @@ class GraphSection extends React.Component {
             };
         }
 
-        /**
-         * Merge step 
-         * 
-         * @param {any} stepInput 
-         * @param {any} step 
-         * @returns 
-         */
         function getFullStepInput(stepInput, step){
             var inputID = stepInput.id.replace(step.id + '.', '');
             var fullStepInput = _.find(step.run.inputs, function(runInput){
@@ -209,8 +195,7 @@ class GraphSection extends React.Component {
                 nodes.push(stepNode);
 
             } else if (i < cwlJSON.steps.length){
-                var prevStepNodeIndex = _.findLastIndex(nodes, { type : 'step' });//nodes[nodes.length - 1];
-                var prevStepNode = nodes[prevStepNodeIndex];
+
                 var allInputOutputNodes = _.filter(nodes, function(n){
                     if (n.type === 'output' || n.type === 'input') return true;
                     return false;
@@ -249,21 +234,85 @@ class GraphSection extends React.Component {
         };
     }
 
-    render(){
-        if (!(this.props.context && this.props.context.cwl_data)) return (
+    static isCwlDataValid(cwlJSON){
+        if (!Array.isArray(cwlJSON.steps)) return false;
+        if (cwlJSON.steps.length === 0) return false;
+        if (!Array.isArray(cwlJSON.steps[0].inputs)) return false;
+        if (!Array.isArray(cwlJSON.steps[0].outputs)) return false;
+        if (cwlJSON.steps[0].inputs.length === 0) return false;
+        if (typeof cwlJSON.steps[0].inputs[0].id !== 'string') return false;
+        if (typeof cwlJSON.steps[0].outputs[0].id !== 'string') return false;
+        return true;
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.state = {
+            // Should be one of 'cwl', 'basic'
+            'showChart' : this.cwlDataExists(props) ? 'cwl' : 'basic'
+        }
+    }
+
+    cwlDataExists(props = this.props){
+        return props.context && props.context.cwl_data && GraphSection.isCwlDataValid(props.context.cwl_data);
+    }
+
+    cwlGraph(){
+        if (!this.cwlDataExists()) return (
             <div>
                 <h4 className="text-400"><em>No graphable data.</em></h4>
             </div>
         );
         var graphData = GraphSection.cwlToGraphData(this.props.context.cwl_data);
         return (
+            <Graph
+                nodes={graphData.nodes}
+                edges={graphData.edges}
+            />
+        );
+    }
+
+    basicGraph(){
+
+    }
+
+    body(){
+        if (this.state.showChart === 'cwl') return this.cwlGraph();
+
+        return (
+            null
+        );
+    }
+
+    render(){
+
+        return (
             <div>
-                <Graph
-                    nodes={graphData.nodes}
-                    edges={graphData.edges}
-                />
+                <h3 className="tab-section-title">
+                    <span>Graph</span>
+                    <span className="pull-right">
+                        <DropdownButton
+                            onSelect={(eventKey, evt)=>{
+                                if (eventKey === this.state.showChart) return;
+                                this.setState({ showChart : eventKey });
+                            }}
+                            title={"Viewing " + (this.state.showChart === 'cwl' ? "Detailed" : "Basic") + " Chart"}
+                        >
+                            <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>
+                                Detailed (Common Workflow Language)
+                            </MenuItem>
+                            <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
+                                Basic
+                            </MenuItem>
+                        </DropdownButton>
+                    </span>
+                </h3>
+                <hr className="tab-section-title-horiz-divider"/>
+                { this.body() }
             </div>
         );
+
     }
 
 }

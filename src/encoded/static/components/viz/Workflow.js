@@ -116,7 +116,6 @@ export class Graph extends React.Component {
 
         var nodes = this.nodesWithCoordinates();
         var edges = this.props.edges;
-        console.log(width, contentWidth);
 
         return (
             <div ref="outerContainer" className="worfklow-chart-outer-container" style={{ height : fullHeight }}>
