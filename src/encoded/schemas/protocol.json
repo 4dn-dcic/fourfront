@@ -27,15 +27,26 @@
             "type": "string",
             "default": ""
         },
-        "protocol_documents": {
-          "title": "This Field Will be Deleted After Update",
-          "type": "array",
-          "items": {
-            "title": "Protocol Document",
-            "description": "A protocol specific document.",
+        "protocol_type": {
+            "title": "Type",
+            "description": "The category that best describes the protocol.",
             "type": "string",
-            "linkTo": "Document"
-          }
-       }
+            "enum": [
+                "SOP for Experiment",
+                "SOP for Biosource",
+                "growth protocol",
+                "extraction protocol",
+                "differentiation protocol",
+                "dedifferentiation protocol",
+                "treatment protocol",
+                "general protocol",
+                "excision protocol",
+                "transfection protocol",
+                "cell isolation protocol",
+                "iPS reprogramming protocol",
+                "strain generation protocol",
+                "other"
+            ]
+        }
     }
 }

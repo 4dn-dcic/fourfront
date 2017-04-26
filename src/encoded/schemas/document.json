@@ -27,28 +27,14 @@
             "description": "The category that best describes the document.",
             "type": "string",
             "enum": [
-                "growth protocol",
-                "extraction protocol",
                 "certificate of analysis",
                 "data QA",
-                "differentiation protocol",
-                "dedifferentiation protocol",
                 "data sheet",
-                "treatment protocol",
-                "general protocol",
-                "excision protocol",
-                "transfection protocol",
-                "construct image",
-                "cell isolation protocol",
-                "iPS reprogramming protocol",
-                "standards document",
-                "strain generation protocol",
                 "spike-in concentrations",
                 "pipeline protocol",
                 "file format specification",
-                "high resolution pathology slide image",
                 "other"
-           ]
+            ]
         },
         "description": {
             "title": "Description",
