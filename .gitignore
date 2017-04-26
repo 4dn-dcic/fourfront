@@ -24,6 +24,7 @@ coverage.xml
 /src/encoded/static/css/style.css
 /src/encoded/static/scss/_variables.original.scss
 
+*.swp
 *.DS_Store
 *.egg-info
 *.pyc

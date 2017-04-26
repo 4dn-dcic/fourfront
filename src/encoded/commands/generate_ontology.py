@@ -1,7 +1,11 @@
 import os
+import json
 import sys
 import argparse
-import json
+from encoded.loadxl import load_ontology_terms
+from dateutil.relativedelta import relativedelta
+import datetime
+import boto3
 from rdflib.collection import Collection
 from encoded.commands.owltools import (
     Namespace,
@@ -21,7 +25,8 @@ from wranglertools.fdnDCIC import (
     FDN_Connection,
     get_FDN
 )
-
+import mimetypes
+from pyramid.paster import get_app
 
 EPILOG = __doc__
 
@@ -173,8 +178,6 @@ def process_intersection_of(class_, intersection, data, terms):
         col_list.append(col.__str__())
     if _has_human(col_list):
         if PART_OF in col_list:
-            # print('COL-0 = ', collection[0])
-            # print('CLASS = ', class_.__str__())
             terms = _add_term_and_info(class_, collection[0], 'relationships', data, terms)
         elif DEVELOPS_FROM in col_list:
             terms = _add_term_and_info(class_, collection[0], 'develops_from', data, terms)
@@ -350,7 +353,7 @@ def get_syndef_terms_as_uri(connection, ontology, termtype, as_rdf=True):
         if as_rdf=False.
     '''
     sdterms = ontology.get(termtype)
-    uris = [term['term_url'] for term in sdterms]
+    uris = [term['term_url'] for term in sdterms if term is not None]
     if as_rdf:
         uris = [convert2namespace(uri) for uri in uris]
     return uris
@@ -382,7 +385,7 @@ def get_slim_terms(connection):
     # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
     slim_categories = ['developmental', 'assay', 'organ', 'system']
-    search_suffix = 'search/?type=OntologyTerm&is_slim_for='
+    search_suffix = 'search/?type=OntologyTerm&limit=all&is_slim_for='
     slim_terms = []
     for cat in slim_categories:
         terms = get_FDN(None, connection, None, search_suffix + cat)
@@ -394,6 +397,13 @@ def get_slim_terms(connection):
         except:
             slim_terms.extend(terms)
     return slim_terms
+
+
+def get_existing_ontology_terms(connection):
+    '''Retrieves all existing ontology terms from the db
+    '''
+    search_suffix = 'search/?type=OntologyTerm&limit=all'
+    return get_FDN(None, connection, None, search_suffix)
 
 
 def get_ontologies(connection, ont_list):
@@ -452,6 +462,112 @@ def verify_and_update_ontology(terms, ontologies):
     return terms
 
 
+def _terms_match(t1, t2):
+    '''check that all the fields in the first term t1 are in t2 and
+        have the same values
+    '''
+    for k, val in t1.items():
+        if k not in t2:
+            return False
+        else:
+            if k == 'parents':
+                if len(val) != len(t2['parents']):
+                    return False
+                for p1 in val:
+                    found = False
+                    for p2 in t2['parents']:
+                        # this bit depends on the {link_id: val, display_title: val}
+                        # form of embedded info - may need to make more complex to deal with
+                        # other scenarios like a list of uuids or fully embedded terms
+                        if p1 in p2['link_id']:
+                            found = True
+                    if not found:
+                        return False
+            elif k == 'source_ontology':
+                # same as above comment to potentially deal with different response
+                t2ont = t2['source_ontology']['link_id']
+                if val not in t2ont:
+                    return False
+            else:
+                if val != t2[k]:
+                    return False
+    return True
+
+
+def id_post_and_patch(terms, dbterms, rm_unchanged=True):
+    '''compares terms to terms that are already in db - if no change
+        removes them from the list of updates, if new adds to post dict,
+        if changed adds uuid and add to patch dict
+    '''
+    to_post = {}
+    to_patch = {}
+    tid2uuid = {}  # to keep track of existing uuids
+    for tid, term in terms.items():
+        if tid not in dbterms:
+            # new term
+            to_post[tid] = term
+        else:
+            # add uuid to mapping
+            dbterm = dbterms[tid]
+            uuid = dbterm['uuid']
+            tid2uuid[term['term_id']] = uuid
+            if rm_unchanged and _terms_match(term, dbterm):
+                # check to see if contents of term are also in db_term
+                continue
+            else:
+                term['uuid'] = uuid
+                to_patch[uuid] = term
+    return {'post': to_post, 'patch': to_patch, 'idmap': tid2uuid}
+
+
+def add_uuids(partitioned_terms):
+    '''adds new uuids to terms to post and existing uuids to patch terms
+        this function depends on the partitioned term dictionary that
+        contains keys 'post', 'patch' and 'idmap'
+    '''
+    from uuid import uuid4
+    # go through all the new terms and add uuids to them and idmap
+    idmap = partitioned_terms.get('idmap', {})
+    newterms = partitioned_terms.get('post', None)
+    if newterms:
+        for tid, term in newterms.items():
+            uid = str(uuid4())
+            idmap[tid] = uid
+            term['uuid'] = uid
+        # now that we should have all uuids go through again
+        # and switch parent term ids for uuids
+        for term in newterms.values():
+            if term.get('parents'):
+                puuids = []
+                for p in term['parents']:
+                    if p in idmap:
+                        puuids.append(idmap[p])
+                    else:
+                        print('WARNING - ', p, ' MSSING FROM IDMAP')
+                term['parents'] = puuids
+    # and finally do the same for the patches
+    patches = partitioned_terms.get('patch', None)
+    if patches:
+        for term in patches.values():
+            if term.get('parents'):
+                puuids = []
+                for p in term['parents']:
+                    if p in idmap:
+                        puuids.append(idmap[p])
+                    else:
+                        print('WARNING - ', p, ' MSSING FROM IDMAP')
+                term['parents'] = puuids
+    try:
+        post = list(newterms.values())
+    except AttributeError:
+        post = None
+    try:
+        patch = list(patches.values())
+    except AttributeError:
+        patch = None
+    return [post, patch]
+
+
 def add_additional_term_info(terms, data, synonym_terms, definition_terms):
     for termid, term in terms.items():
         termuri = convert2URIRef(term['term_url'])
@@ -477,12 +593,11 @@ def download_and_process_owl(ontology, connection, terms):
     synonym_terms = get_synonym_term_uris(connection, ontology)
     definition_terms = get_definition_term_uris(connection, ontology)
     data = Owler(ontology['download_url'])
+    terms = {}
     for class_ in data.allclasses:
         if isBlankNode(class_):
             terms = process_blank_node(class_, data, terms)
         else:
-            if not terms:
-                terms = {}
             termid = get_termid_from_uri(class_)
             if terms.get(termid) is None:
                 terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
@@ -500,19 +615,27 @@ def download_and_process_owl(ontology, connection, terms):
 
 
 def write_outfile(terms, filename, pretty=False):
+    '''terms is a list of dicts
+        write to file by default as a json list or if pretty
+        then same with indents and newlines
+    '''
     indent = None
     lenterms = len(terms)
     with open(filename, 'w') as outfile:
         if pretty:
             indent = 4
             outfile.write('[\n')
-        for i, term in enumerate(terms.values()):
+        else:
+            outfile.write('[')
+        for i, term in enumerate(terms):
             json.dump(term, outfile, indent=indent)
-            if pretty and i != lenterms - 1:
+            if i != lenterms - 1:
                 outfile.write(',')
-            outfile.write('\n')
+            if pretty:
+                outfile.write('\n')
+        outfile.write(']')
         if pretty:
-            outfile.write(']\n')
+            outfile.write('\n')
 
 
 def parse_args(args):
@@ -526,14 +649,30 @@ def parse_args(args):
                         default='all',
                         help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
                         all retrieves all ontologies that exist in db")
-    parser.add_argument('--outfile',
-                        default='ontology.json',
-                        help="The name of the output file.  \
-                        Default is --outfile=ontology.json")
+    parser.add_argument('--outdir',
+                        default='tests/data/ontology-term-inserts/',
+                        help="the directory (relative to src/encoded)  for the output files default is.  \
+                        Default is tests/data/ontology-term-inserts/")
+    parser.add_argument('--s3upload',
+                        default=False,
+                        action='store_true',
+                        help="set to upload to system defined s3.")
+    parser.add_argument('--load',
+                        default=False,
+                        action='store_true',
+                        help="also load the ontology stuff into the database")
+    parser.add_argument('--force',
+                        default=False,
+                        action='store_true',
+                        help="force overwritting of existing file in s3.")
     parser.add_argument('--pretty',
                         default=False,
                         action='store_true',
                         help="Default False - set True if you want json format easy to read, hard to parse")
+    parser.add_argument('--full',
+                        default=False,
+                        action='store_true',
+                        help="Default False - set True to generate full file to load - do not filter out existing unchanged terms")
     parser.add_argument('--key',
                         default='default',
                         help="The keypair identifier from the keyfile.  \
@@ -542,22 +681,68 @@ def parse_args(args):
                         default=os.path.expanduser("~/keypairs.json"),
                         help="The keypair file.  Default is --keyfile=%s" %
                              (os.path.expanduser("~/keypairs.json")))
+
+    parser.add_argument('--app-name', help="Pyramid app name in configfile")
+    parser.add_argument('config_uri', help="path to configfile")
+
     return parser.parse_args(args)
+
+
+def owl_runner(value):
+    print('Processing: ', value[0]['ontology_name'])
+    return download_and_process_owl(*value)
+
+
+def last_ontology_load(app):
+    from webtest import TestApp
+    from webtest.app import AppError
+    import dateutil
+
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+    try:
+        sysinfo = testapp.get("/sysinfo/ffsysinfo").follow().json
+        return dateutil.parser.parse(sysinfo['ontology_updated'])
+    except AppError:
+        return datetime.datetime.min
 
 
 def main():
     ''' Downloads latest Ontology OWL files for Ontologies in the database
         and Updates Terms by generating json inserts
     '''
-    # setup
-    args = parse_args(sys.argv[1:])  # to facilitate testing
-    connection = connect2server(args.keyfile, args.key)
 
+    args = parse_args(sys.argv[1:])  # to facilitate testing
+
+    s3_postfile = 'ontology_post.json'
+    s3_patchfile = 'ontology_post.json'
+    from pkg_resources import resource_filename
+    outdir = resource_filename('encoded', args.outdir)
+
+    postfile = outdir + s3_postfile
+    patchfile = outdir + s3_patchfile
+
+    # pyramids app
+    app = get_app(args.config_uri, args.app_name)
+
+    if args.s3upload and not args.force:
+        # first check and see if we are more than 3 months past date
+        adjust = relativedelta(months=3)
+        if last_ontology_load(app) + adjust > datetime.datetime.now():
+            print("it hasn't been three months skipping for now")
+            return
+
+    # fourfront connection
+    connection = connect2server(args.keyfile, args.key)
     ontologies = get_ontologies(connection, args.ontologies)
     slim_terms = get_slim_terms(connection)
-
-    # start iteratively downloading and processing ontologies
+    db_terms = get_existing_ontology_terms(connection)
+    db_terms = {t['term_id']: t for t in db_terms}
     terms = {}
+
     for ontology in ontologies:
         print('Processing: ', ontology['ontology_name'])
         if ontology['download_url'] is not None:
@@ -569,10 +754,52 @@ def main():
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
         terms = verify_and_update_ontology(terms, ontologies)
-        # at the moment we're writing json output but consider updating db directly
-        # including checks for removal of terms already in db from ontologies
-        # and audits for items linked to terms
-        write_outfile(terms, args.outfile)
+        filter_unchanged = True
+        if args.full:
+            filter_unchanged = False
+        partitioned_terms = id_post_and_patch(terms, db_terms, filter_unchanged)
+        terms2write = add_uuids(partitioned_terms)
+
+        write_outfile(terms2write[0], postfile)
+        write_outfile(terms2write[1], patchfile)
+
+        if args.load:  # load em into the database
+            load_ontology_terms(app,
+                                args.outdir + s3_postfile,
+                                args.outdir + s3_patchfile)
+
+        if args.s3upload: # upload file to s3
+            with open(postfile, 'rb') as postedfile:
+                s3_put(postedfile, s3_postfile, app)
+            with open(patchfile, 'rb') as patchedfile:
+                s3_put(patchedfile, s3_patchfile, app)
+
+
+def s3_check_last_modified(key, app):
+    '''
+    get last updated date for s3 ky
+    '''
+
+    s3bucket = app.registry.settings['system_bucket']
+    s3 = boto3.resource('s3')
+    obj = s3.Object(s3bucket, key)
+    return obj.last_modified
+
+
+def s3_put(obj, filename, app):
+    '''
+    try to guess content type
+    '''
+    content_type = mimetypes.guess_type(filename)[0]
+    if content_type is None:
+        content_type = 'binary/octet-stream'
+
+    s3bucket = app.registry.settings['system_bucket']
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket=s3bucket,
+                  Key=filename,
+                  Body=obj,
+                  )
 
 
 if __name__ == '__main__':
