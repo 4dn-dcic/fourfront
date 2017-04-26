@@ -28,6 +28,8 @@ require('./item-pages/UserView');
 require('./item-pages/FallbackView');
 require('./statuslabel');
 require('./navigation');
+require('./submission/submission-view');
+require('./submission/submission-fields');
 require('./inputs');
 require('./schema');
 require('./search');

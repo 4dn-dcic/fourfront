@@ -5,7 +5,7 @@ var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var ErrorPage = require('./error');
 import Navigation from './navigation';
-var Action = require('./action');
+import SubmissionView from './submission/submission-view';
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
@@ -1018,7 +1018,7 @@ var App = React.createClass({
                 ContentView = globals.content_views.lookup(context, current_action);
                 if (ContentView){
                     content = (
-                        <Action
+                        <SubmissionView
                             context={context}
                             schemas={this.state.schemas}
                             expSetFilters={this.props.expSetFilters}

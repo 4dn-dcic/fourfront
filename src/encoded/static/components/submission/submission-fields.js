@@ -1,15 +1,14 @@
 'use strict';
 var React = require('react');
-var globals = require('./globals');
+var globals = require('../globals');
 var _ = require('underscore');
-var { ajax, console, object, isServerSide } = require('./util');
-var {getS3UploadUrl, s3UploadFile} = require('./util/aws');
-var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
-var makeTitle = require('./item-pages/item').title;
-var Alerts = require('./alerts');
-var d3 = require('d3');
-var store = require('../store');
-var getLargeMD5 = require('./util/file-utility').getLargeMD5;
+var { ajax, console, object, isServerSide } = require('../util');
+var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
+var { DropdownButton, Button, MenuItem, Panel, Table, Collapse} = require('react-bootstrap');
+var makeTitle = require('../item-pages/item').title;
+var Alerts = require('../alerts');
+var getLargeMD5 = require('../util/file-utility').getLargeMD5;
+var ReactTooltip = require('react-tooltip');
 
 /*
 This is a key/input pair for any one field. Made to be stateless; changes
@@ -17,22 +16,9 @@ This is a key/input pair for any one field. Made to be stateless; changes
  description and some validation message based on the schema
  */
 var BuildField = module.exports.BuildField = React.createClass({
-    // display a limited message including if the field is required and its type
-    displayMessage: function(field_case){
-        if(this.props.required){
-            return(
-                <div className="display-message">
-                    <span className="display-bold">Required field. </span>
-                    <span>{'Type: ' + field_case}</span>
-                </div>
-            );
-        }else{
-            return(
-                <div className="display-message">
-                    <span>{'Type: ' + field_case}</span>
-                </div>
-            );
-        }
+
+    componentDidMount: function(){
+        ReactTooltip.rebuild();
     },
 
     displayField: function(field_case){
@@ -46,7 +32,6 @@ var BuildField = module.exports.BuildField = React.createClass({
             'autoFocus': true,
             'placeholder': "No value"
         };
-
         switch(field_case){
             case 'text' : return (
                 <div className="input-wrapper">
@@ -65,19 +50,19 @@ var BuildField = module.exports.BuildField = React.createClass({
             );
             case 'enum' : return (
                 <span className="input-wrapper">
-                    <DropdownButton id="dropdown-size-extra-small" title={this.props.value || "No value"}>
+                    <DropdownButton bsSize="xsmall" id="dropdown-size-extra-small" title={this.props.value || "No value"}>
                         {this.props.enumValues.map((val) => this.buildEnumEntry(val))}
                     </DropdownButton>
                 </span>
             );
             case 'linked object' : return (
-                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
+                    <LinkedObj field={this.props.isArray ? this.props.arrayField : this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue} selectObj={this.props.selectObj} arrayIdx={this.props.isArray ? this.props.label : null}/>
             );
             case 'array' : return (
-                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
+                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue} selectObj={this.props.selectObj}/>
             );
             case 'object' : return (
-                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
+                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue} selectObj={this.props.selectObj}/>
             );
             case 'attachment' : return (
                 <AttachmentInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
@@ -123,46 +108,63 @@ var BuildField = module.exports.BuildField = React.createClass({
     // call modifyNewContext from parent to delete the value in the field
     deleteField : function(e){
         e.preventDefault();
-        this.props.modifyNewContext(this.props.label, null, true);
+        if(this.props.isArray){
+            this.props.arrayDelete(this.props.label);
+        }else{
+            this.props.modifyNewContext(this.props.label, null);
+        }
     },
 
     render: function(){
-        var isArray = this.props.isArray || false;
-        // array entries don't need dt/dd rows
-        if(isArray){
-            return(
-                <div>
-                    {this.displayField(this.props.fieldType)}
-                </div>
-            );
-        }
-        var field_title = this.props.label;
-        if(this.props.schema.title && this.props.schema.title.length > 0){
-            field_title = this.props.schema.title;
-        }
         // TODO: come up with a schema based solution for code below?
         // hardcoded fields you can't delete
         var cannot_delete = ['filename'];
+        var showDelete = false;
+        // don't show delet button unless:
+        // 1. not in hardcoded cannot delete list AND 2. has a value (non-null)
+        // AND 3. is not an array (individual values get deleted)
+        if(!_.contains(cannot_delete,this.props.label) && this.props.value && this.props.fieldType !== 'array'){
+            showDelete = true;
+        }
+        var isArrayItem = this.props.isArray || false;
+        // array items don't need fieldnames/tooltips
+        if(isArrayItem){
+            return(
+                <div>
+                    <div style={{'paddingTop':'2px'}}>
+                        {this.displayField(this.props.fieldType)}
+                    </div>
+                    <Collapse in={true}>
+                        <div style={{'marginTop':'5px'}}>
+                            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'160px'}} onClick={this.deleteField}>
+                                {'Delete item'}
+                            </Button>
+                        </div>
+                    </Collapse>
+                </div>
+            );
+        }
         return(
-            <dl className="key-value row extra-footspace">
-                <dt className="col-sm-3">
-                        <span style={{'display':'inline-block', 'width':'120px'}}>
-                            {field_title}
-                        </span>
-                        {!_.contains(cannot_delete,this.props.label) ?
-                            <a href="#" className="cancel-button" onClick={this.deleteField} title="Delete">
-                                <i className="icon icon-times-circle-o icon-fw"></i>
-                            </a>
-                            :
-                            null}
-                </dt>
-                <dd className="col-sm-9">
+            <div className="row facet" style={{'marginBottom':'10px', 'overflow':'visible'}}>
+                <h5 className="facet-title" style={{'paddingBottom':'2px', 'marginBottom':"2px"}}>
+                    <span className="inline-block">{this.props.title}</span>
+                    <InfoIcon children={this.props.fieldTip}/>
+                    {this.props.required ?
+                        <span style={{'color':'#a94442', 'marginLeft':'6px'}}>Required</span>
+                        : null
+                    }
+                </h5>
+                <div style={{'paddingTop':'2px'}}>
                     {this.displayField(this.props.fieldType)}
-                    <div className="display-tip">{this.props.fieldTip}</div>
-                    {this.displayMessage(this.props.fieldType)}
-                </dd>
-
-            </dl>
+                </div>
+                <Collapse in={showDelete}>
+                    <div style={{'marginTop':'5px'}}>
+                        <Button bsSize="xsmall" bsStyle="danger" style={{'width':'160px'}} disabled={!this.props.value} onClick={this.deleteField}>
+                            {'Delete'}
+                        </Button>
+                    </div>
+                </Collapse>
+            </div>
         );
     }
 });
@@ -191,21 +193,14 @@ var LinkedObj = React.createClass({
         if(this.props.collection){
             ajax.promise('/' + this.props.collection + '/?format=json').then(data => {
                 if (this.context.contentTypeIsJSON(data) && data['@graph']){
-                    state['data'] = data['@graph'];
-                    // get a nicer collection name
-                    state['collection'] = data['@id'].split('/')[1];
+                    state['data'] = data;
                 }else{
                     console.log('Available object failed. See LinkedObj in create.js');
-                    state['data'] = {};
+                    state['data'] = null;
                 }
                 this.propSetState(state);
             });
         }
-    },
-
-    toggleOpen: function(e){
-        e.preventDefault();
-        this.setState({'open':!this.state.open});
     },
 
     // dummy function needed to set state through componentDidMount
@@ -213,96 +208,27 @@ var LinkedObj = React.createClass({
         this.setState(state);
     },
 
-    displayToggle: function(){
-        if(this.state.open){
-            return(
-                <a style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Close objects">
-                    <i className="icon icon-toggle-up icon-fw"></i>
-                </a>
-            );
-        }else{
-            return(
-                <a style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Expand objects">
-                    <i className="icon icon-toggle-down icon-fw"></i>
-                </a>
-            );
-        }
-    },
-
-    // render the object results in a table
-    displayObjectList: function(){
-        var collections = this.state.collection || 'objects';
-        var tableContent = Object.keys(this.state.data).map((key) => this.objectEntry(key));
-        if(this.state.open){
-            return(
-                <Panel className='panel-create-obj' header={'Available ' + collections + ':'}>
-                    <Table fill bordered condensed>
-                        <tbody>{tableContent}</tbody>
-                    </Table>
-                </Panel>
-
-            );
-        }
-    },
-
-    // each individual object corresponds to a <tr> in the table
-    // onClick for these objects modifies the top level newContext state
-    // through this.props.modifyNewContext
-    objectEntry: function(key){
-        var thisObj = this.state.data[key];
-        var moreStyles = {};
-        var targetVal = null;
-        var popLink = null;
-        var display = makeTitle({'context': thisObj});
-
-        if(thisObj['@id']){
-            if(thisObj['@id'] == this.props.value){
-                moreStyles['className'] = 'active-object';
-            }
-            targetVal = thisObj['@id'];
-            if(window !== 'undefined'){
-                popLink = thisObj['@id'];
-            }else{
-                popLink = '/';
-            }
-        }
-        return(
-            <tr key={key}><td {...moreStyles}>
-                <a href="#" className="tab-left" onClick={function(e){
-                    e.preventDefault();
-                    this.props.modifyNewContext(this.props.field, targetVal);
-                }.bind(this)} title="Select">
-                    {display}
-                </a>
-                <span style={{'color':'#808080', 'textAlign':'center'}}>
-                    {thisObj.description || null}
-                </span>
-                <a href="#" className="tab-right" onClick={function(e){
-                    e.preventDefault();
-                    var win = window.open(popLink, '_blank');
-                    if(win){
-                        win.focus();
-                    }else{
-                        alert('Object page popup blocked!');
-                    }
-                }} title="Select">
-                    <i className="icon icon-external-link icon-fw"></i>
-                </a>
-            </td></tr>
-        );
-    },
-
     render: function(){
-        if(this.state.data == {}){
-            return(<div>{this.props.value || "No object"}</div>);
+        var style={'width':'160px', 'marginRight':'10px'};
+        // object chosen or being created
+        if(this.props.value){
+            return(
+                <div>
+                    <a href={this.props.value} target="_blank">{this.props.value}</a>
+                </div>
+            );
         }
         return(
             <div>
-                <span>
-                    {this.props.value || "No object"}
-                    {this.displayToggle()}
-                </span>
-                {this.displayObjectList()}
+                <Button bsSize="xsmall" style={style} onClick={function(e){
+                        e.preventDefault();
+                        this.props.selectObj(this.state.collection, this.state.data, this.props.field, this.props.arrayIdx);
+                    }.bind(this)}>
+                    {'Select existing'}
+                </Button>
+                <Button bsSize="xsmall" style={style}>
+                    {'Create new'}
+                </Button>
             </div>
         );
     }
@@ -315,30 +241,6 @@ which essentially aggregates the context of the elements are propogates them
 upwards using this.props.modifyNewContext*/
 
 var ArrayField = React.createClass({
-    getInitialState: function(){
-        return{'open': false};
-    },
-
-    toggleOpen: function(e){
-        e.preventDefault();
-        this.setState({'open':!this.state.open});
-    },
-
-    displayToggle: function(){
-        if(this.state.open){
-            return(
-                <a className='array-contract' style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Close objects">
-                    <i className="icon icon-toggle-up icon-fw"></i>
-                </a>
-            );
-        }else{
-            return(
-                <a className='array-expand' style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Expand objects">
-                    <i className="icon icon-toggle-down icon-fw"></i>
-                </a>
-            );
-        }
-    },
 
     modifyArrayContent: function(idx, value){
         var valueCopy = this.props.value;
@@ -356,13 +258,17 @@ var ArrayField = React.createClass({
     deleteArrayValue: function(idx){
         var valueCopy = this.props.value;
         valueCopy.splice(idx, 1);
+        // an empty array should be represented as null
+        if(valueCopy.length === 0){
+            valueCopy = null;
+        }
         this.props.modifyNewContext(this.props.field, valueCopy);
     },
 
     initiateArrayField: function(arrayInfo) {
         var value = arrayInfo[0] || null;
         var fieldSchema = arrayInfo[1];
-        var field = fieldSchema.title || "No title";
+        var title = fieldSchema.title || this.props.field;
         // use arrayIdx as stand-in value for field
         var arrayIdx = arrayInfo[2];
         var fieldTip = null;
@@ -381,18 +287,17 @@ var ArrayField = React.createClass({
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
         }
-
+        var style = {'marginBottom':'5px'};
+        // stripe every other item for ease of visibility
+        if(arrayIdx % 2 == 0){
+            style.backgroundColor = '#f4f4f4'
+        }else{
+            style.backgroundColor = '#fff'
+        }
         return(
-            <tr key={field + parseInt(arrayIdx)}><td>
-                <BuildField value={value} key={arrayIdx} schema={fieldSchema} label={arrayIdx} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyArrayContent} required={false} isArray={true}/>
-                <a href="#" className="cancel-button-inline" onClick={function(e){
-                    e.preventDefault();
-                    this.deleteArrayValue(arrayIdx);
-                }.bind(this)} title="Delete item">
-                    {'Delete item'}
-                </a>
-            </td></tr>
-
+            <div key={arrayIdx} style={style}>
+                <BuildField value={value} schema={fieldSchema} label={arrayIdx} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyArrayContent} required={false} isArray={true} arrayDelete={this.deleteArrayValue} selectObj={this.props.selectObj} arrayField={this.props.field} title={title}/>
+            </div>
         );
     },
 
@@ -413,30 +318,14 @@ var ArrayField = React.createClass({
         for(var i=0; i<value.length; i++){
             arrayInfo.push([value[i], schema, i]);
         }
-        if(this.state.open){
-            arrayTable = (
-                <Panel className='panel-create-obj' header={
-                    <div>
-                        <span className="display-tip">{fieldTip}</span>
-                        <span className="display-message">{'Type: ' + fieldType}</span>
-                        <a href="#" style={{'display':'inline-block', 'float':'right', 'color':'#388a92'}} onClick={this.pushArrayValue} title="Add item">
-                            <i className="icon icon-plus-circle icon-fw"></i>
-                        </a>
-                    </div>
-                }>
-                    <Table fill bordered condensed>
-                        <tbody>{arrayInfo.map((entry) => this.initiateArrayField(entry))}</tbody>
-                    </Table>
-                </Panel>
-            );
-        }
         return(
             <div>
-                <span>
-                    {parseInt(value.length) + ' items'}
-                    {this.displayToggle()}
-                </span>
-                {arrayTable}
+                <Button bsSize="xsmall" style={{'width':'160px'}} onClick={this.pushArrayValue}>
+                    {'Add item'}
+                </Button>
+                <div style={{'marginLeft':'50px','paddingTop':'13px'}}>
+                    {arrayInfo.map((entry) => this.initiateArrayField(entry))}
+                </div>
             </div>
         );
     }
@@ -504,7 +393,7 @@ var ObjectField = React.createClass({
             fieldType = 'linked object';
         }
         return(
-            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyObjectContent} required={false}/>
+            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyObjectContent} required={false} selectObj={this.props.selectObj}/>
         );
     },
 
@@ -553,7 +442,7 @@ var AttachmentInput = React.createClass({
         var attachment_props = {};
         var file = e.target.files[0];
         if(!file){
-            this.props.modifyNewContext(this.props.field, null, true);
+            this.props.modifyNewContext(this.props.field, null);
             return;
         }
         attachment_props.type = file.type;
@@ -663,3 +552,12 @@ var S3FileInput = React.createClass({
 
     }
 });
+
+class InfoIcon extends React.Component{
+    render() {
+        if (!this.props.children) return null;
+        return (
+            <i className="icon icon-info-circle" data-tip={this.props.children}/>
+        );
+    }
+}

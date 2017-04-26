@@ -61,7 +61,7 @@ var Detail = module.exports.Detail = React.createClass({
          * @param {Object} schemas - Object containing schemas for server's JSONized object output.
          * @param {Object|Array|string} item - Item(s) to render recursively.
          */
-        formValue : function (schemas, item, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
+        formValue : function (schemas, item, popLink=false, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
             if (item === null){
                 return <span>No Value</span>;
             } else if (Array.isArray(item)) {
@@ -76,7 +76,7 @@ var Detail = module.exports.Detail = React.createClass({
                     <ul>
                         {   item.length === 0 ? <li><em>None</em></li>
                             :   item.map(function(it, i){
-                                    return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, atType, depth + 1) }</li>;
+                                    return <li key={i}>{ Detail.formValue(schemas, it, popLink, keyPrefix, atType, depth + 1) }</li>;
                                 })
                         }
                     </ul>
@@ -87,11 +87,19 @@ var Detail = module.exports.Detail = React.createClass({
                 // if the following is true, we have an embedded object
                 if (item.display_title && typeof item.link_id === 'string'){
                     var format_id = item.link_id.replace(/~/g, "/")
-                    return (
-                        <a href={format_id}>
-                            { title }
-                        </a>
-                    );
+                    if(popLink){
+                        return (
+                            <a href={format_id} target="_blank">
+                                {title}
+                            </a>
+                        );
+                    }else{
+                        return (
+                            <a href={format_id}>
+                                { title }
+                            </a>
+                        );
+                    }
                 } else { // it must be an embedded sub-object (not Item)
                     return (
                         <Detail.SubIPanel
@@ -99,6 +107,7 @@ var Detail = module.exports.Detail = React.createClass({
                             content={item}
                             key={title}
                             title={title}
+                            popLink={popLink}
                         />
                     );
                 }
@@ -199,11 +208,12 @@ var Detail = module.exports.Detail = React.createClass({
                 var schemas = this.props.schemas;
                 var item = this.props.content;
                 var title = this.props.title;
+                var popLink = this.props.popLink;
                 return (
                     <span>
                         { this.toggleLink(title, this.state.isOpen) }
                         { this.state.isOpen ?
-                            <Detail.Subview schemas={schemas} content={item} title={title}/>
+                            <Detail.Subview schemas={schemas} content={item} title={title} popLink={popLink}/>
                         : null }
                     </span>
                 );
@@ -223,6 +233,7 @@ var Detail = module.exports.Detail = React.createClass({
                 var schemas = this.props.schemas;
                 var item = this.props.content;
                 var title = this.props.title;
+                var popLink = this.props.popLink;
                 var tips = object.tipsFromSchema(schemas, item);
                 var sortKeys = Object.keys(item).sort();
                 return (
@@ -231,7 +242,7 @@ var Detail = module.exports.Detail = React.createClass({
                             {sortKeys.map(function(key, idx){
                                 return (
                                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
-                                        { Detail.formValue(schemas, item[key], key) }
+                                        { Detail.formValue(schemas, item[key], popLink, key) }
                                     </PartialList.Row>
                                 );
                             })}
@@ -277,7 +288,7 @@ var Detail = module.exports.Detail = React.createClass({
                 // Document
                 'attachment',
                 // Things to go at bottom consistently
-                'aliases', 
+                'aliases',
             ],
             'alwaysCollapsibleKeys' : [
                 '@type', 'accession', 'schema_version', 'uuid', 'replicate_exps', 'dbxrefs', 'status', 'external_references', 'date_created'
@@ -306,17 +317,17 @@ var Detail = module.exports.Detail = React.createClass({
         var extraKeys = _.difference(sortKeys, this.props.stickyKeys.slice(0).sort());
         var collapsibleKeys = _.intersection(extraKeys.sort(), this.props.alwaysCollapsibleKeys.slice(0).sort());
         extraKeys = _.difference(extraKeys, collapsibleKeys);
-
+        var popLink = this.props.popLink || false; // determines whether links should be opened in a new tab
         return (
             <PartialList
                 persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
-                        { Detail.formValue(this.props.schemas,context[key], key, context['@type'] && context['@type'][0]) }
+                        { Detail.formValue(this.props.schemas,context[key], popLink, key, context['@type'] && context['@type'][0]) }
                     </PartialList.Row>
                 )}
                 collapsible={ collapsibleKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
-                        { Detail.formValue(this.props.schemas,context[key], key, context['@type'] && context['@type'][0]) }
+                        { Detail.formValue(this.props.schemas,context[key], popLink, key, context['@type'] && context['@type'][0]) }
                     </PartialList.Row>
                 )}
                 open={this.props.open}
@@ -400,7 +411,7 @@ var ItemDetailList = module.exports.ItemDetailList = React.createClass({
                         </div>
                     </div>
                 }
-                
+
             </div>
         );
     }
