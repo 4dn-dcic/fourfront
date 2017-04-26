@@ -124,7 +124,7 @@ def lung_biosource(testapp, lab, award, lung_oterm):
 def tissue_biosample(testapp, lung_biosource, lab, award):
     item = {
         'description': "Tissue Biosample",
-        'biosource': [lung_biosource['@id']],
+        'biosource': [lung_biosource['uuid']],
         'award': award['@id'],
         'lab': lab['@id']
     }
@@ -470,30 +470,36 @@ def basic_genomic_region(testapp, lab, award):
 
 
 @pytest.fixture
+def uberon_ont(testapp):
+    return testapp.post_json('/ontology', {'ontology_name': 'Uberon'}).json['@graph'][0]
+
+
+@pytest.fixture
 def ontology(testapp):
     data = {
-            "uuid": "530006bc-8535-4448-903e-854af460b254",
-            "ontology_name": "Experimental Factor Ontology",
-            "ontology_url": "http://www.ebi.ac.uk/efo/",
-            "download_url": "http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw",
-            "namespace_url": "http://www.ebi.ac.uk/efo/",
-            "ontology_prefix": "EFO",
-            "description": "The description",
-            "notes": "The download",
-        }
+        "uuid": "530006bc-8535-4448-903e-854af460b254",
+        "ontology_name": "Experimental Factor Ontology",
+        "ontology_url": "http://www.ebi.ac.uk/efo/",
+        "download_url": "http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw",
+        "namespace_url": "http://www.ebi.ac.uk/efo/",
+        "ontology_prefix": "EFO",
+        "description": "The description",
+        "notes": "The download",
+    }
     return testapp.post_json('/ontology', data).json['@graph'][0]
 
 
 @pytest.fixture
-def oterm(ontology):
+def oterm(uberon_ont):
     return {
         "uuid": "530036bc-8535-4448-903e-854af460b254",
         "preferred_name": "preferred lung name",
         "term_name": "lung",
         "term_id": "UBERON:0002048",
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002048",
-        "source_ontology": ontology['@id']
+        "source_ontology": uberon_ont['@id']
     }
+
 
 @pytest.fixture
 def lung_oterm(oterm, testapp):
