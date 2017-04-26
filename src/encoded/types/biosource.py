@@ -134,7 +134,7 @@ def validate_biosource_tissue(context, request):
     term_ok = False
     tissue = data['tissue']
     # print(tissue)
-    tissue = embed_if_you_can(request, tissue)
+    tissue = get_item_if_you_can(request, tissue)
     ontology = None
     ontology_name = None
     try:
@@ -143,7 +143,7 @@ def validate_biosource_tissue(context, request):
         pass
 
     if ontology is not None:
-        ontology = embed_if_you_can(request, ontology)
+        ontology = get_item_if_you_can(request, ontology)
         try:
             ontology_name = ontology.get('ontology_name')
         except AttributeError:
