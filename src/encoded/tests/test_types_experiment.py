@@ -324,11 +324,9 @@ def test_calculated_publications_in_rep_experiment_set_two_pubs_both_fields(
     assert 'publications_of_set' in response
     assert len(response.json['publications_of_set']) == 2
     publications = response.json['publications_of_set']
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in publications
-    assert '/publication/' + pub2res.json['@graph'][0]['uuid'] in publications
-    # combined_pub_vals = list(publications[0].values()) + list(publications[1].values())
-    # assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' in combined_pub_vals
-    # assert '/publications/' + pub2res.json['@graph'][0]['uuid'] + '/' in combined_pub_vals
+    combined_pub_vals = [p['@id'] for p in publications]
+    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' in combined_pub_vals
+    assert '/publications/' + pub2res.json['@graph'][0]['uuid'] + '/' in combined_pub_vals
 
 
 def test_calculated_publications_in_rep_experiment_set_two_pubs_in_used(

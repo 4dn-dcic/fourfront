@@ -1,7 +1,11 @@
 """Create publication class and contain methods for data fetching."""
 import requests
 import json
-from snovault import (collection, load_schema)
+from snovault import (
+    collection,
+    load_schema,
+    calculated_property
+)
 from .base import (
     Item
 )
@@ -205,6 +209,8 @@ class Publication(Item):
         if journal:
             properties['journal'] = journal
         super(Publication, self)._update(properties, sheets)
+        return
+
         if 'exp_sets_prod_in_pub' in properties:
             invalidate_linked_items(self, 'exp_sets_prod_in_pub')
             esets.extend(properties['exp_sets_prod_in_pub'])
@@ -219,7 +225,7 @@ class Publication(Item):
                         invalidate_linked_items(eset, 'experiments_in_set')
         #print(properties)
         #import pdb; pdb.set_trace()
-        super(Publication, self)._update(properties, sheets)
+        #super(Publication, self)._update(properties, sheets)
         # if 'exp_sets_prod_in_pub' in properties:
         #    invalidate_linked_items(self, 'exp_sets_prod_in_pub')
         # if 'exp_sets_used_in_pub' in properties:
