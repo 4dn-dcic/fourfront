@@ -16,9 +16,10 @@ addons:
     - build-essential
     - make
     - graphviz
+  postgresql: "9.4"
 env:
   global:
-  - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.3/bin:$PATH"
+  - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
   - ELASTIC_BEANSTALK_LABEL=$TRAVIS_COMMIT
   - secure: vovAkyWqRwZdzZYc061JuENHIPxnjek1t7TWnzeo8AwQdFQwhbt76z0XV9g5DvjYclUWdYxfOb7fiUyxc8M0M2wPfwU05uStewWTuBKILobaNqMdsWaxRQ9OSJ3NxqTLabnmIsAuCQPwHFqM6etyHXiMaAgK8EU+r23CRzklMY77vQMN/2Bs+3Y1ngZ17OVvdbmAwzlUS0uE7+P9X2YXz6QVeTvyPWnBr5SMZ/gyA1/LU+44svKLC85BLtG+2YWHwEOPl0+Jt8diOP+UMBVI0GkCl2cN0dLQhVP26Jcp479BpnPVMOsRqH+Ve9qxpfY6aesTjAVc3D7AJcKzlOnA9o7GTaVGj0pWV+eCv9n3pFacIJkTF1/JNI3lmqKlWyeRd1qMCgCi94mNXEKEgXfxVBSczALhZcxHWTMYo1jE1aDAaAj09yukMJ9UEIBVSQsAGywihlFvTtUTwZDpd0cSfl2RYx6z845HU5EX9oNASEYcbC237I83bObu232ljRokBixA5fo4y+TLNLwK97DsFNGocIXsPBKVBq8uCClD3S8kG9sB88vjM9bFnkenw7GfZLjJFChzd4Hw+x4xJQH0L99MbWeMYAl9R/ojqk3tVrpGEpXwmf/MOgTmVGPUEExgeRTSWUn95YrpenOx7FsJJQ4ZpD1rnVRev2X0A21l0H0=
   - secure: VaAvhzAtXo69D1TthYVabBSu/ESHj+/Wura9+XuFA6aG27tWQSZJ1FWPBN0nax2/vs4MkZfW19qbXgxFZBE671eYiu53iXvi4JbJRJU6efG08gQH4wpsOhxg0WF4+uWIpbIok5dCUPVLh0nTkHBpFAlcgTn6O/ST7hYFliEUxwcRATBe6fslJcLpR6fmsnNVs6kwkv1MvkMikje3fCbfj+V8/dHqQRobwCbMlgJMuxV+MWx4RUfKimQ/oUGCef6YCzcilTEgW4fAdPLsxqZiGn8wihC3lpjNYyGOfX/NCzPo8iVtX49X+Dp+sePRxKgWvovwLQDCWkomMBpxtdea/bkkPg7v92G0ivCcYX8hs14WCWjkqScCk6B0XACyMmE7dCE2Xte86sarxGbsp5lp39OvQxAbFbK+QBEKfPOdoxkcM3rrhf+kAnq+PsH1HrzzGe1F3L0BTpeS9F8w26skgrXmR/6X78mMzLk2TtHmXf3qPpPcFEP+fEOfiZyJSLEvfti9fVjZWSkCDUDEuvgF5haYpKy+cgzMHyHIgJZxfokyRvY7mEWwDZzqnSGvvVx/km0LjkQUY0RCvoT5xAtFSC2AguTfJ1C1RlZvuuYxBHa3a7tFn+ahPfRtdtFpcEGjwKBDRTNY5xzKrzozXLVQHpPVYhFQndPSF2n3+0JwE6M=
@@ -41,6 +42,7 @@ notifications:
   slack:
     secure: DQyUTk6evwPpO0P5+OPhBSgl+fGEerOjBlBwQliXAkDaMKH3Cpi4cTQ3ETR/+3g6bGqPGK+QJ1R+6Ht+hJD7dNomyVIoQmvF0P5afJtpk/A3cDILe90t76ET9jc/iBjWeUFQdokFUJ7Gt1GGYtI6e5XcVu/Qc/xqCvFMtsBN6mnBFuvcQki+WkoIIPPawyhfryCNOLo5vvbi4SZ5dZI+M0MGq9HQjOyF1sdIgKuXhxjupmL+kVPVXAq9kiOANYFkwbNsP9j0BTYW5wFHpAztBqz3NT6EchgCdue8tgV4hC4rRFvM/bsA4qz/TJ5wRRLBRXtnNtPcyhAqTiU+wC6qWt++fjSEMGe4KYqtRRV1YuxQiTVHN84t77DILLNfMh/6uSs0KijwOT+Oazwd/UsN1zYOH93AM4FZ0h92yyb6j6JQ+DUk4WFel1Zr4kZzhtHSPGw+K4fxY0zIt1qpaDPXjtZHQ0+LwIIMtwMp5bBcwDn9d1ADnUhUAuuIN2hHaXrVy4vP2hIcd0LzezBqvc7JXimyd5yRgUeOCTrKGkAeSo8VA7XIj0ZmlpQRYKNTJP+gz4Y6C/RCxISnFDF/vcX+IsDdvreZXJMplE1Aqxf0uR6Zj8Sr8q+QWGKydv6ettlLZuqDuv0l/l/9qpzYfRqLSZcetGRVFHHcR9wuQiDyums=
 before_install:
+- echo $tibanna_deploy
 - postgres --version
 - initdb --version
 - elasticsearch -v
@@ -110,28 +112,32 @@ after_success:
 - if test -n "$UNIT"; then python-codacy-coverage -r coverage.xml; fi
 - python deploy/travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
+- echo $TRAVIS_COMMIT_MESSAGE
+- MSG_NO_WHITESPACE="$(echo -e "${TRAVIS_COMMIT_MSG}" | tr -d '[:space:]')"
+- echo $MSG_NO_WHITESPACE
+- echo $TRAVIS_PULL_REQUEST
+- echo $TRAVIS_BRANCH
+- echo $tibanna_deploy
 - |
   if [ "$BUILD_LEADER" = "YES" ]; then
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
         if [ "$TRAVIS_BRANCH" = "master" ]; then
-          echo "Job succeeded! PUBLISHING to dev environment..."
+          echo "Job succeeded! PUBLISHING to 4dnweb-prod environment..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
-          #git checkout master
-          eb use 4dn-web-dev
+          eb use fourfront-webprod --debug --verbose
           python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-          echo "Job succeeded! PUBLISHING to PROD environment..."
-          git config --global user.email "travis@builder.com"
-          git config --global user.name "Travis"
-          #git checkout production
-          eb use 4dnweb-prod --debug --verbose
-          python deploy/deploy_beanstalk.py
+            echo "Job succeeded! PUBLISHING to 4dn-web-dev environment..."
+            git config --global user.email "travis@builder.com"
+            git config --global user.name "Travis"
+            eb use fourfront-webdev --debug --verbose
+            python deploy/deploy_beanstalk.py --prod
+          fi
         fi
-      fi
      fi
     fi
 after_failure:

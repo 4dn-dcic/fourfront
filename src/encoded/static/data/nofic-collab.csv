@@ -1,0 +1,32 @@
+"Table 1. Experimental methods, groups and cell lines",,,,,,,
+,,,,,,,
+Methods,Participating Groups,H1 hESC,HFFc6,GM12878,IMR90,mESC F121-9/F123,RPE
+OMICS,,,,,,,
+Hi-C - very deep,Dekker,X,X,,,,
+single fragment 5C on selected loci,Dekker,X,X,X,X,X,X
+Micro-C,Dekker,X,X,,,,
+Hi-C - very deep,Ren,,,,X,X,X
+PLAC-seq,Ren,X,X,X,X,X,X
+GAM,Pombo (Ren),X* small dataset,,,,X (F123 male),
+Repli-seq ,Gilbert (Belmont),X,X,X,X,X (both male and female),X
+Single cell repli-seq,Gilbert (Belmont),,,,,X (F121-9),
+Lamin B DamID,van Steensel(Belmont),x,x,x (? may be difficult to transfect suitably),x,x,x
+Hi-C with modifcations,Alber/Chen,,,X ,X,,
+Photo-crosllinked TCC (PXT),Alber/Chen,,,X,X,,
+GCCP,Alber/Chen,,,X (if selected loci have GFP fused target),X (if selcted loci have GFP fused target),,
+ChIA-PET,Ruan,X,X,X,X,X,X
+RICh-PET,Ruan,X,X,X,X,X,X
+"Hi-C (very deep, including published data)",Aiden,X,X,X (new + published),X (new + published),X,X (new + published)
+Hi-C^2 of selected loci,Aiden,X,X,X,X,X,
+single cell Hi-C,Shendure,X,X,X,X,X,X
+,,,,,,,
+,,,,,,,
+Imaging based tools,,,,,,,
+FISH,Ren,X,X,X,,X,
+"Tet, Tale live cell imaging",Belmont,,X,,,,
+FISH and HiPMAP,Dekker,X,X,,,,
+PALM,Dekker,X,X,,,,
+Light sheet,Dekker,X,X,,,,
+CRISPR live cell,Dekker,X,X,,,,
+FISH,Aiden,,,X,,,
+FISH,Ruan,,,X,,,

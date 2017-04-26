@@ -34,7 +34,7 @@
             "description": "The type of file based on the information in the file.",
             "type": "string",
             "default": "reads",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
                 "reads"
             ]
@@ -44,7 +44,7 @@
             "description": "General classification group for the File (raw, processed, ancillary (eg. index files))",
             "type": "string",
             "default": "raw file",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
                 "raw file"
               ]

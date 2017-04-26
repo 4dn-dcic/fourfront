@@ -7,8 +7,7 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item,
-    add_default_embeds
+    Item
 )
 
 
@@ -28,7 +27,6 @@ class Experiment(Item):
                 "produced_in_pub", "publications_of_exp",
                 "biosample", "biosample.biosource", "biosample.modifications",
                 "biosample.treatments", "biosample.biosource.individual.organism"]
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
@@ -179,7 +177,6 @@ class ExperimentHiC(Experiment):
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
     embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -224,7 +221,6 @@ class ExperimentCaptureC(Experiment):
                                       "targeted_regions",
                                       "targeted_regions.target",
                                       "targeted_regions.oligo_file"]
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -266,7 +262,6 @@ class ExperimentRepliseq(Experiment):
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
     embedded = Experiment.embedded + ["submitted_by"]
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -291,3 +286,51 @@ class ExperimentRepliseq(Experiment):
     })
     def display_title(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
         return self.experiment_summary(request, experiment_type, cell_cycle_stage, biosample)
+
+
+@collection(
+    name='experiments-mic',
+    unique_key='accession',
+    properties={
+        'title': 'Microscopy Experiments',
+        'description': 'Listing of Microscopy Experiments',
+    })
+class ExperimentMic(Experiment):
+    """The experiment class for Microscopy experiments."""
+    item_type = 'experiment_mic'
+    schema = load_schema('encoded:schemas/experiment_mic.json')
+    embedded = Experiment.embedded + ["submitted_by"]
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type, enzyme and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
+        sum_str = experiment_type
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', biosample=None):
+        return self.experiment_summary(request, experiment_type, biosample)
+
+@calculated_property(context=Experiment, category='action')
+def clone(context, request):
+    """If the user submits for any lab, allow them to clone
+    This is like creating, but keeps previous fields"""
+    if request.has_permission('create'):
+        return {
+            'name': 'clone',
+            'title': 'Clone',
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!clone'.format(item_uri=request.resource_path(context)),
+        }

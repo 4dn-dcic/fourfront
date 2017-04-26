@@ -83,6 +83,7 @@
                   "WTC-11",
                   "H9",
                   "F123-CASTx129",
+                  "HCT116",
                   "CC-2551",
                   "CH12-LX",
                   "KBM-7",
@@ -90,7 +91,28 @@
                   "CC-2517",
                   "HeLa-S3",
                   "HFF",
-                  "HFFc6"
+                  "HFFc6",
+                  "SK-N-DZ",
+                  "A549",
+                  "NCI-H460",
+                  "SK-N-MC",
+                  "T47D",
+                  "SK-MEL-5",
+                  "G401",
+                  "Panc1",
+                  "Caki2",
+                  "LNCaP clone FGC",
+                  "RPMI-7951",
+                  "SJCRH30",
+                  "GM19238",
+                  "GM19239",
+                  "GM19240",
+                  "HG00731",
+                  "HG00732",
+                  "HG00733",
+                  "HG00512",
+                  "HG00513",
+                  "HG00514"
               ]
           },
           "cell_line_termid": {
@@ -114,7 +136,8 @@
           "tissue": {
               "title": "Tissue name",
               "description": "Anatomy (UBERON) Ontology term for the tissue used.",
-              "type":  "string"
+              "type":  "string",
+              "linkTo": "OntologyTerm"
           },
           "biosource_vendor": {
                 "title": "Biosource Vendor",

@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
-var { console, isServerSide, Filters } = require('./../../util');
+var { console, isServerSide, Filters, analytics } = require('./../../util');
 
 var ActiveFiltersBar = module.exports = React.createClass({
 
@@ -46,7 +46,18 @@ var ActiveFiltersBar = module.exports = React.createClass({
                     >
                         { node.data.name }
                         <span className="icon-container" onClick={()=>{
-                            Filters.changeFilter(node.data.field, node.data.term, 'sets', this.props.expSetFilters, null, false, true, this.props.href);
+                            Filters.changeFilter(
+                                node.data.field,
+                                node.data.term,
+                                'sets',
+                                this.props.expSetFilters,
+                                null, false, true,
+                                this.props.href
+                            );
+                            analytics.event('QuickInfoBar', 'Unset Filter', {
+                                'eventLabel' : analytics.eventLabelFromChartNode(node.data),
+                                'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
+                            });
                         }}>
                             <i className="icon icon-times"/>
                         </span>
@@ -109,7 +120,7 @@ var ActiveFiltersBar = module.exports = React.createClass({
                                 expSetFilters={_this.props.expSetFilters}
                                 href={_this.props.href}
                                 key={node.data.term}
-                                color={(node.color ? node.color : vizUtil.colorForNode(node))}
+                                color={node.color || null}
                             />);
                         }) }
                         <div className="field-label">{ Filters.Field.toName(nodeSet[0].data.field) || 'N/A' }</div>

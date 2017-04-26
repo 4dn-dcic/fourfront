@@ -19,6 +19,9 @@ from pyramid.security import (
 
 def includeme(config):
     config.include(static_pages)
+    config.include(uploads_page)
+    config.include(health_check)
+    config.include(submissions_page)
     config.scan(__name__)
 
 
@@ -60,18 +63,18 @@ def static_pages(config):
         page = request.matchdict.get('page','none')
         content = None
         contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-        
+
         pageMeta = pageLocations.get(page, None)
 
         if isinstance(pageMeta, dict) and pageMeta.get('directory', None) is not None:
             contentFilesLocation += "/../.." # get us to root of Git repo.
             contentFilesLocation += pageMeta['directory']
-            
+
             if pageMeta.get('sections', None) is not None:
                 sections = pageMeta['sections']
             else:
                 sections = [ { 'filename' : fn } for fn in listFilesInInDirectory(contentFilesLocation) ]
-            
+
             # Set order (as py dicts don't maintain order)
             i = 0
             for s in sections:
@@ -81,21 +84,37 @@ def static_pages(config):
             try:
                 content = {}
                 for s in sections:
-                    filenameParts = s['filename'].split('.')
-                    content[filenameParts[0]] = {
-                        'content' : s.get('content', False) or getStaticFileContent(
-                            s['filename'],
-                            pageMeta['directory'],
-                            contentFilesLocation
-                        ),
-                        'title'   : s.get('title', None),
-                        'order'   : s['order'],
-                        'filetype': filenameParts[len(filenameParts) - 1]
-                    }
+                    sectionID = s.get('id') # use section 'id', or 'filename' minus extension ('.*')
+                    if sectionID is None:
+                        sectionID = s['filename'].split('.')[0]
+                    if s.get('content', None) is not None:
+                        content[sectionID] = {
+                            'content' : s['content'],
+                            'title'   : s.get('title', None),
+                            'order'   : s['order'],
+                            'filetype': 'txt'
+                        }
+                    else:
+                        filenameParts = s['filename'].split('.')
+                        content[sectionID] = {
+                            'content' : getStaticFileContent(
+                                s['filename'],
+                                pageMeta['directory'],
+                                contentFilesLocation
+                            ),
+                            'title'   : s.get('title', None),
+                            'order'   : s['order'],
+                            'filetype': filenameParts[len(filenameParts) - 1]
+                        }
                     if s.get('title', None):
-                        content[filenameParts[0]]['title'] = s['title']
+                        content[sectionID]['title'] = s['title']
                     if s.get('toc-title', None):
-                        content[filenameParts[0]]['toc-title'] = s['toc-title']
+                        content[sectionID]['toc-title'] = s['toc-title']
+
+                    content[sectionID].update({
+                        k : v for k,v in s.items() if k not in ['id', 'title', 'toc-title', 'order', 'filetype', 'filename']
+                    })
+
             except Exception as e:
                 print(e)
                 print('Could not get contents from ' + contentFilesLocation)
@@ -133,6 +152,103 @@ def static_pages(config):
         return responseDict
 
     config.add_view(static_page, route_name='static-page')
+
+
+def uploads_page(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'uploads-page',
+        '/uploads'
+    )
+    def upload_page_view(request):
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+
+        responseDict = {
+            "title" : "Uploads",
+            "notification" : "success",
+            "@type" : [ "Uploads", "Portal" ],
+            "@context" : "/uploads",
+            "@id" : "/uploads",
+            "content" : None
+        }
+
+        return responseDict
+
+    config.add_view(upload_page_view, route_name='uploads-page')
+
+
+
+def health_check(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'health-check',
+        '/health'
+    )
+    def health_page_view(request):
+
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+        settings = request.registry.settings
+        db = request.registry['dbsession']
+        count = db.scalar("""SELECT count(*) FROM "propsheets";""")
+        es_index = settings.get('snovault.elasticsearch.index')
+        try:
+            si =  request.embed('/sysinfo/ffsysinfo')
+            ont_date = si.json['ontology_updated']
+        except:  # pylint:disable
+            ont_date = "Never Generated"
+
+        responseDict = {
+            "file_upload_bucket" : settings.get('file_upload_bucket'),
+            "blob_bucket" : settings.get('blob_bucket'),
+            "system_bucket" : settings.get('system_bucket'),
+            "elasticserach" : settings.get('elasticsearch.server') + '/' +es_index,
+            "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
+            "load_data": settings.get('snovault.load_test_data'),
+            'es_count': request.registry['elasticsearch'].count(index=es_index),
+            'db_count': count,
+            'ontology_updated': ont_date,
+            "@type" : [ "Health", "Portal" ],
+            "@context" : "/health",
+            "@id" : "/health",
+            "content" : None,
+            "display_title" : "Health Status"
+        }
+
+        return responseDict
+
+    config.add_view(health_page_view, route_name='health-check')
+
+
+def submissions_page(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'submissions-page',
+        '/submissions'
+    )
+    def submissions_page_view(request):
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+
+        responseDict = {
+            "title" : "Submissions",
+            "notification" : "success",
+            "@type" : [ "Submissions", "Portal" ],
+            "@context" : "/submissions",
+            "@id" : "/submissions",
+            "content" : None
+        }
+
+        return responseDict
+
+    config.add_view(submissions_page_view, route_name='submissions-page')
 
 
 def acl_from_settings(settings):

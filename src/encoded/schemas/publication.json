@@ -105,32 +105,41 @@
             "description": "DON'T SUBMIT, auto-generated.",
             "uniqueKey": true,
             "type": "string",
-            "exclude_from": "edit"
+            "exclude_from": ["FFedit-create"]
         },
         "abstract": {
             "title": "Abstract",
             "description": "Abstract of the publication or communication.",
             "type": "string",
-            "exclude_from": "submit4dn"
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "journal": {
+            "title": "Journal",
+            "type": "string",
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "authors": {
             "title": "Authors",
             "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
-            "type": "string",
-            "exclude_from": "submit4dn"
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Author",
+                "type": "string"
+            }
         },
         "date_published": {
             "title": "Publication date",
             "description": "Publication date.",
             "type": "string",
-            "exclude_from": "submit4dn"
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "url": {
             "title": "URL",
             "description": "An external resource with additional information about the source.",
             "type": "string",
             "format": "uri",
-            "exclude_from": "submit4dn"
+            "exclude_from": ["submit4dn", "FFedit-create"]
         }
     }
 }

@@ -4,7 +4,12 @@ var vizUtil = require('./../utilities');
 var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, layout } = require('./../../util');
 
-// If keep in RotatedLabel.statics, RotatedLabel doesn't exist at time that getDefaultProps() is hit.
+/**
+ * If keep in RotatedLabel.statics, RotatedLabel doesn't exist at time that getDefaultProps() is hit.
+ * @memberof viz/components.RotatedLabel
+ * @type {Object}
+ * @private
+ */
 var commonDefaultProps = {
     'angle'             : 30,
     'placementWidth'    : 60,
@@ -35,12 +40,27 @@ var RotatedLabel = module.exports = React.createClass({
 
     statics : {
 
+        /**
+         * @memberof module:viz/components.RotatedLabel
+         * @static
+         * @param {number} height - Available height.
+         * @param {number} angle - Angle to rotate.
+         * @returns {number} Length of hypotenuse.
+         */
         maxHypotenuse : function(height, angle){
             return Math.floor((
                 1 / Math.abs(Math.sin((angle / 180) * Math.PI)
             )) * height);
         },
 
+        /**
+         * @memberof module:viz/components.RotatedLabel
+         * @static
+         * @param {number} [placementWidth=60] Available width.
+         * @param {number} [lineHeight=14] Line height, in px.
+         * @param {number} [extraHeight=0] Extra height to give.
+         * @returns {number} Maximum hypotenuse length.
+         */
         maxTextHeight : function(placementWidth = 60, lineHeight = 14, extraHeight = 0){
             return Math.max(lineHeight,
                 typeof lineHeight === 'number' ?
@@ -49,8 +69,23 @@ var RotatedLabel = module.exports = React.createClass({
             );
         },
 
+        /**
+         * An Axis component which would generate and contain multiple RotatedLabel components, data for which is provided via props.labels.
+         * @memberof module:viz/components.RotatedLabel
+         * @namespace
+         * @type {Component}
+         * @prop {Object[]} labels - List of label objects containing 'name' and maybe 'term'.
+         * @prop {string} labelClassName - Class name to give to rendered label <div> elements.
+         * @prop {string} className - Outer <div> element class name, in addition to 'rotated-label-axis'.
+        */
         Axis : React.createClass({
 
+            /**
+             * @memberof module:viz/components.RotatedLabel.Axis
+             * @instance
+             * @private
+             * @returns {Object} Common default props.
+            */
             getDefaultProps : function(){
                 return _.extend({}, commonDefaultProps, {
                     'labels' : [

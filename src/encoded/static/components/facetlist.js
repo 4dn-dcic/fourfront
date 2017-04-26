@@ -1,15 +1,30 @@
+'use strict';
+
 var React = require('react');
 var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
-var { ajax, console, object, isServerSide, Filters } = require('./util');
+var { ajax, console, object, isServerSide, Filters, layout, analytics } = require('./util');
 var vizUtil = require('./viz/utilities');
+var ReactTooltip = require('react-tooltip');
 
+/**
+ * Component to render out the FacetList for the Browse and ExperimentSet views.
+ * It can work with AJAX-ed in back-end data, as is used for the Browse page, or
+ * with client-side data from back-end-provided Experiments, as is used for the ExperimentSet view.
+ *
+ * Some of this code is not super clean and eventually could use some refactoring.
+ *
+ * @module {Component} facetlist
+ */
 
 /**
  * Used to render individual terms in FacetList.
- * Available through FacetList.Facet.ExpTerm
+ *
+ * @memberof module:facetlist.Facet
+ * @namespace
+ * @type {Component}
  */
 var ExpTerm = React.createClass({
 
@@ -37,7 +52,6 @@ var ExpTerm = React.createClass({
             return numPassed;
         },
 
-        /* Use as a mixin (i.e. func.call(this, termKey, facetField, expsOrSets) ) in components with access to this.props.expSetFilters */
         isSelected : function(
             termKey     = (this.state.term || this.props.term || {key:null}).key,
             facetField  = (this.state.facet || this.props.facet || {field:null}).field,
@@ -45,7 +59,7 @@ var ExpTerm = React.createClass({
         ){
             var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
             if (
-                this.props.expSetFilters[standardizedFieldKey] && 
+                this.props.expSetFilters[standardizedFieldKey] &&
                 this.props.expSetFilters[standardizedFieldKey].has(termKey)
             ){
                 return true;
@@ -86,11 +100,11 @@ var ExpTerm = React.createClass({
 
         } else { // Manual client-side filtering.
 
-            /** 
+            /**
              * props.expSetFilters uses standardized fieldKeys/props.facet.field while
-             * experiment tables & facets do not. Props provided through props.facet 
-             * are un-standardized, so run them through standardizeFieldKey() before
-             * checking if in expSetFilters (e.g. as in ExpTerm.isSelected() ).
+             * experiment tables & facets do not. Props provided through props.facet
+             * are un-standardized, so run them through func standardizeFieldKey before
+             * checking if in expSetFilters, e.g. as in ExpTerm.isSelected.
              */
             var termMatchExps = Filters.siftExperimentsClientSide(
                 this.props.experimentSetListJSON,
@@ -104,7 +118,7 @@ var ExpTerm = React.createClass({
                 'passExpsCount' : this.getPassExpsCount(termMatchExps),
                 'filtering' : false
             }
-        
+
         }
     },
 
@@ -153,6 +167,7 @@ var ExpTerm = React.createClass({
 
     handleClick: function(e) {
         e.preventDefault();
+        var existingFilters = _.clone(this.props.expSetFilters);
         //this.setState(
         //    { filtering : true },
         //    () => {
@@ -161,6 +176,18 @@ var ExpTerm = React.createClass({
                     this.props.term.key,
                     //() => this.setState({ filtering : false })
                 );
+
+                var isUnset = false;
+                if (
+                    existingFilters &&
+                    existingFilters[this.props.facet.field] &&
+                    existingFilters[this.props.facet.field].has(this.props.term.key)
+                ) isUnset = true;
+
+                analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
+                    'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.term.key,
+                    'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
+                });
         //    }
         //);
     },
@@ -176,7 +203,7 @@ var ExpTerm = React.createClass({
                     <span className="pull-left facet-selector">
                         { this.state.filtering ?
                             <i className="icon icon-circle-o-notch icon-spin icon-fw"></i>
-                            : selected ? 
+                            : selected ?
                                 <i className="icon icon-times-circle icon-fw"></i>
                                 : '' }
                     </span>
@@ -192,13 +219,30 @@ var ExpTerm = React.createClass({
 
 
 /**
- * Used to render individual facet fields and their option(s) in FacetList.
- * Available through FacetList.Facet
+ * Used to render individual facet fields and their available terms in FacetList.
+ *
+ * @memberof module:facetlist
+ * @namespace
+ * @type {Component}
  */
 var Facet = React.createClass({
 
     statics : {
-        ExpTerm : ExpTerm // Allow access to ExpTerm thru Facet.ExpTerm
+        ExpTerm : ExpTerm, // Allow access to ExpTerm thru Facet.ExpTerm
+
+        /**
+         * @memberof module:facetlist.Facet
+         * @namespace
+         * @type {Component}
+         */
+        InfoIcon : React.createClass({
+            render : function(){
+                if (!this.props.children) return null;
+                return (
+                    <i className="icon icon-info-circle" data-tip={this.props.children}/>
+                );
+            }
+        })
     },
 
     propTypes : {
@@ -208,13 +252,15 @@ var Facet = React.createClass({
             'total' : React.PropTypes.number,               // Total experiments (or terms??) w/ field
             'terms' : React.PropTypes.array.isRequired      // Possible terms
         }),
+        defaultFacetOpen : React.PropTypes.bool,
         experimentSetListJSON : React.PropTypes.array,
         expSetFilters : React.PropTypes.object.isRequired,
         ignoredFilters : React.PropTypes.object,
         changeFilter : React.PropTypes.func,                // Executed on term click
         experimentsOrSets : React.PropTypes.string,         // Defaults to 'sets'
         width : React.PropTypes.any,
-        extraClassname : React.PropTypes.string
+        extraClassname : React.PropTypes.string,
+        schemas : React.PropTypes.object
     },
 
     getDefaultProps: function() {
@@ -222,7 +268,7 @@ var Facet = React.createClass({
             width: 'inherit'
         };
     },
-    
+
     getInitialState: function () {
         // Bind class instance to ExpTerm.isSelected to create this.isSelected if static (== 1 term in facet)
         this.isSelected = this.isStatic() ?
@@ -231,8 +277,18 @@ var Facet = React.createClass({
             () => false;
 
         return {
-            facetOpen: true // Potential ToDo: store list of open or closed facet field IDs in localstorage.
+            facetOpen: typeof this.props.defaultFacetOpen === 'boolean' ? this.props.defaultFacetOpen : true // Potential ToDo: store list of open or closed facet field IDs in localstorage.
         };
+    },
+
+    componentWillReceiveProps : function(nextProps){
+        // We might want to change defaultFacetOpen right after mount, so let us re-do getInitialState.
+        if (
+            (nextProps.mounted && !this.props.mounted) &&
+            (typeof nextProps.defaultFacetOpen === 'boolean' && nextProps.defaultFacetOpen !== this.props.defaultFacetOpen)
+        ){
+            this.setState({ facetOpen : nextProps.defaultFacetOpen });
+        }
     },
 
     isStatic: function(props = this.props){ return !!(props.facet.terms.length === 1); },
@@ -246,6 +302,7 @@ var Facet = React.createClass({
     handleStaticClick: function(e) {
         e.preventDefault();
         if (!this.isStatic()) return false;
+        var existingFilters = _.clone(this.props.expSetFilters);
         this.setState(
             { filtering : true },
             () => {
@@ -253,7 +310,17 @@ var Facet = React.createClass({
                     this.props.facet.field,
                     this.props.facet.terms[0].key,
                     ()=> {
-                        this.setState({ filtering : false })
+                        this.setState({ filtering : false });
+                        var isUnset = false;
+                        if (
+                            existingFilters &&
+                            existingFilters[this.props.facet.field] &&
+                            existingFilters[this.props.facet.field].has(this.props.facet.terms[0].key)
+                        ) isUnset = true;
+                        analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
+                            'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.facet.terms[0].key,
+                            'dimension1' : analytics.getStringifiedCurrentFilters(existingFilters)
+                        });
                     }
                 )
             }
@@ -264,7 +331,16 @@ var Facet = React.createClass({
         var facet = this.props.facet;
         var standardizedFieldKey = Filters.standardizeFieldKey(facet.field, this.props.experimentsOrSets);
         var selected = this.isSelected();
-        if (this.isStatic()){ 
+        if (typeof facet.title !== 'string'){
+            facet = _.extend({}, facet, {
+                'title' : Filters.Field.toName(facet.field, this.props.schemas || null)
+            });
+        }
+
+        var schemaProperty = Filters.Field.getSchemaProperty(facet.field, this.props.schemas);
+        var description = schemaProperty && schemaProperty.description;
+
+        if (this.isStatic()){
             // Only one term
             return (
                 <div
@@ -276,29 +352,28 @@ var Facet = React.createClass({
                     }
                     style={{width: this.props.width}}
                     data-field={standardizedFieldKey}
-                    title={
-                        'All ' +
-                        (this.props.experimentsOrSets === 'sets' ? 'experiment sets' : 'experiments') +
-                        ' have ' +
-                        facet.terms[0].key +
-                        ' as their ' +
-                        (facet.title || facet.field ).toLowerCase() + '; ' +
-                        (selected ? 
-                            'currently active as portal-wide filter.' : 
-                            'not currently active as portal-wide filter.'
-                        )
-                    }
                 >
                     <div className="facet-static-row clearfix">
                         <h5 className="facet-title">
-                            { facet.title || facet.field }
+                            <span className="inline-block" data-tip={description} data-place="right">{ facet.title || facet.field }</span>
                         </h5>
                         <div className={
                             "facet-item term" +
                             (selected? ' selected' : '') +
                             (this.state.filtering ? ' filtering' : '')
                         }>
-                            <span onClick={this.handleStaticClick}>
+                            <span onClick={this.handleStaticClick} title={
+                                'All ' +
+                                (this.props.experimentsOrSets === 'sets' ? 'experiment sets' : 'experiments') +
+                                ' have ' +
+                                facet.terms[0].key +
+                                ' as their ' +
+                                (facet.title || facet.field ).toLowerCase() + '; ' +
+                                (selected ?
+                                    'currently active as portal-wide filter.' :
+                                    'not currently active as portal-wide filter.'
+                                )
+                            }>
                                 <i className={
                                     "icon icon-fw " +
                                     (this.state.filtering ? 'icon-spin icon-circle-o-notch' :
@@ -319,20 +394,20 @@ var Facet = React.createClass({
                 hidden={false/*this.isEmpty()*/}
                 data-field={standardizedFieldKey}
             >
-                <h5 className="facet-title" onClick={this.handleExpandToggleClick} title="Hide or expand facet terms">
-                    { facet.title || facet.field }
+                <h5 className="facet-title" onClick={this.handleExpandToggleClick}>
                     <span className="right">
                         <i className={
                             "icon icon-fw " +
                             (this.state.facetOpen ? "icon-angle-down" : "icon-angle-right")
                         }></i>
                     </span>
+                    <span className="inline-block" data-tip={description} data-place="right">{ facet.title || facet.field }</span>
                 </h5>
                 { this.state.facetOpen ?
                 <div className="facet-list nav">
                     <div>
                         { facet.terms.map((term)=>
-                            <Facet.ExpTerm 
+                            <Facet.ExpTerm
                                 {...this.props}
                                 key={term.key}
                                 term={term}
@@ -356,7 +431,7 @@ var Facet = React.createClass({
 });
 
 /**
- * FacetList - Exported
+ * @alias module:facetlist
  */
 
 var FacetList = module.exports = React.createClass({
@@ -366,7 +441,7 @@ var FacetList = module.exports = React.createClass({
         // Include sub-components as static (sub-)properties of main FacetList
         Facet : Facet,
 
-        /** 
+        /**
          * Highlights all terms on document (changes background color) of given field,term.
          * @param {string} field - Field, in object dot notation.
          * @param {string} term - Term to highlight.
@@ -391,7 +466,7 @@ var FacetList = module.exports = React.createClass({
                     isSVG = false;
                     className = el.className;
                 }
-                
+
                 if (el.classList && el.classList.add){
                     if (!off) el.classList.add('highlight');
                     else el.classList.remove('highlight');
@@ -444,15 +519,18 @@ var FacetList = module.exports = React.createClass({
             return true;
         }, 100, { leading: false }),
 
-        /** Resets background color of term(s). @see FacetList.highlightTerm */
+        /**
+         * Resets background color of terms.
+         * @see FacetList.highlightTerm
+         */
         unhighlightTerms : function(field = null){
             return FacetList.highlightTerm.call(this, field, null, '');
         },
 
-        
+
         /**
          * Adds a restrictions property to each facet from restrictions object and uses it to filter terms.
-         * 
+         *
          * @param {Object[]} origFacets - Array of initial facets; should have terms already.
          * @param {Object} [restrictions] - Object containing restricted facet fields as property names and arrays of term keys as values.
          * @return {Object[]} Facets which have filtered terms and a restrictions property, if there is a restriction for it in restrictions object.
@@ -471,8 +549,8 @@ var FacetList = module.exports = React.createClass({
         /**
          * For client-side filtering of experiments only.
          * Unsets any 'terms' or 'total' properties on facets.
-         * Modifies facets param in place, does not clone/copy/create new one(s).
-         * 
+         * Modifies facets param in place, does not clone/copy/create new ones.
+         *
          * @param {Object[]} facets - List of facets.
          */
         resetFacetTermsAndCounts : function(facets){
@@ -485,7 +563,7 @@ var FacetList = module.exports = React.createClass({
         /**
          * For client-side filtering of experiments only.
          * Fills facet objects with 'terms' and 'total' properties, as well as terms' counts.
-         * Modifies incompleteFacets param in place (to turn them into "complete" facets).
+         * Modifies incompleteFacets param in place to turn the array of object into "complete" facets.
          *
          * @param {Object[]} incompleteFacets - Array of facet objects. Each should have field and title keys/values.
          * @param {Object[]} exps - Array of experiment objects, obtained from @graph or experiments_in_set property on context.
@@ -532,11 +610,10 @@ var FacetList = module.exports = React.createClass({
         /**
          * Find filters to ignore - i.e. filters which are set in expSetFilters but are
          * not present in facets.
-         * 
-         * @param {Object[]} facets - Array of complete facet objects (must have 'terms' & 'fields' properties).
-         * @param {Object} expSetFilters - Object containing facet fields and their enabled terms:
-         *     '{string} Field in item JSON hierarchy, using object dot notation : {Set} terms'.
-         * 
+         *
+         * @param {Object[]} facets - Array of complete facet objects; must have at least 'terms' & 'fields' properties.
+         * @param {Object} expSetFilters - Object containing facet fields and their enabled terms: '{string} Field in item JSON hierarchy, using object dot notation : {Set} terms'.
+         *
          * @return {Object} The filters which are ignored. Object looks like expSetFilters.
          */
         findIgnoredFiltersByMissingFacets : function(facets, expSetFilters){
@@ -568,7 +645,7 @@ var FacetList = module.exports = React.createClass({
         /**
          * Find filters which to ignore based on if all experiments in experimentArray which are being filtered
          * have the same term for that selected filter. Geared towards usage by ExperimentSetView.
-         * 
+         *
          * @param {Object[]} experimentArray - Experiments which are being filtered.
          * @param {Object} expSetFilters - Object containing facet field name as key and set of terms to filter by as value.
          * @param {string} [expsOrSets] - Whether are filtering experiments or sets, in order to standardize facet names.
@@ -591,7 +668,7 @@ var FacetList = module.exports = React.createClass({
                             }
                             return termVal;
                         })
-                    ).filter((experimentTermValue, j, allTermValues)=>{ 
+                    ).filter((experimentTermValue, j, allTermValues)=>{
                         // Reduce to unique term vals (indexOf returns first index, so if is repeat occurance, returns false)
                         return allTermValues.indexOf(experimentTermValue) === j;
                     }).length < 2
@@ -605,7 +682,7 @@ var FacetList = module.exports = React.createClass({
 
         /**
          * Compare two arrays of experiments to check if contain same experiments, by their ID.
-         * @return {boolean} True if equal.
+         * @returns {boolean} true if equal.
          */
         compareExperimentLists : function(exps1, exps2){
             if (exps1.length != exps2.length) return false;
@@ -615,10 +692,7 @@ var FacetList = module.exports = React.createClass({
             return true;
         },
 
-        /**
-         * ToDo : Compare two objects of expSetFilters.
-         * @return {boolean} True if equal.
-         */
+
         /*
         compareExpSetFilters : function(expSetFilters1, expSetFilters2){
             var esfKeys1 = Object.keys(expSetFilters1);
@@ -655,7 +729,7 @@ var FacetList = module.exports = React.createClass({
         })),
         /**
          * In lieu of facets, which are only generated by search.py, can
-         * use and format schemas (available to experiment-set-view.js through item.js)
+         * use and format schemas, which are available to experiment-set-view.js through item.js.
          */
         schemas : React.PropTypes.object,
         // { '<schemaKey : string > (active facet categories)' : Set (active filters within category) }
@@ -700,18 +774,19 @@ var FacetList = module.exports = React.createClass({
 
     /**
      * Sets up list of facets to use for filtering in facets.
-     * - (1) Try to use facets passed in through props, if any.
-     * - (2) Try to get list of incomplete experiment-applicable facets from redux store (passed through props),
+     *    1. Try to use facets passed in through props, if any.
+     *    2. Try to get list of incomplete experiment-applicable facets from redux store - passed through props,
      *       if has been loaded previously. Then fill up facets with terms and term-match counts on mount.
-     * - (3) If not set here in getInitialState, then get list of incomplete exp-applicable facets from back-end
+     *    3. If not set here in getInitialState, then get list of incomplete exp-applicable facets from back-end
      *       on componentDidMount. Once fetched, fill up w/ terms and term-match counts and update state.
-     * 
+     *
      * @return {Object} Initial state object.
      */
     getInitialState : function(){
 
         var initState = {
-            facetsLoaded : false
+            facetsLoaded : false,
+            mounted : false
         };
 
         if (!this.isUsingProvidedFacets()) {
@@ -738,9 +813,9 @@ var FacetList = module.exports = React.createClass({
 
     /**
      * If not using props passed in through props, and incomplete facets not available (yet) in redux store,
-     * AJAX them in, save to redux store, then fill up w/ terms. @see FacetList.getInitialState
-     * 
-     * Possible ToDo : Store copy of this.(state.)facets in redux store instead of reference.
+     * AJAX them in, save to redux store, then fill up w/ terms.
+     *
+     * @see FacetList.getInitialState
      */
     componentDidMount : function(){
 
@@ -760,20 +835,26 @@ var FacetList = module.exports = React.createClass({
                     this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
                 }
                 if (Array.isArray(facets) && facets.length > 0){
-                    this.setState({ 'facets' : facets, 'facetsLoaded' : true });
+                    this.setState({ 'facets' : facets, 'facetsLoaded' : true, 'mounted' : true }, function(){
+                        ReactTooltip.rebuild();
+                    });
                 }
             });
-        } // else @see getInitialState
+        } else {
+            // @see getInitialState
+            this.setState({ 'mounted' : true });
+        }
     },
 
     /**
      * Deprecated description:
-     * Since there's a good chunk of intensive (potentially UI-blocking) calculation,
+     * Since there's a good chunk of intensive potentially UI-blocking calculation,
      * minimize updates to only when necessary, i.e. only when relevant-to-facetlist-changes props
-     * or state has changed. Child components' state changes (e.g. show/collapse facet) are not affected.
+     * or state has changed. Child components' state changes, e.g. show/collapse facet, are not affected.
      */
     shouldComponentUpdate : function(nextProps, nextState){
         if (
+            this.state.mounted !== nextState.mounted ||
             !this.isUsingProvidedFacets() ||
             this.props.useAjax ||
             this.props.expSetFilters !== nextProps.expSetFilters ||
@@ -781,7 +862,8 @@ var FacetList = module.exports = React.createClass({
             !_.isEqual(this.state.facets, nextState.facets) ||
             this.state.facetsLoaded !== nextState.facetsLoaded ||
             !_.isEqual(nextProps.expIncompleteFacets, this.props.expIncompleteFacets) ||
-            !_.isEqual(nextProps.ignoredFilters, this.props.ignoredFilters)
+            !_.isEqual(nextProps.ignoredFilters, this.props.ignoredFilters) ||
+            nextProps.schemas !== this.props.schemas
         ){
             if (this.props.debug) console.log('%cWill','color: green', 'update FacetList');
             return true;
@@ -836,11 +918,11 @@ var FacetList = module.exports = React.createClass({
                 (facet.field === 'type') ||
                 (facet.field === 'experimentset_type') ||
                 (   /* permissions */
-                    !this.context.session && 
-                    this.context.hidePublicAudits && 
+                    !this.context.session &&
+                    this.context.hidePublicAudits &&
                     facet.field.substring(0, 6) === 'audit.'
                 )
-            ) ? false : true 
+            ) ? false : true
         )
     },
 
@@ -880,6 +962,7 @@ var FacetList = module.exports = React.createClass({
     },
 
     renderFacets : function(facets = this.state.facets || this.props.facets || []){
+        console.log(layout.responsiveGridState(), this.state.mounted);
         var extClass = this.checkIfAllSingleTerm() ? ' all-single-term' : null;
         return facets.map(facet =>
             <FacetList.Facet
@@ -894,6 +977,9 @@ var FacetList = module.exports = React.createClass({
                 extraClassname={extClass}
                 href={this.props.href}
                 useAjax={this.props.useAjax}
+                schemas={this.props.schemas}
+                defaultFacetOpen={ !this.state.mounted ? false : !!(layout.responsiveGridState() !== 'xs') }
+                mounted={this.state.mounted}
             />
         )
     },
@@ -934,9 +1020,11 @@ var FacetList = module.exports = React.createClass({
 
         return (
             <div>
+                {/*
                 <div className="exptype-box">
                     { exptypeDropdown }
                 </div>
+                */}
                 <div className={
                     "facets-container facets " +
                     this.props.orientation +
@@ -960,4 +1048,3 @@ var FacetList = module.exports = React.createClass({
         );
     }
 });
-

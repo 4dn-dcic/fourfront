@@ -9,11 +9,18 @@ var JWT = module.exports = {
 
     COOKIE_ID : 'jwtToken',
     dummyStorage : {}, // Fake localStorage for use by serverside and tests.
+    tempStore : {},    // Temporary storage to use for remainder of session. Meant to support Impersonate User.
     
     get : function(source = 'cookie'){
         if (source === 'all' || source === '*') source = 'any';
 
         var idToken = null;
+
+        // Use tempStore first, incase impersonating user.
+        if (JWT.tempStore && JWT.tempStore.user_info && JWT.tempStore.user_info.id_token){
+            console.warn("Using tempStore. If you are not impersonating a user, this is wrong.");
+            return JWT.tempStore.user_info.id_token;
+        }
 
         if (source === 'cookie' || source === 'any'){
             if (isServerSide()){
@@ -37,10 +44,18 @@ var JWT = module.exports = {
     },
 
     maybeValid : function(jwtToken){
-        return (jwtToken && jwtToken.length > 0 && jwtToken !== "null" && jwtToken !== "expired") ? true : false;
+        return (
+            typeof jwtToken === 'string' && jwtToken.length > 0 && 
+            jwtToken !== "null" &&
+            jwtToken !== "expired"
+        ) ? true : false;
     },
 
     getUserInfo : function(){
+        if (JWT.tempStore && JWT.tempStore.user_info){
+            console.warn("Using tempStore. If you are not impersonating a user, this is wrong.");
+            return JWT.tempStore.user_info;
+        }
         try {
             if (JWT.storeExists()){
                 return JSON.parse(localStorage.getItem('user_info'));
@@ -94,7 +109,11 @@ var JWT = module.exports = {
         return true;
     },
 
-    saveUserInfo : function(user_info){
+    saveUserInfo : function(user_info, toTempStore = false){
+        if (toTempStore){
+            JWT.tempStore.user_info = user_info;
+            return;
+        }
         // Delegate JWT token to cookie, keep extended user_info obj (w/ copy of token) in localStorage.
         JWT.save(user_info.idToken || user_info.id_token, 'cookie');
         JWT.saveUserInfoLocalStorage(user_info);
@@ -102,6 +121,11 @@ var JWT = module.exports = {
 
     remove : function(source = 'all'){
         if (source === 'any' || source === '*') source = 'all';
+
+        if (source.toLowerCase() === 'tempstore') {
+            JWT.tempStore = {};
+            return;
+        }
 
         var removedCookie = false,
             removedLocalStorage = false;

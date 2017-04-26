@@ -9,8 +9,7 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item,
-    add_default_embeds
+    Item
     # paths_filtered_by_status,
 )
 
@@ -26,11 +25,10 @@ class Software(Item):
     item_type = 'software'
     schema = load_schema('encoded:schemas/software.json')
     embedded = []
-    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'software_relation' are stored in self.properties
-        properties['tile'] = properties['name'].replace(' ', '-').lower() + '_' + properties['version']
+        properties['title'] = properties['name'].replace(' ', '-').lower() + '_' + properties['version']
         super(Software, self)._update(properties, sheets)
 
         DicRefRelation = {

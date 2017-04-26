@@ -2,20 +2,49 @@
 Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 ************************************************************/
 
+.item-page-container {
+	/** Override margin-bottom for margin pages so accession and title are close to each other **/
+	h1.page-title {
+		margin-bottom: 2px;
+	}
+}
 
 @media screen and (min-width: $screen-md-min){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
+	/*
 	.item-view-header {
 		margin-top: -27px;
 	}
-	
+	*/
+
 }
 
-.item-label-title {
-	margin-bottom: 9px;
+.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
 	font-family: 'Work Sans', sans-serif;
 	font-weight: 300;
-	margin-top: 0;
+	height: 36px;
+	/* line-height: 36px; */
+	margin: 0;
+	padding-left: 13px;
+
+	> span:not(:last-child){
+		padding-right: 5px;
+		margin-right: 5px;
+		border-right: 1px solid #ccc;
+	}
+
+	/*
+	.accession-label {
+		font-size: 1rem;
+		font-weight: 400;
+		color: #888;
+	}
+	*/
+
+	.accession {
+		font-weight: 500;
+		font-size: 1.15rem;
+	}
 }
 
 .item-label-extra {
@@ -91,10 +120,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.flexcol-heading, .item-page-heading {
+.flexcol-heading, .item-page-heading, .submission-page-heading{
     position: relative;
-    margin-right: -10px;
-    margin-left: -10px;
+    //margin-right: -10px;
+    //margin-left: -10px;
     background-color: #f4f4f4;
 
     h1, h2, h3, h4, h5, h6 {
@@ -266,8 +295,26 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-container {
     .info-area {
-	    margin-top: 24px;
+	    margin-top: 17px;
+		//border-bottom: 1px solid #ddd;
+		padding-bottom: 7px;
     }
+
+	.rc-tabs-tabpane {
+		.info-area {
+			overflow: hidden;
+			border-bottom: none;
+		}
+	}
+
+	.tab-view-container {
+		.rc-tabs {
+			@media screen and (min-width: $screen-sm-min){
+				//margin-top: -17px;
+			}
+		}
+	}
+
     .item-info-area {
         margin-bottom: 20px;
         min-height: 120px;
@@ -279,22 +326,28 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	margin-bottom: 12px;
 
+	.expandable-list {
+		overflow: hidden;
+	}
+
 	.list-item {
-		
+
 		/* Equalize Height of Columns, unsupported for IE9 and below: */
 		display: -webkit-box;
 		display: -webkit-flex;
 		display: -ms-flexbox;
 		display: flex;
-		
-		.item-label, .item-value {		
+
+
+
+		.item-label, .item-value {
 			> div {
-				min-height: 20px;
+				min-height: 26px;
 				height: 100%;
 				word-break: break-all;
 				border-bottom: 1px solid #eee;
-				padding-top: 5px;
-				padding-bottom: 5px;
+				padding-top: 8px;
+				padding-bottom: 8px;
 			}
 		}
 		.item-label {
@@ -336,17 +389,253 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		}
 
 	}
-		
+
 }
 
+/** JSON Tree Wrapper (e.g. fallback view) **/
 
+.json-tree-wrapper {
+	border-radius: 4px;
+	overflow: hidden;
+	> ul {
+		padding: 8px 16px 16px !important;
+		margin: 0 !important;
+	}
+}
+
+/*** Partial or Expandable Lists ***/
+
+.expandable-list {
+	margin-bottom: 10px;
+
+	ul {
+		margin-bottom: 0px;
+	}
+}
+
+/*** Files In Set Table ***/
+
+$download-button-width : 100px;
+
+
+.files-in-set-table-title {
+	font-weight: 300;
+	padding-bottom: 10px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #f4f4f4;
+	margin-top: 20px;
+}
+
+.files-in-set-table {
+
+	margin-bottom: 20px;
+
+	.row {
+
+
+
+		> div {
+			padding-top: 5px;
+			padding-bottom: 5px;
+		}
+
+		h6.accession {
+			margin: 0;
+			font-size: 0.925rem;
+			font-weight: 400;
+			> a {
+				color: #777;
+				&:hover {
+					color: #000;
+				}
+			}
+		}
+
+		> .title {
+			vertical-align: middle;
+			text-align: left;
+			padding-top: 10px;
+		}
+
+		> .description {
+			padding-top: 1px;
+    		padding-bottom: 0px;
+		}
+
+		> .lab {
+			text-align: right;
+			.lab-icon {
+				&.no-lab {
+					opacity: 0.125;
+				}
+			}
+			a.lab-icon {
+				color: #555;
+				transition: color .5s;
+				&:hover {
+					color : #000;
+				}
+			}
+		}
+
+		> .submitter {
+			small {
+				line-height: 1rem;
+				color: #777;
+			}
+		}
+
+		> div.divider-column {
+			padding-bottom: 0;
+			padding-top: 0;
+			> .divider {
+				border-bottom: 1px solid #f4f4f4;
+				height: 1px;
+			}
+		}
+
+		&.header-row {
+			user-select: none;
+
+			> div {
+				font-weight: 500;
+			}
+			> div.divider-column > .divider {
+				border-bottom: 1px solid #ddd;
+			}
+			> .download-button-title {
+				> i.icon {
+					width: 32px;
+					text-align: center;
+				}
+				> span.file {
+					display: inline-block;
+					min-width: $download-button-width;
+					text-align: left;
+				}
+				> span.docs {
+					width : 33px;
+					margin-left: 6px;
+					display: inline-block;
+					text-align: center;
+				}
+			}
+		}
+
+		> .download-button{
+			position: relative;
+			z-index: 10;
+			> a.btn, > button.btn {
+				&.button-dl-doc {
+					margin-left: 5px;
+					&.disabled {
+						opacity: 0.33;
+					}
+				}
+				&.button-dl-file {
+					min-width: $download-button-width;
+				}
+			}
+
+		}
+
+	}
+}
+
+// Tablet & mobile screen size adjustments
+@media screen and (max-width : $screen-sm-max){
+	.files-in-set-table .row > .download-button {
+		margin-bottom: -50px;
+	}
+}
+
+// Mobile screen size
+@media screen and (max-width : $screen-xs-max){
+	.files-in-set-table .row > .download-button {
+		> .button-dl-file {
+			margin-bottom: 5px;
+		}
+	}
+}
+
+// Large screen adjustments
+@media screen and (min-width : $screen-md-min){
+
+	.files-in-set-table-title {
+		margin-top: 20px;
+	}
+
+	.files-in-set-table {
+		.row {
+
+			> div, h6 {
+				line-height: 30px;
+			}
+
+			h6.accession {
+				text-align: right;
+			}
+
+
+
+			> .title {
+				padding-top: 5px;
+				padding-bottom: 5px;
+				text-align: right;
+			}
+
+			> .description {
+				min-height: 30px;
+				padding-top: 12px;
+				padding-bottom: 12px;
+				line-height: normal;
+			}
+
+			> .download-button {
+				height: 40px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+			}
+
+		}
+	}
+}
 
 
 
 
 /*********** Formatted Info Panel/Block *****************/
 
+// Mixin for top-left label. To be re-used in other areas.4s
 
+@mixin small-block-label(){
+	font-weight: 500;
+	color: #646464;
+	margin-bottom: 7px;
+	margin-top: 0px;
+
+	&:after {
+		content : "\f105";
+		font-family: "FontAwesome";
+		padding-left: 6px;
+	}
+}
+
+@mixin icon-container-child(){
+
+	.icon-container {
+		text-align: center;
+		padding-top: 4px;
+		font-size: 20px;
+		//margin-bottom: -10px;
+
+		&.col-xs-2 {
+			padding-right: 0px;
+			padding-left: 5px;
+		}
+	}
+
+}
 
 .formatted-info-panel {
 	padding : 0 10px 12px;
@@ -368,15 +657,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 
 	> h6 {
-		margin : 0 0 7px /* -3px -> */ -8px;
-		font-weight: 500;
-		color: #646464;
-
-		&:after {
-			content : "\f105";
-			font-family: "FontAwesome";
-			padding-left: 6px;
-		}
+		margin-left : -10px;
+		@include small-block-label();
 
 	}
 
@@ -424,17 +706,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		}
 	}
 
-	.icon-container {
-		text-align: center;
-		padding-top: 4px;
-		font-size: 20px;
-		margin-bottom: -10px;
-
-		&.col-xs-2 {
-			padding-right: 0px;
-			padding-left: 5px;
-		}
-	}
+	@include icon-container-child();
 
 }
 
@@ -460,15 +732,51 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
+/************** Publications Block ****************/
+
+.publications-block {
+
+	ul {
+		margin-bottom: 0;
+		padding-left: 10px;
+	}
+
+	&.single-item {
+		ul {
+			margin-bottom: 1px;
+    		margin-top: 7px;
+		}
+	}
+
+	.details {
+		padding-top: 3px;
+		> .details-row {
+			margin-top: 7px;
+		}
+	}
+
+	h6.publication-label {
+		@include small-block-label();
+	}
+
+	.label-col {
+		user-select: none;
+	}
+
+	.icon.abstract-toggle {
+		cursor : pointer;
+		color : #888;
+	}
+
+	@include icon-container-child();
+
+}
+
 /************** Experiments Set View **************/
 
 .exp-table-section {
 
 	h3 {
-		font-weight: 300;
-		margin: 0;
-		border-top: 1px solid #eee;
-		padding: 16px 0 16px;
 
 		span.exp-number {
 			padding-top: 5px;
@@ -479,6 +787,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	.exp-table-container {
 		overflow-x: auto;
 		display: block;
+		border-bottom: 1px solid #888;
 	}
 
 	/*

@@ -46,8 +46,8 @@ var HelpPage = module.exports = React.createClass({
         }).isRequired
     },
 
-    entryRenderFxn : function(key, content){
-        return (<HelpPage.Entry key={key} section={key} content={content} />);
+    entryRenderFxn : function(key, content, context){
+        return (<HelpPage.Entry key={key} section={key} content={content} context={context} />);
     },
 
     getDefaultProps : StaticPageBase.getDefaultProps,
@@ -63,15 +63,15 @@ var SlideCarousel = React.createClass({
     getInitialState() {
         return {
             index: 0,
-            slideTitles: ["Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png", "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png", "Slide10.png", "Slide11.png", "Slide12.png"]
+            slideTitles: ["Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png", "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png", "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png", "Slide13.png", "Slide14.png", "Slide15.png", "Slide16.png"]
         };
     },
     handleForward() {
         var nextIdx;
-        if (this.state.index + 1 === this.state.slideTitles.length) {
-            nextIdx = 0;
-        }else{
+        if (this.state.index + 1 < this.state.slideTitles.length) {
             nextIdx = this.state.index + 1;
+        }else{
+            nextIdx = this.state.index;
         }
         this.setState({
             index: nextIdx
@@ -79,10 +79,10 @@ var SlideCarousel = React.createClass({
     },
     handleBackward() {
         var nextIdx;
-        if (this.state.index - 1 < 0) {
-            nextIdx = this.state.slideTitles.length - 1;
-        }else{
+        if (this.state.index - 1 >= 0) {
             nextIdx = this.state.index - 1;
+        }else{
+            nextIdx = this.state.index;
         }
         this.setState({
             index: nextIdx
@@ -94,8 +94,8 @@ var SlideCarousel = React.createClass({
         return(
             <div className="slide-display">
                 <div className="slide-controls">
-                    <Button bsSize="xsmall" onClick={this.handleBackward}>Previous</Button>
-                    <Button bsSize="xsmall" onClick={this.handleForward}>Next</Button>
+                    <Button disabled={this.state.index == 0} bsSize="xsmall" onClick={this.handleBackward}>Previous</Button>
+                    <Button disabled={this.state.index == this.state.slideTitles.length-1} bsSize="xsmall" onClick={this.handleForward}>Next</Button>
                 </div>
                 {slide}
             </div>

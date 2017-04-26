@@ -1,13 +1,26 @@
 'use strict';
 
+/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
 var { console, isServerSide } = require('./../util');
 
+/**
+ * Utility functions for aiding with visualizations.
+ * 
+ * @module {Object} viz/utilities
+ */
+
+/** @alias module:viz/utilities */
 var vizUtil = module.exports = {
 
-    // Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
+    /** 
+     * Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
+     * 
+     * @param {string} str - String to generate a color form.
+     * @returns {string} A CSS color.
+     */
     stringToColor : function(str) {
         var hash = 0;
         var i;
@@ -21,7 +34,12 @@ var vizUtil = module.exports = {
         }
         return colour;
     },
-
+    /** 
+     * Helper function for window.requestAnimationFrame. Falls back to browser-prefixed versions if default not available, or falls back to setTimeout with 0ms delay if no requestAnimationFrame available at all.
+     * 
+     * @param {function} cb - Callback method.
+     * @returns {undefined|string} Undefined or timeout ID if falling back to setTimeout.
+     */
     requestAnimationFrame : function(cb){
         if (!isServerSide() && typeof window !== 'undefined'){
             if (typeof window.requestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
@@ -30,10 +48,15 @@ var vizUtil = module.exports = {
         }
         return setTimeout(cb, 0);
     },
-
+    /** @ignore */
     colorCache : {},        // We cache generated colors into here to re-use and speed up.
+    /** @ignore */
     colorCacheByField : {},
 
+    /**
+     * Mapping of colors to particular terms.
+     * @type {Object.<string>}
+     */
     predefinedColors : {    // Keys should be all lowercase
         "human (homo sapiens)"  : "rgb(218, 112, 6)",
         "human"                 : "rgb(218, 112, 6)",
@@ -57,7 +80,13 @@ var vizUtil = module.exports = {
             '#4d4d4d'   // gray
         ]
     },
-
+    /** 
+     * @param   {string} field
+     * @param   {string} term
+     * @param   {string|Object} [color]
+     * @param   {string} [palette="muted"]
+     * @returns {string|Object}
+     */
     addToColorCacheByField : function(field, term, color = null, palette = 'muted'){
         if (typeof vizUtil.colorCacheByField[field] === 'undefined'){
             vizUtil.colorCacheByField[field] = {};
@@ -204,8 +233,9 @@ var vizUtil = module.exports = {
         // TODO
     },
 
+    /** @namespace */
     style : {
-
+        
         translate3d : function(x=0, y=0, z=0, append = 'px'){
             if (!append) append = '';
             return 'translate3d(' + x + append + ',' + y + append + ',' + z + append + ')';

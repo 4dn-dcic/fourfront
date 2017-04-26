@@ -3,14 +3,17 @@ var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide } = require('./util');
+var {getS3UploadUrl, s3UploadFile} = require('./util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
 var makeTitle = require('./item-pages/item').title;
 var Alerts = require('./alerts');
 var d3 = require('d3');
+var store = require('../store');
+var getLargeMD5 = require('./util/file-utility').getLargeMD5;
 
 // Master component used for user actions: create and edit
 // create is considered default mode, but by simply switching the behavior
-// from POST to PATCH, this can be used for editing by providing a value
+// from POST to PUT, this can be used for editing by providing a value
 // of true to the edit prop.
 // This component initiates and hold the new context and coordinated
 // submission/validation
@@ -30,9 +33,12 @@ var Action = module.exports = React.createClass({
             'newContext': {},
             'requiredFields': reqFields,
             'validated': 0, // 0 = not validated, 1 = validated, 2 = error
+            'processingFetch': false,
             'thisType': contType[0],
             'thisSchema': thisSchema,
-            'errorCount': 0
+            'errorCount': 0,
+            'file': null,
+            'md5Progress': null
         };
     },
 
@@ -44,7 +50,8 @@ var Action = module.exports = React.createClass({
     // we need the frame=object context for create, so fetch this
     contextFlatten: function(context){
         var contextID = context['@id'] || null;
-        if(!contextID){
+        // if @id cannot be found or we are creating from scratch, start with empty fields
+        if(!contextID || this.props.create){
             this.setState({'newContext': {}});
             return;
         }
@@ -61,6 +68,8 @@ var Action = module.exports = React.createClass({
             return response;
         })
         .then(response => {
+            // clear fields based off of action method and ff_clear values in schema
+            response = this.clearFields(response, this.state.thisSchema);
             this.setState({'newContext': response});
         }, error => {
             // something went wrong with fetch context. Just use an empty object
@@ -68,17 +77,39 @@ var Action = module.exports = React.createClass({
         });
     },
 
+    // Loop through fields in new context. If schema for field has
+    // "ff_clear": "clone", then clear the value on clone
+    // if "ff_clear": "edit" then clear on edit
+    clearFields: function(context, schema){
+        var contextKeys = Object.keys(context);
+        for(var i=0; i<contextKeys.length; i++){
+            if(schema.properties[contextKeys[i]]){
+                var fieldSchema = schema.properties[contextKeys[i]];
+                if (fieldSchema.ff_clear){
+                    if(this.props.edit && fieldSchema.ff_clear == "edit"){
+                        delete context[contextKeys[i]];
+                    }else if(!this.props.create && fieldSchema.ff_clear == "clone"){
+                        delete context[contextKeys[i]];
+                    }
+                }
+            }
+        }
+        return context;
+    },
+
     contextSift: function(context, schema){
         // Remove non-creatable fields from the new context
+        // this only needs to be calculated properties, since other fields should
+        // be removed earlier
         var sifted = {};
         var contextKeys = Object.keys(context);
         for(var i=0; i<contextKeys.length; i++){
             if(schema.properties[contextKeys[i]]){
                 var fieldSchema = schema.properties[contextKeys[i]];
-                if (fieldSchema.exclude_from && (fieldSchema.exclude_from == 'submit4dn' || fieldSchema.exclude_from == 'edit')){
+                if (fieldSchema.exclude_from && (_.contains(fieldSchema.exclude_from,'FFedit-create') || fieldSchema.exclude_from == 'FFedit-create')){
                     continue;
                 }
-                // check to see if this field is a calculated val
+                // check to see if this field is a calculated prop
                 if (fieldSchema.calculatedProperty && fieldSchema.calculatedProperty === true){
                     continue;
                 }
@@ -115,23 +146,78 @@ var Action = module.exports = React.createClass({
         this.setState({'newContext': contextCopy, 'validated': 0});
     },
 
-    generatePostButton: function(){
-        if(this.state.validated == 1){
+    modifyFile: function(file){
+        // function that updates state to contain a file upload
+        // not used for all object types
+        this.setState({'file':file});
+    },
+
+    modifyMD5Progess: function(progress){
+        // set this.state.md5Progress to passed in progress value (should be int)
+        this.setState({'md5Progress':progress});
+    },
+
+    getFieldValue: function(field){
+        if(this.state.newContext.hasOwnProperty(field)){
+            return this.state.newContext[field];
+        }else{
+            return null;
+        }
+    },
+
+    generateValidationButton: function(){
+        var style={'width':'160px'};
+        if(this.state.md5Progress && this.state.md5Progress != 100){
             return(
-                <Button bsStyle="success" onClick={this.realPostNewContext}>
-                    {this.props.edit ? 'Edit object' : 'Create object'}
+                <Button bsStyle="info" style={style} disabled>
+                    {'Calculating md5...'}
+                </Button>
+            );
+        }else if(this.state.validated == 1){
+            return(
+                <Button bsStyle="info" style={style} disabled>
+                    {'Validated'}
+                </Button>
+            );
+        }else if(this.state.processingFetch){
+            return(
+                <Button bsStyle="info" style={style} disabled>
+                    <i className="icon icon-spin icon-circle-o-notch"></i>
                 </Button>
             );
         }else if (this.state.validated == 0){
             return(
-                <Button bsStyle="warning" onClick={this.testPostNewContext}>
+                <Button bsStyle="info" style={style} onClick={this.testPostNewContext}>
                     {'Test object validity'}
                 </Button>
             );
         }else{
             return(
-                <Button bsStyle="danger" onClick={this.testPostNewContext}>
-                    {'Failed user permissions'}
+                <Button bsStyle="danger" style={style} onClick={this.testPostNewContext}>
+                    {'Failed permissions'}
+                </Button>
+            );
+        }
+    },
+
+    generatePostButton: function(){
+        var style={'marginLeft':'30px','width':'160px'};
+        if(this.state.validated == 1 && !this.state.processingFetch){
+            return(
+                <Button bsStyle="success" style={style} onClick={this.realPostNewContext}>
+                    {this.props.edit ? 'Edit object' : 'Create object'}
+                </Button>
+            );
+        }else if(this.state.validated == 1 && this.state.processingFetch){
+            return(
+                <Button bsStyle="success" style={style} disabled>
+                    <i className="icon icon-spin icon-circle-o-notch"></i>
+                </Button>
+            );
+        }else{
+            return(
+                <Button bsStyle="success" style={style} disabled>
+                    {this.props.edit ? 'Edit object' : 'Create object'}
                 </Button>
             );
         }
@@ -151,6 +237,8 @@ var Action = module.exports = React.createClass({
         // function to test a POST of the data or actually POST it.
         // validates if test=true, POSTs if test=false.
         var stateToSet = {}; // hold state
+        // this will always be reset when stateToSet is implemented
+        stateToSet.processingFetch = false;
         // get rid of any hanging errors
         for(var i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Object validation error " + parseInt(i + 1)});
@@ -160,39 +248,61 @@ var Action = module.exports = React.createClass({
         var lab;
         var award;
         var finalizedContext = this.contextSift(this.state.newContext, this.state.thisSchema);
-        // get award and lab info from the /me endpoint
+        console.log('contextToPOST:', finalizedContext);
+        this.setState({'processingFetch': true});
         ajax.promise('/me?frame=embedded').then(data => {
             if (this.context.contentTypeIsJSON(data)){
                 if(!data.submits_for || data.submits_for.length == 0){
                     console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
-                    this.setState({'validated': 2});
+                    stateToSet.validated = 2;
+                    this.setState(stateToSet);
                     return;
                 }
-                lab = data.submits_for[0];
+                // use first lab for now
+                var submits_for = data.submits_for[0];
+                lab = submits_for['@id'] ? submits_for['@id'] : submits_for.link_id.replace(/~/g, "/");
             }
             ajax.promise(lab).then(lab_data => {
                 if (this.context.contentTypeIsJSON(lab_data)){
                     if(!lab_data.awards || lab_data.awards.length == 0){
-                        console.log('THIS LAB FOR ACCOUNT LACKS AN AWARD');
-                        this.setState({'validated': 2});
+                        console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
+                        stateToSet.validated = 2;
+                        this.setState(stateToSet);
                         return;
                     }
                     // should we really always use the first award?
                     award = lab_data.awards[0];
                 }
-                if(this.state.thisSchema.properties.award){
-                    finalizedContext.award = award['@id'] ? award['@id'] : award;
-                }
-                if(this.state.thisSchema.properties.lab){
-                    finalizedContext.lab = lab;
+                // if editing, use pre-existing award, lab, and submitted_by
+                if(this.props.edit && this.state.newContext.award && this.state.newContext.lab){
+                    finalizedContext.award = this.state.newContext.award;
+                    finalizedContext.lab = this.state.newContext.lab;
+                    // an admin is editing. Use the pre-existing submitted_by
+                    // otherwise, permissions won't let us change this field
+                    if(data.groups && _.contains(data.groups, 'admin')){
+                        finalizedContext.submitted_by = this.state.newContext.submitted_by;
+                    }
+                }else{ // use info of person creating/cloning
+                    if(this.state.thisSchema.properties.award){
+                        finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
+                    }
+                    if(this.state.thisSchema.properties.lab){
+                        finalizedContext.lab = lab;
+                    }
                 }
                 // if testing validation, use check_only=True (see /types/base.py)
                 var destination = test ? '/' + objType + '/?check_only=True' : '/' + objType;
                 var actionMethod = 'POST';
                 // see if this is not a test and we're editing
                 if(!test && this.props.edit){
-                    actionMethod = 'PATCH';
+                    actionMethod = 'PUT';
                     destination = this.state.newContext['@id'];
+                    // must add uuid (and accession, if available) to PUT body
+                    finalizedContext.uuid = this.state.newContext.uuid;
+                    // not all objects have accessions
+                    if(this.state.newContext.accession){
+                        finalizedContext.accession = this.state.newContext.accession;
+                    }
                 }
                 this.context.fetch(destination, {
                     method: actionMethod,
@@ -207,27 +317,40 @@ var Action = module.exports = React.createClass({
                     return response;
                 })
                 .then(response => {
+                    var response_data;
                     if(test){
                         console.log('OBJECT SUCCESSFULLY TESTED!');
                         stateToSet.validated = 1;
                         this.setState(stateToSet);
-                    }else if(this.props.edit){
-                        console.log('OBJECT SUCCESSFULLY PATCHED!');
-                        alert('Success! Navigating to the patched object page.');
-                        this.context.navigate(destination);
+                        return;
                     }else{
-                        console.log('OBJECT SUCCESSFULLY POSTED!');
-                        var newID = response['@graph'][0]['@id'];
-                        if(typeof newID !== 'string'){
-                            newID = '/';
+                        response_data = response['@graph'][0];
+                        if(!this.props.edit){
+                            destination = response_data['@id'];
                         }
-                        alert('Success! Navigating to the new object page.');
-                        this.context.navigate(newID);
+                    }
+                    // handle file upload if this is a file
+                    if(this.state.file && response_data['upload_credentials']){
+                        // add important info to result from finalizedContext
+                        // that is not added from /types/file.py get_upload
+                        var creds = response_data['upload_credentials'];
+                        var upload_manager = s3UploadFile(this.state.file, creds);
+                        var upload_info = {
+                            'context': response_data,
+                            'manager': upload_manager
+                        };
+                        // Passes upload_manager to uploads.js through app.js
+                        this.props.updateUploads(destination, upload_info);
+                        alert('Success! Navigating to the uploads page.');
+                        this.context.navigate('/uploads');
+                    }else{
+                        console.log('ACTION SUCCESSFUL!');
+                        alert('Success! Navigating to the object page.');
+                        this.context.navigate(destination);
                     }
                 }, error => {
                     stateToSet.validated = 0;
                     console.log('ERROR IN OBJECT VALIDATION!');
-                    console.log(error);
                     var errorList = error.errors || [error.detail] || [];
                     // make an alert for each error description
                     stateToSet.errorCount = errorList.length;
@@ -260,32 +383,44 @@ var Action = module.exports = React.createClass({
     render: function() {
         var title = makeTitle({'context': this.props.context});
         var context = this.state.newContext;
+        var baseContext = this.props.context; // includes calc props and the like
         var thisType = this.state.thisType;
         var itemClass = globals.itemClass(context, 'view-item');
         var schema = this.state.thisSchema;
-        var createTitle = 'Creating ' + thisType + ' with ' + title + ' as template';
-        var editTitle = 'Editing ' + thisType + ' ' + title;
+        var actionTitle;
+        if(this.props.edit){
+            actionTitle = 'Editing ' + thisType + ' ' + title;
+        }else if(this.props.create){
+            actionTitle = 'Creating new ' + thisType;
+        }else{
+            actionTitle = 'Creating ' + thisType + ' with ' + title + ' as template';
+        }
         var reqFields = this.state.requiredFields;
         return (
             <div className={itemClass}>
-                <h2>{this.props.edit ? editTitle : createTitle}</h2>
+                <h2>{actionTitle}</h2>
                 <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
-                <FieldPanel thisType={thisType} context={context} schema={schema} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
-                <div>{this.generatePostButton()}</div>
+                <FieldPanel thisType={thisType} context={context} baseContext={baseContext} schema={schema} modifyNewContext={this.modifyNewContext} modifyFile={this.modifyFile} modifyMD5Progess={this.modifyMD5Progess} md5Progress={this.state.md5Progress} getFieldValue={this.getFieldValue} reqFields={reqFields} edit={this.props.edit}/>
+                <div>
+                    {this.generateValidationButton()}
+                    {this.generatePostButton()}
+                </div>
             </div>
         );
     }
 });
 
-// Based off EditPanel in edit.js
+// Container for BuildField that passes them the appropriate information
 var FieldPanel = React.createClass({
-
     includeField : function(schema, field){
         if (!schema) return null;
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
         if (!schemaVal) return null;
         // check to see if this field should be excluded based on exclude_from status
-        if (schemaVal.exclude_from && (schemaVal.exclude_from == 'submit4dn' || schemaVal.exclude_from == 'edit')){
+        if (schemaVal.exclude_from && (_.contains(schemaVal.exclude_from,'FFedit-create') || schemaVal.exclude_from == 'FFedit-create')){
+            return null;
+        }
+        if (schemaVal.exclude_from && (_.contains(schemaVal.exclude_from,'FF-calculate') || schemaVal.exclude_from == 'FF-calculate')){
             return null;
         }
         // check to see if this field is a calculated val
@@ -319,11 +454,25 @@ var FieldPanel = React.createClass({
         // set a required flag if this field is required
         var required = _.contains(this.props.reqFields, field);
         // handle a linkTo object on the the top level
+        // check if any schema-specific adjustments need to made:
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
+        }else if (fieldSchema.attachment && fieldSchema.attachment === true){
+            fieldType = 'attachment';
+        }else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
+            // only render file upload input if status is 'uploading' or 'upload_failed'
+            if(this.props.edit && this.props.baseContext.status){
+                if(this.props.baseContext.status == 'uploading' || this.props.baseContext.status == 'upload failed'){
+                    fieldType = 'file upload';
+                }else{
+                    return null;
+                }
+            }else{
+                fieldType = 'file upload';
+            }
         }
         return(
-            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} required={required}/>
+            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} modifyMD5Progess={this.props.modifyMD5Progess} md5Progress={this.props.md5Progress} getFieldValue={this.props.getFieldValue} required={required}/>
         );
     },
 
@@ -406,16 +555,19 @@ var BuildField = React.createClass({
                 </span>
             );
             case 'linked object' : return (
-                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext}/>
+                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
             );
             case 'array' : return (
-                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
+                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
             );
             case 'object' : return (
-                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
+                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
             );
             case 'attachment' : return (
-                <FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
+                <AttachmentInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
+            );
+            case 'file upload' : return (
+                <S3FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} modifyMD5Progess={this.props.modifyMD5Progess} md5Progress={this.props.md5Progress} schema={this.props.schema} getFieldValue={this.props.getFieldValue}/>
             );
         }
         // Fallback
@@ -459,32 +611,39 @@ var BuildField = React.createClass({
     },
 
     render: function(){
-        // check if any schema-specific adjustments need to made:
-        var field_case = this.props.fieldType;
-        if (this.props.schema.attachment && this.props.schema.attachment === true){
-            field_case = 'attachment';
-        }
         var isArray = this.props.isArray || false;
         // array entries don't need dt/dd rows
         if(isArray){
             return(
                 <div>
-                    {this.displayField(field_case)}
+                    {this.displayField(this.props.fieldType)}
                 </div>
             );
         }
+        var field_title = this.props.label;
+        if(this.props.schema.title && this.props.schema.title.length > 0){
+            field_title = this.props.schema.title;
+        }
+        // TODO: come up with a schema based solution for code below?
+        // hardcoded fields you can't delete
+        var cannot_delete = ['filename'];
         return(
             <dl className="key-value row extra-footspace">
                 <dt className="col-sm-3">
-                        <span>{this.props.label}</span>
-                        <a href="#" className="cancel-button" onClick={this.deleteField} title="Delete">
-                            <i className="icon icon-times-circle-o icon-fw"></i>
-                        </a>
+                        <span style={{'display':'inline-block', 'width':'120px'}}>
+                            {field_title}
+                        </span>
+                        {!_.contains(cannot_delete,this.props.label) ?
+                            <a href="#" className="cancel-button" onClick={this.deleteField} title="Delete">
+                                <i className="icon icon-times-circle-o icon-fw"></i>
+                            </a>
+                            :
+                            null}
                 </dt>
                 <dd className="col-sm-9">
-                    {this.displayField(field_case)}
+                    {this.displayField(this.props.fieldType)}
                     <div className="display-tip">{this.props.fieldTip}</div>
-                    {this.displayMessage(field_case)}
+                    {this.displayMessage(this.props.fieldType)}
                 </dd>
 
             </dl>
@@ -500,6 +659,7 @@ var LinkedObj = React.createClass({
     contextTypes: {
         contentTypeIsJSON: React.PropTypes.func
     },
+
     getInitialState: function(){
         return{
             'open': false,
@@ -785,7 +945,10 @@ var ObjectField = React.createClass({
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
         if (!schemaVal) return null;
         // check to see if this field should be excluded based on exclude_from status
-        if (schemaVal.exclude_from && (schemaVal.exclude_from == 'submit4dn' || schemaVal.exclude_from == 'edit')){
+        if (schemaVal.exclude_from && (_.contains(schemaVal.exclude_from,'FFedit-create') || schemaVal.exclude_from == 'FFedit-create')){
+            return null;
+        }
+        if (schemaVal.exclude_from && (_.contains(schemaVal.exclude_from,'FF-calculate') || schemaVal.exclude_from == 'FF-calculate')){
             return null;
         }
         // check to see if this field is a calculated val
@@ -850,10 +1013,13 @@ var ObjectField = React.createClass({
 /* For version 1. A simple local file upload that gets the name, type,
 size, and b64 encoded stream in the form of a data url. Upon successful
 upload, adds this information to NewContext*/
-var FileInput = React.createClass({
-    handleChange: function(e){
-        var acceptedTypes = [
+var AttachmentInput = React.createClass({
+
+    acceptedTypes: function(){
+        var types = [
             "application/pdf",
+            "application/zip",
+            "application/msword",
             "text/plain",
             "text/tab-separated-values",
             "image/jpeg",
@@ -864,15 +1030,17 @@ var FileInput = React.createClass({
             "image/svs",
             "text/autosql"
         ];
+        return(types.toString());
+    },
+
+    handleChange: function(e){
         var attachment_props = {};
         var file = e.target.files[0];
-        if ((!file.type || !_.contains(acceptedTypes, file.type))){
-            this.refs.fileInput.value = '';
-            alert('File upload failed! File must of one of the following types: application/pdf, text/plain, text/tab-separated-values, image/jpeg, image/tiff, image/gif, text/html, image/png, image/svs, text/autosql.');
+        if(!file){
+            this.props.modifyNewContext(this.props.field, null, true);
             return;
-        }else{
-            attachment_props.type = file.type;
         }
+        attachment_props.type = file.type;
         if(file.size) {attachment_props.size = file.size;}
         if(file.name) {attachment_props.download = file.name;}
         var fileReader = new window.FileReader();
@@ -890,8 +1058,92 @@ var FileInput = React.createClass({
     },
 
     render: function(){
+        var attach_title;
+        if(this.props.value && this.props.value.download){
+            attach_title = this.props.value.download;
+        }else{
+            attach_title = "No file chosen";
+        }
         return(
-            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput"/>
+            <div>
+                <input id={this.props.field} type='file' onChange={this.handleChange} style={{'display':'none'}} accept={this.acceptedTypes()}/>
+                <Button style={{'padding':'0px'}}>
+                    <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
+                        {attach_title}
+                    </label>
+                </Button>
+            </div>
         );
+    }
+});
+
+/* Input for an s3 file upload. Context value set is local value of the filename.
+Also updates this.state.file for the overall component.
+*/
+var S3FileInput = React.createClass({
+    handleChange: function(e){
+        var req_type = null;
+        var file = e.target.files[0];
+        // file was not chosen
+        if(!file){
+            return;
+        }else{
+            var filename = file.name ? file.name : "unknown";
+            getLargeMD5(file, this.props.modifyMD5Progess).then((hash) => {
+                this.props.modifyNewContext('md5sum',hash);
+                console.log('HASH SET TO:', hash, 'FOR FILE:', this.props.value);
+                this.props.modifyMD5Progess(null);
+            }).catch((error) => {
+                console.log('ERROR CALCULATING MD5!', error);
+                // TODO: should file upload fail on a md5 error?
+                this.props.modifyMD5Progess(null);
+            });
+            this.props.modifyNewContext(this.props.field, filename);
+            // calling modifyFile changes the 'file' state of top level component
+            this.props.modifyFile(file);
+        }
+    },
+
+    render: function(){
+        var edit_tip;
+        var previous_status = this.props.getFieldValue('status');
+        var filename_text = this.props.value ? this.props.value : "No file chosen";
+        var md5sum = this.props.getFieldValue('md5sum');
+        if(this.props.value && !md5sum && previous_status){
+            // edit tip to show that there is filename metadata but no actual file
+            // selected (i.e. no file held in state)
+            edit_tip = "Previous file: " + this.props.value;
+            // inform them if the upload failed previously
+            if(previous_status == 'upload failed'){
+                edit_tip += ' (upload FAILED)';
+            }
+            filename_text = "No file chosen";
+        }
+        return(
+            <div>
+                <input id={this.props.field} type='file' onChange={this.handleChange} disabled={this.props.md5Progress ? true : false} style={{'display':'none'}}/>
+                <Button disabled={this.props.md5Progress ? true : false} style={{'padding':'0px'}}>
+                    <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
+                        {filename_text}
+                    </label>
+                </Button>
+                {edit_tip ?
+                    <span style={{'color':'#a94442','paddingBottom':'6px', 'paddingLeft':'10px'}}>
+                        {edit_tip}
+                    </span>
+                    :
+                    null}
+                {this.props.md5Progress ?
+                    <div style={{'paddingTop':'10px','paddingBottom':'6px'}}>
+                        <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}></i>
+                        <span style={{'paddingLeft':'10px'}}>
+                            {'Calculating md5... ' + this.props.md5Progress + '%'}
+                        </span>
+                    </div>
+                    :
+                    null}
+            </div>
+        );
+
     }
 });

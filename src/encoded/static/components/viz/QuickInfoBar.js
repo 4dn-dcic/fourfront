@@ -1,18 +1,28 @@
 'use strict';
 
+/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var url = require('url');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide, layout,  } = require('../util');
+var { expFxn, Filters, console, object, isServerSide, layout, analytics } = require('../util');
 var ActiveFiltersBar = require('./components/ActiveFiltersBar');
 var MosaicChart = require('./MosaicChart');
 var ChartDataController = require('./chart-data-controller');
+var ReactTooltip = require('react-tooltip');
 
+/**
+ * Bar shown below header on home and browse pages.
+ * Shows counts of selected experiment_sets, experiments, and files against those properties' total counts.
+ *
+ * @module {Component} viz/QuickInfoBar
+ * @prop {string} href - Current location/href passed down from Redux store. Used for determining whether to display QuickInfoBar or not.
+ */
 
+/** @alias module:viz/QuickInfoBar  */
 var QuickInfoBar = module.exports = React.createClass({
-
+    /** @ignore */
     getDefaultProps : function(){
         return {
             'offset' : {},
@@ -22,6 +32,21 @@ var QuickInfoBar = module.exports = React.createClass({
         };
     },
 
+    /**
+     * Returns an object containing counts for filtered & total experiments, experiment_sets, and files.
+     * Counts are set to null by default, and instance's updateCurrentAndTotalCounts method must be called
+     * each time stats are updated from some high-level component.
+     *
+     * Currently this is done by having refs...updateCurrentAndTotalCounts being accessible
+     * through refs.navigation on app component/module, which makes an 'updateStats' instance function available,
+     * which is provided to ChartDataController.
+     *
+     * Additionally holds {boolean|string} 'show' property, describing what is shown in bottom part; and a {boolean} 'mounted' property.
+     *
+     * @private
+     * @instance
+     * @returns {Object.<number, boolean, string>} Initial State
+     */
     getInitialState : function(){
         return {
             'count_experiments'     : null,
@@ -31,33 +56,26 @@ var QuickInfoBar = module.exports = React.createClass({
             'count_experiment_sets_total' : null,
             'count_files_total'           : null,
             'mounted'               : false,
-            'show'                  : false
+            'show'                  : false,
+            'reallyShow'            : false
         };
     },
 
-    componentDidMount : function(){
-        this.setState({'mounted' : true});
-    },
-
-    shouldComponentUpdate : function(newProps, newState){
-        if (this.state.count_experiments !== newState.count_experiments) return true;
-        if (this.state.count_experiment_sets !== newState.count_experiment_sets) return true;
-        if (this.state.count_files !== newState.count_files) return true;
-        
-        if (!this.state.count_experiments_total     && this.state.count_experiments_total !== newState.count_experiments_total) return true;
-        if (!this.state.count_experiment_sets_total && this.state.count_experiment_sets_total !== newState.count_experiment_sets_total) return true;
-        if (!this.state.count_files_total           && this.state.count_files_total !== newState.count_files_total) return true;
-
-        if (this.state.mounted !== newState.mounted) return true;
-        if (this.state.show !== newState.show) return true;
-        if (this.props.showCurrent !== newProps.showCurrent) return true;
-        if (this.props.expSetFilters !== newProps.expSetFilters) return true;
-        if (this.isInvisible(this.props, this.state) != this.isInvisible(newProps, newState)) return true;
-
-        return false;
-    },
-
-    updateCurrentAndTotalCounts : function(current, total, callback){
+    /**
+     * Publically accessible when QuickInfoBar Component instance has a 'ref' prop set by parent component.
+     * Use to update stats when expSetFilters change.
+     *
+     * Currently this is done through ChartDataController, to which an 'updateStats' callback,
+     * itself defined in app Component, is provided on initialization.
+     *
+     * @public
+     * @instance
+     * @param {Object} current - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
+     * @param {Object} total - Same as 'current' param, but containing total counts.
+     * @param {function} [callback] Optional callback function.
+     * @returns {boolean} true
+     */
+    updateCurrentAndTotalCounts : function(current, total, callback = null){
         this.setState({
             'count_experiments' : current.experiments,
             'count_experiment_sets' : current.experiment_sets,
@@ -69,6 +87,15 @@ var QuickInfoBar = module.exports = React.createClass({
         return true;
     },
 
+    /**
+     * Same as updateCurrentAndTotalCounts(), but only for current counts.
+     *
+     * @public
+     * @instance
+     * @param {Object} newCounts - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
+     * @param {function} [callback] Optional callback function.
+     * @returns {boolean} true
+     */
     updateCurrentCounts : function(newCounts, callback){
         this.setState({
             'count_experiments' : newCounts.experiments,
@@ -78,6 +105,15 @@ var QuickInfoBar = module.exports = React.createClass({
         return true;
     },
 
+    /**
+     * Same as updateCurrentAndTotalCounts(), but only for total counts.
+     *
+     * @public
+     * @instance
+     * @param {Object} newCounts - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
+     * @param {function} [callback] Optional callback function.
+     * @returns {boolean} true
+     */
     updateTotalCounts : function(newCounts, callback){
         this.setState({
             'count_experiments_total' : newCounts.experiments,
@@ -87,6 +123,13 @@ var QuickInfoBar = module.exports = React.createClass({
         return true;
     },
 
+    /**
+     * Check if QuickInfoBar instance is currently invisible, i.e. according to props.href.
+     *
+     * @public
+     * @instance
+     * @returns {boolean} True if counts are null or on a 'href' is not of a page for which searching or summary is applicable.
+     */
     isInvisible : function(props = this.props, state = this.state){
         if (
             !state.mounted ||
@@ -100,10 +143,12 @@ var QuickInfoBar = module.exports = React.createClass({
 
         // If have href, only show for /browse/, /search/, and / & /home
         if (typeof props.href === 'string'){
+            var urlParts = url.parse(props.href);
+            if (urlParts.hash && urlParts.hash.indexOf('!impersonate-user') > -1) return true;
             // Doing replace twice should be faster than one time with /g regex flag (3 steps each or 15 steps combined w/ '/g')
-            var pathParts = url.parse(props.href).pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
+            var pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
             if (pathParts[0] === 'browse') return false;
-            if (pathParts[0] === 'search') return false;
+            if (pathParts[0] === 'search') return true;
             if (pathParts[0] === 'home') return false;
             if (pathParts.length === 1 && pathParts[0] === "") return false;
             return true;
@@ -112,12 +157,60 @@ var QuickInfoBar = module.exports = React.createClass({
         return false;
     },
 
+    /**
+     * Updates state.show if no filters are selected.
+     *
+     * @private
+     * @instance
+     * @param {Object} nextProps - Next props.
+     * @returns {undefined}
+     */
     componentWillReceiveProps : function(nextProps){
         if (!(nextProps.expSetFilters && _.keys(nextProps.expSetFilters).length > 0) && this.state.show){
             this.setState({ 'show' : false });
         }
     },
 
+    /**
+     * Sets state's 'mounted' property to true.
+     *
+     * @private
+     * @instance
+     */
+    componentDidMount : function(){
+        this.setState({'mounted' : true});
+    },
+
+    /** @ignore */
+    /*
+    shouldComponentUpdate : function(newProps, newState){
+        if (this.state.count_experiments !== newState.count_experiments) return true;
+        if (this.state.count_experiment_sets !== newState.count_experiment_sets) return true;
+        if (this.state.count_files !== newState.count_files) return true;
+
+        if (!this.state.count_experiments_total     && this.state.count_experiments_total !== newState.count_experiments_total) return true;
+        if (!this.state.count_experiment_sets_total && this.state.count_experiment_sets_total !== newState.count_experiment_sets_total) return true;
+        if (!this.state.count_files_total           && this.state.count_files_total !== newState.count_files_total) return true;
+
+        if (this.state.mounted !== newState.mounted) return true;
+        if (this.state.show !== newState.show) return true;
+        if (this.props.showCurrent !== newProps.showCurrent) return true;
+        if (this.props.expSetFilters !== newProps.expSetFilters) return true;
+        if (this.isInvisible(this.props, this.state) != this.isInvisible(newProps, newState)) return true;
+
+        return false;
+    },
+    */
+
+    anyFiltersSet : function(props = this.props){
+        return (props.expSetFilters && _.keys(props.expSetFilters).length > 0);
+    },
+
+    componentDidUpdate : function(pastProps, pastState){
+        if (this.anyFiltersSet() !== this.anyFiltersSet(pastProps)) ReactTooltip.rebuild();
+    },
+
+    /** @ignore */
     className: function(){
         var cn = "explanation";
         if (typeof this.props.className === 'string') cn += ' ' + this.props.className;
@@ -125,15 +218,28 @@ var QuickInfoBar = module.exports = React.createClass({
         return cn;
     },
 
+    /** @ignore */
     renderStats : function(){
-        var areAnyFiltersSet = (this.props.expSetFilters && _.keys(this.props.expSetFilters).length > 0);
+        var areAnyFiltersSet = this.anyFiltersSet();
         var stats;
         //if (this.props.showCurrent || this.state.showCurrent){
         if (this.state.count_experiment_sets || this.state.count_experiments || this.state.count_files) {
             stats = {
-                'experiment_sets' : this.state.count_experiment_sets,
-                'experiments' : this.state.count_experiments,
-                'files' : this.state.count_files
+                'experiment_sets' : (
+                    <span>
+                        { this.state.count_experiment_sets }<small> / { (this.state.count_experiment_sets_total || 0) }</small>
+                    </span>
+                ),
+                'experiments' : (
+                    <span>
+                        { this.state.count_experiments }<small> / {this.state.count_experiments_total || 0}</small>
+                    </span>
+                ),
+                'files' : (
+                    <span>
+                        { this.state.count_files }<small> / {this.state.count_files_total || 0}</small>
+                    </span>
+                ),
             };
         } else {
             stats = {
@@ -149,6 +255,7 @@ var QuickInfoBar = module.exports = React.createClass({
         return (
             <div className={className} onMouseLeave={()=>{
                 this.setState({ show : false });
+                this.timeout = setTimeout(this.setState.bind(this), 500, { 'reallyShow' : false });
             }}>
                 <div className="left-side clearfix">
                     <QuickInfoBar.Stat
@@ -177,9 +284,14 @@ var QuickInfoBar = module.exports = React.createClass({
                     />
                     <div
                         className="any-filters glance-label"
-                        title={areAnyFiltersSet ? "Filtered" : "No filters set"}
+                        data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"}
                         onMouseEnter={_.debounce(()=>{
-                            if (areAnyFiltersSet) this.setState({ show : 'activeFilters' });
+                            if (this.timeout) clearTimeout(this.timeout);
+                            if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
+                            analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
+                                'eventLabel' : ( areAnyFiltersSet ? "No filters set" : "Some filters are set" ),
+                                'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
+                            });
                         },100)}
                     >
                         <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
@@ -190,8 +302,9 @@ var QuickInfoBar = module.exports = React.createClass({
         );
     },
 
+    /** @ignore */
     renderHoverBar : function(){
-        if (this.state.show === 'activeFilters') {
+        if (this.state.show === 'activeFilters' || (this.state.show === false && this.state.reallyShow)) {
             return (
                 <div className="bottom-side">
                     <div className="crumbs-label">
@@ -199,7 +312,6 @@ var QuickInfoBar = module.exports = React.createClass({
                     </div>
                     <ActiveFiltersBar
                         expSetFilters={this.props.expSetFilters}
-                        invisible={!this.state.mounted}
                         orderedFieldNames={null}
                         href={this.props.href}
                         showTitle={false}
@@ -242,6 +354,7 @@ var QuickInfoBar = module.exports = React.createClass({
         }
     },
 
+    /** @ignore */
     render : function(){
         return(
             <div id={this.props.id} className={this.className()}>
@@ -250,9 +363,13 @@ var QuickInfoBar = module.exports = React.createClass({
         );
     },
 
+    /** @ignore */
     statics : {
+
+        /** @ignore */
         Stat : React.createClass({
 
+            /** @ignore */
             getDefaultProps : function(){
                 return {
                     'value' : 0,
@@ -262,6 +379,7 @@ var QuickInfoBar = module.exports = React.createClass({
                 };
             },
 
+            /** @ignore */
             render : function(){
                 return (
                     <div className={"stat stat-" + this.props.classNameID} title={this.props.longLabel}>

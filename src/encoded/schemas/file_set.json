@@ -1,5 +1,5 @@
 {
-    "title": "File set",
+    "title": "File Set",
     "description": "Schema for submitting metadata for a file set.",
     "id": "/profiles/file_set.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -30,7 +30,6 @@
             "description": "List of data files to be associated with the experiment.",
             "type": "array",
             "default": [],
-            "exclude_from": "submit4dn",
             "uniqueItems": true,
             "items": {
                 "title": "Data file",

@@ -39,7 +39,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         'facets': [],
         '@graph': [],
         'notification': '',
-        'sort': {}  # probably could eliminate
+        'sort': {}
     }
     principals = effective_principals(request)
 
@@ -73,9 +73,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # schemas = [types[doc_type].schema for doc_type in doc_types]
 
     ### Set sort order
-    # has_sort = set_sort_order(request, search_term, types, doc_types, query, result)
-    # TODO: implement BOOST here? For now, don't set a sort order
-    has_sort = False
+    set_sort_order(request, prepared_terms, types, doc_types, query, result)
+    # TODO: implement BOOST here?
 
     ### Set filters
     used_filters = set_filters(request, query, result)
@@ -85,7 +84,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Adding facets to the query
     query['aggs'] = set_facets(facets, used_filters, principals, doc_types)
-
     ### Execute the query
     if size == 'all':
         es_results = get_all_results(request, query)
@@ -281,7 +279,9 @@ def prepare_search_term(request):
     prepared_terms = {}
     prepared_vals = []
     for field, val in request.params.iteritems():
-        if field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
+        if field.startswith('audit'):
+            continue
+        elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
             prepared_terms['embedded.' + field].append(val)
@@ -334,12 +334,14 @@ def list_result_fields(request, doc_types):
     Note that you must provide the full fieldname with embeds, such as:
     'field=biosample.biosource.individual.organism.name' and not just
     'field=name'
+    Add audit to this so we can look at that as well
     """
     frame = request.params.get('frame')
     fields_requested = request.params.getall('field')
     if fields_requested:
-        fields = {'embedded.@id', 'embedded.@type'}
-        fields.update('embedded.' + field for field in fields_requested)
+        fields = ['embedded.@id', 'embedded.@type']
+        for field in fields_requested:
+            fields.append('embedded.' + field)
     elif frame in ['embedded', 'object']:
         fields = [frame + '.*']
     else:
@@ -382,6 +384,55 @@ def get_filtered_query(prepared_terms, result_fields, principals, doc_types):
         },
         '_source': list(result_fields),
     }
+
+
+def set_sort_order(request, search_term, types, doc_types, query, result):
+    """
+    sets sort order for elasticsearch results
+    example: /search/?type=Biosource&sort_by=display_title
+    will sort by display_title in ascending order. To set descending order,
+    use the "-" flag: sort_by=-date_created.
+    Sorting is done alphatbetically, case sensitive by default.
+    TODO: add a schema flag for case sensitivity/insensitivity?
+    """
+    sort = OrderedDict()
+    result_sort = OrderedDict()
+    # Prefer sort order specified in request, if any
+    requested_sort = request.params.get('sort')
+    if requested_sort:
+        if requested_sort.startswith('-'):
+            name = requested_sort[1:]
+            order = 'desc'
+        else:
+            name = requested_sort
+            order = 'asc'
+        sort['embedded.' + name + '.lower_case_sort'] = result_sort[name] = {
+            'order': order,
+            'ignore_unmapped': True,
+        }
+    # Otherwise we use a default sort only when there's no text search to be ranked
+    if not sort and search_term == '*':
+        # If searching for a single type, look for sort options in its schema
+        if len(doc_types) == 1:
+            type_schema = types[doc_types[0]].schema
+            if 'sort_by' in type_schema:
+                for k, v in type_schema['sort_by'].items():
+                    # Should always sort on raw field rather than analyzed field
+                    # OR search on lower_case_sort for case insensitive results
+                    sort['embedded.' + k + '.lower_case_sort'] = result_sort[k] = v
+        # Default is most recent first, then alphabetical by label
+        if not sort:
+            sort['embedded.date_created.raw'] = result_sort['date_created'] = {
+                'order': 'desc',
+                'ignore_unmapped': True,
+            }
+            sort['embedded.label.raw'] = result_sort['label'] = {
+                'order': 'asc',
+                'missing': '_last',
+                'ignore_unmapped': True,
+            }
+    query['sort'] = sort
+    result['sort'] = result_sort
 
 
 def set_filters(request, query, result):
@@ -478,7 +529,6 @@ def set_facets(facets, used_filters, principals, doc_types):
     :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
     :param used_filters: Dict of filters which are set for the ES query. Key is field type, e.g. 'experiments_in_set.award.project', and value is list of terms (strings).
     """
-
     aggs = {}
     facetFields = dict(facets).keys() # List of first entry of tuples in facets list.
     # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
@@ -496,8 +546,6 @@ def set_facets(facets, used_filters, principals, doc_types):
         aggregation = {
             'terms': {
                 'field': query_field,
-                'min_doc_count': 0,
-                'size': 100
             }
         }
 
@@ -535,7 +583,17 @@ def set_facets(facets, used_filters, principals, doc_types):
             'filter': termFilter,
         }
 
-    return aggs
+    # to achieve OR behavior within facets, search among GLOBAL results,
+    # not just returned ones. to do this, wrap aggs in ['all_items']
+    # and add "global": {} to top level aggs query
+    # see elasticsearch global aggs for documentation (should be ES5 compliant)
+    final_aggs = {
+        'all_items': {
+            'global': {},
+            'aggs': aggs
+        }
+    }
+    return final_aggs
 
 
 def format_facets(es_results, facets, used_filters, schemas, total):
@@ -548,7 +606,7 @@ def format_facets(es_results, facets, used_filters, schemas, total):
     if 'aggregations' not in es_results:
         return result
 
-    aggregations = es_results['aggregations']
+    aggregations = es_results['aggregations']['all_items']
     used_facets = set()
     for field, facet in facets:
         resultFacet = {
@@ -591,6 +649,7 @@ def format_facets(es_results, facets, used_filters, schemas, total):
 def format_results(request, hits):
     """
     Loads results to pass onto UI
+    For now, add audits to the results so we can facet/not facet on audits
     """
     fields_requested = request.params.getall('field')
     if fields_requested:
@@ -600,9 +659,12 @@ def format_results(request, hits):
     else:
         frame = 'embedded'
 
-    if frame in ['embedded', 'object']:
+    if frame in ['embedded', 'object', ]:
         for hit in hits:
-            yield hit['_source'][frame]
+            frame_result = hit['_source'][frame]
+            if 'audit' in hit['_source'] and 'audit' not in frame_result:
+                frame_result['audit'] = hit['_source']['audit']
+            yield frame_result
         return
 
 ### stupid things to remove; had to add because of other fxns importing

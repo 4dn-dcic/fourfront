@@ -21,7 +21,7 @@ def fastq_json(award, experiment, lab):
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'fastq',
-        'filename': 'test.fastq',
+        'filename': 'test.fastq.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploaded',
     }
@@ -34,7 +34,7 @@ def fasta_json(award, experiment, lab):
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'fasta',
-        'filename': 'test.fasta',
+        'filename': 'test.fasta.gz',
         'md5sum': '0123456789abcdef0123456789111111',
         'status': 'uploaded',
     }
@@ -68,6 +68,48 @@ def test_file_post_all(testapp, all_file_jsons):
 def fastq_uploading(fastq_json):
     fastq_json['status'] = 'uploading'
     return fastq_json
+
+
+def test_files_aws_credentials(testapp, fastq_uploading):
+    # fastq_uploading.pop('filename')
+    res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
+    resobj = res.json['@graph'][0]
+
+    res_put = testapp.put_json(resobj['@id'], fastq_uploading)
+
+    assert resobj['upload_credentials']['key'] == res_put.json['@graph'][0]['upload_credentials']['key']
+
+
+def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
+    fastq_uploading['filename'] = 'test.zip'
+    fastq_uploading['file_format'] = 'zip'
+    res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
+    resobj = res.json['@graph'][0]
+
+    fastq_uploading['filename'] = 'test.tiff'
+    fastq_uploading['file_format'] = 'tiff'
+    res_put = testapp.put_json(resobj['@id'], fastq_uploading)
+
+    assert resobj['upload_credentials']['key'].endswith('zip')
+    assert resobj['href'].endswith('zip')
+    assert res_put.json['@graph'][0]['upload_credentials']['key'].endswith('tiff')
+    assert res_put.json['@graph'][0]['href'].endswith('tiff')
+
+
+def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading):
+    fastq_uploading['filename'] = 'test.zip'
+    fastq_uploading['file_format'] = 'zip'
+    res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
+    resobj = res.json['@graph'][0]
+
+    fastq_uploading['status'] = 'released'
+    res_put = testapp.put_json(resobj['@id'], fastq_uploading)
+    res_upload = testapp.get(resobj['@id'] + '/upload')
+    put_obj = res_upload.json['@graph'][0]
+
+    assert resobj['upload_credentials']['key'] == put_obj['upload_credentials']['key']
+
+    assert resobj['href'] == res_put.json['@graph'][0]['href']
 
 
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
@@ -109,7 +151,7 @@ def file(testapp, award, experiment, lab):
         'lab': lab['@id'],
         'file_format': 'fastq',
         'md5sum': '00000000000000000000000000000000',
-        'filename': 'my.tsv',
+        'filename': 'my.fastq.gz',
         'status': 'uploaded',
     }
     res = testapp.post_json('/file_fastq', item)
@@ -133,8 +175,7 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
     # when updating the last one we should have updated this one too
     fastq_res = testapp.get('/md5:{md5sum}'.format(**fastq_json)).follow(status=200)
     fastq_related_files = fastq_res.json['related_files']
-    assert fastq_related_files == [{'file': fastq_related_res.json['@graph'][0]['@id'],
-                                   'relationship_type': 'parent of'}]
+    assert fastq_related_files[0]['file']['@id'] == fastq_related_res.json['@graph'][0]['@id']
 
 
 def test_external_creds(mocker):

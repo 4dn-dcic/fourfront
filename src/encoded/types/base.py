@@ -20,6 +20,7 @@ import snovault
 # import snovalut default post / patch stuff so we can overwrite it in this file
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.crud_views import item_edit as sno_item_edit
+from snovault.fourfront_utils import add_default_embeds
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
@@ -43,17 +44,23 @@ ONLY_ADMIN_VIEW = [
     (Deny, Everyone, ['view', 'edit'])
 ]
 
+# This acl allows item creation; it is easily overwritten in lab and user,
+# as these items should not be available for creation
+SUBMITTER_CREATE = [
+    (Allow, 'group.submitter', 'create'),
+]
+
 ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.viewing_group_member', 'view'),
@@ -63,16 +70,16 @@ ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
 ALLOW_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.lab_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_CURRENT = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 DELETED = [
     (Deny, Everyone, 'visible_for_edit')
@@ -82,7 +89,7 @@ DELETED = [
 
 ALLOW_SUBMITTER_ADD = [
     (Allow, 'group.submitter', ['add']),
-]
+] + SUBMITTER_CREATE
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
@@ -102,13 +109,39 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 class AbstractCollection(snovault.AbstractCollection):
     """smth."""
 
+    def __init__(self, *args, **kw):
+        try:
+            self.lookup_key = kw.pop('lookup_key')
+        except KeyError:
+            pass
+        super(AbstractCollection, self).__init__(*args, **kw)
+
+
     def get(self, name, default=None):
-        """smth."""
+        '''
+        heres' and example of why this is the way it is:
+        ontology terms have uuid or term_id as unique ID keys
+        and if neither of those are included in post, try to
+        use prefered_name such that:
+        No - fail load with non-existing term message
+        Multiple - fail load with ‘ambiguous name - more than 1 term with that name exist use ID’
+        Single result - get uuid and use that for post/patch
+        '''
         resource = super(AbstractCollection, self).get(name, None)
         if resource is not None:
             return resource
         if ':' in name:
             resource = self.connection.get_by_unique_key('alias', name)
+            if resource is not None:
+                if not self._allow_contained(resource):
+                    return default
+                return resource
+        if getattr(self, 'lookup_key', None) is not None:
+            # lookup key translates to query json by key / value and return if only one of the
+            # item type was found... so for keys that are mostly unique, but do to whatever
+            # reason (bad data mainly..) can be defined as unique keys
+            item_type = self.type_info.item_type
+            resource = self.connection.get_by_json(self.lookup_key, name, item_type)
             if resource is not None:
                 if not self._allow_contained(resource):
                     return default
@@ -186,6 +219,10 @@ class Item(snovault.Item):
     def __init__(self, registry, models):
         super().__init__(registry, models)
         self.STATUS_ACL = self.__class__.STATUS_ACL
+        # update self.embedded here
+        self.update_embeds()
+        # update registry embedded
+        self.registry.embedded = self.embedded;
 
     @property
     def __name__(self):
@@ -301,12 +338,26 @@ class Item(snovault.Item):
     },)
     def link_id(self, request):
         """create the link_id field, which is a copy of @id using ~ instead of /"""
-        path_str = request.path if request.path else self.properties.get('accession', None)
-        if path_str:
-            path_split = path_str.split('/')
-            if len(path_split) == 4 and '@@' in path_split[-1]:
-                path_str = '~'.join(path_split[:-1]) + '~'
-            return path_str
+        id_str = str(self).split(' at ')
+        path_str = id_str[-1].strip('>')
+        path_split = path_str.split('/')
+        path_str = '~'.join(path_split) + '~'
+        return path_str
+
+    def update_embeds(self):
+        """
+        extend self.embedded to have link_id and display_title for every linkTo
+        field in the properties schema and the schema of all calculated properties
+        (this is created here)
+        """
+        total_schema = self.schema['properties'].copy() if self.schema else {}
+        self.calc_props_schema = {}
+        if self.registry and self.registry['calculated_properties']:
+            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
+                if calc_props_val.schema:
+                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
+        total_schema.update(self.calc_props_schema)
+        self.embedded = add_default_embeds(self.embedded, total_schema)
 
 
 class SharedItem(Item):
@@ -349,42 +400,11 @@ def edit(context, request):
 
 @snovault.calculated_property(context=Item, category='action')
 def create(context, request):
-    """smth."""
-    if request.has_permission('edit'):
+    """If the user submits for any lab, allow them to create"""
+    if request.has_permission('create'):
         return {
             'name': 'create',
             'title': 'Create',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
             'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
         }
-
-
-def add_default_embeds(embeds, schema={}):
-    """Perform default processing on the embeds list.
-    This adds display_title to any non-fully embedded linkTo field and defaults
-    to using the @id and display_title of non-embedded linkTo's
-    """
-
-    embedded_base_fields = []
-    fields_to_process = []
-    # find pre-existing fields
-    for field in embeds:
-        split_field = field.strip().split('.')
-        if len(split_field) > 1:
-            embed_path = '.'.join(split_field[:-1])
-            if embed_path not in embeds and embed_path not in fields_to_process:
-                fields_to_process.append(embed_path)
-        elif len(split_field) == 1:
-            embedded_base_fields.append(split_field)
-    processed_fields = [field + '.display_title' for field in fields_to_process]
-    processed_fields += [field + '.link_id' for field in fields_to_process]
-    if('properties' not in schema.keys()):
-        return processed_fields + embeds
-    # automatically embed top level linkTo's not already embedded
-    for key, val in schema['properties'].items():
-        if key not in embedded_base_fields and 'linkTo' in val:
-            if key + '.link_id' not in processed_fields:
-                processed_fields.append(key + '.link_id')
-            if key + '.display_title' not in processed_fields:
-                processed_fields.append(key + '.display_title')
-    return processed_fields + embeds

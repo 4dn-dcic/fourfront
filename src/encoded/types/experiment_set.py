@@ -12,8 +12,7 @@ from snovault import (
 from snovault.calculated import calculate_properties
 
 from .base import (
-    Item,
-    add_default_embeds
+    Item
 )
 
 import datetime
@@ -75,7 +74,6 @@ class ExperimentSet(Item):
     """The experiment set class."""
 
     item_type = 'experiment_set'
-    base_types = ['ExperimentSet'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "accession"
     embedded = ["award",
@@ -100,9 +98,13 @@ class ExperimentSet(Item):
                 "experiments_in_set.filesets.files_in_set.related_files.relationship_type",
                 "experiments_in_set.filesets.files_in_set.related_files.file.uuid",
                 "experiments_in_set.digestion_enzyme"]
-    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
+        if 'date_released' not in properties:
+            status = properties.get('status', None)
+            if status == 'released':
+                release_date = datetime.datetime.now().strftime("%Y-%m-%d")
+                properties['date_released'] = release_date
         super(ExperimentSet, self)._update(properties, sheets)
         if 'experiments_in_set' in properties:
             invalidate_linked_items(self, 'experiments_in_set')
@@ -127,7 +129,7 @@ class ExperimentSet(Item):
                             newest = pubdate
                             ppub = str(uuid)
         if ppub is not None:
-            ppub = '/publication/' + ppub
+            ppub = '/publications/' + ppub + '/'
         return ppub
 
     @calculated_property(schema={
@@ -152,7 +154,7 @@ class ExperimentSet(Item):
                 expsets.extend(pub.properties['exp_sets_used_in_pub'])
             for expset in expsets:
                 if str(expset) == str(self.uuid):
-                    pubs.append('/publication/' + str(uuid))
+                    pubs.append('/publications/' + str(uuid) + '/')
         return list(set(pubs))
 
 
@@ -165,7 +167,7 @@ class ExperimentSet(Item):
     })
 class ExperimentSetReplicate(ExperimentSet):
     """The experiment set class for replicate experiments."""
-
+    base_types = ['ExperimentSet'] + Item.base_types
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
@@ -174,7 +176,6 @@ class ExperimentSetReplicate(ExperimentSet):
         "replicate_exps.replicate_exp.accession",
         "replicate_exps.replicate_exp.uuid"
     ]
-    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]

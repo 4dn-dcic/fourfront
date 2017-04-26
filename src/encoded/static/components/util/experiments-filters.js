@@ -6,13 +6,11 @@ var ajax = require('./ajax');
 var Alerts = null; //require('./../alerts');
 var store = null;
 var object = require('./object');
+var navigate = require('./navigate').default;
 
 
 var expFilters = module.exports = {
 
-    // navigate should be set by app.js in App.getInitialState(), getSchemas is set in App.componentDidMount() -> App.loadSchemas()
-    // the others (getPage,getLimit) are defaults but should be overwritten by some component, referencing its state.
-    navigate : null,
     getSchemas : null,
     getPage  : function(){ return 1;  },
     getLimit : function(){ return 25; },
@@ -56,11 +54,11 @@ var expFilters = module.exports = {
             }
         },
 
-        getSchemaProperty : function(field, schemas = null, startAt = 'ExperimentSet'){
-            if (!schemas) schemas = expFilters.getSchemas && expFilters.getSchemas();
+        getSchemaProperty : function(field, schemas = null, startAt = 'ExperimentSet', skipExpFilters=false){
+            if (!schemas && !skipExpFilters) schemas = expFilters.getSchemas && expFilters.getSchemas();
             var baseSchemaProperties = (schemas && schemas[startAt] && schemas[startAt].properties) || null;
             if (!baseSchemaProperties) return null;
-
+            if (field.slice(0,5) === 'audit') return null;
             var fieldParts = field.split('.');
 
             function getNextSchemaProperties(linkToName){
@@ -104,10 +102,22 @@ var expFilters = module.exports = {
 
     },
 
+    /**
+     * Get current expSetFilters from store. Utility method to use from other components if don't want to pass expSetFilters down as prop.
+     * Keep in mind to only use from functions or callbacks, because if it is not a prop, will not update components visually when changed.
+     *
+     * @public
+     * @static
+     */
+    currentExpSetFilters : function(){
+        if (!store) store = require('./../../store');
+        return store.getState().expSetFilters;
+    },
+
 
     /**
      * Given a field/term, add or remove filter from expSetFilters (in redux store) within context of current state of filters.
-     * 
+     *
      * @param {string}  field               Field, in object dot notation.
      * @param {string}  term                Term to add/remove from active filters.
      * @param {string}  [experimentsOrSets='experiments'] - Informs whether we're standardizing field to experiments_in_set or not. Defaults to 'experiments'.
@@ -127,9 +137,16 @@ var expFilters = module.exports = {
         useAjax=true,
         href=null
     ){
+
+        // If no expSetFilters (and maybe href, which is optional)
+        // are supplied, get them from Redux store.
         if (!expSetFilters){
             if (!store) store = require('./../../store');
-            expSetFilters = store.getState().expSetFilters;
+            var storeState = store.getState();
+            expSetFilters = storeState.expSetFilters;
+            if (!href) {
+                href = storeState.href;
+            }
         }
 
         // store currently selected filters as a dict of sets
@@ -162,57 +179,58 @@ var expFilters = module.exports = {
         }
     },
 
-
-    
     /**
      * Update expSetFilters in redux store and, if using AJAX, update context and href as well after fetching.
      * Before calling, make sure expSetFilters is a new or cloned object (not props.expSetFilters) for Redux to recognize that it has changed.
-     * 
+     *
      * @param {Object}  expSetFilters   A new or cloned expSetFilters object to save. Can be empty (to clear all filters).
      * @param {boolean} [useAjax=true]  Whether to use AJAX and update context & href in Redux store as well.
      * @param {string}  [href]          Base URL to use for AJAX request, with protocol (i.e. http(s)), hostname (i.e. domain name), and path, at minimum. Required if using AJAX.
      * @param {function}[callback]      Callback function.
      */
-    saveChangedFilters : function(expSetFilters, useAjax=true, href=null, callback = null, originalFilters = null){
+    saveChangedFilters : function(newExpSetFilters, useAjax=true, href=null, callback = null, originalFilters = null){
         if (!store)   store = require('./../../store');
         if (!Alerts) Alerts = require('../alerts');
         if (!useAjax) {
             store.dispatch({
-                type : {'expSetFilters' : expSetFilters}
+                type : {'expSetFilters' : newExpSetFilters}
             });
             if (typeof callback === 'function') setTimeout(callback, 0);
             return true;
         }
 
+        var originalReduxState = store.getState();
+
+        if (!href){
+            console.warn("No HREF (3rd param) supplied, using current href from Redux store. This might be wrong depending on where we should be browsing.");
+            href = originalReduxState.href;
+        }
+
         // Else we fetch new experiment_sets (i.e. (props.)context['@graph'] ) via AJAX.
         if (typeof href !== 'string') throw new Error("No valid href (3rd arg) supplied to saveChangedFilters:", href);
 
-        var originalReduxState = store.getState();
-
-        var newHref = expFilters.filtersToHref(expSetFilters, href);
+        var newHref = expFilters.filtersToHref(newExpSetFilters, href);
 
         var navigateFxn = (
-            this.props && typeof this.props.navigate === 'function' ?   this.props.navigate : 
-                typeof expFilters.navigate === 'function' ?     expFilters.navigate : null
+            typeof navigate === 'function' ? navigate : null
         );
 
         store.dispatch({
             type: {
-                'expSetFilters' : expSetFilters,
+                'expSetFilters' : newExpSetFilters,
             }
         });
 
         if (navigateFxn){
             navigateFxn(newHref, { replace : true, skipConfirmCheck: true }, (result)=>{
                 if (result && result.total === 0){
-                    // No results, cancel out.
-                    Alerts.queue(Alerts.NoFilterResults);
-                    store.dispatch({ 
+                    // No results, unset new filters.
+                    Alerts.queue(Alerts.NoFilterResults); // Present an alert box informing user that their new selection is now being UNSELECTED because it returned no results.
+                    store.dispatch({
                         type : {
                             'expSetFilters' : originalReduxState.expSetFilters,
-                            'context' : originalReduxState.context,
-                            //'expSetFilters' : originalReduxState.expSetFilters
-                        } 
+                            'context' : originalReduxState.context
+                        }
                     });
                     navigateFxn(originalReduxState.href, { skipRequest : true });
                 } else {
@@ -224,14 +242,15 @@ var expFilters = module.exports = {
                 // Fallback callback
                 if (err && (err.status === 404 || err.total === 0)) Alerts.queue(Alerts.NoFilterResults);
                 if (typeof callback === 'function') setTimeout(callback, 0);
-            }/*, { 'expSetFilters' : expSetFilters }*/);
+            }/*, { 'expSetFilters' : newExpSetFilters }*/);
         } else {
+            // DEPRECATED SECTION -- MIGHT NOT WORK.
             ajax.load(newHref, (newContext) => {
                 Alerts.deQueue(Alerts.NoFilterResults);
                 store.dispatch({
                     type: {
                         'context'       : newContext,
-                        //'expSetFilters' : expSetFilters,
+                        //'expSetFilters' : newExpSetFilters,
                         'href'          : newHref
                     }
                 });
@@ -243,7 +262,7 @@ var expFilters = module.exports = {
             });
         }
 
-        
+
 
     },
 
@@ -260,7 +279,7 @@ var expFilters = module.exports = {
     /**
      * Convert expSetFilters to a URL, given a current URL whose path is used to append arguments
      * to (e.g. http://hostname.com/browse/  or http://hostname.com/search/).
-     * 
+     *
      * @param {Object}  expSetFilters    Filters as stored in Redux, keyed by facet field containing Set of term keys.
      * @param {string}  currentHref      String with at least current host & path which to use as base for resulting URL, e.g. http://localhost:8000/browse/[?type=ExperimentSetReplicate&experimentset_type=...].
      * @param {number}  [page=1]         Current page if using pagification.
@@ -274,7 +293,7 @@ var expFilters = module.exports = {
         // Include a '?' or '&' if needed.
         var sep = ['?','&'].indexOf(baseHref.charAt(baseHref.length - 1)) > -1 ? // Is last character a '&' or '?' ?
             '' : (
-                baseHref.match(/\?./) ? 
+                baseHref.match(/\?./) ?
                 '&' : '?'
             );
 
@@ -284,18 +303,18 @@ var expFilters = module.exports = {
         if (!limit) limit = expFilters.getLimit();
 
         return (
-            baseHref + 
-            sep+'limit=' + limit + 
-            '&from=' + (Math.max(page - 1, 0) * (typeof limit === 'number' ? limit : 0)) + 
+            baseHref +
+            sep+'limit=' + limit +
+            '&from=' + (Math.max(page - 1, 0) * (typeof limit === 'number' ? limit : 0)) +
             (filterQuery.length > 0 ? '&' + filterQuery : '')
         );
     },
 
 
-    /** 
-     * Parse href to return an expSetFilters object, the opposite of @see expFilters.filtersToHref. 
+    /**
+     * Parse href to return an expSetFilters object, the opposite of @see expFilters.filtersToHref.
      * Used for server-side rendering to set initial selected filters in UI based on request URL.
-     * 
+     *
      * @param {string}   href              A URL or path containing query at end in form of ?...&field.name=term1&field2.name=term2[...]
      * @param {Object[]} [contextFilters]  Collection of objects from (props.)context.filters or context.facets which have a 'field' property to cross-ref and check if URL query args are facets.
      * @param {string}   [contextFilters.field]
@@ -305,7 +324,9 @@ var expFilters = module.exports = {
             .pairs() // Object to [key, val] pairs.
             .filter(function(queryPair){ // Get only facet fields query args.
                 if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
-                if (contextFilters && _.findWhere(contextFilters,  {'field' : queryPair[0]})) return true; // See if in context.filters, if is available.
+                if (Array.isArray(contextFilters) && typeof _.findWhere(contextFilters,  {'field' : queryPair[0]}) !== 'undefined'){
+                    return true; // See if in context.filters, if is available.
+                }
 
                 // These happen to all start w/ 'experiments_in_set.' currently.
                 if (queryPair[0].indexOf('experiments_in_set.') > -1) return true;
@@ -371,10 +392,10 @@ var expFilters = module.exports = {
 
     /**
      * JSON.stringify() cannot store Set objects, which are used in expSetFilters, so we must convert
-     * the Sets to/from Arrays upon needing to use JSON.stringify() and after returning from JSON.parse(), 
+     * the Sets to/from Arrays upon needing to use JSON.stringify() and after returning from JSON.parse(),
      * such as when saving or grabbing the expSetFilter to/from the <script data-prop-name="expSetFilters"...>...</script>
      * element which is used to pass the filters from server-side render to client-side React initiatilization.
-     * 
+     *
      * @param {Object} expSetFilters  Object keyed by field name/key containing term key strings in form of Set or Array, which need to be converted to Set or Array.
      * @param {string} [to='array']   One of 'array' or 'set' for what to convert expSetFilter's terms to.
      */
@@ -400,12 +421,12 @@ var expFilters = module.exports = {
         }
         var baseHref = urlParts.protocol + '//' + urlParts.host + hrefPath;
         var baseQuery = [];
-        if (urlParts.pathname.indexOf('/browse/') > -1){
+        if (hrefPath.indexOf('/browse/') > -1){
             if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','ExperimentSetReplicate']);
             else baseQuery.push(['type', urlParts.query.type]);
             if (typeof urlParts.query.experimentset_type !== 'string') baseQuery.push(['experimentset_type','replicate']);
             else baseQuery.push(['experimentset_type', urlParts.query.experimentset_type]);
-        } else if (urlParts.pathname.indexOf('/search/') > -1){
+        } else if (hrefPath.indexOf('/search/') > -1){
             if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','Item']);
             else baseQuery.push(['type', urlParts.query.type]);
         }
@@ -413,7 +434,7 @@ var expFilters = module.exports = {
         return baseHref + (baseQuery.length > 0 ? '?' + baseQuery.map(function(queryPair){ return queryPair[0] + '=' + queryPair[1]; }).join('&') : '');
     },
 
-    /** 
+    /**
      * Filter experiments or sets (graph arg) by filters, adjusting for adding/removing field or term (if defined) or ignored filters.
      *
      * @param {Object[]} graph      Array of experiment_sets or experiments as obtained from (props.)context['@graph'].

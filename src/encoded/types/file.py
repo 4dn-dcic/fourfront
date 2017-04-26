@@ -8,9 +8,11 @@ from snovault import (
     abstract_collection,
 )
 from snovault.schema_utils import schema_validator
+from snovault.validators import validate_item_content_post
+from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
-    add_default_embeds
+    collection_add
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -28,8 +30,9 @@ import boto
 import datetime
 import json
 import pytz
-from netaddr.core import AddrFormatError
 
+import logging
+logging.getLogger('boto').setLevel(logging.CRITICAL)
 
 def show_upload_credentials(request=None, context=None, status=None):
     if request is None or status not in ('uploading', 'upload failed'):
@@ -43,6 +46,9 @@ def external_creds(bucket, key, name=None, profile_name=None):
     an access token.  This is useful for linking metadata to files that
     already exist on s3.
     '''
+
+    import logging
+    logging.getLogger('boto').setLevel(logging.CRITICAL)
     credentials = {}
     if name is not None:
         policy = {
@@ -55,7 +61,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-        boto.set_stream_logger('boto')
+        # boto.set_stream_logger('boto')
         conn = boto.connect_sts(profile_name=profile_name)
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
@@ -65,6 +71,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
             'federated_user_arn': token.federated_user_arn,
             'federated_user_id': token.federated_user_id,
             'request_id': token.request_id,
+            'key': key
         })
     return {
         'service': 's3',
@@ -98,12 +105,30 @@ def property_closure(request, propname, root_uuid):
     })
 class FileSet(Item):
     """Collection of files stored under fileset."""
-
     item_type = 'file_set'
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
     embedded = []
-    embedded = add_default_embeds(embedded, schema)
+
+
+@collection(
+    name='file-set-calibrations',
+    unique_key='accession',
+    properties={
+        'title': 'Calibration File Sets',
+        'description': 'Listing of File Sets',
+    })
+class FileSetCalibration(FileSet):
+    """Collection of files stored under fileset."""
+
+    base_types = ['FileSet'] + Item.base_types
+    item_type = 'file_set_calibration'
+    schema = load_schema('encoded:schemas/file_set_calibration.json')
+    name_key = 'accession'
+    embedded = ['files_in_set.submitted_by',
+                'files_in_set.lab',
+                'files_in_set'
+                ]
 
 
 @abstract_collection(
@@ -118,19 +143,33 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ['lab', 'file_format']
-    embedded = add_default_embeds(embedded, schema)
+    embedded = ['lab', 'file_format', 'related_files.file']
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
         if not properties:
             return
-
         # ensure we always have s3 links setup
         sheets = {} if sheets is None else sheets.copy()
-        uuid = properties.get('uuid', False)
-        if not sheets.get('external', False) and uuid:
-            sheets['external'] = self.build_external_creds(self.registry, uuid, properties)
+        uuid = self.uuid
+        old_creds = self.propsheets.get('external', None)
+        new_creds = old_creds
+
+        # don't get new creds
+        if properties.get('status',None) in ('uploading', 'upload failed'):
+            new_creds = self.build_external_creds(self.registry, uuid, properties)
+            sheets['external'] = new_creds
+
+        if old_creds:
+            if old_creds.get('key') != new_creds.get('key'):
+                try:
+                    # delete the old sumabeach
+                    conn = boto.connect_s3()
+                    bname = old_creds['bucket']
+                    bucket = boto.s3.bucket.Bucket(conn,bname)
+                    bucket.delete_key(old_creds['key'])
+                except Exception as e:
+                    print(e)
 
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
@@ -200,7 +239,18 @@ class File(Item):
         accession = accession or external_accession
         file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
-        return request.resource_path(self, '@@download', filename)
+        return request.resource_path(self) + '@@download/' + filename
+
+    @calculated_property(schema={
+        "title": "Upload key",
+        "type": "string",
+    })
+    def upload_key(self, request):
+        properties = self.properties
+        external = self.propsheets.get('external', {})
+        if not external:
+            external = self.build_external_creds(self.registry, self.uuid, properties)
+        return external['key']
 
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
@@ -220,7 +270,6 @@ class File(Item):
         else:
             return file_format + ' ' + file_format_type
 
-
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
         bucket = registry.settings['file_upload_bucket']
@@ -239,13 +288,15 @@ class File(Item):
         profile_name = registry.settings.get('file_upload_profile_name')
         return external_creds(bucket, key, name, profile_name)
 
-
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
         if properties.get('status') == 'uploading':
             sheets = {} if sheets is None else sheets.copy()
             sheets['external'] = cls.build_external_creds(registry, uuid, properties)
         return super(File, cls).create(registry, uuid, properties, sheets)
+
+    class Collection(Item.Collection):
+        pass
 
 
 @collection(
@@ -260,7 +311,6 @@ class FileFastq(File):
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -276,7 +326,6 @@ class FileFasta(File):
     item_type = 'file_fasta'
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -292,7 +341,6 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded = File.embedded
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -308,7 +356,21 @@ class FileReference(File):
     item_type = 'file_reference'
     schema = load_schema('encoded:schemas/file_reference.json')
     embedded = File.embedded
-    embedded = add_default_embeds(embedded, schema)
+    name_key = 'accession'
+
+
+@collection(
+    name='files-calibration',
+    unique_key='accession',
+    properties={
+        'title': 'Calibration Files',
+        'description': 'Listing of Calibration Files',
+    })
+class FileCalibration(ItemWithAttachment, File):
+    """Collection for individual calibration files."""
+    item_type = 'file_calibration'
+    schema = load_schema('encoded:schemas/file_calibration.json')
+    embedded = File.embedded
     name_key = 'accession'
 
 
@@ -318,6 +380,7 @@ def get_upload(context, request):
     external = context.propsheets.get('external', {})
     upload_credentials = external.get('upload_credentials')
     # Show s3 location info for files originally submitted to EDW.
+
     if upload_credentials is None and external.get('service') == 's3':
         upload_credentials = {
             'upload_url': 's3://{bucket}/{key}'.format(**external),
@@ -333,7 +396,6 @@ def get_upload(context, request):
 @view_config(name='upload', context=File, request_method='POST',
              permission='edit', validators=[schema_validator({"type": "object"})])
 def post_upload(context, request):
-
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
@@ -367,9 +429,8 @@ def post_upload(context, request):
     # in case we haven't uploaded a file before
     context.propsheets['external'] = creds
 
-    new_properties = None
+    new_properties = properties.copy()
     if properties['status'] == 'upload failed':
-        new_properties = properties.copy()
         new_properties['status'] = 'uploading'
 
     registry = request.registry
@@ -409,9 +470,8 @@ def download(context, request):
 
     external = context.propsheets.get('external', {})
     if not external:
-        profile_name = request.registry.settings.get('file_upload_profile_name')
-        sheets['external'] = external_creds(bucket, key, name, profile_name)
-    elif external.get('service') == 's3':
+        external = context.build_external_creds(request.registry, context.uuid, properties)
+    if external.get('service') == 's3':
         conn = boto.connect_s3()
         location = conn.generate_url(
             36*60*60, request.method, external['bucket'], external['key'],
@@ -438,3 +498,36 @@ def download(context, request):
 
     # 307 redirect specifies to keep original method
     raise HTTPTemporaryRedirect(location=location)
+
+# validator for filename field
+def validate_file_filename(context, request):
+    data = request.json
+    if 'filename' not in data or 'file_format' not in data:
+        return
+    filename = data['filename']
+    file_format = data['file_format']
+    valid_schema = context.type_info.schema
+    file_extensions = valid_schema['file_format_file_extension'][file_format]
+    if not isinstance(file_extensions, list):
+        file_extensions = [file_extensions]
+    found_match = False
+    for extension in file_extensions:
+        if extension == "":
+            found_match = True
+            break
+        elif filename[-len(extension):] == extension:
+            found_match = True
+            break
+    if not found_match:
+        file_extensions_msg = ["'"+ext+"'" for ext in file_extensions]
+        file_extensions_msg = ', '.join(file_extensions_msg)
+        request.errors.add('body', None, 'Filename extension does not '
+         'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
+    else:
+        request.validated.update({})
+
+
+@view_config(context=File.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post,validate_file_filename])
+def file_add(context, request, render=None):
+    return collection_add(context, request, render)

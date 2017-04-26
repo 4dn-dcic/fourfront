@@ -164,7 +164,11 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     );
                 } else {
                     return(
-                        <td key={key+this.props.href} className="expset-table-cell">{this.props.columns[key]}</td>
+                        <td key={key+this.props.href} className="expset-table-cell">
+                            <div>
+                                {this.props.columns[key]}
+                            </div>
+                        </td>
                     );
                 }
             });
@@ -202,8 +206,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 <ExperimentsTable
                     key='experiments-table'
                     columnHeaders={[
-                        { className: 'file-detail', title : 'File Type'},
-                        { className: 'file-detail', title : 'File Info'}
+                        { columnClass: 'file-detail', title : 'File Type'},
+                        { columnClass: 'file-detail', title : 'File Info'}
                     ]}
                     experimentArray={[...this.props.passExperiments] /* Convert set to array */}
                     replicateExpsArray={this.props.replicateExpsArray}
@@ -243,8 +247,10 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 { this.state.open ?
                 <tr className="expset-addinfo-row">
                     <td className={"expsets-table-hidden " + (this.state.open ? "hidden-col-open" : "hidden-col-closed")} colSpan={Object.keys(this.props.columns).length + 2}>
-                        { formattedAdditionaInformation.call(this) }
-                        { experimentsTable.call(this) }
+                        <div className="experiment-set-info-wrapper">
+                            { formattedAdditionaInformation.call(this) }
+                            { experimentsTable.call(this) }
+                        </div>
                     </td>
                 </tr>
                 : null }
@@ -624,6 +630,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         if (this.state.sortReverse !== nextState.sortReverse) return true;
         if (this.state.overflowingRight !== nextState.overflowingRight) return true;
         if (this.props.searchBase !== nextProps.searchBase) return true;
+        if (this.props.schemas !== nextProps.schemas) return true;
         return false;
     },
 
@@ -935,6 +942,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                             href={this.props.href}
                             navigate={this.props.navigate}
                             useAjax={true}
+                            schemas={this.props.schemas}
                         />
                     </div>
                     :
@@ -1096,6 +1104,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                     href={this.props.href}
                     navigate={this.props.navigate}
                     useAjax={this.props.useAjax}
+                    schemas={this.props.schemas}
                 />
 
             </div>
@@ -1124,7 +1133,8 @@ var Browse = browse.Browse = React.createClass({
         if (this.props.expSetFilters !== nextProps.expSetFilters) return true;
         if (this.props.session !== nextProps.session) return true;
         if (this.props.href !== nextProps.href) return true;
-        return false; // We don't care about props.schemas or props.expIncomplete props (other views might), so we can skip re-render.
+        if (this.props.schemas !== nextProps.schemas) return true;
+        return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     },
 
     componentWillMount: function() {
@@ -1171,6 +1181,7 @@ var Browse = browse.Browse = React.createClass({
                     onChange={this.context.navigate}
                     navigate={this.props.navigate || this.context.navigate}
                     useAjax={true}
+                    schemas={this.props.schemas}
                 />
 
             </div>

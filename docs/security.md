@@ -1,6 +1,6 @@
 # Security
 
-In pyramids security is interwoven into the framework in a very fined grained fashion.  Each view can have it's own security rules as can each object.  Some basic ideas that are helpful in understanding how security works in the system are listed below.
+ In pyramids security is interwoven into the framework in a very fined grained fashion.  Each view can have it's own security rules as can each object.  Some basic ideas that are helpful in understanding how security works in the system are listed below.
 
 ## ACL
 
@@ -73,8 +73,8 @@ And one step earlier, i.e. before _ac_local_roles are set (which are set based o
 
 1.  Request is made to the system
 
-2.  `authorization.groupfinder` is called after user is authenticated and request is assigned the principles of user.id (or special principles for remote user / embed user / etc..).  It addition prinicples are assigned for: 
-* `<lab>` 
+2.  `authorization.groupfinder` is called after user is authenticated and request is assigned the principles of user.id (or special principles for remote user / embed user / etc..).  It addition prinicples are assigned for:
+* `<lab>`
 * `submits_for.<lab>`
 * `group.submitter` -- possibly
 * `groups.<group>`  -- from user.groups

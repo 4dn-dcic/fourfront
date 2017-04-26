@@ -1,9 +1,10 @@
 'use strict';
 var React = require('react');
+var ReactDOM = require('react-dom');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var ErrorPage = require('./error');
-var Navigation = require('./navigation');
+import Navigation from './navigation';
 var Action = require('./action');
 var Footer = require('./footer');
 var url = require('url');
@@ -12,15 +13,33 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { Filters, ajax, JWT, console, isServerSide } = require('./util');
+var { Filters, ajax, JWT, console, isServerSide, navigate, analytics } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
 var ChartDataController = require('./viz/chart-data-controller');
+var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var makeTitle = require('./item-pages/item').title;
+var ReactTooltip = require('react-tooltip');
 
-var dispatch_dict = {}; //used to store value for simultaneous dispatch
+/**
+ * The top-level component for this application.
+ *
+ * @module {Component} app
+ */
 
+/**
+ * Used to temporarily store Redux store values for simultaneous dispatch.
+ *
+ * @memberof module:app
+ */
+var dispatch_dict = {};
+
+/**
+ * Top bar navigation & link schema definition.
+ *
+ * @memberof module:app
+ */
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
@@ -72,16 +91,19 @@ var Title = React.createClass({
     }
 });
 
+/**
+ * Creates a promise which completes after a delay, performing no network request.
+ * Used to perform a promise.race to see if this timeout or a network requests completes first, which
+ * then allows us to set app.state.slow and render a loading icon until long-running network request completes.
+ */
 class Timeout {
     constructor(timeout) {
         this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
     }
 }
 
-
 /**
- * App is the root component, mounted on document.body.
- * It lives for the entire duration the page is loaded.
+ * @alias module:app
  */
 var App = React.createClass({
     SLOW_REQUEST_TIME: 750,
@@ -124,8 +146,9 @@ var App = React.createClass({
             user_actions = user_info.user_actions;
         }
 
-        // Save navigate fxn and other req'd stuffs to Filters.
-        Filters.navigate = this.navigate;
+        // Save navigate fxn and other req'd stuffs to GLOBAL navigate obj.
+        // So that we may call it from anywhere if necessary without passing through props.
+        navigate.setNavigateFunction(this.navigate);
 
         console.log("App Initial State: ", session, user_actions);
 
@@ -135,7 +158,8 @@ var App = React.createClass({
             'content': undefined,
             'session': session,
             'user_actions': user_actions,
-            'schemas': null
+            'schemas': this.props.context.schemas || null,
+            'uploads': {}
         };
     },
 
@@ -199,7 +223,15 @@ var App = React.createClass({
             return portal.user_section;
         }
         if (category === 'user') {
-            return this.state.user_actions || [];
+            var temp_actions;
+            // remove uploads from dropdown if there aren't any current uploads
+            if(this.state.user_actions){
+                temp_actions = this.state.user_actions.slice();
+                if(Object.keys(this.state.uploads).length === 0){
+                    temp_actions = temp_actions.filter(action => action.id !== 'uploads');
+                }
+            }
+            return temp_actions || [];
         }
         if (category === 'global_sections') {
             return portal.global_sections;
@@ -233,6 +265,8 @@ var App = React.createClass({
                 }, () => {
                     // Let Filters have access to schemas for own functions.
                     Filters.getSchemas = () => this.state.schemas;
+                    // Rebuild tooltips because they likely use descriptions from schemas
+                    ReactTooltip.rebuild();
                     if (typeof callback === 'function') callback(data);
                 });
             }
@@ -249,7 +283,7 @@ var App = React.createClass({
     updateStats : function(currentCounts, totalCounts = null, callback = null){
         var statsComponent = this.getStatsComponent();
         if (statsComponent){
-            if (!totalCounts){
+            if (totalCounts === null){
                 return statsComponent.updateCurrentCounts(currentCounts, callback);
             } else {
                 return statsComponent.updateCurrentAndTotalCounts(currentCounts, totalCounts, callback);
@@ -297,6 +331,18 @@ var App = React.createClass({
         } else if (e.which === 13 && this.state.autocompleteFocused && !this.state.autocompleteTermChosen) {
             e.preventDefault();
         }
+    },
+
+    /* Handle updating of info used on the /uploads page. Contains relevant
+    item context and AWS UploadManager*/
+    updateUploads: function(key, upload_info, del_key=false){
+        var new_uploads = _.extend({}, this.state.uploads);
+        if (del_key){
+            delete new_uploads[key];
+        }else{
+            new_uploads[key] = upload_info;
+        }
+        this.setState({'uploads': new_uploads});
     },
 
     authenticateUser : function(callback = null){
@@ -367,12 +413,31 @@ var App = React.createClass({
         } else {
             window.onhashchange = this.onHashChange;
         }
-        //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
+        window.onbeforeunload = this.handleBeforeUnload;
+
+        // Load up analytics
+        analytics.initializeGoogleAnalytics(
+            analytics.getTrackingId(this.props.href),
+            this.props.context,
+            this.props.expSetFilters
+        );
     },
 
     componentDidUpdate: function (prevProps, prevState) {
         var key;
         if (this.props) {
+
+            if (this.props.href !== prevProps.href){ // We navigated somewhere else.
+
+                // Register google analytics pageview event.
+                analytics.registerPageView(this.props.href, this.props.context, this.props.expSetFilters);
+
+                // We need to rebuild tooltips after navigation to a different page.
+                ReactTooltip.rebuild();
+
+            }
+
+
             for (key in this.props) {
                 if (this.props[key] !== prevProps[key]) {
                     console.log('changed props: %s', key);
@@ -381,7 +446,11 @@ var App = React.createClass({
         }
         if (this.state) {
             if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
-                ChartDataController.sync();
+                setTimeout(function(){
+                    // Delay 100ms.
+                    console.log("SYNCING CHART DATA");
+                    ChartDataController.sync();
+                }, 100);
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
@@ -417,7 +486,11 @@ var App = React.createClass({
         var userInfo = JWT.getUserInfo();
         if (userInfo){
             userActions = userInfo.user_actions;
-            session = true;
+            var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.
+            if (currentToken) session = true;
+            else if (this.state.session === true) {
+                Alerts.queue(Alerts.LoggedOut);
+            }
         }
 
         var stateChange = {};
@@ -663,6 +736,8 @@ var App = React.createClass({
             var promise = request.then((response)=>{
                 // Check/handle server-provided error code/message(s).
 
+                console.info("Fetched new context", response);
+
                 if (response.code === 403){
 
                     var jwtHeader = null;
@@ -758,7 +833,7 @@ var App = React.createClass({
                 if (
                     typeof err.status === 'number' &&
                     [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1
-                ) { 
+                ) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
                 } else if (err.message !== 'HTTPForbidden'){
@@ -832,6 +907,14 @@ var App = React.createClass({
         }
     },
 
+    // catch user navigating away from page if there are current uploads running
+    // there doesn't seem to be any way to remove the default alert...
+    handleBeforeUnload: function(e){
+        if(Object.keys(this.state.uploads).length > 0){
+            return 'You have current uploads running. Please wait until they are finished to leave.';
+        }
+    },
+
     render: function() {
         console.log('render app');
         var context = this.props.context;
@@ -884,6 +967,8 @@ var App = React.createClass({
                     actionList.push('edit');
                 }else if (value == '#!create'){
                     actionList.push('create');
+                }else if (value == '#!clone'){
+                    actionList.push('clone');
                 }else{
                     lowerList.push(value.toLowerCase());
                 }
@@ -892,10 +977,10 @@ var App = React.createClass({
         var currRoute = lowerList.slice(1); // eliminate http
         // check error status
         var status;
+        var route = currRoute[currRoute.length-1];
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
-            var route = currRoute[currRoute.length-1];
-            if(route != 'help' && route != 'about' && route != 'home'){
+            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads' && route != 'submissions'){
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
@@ -904,6 +989,12 @@ var App = React.createClass({
             }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
             }
+        }else if(route == 'uploads' && !_.contains(this.state.user_actions.map(action => action.id), 'uploads')){
+            console.log(this.state.user_actions);
+            status = 'forbidden'; // attempting to view uploads but it's not in users actions
+        }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+            console.log(this.state.user_actions);
+            status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
         // first case is fallback
         if (canonical === "about:blank"){
@@ -915,6 +1006,7 @@ var App = React.createClass({
             title = 'Error';
         }else if(actionList.length == 1){
             // check if the desired action is allowed per user (in the context)
+
             var contextActionNames = this.listActionsFor('context').map(function(act){
                 return act.name || '';
             });
@@ -930,12 +1022,15 @@ var App = React.createClass({
                             context={context}
                             schemas={this.state.schemas}
                             expSetFilters={this.props.expSetFilters}
+                            uploads={this.state.uploads}
+                            updateUploads={this.updateUploads}
                             expIncompleteFacets={this.props.expIncompleteFacets}
                             session={this.state.session}
                             key={key}
                             navigate={this.navigate}
                             href={this.props.href}
                             edit={actionList[0] == 'edit'}
+                            create={actionList[0] == 'create'}
                         />
                     );
                     title = makeTitle({'context': context});
@@ -959,13 +1054,15 @@ var App = React.createClass({
                         schemas={this.state.schemas}
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
+                        uploads={this.state.uploads}
+                        updateUploads={this.updateUploads}
                         session={this.state.session}
                         key={key}
                         navigate={this.navigate}
                         href={this.props.href}
                     />
                 );
-                title = context.title || context.name || context.accession || context['@id'];
+                title = context.display_title || context.title || context.name || context.accession || context['@id'];
                 if (title && title != 'Home') {
                     title = title + ' – ' + portal.portal_title;
                 } else {
@@ -1051,6 +1148,18 @@ var App = React.createClass({
                             <Footer version={this.props.context.app_version} />
                         </div>
                     </div>
+                    <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={()=>{
+                        var _tooltip = this.refs && this.refs.tooltipComponent;
+                        // Grab tip & unset style.left and style.top using same method tooltip does internally.
+                        var node = ReactDOM.findDOMNode(_tooltip);
+                        node.style.left = null;
+                        node.style.top = null;
+                    }} />
+                    <ChartDetailCursor
+                        href={this.props.href}
+                        verticalAlign="center" /* cursor position relative to popover */
+                        //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
+                    />
                 </body>
             </html>
         );

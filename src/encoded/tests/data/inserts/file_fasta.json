@@ -8,7 +8,7 @@
         "file_format":"fasta",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fadd",
         "status": "uploaded",
-        "filename": "test_fasta1"
+        "filename": "test_fasta1.fasta.gz"
     },
     {
         "accession":"4DNFI067APB1",
@@ -18,7 +18,7 @@
         "award": "1U01CA200059-01",
         "file_format":"fasta",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fafa",
-        "status": "released",
-        "filename": "test_fasta2"
+        "status": "uploaded",
+        "filename": "test_fasta2.fasta.gz"
     }
 ]

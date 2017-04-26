@@ -1,5 +1,6 @@
+
 {
-    "title": "Data file",
+    "title": "Data File",
     "description": "Schema for submitting metadata for a data file.",
     "id": "/profiles/file.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -13,9 +14,11 @@
         },
         "filename": {
             "title": "File Name",
-            "description": "The local file name used at time of submission.",
+            "description": "The local file name used at time of submission. Must be alphanumeric, with the exception of the following special characters: '+=,.@-_'",
+            "s3Upload": true,
             "type": "string",
-            "exclude_from": "submit4dn",
+            "pattern": "^[\\w+=,.@-]*$",
+            "exclude_from": ["submit4dn"],
             "comment": "ultimately uploaded filename will be uuid/accession, but filename with no directory will be store in metadata as passed in"
         },
         "file_format": {
@@ -71,7 +74,8 @@
             "description": "The md5sum of the file being transferred.",
             "comment": "This can vary for files of same content gzipped at different times",
             "type": "string",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FF-calculate"],
+            "ff_clear":"edit",
             "format": "hex"
         },
         "content_md5sum": {
@@ -79,12 +83,12 @@
             "description": "The MD5sum of the uncompressed file.",
             "comment": "This is only relavant for gzipped files.",
             "type": "string",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "format": "hex"
         },
         "file_size": {
             "title": "File size",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
             "type": "integer"
         },
@@ -119,7 +123,7 @@
         },
         "restricted": {
             "title": "Restricted file",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "description": "A flag to indicate whether this file is subject to restricted access",
             "type": "boolean"
         },
@@ -127,6 +131,8 @@
             "title": "Status",
             "type": "string",
             "default": "uploading",
+            "permission": "import_items",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum" : [
                 "uploading",
                 "uploaded",
@@ -141,6 +147,7 @@
         },
         "quality_metric": {
           "type": "string",
+          "title": "Quality metric",
           "description": "The associated qc reports",
           "linkTo": "QualityMetric"
         }

@@ -42,15 +42,20 @@ describe('Testing viz/QuickInfoBar.js', function() {
             expect(parseInt(el.innerHTML)).toBe(0);
         });
         // Change those vals
-        page.updateCurrentCounts({
+        page.updateCurrentAndTotalCounts({
             experiments: 10,
-            experiment_sets : 5,
-            files : 20
+            experiment_sets : 10,
+            files : 10
+        },{
+            experiments: 211,
+            experiment_sets : 211,
+            files : 211
         });
 
         // Ensure they're changed
         statValEls.forEach(function(el){
-            expect(parseInt(el.innerHTML)).toBeGreaterThan(0);
+            expect(el.innerHTML.indexOf('10')).toBeGreaterThan(-1);
+            expect(el.innerHTML.indexOf('211')).toBeGreaterThan(-1);
         });
     });
 

@@ -2,6 +2,7 @@
 
 var _ = require('underscore');
 var { isServerSide } = require('./misc');
+var d3 = require('d3');
 
 /** 
  * Most of these functions should not be run from a component until it has mounted as they do not work
@@ -223,6 +224,61 @@ var layout = module.exports = {
         }
         return textLineWidth;
     },
+
+    verticalCenterOffset : function(innerElem, extraHeight = 0, outerElem = null){
+        if (!outerElem) {
+            outerElem = innerElem.offsetParent || innerElem.parentElement;
+        }
+        if (!outerElem || !innerElem.offsetHeight || !outerElem.offsetHeight) return 0;
+        return ((outerElem.offsetHeight + extraHeight) - innerElem.offsetHeight) / 2;
+    },
+
+    /**
+     * 
+     * @param {string|number|HTMLElement} to - Where to scroll to.
+     * @param {number} duration - How long should take.
+     */
+    animateScrollTo : function(to, duration = 750, offsetBeforeTarget = 100, callback = null){
+
+        if (!document || !document.body) return null;
+
+        var elementTop;
+
+        if (typeof to === 'string'){
+            var elem = document.getElementById(to);
+            if (!elem) throw new Error(to + " not found in document.");
+            elementTop = layout.getElementTop(elem);
+        //} else if (typeof to === "ELEMENT" /* FIND PROPER TYPEOF */){
+        } else if (typeof to === 'number'){
+            elementTop = to;
+        } else throw new Error("Invalid argument 'to' supplied.");
+
+
+        if (elementTop === null) return null;
+
+        elementTop = Math.max(0, elementTop - offsetBeforeTarget); // - offset re: nav bar header.
+        if (document && document.body && document.body.scrollHeight && window && window.innerHeight){
+            // Try to prevent from trying to scroll past max scrollable height.
+            elementTop = Math.min(document.body.scrollHeight - window.innerHeight, elementTop);
+        }
+
+        function scrollTopTween(scrollTop){
+            return function(){
+                var interpolate = d3.interpolateNumber(this.scrollTop, scrollTop);
+                return function(t){ document.body.scrollTop = interpolate(t); };
+            };
+        }
+        var origScrollTop = document.body.scrollTop;
+        var animation = d3.select(document.body)
+            .interrupt()
+            .transition()
+            .duration(duration)
+            .tween("bodyScroll", scrollTopTween(elementTop));
+
+        if (typeof callback === 'function'){
+            animation.on('end', callback);
+        }
+    }
 
 
 

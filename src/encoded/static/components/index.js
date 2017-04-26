@@ -2,6 +2,11 @@
 
 // Require all components to ensure javascript load ordering
 
+/**
+ * @file
+ * @alias module:app
+ */
+
 require('./lib');
 require('./util');
 require('./app');
@@ -12,11 +17,15 @@ require('./static-pages/static-page-base');
 require('./static-pages/home');
 require('./static-pages/help');
 require('./static-pages/about');
+require('./uploads');
+require('./submissions');
 require('./facetlist');
-require('./item-pages/item-view');
-require('./item-pages/experiment-set-view');
 require('./item-pages/item');
-require('./item-pages/user');
+require('./item-pages/DefaultItemView');
+require('./item-pages/ExperimentSetView');
+require('./item-pages/FileSetCalibrationView');
+require('./item-pages/UserView');
+require('./item-pages/FallbackView');
 require('./statuslabel');
 require('./navigation');
 require('./inputs');

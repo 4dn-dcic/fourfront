@@ -60,7 +60,7 @@
         },
         "modified_regions": {
             "title": "Modified Regions",
-            "description": "The genomic regions being modified.",
+            "description": "Modified genomic regions (if different than target)",
             "type": "array",
             "items": {
                 "title": "Genomic region",
@@ -71,7 +71,7 @@
         },
         "target_of_mod": {
             "title": "Target of Modification",
-            "description": "The targeted gene or genomic region that is targeted by the modification.",
+            "description": "The gene or genomic region that is targeted by the modification.",
             "type": "string",
             "linkTo": "Target"
         },

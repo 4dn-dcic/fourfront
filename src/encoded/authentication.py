@@ -167,7 +167,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         def getUserInfo(request):
             user_props = request.embed('/session-properties', as_user=email)
             user_details = request.embed('/me', as_user=email)
-            includedDetailFields = ['email', 'first_name','last_name','groups','timezone','status', 'lab', 'submits_for']
+            includedDetailFields = ['email', 'first_name','last_name','groups','timezone','status']
             user_props.update({
                 # Only include certain fields from profile
                 "details" : { p:v for p,v in user_details.items() if p in includedDetailFields},
@@ -264,6 +264,7 @@ def logout(request):
 
     return {}
 
+
 @view_config(route_name='me', request_method='GET', permission=NO_PERMISSION_REQUIRED)
 def me(request):
     '''Alias /users/<uuid-of-current-user>'''
@@ -280,6 +281,7 @@ def me(request):
     request.response.status_code = 307 # Prevent from creating 301 redirects which are then cached permanently by browser
     properties = request.embed('/users/' + userid, as_user=userid)
     return properties
+
 
 @view_config(route_name='session-properties', request_method='GET',
              permission=NO_PERMISSION_REQUIRED)

@@ -5,8 +5,7 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item,
-    add_default_embeds
+    Item
     # paths_filtered_by_status,
 )
 
@@ -43,7 +42,6 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'lab',
         'award'
     ]
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -139,3 +137,16 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                         # make data for new biosample_relation
                         target_bs.properties['biosample_relation'].append(relationship_entry)
                         target_bs.update(target_bs.properties)
+
+
+@calculated_property(context=Biosample, category='action')
+def clone(context, request):
+    """If the user submits for any lab, allow them to clone
+    This is like creating, but keeps previous fields"""
+    if request.has_permission('create'):
+        return {
+            'name': 'clone',
+            'title': 'Clone',
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!clone'.format(item_uri=request.resource_path(context)),
+        }

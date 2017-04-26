@@ -2,19 +2,22 @@
 
 var React = require('react');
 var _ = require('underscore');
-var { ajax, console, isServerSide } = require('./../../util');
+var { ajax, console, isServerSide, analytics } = require('./../../util');
 
 /**
  * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.
  * Encapsulates all required ajax/aggregation for fetching array of fields/data.
  * Available via FormattedInfoBlock.List
  * 
- * @param details (optional) - Array of complete details to display.
- * @param endpoints (required if details is blank) - Array of endpoints to AJAX details from.
- * @param renderItem (required) - Render function for items. Should return a FormattedInfoBlock component.
- * @param fallbackMsg (optional) - What to display if both details and endpoints don't exist or are empty.
- * @param propertyName (optional) - Descriptive unique ID of property/ies displayed.
- * @param ajaxCallback (optional) - Callback to execute with details, if/after they are fetched w/ AJAX. 
+ * @namespace
+ * @type {Component}
+ * @memberof module:item-pages/components.FormattedInfoBlock
+ * @prop {Object[]} details         - Array of complete details to display.
+ * @prop {string[]} endpoints       - Array of endpoints to AJAX details from.
+ * @prop {function} renderItem      - Render function for items. Should return a FormattedInfoBlock component.
+ * @prop {Component|Element|string} fallbackMsg - What to display if both details and endpoints don't exist or are empty.
+ * @prop {string} [propertyName]    - Descriptive unique ID of property/ies displayed.
+ * @prop {function} [ajaxCallback]  - Callback to execute with details, if/after they are fetched w/ AJAX. 
  */
 var FormattedInfoBlockList = React.createClass({
 
@@ -215,6 +218,14 @@ var FormattedInfoBlock = module.exports = React.createClass({
                     'body' : error
                 };
                 this.setState(newStateAddition);
+                analytics.event('FormattedInfoBlock', 'ERROR', {
+                    eventLabel : (
+                        "AJAX Error: "  + (error.title       || 'N/A') + ' | ' +
+                        'Detail: '      + (error.detail      || 'N/A') + ' | ' +
+                        'Description: ' + (error.description || 'N/A')
+                    ),
+                    eventValue : error.code || null
+                });
             }.bind(this));
         },
 
@@ -251,7 +262,8 @@ var FormattedInfoBlock = module.exports = React.createClass({
          */
         Lab : function(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
             if (details_lab && typeof details_lab.error !== 'undefined' && details_lab.error) {
-                return FormattedInfoBlock.Error.apply(this, arguments);
+                return null;
+                //return FormattedInfoBlock.Error.apply(this, arguments);
             }
             return FormattedInfoBlock.generate(
                 details_lab,
@@ -275,13 +287,34 @@ var FormattedInfoBlock = module.exports = React.createClass({
          */
         Award : function(details_award, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
             if (details_award && typeof details_award.error !== 'undefined' && details_award.error) {
-                return FormattedInfoBlock.Error.apply(this, arguments);
+                return null;
+                //return FormattedInfoBlock.Error.apply(this, arguments);
             }
             return FormattedInfoBlock.generate(
                 details_award,
                 typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution" : null),
                 includeLabel ? "Award" : null,
                 details_award && includeDetail ? details_award.project : null,
+                'award',
+                'project',
+                key
+            );
+        },
+
+        /**
+         * Preset generator for User detail block.
+         * @see FormattedInfoBlock.Lab
+         */
+        User : function(details_user, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+            if (details_user && typeof details_user.error !== 'undefined' && details_user.error) {
+                return null;
+                //return FormattedInfoBlock.Error.apply(this, arguments);
+            }
+            return FormattedInfoBlock.generate(
+                details_user,
+                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user" : null),
+                includeLabel ? (typeof includeLabel === 'string' ? includeLabel : "Submitted By") : null,
+                details_user && includeDetail ? details_user.lab && details_user.lab.display_title : null,
                 'award',
                 'project',
                 key
@@ -306,8 +339,13 @@ var FormattedInfoBlock = module.exports = React.createClass({
                     key={key}
                     label={label}
                     iconClass={iconClass}
-                    title={(detail && detail.title) || null }
-                    titleHref={detail && detail['@id'] ? detail['@id'] : null }
+                    title={(detail && (detail.display_title || detail.title)) || null }
+                    titleHref={
+                        (detail && 
+                            (detail['@id'] || 
+                                (detail.link_id && detail.link_id.replace(/~/g, "/"))
+                        )) || null
+                    }
                     extraContainerClassName={extraContainerClassName}
                     extraDetailClassName={extraDetailClassName}
                     loading={!detail}

@@ -2,14 +2,14 @@ import pytest
 
 
 @pytest.fixture
-def lab(testapp):
+def lab(testapp, award):
     item = {
         'name': 'encode-lab',
         'title': 'ENCODE lab',
-        'status': 'current'
+        'status': 'current',
+        'awards':[award['@id']]
     }
     return testapp.post_json('/lab', item).json['@graph'][0]
-
 
 @pytest.fixture
 def admin(testapp):
@@ -110,10 +110,10 @@ def mboI(testapp, worthington_biochemical, lab, award):
 
 
 @pytest.fixture
-def lung_biosource(testapp, lab, award):
+def lung_biosource(testapp, lab, award, lung_oterm):
     item = {
         "biosource_type": "tissue",
-        "tissue": "lung",
+        'tissue': lung_oterm['@id'],
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -385,16 +385,17 @@ def document(testapp, lab, award):
 def workflow_run_sbg(testapp, lab, award, workflow_bam):
     item = {'run_platform': 'SBG',
             'parameters': [],
-            'workflow':  workflow_bam['@id'],
+            'workflow': workflow_bam['@id'],
             'title': u'md5 run 2017-01-20 13:16:11.026176',
             'sbg_import_ids': [u'TBCKPdzfUE9DpvtzO6yb9yoIvO81RaZd'],
             'award': award['@id'],
             'sbg_task_id': '1235',
             'lab': lab['@id'],
-            'sbg_mounted_volume_ids': ['4dn_s32gkz1s7x','4dn_s33xkquabu'],
+            'sbg_mounted_volume_ids': ['4dn_s32gkz1s7x', '4dn_s33xkquabu'],
             'run_status': 'started',
            }
     return testapp.post_json('/workflow_run_sbg', item).json['@graph'][0]
+
 
 @pytest.fixture
 def human_biosample(testapp, human_biosource, lab, award):
@@ -456,3 +457,44 @@ def workflow_mapping(testapp, workflow_bam, lab, award):
         ]
     }
     return testapp.post_json('/workflow_mapping', item).json['@graph'][0]
+
+
+@pytest.fixture
+def basic_genomic_region(testapp, lab, award):
+    item = {
+        "genome_assembly": "GRCh38",
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def ontology(testapp):
+    data = {
+            "uuid": "530006bc-8535-4448-903e-854af460b254",
+            "ontology_name": "Experimental Factor Ontology",
+            "ontology_url": "http://www.ebi.ac.uk/efo/",
+            "download_url": "http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw",
+            "namespace_url": "http://www.ebi.ac.uk/efo/",
+            "ontology_prefix": "EFO",
+            "description": "The description",
+            "notes": "The download",
+        }
+    return testapp.post_json('/ontology', data).json['@graph'][0]
+
+
+@pytest.fixture
+def oterm(ontology):
+    return {
+        "uuid": "530036bc-8535-4448-903e-854af460b254",
+        "preferred_name": "preferred lung name",
+        "term_name": "lung",
+        "term_id": "UBERON:0002048",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0002048",
+        "source_ontology": ontology['@id']
+    }
+
+@pytest.fixture
+def lung_oterm(oterm, testapp):
+    return testapp.post_json('/ontology_term', oterm).json['@graph'][0]

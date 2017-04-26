@@ -2,7 +2,7 @@
     {
         "uuid": "231111bc-8535-4448-903e-854af460b254",
         "description": "GM12878 prepared for Hi-C",
-        "biosource": ["331111bc-8535-4448-903e-854af460b254", "331111bc-8535-4448-903e-854af46abcd4"],
+        "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "cell_culture_details": "131106bc-8535-4448-903e-854af460b212",
         "modifications": ["431106bc-8535-4448-903e-854af460b265", "431106bc-8535-4448-903e-854af460b276"],
@@ -10,13 +10,13 @@
         "award": "Test-4DN",
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
-        "status": "released",
+        "status": "in review by lab",
         "accession": "4DNBS1234567"
     },
     {
         "uuid": "231111bc-8535-4448-903e-854af460b242",
-        "description": "GM12878 prepared for Hi-C",
-        "biosource": ["331111bc-8535-4448-903e-854af460b254", "331111bc-8535-4448-903e-854af46abcd4"],
+        "description": "GM12878 prepared for Hi-C, batch 2",
+        "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "cell_culture_details": "131106bc-8535-4448-903e-854af460b212",
         "modifications": ["431106bc-8535-4448-903e-854af460b265", "431106bc-8535-4448-903e-854af460b276"],
@@ -24,19 +24,20 @@
         "award": "Test-4DN",
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
-        "status": "released",
+        "status": "in review by lab",
         "accession": "4DNBS2548734"
     },
     {
         "uuid": "231111bc-8535-4448-903e-854af460ba4d",
         "description": "GM12878 prepared for Hi-C",
-        "biosource": ["331111bc-8535-4448-903e-854af46abcd4"],
+        "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "modifications": ["431106bc-8535-4448-903e-854af460b265"],
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "treatments": ["586b362f-4eb6-4a9c-8173-3ab267307e3b"],
+        "status": "in review by lab",
         "accession": "4DNBS1234678"
     },
     {
@@ -49,6 +50,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307a8d"],
+        "status": "in review by lab",
         "accession": "4DNBS1234789"
     },
     {
@@ -61,6 +63,17 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "treatments": ["486b362f-4eb6-4a9c-8173-3ab267307e4b"],
+        "status": "in review by lab",
         "accession": "4DNBS1234890"
+    },
+    {
+        "uuid": "123111bc-8535-4448-903e-854af460b123",
+        "description": "GM12878 prepared for Microscopy",
+        "biosource": ["331111bc-8535-4448-903e-854af460b254"],
+        "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "accession": "4DNBS1234110"
     }
 ]

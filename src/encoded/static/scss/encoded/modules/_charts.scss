@@ -33,6 +33,13 @@
 
 }
 
+@media screen and (max-width : $screen-xs-max){
+    .facet-charts {
+        height : auto !important;
+        margin-top: 20px;
+    }
+}
+
 /** Individual and standalone chart styles **/
 
 .chart-container {
@@ -155,6 +162,7 @@
         color: #fff;
         font-weight: 500;
         padding: 0 12px;
+        background-color: $facetlist-selected-term-color;
         > .icon-container {
             padding-left: 7px;
             cursor: pointer;
@@ -267,6 +275,7 @@
             position: relative;
             font-size: 0.85rem;
             line-height: 14px;
+            transition: width .75s ease-out, left .75s ease-out;
             &.auto-rotation {
                 transition: transform 1s, left 1s;
                 white-space: nowrap;
@@ -365,7 +374,7 @@
             left: 0;
             right: 0;
             text-align: right;
-            transition: bottom .75s ease-out;
+            //transition: bottom .75s ease-out;
             z-index: 0;
             &:before {
                 content : '';
@@ -383,6 +392,12 @@
                 display: block;
                 top: -1px;
                 transition: width .75s;
+                
+            }
+            &[data-tick-index="0"]{
+                .axis-bg-line {
+                    border-color: #eee;
+                }
             }
             &.last {
                 .axis-label {
@@ -404,8 +419,10 @@
     }
 
     .chart-bar {
-        transition: transform .75s ease-out, opacity .5s;
+        transition: transform .75s ease-out, opacity .5s, width .75s ease-out;
         position: absolute;
+        //outline-offset: 5px;
+        //outline: 2px solid transparent;
 
         .bar-top-label {
             display: block;
@@ -423,7 +440,12 @@
 
         .bar-part {
             opacity: 1;
-            transition: opacity 0.5s, height .75s ease-out, width .75s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s;
+            //outline-offset: 5px;
+            //outline: 1px solid transparent;
+            box-shadow : none;
+            width: 100%;
+            transform: translate3d(0,0,0);
             /*
             &:first-of-type {
                 border-top-left-radius: 3px;
@@ -435,6 +457,22 @@
                 border-bottom-right-radius: 3px;
             }
             */
+
+            &.hover {
+                cursor: pointer;
+            }
+            
+            &.hover,
+            &.selected {
+                //outline-color: rgba(0,0,0,0.25);
+                box-shadow: inset 0 0 0 3px rgba(0,0,0,0.25);
+                //outline-color: transparent !important;
+            }
+        }
+
+        &:hover,
+        &.selected {
+
         }
 
         > rect {
@@ -474,15 +512,192 @@
         .bar-part {
             opacity: 1;
             &.multiple-parts {
-                opacity : 0.1;
+                //opacity : 0.1;
                 border-radius: 0;
                 &.highlight {
-                    opacity : 1;
+                    //opacity : 1;
+                    outline-color: rgba(0,0,0,0.2);
+                    //outline-offset: 5px;
+                    //border-color: rgba(0,0,0,0.25);
                 }
             }
         }
     }
 
+    .silhouette {
+        opacity : 0.75;
+        pointer-events: none;
+        .chart-bar {
+            transition: none !important;
+            .bar-part {
+                transition: none !important;
+            }
+        }
+    }
+
+}
+
+@media screen and (max-width : $screen-xs-max){
+    .bar-plot-chart {
+        position: relative;
+    }
+}
+
+.bar-plot-chart-controls-wrapper {
+
+    position: relative;
+
+    .overlay {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        z-index: 10;
+        .y-axis-top-label {
+            position: absolute;
+            transform: rotate3d(0,0,1,-90deg);
+            text-align: center;
+            transform-origin: 0 100%;
+            z-index: 100;
+            @media screen and (min-width: 1250px){
+                left: -10px;
+            }
+
+            .dropdown-toggle.btn.btn-xs {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            .dropdown-menu {
+                transform: rotate3d(0,0,1,90deg);
+                top: 54px;
+                z-index: 100;
+            }
+        }
+
+        .toggle-zoom {
+            position: absolute;
+            top : 3px;
+            right: 0px;
+            font-size: 1.35rem;
+            cursor: pointer;
+            user-select: none;
+            .text {
+                font-size: 0.85rem;
+                line-height: 0.9rem;
+                margin-right: 10px;
+                display: inline-block;
+                margin-top: -5px;
+                vertical-align: baseline;
+                text-align: right;
+            }
+            i.icon {
+                vertical-align: middle;
+                margin-right: 7px;
+                font-size: 15px;
+                transition : transform .75s ease-out, opacity .75s ease-out;
+            }
+            > span.toggle-container {
+                vertical-align: middle;
+            }
+            &.no-click {
+                cursor: default;
+                pointer-events: none;
+                i.icon {
+                    opacity: 0.25;
+                    transform: scale3d(0.8,0.8,0.8);
+                }
+            }
+        }
+    }
+
+    .x-axis-right-label {
+        position: relative;
+        h6, h5, h4 {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+    }
+
+    .dropdown {
+        text-align: left;
+    }
+
+    .chart-aside{
+        .dropdown {
+            width : 100%;
+            > button {
+                width: 100%;
+                text-align: left;
+                span.caret {
+                    position: absolute;
+                    right: 12px;
+                    top: 14px;
+                }
+            }
+        }
+        .legend-container {
+            margin-bottom: 8px;
+            border-bottom: 1px dotted #eee;
+            overflow-y: auto;
+        }
+    }
+
+    .dropdown-title-container {
+        vertical-align: middle;
+        text-align: left;
+        display: inline-block;
+        padding-right: 5px;
+        min-width: 120px;
+        > small {
+            font-weight: 400;
+        }
+
+        h4, h5, h6 {
+            margin : 0;
+            font-weight: 600;
+        }
+    }
+
+    .dropdown-open-title {
+        font-weight: 400;
+        line-height: 1rem;
+        font-size: 1.1rem;
+        vertical-align: text-bottom;
+    }
+
+    .controls {
+
+        text-align: right;
+
+        .btn-toolbar {
+            display: inline-block;
+        }
+
+        
+
+    }
+}
+
+@media screen and (max-width : $screen-xs-max){
+    .bar-plot-chart-controls-wrapper {
+        position: relative;
+
+        .overlay {
+            .y-axis-top-label {
+                left: 10px;
+            }
+        }
+
+        .chart-aside {
+            height : auto !important;
+            margin-top: 30px;
+            .legend-container {
+                height : auto !important;
+                overflow: visible !important;
+            }
+        }
+    }
 }
 
 /** Sunburst Chart Style(s) **/
@@ -745,7 +960,7 @@
     */
     padding: 14px 16px 14px;
     background-color: #fff;
-    min-width: 200px;
+    min-width: 160px;
     opacity : 1;
     transition: opacity .75s;
     //border: 1px solid #eee;
@@ -803,8 +1018,12 @@
     left: 0;
     //display: none !important;
     opacity: 1;
-    transition: opacity .25s, transform .05s linear;
-    pointer-events: none;
+    transition: opacity .25s, transform .05s linear, margin-left 0s .05s;
+    //pointer-events: none;
+
+    &:not(.sticky) {
+        pointer-events: none;
+    }
 
     .mosaic-cursor-body {
         background-color: #fff;
@@ -897,6 +1116,17 @@
             }
         }
 
+        .actions.buttons-container {
+            margin-left: 0;
+            margin-right: 0;
+            > .button-container {
+                padding-left: 7px;
+                padding-right: 7px;
+                padding-bottom: 7px;
+                padding-top: 3px;
+            }
+        }
+
         .details.row {
             font-size: 0.85rem;
             padding-top: 5px;
@@ -943,4 +1173,10 @@
 
     }
 
+}
+
+/*** ToolTip Extend ***/
+
+.__react_component_tooltip {
+    z-index: 9999 !important;
 }

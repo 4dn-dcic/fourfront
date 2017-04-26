@@ -43,7 +43,8 @@ def camel_case(name):
 def pluralize(name):
     name = name.replace('_', '-')
     # deal with a few special cases explicitly
-    specials = ['experiment', 'file', 'individual', 'treatment', 'quality-metric', 'summary-statistic', 'workflow-run']
+    specials = ['experiment', 'file', 'individual', 'treatment',
+                'quality-metric', 'summary-statistic', 'workflow-run']
     for sp in specials:
         if name.startswith(sp) and re.search('-(set|flag)', name) is None:
             return name.replace(sp, sp + 's')
@@ -109,7 +110,8 @@ def test_load_schema(schema, master_mixins, registry):
                 'submitted_by',
                 'status'
             ]
-            no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json', 'ontology.json', 'ontology_term.json']
+            no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json',
+                                       'ontology.json', 'ontology_term.json', 'sysinfo.json']
             for prop in shared_properties:
                 if schema == 'experiment.json':
                     # currently experiment is abstract and has no mixin properties

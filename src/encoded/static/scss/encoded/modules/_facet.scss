@@ -1,4 +1,6 @@
 
+/************** Styles for FacetList ***************/
+
 .facets-container {
     padding-top: 0;
     padding-bottom: 2px;
@@ -7,6 +9,12 @@
     border: 1px solid rgba(0, 0, 0, 0.125);
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     //border-radius: 3px;
+
+    /*
+    .browse-page-container & {
+        margin-top: 38px;
+    }
+    */
 
     .facets-header {
         padding-top: ($grid-gutter-width / 2);
@@ -26,7 +34,7 @@
     }
 
     &.with-header-bg .facets-header {
-        background-color: #388a92;
+        background-color: #22656d; //#388a92;
         border-top: inherit;
         border-left: inherit;
         border-right: inherit;
@@ -128,6 +136,15 @@
         font-weight: 500;
         line-height: inherit;
         @include font-size(0.925);
+
+        > i.icon-info-circle {
+            margin-left: 6px;
+            opacity: 0.25;
+            transition: opacity .5s;
+            &:hover {
+                opacity: 0.75;
+            }
+        }
     }
 
     &.static {
@@ -194,7 +211,7 @@
 
             span:hover {
                 text-shadow: 0 0 0;
-                i.icon { 
+                i.icon {
                     opacity: 0.5;
                 }
             }
@@ -221,9 +238,9 @@
         }
     }
 
-    .facet-list { 
+    .facet-list {
         margin: 0;
-    
+
         li {
             margin-bottom: 1px;
             position: relative;
@@ -264,7 +281,7 @@
             &.selected > a {
                 text-decoration: none;
                 color: #f8f8f8;
-                background-color: #248bac;
+                background-color: $facetlist-selected-term-color;
                 &:hover {
                     color: #fff;
                     .facet-item, .facet-count {
@@ -449,41 +466,6 @@ div.meta-status {
     margin: auto;
     display: block;
 }
-
-.result-table {
-    position: relative;
-    z-index: 10;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-
-    li {
-        margin-top: 7px;
-        border-bottom: 1px solid #E8E8E8;
-        margin-bottom: 7px;
-        @include font-size(0.9);
-
-        &:first {
-            margin-top: 0px;
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 10px;
-            @include font-size(0.9);
-        }
-
-    }
-
-    &:before {
-        content: none;
-        display: block;
-    }
-
-    .pull-right {
-        position: relative;
-        z-index: 2;
-    }
-}
-
 
 .main-panel {
     position: relative;

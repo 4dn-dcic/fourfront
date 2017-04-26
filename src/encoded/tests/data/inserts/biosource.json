@@ -8,6 +8,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -19,6 +20,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -30,6 +32,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -42,17 +45,8 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e",
+        "status": "in review by lab",
         "modifications": ["431106bc-8535-4448-903e-854af460b265"]
-    },
-    {
-        "uuid": "331111bc-8535-4448-903e-854af46abcd4",
-        "description": "whole flies",
-        "biosource_type": "whole organisms",
-        "individual":"4DNIN000AAQ1",
-        "award": "1U01CA200059-01",
-        "lab": "4dn-dcic-lab",
-        "submitted_by": "wrangler@wrangler.com",
-        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
         "uuid": "331111bc-8535-4448-903e-854af460b666",
@@ -62,17 +56,18 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
         "uuid": "111116bc-8535-4448-903e-854af460b254",
-        "description": "brain tissue",
+        "description": "pancreas",
         "biosource_type": "tissue",
         "individual":"4DNIN000AAQ1",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "tissue": "brain"
+        "tissue": "111170bc-8535-4448-903e-854af460a233"
     },
     {
         "uuid": "331111bc-8535-4448-903e-854af460b89f",
@@ -92,6 +87,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     }
 ]

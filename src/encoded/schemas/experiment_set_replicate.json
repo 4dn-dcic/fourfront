@@ -1,6 +1,6 @@
 {
-    "title": "Experiment set for Replicate experiments",
-    "description": "Schema for submitting metadata for an experiment set.",
+    "title": "Replicate Experiments",
+    "description": "An Experiment Set containing experiment replicates.",
     "id": "/profiles/experiment_set_replicate.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -34,7 +34,7 @@
             "description": "Replicate experiments with biological and technical replication numbers.",
             "type": "array",
             "default": [],
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn"],
             "uniqueItems": true,
             "items": {
                 "title": "Replicate experiment",
@@ -67,6 +67,9 @@
         },
         "experiments_in_set.award.project": {
             "title": "Project"
+        },
+        "experiments_in_set.experiment_type": {
+            "title": "Experiment Type"
         },
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"

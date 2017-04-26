@@ -9,7 +9,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa0",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APT1",
@@ -21,7 +21,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa1",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APV1",
@@ -33,7 +33,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa2",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APY1",
@@ -45,7 +45,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa3",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APZ1",
@@ -57,7 +57,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa4",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APW1",
@@ -68,7 +68,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa5",
         "status": "released",
-        "filename": "test_file2"
+        "filename": "test_file2.fastq.gz"
     },
     {
         "accession":"4DNFI067APX1",
@@ -79,7 +79,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa6",
         "status": "upload failed",
-        "filename": "test_file3"
+        "filename": "test_file3.fastq.gz"
     },
     {
         "accession":"4DNFI067AFHV",
@@ -102,7 +102,49 @@
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65cca2",
         "status": "uploaded",
         "filename": "GM12878_SRR1658581_1pc_1_R2.fastq.gz"
+    },
+    {
+        "accession":"4DNFIN232JJ2",
+        "notes": "sample dcic notes",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688a",
+        "status": "uploaded",
+        "filename": "4DNFIN232JJ2.fastq.gz"
+    },
+    {
+        "accession":"4DNFIN232JJ3",
+        "notes": "sample dcic notes",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688b",
+        "status": "uploaded",
+        "filename": "4DNFIN232JJ3.fastq.gz"
+    },
+    {
+        "accession":"4DNFIN232JJ4",
+        "notes": "sample dcic notes",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688c",
+        "status": "uploaded",
+        "filename": "4DNFIN232JJ4.fastq.gz"
+    },
+    {
+        "accession":"4DNFIN232JJ5",
+        "notes": "sample dcic notes",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688d",
+        "status": "uploaded",
+        "filename": "4DNFIN232JJ5.fastq.gz"
     }
 ]
-
-

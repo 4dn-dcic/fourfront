@@ -77,12 +77,21 @@ describe('Testing item.js', function() {
     it('Key values are found within the schema', function() {
         // the schema used is outdated
         var schemaKeys = Object.keys(schemas['Biosample']['properties']);
+        var schemaTitles = [];
+        for(var i=0; i<schemaKeys.length; i++){
+            var subschema = schemas['Biosample']['properties'][schemaKeys[i]];
+            if(subschema.title){
+                schemaTitles = schemaTitles.concat([subschema.title.toLowerCase()]);
+            }else{
+                schemaTitles = schemaTitles.concat([schemaKeys[i].toLowerCase()]);
+            }
+        }
         var keyValues = TestUtils.scryRenderedDOMComponentsWithTag(testCreate, 'dt');
         expect(keyValues.length).toEqual(54);
         keyValues.map(function(keyVal){
             _.find(keyVal.children, function(child){
                 if(child.tagName.toLowerCase() == 'span'){
-                    expect(_.contains(schemaKeys, child.innerHTML)).toBeTruthy();
+                    expect(_.contains(schemaTitles, child.innerHTML.toLowerCase())).toBeTruthy();
                 }
             });
         });
@@ -163,13 +172,13 @@ describe('Testing item.js', function() {
     });
 
     it('Has a validation button that shouldnt work', function(){
-        var warnButtons = TestUtils.scryRenderedDOMComponentsWithClass(testCreate, 'btn-warning');
+        var warnButtons = TestUtils.scryRenderedDOMComponentsWithClass(testCreate, 'btn-info');
         expect(warnButtons.length).toEqual(1);
         expect(warnButtons[0].innerHTML.toLowerCase()).toEqual('test object validity');
-        // click, but nothing should change because validation shouldn't be passed
+        // click, which should trigger the spinning icon (this.state.processingFetch)
         TestUtils.Simulate.click(warnButtons[0]);
         expect(warnButtons.length).toEqual(1);
-        expect(warnButtons[0].innerHTML.toLowerCase()).toEqual('test object validity');
+        expect(warnButtons[0].innerHTML.toLowerCase()).toEqual('<i class="icon icon-spin icon-circle-o-notch"></i>');
     });
 
 });

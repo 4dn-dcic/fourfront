@@ -5,8 +5,7 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item,
-    add_default_embeds
+    Item
     # paths_filtered_by_status,
 )
 
@@ -24,41 +23,57 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
-    embedded = ["individual", "individual.organism"]
-    embedded = add_default_embeds(embedded, schema)
+    embedded = ["individual", "individual.organism", "tissue", "tissue.name"]
 
     def _update(self, properties, sheets=None):
         name2info = {
-            'H1-hESC': ['Tier 1', 'EFO_0003042'],
-            'GM12878': ['Tier 1', 'EFO_0002784'],
-            'IMR-90': ['Tier 1', 'EFO_0001196'],
-            'HFF-hTERT': ['Tier 1', None],
-            'F121-9-CASTx129': ['Tier 1', None],
-            'K562': ['Tier 2', 'EFO_0002067'],
-            'HEK293': ['Tier 2', 'EFO_0001182'],
-            'HAP-1': ['Tier 2', 'EFO_0007598'],
-            'H9': ['Tier 2', 'EFO_0003045'],
-            'U2OS': ['Tier 2', 'EFO_0002869'],
-            'RPE-hTERT': ['Tier 2', None],
-            'WTC-11': ['Tier 2', None],
-            'F123-CASTx129': ['Tier 2', None],
-            'HHF': ['Unclassified', None],
-            'HHFc6': ['Tier 1', None],
-            "CC-2551": ['Unclassified', None],
-            "CH12-LX": ['Unclassified', 'EFO:0005233'],
-            "KBM-7": ['Unclassified', 'EFO_0005903'],
-            "192627": ['Unclassified', None],
-            "CC-2517": ['Unclassified', 'EFO:0002795'],
-            "HeLa-S3": ['Unclassified', 'EFO:0002791']
+            'H1-hESC': 'EFO_0003042',
+            'GM12878': 'EFO_0002784',
+            'IMR-90': 'EFO_0001196',
+            'HFF-hTERT': None,
+            'F121-9-CASTx129': None,
+            'K562': 'EFO_0002067',
+            'HEK293': 'EFO_0001182',
+            'HAP-1': 'EFO_0007598',
+            'H9': 'EFO_0003045',
+            'U2OS': 'EFO_0002869',
+            'RPE-hTERT': None,
+            'WTC-11': None,
+            'F123-CASTx129': None,
+            'HCT116': 'EFO:0002824',
+            "CC-2551": None,
+            "CH12-LX": 'EFO:0005233',
+            "KBM-7": 'EFO_0005903',
+            "192627": None,
+            "CC-2517": 'EFO:0002795',
+            "HeLa-S3": 'EFO:0002791',
+            "SK-N-DZ": 'EFO:0005721',
+            "A549": 'EFO:0001086',
+            "NCI-H460": 'EFO:0003044',
+            "SK-N-MC": 'EFO:0002860',
+            "T47D": 'EFO:0001247',
+            "SK-MEL-5": 'EFO:0005720',
+            "G401": 'EFO:0002179',
+            "Panc1": 'EFO:0002713',
+            "Caki2": 'EFO:0002150',
+            "LNCaP clone FGC": 'EFO:0005726',
+            "RPMI-7951": 'EFO:0005712',
+            "SJCRH30": 'EFO:0005722',
+            "GM19238": 'EFO:0002788',
+            "GM19239": 'EFO:0002789',
+            "GM19240": 'EFO:0002790',
+            "HG00731": None,
+            "HG00732": None,
+            "HG00733": None,
+            "HG00512": None,
+            "HG00513": None,
+            "HG00514": None,
         }
         if 'cell_line' in properties:
             if properties['cell_line'] in name2info:
-                termid = None
-                info = name2info.get(properties['cell_line'])
-                if info is not None:
-                    termid = info[1]
-                    if termid is not None:
-                        properties['cell_line_termid'] = termid
+                termid = name2info.get(properties['cell_line'])
+                if termid is not None:
+                    properties['cell_line_termid'] = termid
 
         super(Biosource, self)._update(properties, sheets)
 
@@ -73,7 +88,7 @@ class Biosource(Item):
                            'induced pluripotent stem cell line', 'stem cell']
         if biosource_type == "tissue":
             if tissue:
-                return tissue
+                return request.embed(tissue, '@@object').get('term_name')
         elif biosource_type in cell_line_types:
             if cell_line:
                 if cell_line_tier:

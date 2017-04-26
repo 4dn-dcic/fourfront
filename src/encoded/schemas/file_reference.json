@@ -4,7 +4,7 @@
     "id": "/profiles/file_reference.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
+    "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -27,12 +27,14 @@
             "type": "string",
             "enum": [
                 "bwaIndex",
+                "chromsizes",
                 "other"
             ]
         }
     },
     "file_format_file_extension": {
         "bwaIndex": ".bwaIndex.tgz",
-        "other": "no_file_extension"
+        "chromsizes": ".chrom.sizes",
+        "other": ""
     }
 }
