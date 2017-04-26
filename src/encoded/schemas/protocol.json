@@ -32,18 +32,14 @@
             "description": "The category that best describes the protocol.",
             "type": "string",
             "enum": [
-                "SOP for Experiment",
-                "SOP for Biosource",
-                "growth protocol",
-                "extraction protocol",
-                "differentiation protocol",
+                "experimental protocol",
+                "cell growth protocol",
+                "tissue preparation protocol",
+                "cell differentiation protocol",
                 "treatment protocol",
                 "modification protocol",
-                "excision protocol",
                 "transfection protocol",
                 "cell isolation protocol",
-                "iPS reprogramming protocol",
-                "strain generation protocol",
                 "other"
             ]
         }

@@ -1,6 +1,6 @@
 {
     "title": "Protocol Cell Culture",
-    "description": "Description of cell culture specific protocols.",
+    "description": "Cell culture specific parameters and protocols.",
     "id": "/profiles/biosample_cell_culture.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -23,7 +23,7 @@
         },
         "description": {
             "title": "Description",
-            "description": "A short description of the protocol",
+            "description": "A short description of the cell culture procedure - eg. Details on culturing a preparation of K562 cells",
             "type": "string",
             "default": ""
         },
@@ -66,7 +66,7 @@
             ]
         },
         "protocol_SOP_deviations": {
-            "title": "Additional Protocol with Deviations from SOP",
+            "title": "Additional Protocol describing Deviations from SOP",
             "description": "Protocol with deviations from SOP",
             "type": "string",
             "linkTo": "Protocol"
