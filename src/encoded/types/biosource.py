@@ -13,7 +13,7 @@ from pyramid.view import view_config
 from .base import (
     Item,
     collection_add,
-    embed_if_you_can,
+    get_item_if_you_can,
     # paths_filtered_by_status,
 )
 
