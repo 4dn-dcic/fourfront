@@ -7,13 +7,6 @@ import json
 import logging
 import os.path
 import boto3
-
-import argparse
-
-from pyramid.path import DottedNameResolver
-from pyramid.paster import get_app
-from encoded import configure_dbsession
-import sys
 import os
 
 text = type(u'')
@@ -217,7 +210,6 @@ def read_single_sheet(path, name=None):
     """
     from zipfile import ZipFile
     from . import xlreader
-    # import pdb; pdb.set_trace()
     if name is None or path.endswith('.json'):
         root, ext = os.path.splitext(path)
         stream = open(path, 'r')
@@ -643,7 +635,6 @@ PHASE2_PIPELINES = {
 def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
     """smth."""
     # exclude_list is for items that fail phase1 to be excluded from phase2
-    # import pdb; pdb.set_trace()
     exclude_list = []
     order = list(ORDER)
     if itype is not None:
@@ -781,20 +772,28 @@ def load_prod_data(app, access_key_loc=None):
     store_keys(app, access_key_loc, keys, s3_file_name='illnevertell_prod')
 
 
-def load_ontology_terms(app):
+def load_ontology_terms(app,
+                        post_json='tests/data/ontology-term-inserts/ontology_post.json',
+                        patch_json='tests/data/ontology-term-inserts/ontology_patch.json',):
+
     from webtest import TestApp
+    from webtest.app import AppError
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
     }
     testapp = TestApp(app, environ)
-    # import pdb; pdb.set_trace()
 
     from pkg_resources import resource_filename
-    posts = resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_post.json')
-    print(posts)
-    patches = resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_patch.json')
-    print(patches)
+    posts = resource_filename('encoded', post_json)
+    patches = resource_filename('encoded',patch_json)
     docsdir = []
     load_all(testapp, posts, docsdir, itype='ontology_term')
     load_all(testapp, patches, docsdir, itype='ontology_term', phase='patch_ontology')
+
+    # now keep track of the last time we loaded these suckers
+    data = {"name" : "ffsysinfo", "ontology_updated":datetime.today().isoformat()}
+    try:
+        testapp.post_json("/sysinfo", data)
+    except AppError:
+        testapp.patch_json("/sysinfo/%s" % data[name], data)
