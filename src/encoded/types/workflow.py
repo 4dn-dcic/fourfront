@@ -100,22 +100,25 @@ class Workflow(Item):
                         if mappedArg.get('step_argument_type') == 'Input file' or mappedArg.get('step_argument_type') == 'parameter':
                             inputNode = {
                                 "name" : mappedArg.get('step_argument_name'),
-                                "source" : {}
+                                "source" : []
                             }
                             if arg.get("workflow_argument_name") is not None:
-                                inputNode["source"]["name"] = arg["workflow_argument_name"]
+                                source = {}
+                                source["name"] = arg["workflow_argument_name"]
                                 if mappedArg['step_argument_type'] == 'parameter':
-                                    inputNode["source"]["type"] = "Workflow Parameter"
+                                    source["type"] = "Workflow Parameter"
                                 else:
-                                    inputNode["source"]["type"] = "Workflow Input File"
-                            elif len(mapping) > 1:
+                                    source["type"] = "Workflow Input File"
+                                inputNode["source"].append(source)
+                            if len(mapping) > 1:
                                 otherIndex = 0
                                 if mappingIndex == 0:
                                     otherIndex = 1
-                                
-                                inputNode["source"]["name"] = mapping[otherIndex]["step_argument_name"]
-                                inputNode["source"]["step"] = mapping[otherIndex]["workflow_step"]
-                                inputNode["source"]["type"] = mapping[otherIndex].get("step_argument_type")
+                                source = {}
+                                source["name"] = mapping[otherIndex]["step_argument_name"]
+                                source["step"] = mapping[otherIndex]["workflow_step"]
+                                source["type"] = mapping[otherIndex].get("step_argument_type")
+                                inputNode["source"].append(source)
 
                             step["inputs"].append(inputNode)
 
@@ -123,23 +126,27 @@ class Workflow(Item):
 
                             outputNode = {
                                 "name" : mappedArg.get("step_argument_name"),
-                                "target" : {}
+                                "target" : []
                             }
 
                             if arg.get("workflow_argument_name") is not None:
-                                outputNode["target"]["name"] = arg["workflow_argument_name"]
+                                target = {}
+                                target["name"] = arg["workflow_argument_name"]
                                 if mappedArg['step_argument_type'] == 'parameter': # shouldn't happen, but just in case
-                                    outputNode["target"]["type"] = "Workflow Output Parameter"
+                                    target["type"] = "Workflow Output Parameter"
                                 else:
-                                    outputNode["target"]["type"] = "Workflow Output File"
-                            elif len(mapping) > 1:
+                                    target["type"] = "Workflow Output File"
+                                outputNode["target"].append(target)
+                            if len(mapping) > 1:
                                 otherIndex = 0
                                 if mappingIndex == 0:
                                     otherIndex = 1
                                 
-                                outputNode["target"]["name"] = mapping[otherIndex]["step_argument_name"]
-                                outputNode["target"]["step"] = mapping[otherIndex]["workflow_step"]
-                                outputNode["target"]["type"] = mapping[otherIndex].get("step_argument_type")
+                                target = {}
+                                target["name"] = mapping[otherIndex]["step_argument_name"]
+                                target["step"] = mapping[otherIndex]["workflow_step"]
+                                target["type"] = mapping[otherIndex].get("step_argument_type")
+                                outputNode["target"].append(target)
 
                             step["outputs"].append(outputNode)
 
