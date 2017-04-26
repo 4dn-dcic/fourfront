@@ -432,7 +432,6 @@ def connect2server(keyfile, keyname, app=None):
        Also handles keyfiles stored in s3'''
     if keyfile == 's3':
         assert app is not None
-        import pdb; pdb.set_trace()
         s3bucket = app.registry.settings['system_bucket']
         keyfile = get_key(bucket=s3bucket)
         keyname = 'default'
