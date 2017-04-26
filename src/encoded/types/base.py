@@ -137,7 +137,7 @@ class AbstractCollection(snovault.AbstractCollection):
         heres' and example of why this is the way it is:
         ontology terms have uuid or term_id as unique ID keys
         and if neither of those are included in post, try to
-        use prefered_name such that:
+        use term_name such that:
         No - fail load with non-existing term message
         Multiple - fail load with ‘ambiguous name - more than 1 term with that name exist use ID’
         Single result - get uuid and use that for post/patch
