@@ -6,14 +6,16 @@ from snovault import (
 )
 from snovault.validators import (
     validate_item_content_post,
-    validate_item_content_put,
+    validate_item_content_patch,
     validate_item_content_put,
 )
+from snovault.etag import if_match_tid
 from pyramid.view import view_config
 from .base import (
     Item,
     collection_add,
     get_item_if_you_can,
+    item_edit,
     # paths_filtered_by_status,
 )
 
@@ -166,3 +168,13 @@ def validate_biosource_tissue(context, request):
              validators=[validate_item_content_post, validate_biosource_tissue])
 def biosource_add(context, request, render=None):
     return collection_add(context, request, render)
+
+
+@view_config(context=Biosource, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_biosource_tissue],
+             decorator=if_match_tid)
+@view_config(context=Biosource, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_biosource_tissue],
+             decorator=if_match_tid)
+def biosource_edit(context, request, render=None):
+    return item_edit(context, request, render)
