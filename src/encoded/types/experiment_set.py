@@ -125,7 +125,7 @@ class ExperimentSet(Item):
         pubs = [request.embed('/', uuid, '@@object')
                 for uuid in paths_filtered_by_status(request, uuids)]
         if pubs:
-            return sorted(pubs, key=lambda pub: pub.get('date_released', 0))[0]
+            return sorted(pubs, key=lambda pub: pub.get('date_released', pub['date_created']), reverse=True)[0]
         return []
 
     @calculated_property(schema={
