@@ -376,7 +376,7 @@ def document(testapp, lab, award):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
-        'document_type': 'growth protocol',
+        'document_type': 'data sheet',
     }
     return testapp.post_json('/document', item).json['@graph'][0]
 
