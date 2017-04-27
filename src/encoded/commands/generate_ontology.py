@@ -423,10 +423,19 @@ def get_ontologies(connection, ont_list):
     return ontologies
 
 
-def connect2server(keyfile, keyname):
+
+
+def connect2server(keyfile, keyname, app=None):
     '''Sets up credentials for accessing the server.  Generates a key using info
        from the named keyname in the keyfile and checks that the server can be
-       reached with that key'''
+       reached with that key.
+       Also handles keyfiles stored in s3'''
+    if keyfile == 's3':
+        assert app is not None
+        s3bucket = app.registry.settings['system_bucket']
+        keyfile = get_key(bucket=s3bucket)
+        keyname = 'default'
+
     key = FDN_Key(keyfile, keyname)
     connection = FDN_Connection(key)
     print("Running on:       {server}".format(server=connection.server))
@@ -753,7 +762,7 @@ def main():
             return
 
     # fourfront connection
-    connection = connect2server(args.keyfile, args.key)
+    connection = connect2server(args.keyfile, args.key, app)
     ontologies = get_ontologies(connection, args.ontologies)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN'):
@@ -806,6 +815,7 @@ def s3_check_last_modified(key, app):
     return obj.last_modified
 
 
+#TODO: s3 utils file
 def s3_put(obj, filename, app):
     '''
     try to guess content type
@@ -820,6 +830,22 @@ def s3_put(obj, filename, app):
                   Key=filename,
                   Body=obj,
                   )
+
+
+def get_key(bucket, keyfile_name='illnevertell'):
+    # Share secret encrypted S3 File
+    s3 = boto3.client('s3')
+    secret = os.environ['AWS_SECRET_KEY']
+    response = s3.get_object(Bucket=bucket,
+                             Key=keyfile_name,
+                             SSECustomerKey=secret[:32],
+                             SSECustomerAlgorithm='AES256')
+    akey = response['Body'].read()
+    try:
+        return json.loads(akey)
+    except ValueError:
+        # maybe its not json after all
+        return akey
 
 
 if __name__ == '__main__':
