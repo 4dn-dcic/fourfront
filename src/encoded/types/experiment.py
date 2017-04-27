@@ -28,7 +28,7 @@ class Experiment(Item):
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
     embedded = ["protocol", "protocol_variation", "lab", "award", "experiment_sets",
-                "produced_in_pub", "publications_of_exp",
+                # "produced_in_pub", "publications_of_exp",
                 "biosample", "biosample.biosource", "biosample.modifications",
                 "biosample.treatments", "biosample.biosource.individual.organism"]
     name_key = 'accession'
@@ -113,7 +113,6 @@ class Experiment(Item):
     })
     def experiment_sets(self, request, experiment_sets):
         paths = paths_filtered_by_status(request, experiment_sets)
-        import pdb; pdb.set_trace()
         return paths
 
     @calculated_property(schema={
@@ -123,15 +122,14 @@ class Experiment(Item):
         "linkTo": "Publication"
     })
     def produced_in_pub(self, request):
-        ppub = None
-        # this can I think be any collections - maybe change to something w/few items
-        esets = self.experiment_sets(request, self.get_rev_links("experiment_sets"))
-        for link in esets:
-            if 'replicate' in link:
-                _, uuid = link.rsplit("/", 1)
-                eset = exp_set_coll.get(uuid)
-                ppub = eset.produced_in_pub(request)
-        return ppub
+        esets = [request.embed('/', str(uuid), '@@object') for uuid in
+                 self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
+
+        # replicate experiment set is the boss
+        reps = [eset for eset in esets if 'ExperimentSetReplicate' in eset['@type']]
+        if reps:
+            return reps[0].get('produced_in_pub')
+
 
     @calculated_property(schema={
         "title": "Publications",
@@ -144,15 +142,11 @@ class Experiment(Item):
         }
     })
     def publications_of_exp(self, request):
-        pubs = []
-        esets = self.experiment_sets(request, self.get_rev_links('experiment_sets'))
-        for link in esets:
-            _, uuid = link.rsplit("/", 1)
-            eset = exp_set_coll.get(uuid)
-            pubs.extend(eset.publications_of_set(request))
-        if not pubs:
-            return None
-        return list(set(pubs))
+        esets = [request.embed('/', str(uuid), '@@object') for uuid in
+                 self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
+        import itertools
+        return list(itertools.chain.from_iterable([eset.get('publications_of_set',[])
+                                                    for eset in esets]))
 
 
 @collection(
