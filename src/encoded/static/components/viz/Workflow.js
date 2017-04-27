@@ -35,7 +35,7 @@ export function parseAnalysisSteps(analysis_steps){
         step.outputs.forEach(function(stepOutput, j){
             outputNodes.push({
                 column      : column,
-                format      : stepOutput.target[0].type,
+                format      : stepOutput.target && stepOutput.target[0].type,
                 name        : stepOutput.name, 
                 type        : 'output',
                 meta        : _.omit(stepOutput, 'required', 'name'),
@@ -62,9 +62,10 @@ export function parseAnalysisSteps(analysis_steps){
         // Each input on the first step will be a node.
         if (i === 0){
             step.inputs.forEach(function(fullStepInput, j){
+                console.log(fullStepInput);
                 nodes.push({
                     column      : (i + 1) * 2 - 2,
-                    format      : fullStepInput.source[0].type, // First source type takes priority
+                    format      : fullStepInput.source && fullStepInput.source[0].type, // First source type takes priority
                     name        : fullStepInput.name, 
                     type        : 'input',
                     inputOf     : stepNode,
@@ -96,6 +97,7 @@ export function parseAnalysisSteps(analysis_steps){
             step.inputs.forEach(function(fullStepInput){
                 if (!Array.isArray(fullStepInput.source)) return;
                 var matchedInputNode = _.find(allInputOutputNodes, function(n){
+                    console.log(n, fullStepInput)
                     if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
                         return true;
                     }

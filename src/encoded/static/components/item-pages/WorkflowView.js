@@ -76,26 +76,7 @@ export class WorkflowView extends React.Component {
 
 class GraphSection extends React.Component {
 
-    static cwlToGraphData(cwlJSON, spacing){
-
-
-        /**** Outputs ****/
-
-        var nodes = [];
-        var edges = [];
-
-
-        /**** Functions ****/
-
-        function generateStepNode(step, column){
-            return {
-                id : step.id,
-                type : 'step',
-                name : step.id && step.id.charAt(0) === '#' ? step.id.slice(1) : step.id,
-                description : (step.run && step.run.description),
-                column : column
-            };
-        }
+    static parseCWLToAnalysisSteps(cwlJSON){
 
         function getFullStepInput(stepInput, step){
             var inputID = stepInput.id.replace(step.id + '.', '');
@@ -108,130 +89,69 @@ class GraphSection extends React.Component {
             } else {
                 stepInput = _.clone(stepInput);
             }
+            if (!stepInput.name) stepInput.name = inputID;
+            if (Array.isArray(stepInput.source) && typeof stepInput.source[0] === 'string'){
+                stepInput.source = stepInput.source.map(function(s){
+                    var splitID = s.replace('#','').split('.');
+
+                    return {
+                        'name' : splitID[1] || splitID[0],
+                        'argument_type' : stepInput.type && stepInput.type.indexOf('File') > -1 ? 'Input File' : stepInput.type.join(' | '),
+                        'step' : splitID.length > 0 ? splitID[0] : null
+                    };
+                });
+            }
             return stepInput;
         }
 
-        function generateOutputNodes(step, column, stepNode){
-            var outputNodes = [];
-            step.outputs.forEach(function(stepOutput, j){
-                var outputID = stepOutput.id.replace(step.id + '.', '');
-                var fullStepOutput = _.find(step.run.outputs, function(runOutput){
-                    if (outputID === runOutput.id.replace('#', '')) return true;
-                    return false;
-                });
-                if (fullStepOutput){
-                    stepOutput = _.extend({}, stepOutput, _.omit(fullStepOutput, 'id'));
-                }
 
-                var finalOutput = _.find(cwlJSON.outputs, function(cwlOutput){
-                    if (outputID === cwlOutput.id.replace('#', '')) return true;
-                    return false;
-                });
+        return cwlJSON.steps.map(function(step, i){ // Each step will be a node.
 
-                if (finalOutput){
-                    stepOutput = _.extend(stepOutput, _.omit(finalOutput, 'id'));
-                }
+                return _.extend(
+                    step, 
+                    {
+                        'display_title' : step.id.replace('#',''),
+                        'uuid' : step.id,
+                        'inputs' : step.inputs.map(function(stepInput){
+                            return getFullStepInput(stepInput, step);
+                        }),
+                        'outputs' : step.outputs.map(function(stepOutput){
+                            var outputID = stepOutput.id.replace(step.id + '.', '');
+                            var fullStepOutput = _.find(step.run.outputs, function(runOutput){
+                                if (outputID === runOutput.id.replace('#', '')) return true;
+                                return false;
+                            });
+                            if (fullStepOutput){
+                                stepOutput = _.extend({}, stepOutput, _.omit(fullStepOutput, 'id'));
+                            }
 
-                var typeStr = '';
-                if (Array.isArray(stepOutput.type)) typeStr = ' {' + stepOutput.type.join('|')  + '}';
+                            var finalOutput = _.find(cwlJSON.outputs, function(cwlOutput){
+                                if (outputID === cwlOutput.id.replace('#', '')) return true;
+                                return false;
+                            });
 
-                outputNodes.push({
-                    column      : column,
-                    id          : stepOutput.id || null,
-                    format      : stepOutput.type,
-                    name        : stepOutput.id, 
-                    type        : 'output',
-                    required    : stepOutput.required || false,
-                    meta        : _.omit(stepOutput, 'type', 'required', 'id'),
-                    outputOf    : stepNode
-                });
-
-            });
-
-            outputNodes.forEach(function(n){
-                edges.push({
-                    'source' : stepNode,
-                    'target' : n,
-                    'capacity' : 'Output',
-                });
-            });
-
-            nodes = nodes.concat(outputNodes);
-        }
-
-        cwlJSON.steps.forEach(function(step, i){ // Each step will be a node.
-
-            var stepNode = generateStepNode(step, (i + 1) * 2 - 1);
-
-            // Each input on the first step will be a node.
-            if (i === 0){
-                step.inputs.forEach(function(stepInput, j){
-
-                    var fullStepInput = getFullStepInput(stepInput, step);
-                    
-                    nodes.push({
-                        column      : (i + 1) * 2 - 2,
-                        id          : fullStepInput.id || null,
-                        format      : fullStepInput.type,
-                        name        : fullStepInput.id, 
-                        type        : 'input',
-                        inputOf     : stepNode,
-                        required    : fullStepInput.required || false,
-                        meta        : _.omit(fullStepInput, 'type', 'required', 'id')
-                    });
-                });
-
-                nodes.forEach(function(inputNode){
-                    if (inputNode.type !== 'input') return;
-                    edges.push({
-                        'source' : inputNode,
-                        'target' : stepNode,
-                        'capacity' : 'Original Input'
-                    });
-                });
-
-                
-                generateOutputNodes(step, (i + 1) * 2, stepNode);
-                nodes.push(stepNode);
-
-            } else if (i < cwlJSON.steps.length){
-
-                var allInputOutputNodes = _.filter(nodes, function(n){
-                    if (n.type === 'output' || n.type === 'input') return true;
-                    return false;
-                });
-
-                step.inputs.forEach(function(stepInput){
-                    var fullStepInput = getFullStepInput(stepInput, step);
-                    if (!Array.isArray(fullStepInput.source)) return;
-                    var matchedInputNode = _.find(allInputOutputNodes, function(n){
-                        if (fullStepInput.source.indexOf(n.id) > -1){
-                            return true;
-                        }
-                        return false;
-                    });
-                    if (matchedInputNode){
-                        console.log('MATCHEDINPUTNODE', matchedInputNode);
-                        edges.push({
-                            'source' : matchedInputNode,
-                            'target' : stepNode,
-                            'capacity' : 'Input'
-                        });
+                            if (finalOutput){
+                                stepOutput = _.extend(stepOutput, _.omit(finalOutput, 'id'));
+                            }
+                            if (!stepOutput.name) stepOutput.name = outputID;
+                            if (!stepOutput.target){
+                                if (stepOutput.source) {
+                                    stepOutput.target = stepOutput.source.map(function(s){
+                                        return {
+                                            'name' : s,
+                                            'argument_type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
+                                        };
+                                    });
+                                }
+                            }
+                            console.log(stepOutput);
+                            return stepOutput;
+                        })
                     }
-                });
+                );
 
-                generateOutputNodes(step, (i + 1) * 2, stepNode);
-                nodes.push(stepNode);
-            }
 
         });
-
-        console.log(nodes, edges);
-
-        return {
-            'nodes' : nodes,
-            'edges' : edges
-        };
     }
 
     static isCwlDataValid(cwlJSON){
@@ -264,7 +184,9 @@ class GraphSection extends React.Component {
                 <h4 className="text-400"><em>No graphable data.</em></h4>
             </div>
         );
-        var graphData = GraphSection.cwlToGraphData(this.props.context.cwl_data);
+        var graphData = parseAnalysisSteps(
+            GraphSection.parseCWLToAnalysisSteps(this.props.context.cwl_data)
+        );
         return (
             <Graph
                 nodes={graphData.nodes}
