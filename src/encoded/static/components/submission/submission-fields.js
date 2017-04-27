@@ -146,16 +146,18 @@ var BuildField = module.exports.BuildField = React.createClass({
         if(isArrayItem){
             return(
                 <div style={{'paddingTop':'10px','paddingBottom':'10px','marginLeft':'25px'}}>
-                    <div>
-                        {this.displayField(this.props.fieldType)}
-                    </div>
-                    <Collapse in={true}>
-                        <div style={{'marginTop':'5px'}}>
-                            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'160px'}} onClick={this.deleteField}>
+                    <h5 className="facet-title" style={{'paddingBottom':'2px', 'marginBottom':"2px", "border":"none"}}>
+                        <span className="inline-block">{this.props.title + ' ' + parseInt(this.props.field + 1)}</span>
+                        <InfoIcon children={this.props.fieldTip}/>
+                        <div className="pull-right" style={{'display':'inline-block','marginRight':'5px'}}>
+                            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} onClick={this.deleteField}>
                                 {'Delete item'}
                             </Button>
                         </div>
-                    </Collapse>
+                    </h5>
+                    <div style={{'paddingTop':'2px'}}>
+                        {this.displayField(this.props.fieldType)}
+                    </div>
                 </div>
             );
         }
@@ -172,7 +174,7 @@ var BuildField = module.exports.BuildField = React.createClass({
                     {this.props.fieldType !== 'array' ?
                         <Fade in={showDelete}>
                             <div className="pull-right" style={{'display':'inline-block'}}>
-                                <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px', "marginRight":"4px"}} disabled={!showDelete} onClick={this.deleteField}>
+                                <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px', "marginRight":"5px"}} disabled={!showDelete} onClick={this.deleteField}>
                                     {'Delete'}
                                 </Button>
                             </div>
@@ -300,7 +302,8 @@ var ArrayField = React.createClass({
         var fieldSchema = arrayInfo[1];
         // use arrayIdx as stand-in value for field
         var arrayIdx = arrayInfo[2];
-        var fieldTip = null;
+        var fieldTip = fieldSchema.description || null;
+        var title = fieldSchema.title || 'Array item';
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
         var enumValues = [];
         // transform some types...
@@ -338,6 +341,7 @@ var ArrayField = React.createClass({
                     field={arrayIdx}
                     fieldType={fieldType}
                     fieldTip={fieldTip}
+                    title={title}
                     enumValues={enumValues}
                     disabled={false}
                     modifyNewContext={this.modifyArrayContent}
@@ -361,7 +365,7 @@ var ArrayField = React.createClass({
         }
         return(
             <div>
-                <Button className="pull-right" bsSize="xsmall" style={{'width':'160px', "marginTop":"-24px", "marginRight":"4px"}} onClick={this.pushArrayValue}>
+                <Button className="pull-right" bsSize="xsmall" style={{'width':'80px', "marginTop":"-24px", "marginRight":"5px"}} onClick={this.pushArrayValue}>
                     {'Add item'}
                 </Button>
                 <div style={{'marginLeft':'50px','paddingTop':'13px'}}>
