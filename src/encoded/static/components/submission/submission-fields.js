@@ -4,7 +4,7 @@ var globals = require('../globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
-var { DropdownButton, Button, MenuItem, Panel, Table, Collapse} = require('react-bootstrap');
+var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} = require('react-bootstrap');
 var makeTitle = require('../item-pages/item').title;
 var Alerts = require('../alerts');
 var getLargeMD5 = require('../util/file-utility').getLargeMD5;
@@ -23,14 +23,29 @@ var BuildField = module.exports.BuildField = React.createClass({
 
     displayField: function(field_case){
         var inputProps = {
-            'id' : this.props.label,
+            'id' : this.props.field,
             'disabled' : this.props.disabled || false,
             'ref' : "inputElement",
             'value' : this.props.value || '',
             'onChange' : this.handleChange,
-            'name' : this.props.label,
+            'name' : this.props.field,
             'autoFocus': true,
             'placeholder': "No value"
+        };
+        var otherProps = {
+            'field': this.props.field,
+            'collection': this.props.schema.linkTo,
+            'modifyNewContext': this.props.modifyNewContext,
+            'getFieldValue': this.props.getFieldValue,
+            'selectObj': this.props.selectObj,
+            'arrayIdx': this.props.arrayIdx,
+            'isArray': this.props.isArray,
+            'arrayField': this.props.arrayField,
+            'nestedField': this.props.nestedField,
+            'schema': this.props.schema,
+            'md5Progress': this.props.md5Progress,
+            'modifyFile': this.props.modifyFile,
+            'modifyMD5Progess': this.props.modifyMD5Progess
         };
         switch(field_case){
             case 'text' : return (
@@ -56,19 +71,19 @@ var BuildField = module.exports.BuildField = React.createClass({
                 </span>
             );
             case 'linked object' : return (
-                    <LinkedObj field={this.props.isArray ? this.props.arrayField : this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue} selectObj={this.props.selectObj} arrayIdx={this.props.isArray ? this.props.label : null}/>
+                <LinkedObj {...inputProps} {...otherProps}/>
             );
             case 'array' : return (
-                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue} selectObj={this.props.selectObj}/>
+                <ArrayField {...inputProps} {...otherProps}/>
             );
             case 'object' : return (
-                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue} selectObj={this.props.selectObj}/>
+                <ObjectField {...inputProps} {...otherProps}/>
             );
             case 'attachment' : return (
-                <AttachmentInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext} getFieldValue={this.props.getFieldValue}/>
+                <AttachmentInput {...inputProps} {...otherProps}/>
             );
             case 'file upload' : return (
-                <S3FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} modifyMD5Progess={this.props.modifyMD5Progess} md5Progress={this.props.md5Progress} schema={this.props.schema} getFieldValue={this.props.getFieldValue}/>
+                <S3FileInput {...inputProps} {...otherProps}/>
             );
         }
         // Fallback
@@ -86,7 +101,7 @@ var BuildField = module.exports.BuildField = React.createClass({
 
     submitEnumVal: function(eventKey){
         //TODO: add an option to remove the value?
-        this.props.modifyNewContext(this.props.label, eventKey);
+        this.props.modifyNewContext(this.props.field, eventKey);
     },
 
     handleChange: function(e){
@@ -102,16 +117,16 @@ var BuildField = module.exports.BuildField = React.createClass({
                 currValue = parseFloat(currValue);
             }
         }
-        this.props.modifyNewContext(this.props.label, currValue);
+        this.props.modifyNewContext(this.props.field, currValue);
     },
 
     // call modifyNewContext from parent to delete the value in the field
     deleteField : function(e){
         e.preventDefault();
         if(this.props.isArray){
-            this.props.arrayDelete(this.props.label);
+            this.props.arrayDelete(this.props.field);
         }else{
-            this.props.modifyNewContext(this.props.label, null);
+            this.props.modifyNewContext(this.props.field, null);
         }
     },
 
@@ -123,15 +138,15 @@ var BuildField = module.exports.BuildField = React.createClass({
         // don't show delet button unless:
         // 1. not in hardcoded cannot delete list AND 2. has a value (non-null)
         // AND 3. is not an array (individual values get deleted)
-        if(!_.contains(cannot_delete,this.props.label) && this.props.value && this.props.fieldType !== 'array'){
+        if(!_.contains(cannot_delete,this.props.field) && this.props.value && this.props.fieldType !== 'array'){
             showDelete = true;
         }
-        var isArrayItem = this.props.isArray || false;
+        var isArrayItem = this.props.isArray ? true : false;
         // array items don't need fieldnames/tooltips
         if(isArrayItem){
             return(
-                <div>
-                    <div style={{'paddingTop':'2px'}}>
+                <div style={{'paddingTop':'10px','paddingBottom':'10px','marginLeft':'25px'}}>
+                    <div>
                         {this.displayField(this.props.fieldType)}
                     </div>
                     <Collapse in={true}>
@@ -144,26 +159,30 @@ var BuildField = module.exports.BuildField = React.createClass({
                 </div>
             );
         }
+        // in render, below: don't include Fade for delete if an array.
         return(
             <div className="row facet" style={{'marginBottom':'10px', 'overflow':'visible'}}>
-                <h5 className="facet-title" style={{'paddingBottom':'2px', 'marginBottom':"2px"}}>
+                <h5 className="facet-title" style={{'paddingBottom':'2px', 'marginBottom':"2px", "border":"none"}}>
                     <span className="inline-block">{this.props.title}</span>
                     <InfoIcon children={this.props.fieldTip}/>
                     {this.props.required ?
                         <span style={{'color':'#a94442', 'marginLeft':'6px'}}>Required</span>
                         : null
                     }
+                    {this.props.fieldType !== 'array' ?
+                        <Fade in={showDelete}>
+                            <div className="pull-right" style={{'display':'inline-block'}}>
+                                <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px', "marginRight":"4px"}} disabled={!showDelete} onClick={this.deleteField}>
+                                    {'Delete'}
+                                </Button>
+                            </div>
+                        </Fade>
+                        : null
+                    }
                 </h5>
                 <div style={{'paddingTop':'2px'}}>
                     {this.displayField(this.props.fieldType)}
                 </div>
-                <Collapse in={showDelete}>
-                    <div style={{'marginTop':'5px'}}>
-                        <Button bsSize="xsmall" bsStyle="danger" style={{'width':'160px'}} disabled={!this.props.value} onClick={this.deleteField}>
-                            {'Delete'}
-                        </Button>
-                    </div>
-                </Collapse>
             </div>
         );
     }
@@ -218,11 +237,21 @@ var LinkedObj = React.createClass({
                 </div>
             );
         }
+        // pass LinkedObj field to RoundOneObject with nested field format
+        // such as, arguments.argument_mapping.workflow_step
+        var nestedField;
+        if(this.props.nestedField){
+            nestedField = this.props.nestedField;
+        }else if(this.props.isArray){
+            nestedField = this.props.arrayField;
+        }else{
+            nestedField = this.props.field;
+        }
         return(
             <div>
                 <Button bsSize="xsmall" style={style} onClick={function(e){
                         e.preventDefault();
-                        this.props.selectObj(this.state.collection, this.state.data, this.props.field, this.props.arrayIdx);
+                        this.props.selectObj(this.state.collection, this.state.data, nestedField, this.props.arrayIdx);
                     }.bind(this)}>
                     {'Select existing'}
                 </Button>
@@ -250,6 +279,7 @@ var ArrayField = React.createClass({
 
     pushArrayValue: function(e){
         e.preventDefault();
+
         var valueCopy = this.props.value || [];
         valueCopy.push(null);
         this.props.modifyNewContext(this.props.field, valueCopy);
@@ -268,7 +298,6 @@ var ArrayField = React.createClass({
     initiateArrayField: function(arrayInfo) {
         var value = arrayInfo[0] || null;
         var fieldSchema = arrayInfo[1];
-        var title = fieldSchema.title || this.props.field;
         // use arrayIdx as stand-in value for field
         var arrayIdx = arrayInfo[2];
         var fieldTip = null;
@@ -294,25 +323,37 @@ var ArrayField = React.createClass({
         }else{
             style.backgroundColor = '#fff'
         }
+        var arrayIdxList;
+        if(this.props.arrayIdx){
+            arrayIdxList = this.props.arrayIdx.slice();
+        }else{
+            arrayIdxList = [];
+        }
+        arrayIdxList.push(arrayIdx);
         return(
             <div key={arrayIdx} style={style}>
-                <BuildField value={value} schema={fieldSchema} label={arrayIdx} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyArrayContent} required={false} isArray={true} arrayDelete={this.deleteArrayValue} selectObj={this.props.selectObj} arrayField={this.props.field} title={title}/>
+                <BuildField
+                    value={value}
+                    schema={fieldSchema}
+                    field={arrayIdx}
+                    fieldType={fieldType}
+                    fieldTip={fieldTip}
+                    enumValues={enumValues}
+                    disabled={false}
+                    modifyNewContext={this.modifyArrayContent}
+                    required={false}
+                    arrayDelete={this.deleteArrayValue}
+                    selectObj={this.props.selectObj}
+                    arrayIdx={arrayIdxList}
+                    nestedField={this.props.nestedField}
+                    isArray={true}
+                    arrayField={this.props.field}/>
             </div>
         );
     },
 
     render: function(){
         var schema = this.props.schema.items || {};
-        var title = this.props.schema.title ? this.props.schema.title + ' ' : '';
-        var fieldTip = schema.description ? title +schema.description + ' ' : title;
-        var fieldType = schema.type || 'undefined';
-        var arrayTable = null;
-        if(fieldType == 'string'){
-            fieldType = 'text';
-        }
-        if (schema.enum){
-            fieldType = 'enum';
-        }
         var value = this.props.value || [];
         var arrayInfo = [];
         for(var i=0; i<value.length; i++){
@@ -320,7 +361,7 @@ var ArrayField = React.createClass({
         }
         return(
             <div>
-                <Button bsSize="xsmall" style={{'width':'160px'}} onClick={this.pushArrayValue}>
+                <Button className="pull-right" bsSize="xsmall" style={{'width':'160px', "marginTop":"-24px", "marginRight":"4px"}} onClick={this.pushArrayValue}>
                     {'Add item'}
                 </Button>
                 <div style={{'marginLeft':'50px','paddingTop':'13px'}}>
@@ -333,6 +374,12 @@ var ArrayField = React.createClass({
 
 /* Builds a field that represents an inline object. Based off of FieldPanel*/
 var ObjectField = React.createClass({
+
+    componentDidMount: function(){
+        // initialize with empty dictionary
+        var initVal = this.props.value || {};
+        this.props.modifyNewContext(this.props.field, initVal);
+    },
 
     modifyObjectContent: function(field, value){
         var valueCopy;
@@ -372,6 +419,7 @@ var ObjectField = React.createClass({
         var fieldSchema = fieldInfo[1];
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        var title = fieldSchema.title || field;
         var fieldValue;
         if(this.props.value){
             fieldValue = this.props.value[field] || null;
@@ -392,8 +440,34 @@ var ObjectField = React.createClass({
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
         }
+        // format field as <this_field>.<next_field> so top level modification
+        // happens correctly
+        var nestedField;
+        if(this.props.nestedField){
+            nestedField = this.props.nestedField;
+        }else if(this.props.isArray){
+            nestedField = this.props.arrayField;
+        }else{
+            nestedField = this.props.field;
+        }
+        nestedField = nestedField + '.' + field;
         return(
-            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyObjectContent} required={false} selectObj={this.props.selectObj}/>
+            <BuildField
+                value={fieldValue}
+                key={field}
+                schema={fieldSchema}
+                field={field}
+                fieldType={fieldType}
+                fieldTip={fieldTip}
+                enumValues={enumValues}
+                disabled={false}
+                modifyNewContext={this.modifyObjectContent}
+                required={false}
+                selectObj={this.props.selectObj}
+                title={title}
+                nestedField={nestedField}
+                isArray={false}
+                arrayIdx={this.props.arrayIdx}/>
         );
     },
 

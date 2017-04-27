@@ -66,6 +66,7 @@ export default class SubmissionView extends React.Component{
             contextCopy[objKey] = newContext;
             validCopy[objKey] = 0;
         }
+        console.log('newContext:', contextCopy);
         this.setState({'masterContext': contextCopy,
             'masterValid': validCopy,
             'masterTypes': typesCopy
@@ -453,13 +454,39 @@ class RoundOneObject extends React.Component{
     selectComplete = (value) => {
         if(this.state.selectField){
             if(this.state.selectArrayIdx !== null){
-                var origContent = this.props.currContext[this.state.selectField];
-                if(origContent === null){
-                    this.modifyNewContext(this.state.selectField, [value]);
-                }else{
-                    origContent[this.state.selectArrayIdx] = value;
-                    this.modifyNewContext(this.state.selectField, origContent);
+                // we have arrays involved
+                // use an array of array indexes and nested field structure
+                // made by the BuildFields to set the context correctly.
+                var splitField = this.state.selectField.split('.');
+                var arrayIdxPointer = 0;
+                var contextCopy = this.props.currContext;
+                var pointer = contextCopy;
+                for (var i=0; i<(splitField.length-1); i++){
+                    if(pointer[splitField[i]]){
+                        pointer = pointer[splitField[i]];
+                    } else {
+                        this.setState({
+                            'selectType': null,
+                            'selectData': null,
+                            'selectQuery': null,
+                            'selectField': null,
+                            'selectArrayIdx': null
+                        });
+                        return;
+                    }
+                    if(pointer instanceof Array){
+                        pointer = pointer[this.state.selectArrayIdx[arrayIdxPointer]];
+                        arrayIdxPointer += 1;
+                    }
                 }
+                if(pointer[splitField[splitField.length-1]] instanceof Array){
+                    // move pointer into array
+                    pointer = pointer[splitField[splitField.length-1]];
+                    pointer[this.state.selectArrayIdx[arrayIdxPointer]] = value;
+                }else{ // must be a dict
+                    pointer[splitField[splitField.length-1]] = value;
+                }
+                this.props.modifyMasterContext(this.props.objectKey, contextCopy);
             }else{
                 this.modifyNewContext(this.state.selectField, value);
             }
@@ -524,7 +551,7 @@ class RoundOneObject extends React.Component{
         var required = _.contains(this.props.schema.required, field);
 
         return(
-            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyNewContext} modifyFile={null} modifyMD5Progess={null} md5Progress={null} getFieldValue={this.getFieldValue} required={required} isLinked={isLinked} selectObj={this.selectObj} title={fieldTitle} edit={this.props.edit} create={this.props.create}/>
+            <BuildField value={fieldValue} key={field} schema={fieldSchema} field={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyNewContext} modifyFile={null} modifyMD5Progess={null} md5Progress={null} getFieldValue={this.getFieldValue} required={required} isLinked={isLinked} selectObj={this.selectObj} title={fieldTitle} edit={this.props.edit} create={this.props.create}/>
         );
     }
 
