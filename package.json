@@ -65,7 +65,6 @@
     "immutable": "^3.7.5",
     "js-md5": "^0.4.1",
     "jsonwebtoken": "^7.1.9",
-    "markdown-to-jsx": "^5.0.0",
     "marked": "^0.3.6",
     "moment": "^2.15.2",
     "prop-types": "^15.5.8",
