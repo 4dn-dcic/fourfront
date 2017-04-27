@@ -103,8 +103,7 @@ class Workflow(Item):
                                 "source" : []
                             }
                             if arg.get("workflow_argument_name") is not None:
-                                source = {}
-                                source["name"] = arg["workflow_argument_name"]
+                                source = { "name" : arg["workflow_argument_name"] }
                                 if mappedArg['step_argument_type'] == 'parameter':
                                     source["type"] = "Workflow Parameter"
                                 else:
@@ -114,11 +113,11 @@ class Workflow(Item):
                                 otherIndex = 0
                                 if mappingIndex == 0:
                                     otherIndex = 1
-                                source = {}
-                                source["name"] = mapping[otherIndex]["step_argument_name"]
-                                source["step"] = mapping[otherIndex]["workflow_step"]
-                                source["type"] = mapping[otherIndex].get("step_argument_type")
-                                inputNode["source"].append(source)
+                                inputNode["source"].append({
+                                    "name" : mapping[otherIndex]["step_argument_name"],
+                                    "step" : mapping[otherIndex]["workflow_step"],
+                                    "type" : mapping[otherIndex].get("step_argument_type")
+                                })
 
                             step["inputs"].append(inputNode)
 
@@ -141,12 +140,11 @@ class Workflow(Item):
                                 otherIndex = 0
                                 if mappingIndex == 0:
                                     otherIndex = 1
-                                
-                                target = {}
-                                target["name"] = mapping[otherIndex]["step_argument_name"]
-                                target["step"] = mapping[otherIndex]["workflow_step"]
-                                target["type"] = mapping[otherIndex].get("step_argument_type")
-                                outputNode["target"].append(target)
+                                outputNode["target"].append({
+                                    "name" : mapping[otherIndex]["step_argument_name"],
+                                    "step" : mapping[otherIndex]["workflow_step"],
+                                    "type" : mapping[otherIndex].get("step_argument_type")
+                                })
 
                             step["outputs"].append(outputNode)
 

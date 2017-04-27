@@ -7,7 +7,7 @@ var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, Attri
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 var { console, object, DateUtility, Filters } = require('./../util');
-import { Graph } from './../viz/Workflow';
+import { Graph, parseAnalysisSteps } from './../viz/Workflow';
 var { DropdownButton, MenuItem } = require('react-bootstrap');
 
 
@@ -277,12 +277,29 @@ class GraphSection extends React.Component {
 
     }
 
+    detailGraph(){
+        var graphData = parseAnalysisSteps(this.props.context.analysis_steps);
+        return (
+            <Graph
+                nodes={graphData.nodes}
+                edges={graphData.edges}
+            />
+        );
+    }
+
     body(){
         if (this.state.showChart === 'cwl') return this.cwlGraph();
+        if (this.state.showChart === 'detail') return this.detailGraph();
 
         return (
             null
         );
+    }
+
+    static keyTitleMap = {
+        'detail' : 'Analysis Steps',
+        'basic' : 'Basic Graph',
+        'cwl' : 'CWL Graph'
     }
 
     render(){
@@ -293,17 +310,24 @@ class GraphSection extends React.Component {
                     <span>Graph</span>
                     <span className="pull-right">
                         <DropdownButton
+                            pullRight
                             onSelect={(eventKey, evt)=>{
                                 if (eventKey === this.state.showChart) return;
                                 this.setState({ showChart : eventKey });
                             }}
-                            title={"Viewing " + (this.state.showChart === 'cwl' ? "Detailed" : "Basic") + " Chart"}
+                            title={
+                                "Viewing " + 
+                                GraphSection.keyTitleMap[this.state.showChart]
+                            }
                         >
+                            <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
+                                Analysis Steps
+                            </MenuItem>
                             <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>
-                                Detailed (Common Workflow Language)
+                                Common Workflow Language (CWL)
                             </MenuItem>
                             <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
-                                Basic
+                                Basic Inputs & Outputs
                             </MenuItem>
                         </DropdownButton>
                     </span>

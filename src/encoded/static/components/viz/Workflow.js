@@ -10,6 +10,122 @@ import { console, object, isServerSide, expFxn, Filters, layout, navigate, ajax 
 var ReactTooltip = require('react-tooltip');
 
 
+export function parseAnalysisSteps(analysis_steps){
+
+    /**** Outputs ****/
+
+    var nodes = [];
+    var edges = [];
+
+
+    /**** Functions ****/
+
+    function generateStepNode(step, column){
+        return {
+            id : step.uuid,
+            type : 'step',
+            name : step.display_title || step.title || step['@id'],
+            description : step.description,
+            column : column
+        };
+    }
+
+    function generateOutputNodes(step, column, stepNode){
+        var outputNodes = [];
+        step.outputs.forEach(function(stepOutput, j){
+            outputNodes.push({
+                column      : column,
+                format      : stepOutput.target[0].type,
+                name        : stepOutput.name, 
+                type        : 'output',
+                meta        : _.omit(stepOutput, 'required', 'name'),
+                outputOf    : stepNode
+            });
+
+        });
+
+        outputNodes.forEach(function(n){
+            edges.push({
+                'source' : stepNode,
+                'target' : n,
+                'capacity' : 'Output',
+            });
+        });
+
+        nodes = nodes.concat(outputNodes);
+    }
+
+    analysis_steps.forEach(function(step, i){ // Each step will be a node.
+
+        var stepNode = generateStepNode(step, (i + 1) * 2 - 1);
+
+        // Each input on the first step will be a node.
+        if (i === 0){
+            step.inputs.forEach(function(fullStepInput, j){
+                nodes.push({
+                    column      : (i + 1) * 2 - 2,
+                    format      : fullStepInput.source[0].type, // First source type takes priority
+                    name        : fullStepInput.name, 
+                    type        : 'input',
+                    inputOf     : stepNode,
+                    required    : fullStepInput.required || false,
+                    meta        : _.omit(fullStepInput, 'required', 'name')
+                });
+            });
+
+            nodes.forEach(function(inputNode){
+                if (inputNode.type !== 'input') return;
+                edges.push({
+                    'source' : inputNode,
+                    'target' : stepNode,
+                    'capacity' : 'Original Input'
+                });
+            });
+
+            
+            generateOutputNodes(step, (i + 1) * 2, stepNode);
+            nodes.push(stepNode);
+
+        } else if (i < analysis_steps.length){
+
+            var allInputOutputNodes = _.filter(nodes, function(n){
+                if (n.type === 'output' || n.type === 'input') return true;
+                return false;
+            });
+
+            step.inputs.forEach(function(fullStepInput){
+                if (!Array.isArray(fullStepInput.source)) return;
+                var matchedInputNode = _.find(allInputOutputNodes, function(n){
+                    if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
+                        return true;
+                    }
+                    return false;
+                });
+                if (matchedInputNode){
+                    edges.push({
+                        'source' : matchedInputNode,
+                        'target' : stepNode,
+                        'capacity' : 'Input'
+                    });
+                }
+            });
+
+            generateOutputNodes(step, (i + 1) * 2, stepNode);
+            nodes.push(stepNode);
+        }
+
+    });
+
+    console.log(nodes, edges);
+
+    return {
+        'nodes' : nodes,
+        'edges' : edges
+    };
+
+}
+
+
 export class Graph extends React.Component {
 
     static defaultProps = {
@@ -517,9 +633,9 @@ class EdgesLayer extends React.Component {
                             <path
                                 d={this.generatePathDimension(edge)}
                                 className="edge-path"
-                                key={edge.source.id + "----" + edge.target.id}
-                                data-source={edge.source.id}
-                                data-target={edge.target.id}
+                                key={(edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name)}
+                                data-source={edge.source.name}
+                                data-target={edge.target.name}
                                 markerEnd={this.props.pathArrows ? "url(#Triangle)" : null}
                             />
                         )
