@@ -249,7 +249,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     },
 
     componentDidUpdate: function(pastProps, pastState){
-        console.log('Updated FacetCharts', this.state);
+        if (this.props.debug) console.log('Updated FacetCharts', this.state);
     },
     
     /**

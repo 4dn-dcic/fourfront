@@ -151,61 +151,6 @@
         {
             "argument_mapping": [
                 {
-                    "workflow_step": "hictool_fastq2bam",
-                    "step_argument_name": "split_bam2",
-                    "step_argument_type": "Output file"
-                }
-            ],
-            "workflow_argument_name": "split_bam2",
-            "argument_type": "Output processed file"
-        },
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_fastq2bam",
-                    "step_argument_name": "split_bam1",
-                    "step_argument_type": "Output file"
-                }
-            ],
-            "workflow_argument_name": "split_bam1",
-            "argument_type": "Output processed file"
-        },
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "fend_object_hdf5",
-                    "step_argument_type": "Output file"
-                }
-            ],
-            "workflow_argument_name": "fend_object_hdf5",
-            "argument_type": "Output processed file"
-        },
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "HiC_norm_binning_hdf5",
-                    "step_argument_type": "Output file"
-                }
-            ],
-            "workflow_argument_name": "HiC_norm_binning_hdf5",
-            "argument_type": "Output processed file"
-        },
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "HiC_data_object_hdf5",
-                    "step_argument_type": "Output file"
-                }
-            ],
-            "workflow_argument_name": "HiC_data_object_hdf5",
-            "argument_type": "Output processed file"
-        },
-        {
-            "argument_mapping": [
-                {
                     "workflow_step": "hictool_hdf52matrix",
                     "step_argument_name": "observed_contact_matrix",
                     "step_argument_type": "Output file"
@@ -230,80 +175,77 @@
                 {
                     "workflow_step": "hictool_bam2hdf5",
                     "step_argument_name": "input_bam2",
-                    "step_argument_type": "Input file or parameter"
+                    "step_argument_type": "Input file"
                 },
                 {
                     "workflow_step": "hictool_fastq2bam",
                     "step_argument_name": "split_bam2",
-                    "step_argument_type": "Output file or parameter"
+                    "step_argument_type": "Output file"
                 }
             ],
-            "workflow_argument_name": "NA",
-            "argument_type": "NA"
+            "workflow_argument_name": "split_bam2"
         },
         {
             "argument_mapping": [
                 {
                     "workflow_step": "hictool_bam2hdf5",
                     "step_argument_name": "input_bam1",
-                    "step_argument_type": "Input file or parameter"
+                    "step_argument_type": "Input file"
                 },
                 {
                     "workflow_step": "hictool_fastq2bam",
                     "step_argument_name": "split_bam1",
-                    "step_argument_type": "Output file or parameter"
+                    "step_argument_type": "Output file"
                 }
             ],
-            "workflow_argument_name": "NA",
-            "argument_type": "NA"
+            "workflow_argument_name": "split_bam1"
         },
         {
             "argument_mapping": [
                 {
                     "workflow_step": "hictool_hdf52matrix",
                     "step_argument_name": "fend_object_hdf5",
-                    "step_argument_type": "Input file or parameter"
+                    "step_argument_type": "Input file"
                 },
                 {
                     "workflow_step": "hictool_bam2hdf5",
                     "step_argument_name": "fend_object_hdf5",
-                    "step_argument_type": "Output file or parameter"
+                    "step_argument_type": "Output file"
                 }
             ],
-            "workflow_argument_name": "NA",
-            "argument_type": "NA"
+            "workflow_argument_name": "fend_object_hdf5"
         },
         {
             "argument_mapping": [
                 {
                     "workflow_step": "hictool_hdf52matrix",
                     "step_argument_name": "HiC_norm_binning_hdf5",
-                    "step_argument_type": "Input file or parameter"
+                    "step_argument_type": "Input file"
                 },
                 {
                     "workflow_step": "hictool_bam2hdf5",
                     "step_argument_name": "HiC_norm_binning_hdf5",
-                    "step_argument_type": "Output file or parameter"
+                    "step_argument_type": "Output file"
                 }
             ],
-            "workflow_argument_name": "NA",
-            "argument_type": "NA"
+            "workflow_argument_name": "HiC_norm_binning_hdf5",
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
                 {
                     "workflow_step": "hictool_hdf52matrix",
                     "step_argument_name": "HiC_data_object_hdf5",
-                    "step_argument_type": "Input file or parameter"
+                    "step_argument_type": "Input file"
                 },
                 {
                     "workflow_step": "hictool_bam2hdf5",
                     "step_argument_name": "HiC_data_object_hdf5",
-                    "step_argument_type": "Output file or parameter"
+                    "step_argument_type": "Output file"
                 }
             ],
-            "workflow_argument_name": "NA",
-            "argument_type": "NA"
+            "workflow_argument_name": "HiC_data_object_hdf5",
+            "argument_type": "Output processed file"
         }
     ],
     "title": "GITAR",

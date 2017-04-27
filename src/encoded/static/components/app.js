@@ -454,7 +454,7 @@ var App = React.createClass({
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
-                    console.log('changed state: %s', key, this.state[key]);
+                    console.log('changed state: %s', key);
                 }
             }
         }
@@ -916,7 +916,7 @@ var App = React.createClass({
     },
 
     render: function() {
-        console.log('render app', this.state);
+        console.log('render app');
         var context = this.props.context;
         var content;
         var href_url = url.parse(this.props.href);

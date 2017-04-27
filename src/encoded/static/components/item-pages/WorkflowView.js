@@ -182,8 +182,7 @@ class GraphSection extends React.Component {
         super(props);
         this.render = this.render.bind(this);
         this.state = {
-            // Should be one of 'cwl', 'basic'
-            'showChart' : this.cwlDataExists(props) ? 'cwl' : 'basic'
+            'showChart' : 'detail'
         }
     }
 

@@ -104,7 +104,10 @@ class Workflow(Item):
 
                     if mappedArg.get('workflow_step') == step['uuid']:
 
-                        if mappedArg.get('step_argument_type') == 'Input file' or mappedArg.get('step_argument_type') == 'parameter':
+                        if (mappedArg.get('step_argument_type') == 'Input file' or
+                            mappedArg.get('step_argument_type') == 'Input file or parameter' or
+                            mappedArg.get('step_argument_type') == 'parameter' ):
+
                             inputNode = {
                                 "name" : mappedArg.get('step_argument_name'),
                                 "source" : []
@@ -128,7 +131,8 @@ class Workflow(Item):
 
                             step["inputs"].append(inputNode)
 
-                        elif mappedArg.get('step_argument_type') == 'Output file':
+                        elif (mappedArg.get('step_argument_type') == 'Output file' or
+                            mappedArg.get('step_argument_type') == 'Output file or parameter' ):
 
                             outputNode = {
                                 "name" : mappedArg.get("step_argument_name"),

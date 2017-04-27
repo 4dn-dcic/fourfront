@@ -208,7 +208,7 @@ export class Graph extends React.Component {
         nodes.forEach((node, i) => {
             node.x = (node.column * (this.props.columnWidth + this.props.columnSpacing)) + this.props.innerMargin.left;
         });
-        
+
         return nodes;
     }
 
@@ -523,6 +523,7 @@ class NodesLayer extends React.Component {
 
     render(){
         var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
+        console.log('NODEs', this.props.nodes);
         return (
             <div className="nodes-layer-wrapper" style={{ width : this.props.contentWidth, height : fullHeight }}>
                 <div className="nodes-layer" style={{ width : this.props.contentWidth, height : fullHeight }}>
@@ -533,7 +534,7 @@ class NodesLayer extends React.Component {
                                 node={node}
                                 onMouseEnter={this.props.onNodeMouseEnter && this.props.onNodeMouseEnter.bind(this.props.onNodeMouseEnter, node)}
                                 onMouseLeave={this.props.onNodeMouseLeave && this.props.onNodeMouseLeave.bind(this.props.onNodeMouseLeave, node)}
-                                key={node.id}
+                                key={node.id || node.name}
                             />
                         )
                     }
