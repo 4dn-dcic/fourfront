@@ -1,7 +1,6 @@
 import pytest
 import datetime
 from encoded.types.experiment import ExperimentHiC
-from encoded.types.experiment_set import is_newer_than
 # from snovault.storage import UUID
 pytestmark = pytest.mark.working
 '''Has tests for both experiment.py and experiment_set.py'''
@@ -382,6 +381,7 @@ def test_calculated_expt_produced_in_pub_for_rep_experiment_set(
     pub1_data['exp_sets_prod_in_pub'] = [repset_w_exp1['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
     expres = testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp'])
+    import pdb; pdb.set_trace()
     assert 'produced_in_pub' in expres
     assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == expres.json['produced_in_pub']['@id']
 
@@ -499,27 +499,3 @@ def test_calculated_publications_in_expt_w_repset_two_pubs_in_used(
     publications = response.json['publications_of_exp']
     for pub in publications:
         assert pub['uuid'] in pubuuids
-
-
-def test_is_newer_than():
-    ok_date_pairs = [
-        ('2001-01-01', '2000-01-01'),
-        ('2010-02-01', '2010-01-01'),
-        ('2010-01-02', '2010-01-01'),
-    ]
-
-    bad_date_pairs = [
-        ('2000-01-01', '2000-01-01'),
-        ('', '2010-01-01'),
-        (None, '2000-01-01'),
-        ('2000', '01-01'),
-        ('bob', 1),
-    ]
-
-    for dp in ok_date_pairs:
-        assert is_newer_than(dp[0], dp[1])
-        assert not is_newer_than(dp[1], dp[0])
-
-    for dp2 in bad_date_pairs:
-        assert not is_newer_than(dp2[0], dp2[1])
-        assert not is_newer_than(dp2[1], dp2[0])

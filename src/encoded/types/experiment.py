@@ -7,7 +7,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    paths_filtered_by_status
 )
 
 
@@ -23,6 +24,9 @@ class Experiment(Item):
 
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
+    rev = {
+        'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
+    }
     embedded = ["protocol", "protocol_variation", "lab", "award", "experiment_sets",
                 "produced_in_pub", "publications_of_exp",
                 "biosample", "biosample.biosource", "biosample.modifications",
@@ -103,25 +107,14 @@ class Experiment(Item):
         "type": "array",
         "items": {
             "title": "Experiment Set",
-            "type": "string",
-            "linkTo": "ExperimentSet"
+            "type": ["string", "object"],
+            "linkFrom": "ExperimentSet.experiments_in_set"
         }
     })
-    def experiment_sets(self, request):
-        exp_set_coll = list(self.registry['collections']['ExperimentSet'])
-        exp_set_coll.extend(list(self.registry['collections']['ExperimentSetReplicate']))
-        sets = []
-        for uuid in exp_set_coll:
-            eset = self.collection.get(uuid)
-            for exp in eset.properties['experiments_in_set']:
-                if str(exp) == str(self.uuid):
-                    ty = eset.properties['experimentset_type']
-                    prefix = '/experiment_set/'
-                    if ty == 'replicate':
-                        prefix = '/experiment_set_replicate/'
-                    s = prefix + str(uuid)
-                    sets.append(s)
-        return list(set(sets))
+    def experiment_sets(self, request, experiment_sets):
+        paths = paths_filtered_by_status(request, experiment_sets)
+        import pdb; pdb.set_trace()
+        return paths
 
     @calculated_property(schema={
         "title": "Produced in Publication",
@@ -132,8 +125,7 @@ class Experiment(Item):
     def produced_in_pub(self, request):
         ppub = None
         # this can I think be any collections - maybe change to something w/few items
-        exp_set_coll = self.registry['collections']['ExperimentSetReplicate']
-        esets = self.experiment_sets(request)
+        esets = self.experiment_sets(request, self.get_rev_links("experiment_sets"))
         for link in esets:
             if 'replicate' in link:
                 _, uuid = link.rsplit("/", 1)
@@ -153,8 +145,7 @@ class Experiment(Item):
     })
     def publications_of_exp(self, request):
         pubs = []
-        exp_set_coll = self.registry['collections']['ExperimentSet']
-        esets = self.experiment_sets(request)
+        esets = self.experiment_sets(request, self.get_rev_links('experiment_sets'))
         for link in esets:
             _, uuid = link.rsplit("/", 1)
             eset = exp_set_coll.get(uuid)

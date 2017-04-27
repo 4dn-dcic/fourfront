@@ -19,21 +19,6 @@ from .base import (
 import datetime
 
 
-def is_newer_than(d1, d2):
-    '''Takes 2 strings in format YYYY-MM-DD and tries to convert to date
-        and if successful returns True if first string is more recent than
-        second string, otherwise returns False
-    '''
-    try:
-        date1 = datetime.datetime.strptime(d1, '%Y-%m-%d').date()
-        date2 = datetime.datetime.strptime(d2, '%Y-%m-%d').date()
-        if date1 > date2:
-            return True
-    except:
-        pass
-    return False
-
-
 def invalidate_linked_items(item, field, updates=None):
     '''Invalidates the linkTo item(s) in the given field of an item
         which will trigger re-indexing the linked items
@@ -111,8 +96,8 @@ class ExperimentSet(Item):
                 release_date = datetime.datetime.now().strftime("%Y-%m-%d")
                 properties['date_released'] = release_date
         super(ExperimentSet, self)._update(properties, sheets)
-        if 'experiments_in_set' in properties:
-            invalidate_linked_items(self, 'experiments_in_set')
+        # if 'experiments_in_set' in properties:
+        #    invalidate_linked_items(self, 'experiments_in_set')
 
     @calculated_property(schema={
         "title": "Produced in Publication",
