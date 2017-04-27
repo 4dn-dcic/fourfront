@@ -4,8 +4,18 @@ from snovault import (
     collection,
     load_schema,
 )
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_patch,
+    validate_item_content_put,
+)
+from snovault.etag import if_match_tid
+from pyramid.view import view_config
 from .base import (
-    Item
+    Item,
+    collection_add,
+    get_item_if_you_can,
+    item_edit,
     # paths_filtered_by_status,
 )
 
@@ -112,3 +122,59 @@ class Biosource(Item):
     def display_title(self, request, biosource_type, individual=None,
                       cell_line=None, cell_line_tier=None, tissue=None):
         return self.biosource_name(request, biosource_type, individual, cell_line, cell_line_tier, tissue)
+
+    class Collection(Item.Collection):
+        pass
+
+
+# validator for tissue field
+def validate_biosource_tissue(context, request):
+    # import pdb; pdb.set_trace()
+    data = request.json
+    if 'tissue' not in data:
+        return
+    term_ok = False
+    tissue = data['tissue']
+    # print(tissue)
+    tissue = get_item_if_you_can(request, tissue)
+    ontology = None
+    ontology_name = None
+    try:
+        ontology = tissue.get('source_ontology')
+    except AttributeError:
+        pass
+
+    if ontology is not None:
+        ontology = get_item_if_you_can(request, ontology)
+        try:
+            ontology_name = ontology.get('ontology_name')
+        except AttributeError:
+            pass
+
+    if ontology_name is not None and (
+            ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
+        term_ok = True
+    if not term_ok:
+        try:
+            tissuename = tissue.get('term_name')
+        except AttributeError:
+            tissuename = str(tissue)
+        request.errors.add('body', None, 'Term: ' + tissuename + ' is not found in UBERON')
+    else:
+        request.validated.update({})
+
+
+@view_config(context=Biosource.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_biosource_tissue])
+def biosource_add(context, request, render=None):
+    return collection_add(context, request, render)
+
+
+@view_config(context=Biosource, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_biosource_tissue],
+             decorator=if_match_tid)
+@view_config(context=Biosource, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_biosource_tissue],
+             decorator=if_match_tid)
+def biosource_edit(context, request, render=None):
+    return item_edit(context, request, render)
