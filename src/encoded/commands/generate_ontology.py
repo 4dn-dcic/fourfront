@@ -802,5 +802,22 @@ def s3_put(obj, filename, app):
                   )
 
 
+def get_key(bucket, keyfile_name='illnevertell'):
+    # Share secret encrypted S3 File
+    s3 = boto3.client('s3')
+    secret = os.environ['AWS_SECRET_KEY']
+    response = s3.get_object(Bucket=bucket,
+                             Key=keyfile_name,
+                             SSECustomerKey=secret[:32],
+                             SSECustomerAlgorithm='AES256')
+    akey = response['Body'].read()
+    try:
+        import pdb; pdb.set_trace()
+        return json.loads(akey.decode('utf-8'))
+    except ValueError:
+        # maybe its not json after all
+        return akey
+
+
 if __name__ == '__main__':
     main()
