@@ -62,7 +62,6 @@ export function parseAnalysisSteps(analysis_steps){
         // Each input on the first step will be a node.
         if (i === 0){
             step.inputs.forEach(function(fullStepInput, j){
-                console.log(fullStepInput);
                 nodes.push({
                     column      : (i + 1) * 2 - 2,
                     format      : fullStepInput.source && fullStepInput.source[0].type, // First source type takes priority
@@ -97,7 +96,6 @@ export function parseAnalysisSteps(analysis_steps){
             step.inputs.forEach(function(fullStepInput){
                 if (!Array.isArray(fullStepInput.source)) return;
                 var matchedInputNode = _.find(allInputOutputNodes, function(n){
-                    console.log(n, fullStepInput)
                     if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
                         return true;
                     }
@@ -210,6 +208,7 @@ export class Graph extends React.Component {
         nodes.forEach((node, i) => {
             node.x = (node.column * (this.props.columnWidth + this.props.columnSpacing)) + this.props.innerMargin.left;
         });
+        
         return nodes;
     }
 
@@ -294,6 +293,17 @@ class Node extends React.Component {
             var formats = this.props.node.format;
             if (typeof formats === 'undefined'){
                 iconClass = 'question';
+            } else if (typeof formats === 'string') {
+                formats = formats.toLowerCase();
+                if (formats.indexOf('file') > -1){
+                    iconClass = 'file-text-o';
+                } else if (
+                    formats.indexOf('parameter') > -1 || formats.indexOf('int') > -1 || formats.indexOf('string') > -1
+                ){
+                    iconClass = 'cog';
+                } else {
+                    iconClass = 'question';
+                }
             } else if (Array.isArray(formats)) {
                 if (
                     formats[0] === 'File' ||
@@ -375,6 +385,8 @@ class Node extends React.Component {
                     return f;
                 });
                 output += 'Type: ' + formats.join(' | ') + '';
+            } else if (typeof node.format === 'string') {
+                output += 'Type: ' + node.format;
             } else {
                 output += '<em>Unknown Type</em>';
             }

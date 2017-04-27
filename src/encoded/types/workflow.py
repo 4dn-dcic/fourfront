@@ -80,9 +80,16 @@ class Workflow(Item):
                 if step is not None:
                     steps.append(step)
 
+        # Unique-ify steps list while preserving list order
+        unique_steps_unordered = set()
+        unique_add = unique_steps_unordered.add
+        steps = [
+            step for step in steps if not (step in unique_steps_unordered or unique_add(step))
+        ]
+
         steps = list(map(
-            lambda uuid: request.embed('/analysis_step/' + uuid), # 2) Embed
-            list(set(steps)) # 1) Unique-ify list of steps found
+            lambda uuid: request.embed('/analysis_step/' + uuid), # Embed steps' JSON
+            steps
         ))
 
         # Distribute arguments into steps' "inputs" and "outputs" arrays.

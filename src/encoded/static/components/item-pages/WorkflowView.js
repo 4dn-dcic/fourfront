@@ -90,16 +90,24 @@ class GraphSection extends React.Component {
                 stepInput = _.clone(stepInput);
             }
             if (!stepInput.name) stepInput.name = inputID;
+
             if (Array.isArray(stepInput.source) && typeof stepInput.source[0] === 'string'){
                 stepInput.source = stepInput.source.map(function(s){
                     var splitID = s.replace('#','').split('.');
-
+                    console.log(stepInput.type);
                     return {
                         'name' : splitID[1] || splitID[0],
-                        'argument_type' : stepInput.type && stepInput.type.indexOf('File') > -1 ? 'Input File' : stepInput.type.join(' | '),
+                        'type' : stepInput.type && stepInput.type.indexOf('File') > -1 ? 'Input File' : stepInput.type.join(' | '),
                         'step' : splitID.length > 0 ? splitID[0] : null
                     };
                 });
+            } else if (!Array.isArray(stepInput.source)) {
+                var splitID = step.id.replace('#','').split('.');
+                stepInput.source = [{
+                    'name' : splitID[1] || splitID[0],
+                    'type' : (stepInput.type && stepInput.type.indexOf('File') > -1 ? 'Input File' : stepInput.type.join(' | ')),
+                    'step' : splitID.length > 0 ? splitID[0] : null
+                }];
             }
             return stepInput;
         }
@@ -139,9 +147,14 @@ class GraphSection extends React.Component {
                                     stepOutput.target = stepOutput.source.map(function(s){
                                         return {
                                             'name' : s,
-                                            'argument_type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
+                                            'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
                                         };
                                     });
+                                } else {
+                                    stepOutput.target = [{
+                                        'name' : stepOutput.id,
+                                        'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
+                                    }]
                                 }
                             }
                             console.log(stepOutput);
