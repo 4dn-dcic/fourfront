@@ -2,7 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
-var Markdown = require('markdown-to-jsx');
+import Markdown from './../lib/markdown-to-jsx';
 var TableOfContents = require('./table-contents');
 var { CSVMatrixView } = require('./components');
 var globals = require('./../globals');
