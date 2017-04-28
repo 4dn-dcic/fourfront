@@ -417,16 +417,13 @@ def get_ontologies(connection, ont_list):
         ontologies = [get_FDN('ontologys/' + ontology, connection, frame='embedded') for ontology in ont_list]
 
     # removing item not found cases with reporting
+    if not isinstance(ontologies, (list, tuple)):
+        print("we must not have got ontolgies... bailing")
+        import sys
+        sys.exit()
     for i, ontology in enumerate(ontologies):
-        try:
-            if 'Ontology' not in ontology['@type']:
-                ontologies.pop(i)
-        except TypeError:
-            print('''ontology %s, number %d is a string, ontologies is: %s, plus list is %s
-                            connection is %s:%s:%s''' % (ontology, i,ontologies, ont_list,
-                                                         connection.server, connection.auth,
-                                                         connection.check))
-            return []
+        if 'Ontology' not in ontology['@type']:
+            ontologies.pop(i)
     return ontologies
 
 
@@ -439,6 +436,9 @@ def connect2server(keyfile, keyname, app=None):
         assert app is not None
         s3bucket = app.registry.settings['system_bucket']
         keyfile = get_key(bucket=s3bucket)
+        # force server to be localhost, cause this run on
+        # aws potentially before load balancer has switch over
+        keyfile['server'] = 'http://localhost'
         keyname = 'default'
 
     key = FDN_Key(keyfile, keyname)
