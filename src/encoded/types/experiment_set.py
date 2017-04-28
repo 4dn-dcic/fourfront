@@ -110,8 +110,8 @@ class ExperimentSet(Item):
         pubs = [request.embed('/', uuid, '@@object')
                 for uuid in paths_filtered_by_status(request, uuids)]
         if pubs:
-            return sorted(pubs, key=lambda pub: pub.get('date_released', pub['date_created']), reverse=True)[0]
-        return []
+            return sorted(pubs, key=lambda pub: pub.get('date_released', pub['date_created']),
+                          reverse=True)[0].get('@id')
 
     @calculated_property(schema={
         "title": "Publications",
@@ -126,8 +126,7 @@ class ExperimentSet(Item):
     def publications_of_set(self, request):
         pubs = set([str(pub) for pub in self.get_rev_links('publications_produced') +
                 self.get_rev_links('publications_using')])
-        return [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, pubs)]
+        return paths_filtered_by_status(request, pubs)
 
 
 @collection(
