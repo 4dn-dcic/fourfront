@@ -418,8 +418,12 @@ def get_ontologies(connection, ont_list):
 
     # removing item not found cases with reporting
     for i, ontology in enumerate(ontologies):
-        if 'Ontology' not in ontology['@type']:
-            ontologies.pop(i)
+        try:
+            if 'Ontology' not in ontology['@type']:
+                ontologies.pop(i)
+        except TypeError:
+            print(i, ontology, ontologies)
+            raise TypeError("ontology %s, number %d is a string" % (ontology, i))
     return ontologies
 
 
