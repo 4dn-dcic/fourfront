@@ -428,8 +428,6 @@ def get_ontologies(connection, ont_list):
     return ontologies
 
 
-
-
 def connect2server(keyfile, keyname, app=None):
     '''Sets up credentials for accessing the server.  Generates a key using info
        from the named keyname in the keyfile and checks that the server can be
