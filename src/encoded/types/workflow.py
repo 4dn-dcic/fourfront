@@ -28,30 +28,6 @@ class Workflow(Item):
 
 
     @calculated_property(schema={
-        "title": "CWL Data",
-        "type": "object",
-        "description" : "Data of cwl_pointer"
-    }, category='page')
-    def cwl_data(self, request):
-        """smth."""
-        if not request.has_permission('view_details'):
-            return
-
-        if self.properties.get('cwl_pointer') is None:
-            return
-
-        import requests
-
-        r = requests.get(self.properties['cwl_pointer'])
-
-        try:
-            return r.json()
-        except Exception as e:
-            print('\n\n\n\n\n')
-            print('Error parsing CWL data')
-            return
-
-    @calculated_property(schema={
         "title": "Workflow Analysis Steps",
         "type": "array",
         "items": {
@@ -112,7 +88,10 @@ class Workflow(Item):
                                 "name" : mappedArg.get('step_argument_name'),
                                 "source" : []
                             }
-                            if arg.get("workflow_argument_name") is not None:
+
+                            doesOutputMappingExist = len([ mp for mp in mapping if mp.get('step_argument_type') == 'Output file' or mp.get('step_argument_type') == 'Output file or parameter' ]) > 0
+
+                            if arg.get("workflow_argument_name") is not None and not doesOutputMappingExist:
                                 source = { "name" : arg["workflow_argument_name"] }
                                 if mappedArg['step_argument_type'] == 'parameter':
                                     source["type"] = "Workflow Parameter"

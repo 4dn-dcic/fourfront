@@ -95,12 +95,28 @@ export function parseAnalysisSteps(analysis_steps){
 
             step.inputs.forEach(function(fullStepInput){
                 if (!Array.isArray(fullStepInput.source)) return;
+
                 var matchedInputNode = _.find(allInputOutputNodes, function(n){
                     if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
                         return true;
                     }
                     return false;
                 });
+
+                if (!matchedInputNode){
+                    // Whooooah we gots an input that hasn't been defined previously. Probably add this to the first column.
+                    matchedInputNode = {
+                        column : (i + 1) * 2 - 2,
+                        format : fullStepInput.source && fullStepInput.source[0].type,
+                        name : fullStepInput.name,
+                        type : 'input',
+                        inputOf : stepNode,
+                        required : fullStepInput.required || false,
+                        meta : _.omit(fullStepInput, 'required', 'name')
+                    }
+                    nodes.push(matchedInputNode);
+                }
+
                 if (matchedInputNode){
                     edges.push({
                         'source' : matchedInputNode,
@@ -108,6 +124,7 @@ export function parseAnalysisSteps(analysis_steps){
                         'capacity' : 'Input'
                     });
                 }
+
             });
 
             generateOutputNodes(step, (i + 1) * 2, stepNode);
@@ -116,12 +133,62 @@ export function parseAnalysisSteps(analysis_steps){
 
     });
 
-    console.log(nodes, edges);
-
     return {
         'nodes' : nodes,
         'edges' : edges
     };
+
+}
+
+export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem){
+
+    var allWorkflowInputs = _.filter(
+        _.flatten(
+            _.pluck(analysis_steps, 'inputs'), true
+        ),
+        function(input){
+            if (!Array.isArray(input.source)) return false;
+            if (
+                _.find(input.source, function(s){
+                    if (s.type.indexOf('Workflow') > -1) return true;
+                    return false;
+                })
+            ){
+                return true;
+            }
+            return false;
+        }
+    );
+
+    var allWorkflowOutputs = _.filter(
+        _.flatten(
+            _.pluck(analysis_steps, 'outputs'), true
+        ),
+        function(output){
+            if (!Array.isArray(output.target)) return false;
+            if (
+                _.find(output.target, function(t){
+                    if (t.type.indexOf('Workflow') > -1) return true;
+                    return false;
+                })
+            ){
+                return true;
+            }
+            return false;
+        }
+    );
+
+    var singleStep = _.extend(
+        _.omit(workflowItem, 'arguments', 'analysis_steps', 'link_id', '@context', 'cwl_data'),
+        {
+            'inputs' : allWorkflowInputs,
+            'outputs' : allWorkflowOutputs
+        }
+    );
+
+    console.log(singleStep);
+
+    return parseAnalysisSteps([singleStep]);
 
 }
 
@@ -132,13 +199,13 @@ export class Graph extends React.Component {
         'height' : null,
         'width' : null,
         'columnSpacing' : 60,
-        'columnWidth' : 120,
+        'columnWidth' : 150,
         'pathArrows' : true,
         'innerMargin' : {
             'top' : 20,
             'bottom' : 48,
-            'left' : 10,
-            'right' : 10
+            'left' : 15,
+            'right' : 15
         }
     }
 
@@ -187,7 +254,7 @@ export class Graph extends React.Component {
         }, 0) + 1) * (this.props.columnWidth + this.props.columnSpacing) + this.props.innerMargin.left + this.props.innerMargin.right - this.props.columnSpacing;
     }
 
-    nodesWithCoordinates(){
+    nodesWithCoordinates(viewportWidth = null, contentWidth = null){
         var nodes = _.sortBy(this.props.nodes.slice(0), 'column');
 
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
@@ -204,9 +271,14 @@ export class Graph extends React.Component {
             }
         });
 
+        var leftOffset = this.props.innerMargin.left;
+        if (contentWidth && viewportWidth && contentWidth < viewportWidth){
+            leftOffset += (viewportWidth - contentWidth) / 2;
+        }
+
         // Set correct X coordinate on each node depending on column and spacing prop.
         nodes.forEach((node, i) => {
-            node.x = (node.column * (this.props.columnWidth + this.props.columnSpacing)) + this.props.innerMargin.left;
+            node.x = (node.column * (this.props.columnWidth + this.props.columnSpacing)) + leftOffset;
         });
 
         return nodes;
@@ -231,7 +303,7 @@ export class Graph extends React.Component {
             );
         }
 
-        var nodes = this.nodesWithCoordinates();
+        var nodes = this.nodesWithCoordinates(width, contentWidth);
         var edges = this.props.edges;
 
         return (
@@ -252,6 +324,7 @@ export class Graph extends React.Component {
                             />
                             <NodesLayer
                                 nodes={nodes}
+                                edges={edges}
                                 innerWidth={width}
                                 innerHeight={height}
                                 contentWidth={contentWidth}
@@ -410,12 +483,20 @@ class Node extends React.Component {
     render(){
         var node = this.props.node;
 
+        console.log(node);
+
         return (
-            <div className={"node node-type-" + node.type} data-node-id={node.id} style={{
-                'top' : node.y,
-                'left' : node.x,
-                'width' : this.props.columnWidth || 100
-            }}>
+            <div 
+                className={"node node-type-" + node.type}
+                data-node-key={node.id || node.name}
+                data-node-type={node.type}
+                data-node-global={node.isGlobal || null}
+                style={{
+                    'top' : node.y,
+                    'left' : node.x,
+                    'width' : this.props.columnWidth || 100
+                }}
+            >
                 <div
                     className="inner"
                     style={this.innerStyle()}
@@ -506,6 +587,21 @@ class NodesLayerChartCursorController extends React.Component {
 
 class NodesLayer extends React.Component {
 
+    static processNodes(nodes){
+        return _.map(
+                _.sortBy(_.sortBy(nodes, 'name'), 'type'),  // Sort nodes so on updates, they stay in same(-ish) order and can transition.
+                function(n){                                // Calculate extra properties
+                    n.isGlobal = false;
+                    if (typeof n.format === 'string'){
+                        if (n.format.toLowerCase().indexOf('workflow') > -1){
+                            n.isGlobal = true;
+                        }
+                    }
+                    return n;
+                }
+            );
+    }
+
     static defaultProps = {
         onNodeMouseEnter : null,
         onNodeMouseLeave : null
@@ -521,14 +617,17 @@ class NodesLayer extends React.Component {
         ReactTooltip.rebuild();
     }
 
+    componentDidUpdate(){
+        ReactTooltip.rebuild();
+    }
+
     render(){
         var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
-        console.log('NODEs', this.props.nodes);
         return (
             <div className="nodes-layer-wrapper" style={{ width : this.props.contentWidth, height : fullHeight }}>
                 <div className="nodes-layer" style={{ width : this.props.contentWidth, height : fullHeight }}>
                     {
-                        this.props.nodes.map((node, i) =>
+                        NodesLayer.processNodes(this.props.nodes).map((node, i) =>
                             <Node
                                 {..._.omit(this.props, 'children', 'nodes')}
                                 node={node}
@@ -638,10 +737,12 @@ class EdgesLayer extends React.Component {
 
     render(){
         var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
+        var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
+        var divWidth = Math.max(fullWidth, this.props.contentWidth);
         var edges = this.props.edges;
         return (
-            <div className="edges-layer-wrapper" style={{ width : this.props.contentWidth, height : fullHeight }}>
-                <svg className="edges-layer" width={ this.props.contentWidth } height={ fullHeight }>
+            <div className="edges-layer-wrapper" style={{ width : divWidth, height : fullHeight }}>
+                <svg className="edges-layer" width={ divWidth } height={ fullHeight }>
                     { this.pathArrows() }
                     {
                         edges.map((edge)=>

@@ -6,8 +6,8 @@ var _ = require('underscore');
 var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
-var { console, object, DateUtility, Filters } = require('./../util');
-import { Graph, parseAnalysisSteps } from './../viz/Workflow';
+var { console, object, DateUtility, Filters, isServerSide } = require('./../util');
+import { Graph, parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 var { DropdownButton, MenuItem } = require('react-bootstrap');
 
 
@@ -24,6 +24,13 @@ export class WorkflowView extends React.Component {
         super(props);
         this.render = this.render.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
+        this.state = {
+            mounted : false
+        };
+    }
+
+    componentDidMount(){
+        this.setState({ mounted : true });
     }
 
     getTabViewContents(){
@@ -31,12 +38,16 @@ export class WorkflowView extends React.Component {
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
-                content : <GraphSection {...this.props} />
+                content : <GraphSection {...this.props} mounted={this.state.mounted} />
             },
             AttributionTabView.getTabObject(this.props.context),
             ItemDetailList.getTabObject(this.props.context, this.props.schemas),
             AuditTabView.getTabObject(this.props.context)
-        ];
+        ].map((tabObj)=>{ // Common properties
+            return _.extend(tabObj, {
+                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 650 }
+            });
+        });
     }
 
     render() {
@@ -78,6 +89,8 @@ class GraphSection extends React.Component {
 
     static parseCWLToAnalysisSteps(cwlJSON){
 
+        var stepInputNamesEncountered = {};
+
         function getFullStepInput(stepInput, step){
             var inputID = stepInput.id.replace(step.id + '.', '');
             var fullStepInput = _.find(step.run.inputs, function(runInput){
@@ -90,11 +103,13 @@ class GraphSection extends React.Component {
                 stepInput = _.clone(stepInput);
             }
             if (!stepInput.name) stepInput.name = inputID;
-
+            if (stepInputNamesEncountered[stepInput.name]){
+                return null;
+                stepInput.name += '-' + stepInputNamesEncountered[stepInput.name]++;
+            }
             if (Array.isArray(stepInput.source) && typeof stepInput.source[0] === 'string'){
                 stepInput.source = stepInput.source.map(function(s){
                     var splitID = s.replace('#','').split('.');
-                    console.log(stepInput.type);
                     return {
                         'name' : splitID[1] || splitID[0],
                         'type' : stepInput.type && stepInput.type.indexOf('File') > -1 ? 'Input File' : stepInput.type.join(' | '),
@@ -102,6 +117,7 @@ class GraphSection extends React.Component {
                     };
                 });
             } else if (!Array.isArray(stepInput.source)) {
+                return null;
                 var splitID = step.id.replace('#','').split('.');
                 stepInput.source = [{
                     'name' : splitID[1] || splitID[0],
@@ -109,6 +125,7 @@ class GraphSection extends React.Component {
                     'step' : splitID.length > 0 ? splitID[0] : null
                 }];
             }
+            stepInputNamesEncountered[inputID] = 1;
             return stepInput;
         }
 
@@ -122,7 +139,7 @@ class GraphSection extends React.Component {
                         'uuid' : step.id,
                         'inputs' : step.inputs.map(function(stepInput){
                             return getFullStepInput(stepInput, step);
-                        }),
+                        }).filter(function(x){ return !!x; }),
                         'outputs' : step.outputs.map(function(stepOutput){
                             var outputID = stepOutput.id.replace(step.id + '.', '');
                             var fullStepOutput = _.find(step.run.outputs, function(runOutput){
@@ -181,6 +198,12 @@ class GraphSection extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.cwlDataExists = this.cwlDataExists.bind(this);
+        this.cwlGraph = this.cwlGraph.bind(this);
+        this.basicGraph = this.basicGraph.bind(this);
+        this.detailGraph = this.detailGraph.bind(this);
+        this.dropDownMenu = this.dropDownMenu.bind(this);
+        this.body = this.body.bind(this);
         this.state = {
             'showChart' : 'detail'
         }
@@ -208,7 +231,16 @@ class GraphSection extends React.Component {
     }
 
     basicGraph(){
-
+        var graphData = parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context);
+        return (
+            <Graph
+                nodes={graphData.nodes}
+                edges={graphData.edges}
+                columnWidth={this.props.mounted && this.refs.container ?
+                    (this.refs.container.offsetWidth - 180) / 3
+                : 180}
+            />
+        );
     }
 
     detailGraph(){
@@ -224,6 +256,7 @@ class GraphSection extends React.Component {
     body(){
         if (this.state.showChart === 'cwl') return this.cwlGraph();
         if (this.state.showChart === 'detail') return this.detailGraph();
+        if (this.state.showChart === 'basic') return this.basicGraph();
 
         return (
             null
@@ -232,38 +265,52 @@ class GraphSection extends React.Component {
 
     static keyTitleMap = {
         'detail' : 'Analysis Steps',
-        'basic' : 'Basic Graph',
+        'basic' : 'Basic Inputs & Outputs',
         'cwl' : 'CWL Graph'
+    }
+
+    dropDownMenu(){
+
+        var detail = (
+            <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
+                Analysis Steps
+            </MenuItem>
+        );
+
+        var cwl = this.cwlDataExists() ? (
+            <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>
+                Common Workflow Language (CWL)
+            </MenuItem>
+        ) : null;
+
+        var basic = (
+            <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
+                Basic Inputs & Outputs
+            </MenuItem>
+        );
+
+        return (
+            <DropdownButton
+                pullRight
+                onSelect={(eventKey, evt)=>{
+                    if (eventKey === this.state.showChart) return;
+                    this.setState({ showChart : eventKey });
+                }}
+                title={GraphSection.keyTitleMap[this.state.showChart]}
+            >
+                { basic }{ detail }{ cwl }
+            </DropdownButton>
+        );
     }
 
     render(){
 
         return (
-            <div>
+            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
-                    <span className="pull-right">
-                        <DropdownButton
-                            pullRight
-                            onSelect={(eventKey, evt)=>{
-                                if (eventKey === this.state.showChart) return;
-                                this.setState({ showChart : eventKey });
-                            }}
-                            title={
-                                "Viewing " + 
-                                GraphSection.keyTitleMap[this.state.showChart]
-                            }
-                        >
-                            <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
-                                Analysis Steps
-                            </MenuItem>
-                            <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>
-                                Common Workflow Language (CWL)
-                            </MenuItem>
-                            <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
-                                Basic Inputs & Outputs
-                            </MenuItem>
-                        </DropdownButton>
+                    <span className="pull-right workflow-view-dropdown-container">
+                        { this.dropDownMenu() }
                     </span>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>

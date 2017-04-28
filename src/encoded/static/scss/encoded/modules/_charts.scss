@@ -1048,6 +1048,8 @@ $workflow-step-node-lineheight: 18px;
                     .node {
                         pointer-events: all;
                         position: absolute;
+                        transition: top .5s ease-out, left .5s ease-out, width .5s ease-out;
+                        transform: translate3d(0,0,0);
 
                         > .inner {
                             background-color: #ddd;
@@ -1127,6 +1129,41 @@ $workflow-step-node-lineheight: 18px;
                                 
                             }
                         }
+
+                        &.node-type-output {
+                            &[data-node-global="true"] {
+                                &:before {
+                                    background-color: #cde2e1;
+                                }
+                                .workflow-viewing-basic &:after {
+                                    content: '';
+                                    top: 50%;
+                                    margin-top: -1px;
+                                    height: 1px;
+                                    width: 10px;
+                                    background-color: #555;
+                                    position: absolute;
+                                    right: -15px;
+                                }
+                            }
+                        }
+                        &.node-type-input {
+                            &[data-node-global="true"] {
+                                &:before {
+                                    background-color: #d1cde2;
+                                }
+                                &:after {
+                                    content: '';
+                                    top: 50%;
+                                    margin-top: -0.5px;
+                                    height: 1px;
+                                    width: 10px;
+                                    background-color: #555;
+                                    position: absolute;
+                                    left: -15px;
+                                }
+                            }
+                        }
                     }
 
                 }
@@ -1160,6 +1197,10 @@ $workflow-step-node-lineheight: 18px;
 
     }
 
+}
+
+.workflow-view-dropdown-container {
+    margin-top: -10px;
 }
 
 
