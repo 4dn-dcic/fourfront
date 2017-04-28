@@ -44,6 +44,7 @@ def audit_item_schema(value, system):
         detail = 'Object {} has schema error {}'.format(value['@id'], error.message)
         yield AuditFailure(category, detail, level='INTERNAL_ACTION')
 
+
 # 4 levels of status 0-3
 # embedded sub items should have an equal or greater level
 # than that of the item in which they are embedded
@@ -100,3 +101,8 @@ def audit_item_status(value, system):
             detail = '{} {} has {} subobject {}'.format(
                 value['status'], value['@id'], linked_value['status'], linked_value['@id'])
             yield AuditFailure('mismatched status', detail, level='INTERNAL_ACTION')
+
+
+@audit_checker('Item', condition=find_ontology_terms, frame='object')
+def audit_item_obsolete_ontology_terms(value, system):
+    pass
