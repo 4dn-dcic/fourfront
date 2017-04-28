@@ -727,7 +727,7 @@ def main():
     args = parse_args(sys.argv[1:])  # to facilitate testing
 
     s3_postfile = 'ontology_post.json'
-    s3_patchfile = 'ontology_post.json'
+    s3_patchfile = 'ontology_patch.json'
     from pkg_resources import resource_filename
     outdir = resource_filename('encoded', args.outdir)
 
