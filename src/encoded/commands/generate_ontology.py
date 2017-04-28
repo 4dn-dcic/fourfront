@@ -422,11 +422,11 @@ def get_ontologies(connection, ont_list):
             if 'Ontology' not in ontology['@type']:
                 ontologies.pop(i)
         except TypeError:
-            print(i, ontology, ontologies)
-            raise TypeError('''ontology %s, number %d is a string, ontologies is: %s, plus list is %s
+            print('''ontology %s, number %d is a string, ontologies is: %s, plus list is %s
                             connection is %s:%s:%s''' % (ontology, i,ontologies, ont_list,
                                                          connection.server, connection.auth,
                                                          connection.check))
+            return []
     return ontologies
 
 
