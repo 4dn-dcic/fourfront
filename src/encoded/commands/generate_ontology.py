@@ -438,7 +438,7 @@ def connect2server(keyfile, keyname, app=None):
         keyfile = get_key(bucket=s3bucket)
         # force server to be localhost, cause this run on
         # aws potentially before load balancer has switch over
-        keyfile['server'] = 'http://localhost'
+        keyfile['default']['server'] = 'http://localhost'
         keyname = 'default'
 
     key = FDN_Key(keyfile, keyname)
