@@ -423,8 +423,10 @@ def get_ontologies(connection, ont_list):
                 ontologies.pop(i)
         except TypeError:
             print(i, ontology, ontologies)
-            raise TypeError("ontology %s, number %d is a string, ontologies is: %s, plus list is %s" % (ontology, i,
-                                                                                      ontologies, ont_list))
+            raise TypeError('''ontology %s, number %d is a string, ontologies is: %s, plus list is %s
+                            connection is %s:%s:%s''' % (ontology, i,ontologies, ont_list,
+                                                         connection.server, connection.auth,
+                                                         connection.check))
     return ontologies
 
 
