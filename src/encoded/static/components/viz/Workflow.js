@@ -178,17 +178,15 @@ export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem){
         }
     );
 
-    var singleStep = _.extend(
-        _.omit(workflowItem, 'arguments', 'analysis_steps', 'link_id', '@context', 'cwl_data'),
-        {
-            'inputs' : allWorkflowInputs,
-            'outputs' : allWorkflowOutputs
-        }
-    );
-
-    console.log(singleStep);
-
-    return parseAnalysisSteps([singleStep]);
+    return parseAnalysisSteps([
+        _.extend(
+            _.omit(workflowItem, 'arguments', 'analysis_steps', 'link_id', '@context', 'cwl_data'), // Use workflowItem as if it were AnalysisStep
+            {
+                'inputs' : allWorkflowInputs,
+                'outputs' : allWorkflowOutputs
+            }
+        )
+    ]);
 
 }
 
@@ -196,12 +194,13 @@ export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem){
 export class Graph extends React.Component {
 
     static defaultProps = {
-        'height' : null,
-        'width' : null,
+        'height'        : null,
+        'width'         : null,
         'columnSpacing' : 60,
-        'columnWidth' : 150,
-        'pathArrows' : true,
-        'innerMargin' : {
+        'columnWidth'   : 150,
+        'pathArrows'    : true,
+        'detailPane'    : true,
+        'innerMargin'   : {
             'top' : 20,
             'bottom' : 48,
             'left' : 15,
@@ -288,7 +287,6 @@ export class Graph extends React.Component {
 
         var width = this.width();
         var height = this.height();
-        var fullHeight = height + this.props.innerMargin.top + this.props.innerMargin.bottom;
         var contentWidth = this.scrollableWidth();
 
         var widthAndHeightSet = !isNaN(width) && width && !isNaN(height) && height;
@@ -307,34 +305,121 @@ export class Graph extends React.Component {
         var edges = this.props.edges;
 
         return (
-            <div ref="outerContainer" className="worfklow-chart-outer-container" style={{ height : fullHeight }}>
+            <div ref="outerContainer" className="worfklow-chart-outer-container">
                 <Fade transitionAppear in>
                     <div className="workflow-chart-inner-container">
-                        <div className="scroll-container" style={{ width : contentWidth, height: fullHeight }}>
-                            <EdgesLayer
-                                nodes={nodes}
-                                edges={edges}
-                                innerWidth={width}
-                                innerHeight={height}
-                                contentWidth={contentWidth}
-                                innerMargin={this.props.innerMargin}
-                                columnWidth={this.props.columnWidth}
-                                columnSpacing={this.props.columnSpacing}
-                                pathArrows={this.props.pathArrows}
-                            />
-                            <NodesLayer
-                                nodes={nodes}
-                                edges={edges}
-                                innerWidth={width}
-                                innerHeight={height}
-                                contentWidth={contentWidth}
-                                innerMargin={this.props.innerMargin}
-                                columnWidth={this.props.columnWidth}
-                                columnSpacing={this.props.columnSpacing}
-                            />
-                        </div>
+                        <StateContainer
+                            nodes={nodes}
+                            edges={edges}
+                            innerWidth={width}
+                            innerHeight={height}
+                            contentWidth={contentWidth}
+                            innerMargin={this.props.innerMargin}
+                            columnWidth={this.props.columnWidth}
+                            columnSpacing={this.props.columnSpacing}
+                            pathArrows={this.props.pathArrows}
+                        >
+                            <ScrollContainer>
+                                <EdgesLayer />
+                                <NodesLayer />
+                            </ScrollContainer>
+                            { this.props.detailPane ? <DetailPane /> : null }
+                        </StateContainer>
                     </div>
                 </Fade>
+            </div>
+        );
+    }
+
+}
+
+class DetailPane extends React.Component {
+
+    body(){
+        
+    }
+
+    render(){
+        var node = this.props.selectedNode;
+        if (!node) return null;
+
+        var type;
+        if (node.type === 'step'){
+            type = 'Analysis Step';
+        } else {
+            type = node.format || node.type;
+        }
+
+        return (
+            <div className="detail-pane">
+                <h4 className="text-300">
+                    <small>{ type }</small><br />
+                    <span>{ node.name }</span>
+                </h4>
+                <div className="detail-pane-body">
+
+                </div>
+            </div>
+        );
+    }
+
+}
+
+class ScrollContainer extends React.Component {
+
+    render(){
+        var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
+        return (
+            <div className="scroll-container-wrapper">
+                <div className="scroll-container" style={{ width : this.props.contentWidth, height: fullHeight }}>
+                {
+                    React.Children.map(this.props.children, (child)=>{
+                        return React.cloneElement(child, _.omit(this.props, 'children'))
+                    })
+                }
+                </div>
+            </div>
+        );
+    }
+
+}
+
+class StateContainer extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.handleNodeClick = this.handleNodeClick.bind(this);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.state = {
+            'selectedNode' : null
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (
+            nextProps.nodes.length !== this.props.nodes.length ||
+            nextProps.edges.length !== this.props.edges.length
+        ){
+            this.setState({ 'selectedNode' : null });
+        }
+    }
+
+    handleNodeClick(node, evt){
+        console.log(node);
+        this.setState({ 'selectedNode' : node });
+    }
+
+    render(){
+        return (
+            <div className="state-container">
+            {
+                React.Children.map(this.props.children, (child)=>{
+                    return React.cloneElement(child, _.extend(
+                        { onNodeClick : this.handleNodeClick }, _.omit(this.props, 'children'), this.state
+                    ))
+                })
+            }
             </div>
         );
     }
@@ -344,12 +429,25 @@ export class Graph extends React.Component {
 
 class Node extends React.Component {
 
+    static isSelected(currentNode, selectedNode){
+        if (!selectedNode) return false;
+        if (selectedNode === currentNode) return true;
+        if (
+            _.isEqual(
+                _.omit(selectedNode, 'nodesInColumn', 'x', 'y', 'column'),
+                _.omit(currentNode, 'nodesInColumn', 'x', 'y', 'column')
+            )
+        ) return true;
+        return false;
+    }
+
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
         this.icon = this.icon.bind(this);
         this.title = this.title.bind(this);
         this.tooltip = this.tooltip.bind(this);
+        this.isSelected = this.isSelected.bind(this);
     }
 
     innerStyle(){
@@ -480,17 +578,19 @@ class Node extends React.Component {
         return output; 
     }
 
+    isSelected(){
+        return Node.isSelected(this.props.node, this.props.selectedNode);
+    }
+
     render(){
         var node = this.props.node;
-
-        console.log(node);
-
         return (
             <div 
                 className={"node node-type-" + node.type}
                 data-node-key={node.id || node.name}
                 data-node-type={node.type}
                 data-node-global={node.isGlobal || null}
+                data-node-selected={this.isSelected() || null}
                 style={{
                     'top' : node.y,
                     'left' : node.x,
@@ -505,6 +605,7 @@ class Node extends React.Component {
                     data-tip={this.tooltip()}
                     data-place="top"
                     data-html
+                    onClick={this.props.onClick}
                 >
                     <span className="node-name">{ this.icon() }{ this.title() }</span>
                 </div>
@@ -604,7 +705,8 @@ class NodesLayer extends React.Component {
 
     static defaultProps = {
         onNodeMouseEnter : null,
-        onNodeMouseLeave : null
+        onNodeMouseLeave : null,
+        onNodeClick : null
     }
 
     constructor(props){
@@ -633,6 +735,7 @@ class NodesLayer extends React.Component {
                                 node={node}
                                 onMouseEnter={this.props.onNodeMouseEnter && this.props.onNodeMouseEnter.bind(this.props.onNodeMouseEnter, node)}
                                 onMouseLeave={this.props.onNodeMouseLeave && this.props.onNodeMouseLeave.bind(this.props.onNodeMouseLeave, node)}
+                                onClick={typeof this.props.onNodeClick === 'function' && this.props.onNodeClick.bind(this.props.onNodeClick, node)}
                                 key={node.id || node.name}
                             />
                         )
@@ -644,8 +747,14 @@ class NodesLayer extends React.Component {
 
 }
 
+class Edge extends React.Component {
 
-class EdgesLayer extends React.Component {
+    static isSelected(edge, selectedNode){
+        return (
+            Node.isSelected(edge.source, selectedNode) ||
+            Node.isSelected(edge.target, selectedNode)
+        );
+    }
 
     constructor(props){
         super(props);
@@ -718,18 +827,42 @@ class EdgesLayer extends React.Component {
         }
     }
 
+    render(){
+        var edge = this.props.edge;
+
+        return (
+            <path
+                d={this.generatePathDimension(edge)}
+                className="edge-path"
+                data-edge-selected={Edge.isSelected(edge, this.props.selectedNode)}
+                data-source={edge.source.name}
+                data-target={edge.target.name}
+                markerEnd={this.props.pathArrows ? "url(#pathArrow)" : null}
+            />
+        );
+    }
+}
+
+
+class EdgesLayer extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+
     pathArrows(){
         if (!this.props.pathArrows) return null;
         return (
             <defs>
                 <marker
-                    id="Triangle"
+                    id="pathArrow"
                     viewBox="0 0 15 15" refX="0" refY="5" 
                     markerUnits="strokeWidth"
                     markerWidth="6" markerHeight="5"
                     orient="auto"
                 >
-                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#000" />
+                    <path d="M 0 0 L 10 5 L 0 10 Z" className="pathArrow-marker" />
                 </marker>
             </defs>
         );
@@ -746,14 +879,7 @@ class EdgesLayer extends React.Component {
                     { this.pathArrows() }
                     {
                         edges.map((edge)=>
-                            <path
-                                d={this.generatePathDimension(edge)}
-                                className="edge-path"
-                                key={(edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name)}
-                                data-source={edge.source.name}
-                                data-target={edge.target.name}
-                                markerEnd={this.props.pathArrows ? "url(#Triangle)" : null}
-                            />
+                            <Edge {...this.props} edge={edge} key={(edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name)} />
                         )
                     }
                 </svg>

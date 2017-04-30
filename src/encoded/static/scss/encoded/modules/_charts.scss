@@ -1028,9 +1028,15 @@ $workflow-step-node-lineheight: 18px;
         overflow-y: hidden;
         overflow-x: visible;
 
+        .scroll-container-wrapper {
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
         .scroll-container {
 
             overflow: hidden;
+            position: relative;
 
             .nodes-layer-wrapper,
             .edges-layer-wrapper {
@@ -1077,6 +1083,11 @@ $workflow-step-node-lineheight: 18px;
                                 background-color: #b0c4da;
                                 border-radius: 2px;
                                 border: 1px solid rgba(0,0,0,0.2);
+                            }
+
+                            &[data-node-selected="true"]{
+                                outline: 2px solid #000;
+                                outline-offset: 4px;
                             }
                         }
 
@@ -1128,6 +1139,13 @@ $workflow-step-node-lineheight: 18px;
                                 padding-left: 7px;
                                 
                             }
+
+                            &[data-node-selected="true"]{
+                                &:before {
+                                    outline: 2px solid #000;
+                                    outline-offset: 4px;
+                                }
+                            }
                         }
 
                         &.node-type-output {
@@ -1174,8 +1192,9 @@ $workflow-step-node-lineheight: 18px;
                 .edges-layer {
                     pointer-events: inherit;
 
-                    marker#Triangle {
+                    path.pathArrow-marker {
                         fill: #333;
+                        stroke: none;
                     }
 
                     path {
@@ -1187,6 +1206,9 @@ $workflow-step-node-lineheight: 18px;
                         &:hover {
                             stroke: #000;
                             stroke-width: 2px;
+                        }
+                        &[data-edge-selected="true"]{
+                            stroke-width: 3px;
                         }
                     }
 

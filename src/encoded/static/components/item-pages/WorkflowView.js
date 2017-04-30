@@ -34,16 +34,20 @@ export class WorkflowView extends React.Component {
     }
 
     getTabViewContents(){
-        return [
+
+        var listWithGraph = !Array.isArray(this.props.context.analysis_steps) || this.props.context.analysis_steps.length === 0 ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
                 content : <GraphSection {...this.props} mounted={this.state.mounted} />
-            },
+            }
+        ];
+
+        return listWithGraph.concat([
             AttributionTabView.getTabObject(this.props.context),
             ItemDetailList.getTabObject(this.props.context, this.props.schemas),
             AuditTabView.getTabObject(this.props.context)
-        ].map((tabObj)=>{ // Common properties
+        ]).map((tabObj)=>{ // Common properties
             return _.extend(tabObj, {
                 'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 650 }
             });
@@ -231,6 +235,7 @@ class GraphSection extends React.Component {
     }
 
     basicGraph(){
+        if (!Array.isArray(this.props.context.analysis_steps)) return null;
         var graphData = parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context);
         return (
             <Graph
@@ -244,6 +249,7 @@ class GraphSection extends React.Component {
     }
 
     detailGraph(){
+        if (!Array.isArray(this.props.context.analysis_steps)) return null;
         var graphData = parseAnalysisSteps(this.props.context.analysis_steps);
         return (
             <Graph
