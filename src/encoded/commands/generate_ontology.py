@@ -438,7 +438,7 @@ def connect2server(keyfile, keyname, app=None):
 
     key = FDN_Key(keyfile, keyname)
     connection = FDN_Connection(key)
-    print("Running on:       {server}".format(server=connection.server))
+    print("Running on: {server}".format(server=connection.server))
     # test connection
     if connection.check:
         return connection
@@ -727,7 +727,7 @@ def main():
     args = parse_args(sys.argv[1:])  # to facilitate testing
 
     s3_postfile = 'ontology_post.json'
-    s3_patchfile = 'ontology_post.json'
+    s3_patchfile = 'ontology_patch.json'
     from pkg_resources import resource_filename
     outdir = resource_filename('encoded', args.outdir)
 
@@ -822,6 +822,9 @@ def get_key(bucket, keyfile_name='illnevertell'):
                              SSECustomerAlgorithm='AES256')
     akey = response['Body'].read()
     try:
+        return json.loads(akey.decode('utf-8'))
+    except AttributeError:
+        # akey is probably just a string
         return json.loads(akey)
     except ValueError:
         # maybe its not json after all
