@@ -235,6 +235,52 @@ class FormattedInfoWrapper extends React.Component {
 }
 
 
+class ShortAttribution extends React.Component {
+
+    render(){
+        var pub = this.props.publication;
+
+        var authorsString = null;
+        if (Array.isArray(pub.authors)){
+            if (pub.authors.length === 1){
+                authorsString = pub.authors[0];
+            } else {
+                authorsString = pub.authors[0];
+                if (pub.authors[1]) authorsString += ', ' + pub.authors[1];
+                if (pub.authors[2]) authorsString += ', et al.';
+            }
+        }
+
+        var journalString = null;
+        if (typeof pub.journal === 'string'){
+            journalString = pub.journal;
+        }
+
+        if (journalString){
+            authorsString += ', ';
+        }
+
+        var yearPublished = null;
+        try {
+            if (typeof pub.date_published === 'string'){
+                yearPublished = ' ' + (new Date(pub.date_published)).getFullYear();
+            }
+        } catch (e){
+            yearPublished = null;
+        }
+
+        return (
+            <span>
+                { authorsString }
+                { journalString? <em>{ journalString }</em> : null }
+                { yearPublished }
+            </span>
+        );
+    }
+
+}
+
+
 /**
  * Shows publications for current Item.
  * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView .
@@ -252,10 +298,7 @@ export default class Publications extends React.Component {
     static ListBlock = ListBlock;
     static DetailBlock = DetailBlock;
     static FormattedInfoWrapper = FormattedInfoWrapper;
-
-    state = {
-        'abstractCollapsed' : true
-    }
+    static ShortAttribution = ShortAttribution;
 
     constructor(props){
         super(props);
@@ -263,6 +306,9 @@ export default class Publications extends React.Component {
         this.toggleAbstractIcon = this.toggleAbstractIcon.bind(this);
         this.detailRows = this.detailRows.bind(this);
         this.render = this.render.bind(this);
+        this.state = {
+            'abstractCollapsed' : true
+        }
     }
 
     /**
@@ -306,19 +352,28 @@ export default class Publications extends React.Component {
         if (!publication || typeof publication === 'undefined'){
             return [];
         }
+
         var details = [];
+
         if (publication && typeof publication.date_published === 'string'){
             details.push({
                 'label' : 'Published',
                 'content' : DateUtility.format(publication.date_published)
             });
         }
+
         if (typeof publication.authors === 'string'){
             details.push({
                 'label' : 'Authors',
                 'content' : publication.authors
             });
+        } else if (Array.isArray(publication.authors) && publication.authors.length > 0){
+            details.push({
+                'label' : 'Author' + (publication.authors.length > 1 ? 's' : ''),
+                'content' : publication.authors.join(', ')
+            })
         }
+
         if (typeof publication.abstract === 'string'){
             //var inclProps = {};
             //var shortAbstract = this.shortAbstract();

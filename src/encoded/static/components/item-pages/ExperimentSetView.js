@@ -319,9 +319,9 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                     <div className="col-sm-12">
                     { this.props.context.produced_in_pub ?
                         <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
-                            <div className="more-details">{ 
-                                this.props.context.produced_in_pub.authors || this.props.context.produced_in_pub.abstract || this.props.context.produced_in_pub.date_published || null
-                            }</div>
+                            <div className="more-details">
+                                <Publications.ShortAttribution publication={this.props.context.produced_in_pub} />
+                            </div>
                             <br/>
                         </Publications.DetailBlock>
                         : null }

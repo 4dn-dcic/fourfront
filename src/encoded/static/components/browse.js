@@ -6,7 +6,7 @@ var querystring = require('querystring');
 var _ = require('underscore');
 var globals = require('./globals');
 var browse = module.exports;
-var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel } = require('react-bootstrap');
+var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } = require('react-bootstrap');
 var store = require('../store');
 var FacetList = require('./facetlist');
 import ExperimentsTable from './experiments-table';
@@ -77,10 +77,11 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
     },
 
     getInitialState : function(){
-        var state = {};
-        state.open = false;
-        state.selectedFiles = this.props.selectAllFilesInitially ? new Set(this.allFileIDs()) : new Set();
-        return state;
+        return {
+            open : false,
+            reallyOpen : false,
+            selectedFiles : this.props.selectAllFilesInitially ? new Set(this.allFileIDs(this.props)) : new Set()
+        };
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -104,27 +105,39 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         // }
     },
 
-    pairsAndFiles : function(){
+    componentDidUpdate: function(pastProps, pastState){
+        if (pastState.open === true && this.state.open === false && this.state.reallyOpen === true){
+            setTimeout(()=>{
+                this.setState({ reallyOpen : false });
+            }, 300);
+        }
+    },
+
+    pairsAndFiles : function(props = this.props){
         // Combine file pairs and unpaired files into one array. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
         // Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
-        return expFxn.listAllFilePairs(this.props.experimentArray).concat(
-            expFxn.listAllUnpairedFiles(this.props.experimentArray)
+        return expFxn.listAllFilePairs(props.experimentArray).concat(
+            expFxn.listAllUnpairedFiles(props.experimentArray)
         ); // (can always _.flatten() this or map out first file per pair, e.g. for targetFiles below)
     },
 
-    allFileIDs : function(){
-        return this.pairsAndFiles().map(function(f){
+    allFileIDs : function(props = this.props){
+        return this.pairsAndFiles(props).map(function(f){
             if (Array.isArray(f)) return f[0].uuid;
             else return f.uuid;
         });
     },
 
-    handleToggle: function (e) {
-        e.preventDefault();
-        this.setState({
-  		    open: !this.state.open
-        });
-    },
+    handleToggle: _.throttle(function (e) {        
+        var willOpen = !this.state.open;
+        var state = {
+            open : willOpen
+        };
+        if (state.open){
+            state.reallyOpen = true;
+        }
+        this.setState(state);
+    }, 500),
 
     handleCheck: function(e) {
         var newChecked = e.target.checked;
@@ -202,6 +215,13 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
 
         function experimentsTable(){
             /* Removed props.facets & props.expSetFilters as passing in props.passExperiments as experimentArray. */
+            if (!this.state.open) return <div> Test </div>;
+            var expTableWidth = null;
+
+            if (this.refs.tbody && this.refs.tbody.offsetWidth){
+                expTableWidth = this.refs.tbody.offsetWidth - 40;
+            }
+
             return (
                 <ExperimentsTable
                     key='experiments-table'
@@ -214,6 +234,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     experimentSetType={this.props.experimentSetType}
                     parentController={this}
                     useAjax={this.props.useAjax}
+                    width={expTableWidth}
+                    fadeIn={false}
                 />
             );
         }
@@ -225,7 +247,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
-            <tbody data-key={this.props['data-key']} className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber}>
+            <tbody data-key={this.props['data-key']} className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber} ref="tbody">
                 <tr className="expset-table-row">
                     <td className="expset-table-cell dropdown-button-cell">
                         <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
@@ -244,16 +266,18 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     </td>
                     { formattedColumns.call(this) }
                 </tr>
-                { this.state.open ?
-                <tr className="expset-addinfo-row">
-                    <td className={"expsets-table-hidden " + (this.state.open ? "hidden-col-open" : "hidden-col-closed")} colSpan={Object.keys(this.props.columns).length + 2}>
+                <tr className="expset-addinfo-row" style={{ display : !(this.state.open || this.state.reallyOpen) ? 'none' : null }}>
+                    <td className="expsets-table-hidden" colSpan={Object.keys(this.props.columns).length + 2}>
                         <div className="experiment-set-info-wrapper">
-                            { formattedAdditionaInformation.call(this) }
-                            { experimentsTable.call(this) }
+                            <Collapse in={this.state.open} mountOnEnter>
+                                <div>
+                                    { formattedAdditionaInformation.call(this) }
+                                    { experimentsTable.call(this) }
+                                </div>
+                            </Collapse>
                         </div>
                     </td>
                 </tr>
-                : null }
             </tbody>
         );
     }

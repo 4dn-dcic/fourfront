@@ -675,6 +675,8 @@ export default class ExperimentsTable extends React.Component {
 
     static defaultProps = {
         keepCounts : false,
+        fadeIn : true,
+        width: null,
         columnHeaders : [
             { columnClass: 'biosample',     className: 'text-left',     title : 'Biosample'     },
             { columnClass: 'experiment',    className: 'text-left',     title : 'Experiment'    },
@@ -720,8 +722,8 @@ export default class ExperimentsTable extends React.Component {
     updateColumnWidths(){
         // Scale/expand width of columns to fit available width, if any.
         var origColumnWidths;
-        if (!this.refs.header) return null;
-        if (this.refs.header && this.refs.header.clientWidth === 0) return null;
+        if (!this.refs.header && typeof this.props.width !== 'number') return null;
+        if (typeof this.props.width !== 'number' && this.refs.header && this.refs.header.clientWidth === 0) return null;
         if (!this.cache.origColumnWidths){
             origColumnWidths = _.map(this.refs.header.children, function(c){
                 //if ( // For tests/server-side
@@ -737,7 +739,7 @@ export default class ExperimentsTable extends React.Component {
             origColumnWidths = this.cache.origColumnWidths;
         }
 
-        var availableWidth = this.refs.header.offsetWidth || 960, // 960 = fallback for tests
+        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960, // 960 = fallback for tests
             totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v }, 0);
 
         if (totalOrigColsWidth > availableWidth){
@@ -759,6 +761,7 @@ export default class ExperimentsTable extends React.Component {
     }
 
     componentDidMount(){
+
         this.throttledResizeHandler = _.throttle(this.updateColumnWidths, 300);
 
         if (!isServerSide()){
@@ -1082,7 +1085,7 @@ export default class ExperimentsTable extends React.Component {
         }.bind(this);
 
         return (
-            <div className={"expset-experiments" + (this.state.mounted ? ' mounted' : '')}>
+            <div className={"expset-experiments" + (this.state.mounted ? ' mounted' : '') + (this.props.fadeIn ? ' fade-in' : '')}>
                 {
                     !Array.isArray(this.props.experimentArray) ?
                     <h6 className="text-center text-400"><em>No experiments</em></h6>

@@ -516,6 +516,13 @@ $open-expset-table-side-border-color : #e4e4e4;
 			}
 		}
 
+		> tr.expset-addinfo-row {
+			> td {
+				padding: 0;
+				border-top: 1px solid #f4f4f4;
+			}
+		}
+
 		&.open {
 			> tr.expset-table-row {
 				background-color: #fff;
@@ -561,12 +568,6 @@ $open-expset-table-side-border-color : #e4e4e4;
 						top: 0;
 						border-right: 1px solid $open-expset-table-side-border-color;
 					}
-				}
-			}
-			> tr.expset-addinfo-row {
-				> td {
-					padding: 0;
-					border-top: 1px solid #f4f4f4;
 				}
 			}
 
@@ -661,14 +662,16 @@ tr.expset-addinfo-row {
 	.experiment-set-info-wrapper {
 
 		margin-left: 38px;
-		border-bottom: 1px solid #808080;
+		border-bottom: 1px solid transparent;
 		box-shadow : 0 4px 4px -4px rgba(0,0,0,.25);
 		position: relative;
 		z-index: 1;
+		transition: border-bottom .3s ease-out;
 
 		tbody.open & {
 			//border-left: 1px solid $open-expset-table-side-border-color;
 			border-right: 1px solid $open-expset-table-side-border-color;
+			border-bottom-color: #808080;
 		}
 
 		.expset-addinfo {
@@ -786,7 +789,7 @@ $small-label-accession-font-size : 0.75rem;
 		min-width: $expset-full-width;
 		transition: opacity .35s;
 
-		&:not(.mounted){
+		&.fade-in:not(.mounted){
 			opacity: 0;
 		}
 
