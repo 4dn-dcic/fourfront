@@ -2,16 +2,16 @@
 var React = require('react');
 var globals = require('../globals');
 var _ = require('underscore');
-var { ajax, console, object, isServerSide } = require('../util');
+var { ajax, console, object, isServerSide, layout } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} = require('react-bootstrap');
 var BuildField = require('./submission-fields').BuildField;
 var makeTitle = require('../item-pages/item').title;
 var Alerts = require('../alerts');
 var Search = require('../search').Search;
-var d3 = require('d3');
 var getLargeMD5 = require('../util/file-utility').getLargeMD5;
 var ReactTooltip = require('react-tooltip');
+import SubmissionTree from './expandable-tree';
 
 /*
 Master container component for Submission components.
@@ -34,7 +34,11 @@ export default class SubmissionView extends React.Component{
         'masterContext': null,
         'masterValid': null, // 0 = not validated, 1 = validated, 2 = error
         'masterTypes': null,
-        'keyIter': 0 // serves as key versions for child objects
+        'masterDisplay': null, // serves to hold navigation-formatted names for objs
+        'keyIter': 0, // serves as key versions for child objects. 0 is reserved for principal
+        'currKey': null, // start with viewing principle object (key = 0),
+        'keyHierarchy': {},
+        'navigationIsOpen': false
     }
 
     // run async request to get frame=object context to fill the forms
@@ -67,7 +71,8 @@ export default class SubmissionView extends React.Component{
             validCopy[objKey] = 0;
         }
         console.log('newContext:', contextCopy);
-        this.setState({'masterContext': contextCopy,
+        this.setState({
+            'masterContext': contextCopy,
             'masterValid': validCopy,
             'masterTypes': typesCopy
         });
@@ -75,48 +80,117 @@ export default class SubmissionView extends React.Component{
 
     // we need the frame=object context for create, so fetch this
     initializePrincipal = (context, schemas) => {
-        var initContext = {}
+        var initContext = {};
         var contextID = context['@id'] || null;
         var principalTypes = this.props.context['@type'];
-        var initType = {'principal': principalTypes[0]}
-        var initValid = {'principal': 0}
-        var schema = schemas[principalTypes[0]]
+        var initType = {0: principalTypes[0]};
+        var initValid = {0: 0};
+        var principalDisplay = 'New ' + principalTypes[0];
+        var initDisplay = {0: principalDisplay};
+        var schema = schemas[principalTypes[0]];
+        var hierarchy = this.state.keyHierarchy;
+        hierarchy[0] = {};
         // if @id cannot be found or we are creating from scratch, start with empty fields
         if(!contextID || this.props.create){
-            initContext.principal = buildContext({}, schema, this.props.edit, this.props.create);
-            this.setState({'masterContext': initContext,
+            initContext[0] = buildContext({}, schema, this.props.edit, this.props.create);
+            this.setState({
+                'masterContext': initContext,
                 'masterValid': initValid,
-                'masterTypes': initType
+                'masterTypes': initType,
+                'masterDisplay': initDisplay,
+                'currKey': 0,
+                'keyHierarchy': hierarchy
             });
             return;
         }
-        this.context.fetch(contextID + '?frame=object', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+        ajax.promise(contextID + '?frame=object').then(response => {
+            if (response['@id'] && response['@id'] === contextID){
+                initContext[0] = buildContext(response, schema, this.props.edit, this.props.create);
+                this.setState({
+                    'masterContext': initContext,
+                    'masterValid': initValid,
+                    'masterTypes': initType,
+                    'masterDisplay': initDisplay,
+                    'currKey': 0,
+                    'keyHierarchy': hierarchy
+                });
+            }else{
+                // something went wrong with fetching context. Just use an empty object
+                initContext[0] = buildContext({}, schema, this.props.edit, this.props.create);
+                this.setState({
+                    'masterContext': initContext,
+                    'masterValid': initValid,
+                    'masterTypes': initType,
+                    'masterDisplay': initDisplay,
+                    'currKey': 0,
+                    'keyHierarchy': hierarchy
+                });
             }
-        })
-        .then(response => {
-            var newID = response['@id'] || null;
-            if (!newID || newID != contextID) throw response;
-            return response;
-        })
-        .then(response => {
-            // clear fields based off of action method and ff_clear values in schema
-            initContext.principal = buildContext(response, schema, this.props.edit, this.props.create);
-            this.setState({'masterContext': initContext,
-                'masterValid': initValid,
-                'masterTypes': initType
-            });
-        }, error => {
-            // something went wrong with fetch context. Just use an empty object
-            initContext.principal = buildContext({}, schema, this.props.edit, this.props.create);
-            this.setState({'masterContext': initContext,
-                'masterValid': initValid,
-                'masterTypes': initType
-            });
         });
+    }
+
+    createObj = (type) => {
+        var contextCopy = this.state.masterContext;
+        var validCopy = this.state.masterValid;
+        var typesCopy = this.state.masterTypes;
+        var parentKeyIdx = this.state.currKey;
+        var hierarchy = this.state.keyHierarchy;
+        var masterDisplay = this.state.masterDisplay;
+        // increase key iter by 1 for a unique key
+        // this is used as a key for masterContext, masterValid, and masterTypes
+        var keyIdx = this.state.keyIter + 1;
+        var newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
+        validCopy[keyIdx] = 0;
+        typesCopy[keyIdx] = type;
+        contextCopy[keyIdx] = buildContext({}, this.props.schemas[type]);
+        masterDisplay[keyIdx] = 'New ' + type + ' ' + keyIdx;
+        this.setState({
+            'masterContext': contextCopy,
+            'masterValid': validCopy,
+            'masterTypes': typesCopy,
+            'masterDisplay': masterDisplay,
+            'currKey': keyIdx,
+            'keyIter': keyIdx,
+            'keyHierarchy': newHierarchy
+        });
+    }
+
+    // key is @id for exisiting objs, state key idx for custom objs
+    removeObj = (key) => {
+        var masterDisplay = this.state.masterDisplay;
+        if(masterDisplay[key]){
+            var hierarchy = this.state.keyHierarchy;
+            var newHierarchy = trimHierarchy(hierarchy, key);
+            delete masterDisplay[key];
+            this.setState({
+                'keyHierarchy': newHierarchy,
+                'masterDisplay': masterDisplay
+            });
+        }
+    }
+
+    addExistingObj = (path, display) => {
+        var parentKeyIdx = this.state.currKey;
+        var hierarchy = this.state.keyHierarchy;
+        var masterDisplay = this.state.masterDisplay;
+        hierarchy = modifyHierarchy(hierarchy, path, parentKeyIdx);
+        masterDisplay[path] = display;
+        this.setState({
+            'keyHierarchy': hierarchy,
+            'masterDisplay': masterDisplay
+        });
+    }
+
+    setMasterState = (key, value) => {
+        var newState = this.state;
+        newState[key] = value;
+        this.setState({newState});
+    }
+
+    getMasterContext = (key) => {
+        var masterCopy = this.state.masterContext;
+        var result = masterCopy[key] || null;
+        return result;
     }
 
     // generateValidationButton(){
@@ -335,10 +409,11 @@ export default class SubmissionView extends React.Component{
     // }
 
     render(){
+        console.log('TOP LEVEL STATE:', this.state);
         //hard coded for now
-        var currKey = 'principal';
+        var currKey = this.state.currKey;
         // see if initialized
-        if(!this.state.masterContext){
+        if(!this.state.masterContext || currKey === null){
             return null;
         }
         var currType = this.state.masterTypes[currKey];
@@ -350,12 +425,37 @@ export default class SubmissionView extends React.Component{
             navigate,
             ...others
         } = this.props;
+        var currObjDisplay = this.state.masterDisplay[currKey] || currType;
         return(
             <div>
-                <div style={{'backgroundColor':'#ccc'}}>
-                    <h3>{'Item creation: ' + currKey}</h3>
+                <div className="clearfix row">
+                    <div className="col-sm-5 col-md-5 col-lg-5">
+                        <SubmissionTree
+                            setMasterState={this.setMasterState}
+                            hierarchy={this.state.keyHierarchy}
+                            masterValid={this.state.masterValid}
+                            masterTypes={this.state.masterTypes}
+                            masterDisplay={this.state.masterDisplay}
+                            currKey={this.state.currKey}
+                            navigationIsOpen={this.state.navigationIsOpen}
+                        />
+                    </div>
+                    <div className="col-sm-7 col-md-7 col-lg-7">
+                        <h3 style={{'textAlign':'right', 'paddingRight':'10px'}}>{'Working on: ' + currObjDisplay}</h3>
+                    </div>
                 </div>
-                <RoundOneObject {...this.props} objectKey={currKey} schema={currSchema} currContext={currContext} modifyMasterContext={this.modifyMasterContext} />
+                <RoundOneObject
+                    {...others}
+                    currKey={currKey}
+                    schema={currSchema}
+                    currContext={currContext}
+                    modifyMasterContext={this.modifyMasterContext}
+                    createObj={this.createObj}
+                    removeObj={this.removeObj}
+                    addExistingObj={this.addExistingObj}
+                    getMasterContext={this.getMasterContext}
+                    setMasterState={this.setMasterState}
+                />
             </div>
         );
     }
@@ -374,14 +474,21 @@ class RoundOneObject extends React.Component{
     }
 
     state = {
-        'selectType': null, // type of exisiting object being selected
-        'selectData': null, // context used for exisiting object selection
+        'selectType': null, // type of existing object being selected
+        'selectData': null, // context used for existing object selection
         'selectQuery': null, // currently held search query
         'selectField': null, // the actual fieldname that we're selecting for
         'selectArrayIdx': null
     }
 
-    modifyNewContext = (field, value) => {
+    componentWillReceiveProps(nextProps){
+        // scroll to top if worked-on object changes
+        if(this.props.currKey !== nextProps.currKey){
+            setTimeout(layout.animateScrollTo(0), 100);
+        }
+    }
+
+    modifyNewContext = (field, value, addExistingObj=false) => {
         var splitField = field.split('.');
         var contextCopy = this.props.currContext;
         var pointer = contextCopy;
@@ -393,8 +500,38 @@ class RoundOneObject extends React.Component{
                 return;
             }
         }
+        // if deleting, see if this is an object (needs to be removed from nav)
+        var prevValue = pointer[splitField[splitField.length-1]];
+        if(prevValue instanceof Array){
+            prevValue.map(function(arrayValue){
+                if(value === null || !_.contains(value, arrayValue)){
+                    this.checkObjectRemoval(null, arrayValue);
+                }
+            }.bind(this));
+        }else{
+            this.checkObjectRemoval(value, prevValue);
+        }
         pointer[splitField[splitField.length-1]] = value;
-        this.props.modifyMasterContext(this.props.objectKey, contextCopy);
+        this.props.modifyMasterContext(this.props.currKey, contextCopy);
+        if(addExistingObj){
+            this.fetchObjTitle(value);
+        }
+    }
+
+    fetchObjTitle = (value) => {
+        ajax.promise(value).then(data => {
+            if (data['display_title']){
+                this.props.addExistingObj(value, data['display_title']);
+            }else{
+                this.props.addExistingObj(value, value);
+            }
+        });
+    }
+
+    checkObjectRemoval = (value, prevValue) =>{
+        if(value === null){
+            this.props.removeObj(prevValue);
+        }
     }
 
     getFieldValue = (field) => {
@@ -434,12 +571,7 @@ class RoundOneObject extends React.Component{
 
     // use when selecting a new object
     selectObj = (type, data, field, array=null) => {
-        var origScrollTop = document.body.scrollTop;
-        d3.select(document.body)
-            .interrupt()
-            .transition()
-            .duration(750)
-            .tween("bodyScroll", scrollTopTween(0));
+        setTimeout(layout.animateScrollTo(0), 100);
         this.setState({
             'selectType': type,
             'selectData': data,
@@ -447,9 +579,11 @@ class RoundOneObject extends React.Component{
             'selectField': field,
             'selectArrayIdx': array
         });
+        // close navigation menu
+        this.props.setMasterState('navigationIsOpen', false);
     }
 
-    // callback passed to Search when selecting exisiting object
+    // callback passed to Search when selecting existing object
     // when value is null, function is delete
     selectComplete = (value) => {
         if(this.state.selectField){
@@ -486,9 +620,10 @@ class RoundOneObject extends React.Component{
                 }else{ // must be a dict
                     pointer[splitField[splitField.length-1]] = value;
                 }
-                this.props.modifyMasterContext(this.props.objectKey, contextCopy);
+                this.props.modifyMasterContext(this.props.currKey, contextCopy);
+                this.fetchObjTitle(value);
             }else{
-                this.modifyNewContext(this.state.selectField, value);
+                this.modifyNewContext(this.state.selectField, value, true);
             }
         }
         this.setState({
@@ -532,8 +667,7 @@ class RoundOneObject extends React.Component{
             fieldType = 'linked object';
             isLinked = true;
         }else if (fieldSchema.attachment && fieldSchema.attachment === true){
-            return null;
-            // fieldType = 'attachment';
+            fieldType = 'attachment';
         }else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
             return null;
             // // only render file upload input if status is 'uploading' or 'upload_failed'
@@ -551,7 +685,26 @@ class RoundOneObject extends React.Component{
         var required = _.contains(this.props.schema.required, field);
 
         return(
-            <BuildField value={fieldValue} key={field} schema={fieldSchema} field={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyNewContext} modifyFile={null} modifyMD5Progess={null} md5Progress={null} getFieldValue={this.getFieldValue} required={required} isLinked={isLinked} selectObj={this.selectObj} title={fieldTitle} edit={this.props.edit} create={this.props.create}/>
+            <BuildField
+                value={fieldValue}
+                key={field}
+                schema={fieldSchema}
+                field={field}
+                fieldType={fieldType}
+                fieldTip={fieldTip}
+                enumValues={enumValues}
+                disabled={false}
+                modifyNewContext={this.modifyNewContext}
+                modifyFile={null}
+                modifyMD5Progess={null}
+                md5Progress={null}
+                getFieldValue={this.getFieldValue}
+                required={required} isLinked={isLinked}
+                selectObj={this.selectObj}
+                createObj={this.props.createObj}
+                title={fieldTitle}
+                edit={this.props.edit}
+                create={this.props.create} />
         );
     }
 
@@ -578,15 +731,19 @@ class RoundOneObject extends React.Component{
         buildFields = sortPropFields(buildFields);
         return(
             <div>
-                <Fade in={selecting}>
+                <Fade in={selecting} transitionAppear={true}>
     				<div>
                         {selecting ?
-                            <Search {...this.props} context={this.state.selectData} navigate={this.inPlaceNavigate} selectCallback={this.selectComplete} submissionBase={this.state.selectQuery}/>
+                            <Search {...this.props}
+                                context={this.state.selectData}
+                                navigate={this.inPlaceNavigate}
+                                selectCallback={this.selectComplete}
+                                submissionBase={this.state.selectQuery}/>
                             : null
                         }
                     </div>
                 </Fade>
-                <Fade in={!selecting}>
+                <Fade in={!selecting} transitionAppear={true}>
     				<div>
                         <RoundOnePanel title='Fields' fields={buildFields} />
                         <RoundOnePanel title='Linked objects' fields={linkedObjs} />
@@ -603,7 +760,7 @@ class RoundOnePanel extends React.Component{
     }
 
     state = {
-        'open': true
+        'open': false
     }
 
     handleToggle = (e) => {
@@ -617,7 +774,7 @@ class RoundOnePanel extends React.Component{
         }
         return(
             <div>
-                <h4 className="page-subtitle submission-field-header">
+                <h4 className="clearfix page-subtitle submission-field-header">
                     <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
                         <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                     </Button>
@@ -686,6 +843,32 @@ var delveObject = function myself(json){
     return found_obj;
 }
 
+// given the parent object key and a new object key, return a version
+// of this.state.keyHierarchy that includes the new parent-child relation
+// recursive function
+var modifyHierarchy = function myself(hierarchy, keyIdx, parentKeyIdx){
+    Object.keys(hierarchy).forEach(function(key, index){
+        if(key == parentKeyIdx){
+            hierarchy[parentKeyIdx][keyIdx] = {};
+        }else{
+            hierarchy[key] = myself(hierarchy[key], keyIdx, parentKeyIdx);
+        }
+    });
+    return hierarchy
+}
+
+// remove given key from hierarchy
+var trimHierarchy = function myself(hierarchy, keyIdx){
+    Object.keys(hierarchy).forEach(function(key, index){
+        if(_.contains(Object.keys(hierarchy), keyIdx)){
+            delete hierarchy[keyIdx];
+        }else{
+            hierarchy[key] = myself(hierarchy[key], keyIdx);
+        }
+    });
+    return hierarchy
+}
+
 class InfoIcon extends React.Component{
     render() {
         if (!this.props.children) return null;
@@ -740,7 +923,6 @@ export function buildContext(context, schema, edit=false, create=true){
     }
     return built;
 }
-
 
 // scroll to the top of the page using d3
 function scrollTopTween(scrollTop){

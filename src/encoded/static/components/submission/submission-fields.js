@@ -2,7 +2,7 @@
 var React = require('react');
 var globals = require('../globals');
 var _ = require('underscore');
-var { ajax, console, object, isServerSide } = require('../util');
+var { ajax, console, object, isServerSide, animateScrollTo } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} = require('react-bootstrap');
 var makeTitle = require('../item-pages/item').title;
@@ -38,6 +38,7 @@ var BuildField = module.exports.BuildField = React.createClass({
             'modifyNewContext': this.props.modifyNewContext,
             'getFieldValue': this.props.getFieldValue,
             'selectObj': this.props.selectObj,
+            'createObj': this.props.createObj,
             'arrayIdx': this.props.arrayIdx,
             'isArray': this.props.isArray,
             'arrayField': this.props.arrayField,
@@ -147,7 +148,7 @@ var BuildField = module.exports.BuildField = React.createClass({
             return(
                 <div style={{'paddingTop':'10px','paddingBottom':'10px','marginLeft':'25px'}}>
                     <h5 className="facet-title" style={{'paddingBottom':'2px', 'marginBottom':"2px", "border":"none"}}>
-                        <span className="inline-block">{this.props.title + ' ' + parseInt(this.props.field + 1)}</span>
+                        <span className="inline-block">{this.props.title + ' #' + parseInt(this.props.field + 1)}</span>
                         <InfoIcon children={this.props.fieldTip}/>
                         <div className="pull-right" style={{'display':'inline-block','marginRight':'5px'}}>
                             <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} onClick={this.deleteField}>
@@ -201,8 +202,8 @@ var LinkedObj = React.createClass({
 
     getInitialState: function(){
         return{
-            'open': false,
             'data': {},
+            'type': null,
             'collection': this.props.collection || null
         };
     },
@@ -214,10 +215,19 @@ var LinkedObj = React.createClass({
         if(this.props.collection){
             ajax.promise('/' + this.props.collection + '/?format=json').then(data => {
                 if (this.context.contentTypeIsJSON(data) && data['@graph']){
-                    state['data'] = data;
+                    var results = data['@graph'];
+                    if(results.length === 0){
+                        state['data'] = null;
+                        state['type'] = null;
+                    }else{
+                        var type = results[0]['@type'][0];
+                        state['type'] = type;
+                        state['data'] = data;
+                    }
                 }else{
                     console.log('Available object failed. See LinkedObj in create.js');
                     state['data'] = null;
+                    state['type'] = null;
                 }
                 this.propSetState(state);
             });
@@ -251,13 +261,22 @@ var LinkedObj = React.createClass({
         }
         return(
             <div>
-                <Button bsSize="xsmall" style={style} onClick={function(e){
+                {this.state.data ?
+                    <Button bsSize="xsmall" style={style} onClick={function(e){
+                            e.preventDefault();
+                            this.props.selectObj(this.state.collection, this.state.data, nestedField, this.props.arrayIdx);
+                        }.bind(this)}>
+                        {'Select existing'}
+                    </Button>
+                    :
+                    <Button bsSize="xsmall" style={style} disabled>
+                        {'No existing objects'}
+                    </Button>
+                }
+                <Button bsSize="xsmall" style={style}onClick={function(e){
                         e.preventDefault();
-                        this.props.selectObj(this.state.collection, this.state.data, nestedField, this.props.arrayIdx);
+                        this.props.createObj(this.state.type);
                     }.bind(this)}>
-                    {'Select existing'}
-                </Button>
-                <Button bsSize="xsmall" style={style}>
                     {'Create new'}
                 </Button>
             </div>
@@ -274,21 +293,20 @@ upwards using this.props.modifyNewContext*/
 var ArrayField = React.createClass({
 
     modifyArrayContent: function(idx, value){
-        var valueCopy = this.props.value;
+        var valueCopy = this.props.value.slice();
         valueCopy[idx] = value;
         this.props.modifyNewContext(this.props.field, valueCopy);
     },
 
     pushArrayValue: function(e){
         e.preventDefault();
-
-        var valueCopy = this.props.value || [];
+        var valueCopy = this.props.value.slice() || [];
         valueCopy.push(null);
         this.props.modifyNewContext(this.props.field, valueCopy);
     },
 
     deleteArrayValue: function(idx){
-        var valueCopy = this.props.value;
+        var valueCopy = this.props.value.slice();
         valueCopy.splice(idx, 1);
         // an empty array should be represented as null
         if(valueCopy.length === 0){
@@ -303,7 +321,7 @@ var ArrayField = React.createClass({
         // use arrayIdx as stand-in value for field
         var arrayIdx = arrayInfo[2];
         var fieldTip = fieldSchema.description || null;
-        var title = fieldSchema.title || 'Array item';
+        var title = fieldSchema.title || 'Item';
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
         var enumValues = [];
         // transform some types...
@@ -348,6 +366,7 @@ var ArrayField = React.createClass({
                     required={false}
                     arrayDelete={this.deleteArrayValue}
                     selectObj={this.props.selectObj}
+                    createObj={this.props.createObj}
                     arrayIdx={arrayIdxList}
                     nestedField={this.props.nestedField}
                     isArray={true}
@@ -468,6 +487,7 @@ var ObjectField = React.createClass({
                 modifyNewContext={this.modifyObjectContent}
                 required={false}
                 selectObj={this.props.selectObj}
+                createObj={this.props.createObj}
                 title={title}
                 nestedField={nestedField}
                 isArray={false}
@@ -547,11 +567,19 @@ var AttachmentInput = React.createClass({
         }else{
             attach_title = "No file chosen";
         }
+        var labelStyle = {
+            'paddingRight':'5px',
+            'paddingTop':'1px',
+            'paddingBottom':'1px',
+            'paddingLeft':'5px',
+            'marginBottom':'0px',
+            'fontWeight':'400'
+        };
         return(
             <div>
                 <input id={this.props.field} type='file' onChange={this.handleChange} style={{'display':'none'}} accept={this.acceptedTypes()}/>
-                <Button style={{'padding':'0px'}}>
-                    <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
+                <Button bsSize="xsmall" style={{'padding':'0px'}}>
+                    <label htmlFor={this.props.field} style={labelStyle}>
                         {attach_title}
                     </label>
                 </Button>
