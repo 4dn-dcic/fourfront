@@ -17,7 +17,7 @@ var { expFxn, Filters, console, isServerSide } = require('./util');
  * @class Label
  * @extends {React.Component}
  */
-class Label extends React.Component {
+class StackedBlockNameLabel extends React.Component {
 
     constructor(props){
         super(props);
@@ -118,7 +118,7 @@ class Label extends React.Component {
  */
 class StackedBlockName extends React.Component {
 
-    static Label = Label
+    static Label = StackedBlockNameLabel
     
     static propTypes = {
         columnClass : PropTypes.string,
@@ -190,7 +190,7 @@ class StackedBlockName extends React.Component {
         return (
             <div className={"name col-" + this.props.columnClass} style={style}>
                 { this.props.label ?
-                    <Label {..._.extend({}, this.props.label, {
+                    <StackedBlockName.Label {..._.extend({}, this.props.label, {
                         inline : false,
                         className : this.props.label.subtitleVisible === true ? 'subtitle-visible' : null
                     })} />
@@ -1165,9 +1165,9 @@ class FilePairBlock extends React.Component {
 
         function label(){
             if (typeof this.props.label === 'string'){
-                return <Label title="Pair" subtitle={this.props.label} />;
+                return <StackedBlock.Name.Label title="Pair" subtitle={this.props.label} />;
             } else if (typeof this.props.label === 'object' && this.props.label){
-                return <Label {...this.props.label} />;
+                return <StackedBlock.Name.Label {...this.props.label} />;
             } else return null;
         }
 
@@ -1324,13 +1324,13 @@ class FileEntryBlock extends React.Component {
             };
 
             if (this.props.label) {
-                return <Label {..._.extend(commonProperties, this.props.label)} />;
+                return <StackedBlock.Name.Label {..._.extend(commonProperties, this.props.label)} />;
             } else if (this.props.type === 'sequence-replicate') {
-                return <Label {..._.extend(commonProperties, this.props.label, {
+                return <StackedBlock.Name.Label {..._.extend(commonProperties, this.props.label, {
                     subtitle : this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null
                 })} />;
             } else if (this.props.type === 'paired-end') {
-                return <Label {...commonProperties} />;
+                return <StackedBlock.Name.Label {...commonProperties} />;
                 //return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
                 //    //subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
                 //}));
@@ -1342,7 +1342,7 @@ class FileEntryBlock extends React.Component {
                     (this.props.file.file_type || this.props.file.file_format) &&
                     _.intersection(headerTitles,['File Type', 'File Format']).length === 0
                 ){
-                    return <Label {..._.extend(commonProperties, {
+                    return <StackedBlock.Name.Label {..._.extend(commonProperties, {
                         subtitle : this.props.file.file_type || this.props.file.file_format,
                     })} />;
                 }
@@ -1350,13 +1350,13 @@ class FileEntryBlock extends React.Component {
                     this.props.file.instrument &&
                     _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0
                 ){
-                    return <Label {..._.extend(commonProperties, {
+                    return <StackedBlock.Name.Label {..._.extend(commonProperties, {
                         subtitle : this.props.file.instrument
                     })} />;
                 }
             }
 
-            return <Label {...commonProperties} />;
+            return <StackedBlock.Name.Label {...commonProperties} />;
         }
 
         return (
