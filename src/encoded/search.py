@@ -28,7 +28,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     Search view connects to ElasticSearch and returns the results
     """
     types = request.registry[TYPES]
-    search_base = normalize_query(request)
+    search_base = normalize_query(request, search_type)
     ### INITIALIZE RESULT
     result = {
         '@context': request.route_path('jsonld_context'),
@@ -141,13 +141,13 @@ def browse(context, request, search_type=None, return_generator=False):
     return search(context, request, search_type, return_generator, forced_type='Browse')
 
 
-@view_config(context=AbstractCollection, permission='list', request_method='GET',
-             name='listing')
+@view_config(context=AbstractCollection, permission='list', request_method='GET')
 def collection_view(context, request):
     """
     Simply use search results for collections views (e.g./biosamples/)
+    This is a redirect directly to the search page
     """
-    return search(context, request, context.type_info.name)
+    return search(context, request, context.type_info.name, False, forced_type='Search')
 
 
 @view_config(route_name='available_facets', request_method='GET', permission='search', renderer='json')
@@ -215,11 +215,12 @@ def get_all_results(request, origQuery):
     return es_result
 
 
-def normalize_query(request):
+def normalize_query(request, search_type):
     """
     Normalize the query used to make the search. If no type is provided,
     use type=Item
     """
+    item_type = search_type if search_type != None else 'Item'
     types = request.registry[TYPES]
     fixed_types = (
         (k, types[v].name if k == 'type' and v in types else v)
@@ -229,10 +230,10 @@ def normalize_query(request):
         (k.encode('utf-8'), v.encode('utf-8'))
         for k, v in fixed_types
     ])
-    # default to type=Item if no type is specified
-    qs = '?' + qs if qs else '?type=Item'
+    # default to the search_type or type=Item if no type is specified
+    qs = '?' + qs if qs else '?type=' + item_type
     if 'type=' not in qs:
-        qs += '&type=Item'
+        qs += ('&type=' + item_type)
     return qs
 
 
