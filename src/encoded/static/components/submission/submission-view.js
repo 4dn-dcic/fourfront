@@ -129,7 +129,7 @@ export default class SubmissionView extends React.Component{
         });
     }
 
-    createObj = (type) => {
+    createObj = (type, newIdx) => {
         var contextCopy = this.state.masterContext;
         var validCopy = this.state.masterValid;
         var typesCopy = this.state.masterTypes;
@@ -139,6 +139,10 @@ export default class SubmissionView extends React.Component{
         // increase key iter by 1 for a unique key
         // this is used as a key for masterContext, masterValid, and masterTypes
         var keyIdx = this.state.keyIter + 1;
+        if(newIdx !== keyIdx){
+            console.log('ERROR: key index inconsistencies!')
+            return;
+        }
         var newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
         validCopy[keyIdx] = 0;
         typesCopy[keyIdx] = type;
@@ -157,14 +161,25 @@ export default class SubmissionView extends React.Component{
 
     // key is @id for exisiting objs, state key idx for custom objs
     removeObj = (key) => {
+        var contextCopy = this.state.masterContext;
+        var validCopy = this.state.masterValid;
+        var typesCopy = this.state.masterTypes;
         var masterDisplay = this.state.masterDisplay;
         if(masterDisplay[key]){
             var hierarchy = this.state.keyHierarchy;
             var newHierarchy = trimHierarchy(hierarchy, key);
-            delete masterDisplay[key];
+            if(contextCopy[key]){ // custom object
+                delete validCopy[key];
+                delete contextCopy[key];
+                delete typesCopy[key];
+                delete masterDisplay[key];
+            }
             this.setState({
                 'keyHierarchy': newHierarchy,
-                'masterDisplay': masterDisplay
+                'masterDisplay': masterDisplay,
+                'masterContext': contextCopy,
+                'masterValid': validCopy,
+                'masterTypes': typesCopy
             });
         }
     }
@@ -183,14 +198,10 @@ export default class SubmissionView extends React.Component{
 
     setMasterState = (key, value) => {
         var newState = this.state;
-        newState[key] = value;
-        this.setState({newState});
-    }
-
-    getMasterContext = (key) => {
-        var masterCopy = this.state.masterContext;
-        var result = masterCopy[key] || null;
-        return result;
+        if(_.contains(Object.keys(newState),key)){
+            newState[key] = value;
+            this.setState({newState});
+        }
     }
 
     // generateValidationButton(){
@@ -447,13 +458,14 @@ export default class SubmissionView extends React.Component{
                 <RoundOneObject
                     {...others}
                     currKey={currKey}
+                    keyIter={this.state.keyIter}
                     schema={currSchema}
                     currContext={currContext}
                     modifyMasterContext={this.modifyMasterContext}
                     createObj={this.createObj}
                     removeObj={this.removeObj}
                     addExistingObj={this.addExistingObj}
-                    getMasterContext={this.getMasterContext}
+                    masterDisplay={this.state.masterDisplay}
                     setMasterState={this.setMasterState}
                 />
             </div>
@@ -566,6 +578,42 @@ class RoundOneObject extends React.Component{
                     });
                 }
             });
+        }
+    }
+
+    createObj = (type, nestedField, arrayIdx) => {
+        if(arrayIdx !== null){
+            // we have arrays involved
+            // use an array of array indexes and nested field structure
+            // made by the BuildFields to set the context correctly.
+            var splitField = nestedField.split('.');
+            var arrayIdxPointer = 0;
+            var contextCopy = this.props.currContext;
+            var pointer = contextCopy;
+            var newIdx = this.props.keyIter + 1;
+            for (var i=0; i<(splitField.length-1); i++){
+                if(pointer[splitField[i]]){
+                    pointer = pointer[splitField[i]];
+                }else{
+                    return;
+                }
+                if(pointer instanceof Array){
+                    pointer = pointer[arrayIdx[arrayIdxPointer]];
+                    arrayIdxPointer += 1;
+                }
+            }
+            if(pointer[splitField[splitField.length-1]] instanceof Array){
+                // move pointer into array
+                pointer = pointer[splitField[splitField.length-1]];
+                pointer[arrayIdx[arrayIdxPointer]] = newIdx;
+            }else{ // must be a dict
+                pointer[splitField[splitField.length-1]] = newIdx;
+            }
+            this.props.modifyMasterContext(this.props.currKey, contextCopy);
+            this.props.createObj(type, newIdx);
+        }else{
+            this.modifyNewContext(this.state.selectField, newIdx);
+            this.props.createObj(type, newIdx);
         }
     }
 
@@ -701,10 +749,13 @@ class RoundOneObject extends React.Component{
                 getFieldValue={this.getFieldValue}
                 required={required} isLinked={isLinked}
                 selectObj={this.selectObj}
-                createObj={this.props.createObj}
+                createObj={this.createObj}
                 title={fieldTitle}
                 edit={this.props.edit}
-                create={this.props.create} />
+                create={this.props.create}
+                masterDisplay={this.props.masterDisplay}
+                setMasterState={this.props.setMasterState}
+            />
         );
     }
 
@@ -824,60 +875,6 @@ class RoundTwoObject extends React.Component{
     }
 }
 
-/*
- Function to recursively find whether a json object contains a linkTo field
- anywhere in its nested structure. Returns true if found, false otherwise.
-*/
-var delveObject = function myself(json){
-    var found_obj = false;
-    Object.keys(json).forEach(function(key, index){
-        if(key == 'linkTo'){
-            found_obj = true;
-        }else if(json[key] !== null && typeof json[key] === 'object'){
-            var test = myself(json[key]);
-            if(test){
-                found_obj = true;
-            }
-        }
-    });
-    return found_obj;
-}
-
-// given the parent object key and a new object key, return a version
-// of this.state.keyHierarchy that includes the new parent-child relation
-// recursive function
-var modifyHierarchy = function myself(hierarchy, keyIdx, parentKeyIdx){
-    Object.keys(hierarchy).forEach(function(key, index){
-        if(key == parentKeyIdx){
-            hierarchy[parentKeyIdx][keyIdx] = {};
-        }else{
-            hierarchy[key] = myself(hierarchy[key], keyIdx, parentKeyIdx);
-        }
-    });
-    return hierarchy
-}
-
-// remove given key from hierarchy
-var trimHierarchy = function myself(hierarchy, keyIdx){
-    Object.keys(hierarchy).forEach(function(key, index){
-        if(_.contains(Object.keys(hierarchy), keyIdx)){
-            delete hierarchy[keyIdx];
-        }else{
-            hierarchy[key] = myself(hierarchy[key], keyIdx);
-        }
-    });
-    return hierarchy
-}
-
-class InfoIcon extends React.Component{
-    render() {
-        if (!this.props.children) return null;
-        return (
-            <i className="icon icon-info-circle" data-tip={this.props.children}/>
-        );
-    }
-}
-
 /***** MISC. FUNCIONS *****/
 
 export function buildContext(context, schema, edit=false, create=true){
@@ -924,14 +921,6 @@ export function buildContext(context, schema, edit=false, create=true){
     return built;
 }
 
-// scroll to the top of the page using d3
-function scrollTopTween(scrollTop){
-    return function(){
-        var interpolate = d3.interpolateNumber(this.scrollTop, scrollTop);
-        return function(t){ document.body.scrollTop = interpolate(t); };
-    };
-}
-
 // sort a list of BuildFields first by required status, then by title
 function sortPropFields(fields){
     var reqFields = [];
@@ -955,4 +944,58 @@ function sortPropFields(fields){
     });
     var retFields = reqFields.concat(optFields);
     return retFields;
+}
+
+/*
+ Function to recursively find whether a json object contains a linkTo field
+ anywhere in its nested structure. Returns true if found, false otherwise.
+*/
+var delveObject = function myself(json){
+    var found_obj = false;
+    Object.keys(json).forEach(function(key, index){
+        if(key == 'linkTo'){
+            found_obj = true;
+        }else if(json[key] !== null && typeof json[key] === 'object'){
+            var test = myself(json[key]);
+            if(test){
+                found_obj = true;
+            }
+        }
+    });
+    return found_obj;
+}
+
+// given the parent object key and a new object key, return a version
+// of this.state.keyHierarchy that includes the new parent-child relation
+// recursive function
+var modifyHierarchy = function myself(hierarchy, keyIdx, parentKeyIdx){
+    Object.keys(hierarchy).forEach(function(key, index){
+        if(key == parentKeyIdx){
+            hierarchy[parentKeyIdx][keyIdx] = {};
+        }else{
+            hierarchy[key] = myself(hierarchy[key], keyIdx, parentKeyIdx);
+        }
+    });
+    return hierarchy
+}
+
+// remove given key from hierarchy
+var trimHierarchy = function myself(hierarchy, keyIdx){
+    if(hierarchy[keyIdx]){
+        delete hierarchy[keyIdx];
+    }else{
+        Object.keys(hierarchy).forEach(function(key, index){
+            hierarchy[key] = myself(hierarchy[key], keyIdx);
+        });
+    }
+    return hierarchy;
+}
+
+class InfoIcon extends React.Component{
+    render() {
+        if (!this.props.children) return null;
+        return (
+            <i className="icon icon-info-circle" data-tip={this.props.children}/>
+        );
+    }
 }

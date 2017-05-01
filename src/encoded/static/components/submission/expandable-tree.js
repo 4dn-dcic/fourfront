@@ -76,7 +76,6 @@ class SubmissionLeaf extends React.Component{
     callBack = (e) => {
         e.preventDefault();
         this.props.setMasterState('currKey', this.props.keyIdx);
-        return false;
     }
 
     render() {

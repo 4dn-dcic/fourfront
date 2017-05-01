@@ -46,7 +46,9 @@ var BuildField = module.exports.BuildField = React.createClass({
             'schema': this.props.schema,
             'md5Progress': this.props.md5Progress,
             'modifyFile': this.props.modifyFile,
-            'modifyMD5Progess': this.props.modifyMD5Progess
+            'modifyMD5Progess': this.props.modifyMD5Progess,
+            'masterDisplay': this.props.masterDisplay,
+            'setMasterState': this.props.setMasterState
         };
         switch(field_case){
             case 'text' : return (
@@ -243,11 +245,31 @@ var LinkedObj = React.createClass({
         var style={'width':'160px', 'marginRight':'10px'};
         // object chosen or being created
         if(this.props.value){
-            return(
-                <div>
-                    <a href={this.props.value} target="_blank">{this.props.value}</a>
-                </div>
-            );
+            var masterDisplay = this.props.masterDisplay;
+            var thisDisplay;
+            if(isNaN(this.props.value)){
+                thisDisplay = masterDisplay ? masterDisplay[this.props.value] : this.props.value;
+                return(
+                    <div>
+                        <a href={this.props.value} target="_blank">{thisDisplay}</a>
+                    </div>
+                );
+            }else{
+                var intKey = parseInt(this.props.value);
+                thisDisplay = masterDisplay ? masterDisplay[intKey] : this.props.value;
+                return(
+                    <div>
+                        <a href="" onClick={function(e){
+                                e.preventDefault();
+                                this.props.setMasterState('currKey', intKey);
+                            }.bind(this)}>
+                            {thisDisplay}
+                        </a>
+                    </div>
+                );
+
+            }
+
         }
         // pass LinkedObj field to RoundOneObject with nested field format
         // such as, arguments.argument_mapping.workflow_step
@@ -275,7 +297,7 @@ var LinkedObj = React.createClass({
                 }
                 <Button bsSize="xsmall" style={style}onClick={function(e){
                         e.preventDefault();
-                        this.props.createObj(this.state.type);
+                        this.props.createObj(this.state.type, nestedField, this.props.arrayIdx);
                     }.bind(this)}>
                     {'Create new'}
                 </Button>
@@ -370,7 +392,10 @@ var ArrayField = React.createClass({
                     arrayIdx={arrayIdxList}
                     nestedField={this.props.nestedField}
                     isArray={true}
-                    arrayField={this.props.field}/>
+                    arrayField={this.props.field}
+                    masterDisplay={this.props.masterDisplay}
+                    setMasterState= {this.props.setMasterState}
+                />
             </div>
         );
     },
