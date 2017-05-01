@@ -9,7 +9,7 @@ var browse = module.exports;
 var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel } = require('react-bootstrap');
 var store = require('../store');
 var FacetList = require('./facetlist');
-var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table');
+import ExperimentsTable from './experiments-table';
 var { isServerSide, expFxn, Filters } = require('./util');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
 var { FlexibleDescriptionBox } = require('./experiment-common');

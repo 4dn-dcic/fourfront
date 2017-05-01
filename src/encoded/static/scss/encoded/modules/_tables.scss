@@ -891,6 +891,7 @@ $small-label-accession-font-size : 0.75rem;
 					display: inline-block;
 					vertical-align: middle;
 				}
+				position: relative;
 				padding: 7px 12px;
 				text-align: center;
 				line-height: 20px;
@@ -926,6 +927,12 @@ $small-label-accession-font-size : 0.75rem;
 					opacity: 0.1;
 					&.is-accession {
 						font-size: $small-label-accession-font-size;
+						i.icon-copy {
+							opacity : 0;
+							transition: opacity .25s;
+							font-size: 9px;
+							cursor: pointer;
+						}
 					}
 				}
 
@@ -985,7 +992,7 @@ $small-label-accession-font-size : 0.75rem;
 			.s-block:hover > .name > .label-ext-info {
 				opacity: 1 !important;
 				color: #000;
-				transform: scale3d(0.875,0.875,1) translate3d(-6%,12%,0);
+				transform: scale3d(1,1,1) translate3d(0%,20%,0);
 			}
 			.s-block:hover > .name:not(:hover) > .label-ext-info {
 				transform: scale3d(1, 1, 1) translate3d(1%, 20%, 0);
@@ -993,7 +1000,7 @@ $small-label-accession-font-size : 0.75rem;
 			.s-block.hide-name-on-block-hover:hover > .name:not(:hover) > .label-ext-info {
 				top: 50%;
     			margin-top: -9px;
-				transform: scale3d(1, 1, 1) translate3d(1%, 20%, 0);
+				transform: scale3d(1, 1, 1) translate3d(1%, 12%, 0);
 			}
 			.s-block.hide-name-on-block-hover:hover > .name:not(:hover) > .label-ext-info.has-subtitle {
     			margin-top: -13px;
@@ -1019,8 +1026,13 @@ $small-label-accession-font-size : 0.75rem;
 			}
 			.s-block:hover > .name:hover > .label-ext-info > .ext {
 				opacity: 1;
+				transform: scale3d(1,1,1);
 				/* transform: scale3d(1.125, 1.125, 1) translate3d(6%, 0, 0) !important; */
 				font-weight: 600;
+				i.icon-copy {
+					opacity: 1;
+					cursor: pointer;
+				}
 			}
 
 			.s-block.hide-name-on-block-hover .name.col-file > .exp-table-checkbox {
