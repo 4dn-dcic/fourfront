@@ -237,7 +237,7 @@ class FormattedInfoWrapper extends React.Component {
 
 /**
  * Shows publications for current Item.
- * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/experiment-set-view .
+ * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView .
  * 
  * @memberof module:item-pages/components
  * @export

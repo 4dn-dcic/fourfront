@@ -23,11 +23,19 @@ class StackedBlockNameLabel extends React.Component {
         super(props);
         this.render = this.render.bind(this);
         this.copyAccessionButton = this.copyAccessionButton.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.state = {
+            'mounted' : false
+        };
+    }
+
+    componentDidMount(){
+        this.setState({ mounted : true });
     }
 
     copyAccessionButton(){
         if (!this.props.accession) return null;
-        if (isServerSide() || !document || !document.createElement || !document.execCommand) return null;
+        if (!this.state.mounted || isServerSide() || !document || !document.createElement || !document.execCommand) return null;
 
         function copy(){
             var textArea = document.createElement('textarea');
