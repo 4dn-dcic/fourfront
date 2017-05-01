@@ -381,7 +381,7 @@ def test_calculated_expt_produced_in_pub_for_rep_experiment_set(
     pub1_data['exp_sets_prod_in_pub'] = [repset_w_exp1['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
     expres = testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp'])
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     assert 'produced_in_pub' in expres
     assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == expres.json['produced_in_pub']['@id']
 

@@ -28,7 +28,7 @@ class Experiment(Item):
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
     embedded = ["protocol", "protocol_variation", "lab", "award", "experiment_sets",
-                # "produced_in_pub", "publications_of_exp",
+                "produced_in_pub", "publications_of_exp",
                 "biosample", "biosample.biosource", "biosample.modifications",
                 "biosample.treatments", "biosample.biosource.individual.organism"]
     name_key = 'accession'
@@ -145,8 +145,10 @@ class Experiment(Item):
         esets = [request.embed('/', str(uuid), '@@object') for uuid in
                  self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
         import itertools
-        return list(itertools.chain.from_iterable([eset.get('publications_of_set',[])
+        pubs = list(itertools.chain.from_iterable([eset.get('publications_of_set',[])
                                                     for eset in esets]))
+        import pdb; pdb.set_trace()
+        return pubs
 
 
 @collection(
