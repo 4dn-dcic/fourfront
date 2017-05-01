@@ -65,6 +65,7 @@
     "immutable": "^3.7.5",
     "js-md5": "^0.4.1",
     "jsonwebtoken": "^7.1.9",
+    "lodash": "^4.17.4",
     "marked": "^0.3.6",
     "moment": "^2.15.2",
     "prop-types": "^15.5.8",
@@ -81,10 +82,12 @@
     "react-redux": "^4.4.5",
     "react-tooltip": "^3.2.7",
     "redux": "^3.5.2",
+    "remark-parse": "^3.0.0",
     "scriptjs": "^2.5.7",
     "source-map-support": "^0.2.7",
     "subprocess-middleware": "^0.1.0",
     "underscore": "^1.8.3",
+    "unified": "^6.1.2",
     "xhr2": "^0.1.3"
   }
 }
