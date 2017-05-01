@@ -796,4 +796,4 @@ def load_ontology_terms(app,
     try:
         testapp.post_json("/sysinfo", data)
     except AppError:
-        testapp.patch_json("/sysinfo/%s" % data[name], data)
+        testapp.patch_json("/sysinfo/%s" % data['name'], data)
