@@ -146,10 +146,10 @@ class File(Item):
     schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab', 'file_format', 'related_files.file']
     name_key = 'accession'
-    rev = {
-        'workflow_run_inputs': ('WorkflowRun', 'input_files'),
-        'workflow_run_outputs': ('WorkflowRun', 'output_files'),
-    }
+    #rev = {
+    #    "workflow_run_inputs": ('WorkflowRun', 'input_files'),
+    #    "workflow_run_outputs": ('WorkflowRun', 'output_files'),
+    #}
 
     @calculated_property(schema={
         "title": "Input of Workflow Runs",
@@ -157,15 +157,26 @@ class File(Item):
         "type": "array",
         "items": {
             "title": "Input of Workflow Run",
-            "type": "string",
+            "type": ["string", "object"],
             "linkTo": "WorkflowRun"
         }
     })
     def workflow_run_inputs(self, request):
-        return paths_filtered_by_status(request, self.get_rev_links('workflow_run_inputs'))
+        runs = list(self.registry['collections']['WorkflowRun'])
+        runs.extend(list(self.registry['collections']['WorkflowRunSbg']))
+        result_runs = []
+        for uuid in runs:
+            run = self.collection.get(uuid)
+            if run:
+                for file in run.properties.get("input_files",[]):
+                    if str(file.get("value","null")) == str(self.uuid):
+                        result_runs.append(run)
+
+        return [ '/' + str(r.uuid) for r in result_runs ]
+        #return self.get_rev_links('workflow_run_inputs')
 
     @calculated_property(schema={
-        "title": "Outputs of Workflow Runs",
+        "title": "Output of Workflow Runs",
         "description": "All workflow runs that this file serves as an output from",
         "type": "array",
         "items": {
@@ -175,7 +186,18 @@ class File(Item):
         }
     })
     def workflow_run_outputs(self, request):
-        return paths_filtered_by_status(request, self.get_rev_links('workflow_run_outputs'))
+        runs = list(self.registry['collections']['WorkflowRun'])
+        runs.extend(list(self.registry['collections']['WorkflowRunSbg']))
+        result_runs = []
+        for uuid in runs:
+            run = self.collection.get(uuid)
+            if run:
+                for file in run.properties.get("output_files",[]):
+                    if str(file.get("value","null")) == str(self.uuid):
+                        result_runs.append(run)
+
+        return [ '/' + str(r.uuid) for r in result_runs ]
+        #return self.get_rev_links('workflow_run_outputs')
 
 
     def _update(self, properties, sheets=None):
