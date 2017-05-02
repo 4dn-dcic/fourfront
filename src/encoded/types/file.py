@@ -156,26 +156,26 @@ class File(Item):
         "description": "All workflow runs that this file serves as an input to",
         "type": "array",
         "items": {
-            "title": "Workflow Runs",
-            "type": ["string","object"],
-            "linkFrom": "WorkflowRun.input_files"
+            "title": "Input of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
         }
     })
-    def workflow_run_inputs(self, request, workflow_runs):
-        return paths_filtered_by_status(request, workflow_runs)
+    def workflow_run_inputs(self, request):
+        return paths_filtered_by_status(request, self.get_rev_links('workflow_run_inputs'))
 
     @calculated_property(schema={
         "title": "Outputs of Workflow Runs",
         "description": "All workflow runs that this file serves as an output from",
         "type": "array",
         "items": {
-            "title": "Workflow Runs",
-            "type": ["string","object"],
-            "linkFrom": "WorkflowRun.output_files"
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
         }
     })
-    def workflow_run_outputs(self, request, workflow_runs):
-        return paths_filtered_by_status(request, workflow_runs)
+    def workflow_run_outputs(self, request):
+        return paths_filtered_by_status(request, self.get_rev_links('workflow_run_outputs'))
 
 
     def _update(self, properties, sheets=None):
