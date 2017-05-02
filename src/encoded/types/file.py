@@ -12,7 +12,8 @@ from snovault.validators import validate_item_content_post
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
-    collection_add
+    collection_add,
+    path_filtered_by_status
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -145,6 +146,37 @@ class File(Item):
     schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab', 'file_format', 'related_files.file']
     name_key = 'accession'
+    rev = {
+        'workflow_run_inputs': ('WorkflowRun', 'input_files'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files'),
+    }
+
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Workflow Runs",
+            "type": ["string","object"],
+            "linkFrom": "WorkflowRun.input_files"
+        }
+    })
+    def workflow_run_inputs(self, request, workflow_runs):
+        return paths_filtered_by_status(request, workflow_runs)
+
+    @calculated_property(schema={
+        "title": "Outputs of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Workflow Runs",
+            "type": ["string","object"],
+            "linkFrom": "WorkflowRun.output_files"
+        }
+    })
+    def workflow_run_inputs(self, request, workflow_runs):
+        return paths_filtered_by_status(request, workflow_runs)
+
 
     def _update(self, properties, sheets=None):
         if not properties:
