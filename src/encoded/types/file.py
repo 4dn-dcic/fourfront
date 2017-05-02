@@ -13,7 +13,7 @@ from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     collection_add,
-    path_filtered_by_status
+    paths_filtered_by_status
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -174,7 +174,7 @@ class File(Item):
             "linkFrom": "WorkflowRun.output_files"
         }
     })
-    def workflow_run_inputs(self, request, workflow_runs):
+    def workflow_run_outputs(self, request, workflow_runs):
         return paths_filtered_by_status(request, workflow_runs)
 
 
