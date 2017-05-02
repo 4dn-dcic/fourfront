@@ -126,7 +126,9 @@ class ExperimentSet(Item):
     def publications_of_set(self, request):
         pubs = set([str(pub) for pub in self.get_rev_links('publications_produced') +
                 self.get_rev_links('publications_using')])
-        return paths_filtered_by_status(request, pubs)
+        pubs = [request.embed('/', uuid, '@@object')
+                for uuid in paths_filtered_by_status(request, pubs )]
+        return [pub['@id'] for pub in pubs]
 
 
 @collection(

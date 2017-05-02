@@ -441,7 +441,7 @@ def test_calculated_publications_in_experiment_no_data(
     responses = [testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp']),
                  testapp.get(custset_w_exp2['experiments_in_set'][0])]
     for response in responses:
-        assert 'publications_of_exp' not in response
+        response.json['publications_of_exp'] is None
 
 
 def test_calculated_publications_in_expt_w_repset_in_both_fields(
