@@ -146,7 +146,7 @@ class File(Item):
     schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab', 'file_format', 'related_files.file']
     name_key = 'accession'
-    rev = {
+    '''rev = {
         'workflow_run_inputs': ('WorkflowRun', 'input_files'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files'),
     }
@@ -176,6 +176,7 @@ class File(Item):
     })
     def workflow_run_outputs(self, request):
         return paths_filtered_by_status(request, self.get_rev_links('workflow_run_outputs'))
+    '''
 
 
     def _update(self, properties, sheets=None):
