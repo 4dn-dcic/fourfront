@@ -4,7 +4,7 @@
     "id": "/profiles/document.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [ "document_type", "lab", "award"],
+    "required": ["lab", "award"],
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "mixinProperties": [
