@@ -224,6 +224,7 @@ class Item(snovault.Item):
         # for file
         'obsolete': ONLY_ADMIN_VIEW,
         'uploading': ALLOW_LAB_SUBMITTER_EDIT,
+        'to be uploaded by workflow': ALLOW_LAB_SUBMITTER_EDIT,
         'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
         'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
 
