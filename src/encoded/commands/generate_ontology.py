@@ -603,7 +603,8 @@ def download_and_process_owl(ontology, connection, terms):
     synonym_terms = get_synonym_term_uris(connection, ontology)
     definition_terms = get_definition_term_uris(connection, ontology)
     data = Owler(ontology['download_url'])
-    terms = {}
+    if not terms:
+        terms = {}
     for class_ in data.allclasses:
         if isBlankNode(class_):
             terms = process_blank_node(class_, data, terms)
