@@ -147,7 +147,6 @@ class Experiment(Item):
         import itertools
         pubs = list(itertools.chain.from_iterable([eset.get('publications_of_set',[])
                                                     for eset in esets]))
-        import pdb; pdb.set_trace()
         return pubs
 
 
