@@ -498,6 +498,14 @@ $open-expset-table-side-border-color : #e4e4e4;
 					padding-top: 4px;
 					padding-bottom: 4px;
 					transition : height .5s, border-top-color .35s;
+					&:last-child:after {
+						content: '';
+						height: 100%;
+						position: absolute;
+						right: 0;
+						top: 0;
+						border-right: 1px solid transparent;
+					}
 				}
 			}
 
@@ -667,10 +675,11 @@ tr.expset-addinfo-row {
 		position: relative;
 		z-index: 1;
 		transition: border-bottom .3s ease-out;
+		border-right: 1px solid transparent;
 
 		tbody.open & {
 			//border-left: 1px solid $open-expset-table-side-border-color;
-			border-right: 1px solid $open-expset-table-side-border-color;
+			border-right-color: $open-expset-table-side-border-color;
 			border-bottom-color: #808080;
 		}
 

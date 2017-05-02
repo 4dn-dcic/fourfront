@@ -215,7 +215,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
 
         function experimentsTable(){
             /* Removed props.facets & props.expSetFilters as passing in props.passExperiments as experimentArray. */
-            if (!this.state.open) return <div> Test </div>;
+            if (!this.state.open && !this.state.reallyOpen) return <div> Test </div>;
             var expTableWidth = null;
 
             if (this.refs.tbody && this.refs.tbody.offsetWidth){

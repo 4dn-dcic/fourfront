@@ -263,7 +263,10 @@ class ShortAttribution extends React.Component {
         var yearPublished = null;
         try {
             if (typeof pub.date_published === 'string'){
-                yearPublished = ' ' + (new Date(pub.date_published)).getFullYear();
+                yearPublished = (new Date(pub.date_published)).getFullYear();
+            }
+            if (journalString){
+                yearPublished = ' ' + yearPublished;
             }
         } catch (e){
             yearPublished = null;
