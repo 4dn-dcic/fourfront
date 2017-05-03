@@ -46,8 +46,6 @@ export default class ItemPageTitle extends React.Component {
             );
         }
 
-        console.log(itemTypeTitle, subtitle);
-
         return ((itemTypeTitle || subtitle) && (
             <h1 className="page-title">
                 { itemTypeTitle } { subtitle }
