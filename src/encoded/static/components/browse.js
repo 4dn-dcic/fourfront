@@ -866,7 +866,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         var formattedExperimentSetListings = this.formatExperimentSetListings();
         if (!formattedExperimentSetListings) return null;
 
-        console.log('RENDER TABLE EXP LISTINGS', formattedExperimentSetListings);
+        //console.log('RENDER TABLE EXP LISTINGS', formattedExperimentSetListings);
 
         this.experimentSetRows = {}; // ExperimentSetRow instances stored here, keyed by @id, to get selectFiles from (?).
         var maxPage = Math.ceil(this.props.context.total / this.state.limit);
@@ -1166,7 +1166,7 @@ var Browse = browse.Browse = React.createClass({
     },
 
     render: function() {
-        console.log('BROWSE PROPS', this.props);
+        //console.log('BROWSE PROPS', this.props);
         var context = this.props.context;
         var fileFormats = findFormats(context['@graph']);
 
@@ -1178,7 +1178,7 @@ var Browse = browse.Browse = React.createClass({
         var searchBase = url.parse(this.props.href || this.context.location_href).search || '';
 
         // browse is only for experiment sets
-        console.log(this.props.href, this.context.location_href, searchBase);
+        //console.log(this.props.href, this.context.location_href, searchBase);
         if(searchBase.indexOf('?type=ExperimentSetReplicate') === -1){
             return(
                 <div className="error-page">

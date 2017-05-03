@@ -321,7 +321,7 @@ var TableOfContents = module.exports = React.createClass({
             children : function(){
                 var childHeaders = this.getHeadersFromContent();
                 if (childHeaders && childHeaders.length){
-                    console.log(this.props.depth, childHeaders);
+                    //console.log(this.props.depth, childHeaders);
                     return childHeaders.map((h, index) =>{
                         var hString = TableOfContents.textFromReactChildren(h.props.children);
                         var childContent = this.getSubsequentChildHeaders(h);

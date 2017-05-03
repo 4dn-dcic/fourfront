@@ -2,7 +2,7 @@
 
 var React = require('react');
 import PropTypes from 'prop-types';
-var { Table, Checkbox, Collapse } = require('react-bootstrap');
+var { Checkbox, Collapse } = require('react-bootstrap');
 var _ = require('underscore');
 var FacetList = require('./facetlist'); // Only used for statics.
 var { expFxn, Filters, console, isServerSide } = require('./util');
@@ -722,8 +722,14 @@ export default class ExperimentsTable extends React.Component {
     updateColumnWidths(){
         // Scale/expand width of columns to fit available width, if any.
         var origColumnWidths;
-        if (!this.refs.header && typeof this.props.width !== 'number') return null;
-        if (typeof this.props.width !== 'number' && this.refs.header && this.refs.header.clientWidth === 0) return null;
+        if (
+            typeof this.props.width !== 'number' && (
+                !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
+            )
+        ){
+            this.setState({ columnWidths : ExperimentsTable.initialColumnWidths(null) })
+            return null;
+        }
         if (!this.cache.origColumnWidths){
             origColumnWidths = _.map(this.refs.header.children, function(c){
                 //if ( // For tests/server-side
@@ -1482,4 +1488,3 @@ export function getFileDetailContainer(experimentArray, passedExperiments = null
     }
     return { 'fileDetail' : fileDetail, 'emptyExps' : emptyExps };
 }
-
