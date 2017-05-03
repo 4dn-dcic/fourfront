@@ -33,6 +33,13 @@ export function parseAnalysisSteps(analysis_steps){
         };
     }
 
+    /**
+     * Generate output nodes from step.outputs and create edges between them and stepNode.
+     * 
+     * @param {Object} step - Analysis Step
+     * @param {number} column - Column index (later translated into X coordinate).
+     * @param {Object} stepNode - Analysis Step Node Reference
+     */
     function generateOutputNodes(step, column, stepNode){
         var outputNodes = [];
         step.outputs.forEach(function(stepOutput, j){
@@ -58,82 +65,70 @@ export function parseAnalysisSteps(analysis_steps){
         nodes = nodes.concat(outputNodes);
     }
 
-    analysis_steps.forEach(function(step, i){ // Each step will be a node.
+    function generateInputNode(stepInput, column, inputOfNode){
+        return {
+            column      : column,
+            format      : stepInput.source && stepInput.source[0].type, // First source type takes priority
+            name        : stepInput.name, 
+            type        : 'input',
+            inputOf     : inputOfNode,
+            meta        : _.omit(stepInput, 'required', 'name'),
+            required    : stepInput.required || false,
+        };
+    }
 
-        var stepNode = generateStepNode(step, (i + 1) * 2 - 1);
+    /**
+     * Find existing or generate new input nodes for each input in step.inputs and
+     * create edges between them and stepNode.
+     * 
+     * @param {Object} step - Analysis Step
+     * @param {number} column - Column index (later translated into X coordinate).
+     * @param {Object} stepNode - Analysis Step Node Reference
+     */
+    function generateInputNodes(step, column, stepNode){
+        var allInputOutputNodes = _.filter(nodes, function(n){
+            if (n.type === 'output' || n.type === 'input') return true;
+            return false;
+        });
 
-        // Each input on the first step will be a node.
-        if (i === 0){
-            step.inputs.forEach(function(fullStepInput, j){
-                nodes.push({
-                    column      : (i + 1) * 2 - 2,
-                    format      : fullStepInput.source && fullStepInput.source[0].type, // First source type takes priority
-                    name        : fullStepInput.name, 
-                    type        : 'input',
-                    inputOf     : stepNode,
-                    required    : fullStepInput.required || false,
-                    meta        : _.omit(fullStepInput, 'required', 'name')
-                });
-            });
+        step.inputs.forEach(function(fullStepInput){
+            if (!Array.isArray(fullStepInput.source)) return;
 
-            nodes.forEach(function(inputNode){
-                if (inputNode.type !== 'input') return;
-                edges.push({
-                    'source' : inputNode,
-                    'target' : stepNode,
-                    'capacity' : 'Original Input'
-                });
-            });
-
-            
-            generateOutputNodes(step, (i + 1) * 2, stepNode);
-            nodes.push(stepNode);
-
-        } else if (i < analysis_steps.length){
-
-            var allInputOutputNodes = _.filter(nodes, function(n){
-                if (n.type === 'output' || n.type === 'input') return true;
+            // Try to find existing matching node first.
+            var inputNode = _.find(allInputOutputNodes, function(n){
+                if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
+                    return true;
+                }
                 return false;
             });
 
-            step.inputs.forEach(function(fullStepInput){
-                if (!Array.isArray(fullStepInput.source)) return;
+            // Else create new one.
+            if (!inputNode){
+                inputNode = generateInputNode(fullStepInput, column, stepNode);
+                nodes.push(inputNode);
+            }
 
-                var matchedInputNode = _.find(allInputOutputNodes, function(n){
-                    if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
-                        return true;
-                    }
-                    return false;
+            // Finally, attach edge.
+            if (inputNode){
+                edges.push({
+                    'source' : inputNode,
+                    'target' : stepNode,
+                    'capacity' : 'Input'
                 });
+            }
 
-                if (!matchedInputNode){
-                    // Whooooah we gots an input that hasn't been defined previously. Probably add this to the first column.
-                    matchedInputNode = {
-                        column : (i + 1) * 2 - 2,
-                        format : fullStepInput.source && fullStepInput.source[0].type,
-                        name : fullStepInput.name,
-                        type : 'input',
-                        inputOf : stepNode,
-                        required : fullStepInput.required || false,
-                        meta : _.omit(fullStepInput, 'required', 'name')
-                    }
-                    nodes.push(matchedInputNode);
-                }
+        });
+    }
 
-                if (matchedInputNode){
-                    edges.push({
-                        'source' : matchedInputNode,
-                        'target' : stepNode,
-                        'capacity' : 'Input'
-                    });
-                }
+    /***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+     *  Process each Analysis Step as a node. Inputs & output nodes placed in alternating column.  *
+     ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****/
 
-            });
-
-            generateOutputNodes(step, (i + 1) * 2, stepNode);
-            nodes.push(stepNode);
-        }
-
+    analysis_steps.forEach(function(step, i){
+        var stepNode = generateStepNode(step, (i + 1) * 2 - 1);
+        generateInputNodes(step, (i + 1) * 2 - 2, stepNode);
+        generateOutputNodes(step, (i + 1) * 2, stepNode);
+        nodes.push(stepNode);
     });
 
     return {
