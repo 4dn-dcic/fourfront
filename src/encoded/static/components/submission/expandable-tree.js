@@ -68,6 +68,7 @@ class SubmissionLeaf extends React.Component{
                 key={childKey}
                 {...others}
                 keyIdx={childKey}
+                open={true}
                 hierarchy={this.props.hierarchy[this.props.keyIdx]}
             />
         );
@@ -76,6 +77,7 @@ class SubmissionLeaf extends React.Component{
     callBack = (e) => {
         e.preventDefault();
         this.props.setMasterState('currKey', this.props.keyIdx);
+        this.props.setMasterState('navigationIsOpen', false);
     }
 
     render() {

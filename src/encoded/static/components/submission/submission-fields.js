@@ -434,7 +434,7 @@ var ObjectField = React.createClass({
         if(!this.props.value || this.props.value == '' || this.props.value == 'No value'){
             valueCopy = {};
         }else{
-            valueCopy = this.props.value;
+            valueCopy = JSON.parse(JSON.stringify(this.props.value));
         }
         valueCopy[field] = value;
         this.props.modifyNewContext(this.props.field, valueCopy);
@@ -516,7 +516,10 @@ var ObjectField = React.createClass({
                 title={title}
                 nestedField={nestedField}
                 isArray={false}
-                arrayIdx={this.props.arrayIdx}/>
+                arrayIdx={this.props.arrayIdx}
+                masterDisplay={this.props.masterDisplay}
+                setMasterState= {this.props.setMasterState}
+            />
         );
     },
 

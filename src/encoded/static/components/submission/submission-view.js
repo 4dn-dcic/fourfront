@@ -155,7 +155,8 @@ export default class SubmissionView extends React.Component{
             'masterDisplay': masterDisplay,
             'currKey': keyIdx,
             'keyIter': keyIdx,
-            'keyHierarchy': newHierarchy
+            'keyHierarchy': newHierarchy,
+            'processingFetch': false
         });
     }
 
@@ -168,11 +169,11 @@ export default class SubmissionView extends React.Component{
         if(masterDisplay[key]){
             var hierarchy = this.state.keyHierarchy;
             var newHierarchy = trimHierarchy(hierarchy, key);
+            delete masterDisplay[key];
             if(contextCopy[key]){ // custom object
                 delete validCopy[key];
                 delete contextCopy[key];
                 delete typesCopy[key];
-                delete masterDisplay[key];
             }
             this.setState({
                 'keyHierarchy': newHierarchy,
@@ -272,152 +273,136 @@ export default class SubmissionView extends React.Component{
     //     this.executePost();
     // }
     //
-    // executePost(test=false){
-    //     // function to test a POST of the data or actually POST it.
-    //     // validates if test=true, POSTs if test=false.
-    //     var stateToSet = {}; // hold state
-    //     // this will always be reset when stateToSet is implemented
-    //     stateToSet.processingFetch = false;
-    //     // get rid of any hanging errors
-    //     for(var i=0; i<this.state.errorCount; i++){
-    //         Alerts.deQueue({ 'title' : "Object validation error " + parseInt(i + 1)});
-    //         stateToSet.errorCount = 0;
-    //     }
-    //     var objType = this.props.context['@type'][0] || 'Item';
-    //     var lab;
-    //     var award;
-    //     var finalizedContext = this.contextSift(this.state.newContext, this.state.thisSchema);
-    //     console.log('contextToPOST:', finalizedContext);
-    //     this.setState({'processingFetch': true});
-    //     ajax.promise('/me?frame=embedded').then(data => {
-    //         if (this.context.contentTypeIsJSON(data)){
-    //             if(!data.submits_for || data.submits_for.length == 0){
-    //                 console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
-    //                 stateToSet.validated = 2;
-    //                 this.setState(stateToSet);
-    //                 return;
-    //             }
-    //             // use first lab for now
-    //             var submits_for = data.submits_for[0];
-    //             lab = submits_for['@id'] ? submits_for['@id'] : submits_for.link_id.replace(/~/g, "/");
-    //         }
-    //         ajax.promise(lab).then(lab_data => {
-    //             if (this.context.contentTypeIsJSON(lab_data)){
-    //                 if(!lab_data.awards || lab_data.awards.length == 0){
-    //                     console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
-    //                     stateToSet.validated = 2;
-    //                     this.setState(stateToSet);
-    //                     return;
-    //                 }
-    //                 // should we really always use the first award?
-    //                 award = lab_data.awards[0];
-    //             }
-    //             // if editing, use pre-existing award, lab, and submitted_by
-    //             if(this.props.edit && this.state.newContext.award && this.state.newContext.lab){
-    //                 finalizedContext.award = this.state.newContext.award;
-    //                 finalizedContext.lab = this.state.newContext.lab;
-    //                 // an admin is editing. Use the pre-existing submitted_by
-    //                 // otherwise, permissions won't let us change this field
-    //                 if(data.groups && _.contains(data.groups, 'admin')){
-    //                     finalizedContext.submitted_by = this.state.newContext.submitted_by;
-    //                 }
-    //             }else{ // use info of person creating/cloning
-    //                 if(this.state.thisSchema.properties.award){
-    //                     finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
-    //                 }
-    //                 if(this.state.thisSchema.properties.lab){
-    //                     finalizedContext.lab = lab;
-    //                 }
-    //             }
-    //             // if testing validation, use check_only=True (see /types/base.py)
-    //             var destination = test ? '/' + objType + '/?check_only=True' : '/' + objType;
-    //             var actionMethod = 'POST';
-    //             // see if this is not a test and we're editing
-    //             if(!test && this.props.edit){
-    //                 actionMethod = 'PUT';
-    //                 destination = this.state.newContext['@id'];
-    //                 // must add uuid (and accession, if available) to PUT body
-    //                 finalizedContext.uuid = this.state.newContext.uuid;
-    //                 // not all objects have accessions
-    //                 if(this.state.newContext.accession){
-    //                     finalizedContext.accession = this.state.newContext.accession;
-    //                 }
-    //             }
-    //             this.context.fetch(destination, {
-    //                 method: actionMethod,
-    //                 headers: {
-    //                     'Accept': 'application/json',
-    //                     'Content-Type': 'application/json'
-    //                 },
-    //                 body: JSON.stringify(finalizedContext)
-    //             })
-    //             .then(response => {
-    //                 if (response.status && response.status !== 'success') throw response;
-    //                 return response;
-    //             })
-    //             .then(response => {
-    //                 var response_data;
-    //                 if(test){
-    //                     console.log('OBJECT SUCCESSFULLY TESTED!');
-    //                     stateToSet.validated = 1;
-    //                     this.setState(stateToSet);
-    //                     return;
-    //                 }else{
-    //                     response_data = response['@graph'][0];
-    //                     if(!this.props.edit){
-    //                         destination = response_data['@id'];
-    //                     }
-    //                 }
-    //                 // handle file upload if this is a file
-    //                 if(this.state.file && response_data['upload_credentials']){
-    //                     // add important info to result from finalizedContext
-    //                     // that is not added from /types/file.py get_upload
-    //                     var creds = response_data['upload_credentials'];
-    //                     var upload_manager = s3UploadFile(this.state.file, creds);
-    //                     var upload_info = {
-    //                         'context': response_data,
-    //                         'manager': upload_manager
-    //                     };
-    //                     // Passes upload_manager to uploads.js through app.js
-    //                     this.props.updateUploads(destination, upload_info);
-    //                     alert('Success! Navigating to the uploads page.');
-    //                     this.context.navigate('/uploads');
-    //                 }else{
-    //                     console.log('ACTION SUCCESSFUL!');
-    //                     alert('Success! Navigating to the object page.');
-    //                     this.context.navigate(destination);
-    //                 }
-    //             }, error => {
-    //                 stateToSet.validated = 0;
-    //                 console.log('ERROR IN OBJECT VALIDATION!');
-    //                 var errorList = error.errors || [error.detail] || [];
-    //                 // make an alert for each error description
-    //                 stateToSet.errorCount = errorList.length;
-    //                 for(var i=0; i<errorList.length; i++){
-    //                     var detail = errorList[i].description || errorList[i] || "Unidentified error";
-    //                     if(errorList[i].name && errorList[i].name.length > 0){
-    //                         detail += ('. See: ' + errorList[i].name[0]);
-    //                     }
-    //                     Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': detail, 'style': 'danger' });
-    //                 }
-    //                 // scroll to the top of the page using d3
-    //                 function scrollTopTween(scrollTop){
-    //                     return function(){
-    //                         var interpolate = d3.interpolateNumber(this.scrollTop, scrollTop);
-    //                         return function(t){ document.body.scrollTop = interpolate(t); };
-    //                     };
-    //                 }
-    //                 var origScrollTop = document.body.scrollTop;
-    //                 d3.select(document.body)
-    //                     .interrupt()
-    //                     .transition()
-    //                     .duration(750)
-    //                     .tween("bodyScroll", scrollTopTween(0));
-    //                 this.setState(stateToSet);
-    //             });
-    //         });
-    //     });
-    // }
+    executePost = (test=false) => {
+        // function to test a POST of the data or actually POST it.
+        // validates if test=true, POSTs if test=false.
+        var stateToSet = {}; // hold state
+        // this will always be reset when stateToSet is implemented
+        stateToSet.processingFetch = false;
+        // get rid of any hanging errors
+        for(var i=0; i<this.state.errorCount; i++){
+            Alerts.deQueue({ 'title' : "Object validation error " + parseInt(i + 1)});
+            stateToSet.errorCount = 0;
+        }
+        var objType = this.props.context['@type'][0] || 'Item';
+        var lab;
+        var award;
+        var finalizedContext = JSON.parse(JSON.stringify(this.state.masterContext[this.state.currKey]));
+        console.log('contextToPOST:', finalizedContext);
+        this.setState({'processingFetch': true});
+        ajax.promise('/me?frame=embedded').then(data => {
+            if(!data || !data.submits_for || data.submits_for.length == 0){
+                console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
+                stateToSet.validated = 2;
+                this.setState(stateToSet);
+                return;
+            }
+            // use first lab for now
+            var submits_for = data.submits_for[0];
+            lab = submits_for['@id'] ? submits_for['@id'] : submits_for.link_id.replace(/~/g, "/");
+            ajax.promise(lab).then(lab_data => {
+                if(!lab || !lab_data.awards || lab_data.awards.length == 0){
+                    console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
+                    stateToSet.validated = 2;
+                    this.setState(stateToSet);
+                    return;
+                }
+                // should we really always use the first award?
+                award = lab_data.awards[0];
+                // if editing, use pre-existing award, lab, and submitted_by
+                if(this.props.edit && this.state.newContext.award && this.state.newContext.lab){
+                    finalizedContext.award = this.state.newContext.award;
+                    finalizedContext.lab = this.state.newContext.lab;
+                    // an admin is editing. Use the pre-existing submitted_by
+                    // otherwise, permissions won't let us change this field
+                    if(data.groups && _.contains(data.groups, 'admin')){
+                        finalizedContext.submitted_by = this.state.newContext.submitted_by;
+                    }
+                }else{ // use info of person creating/cloning
+                    if(this.state.thisSchema.properties.award){
+                        finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
+                    }
+                    if(this.state.thisSchema.properties.lab){
+                        finalizedContext.lab = lab;
+                    }
+                }
+                // if testing validation, use check_only=True (see /types/base.py)
+                var destination = test ? '/' + objType + '/?check_only=True' : '/' + objType;
+                var actionMethod = 'POST';
+                // see if this is not a test and we're editing
+                if(!test && this.props.edit){
+                    actionMethod = 'PUT';
+                    destination = this.state.newContext['@id'];
+                    // must add uuid (and accession, if available) to PUT body
+                    finalizedContext.uuid = this.state.newContext.uuid;
+                    // not all objects have accessions
+                    if(this.state.newContext.accession){
+                        finalizedContext.accession = this.state.newContext.accession;
+                    }
+                }
+                this.context.fetch(destination, {
+                    method: actionMethod,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(finalizedContext)
+                })
+                .then(response => {
+                    if (response.status && response.status !== 'success') throw response;
+                    return response;
+                })
+                .then(response => {
+                    var response_data;
+                    if(test){
+                        console.log('OBJECT SUCCESSFULLY TESTED!');
+                        stateToSet.validated = 1;
+                        this.setState(stateToSet);
+                        return;
+                    }else{
+                        response_data = response['@graph'][0];
+                        if(!this.props.edit){
+                            destination = response_data['@id'];
+                        }
+                    }
+                    // handle file upload if this is a file
+                    if(this.state.file && response_data['upload_credentials']){
+                        // add important info to result from finalizedContext
+                        // that is not added from /types/file.py get_upload
+                        var creds = response_data['upload_credentials'];
+                        var upload_manager = s3UploadFile(this.state.file, creds);
+                        var upload_info = {
+                            'context': response_data,
+                            'manager': upload_manager
+                        };
+                        // Passes upload_manager to uploads.js through app.js
+                        this.props.updateUploads(destination, upload_info);
+                        alert('Success! Navigating to the uploads page.');
+                        this.context.navigate('/uploads');
+                    }else{
+                        console.log('ACTION SUCCESSFUL!');
+                        alert('Success! Navigating to the object page.');
+                        this.context.navigate(destination);
+                    }
+                }, error => {
+                    stateToSet.validated = 0;
+                    console.log('ERROR IN OBJECT VALIDATION!');
+                    var errorList = error.errors || [error.detail] || [];
+                    // make an alert for each error description
+                    stateToSet.errorCount = errorList.length;
+                    for(var i=0; i<errorList.length; i++){
+                        var detail = errorList[i].description || errorList[i] || "Unidentified error";
+                        if(errorList[i].name && errorList[i].name.length > 0){
+                            detail += ('. See: ' + errorList[i].name[0]);
+                        }
+                        Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': detail, 'style': 'danger' });
+                    }
+                    setTimeout(layout.animateScrollTo(0), 100);
+                    this.setState(stateToSet);
+                });
+            });
+        });
+    }
 
     render(){
         console.log('TOP LEVEL STATE:', this.state);
@@ -490,13 +475,17 @@ class RoundOneObject extends React.Component{
         'selectData': null, // context used for existing object selection
         'selectQuery': null, // currently held search query
         'selectField': null, // the actual fieldname that we're selecting for
-        'selectArrayIdx': null
+        'selectArrayIdx': null,
+        'fadeState': false
     }
 
     componentWillReceiveProps(nextProps){
         // scroll to top if worked-on object changes
         if(this.props.currKey !== nextProps.currKey){
             setTimeout(layout.animateScrollTo(0), 100);
+            this.setState({'fadeState': true});
+        }else{
+            this.setState({'fadeState': false});
         }
     }
 
@@ -512,17 +501,8 @@ class RoundOneObject extends React.Component{
                 return;
             }
         }
-        // if deleting, see if this is an object (needs to be removed from nav)
         var prevValue = pointer[splitField[splitField.length-1]];
-        if(prevValue instanceof Array){
-            prevValue.map(function(arrayValue){
-                if(value === null || !_.contains(value, arrayValue)){
-                    this.checkObjectRemoval(null, arrayValue);
-                }
-            }.bind(this));
-        }else{
-            this.checkObjectRemoval(value, prevValue);
-        }
+        this.checkObjectRemoval(value, prevValue);
         pointer[splitField[splitField.length-1]] = value;
         this.props.modifyMasterContext(this.props.currKey, contextCopy);
         if(addExistingObj){
@@ -541,9 +521,43 @@ class RoundOneObject extends React.Component{
     }
 
     checkObjectRemoval = (value, prevValue) =>{
-        if(value === null){
+        // If deleting, check array and object cases to see if the removed
+        // value is a key to a custom/existing linked object; update top-level
+        // state if so.
+        // Must repeatedly check for arrays/objects
+        if(prevValue instanceof Array){
+            prevValue.forEach(function(arrayValue, index){
+                if(arrayValue instanceof Array || arrayValue instanceof Object){
+                    var nextValue;
+                    if(value === null){
+                        nextValue = null;
+                    }else{
+                        // this might be a problem in some edge cases
+                        nextValue = value[index];
+                    }
+                    this.checkObjectRemoval(nextValue, arrayValue);
+                }else if(value === null || !_.contains(value, arrayValue)){
+                    this.props.removeObj(arrayValue);
+                }
+            }.bind(this));
+        }else if(prevValue instanceof Object){
+            Object.keys(prevValue).map(function(key){
+                if(prevValue[key] instanceof Array || prevValue[key] instanceof Object){
+                    var nextValue;
+                    if(value === null){
+                        nextValue = null;
+                    }else{
+                        nextValue = value[key];
+                    }
+                    this.checkObjectRemoval(nextValue, prevValue[key]);
+                }else if(value === null || (prevValue[key] !== null && value[key] === null)){
+                    this.props.removeObj(prevValue[key]);
+                }
+            }.bind(this));
+        }else if(value === null){
             this.props.removeObj(prevValue);
         }
+
     }
 
     getFieldValue = (field) => {
@@ -794,10 +808,10 @@ class RoundOneObject extends React.Component{
                         }
                     </div>
                 </Fade>
-                <Fade in={!selecting} transitionAppear={true}>
+                <Fade in={!selecting || this.state.fadeState} transitionAppear={true}>
     				<div>
-                        <RoundOnePanel title='Fields' fields={buildFields} />
-                        <RoundOnePanel title='Linked objects' fields={linkedObjs} />
+                        <RoundOnePanel title='Fields' fields={buildFields} currKey={this.props.currKey}/>
+                        <RoundOnePanel title='Linked objects' fields={linkedObjs} currKey={this.props.currKey}/>
                     </div>
                 </Fade>
             </div>
@@ -812,6 +826,13 @@ class RoundOnePanel extends React.Component{
 
     state = {
         'open': false
+    }
+
+    componentWillReceiveProps(nextProps){
+        // scroll to top if worked-on object changes
+        if(this.props.currKey !== nextProps.currKey){
+            this.setState({'open': false});
+        }
     }
 
     handleToggle = (e) => {
