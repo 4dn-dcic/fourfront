@@ -124,7 +124,7 @@ def lung_biosource(testapp, lab, award, lung_oterm):
 def tissue_biosample(testapp, lung_biosource, lab, award):
     item = {
         'description': "Tissue Biosample",
-        'biosource': [lung_biosource['@id']],
+        'biosource': [lung_biosource['uuid']],
         'award': award['@id'],
         'lab': lab['@id']
     }
@@ -397,6 +397,21 @@ def workflow_run_sbg(testapp, lab, award, workflow_bam):
     return testapp.post_json('/workflow_run_sbg', item).json['@graph'][0]
 
 
+
+@pytest.fixture
+def workflow_run_json(testapp, lab, award, workflow_bam):
+    return {'run_platform': 'SBG',
+            'parameters': [],
+            'workflow': workflow_bam['@id'],
+            'title': u'md5 run 2017-01-20 13:16:11.026176',
+            'sbg_import_ids': [u'TBCKPdzfUE9DpvtzO6yb9yoIvO81RaZd'],
+            'award': award['@id'],
+            'sbg_task_id': '1235',
+            'lab': lab['@id'],
+            'sbg_mounted_volume_ids': ['4dn_s32gkz1s7x', '4dn_s33xkquabu'],
+            'run_status': 'started',
+           }
+
 @pytest.fixture
 def human_biosample(testapp, human_biosource, lab, award):
     item = {
@@ -470,30 +485,36 @@ def basic_genomic_region(testapp, lab, award):
 
 
 @pytest.fixture
+def uberon_ont(testapp):
+    return testapp.post_json('/ontology', {'ontology_name': 'Uberon'}).json['@graph'][0]
+
+
+@pytest.fixture
 def ontology(testapp):
     data = {
-            "uuid": "530006bc-8535-4448-903e-854af460b254",
-            "ontology_name": "Experimental Factor Ontology",
-            "ontology_url": "http://www.ebi.ac.uk/efo/",
-            "download_url": "http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw",
-            "namespace_url": "http://www.ebi.ac.uk/efo/",
-            "ontology_prefix": "EFO",
-            "description": "The description",
-            "notes": "The download",
-        }
+        "uuid": "530006bc-8535-4448-903e-854af460b254",
+        "ontology_name": "Experimental Factor Ontology",
+        "ontology_url": "http://www.ebi.ac.uk/efo/",
+        "download_url": "http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw",
+        "namespace_url": "http://www.ebi.ac.uk/efo/",
+        "ontology_prefix": "EFO",
+        "description": "The description",
+        "notes": "The download",
+    }
     return testapp.post_json('/ontology', data).json['@graph'][0]
 
 
 @pytest.fixture
-def oterm(ontology):
+def oterm(uberon_ont):
     return {
         "uuid": "530036bc-8535-4448-903e-854af460b254",
         "preferred_name": "preferred lung name",
         "term_name": "lung",
         "term_id": "UBERON:0002048",
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002048",
-        "source_ontology": ontology['@id']
+        "source_ontology": uberon_ont['@id']
     }
+
 
 @pytest.fixture
 def lung_oterm(oterm, testapp):

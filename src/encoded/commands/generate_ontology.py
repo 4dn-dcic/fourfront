@@ -417,19 +417,29 @@ def get_ontologies(connection, ont_list):
         ontologies = [get_FDN('ontologys/' + ontology, connection, frame='embedded') for ontology in ont_list]
 
     # removing item not found cases with reporting
+    if not isinstance(ontologies, (list, tuple)):
+        print("we must not have got ontolgies... bailing")
+        import sys
+        sys.exit()
     for i, ontology in enumerate(ontologies):
         if 'Ontology' not in ontology['@type']:
             ontologies.pop(i)
     return ontologies
 
 
-def connect2server(keyfile, keyname):
+def connect2server(keyfile, keyname, app=None):
     '''Sets up credentials for accessing the server.  Generates a key using info
        from the named keyname in the keyfile and checks that the server can be
-       reached with that key'''
+       reached with that key.
+       Also handles keyfiles stored in s3'''
+    if keyfile == 's3':
+        assert app is not None
+        s3bucket = app.registry.settings['system_bucket']
+        keyfile = get_key(bucket=s3bucket)
+
     key = FDN_Key(keyfile, keyname)
     connection = FDN_Connection(key)
-    print("Running on:       {server}".format(server=connection.server))
+    print("Running on: {server}".format(server=connection.server))
     # test connection
     if connection.check:
         return connection
@@ -593,7 +603,8 @@ def download_and_process_owl(ontology, connection, terms):
     synonym_terms = get_synonym_term_uris(connection, ontology)
     definition_terms = get_definition_term_uris(connection, ontology)
     data = Owler(ontology['download_url'])
-    terms = {}
+    if not terms:
+        terms = {}
     for class_ in data.allclasses:
         if isBlankNode(class_):
             terms = process_blank_node(class_, data, terms)
@@ -718,7 +729,7 @@ def main():
     args = parse_args(sys.argv[1:])  # to facilitate testing
 
     s3_postfile = 'ontology_post.json'
-    s3_patchfile = 'ontology_post.json'
+    s3_patchfile = 'ontology_patch.json'
     from pkg_resources import resource_filename
     outdir = resource_filename('encoded', args.outdir)
 
@@ -736,7 +747,7 @@ def main():
             return
 
     # fourfront connection
-    connection = connect2server(args.keyfile, args.key)
+    connection = connect2server(args.keyfile, args.key, app)
     ontologies = get_ontologies(connection, args.ontologies)
     slim_terms = get_slim_terms(connection)
     db_terms = get_existing_ontology_terms(connection)
@@ -786,6 +797,7 @@ def s3_check_last_modified(key, app):
     return obj.last_modified
 
 
+#TODO: s3 utils file
 def s3_put(obj, filename, app):
     '''
     try to guess content type
@@ -812,8 +824,10 @@ def get_key(bucket, keyfile_name='illnevertell'):
                              SSECustomerAlgorithm='AES256')
     akey = response['Body'].read()
     try:
-        import pdb; pdb.set_trace()
         return json.loads(akey.decode('utf-8'))
+    except AttributeError:
+        # akey is probably just a string
+        return json.loads(akey)
     except ValueError:
         # maybe its not json after all
         return akey
