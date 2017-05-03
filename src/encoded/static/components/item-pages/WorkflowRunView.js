@@ -93,6 +93,14 @@ export class WorkflowRunView extends React.Component {
 
 class GraphSection extends React.Component {
 
+    static isNodeDisabled(node){
+        if (node.type === 'step') return false;
+        if (node && node.meta && node.meta.run_data){
+            return false;
+        }
+        return true;
+    }
+
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
@@ -115,6 +123,8 @@ class GraphSection extends React.Component {
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
+                schemas={this.props.schemas}
+                isNodeDisabled={GraphSection.isNodeDisabled}
             />
         );
     }
@@ -126,6 +136,8 @@ class GraphSection extends React.Component {
             <Graph
                 nodes={graphData.nodes}
                 edges={graphData.edges}
+                schemas={this.props.schemas}
+                isNodeDisabled={GraphSection.isNodeDisabled}
             />
         );
     }

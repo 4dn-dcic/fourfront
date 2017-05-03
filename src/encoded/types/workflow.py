@@ -64,15 +64,12 @@ class Workflow(Item):
         ]
 
         steps = list(map(
-            lambda uuid: self.collection.get(uuid),
+            lambda uuid: request.embed('/' + str(uuid), '@@embedded'),
             steps
         ))
 
-        stepsJSON = []
-
         # Distribute arguments into steps' "inputs" and "outputs" arrays.
-        for stepObj in steps:
-            step = stepObj.__json__(request)
+        for step in steps:
             step['inputs'] = []
             step['outputs'] = []
             for arg in self.properties['arguments']:
@@ -81,7 +78,7 @@ class Workflow(Item):
                     continue
                 for mappingIndex, mappedArg in enumerate(mapping):
 
-                    if mappedArg.get('workflow_step') == str(stepObj.uuid):
+                    if mappedArg.get('workflow_step') == step['uuid']:
 
                         if (mappedArg.get('step_argument_type') == 'Input file' or
                             mappedArg.get('step_argument_type') == 'Input file or parameter' or
@@ -140,10 +137,8 @@ class Workflow(Item):
                                 })
 
                             step["outputs"].append(outputNode)
-            
-            stepsJSON.append(step)
 
-        return stepsJSON
+        return steps
 
 
 @collection(
@@ -185,24 +180,49 @@ class WorkflowRun(Item):
         workflow = self.collection.get(workflow)
         analysis_steps = workflow.analysis_steps(request)
 
+        fileCache = {}
+
         for step in analysis_steps:
             # Add output file metadata to step outputs & inputs, based on workflow_argument_name v step output target name.
 
             for output in step['outputs']:
+                found = False
                 for outputTarget in output.get('target',[]):
-                    for file in self.properties.get('output_files',[]):
-                        if outputTarget['name'] == file.get('workflow_argument_name'):
-                            output['run_data'] = {
-                                "file" : request.embed('/' + file.get('value'), '@@embedded')
-                            }
+                    if 'Workflow' in outputTarget.get('type', ''):
+                        for file in self.properties.get('output_files',[]):
+                            if outputTarget['name'] == file.get('workflow_argument_name'):
+                                output['run_data'] = {
+                                    "file" : fileCache.get(file.get('value')) or request.embed('/' + file.get('value'), '@@embedded')
+                                }
+                                fileCache[file.get('value')] = output["run_data"]["file"]
+                                found = True
+                                break
+                    if found:
+                        break
 
             for input in step['inputs']:
+                found = False
                 for inputSource in input.get('source',[]):
-                    for file in self.properties.get('input_files',[]):
-                        if inputSource['name'] == file.get('workflow_argument_name'):
-                            input['run_data'] = {
-                                "file" : request.embed('/' + file.get('value'), '@@embedded')
-                            }
+                    if 'Workflow' in inputSource.get('type',''):
+                        for file in self.properties.get('input_files',[]):
+                            if inputSource['name'] == file.get('workflow_argument_name'):
+                                input['run_data'] = {
+                                    "file" : fileCache.get(file.get('value')) or request.embed('/' + file.get('value'), '@@embedded')
+                                }
+                                fileCache[file.get('value')] = input["run_data"]["file"]
+                                found = True
+                                break
+
+                        if not found:
+                            for param in self.properties.get('parameters',[]):
+                                if inputSource['name'] == param.get('workflow_argument_name'):
+                                    input['run_data'] = {
+                                        "value" : param.get('value')
+                                    }
+                                    found = True
+                                    break
+                    if found:
+                        break
 
         return analysis_steps
 

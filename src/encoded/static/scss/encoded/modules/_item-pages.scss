@@ -802,3 +802,16 @@ $download-button-width : 100px;
 	}
 	*/
 }
+
+/****** Graph Detail Pane ******/
+
+.workflow-chart-inner-container {
+	.detail-pane {
+		> h5 {
+			margin-bottom: 0px;
+			& + h3 {
+				margin-top: 4px;
+			}
+		}
+	}
+}

@@ -393,7 +393,7 @@ var ItemDetailList = module.exports.ItemDetailList = React.createClass({
         if (typeof this.props.collapsed === 'boolean') collapsed = this.props.collapsed;
         else collapsed = this.state.collapsed;
         return (
-            <div className="item-page-detail">
+            <div className="item-page-detail" style={typeof this.props.minHeight === 'number' ? { minHeight : this.props.minHeight } : null}>
                 { !this.state.showingJSON ?
                     <div className="overflow-hidden">
                         <Detail

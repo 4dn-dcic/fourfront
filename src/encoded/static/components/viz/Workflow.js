@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+import PropTypes from 'prop-types';
 var _ = require('underscore');
 var d3 = require('d3');
 import { Fade } from 'react-bootstrap';
@@ -8,6 +9,7 @@ var store = require('./../../store');
 var vizUtil = require('./utilities');
 import { console, object, isServerSide, expFxn, Filters, layout, navigate, ajax } from './../util';
 var ReactTooltip = require('react-tooltip');
+import { ItemDetailList } from './../item-pages/components';
 
 
 export function parseAnalysisSteps(analysis_steps){
@@ -25,6 +27,7 @@ export function parseAnalysisSteps(analysis_steps){
             id : step.uuid,
             type : 'step',
             name : step.display_title || step.title || step['@id'],
+            meta : _.omit(step, 'inputs', 'outputs'),
             description : step.description,
             column : column
         };
@@ -190,19 +193,27 @@ export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem){
 
 }
 
-export function addRunDataToAnalysisSteps(analysis_steps, workflow_run){
-    
-}
-
 export class Graph extends React.Component {
+
+    static propTypes = {
+        'isNodeDisabled' : PropTypes.func,
+        'innerMargin' : PropTypes.shape({
+            'top' : PropTypes.number.isRequired,
+            'bottom' : PropTypes.number.isRequired,
+            'left' : PropTypes.number.isRequired,
+            'right' : PropTypes.number.isRequired
+        }).isRequired,
+    }
 
     static defaultProps = {
         'height'        : null,
         'width'         : null,
-        'columnSpacing' : 60,
+        'columnSpacing' : 56,
         'columnWidth'   : 150,
+        'rowSpacing'    : 56,
         'pathArrows'    : true,
         'detailPane'    : true,
+        'rowSpacingType': 'wide',
         'innerMargin'   : {
             'top' : 20,
             'bottom' : 48,
@@ -243,7 +254,7 @@ export class Graph extends React.Component {
             // Use highest count of nodes in a column * 60.
             height = _.reduce(_.groupBy(this.props.nodes, 'column'), function(maxCount, nodeSet){
                 return Math.max(nodeSet.length, maxCount);
-            }, 0) * 60;
+            }, 0) * this.props.rowSpacing;
         } else if (isNaN(height)){
             return null;
         }
@@ -264,7 +275,13 @@ export class Graph extends React.Component {
             var countInCol = columnGroup[1].length;
             if (countInCol === 1){
                 columnGroup[1][0].y = (this.height() / 2) + this.props.innerMargin.top;
-                columnGroup[1][0].nodesInColumn = 1;
+                columnGroup[1][0].nodesInColumn = countInCol;
+            } else if (this.props.rowSpacingType === 'compact') {
+                var padding = Math.max(0,this.height() - ((countInCol - 1) * this.props.rowSpacing)) / 2;
+                d3.range(countInCol).forEach((i) => {
+                    columnGroup[1][i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding;
+                    columnGroup[1][i].nodesInColumn = countInCol;
+                });
             } else {
                 d3.range(countInCol).forEach((i) => {
                     columnGroup[1][i].y = ((i / Math.max(countInCol - 1, 1)) * this.height()) + this.props.innerMargin.top;
@@ -321,12 +338,16 @@ export class Graph extends React.Component {
                             columnWidth={this.props.columnWidth}
                             columnSpacing={this.props.columnSpacing}
                             pathArrows={this.props.pathArrows}
+                            schemas={this.props.schemas}
+                            isNodeDisabled={this.props.isNodeDisabled}
                         >
                             <ScrollContainer>
                                 <EdgesLayer />
                                 <NodesLayer />
                             </ScrollContainer>
-                            { this.props.detailPane ? <DetailPane /> : null }
+                            { this.props.detailPane ?
+                                <DetailPane />
+                            : null }
                         </StateContainer>
                     </div>
                 </Fade>
@@ -338,8 +359,37 @@ export class Graph extends React.Component {
 
 class DetailPane extends React.Component {
 
+    static defaultProps = {
+        'minHeight' : 500
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.body = this.body.bind(this);
+    }
+
     body(){
-        
+        var node = this.props.selectedNode;
+        if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file['@id']){
+            return (
+                <ItemDetailList context={node.meta.run_data.file} schemas={this.props.schemas} minHeight={this.props.minHeight} />
+            )
+        }
+        if (node.meta && node.meta.run_data && (typeof node.meta.run_data.value === 'number' || typeof node.meta.run_data.value === 'string')){
+            return (
+                <div style={typeof this.props.minHeight === 'number' ? { minHeight : this.props.minHeight } : null}>
+                    <h4 className="text-400">
+                        <small>Value: </small> { node.meta.run_data.value }
+                    </h4>
+                </div>
+            )
+        }
+        if (node.type === 'step' && node.meta && node.meta.uuid){
+            return (
+                <ItemDetailList context={node.meta} schemas={this.props.schemas} minHeight={this.props.minHeight} />
+            )
+        }
     }
 
     render(){
@@ -355,12 +405,14 @@ class DetailPane extends React.Component {
 
         return (
             <div className="detail-pane">
-                <h4 className="text-300">
-                    <small>{ type }</small><br />
+                <h5 className="text-500">
+                    { type }
+                </h5>
+                <h3 className="text-300">
                     <span>{ node.name }</span>
-                </h4>
+                </h3>
                 <div className="detail-pane-body">
-
+                    { this.body() }
                 </div>
             </div>
         );
@@ -372,9 +424,10 @@ class ScrollContainer extends React.Component {
 
     render(){
         var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
+        var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
         return (
             <div className="scroll-container-wrapper">
-                <div className="scroll-container" style={{ width : this.props.contentWidth, height: fullHeight }}>
+                <div className="scroll-container" style={{ width : Math.max(this.props.contentWidth, fullWidth), height: fullHeight }}>
                 {
                     React.Children.map(this.props.children, (child)=>{
                         return React.cloneElement(child, _.omit(this.props, 'children'))
@@ -587,9 +640,13 @@ class Node extends React.Component {
 
     render(){
         var node = this.props.node;
+        var disabled = null;
+        if (typeof this.props.isNodeDisabled === 'function'){
+            disabled = this.props.isNodeDisabled(node);
+        }
         return (
             <div 
-                className={"node node-type-" + node.type}
+                className={"node node-type-" + node.type + (disabled ? ' disabled' : '')}
                 data-node-key={node.id || node.name}
                 data-node-type={node.type}
                 data-node-global={node.isGlobal || null}
@@ -608,7 +665,7 @@ class Node extends React.Component {
                     data-tip={this.tooltip()}
                     data-place="top"
                     data-html
-                    onClick={this.props.onClick}
+                    onClick={disabled ? null : this.props.onClick}
                 >
                     <span className="node-name">{ this.icon() }{ this.title() }</span>
                 </div>
@@ -752,10 +809,21 @@ class NodesLayer extends React.Component {
 
 class Edge extends React.Component {
 
-    static isSelected(edge, selectedNode){
+    static isSelected(edge, selectedNode, isNodeDisabled = null){
         return (
             Node.isSelected(edge.source, selectedNode) ||
             Node.isSelected(edge.target, selectedNode)
+        ) && !Edge.isDisabled(edge, isNodeDisabled);
+    }
+
+    static isDisabled(edge, isNodeDisabled = null){
+        if (typeof isNodeDisabled === 'boolean') return isNodeDisabled;
+        return (
+            typeof isNodeDisabled === 'function' &&
+            (
+                isNodeDisabled(edge.source) ||
+                isNodeDisabled(edge.target)
+            )
         );
     }
 
@@ -770,6 +838,9 @@ class Edge extends React.Component {
         var endOffset = -5; //(edge.target.type === 'input' || edge.target.type === 'output') ? 0 : -5;
         if (this.props.pathArrows){
             endOffset -= 8;
+        }
+        if (Edge.isSelected(edge, this.props.selectedNode, this.props.isNodeDisabled)){
+            endOffset -= 2;
         }
         
         var startPt = {
@@ -832,12 +903,12 @@ class Edge extends React.Component {
 
     render(){
         var edge = this.props.edge;
-
+        var disabled = Edge.isDisabled(edge, this.props.isNodeDisabled);
         return (
             <path
                 d={this.generatePathDimension(edge)}
-                className="edge-path"
-                data-edge-selected={Edge.isSelected(edge, this.props.selectedNode)}
+                className={"edge-path" + (disabled ? ' disabled' : '' )}
+                data-edge-selected={Edge.isSelected(edge, this.props.selectedNode, disabled)}
                 data-source={edge.source.name}
                 data-target={edge.target.name}
                 markerEnd={this.props.pathArrows ? "url(#pathArrow)" : null}
@@ -881,7 +952,30 @@ class EdgesLayer extends React.Component {
                 <svg className="edges-layer" width={ divWidth } height={ fullHeight }>
                     { this.pathArrows() }
                     {
-                        edges.map((edge)=>
+                        // Move selected edges to top, and disabled ones to bottom, because CSS z-index doesn't work for SVG elements.
+                        edges.sort((a,b)=>{
+                            var isASelected = Edge.isSelected(a, this.props.selectedNode, this.props.isNodeDisabled);
+                            var isBSelected = Edge.isSelected(b, this.props.selectedNode, this.props.isNodeDisabled);
+
+                            if (isASelected && !isBSelected){
+                                return 1;
+                            } else if (!isASelected && isBSelected){
+                                return -1;
+                            } else {
+                                return 0;
+                            }
+                        }).sort((a,b)=>{
+                            var isADisabled = Edge.isDisabled(a, this.props.isNodeDisabled);
+                            var isBDisabled = Edge.isDisabled(b, this.props.isNodeDisabled);
+
+                            if (isADisabled && !isBDisabled){
+                                return -1;
+                            } else if (!isADisabled && isBDisabled) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        }).map((edge)=>
                             <Edge {...this.props} edge={edge} key={(edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name)} />
                         )
                     }
