@@ -147,8 +147,8 @@ class File(Item):
     embedded = ['lab', 'file_format', 'related_files.file']
     name_key = 'accession'
     rev = {
-        'workflow_run_inputs': ('WorkflowRun', 'input_files'),
-        'workflow_run_outputs': ('WorkflowRun', 'output_files'),
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
     }
 
     @calculated_property(schema={
@@ -162,7 +162,10 @@ class File(Item):
         }
     })
     def workflow_run_inputs(self, request):
-        return paths_filtered_by_status(request, self.get_rev_links('workflow_run_inputs'))
+        return [run['@id'] for run in
+                [request.embed('/' ,uuid, '@@object') for uuid in
+        [str(uuid) for uuid in self.get_rev_links('workflow_run_inputs')]]]
+
 
     @calculated_property(schema={
         "title": "Outputs of Workflow Runs",
@@ -175,7 +178,9 @@ class File(Item):
         }
     })
     def workflow_run_outputs(self, request):
-        return paths_filtered_by_status(request, self.get_rev_links('workflow_run_outputs'))
+        return [run['@id'] for run in
+                [request.embed('/' ,uuid, '@@object') for uuid in
+        [str(uuid) for uuid in self.get_rev_links('workflow_run_outputs')]]]
 
 
     def _update(self, properties, sheets=None):

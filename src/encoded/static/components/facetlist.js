@@ -962,7 +962,6 @@ var FacetList = module.exports = React.createClass({
     },
 
     renderFacets : function(facets = this.state.facets || this.props.facets || []){
-        console.log(layout.responsiveGridState(), this.state.mounted);
         var extClass = this.checkIfAllSingleTerm() ? ' all-single-term' : null;
         return facets.map(facet =>
             <FacetList.Facet
