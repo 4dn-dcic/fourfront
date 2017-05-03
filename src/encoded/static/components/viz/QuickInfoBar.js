@@ -289,10 +289,10 @@ var QuickInfoBar = module.exports = React.createClass({
                             if (this.timeout) clearTimeout(this.timeout);
                             if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
                             analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
-                                'eventLabel' : ( areAnyFiltersSet ? "No filters set" : "Some filters are set" ),
+                                'eventLabel' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
                                 'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
                             });
-                        },100)}
+                        }, 500)}
                     >
                         <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
                     </div>

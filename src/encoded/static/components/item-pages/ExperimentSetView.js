@@ -6,7 +6,7 @@ var Panel = require('react-bootstrap').Panel;
 import PropTypes from 'prop-types';
 var { ajax, console, DateUtility, object, isServerSide } = require('./../util');
 var globals = require('./../globals');
-var { ExperimentsTable } = require('./../experiments-table');
+import ExperimentsTable from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView } from './components';
 var FacetList = require('./../facetlist');
 
@@ -145,9 +145,9 @@ export default class ExperimentSetView extends React.Component {
                     <div className="col-sm-12">
                     { this.props.context.produced_in_pub ?
                         <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
-                            <div className="more-details">{ 
-                                this.props.context.produced_in_pub.authors || this.props.context.produced_in_pub.abstract || this.props.context.produced_in_pub.date_published || null
-                            }</div>
+                            <div className="more-details">
+                                <Publications.ShortAttribution publication={this.props.context.produced_in_pub} />
+                            </div>
                             <br/>
                         </Publications.DetailBlock>
                         : <br/> }

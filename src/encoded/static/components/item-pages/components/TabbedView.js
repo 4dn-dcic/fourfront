@@ -8,6 +8,14 @@ import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
 
 export default class TabView extends React.Component {
 
+    static defaultProps = {
+        'contents' : [
+            { tab : "Tab 1", content : <span>Test1</span> },
+            { tab : "Tab 2", content : <span>Test2</span> }
+        ],
+        'animated' : false
+    }
+
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
@@ -53,12 +61,4 @@ export default class TabView extends React.Component {
         );
     }
 
-}
-
-TabView.defaultProps = {
-    'contents' : [
-        { tab : "Tab 1", content : <span>Test1</span> },
-        { tab : "Tab 2", content : <span>Test2</span> }
-    ],
-    'animated' : false
 }
