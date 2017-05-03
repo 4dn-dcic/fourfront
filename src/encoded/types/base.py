@@ -26,6 +26,7 @@ from snovault.validators import (
     validate_item_content_put,
     validate_item_content_patch
 )
+from snovault.interfaces import CONNECTION
 from snovault.etag import if_match_tid
 
 
@@ -241,6 +242,7 @@ class Item(snovault.Item):
         # update registry embedded
         self.registry.embedded = self.embedded;
 
+
     @property
     def __name__(self):
         """smth."""
@@ -375,6 +377,11 @@ class Item(snovault.Item):
                     self.calc_props_schema[calc_props_key] = calc_props_val.schema
         total_schema.update(self.calc_props_schema)
         self.embedded = add_default_embeds(self.embedded, total_schema)
+
+    def rev_link_atids(self, request, rev_name):
+        conn = request.registry[CONNECTION]
+        return [ request.resource_path(conn[uuid]) for uuid in
+                paths_filtered_by_status(request, self.get_rev_links(rev_name))]
 
 
 class SharedItem(Item):
