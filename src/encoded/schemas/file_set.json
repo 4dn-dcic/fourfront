@@ -26,7 +26,7 @@
             "accessionType": "FS"
         },
         "files_in_set": {
-            "title": "Sets of data files",
+            "title": "Sets of Data Files",
             "description": "List of data files to be associated with the experiment.",
             "type": "array",
             "default": [],
@@ -38,7 +38,7 @@
             }
         },
         "fileset_type": {
-            "title": "Fileset type",
+            "title": "Fileset Type",
             "description": "The categorization of the set of files.",
             "type": "string",
             "enum" : [

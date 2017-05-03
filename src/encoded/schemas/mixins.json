@@ -33,7 +33,7 @@
             "serverDefault": "accession"
         },
         "alternate_accessions": {
-            "title": "Alternate accessions",
+            "title": "Alternate Accessions",
             "description": "Accessions previously assigned to objects that have been merged with this object.",
             "type": "array",
             "internal_comment":"Only admins are allowed to set or update this value.",
@@ -50,7 +50,7 @@
     },
     "aliases": {
         "aliases": {
-            "title": "Lab aliases",
+            "title": "Lab Aliases",
             "description": "Lab specific identifiers to reference an object.",
             "type": "array",
             "comment": "Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).",
@@ -88,7 +88,7 @@
     "submitted": {
         "date_created": {
             "rdfs:subPropertyOf": "dc:created",
-            "title": "Date created",
+            "title": "Date Created",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "anyOf": [
@@ -100,7 +100,7 @@
         },
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
-            "title": "Submitted by",
+            "title": "Submitted By",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "linkTo": "User",
@@ -110,7 +110,7 @@
     },
     "modified": {
       "lastmodified": {
-          "title": "Last modified",
+          "title": "Last Modified",
           "exclude_from": ["submit4dn", "FFedit-create"],
           "type": "array",
           "items": {
@@ -209,7 +209,7 @@
     },
     "attachment": {
         "attachment": {
-            "title": "Attach File",
+            "title": "Attached File",
             "type": "object",
             "additionalProperties": false,
             "formInput": "file",
@@ -344,7 +344,7 @@
     },
     "sop_mapping": {
         "sop_mapping": {
-            "title": "SOP mappping",
+            "title": "SOP Mappping",
             "permission": "import-items",
             "exclude_from" : ["submit4dn", "FFedit-create"],
             "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",
@@ -352,14 +352,14 @@
             "additionalProperties": false,
             "properties": {
                 "has_sop": {
-                    "title": "has SOP",
-                    "description": "does this item have an sop when it was submitted",
+                    "title": "Has SOP",
+                    "description": "Does this item have an sop when it was submitted",
                     "type": "string",
                     "enum": ["Yes", "No"]
                 },
                 "sop_map": {
                     "title": "SOP MAP",
-                    "description": "the SOP map that the item maps to",
+                    "description": "The SOP map that the item maps to",
                     "type": "string",
                     "linkTo": "SopMap"
                 }

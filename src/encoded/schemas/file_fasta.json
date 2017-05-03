@@ -30,7 +30,7 @@
             ]
         },
         "file_type": {
-            "title": "File type",
+            "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "type": "string",
             "enum": [

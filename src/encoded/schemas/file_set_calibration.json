@@ -32,13 +32,13 @@
             "default": [],
             "uniqueItems": true,
             "items": {
-                "title": "Data file",
+                "title": "Data File",
                 "type": "string",
                 "linkTo": "FileCalibration"
             }
         },
         "fileset_type": {
-            "title": "Fileset type",
+            "title": "Fileset Type",
             "description": "The categorization of the set of files.",
             "type": "string",
             "enum" : [

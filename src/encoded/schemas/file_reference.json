@@ -23,7 +23,7 @@
             "default": "1"
         },
         "file_format": {
-            "title": "File format",
+            "title": "File Format",
             "type": "string",
             "enum": [
                 "bwaIndex",
