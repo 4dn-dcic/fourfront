@@ -146,10 +146,10 @@ class File(Item):
     schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab', 'file_format', 'related_files.file']
     name_key = 'accession'
-    #rev = {
-    #    "workflow_run_inputs": ('WorkflowRun', 'input_files'),
-    #    "workflow_run_outputs": ('WorkflowRun', 'output_files'),
-    #}
+    rev = {
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    }
 
     @calculated_property(schema={
         "title": "Input of Workflow Runs",
@@ -162,18 +162,9 @@ class File(Item):
         }
     })
     def workflow_run_inputs(self, request):
-        runs = list(self.registry['collections']['WorkflowRun'])
-        runs.extend(list(self.registry['collections']['WorkflowRunSbg']))
-        result_runs = []
-        for uuid in runs:
-            run = self.collection.get(uuid)
-            if run:
-                for file in run.properties.get("input_files",[]):
-                    if str(file.get("value","null")) == str(self.uuid):
-                        result_runs.append(run)
-
-        return [ '/' + str(r.uuid) for r in result_runs ]
-        #return self.get_rev_links('workflow_run_inputs')
+        return [run['@id'] for run in
+                [request.embed('/' ,uuid, '@@object') for uuid in
+        [str(uuid) for uuid in self.get_rev_links('workflow_run_inputs')]]]
 
     @calculated_property(schema={
         "title": "Output of Workflow Runs",
@@ -186,18 +177,9 @@ class File(Item):
         }
     })
     def workflow_run_outputs(self, request):
-        runs = list(self.registry['collections']['WorkflowRun'])
-        runs.extend(list(self.registry['collections']['WorkflowRunSbg']))
-        result_runs = []
-        for uuid in runs:
-            run = self.collection.get(uuid)
-            if run:
-                for file in run.properties.get("output_files",[]):
-                    if str(file.get("value","null")) == str(self.uuid):
-                        result_runs.append(run)
-
-        return [ '/' + str(r.uuid) for r in result_runs ]
-        #return self.get_rev_links('workflow_run_outputs')
+        return [run['@id'] for run in
+                [request.embed('/' ,uuid, '@@object') for uuid in
+        [str(uuid) for uuid in self.get_rev_links('workflow_run_outputs')]]]
 
 
     def _update(self, properties, sheets=None):
