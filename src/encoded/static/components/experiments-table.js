@@ -1,10 +1,481 @@
 'use strict';
 
 var React = require('react');
-var { Table, Checkbox, Collapse } = require('react-bootstrap');
+import PropTypes from 'prop-types';
+var { Checkbox, Collapse } = require('react-bootstrap');
 var _ = require('underscore');
 var FacetList = require('./facetlist'); // Only used for statics.
 var { expFxn, Filters, console, isServerSide } = require('./util');
+
+
+
+/**
+ * Label to show at top left of Name block.
+ * 
+ * @private
+ * @memberof StackedBlockName
+ * @class Label
+ * @extends {React.Component}
+ */
+class StackedBlockNameLabel extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.copyAccessionButton = this.copyAccessionButton.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.state = {
+            'mounted' : false
+        };
+    }
+
+    componentDidMount(){
+        this.setState({ mounted : true });
+    }
+
+    copyAccessionButton(){
+        if (!this.props.accession) return null;
+        if (!this.state.mounted || isServerSide() || !document || !document.createElement || !document.execCommand) return null;
+
+        function copy(){
+            var textArea = document.createElement('textarea');
+            textArea.style.top = '-100px';
+            textArea.style.left = '-100px';
+            textArea.style.position = 'absolute';
+            textArea.style.width = '5px';
+            textArea.style.height = '5px';
+            textArea.style.padding = 0;
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+
+            // Avoid flash of white box if rendered for any reason.
+            textArea.style.background = 'transparent';
+            textArea.value = this.props.accession;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                var successful = document.execCommand('copy');
+                var msg = successful ? 'successful' : 'unsuccessful';
+                console.log('Copying text command was ' + msg);
+                this.flashEffect();
+            } catch (err) {
+                console.error('Oops, unable to copy');
+            }
+        }
+
+        return (
+            <i className="icon icon-fw icon-copy" title="Copy to clipboard" onClick={copy.bind(this)} />
+        );
+    }
+
+    flashEffect(){
+        if (!this.refs || !this.refs.subtitle) return null;
+        this.refs.subtitle.style.transform = 'scale3d(1.2, 1.2, 1.2) translate3d(10%, 0, 0)';
+        setTimeout(()=>{
+            this.refs.subtitle.style.transform = '';
+        }, 100);
+    }
+
+    render(){
+
+        var { title, subtitle, accession, inline, className } = this.props;
+
+        function titleElement(){
+            return React.createElement(
+                inline ? 'span' : 'div',
+                { className : "label-title" },
+                title
+            );
+        }
+
+        function subtitleElement(){
+            if (!accession && !subtitle) return null;
+            return React.createElement(
+                inline ? 'span' : 'div',
+                {
+                    className : "ext" + (accession ? ' is-accession' : ''),
+                    ref : 'subtitle'
+                },
+                <span>
+                    { accession || subtitle } { this.copyAccessionButton() }
+                </span>
+            );
+        }
+
+        var fullClassName = "label-ext-info";
+        if (typeof className === 'string') fullClassName += ' ' + className;
+        if (subtitle !== null) fullClassName += ' has-subtitle';
+
+        return (
+            <div className={fullClassName} ref="labelContainerElement">
+                { titleElement() }
+                { subtitleElement.call(this) }
+            </div>
+        );
+    }
+
+}
+
+/**
+ * Name element to be put inside of StackedBlocks as the first child.
+ * 
+ * @memberof StackedBlock
+ * @class StackedBlockList
+ * @extends {React.Component}
+ */
+class StackedBlockName extends React.Component {
+
+    static Label = StackedBlockNameLabel
+    
+    static propTypes = {
+        columnClass : PropTypes.string,
+        colWidthStyles : PropTypes.object,
+        label : PropTypes.shape({
+            title : PropTypes.node,
+            subtitle : PropTypes.node,
+            subtitleVisible : PropTypes.bool
+        }),
+        visible : PropTypes.bool
+    }
+
+    static defaultProps = {
+        visible : true
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
+        this.adjustedChildren = this.adjustedChildren.bind(this);
+    }
+
+    shouldComponentUpdate(nextProps){
+        if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
+        return false;
+    }
+
+    getColumnWidthStyle(){
+        if (this.props.colWidthStyles && typeof this.props.colWidthStyles[this.props.columnClass] !== 'undefined'){
+            return this.props.colWidthStyles[this.props.columnClass];
+        }
+
+        if (
+            this.props.expTable &&
+            this.props.expTable.state &&
+            Array.isArray(this.props.expTable.state.columnWidths)
+        ){
+            var colWidthIndex = _.findIndex(this.props.expTable.columnHeaders(), { 'columnClass' : this.props.columnClass });
+            if (colWidthIndex > -1) return { 'width' : this.props.expTable.state.columnWidths[colWidthIndex] };
+        }
+
+        return null;
+    }
+
+    adjustedChildren(){
+        if (React.Children.count(this.props.children) > 1) return this.props.children;
+        return React.Children.map(this.props.children, function(c){
+            if (c && c.props && typeof c.props.className === 'string' && c.props.className.indexOf('name-title') === -1){
+                return React.cloneElement(c, { className : c.props.className + ' name-title' }, c.props.children);
+            }
+            return c;
+        });
+    }
+
+    render(){
+        if (!this.props.visible) return null;
+        var style = null;
+        var colWidthStyle = this.getColumnWidthStyle();
+        if (colWidthStyle){
+            if (this.props.colStyle) style = _.extend(_.clone(colWidthStyle), this.props.colStyle);
+            else style = _.clone(colWidthStyle);
+        }
+        if (this.props.relativePosition){
+            if (style) style.position = 'relative';
+            else style = { 'position' : 'relative' };
+        }
+        return (
+            <div className={"name col-" + this.props.columnClass} style={style}>
+                { this.props.label ?
+                    <StackedBlockName.Label {..._.extend({}, this.props.label, {
+                        inline : false,
+                        className : this.props.label.subtitleVisible === true ? 'subtitle-visible' : null
+                    })} />
+                    : null }
+                { this.adjustedChildren() }
+            </div>
+        );
+    }
+
+}
+
+/**
+ * Button to toggle collapse/visible of longer StacedkBlockLists. Used in StackedBlockLists.
+ * 
+ * @private
+ * @memberof StackedBlockList
+ * @class StackedBlockListViewMoreButton
+ * @extends {React.Component}
+ */
+class StackedBlockListViewMoreButton extends React.Component {
+    
+    static propTypes = {
+        collapsibleChildren : PropTypes.array,
+        collapsed : PropTypes.bool,
+        handleCollapseToggle : PropTypes.func
+        // + those from parent .List
+    }
+
+    constructor(props){
+        super(props);
+        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    shouldComponentUpdate(nextProps){
+        if (this.props.collapsed !== nextProps.collapsed) return true;
+        if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
+        if (this.props.title !== nextProps.title) return true;
+        if (this.props.showMoreExtTitle !== nextProps.showMoreExtTitle) return true;
+        return false;
+    }
+
+    render(){
+
+        if (this.props.collapsibleChildren.length === 0) return null;
+
+        var collapsedMsg = this.props.collapsed &&
+        (this.props.currentlyCollapsing ?
+            (this.props.currentlyCollapsing === this.props.parentID ? false : true)
+            :
+            true
+        );
+
+        function collapseTitle(){
+            var title;
+            if (collapsedMsg){
+                title = "Show " + this.props.collapsibleChildren.length + " More";
+            } else {
+                title = "Show Less";
+            }
+            if (this.props.title) title += ' ' + this.props.title;
+
+            function extTitle(){
+                if (!this.props.showMoreExtTitle || !collapsedMsg) return null;
+                return <span className="ext text-400"> { this.props.showMoreExtTitle }</span>;
+            }
+
+            return <span>{ title }{ extTitle.call(this) }</span>;
+        }
+
+        return (
+            <div className="view-more-button" onClick={this.props.handleCollapseToggle}>
+                <i className={"icon icon-" + (collapsedMsg ? 'plus': 'minus')}></i>
+                &nbsp; { collapseTitle.call(this) }
+            </div>
+        );
+    }
+}
+
+/**
+ * List which can be put inside a StackedBlock, after a StackedBlockName, and which holds other StackedBlocks.
+ * 
+ * @memberof StackedBlock
+ * @class StackedBlockList
+ * @extends {React.Component}
+ */
+class StackedBlockList extends React.Component {
+
+    static ViewMoreButton = StackedBlockListViewMoreButton
+
+    static propTypes = {
+        title : PropTypes.string,
+        showMoreExtTitle : PropTypes.string,
+        collapseLimit : PropTypes.number,
+        collapseShow : PropTypes.number,
+        expTable : PropTypes.any
+    }
+
+    static defaultProps = {
+        collapseLimit : 5,
+        collapseShow : 3
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        this.adjustedChildren = this.adjustedChildren.bind(this);
+        this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
+        if (Array.isArray(this.props.children) && this.props.children.length > this.props.collapseLimit){
+            this.state = { 'collapsed' : true };
+        }
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+        if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
+        if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
+        if (this.state === null) return false;
+        if (this.state.collapsed !== nextState.collapsed) return true;
+        return false;
+    }
+
+    adjustedChildren(){
+        return React.Children.map(this.props.children, (c)=>{
+            //if (c.type.displayName !== 'StackedBlock') return c; // Only add props to StackedBlocks
+            var addedProps = {};
+            if (this.props.parentIDList && !c.props.parentIDList){
+                addedProps.parentIDList = this.props.parentIDList;
+            }
+            if (this.props.currentlyCollapsing && !c.props.currentlyCollapsing){
+                addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
+            }
+            if (this.props.expTable && !c.props.expTable){
+                addedProps.expTable = this.props.expTable;
+            }
+            if (this.props.colWidthStyles && !c.props.colWidthStyles){
+                addedProps.colWidthStyles = this.props.colWidthStyles;
+            }
+            if (this.props.experimentSetType && !c.props.experimentSetType){
+                addedProps.experimentSetType = this.props.experimentSetType;
+            }
+            if (Object.keys(addedProps).length > 0){
+                return React.cloneElement(c, addedProps, c.props.children);
+            }
+            return c;
+        });
+    }
+
+    handleCollapseToggle(){
+        if (this.props.expTable && this.props.expTable.state && !this.props.expTable.state.collapsing){
+            this.props.expTable.setState({
+                'collapsing' : this.props.rootList ? 'root' :
+                    this.props.parentID || this.props.className || true
+            }, ()=>{
+                this.setState({ 'collapsed' : !this.state.collapsed });
+            });
+        } else this.setState({ 'collapsed' : !this.state.collapsed });
+    }
+
+    render(){
+        var children = this.adjustedChildren();
+
+        var className = "s-block-list " + this.props.className;
+        var timeout = 350; // Default
+        if (!Array.isArray(children) || children.length <= this.props.collapseLimit) {
+            // Don't have enough items for collapsible element, return plain list.
+            return <div className={className}>{ children }</div>;
+        }
+
+        var collapsibleChildren = children.slice(this.props.collapseShow);
+        if (collapsibleChildren.length > 18) {
+            className += ' transition-slow';
+            timeout = 1000;
+        } else if (collapsibleChildren.length > 9) {
+            className += ' transition-med';
+            timeout = 500;
+        }
+
+        var transitionFinish = function(){
+            if (this.props.expTable && this.props.expTable.state){
+                this.props.expTable.setState({ 'collapsing' : false });
+            }
+        }.bind(this);
+
+        return (
+            <div className={className} data-count-collapsed={collapsibleChildren.length}>
+                { children.slice(0, this.props.collapseShow) }
+                <Collapse in={!this.state.collapsed} timeout={timeout} onExited={transitionFinish} onEntered={transitionFinish}>
+                    <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>
+                </Collapse>
+                <ExperimentsTable.StackedBlock.List.ViewMoreButton
+                    collapsibleChildren={collapsibleChildren}
+                    collapsed={this.state.collapsed}
+                    handleCollapseToggle={this.handleCollapseToggle}
+                    {...this.props}
+                />
+            </div>
+        );
+    }
+
+}
+
+class StackedBlock extends React.Component {
+
+    static Name = StackedBlockName
+
+    static List = StackedBlockList
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.adjustedChildren = this.adjustedChildren.bind(this);
+        this.childIDList = new Set();
+    }
+
+    adjustedChildren(){
+        return React.Children.map(this.props.children, (c) => {
+            if (c === null) return null;
+            var addedProps = {};
+
+            if (!c.props.columnClass && this.props.columnClass) addedProps.columnClass = this.props.columnClass;
+            if (!c.props.colWidthStyles && this.props.colWidthStyles) addedProps.colWidthStyles = this.props.colWidthStyles;
+            if (!c.props.label && this.props.label) addedProps.label = this.props.label;
+            if (!c.props.expTable && this.props.expTable) addedProps.expTable = this.props.expTable;
+            if (!c.props.experimentSetType && this.props.experimentSetType) addedProps.experimentSetType = this.props.experimentSetType;
+            if (!c.props.currentlyCollapsing && this.props.currentlyCollapsing) addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
+
+            if (c.props.children){
+                // Grab & save child s-block ids (one level deep)
+                React.Children.forEach(c.props.children, (cc)=>{
+                    if (cc.props && typeof cc.props.id === 'string'){
+                        this.childIDList.add(cc.props.id);
+                    }
+                });
+            }
+            if (this.props.id){
+                // Pass down (and include self in) parent s-block ids to child elements.
+                if (this.props.parentIDList){
+                    addedProps.parentIDList = new Set(this.props.parentIDList);
+                } else {
+                    addedProps.parentIDList = new Set();
+                }
+                addedProps.parentIDList.add(this.props.id);
+                addedProps.parentID = this.props.id;
+            }
+            if (Object.keys(addedProps).length > 0){
+                return React.cloneElement(c, addedProps, c.props.children);
+            } else return c;
+        });
+    }
+
+    render(){
+        var className = this.props.columnClass ? this.props.columnClass + ' ' : '';
+        className += "s-block";
+        if (this.props.hideNameOnHover) className += ' hide-name-on-block-hover';
+        if (typeof this.props.stripe !== 'undefined' && this.props.stripe !== null){
+            if (this.props.stripe === true || this.props.stripe === 'even') className += ' even';
+            else className += ' odd';
+        }
+        if (this.props.currentlyCollapsing){
+            className += ' s-block-list-collapsing collapsing-' + this.props.currentlyCollapsing;
+            if (
+                this.props.currentlyCollapsing === this.props.id ||
+                this.props.currentlyCollapsing === 'root' ||
+                ((this.props.parentIDList instanceof Set) && this.props.parentIDList.has(this.props.currentlyCollapsing)) ||
+                ((this.childIDList instanceof Set) && this.childIDList.has(this.props.currentlyCollapsing))
+            ) className += ' collapsing-child';
+        }
+        return (
+            <div className={className}>
+                { this.adjustedChildren() }
+            </div>
+        );
+    }
+
+}
+
 
 /**
  * To be used within Experiments Set View/Page, or
@@ -17,540 +488,180 @@ var { expFxn, Filters, console, isServerSide } = require('./util');
  * of "selectedFiles" Set and "checked", for integration with other pages/UI.
  */
 
-var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
-    statics : {
+export default class ExperimentsTable extends React.Component {
 
-        /* List of headers which are created/controlled by component (not customizable), by experimentset_type */
-        builtInHeaders : function(expSetType = 'replicate'){
-            switch (expSetType){
-                case 'replicate' :
-                    return [
-                        { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample'  },
-                        { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment' },
-                        { columnClass: 'file-pair',                                 title: 'File Pair',     visibleTitle : <i className="icon icon-download"></i> },
-                        { columnClass: 'file',                                      title: 'File'       },
-                    ];
-                default:
-                    return [
-                        { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample'  },
-                        { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment' },
-                        { columnClass: 'file',                                      title: 'File'       },
-                    ];
-            }
+    static StackedBlock = StackedBlock
 
-        },
+    static builtInHeaders(expSetType = 'replicate'){
+        switch (expSetType){
+            case 'replicate' :
+                return [
+                    { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample'  },
+                    { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment' },
+                    { columnClass: 'file-pair',                                 title: 'File Pair',     visibleTitle : <i className="icon icon-download"></i> },
+                    { columnClass: 'file',                                      title: 'File'       },
+                ];
+            default:
+                return [
+                    { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample'  },
+                    { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment' },
+                    { columnClass: 'file',                                      title: 'File'       },
+                ];
+        }
 
-        /* Returns undefined if not set */
-        initialColumnWidths : function(columnClassName = null, expSetType = 'replicate'){
-            if (expSetType === 'replicate'){
-                // ToDo put into schemas?
-                var widthsByColumnClass = {
-                    'biosample' : 115,
-                    'experiment' : 145,
-                    'file-pair' : 40,
-                    'file' : 125,
-                    'file-detail' : 100,
-                    'default' : 120
-                };
-                // No columnClassName specified.
-                if (columnClassName === null) return widthsByColumnClass;
-                // columnClassName specified and set.
-                else if (columnClassName !== null && _.contains(Object.keys(widthsByColumnClass), columnClassName)){
-                    return widthsByColumnClass[columnClassName];
-                }
-                // columnClassName specified but width not configured.
-                else return widthsByColumnClass.default;
-            }
-        },
+    }
 
-        /**
-         * Calculate amount of experiments out of provided experiments which match currently-set filters.
-         * Use only for front-end faceting, e.g. on Exp-Set View page where all experiments are provided,
-         * NOT (eventually) for /browse/ page where faceting results will be controlled by back-end.
-         */
-        getPassedExperiments : function(
-            allExperiments,
-            filters = null, // aka expSetFilters (available in redux store)
-            getIgnoredFiltersMethod = 'single-term',
-            facets = null,  // Required if want to get ignored filters by missing facet(s).
-            useSet = false  // Return as array instead of set.
-        ){
-            if (!Array.isArray(allExperiments)){
-                 // no experiments
-                 if (useSet) return new Set();
-                 return [];
-            }
-            // TODO: If filters === null then filters = store.getState().expSetFilters ?
-            if (Array.isArray(allExperiments[0].experiments_in_set)){
-                // We got experiment sets, not experiments. Lets fix that (convert to arr of experiments).
-                allExperiments = _.flatten(_.map(allExperiments, function(es){ return es.experiments_in_set; }), true);
-            }
-            if (typeof filters !== 'object' || !filters || Object.keys(filters).length === 0){
-                if (useSet) return new Set(allExperiments);
-                else return allExperiments;
-            }
-            var ignoredFilters = null;
-            if (getIgnoredFiltersMethod === 'missing-facets') {
-                if (Array.isArray(facets) && facets.length > 0) {
-                    if (typeof facets[0].restrictions === 'undefined'){
-                        // No restrictions added yet. TODO: Grab & include restrictions object.
-                        facets = FacetList.adjustedFacets(facets);
-                    }
-                    ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, filters);
-                }
-            } else if (getIgnoredFiltersMethod === 'single-term') {
-                // Ignore filters if none in current experiment_set match it so that if coming from
-                // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
-                ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(allExperiments, filters);
-            }
-            if (useSet) return Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
-            else return [...Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array
-        },
-
-        totalExperimentsCount : function(experimentArray = null){
-            if (!experimentArray) return null;
-            var experimentsCount = 0;
-            var fileSet = new Set();
-            for (var i = 0; i < experimentArray.length; i++){
-                if (experimentArray[i].files && experimentArray[i].files.length > 0){
-                    experimentsCount++; // Exclude empty experiments
-                    for (var j = 0; j < experimentArray[i].files.length; j++){
-                        if (!fileSet.has(experimentArray[i].files[j]['@id'])){
-                            fileSet.add(experimentArray[i].files[j]['@id']);
-                        }
-                    }
-                } else if (experimentArray[i].filesets && experimentArray[i].filesets.length > 0){
-                    experimentsCount++;
-                    for (var j = 0; j < experimentArray[i].filesets.length; j++){
-                        for (var k = 0; k < experimentArray[i].filesets[j].files_in_set.length; k++){
-                            if (!fileSet.has(experimentArray[i].filesets[j].files_in_set[k]['@id'])){
-                                fileSet.add(experimentArray[i].filesets[j].files_in_set[k]['@id']);
-                            }
-                        }
-                    }
-                } else {
-                    console.error("Couldn't find files for experiment - excluding from total count", experimentArray[i]);
-                }
-            }
-            return {
-                'experiments' : experimentsCount,
-                'files' : fileSet.size
+    /* Returns undefined if not set */
+    static initialColumnWidths(columnClassName = null, expSetType = 'replicate'){
+        if (expSetType === 'replicate'){
+            // ToDo put into schemas?
+            var widthsByColumnClass = {
+                'biosample' : 115,
+                'experiment' : 145,
+                'file-pair' : 40,
+                'file' : 125,
+                'file-detail' : 100,
+                'default' : 120
             };
-        },
+            // No columnClassName specified.
+            if (columnClassName === null) return widthsByColumnClass;
+            // columnClassName specified and set.
+            else if (columnClassName !== null && _.contains(Object.keys(widthsByColumnClass), columnClassName)){
+                return widthsByColumnClass[columnClassName];
+            }
+            // columnClassName specified but width not configured.
+            else return widthsByColumnClass.default;
+        }
+    }
 
-        visibleExperimentsCount : function(experimentArray){
-            if (!Array.isArray(experimentArray)) return null;
-            var fileKeys = Object.keys(fileDetailContainer.fileDetail);
-            var experiments = new Set();
-            var fileSet = new Set(fileKeys);
-
-            for (var i = 0; i < fileKeys.length; i++){
-                if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
-                    experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
+    /**
+     * Calculate amount of experiments out of provided experiments which match currently-set filters.
+     * Use only for front-end faceting, e.g. on Exp-Set View page where all experiments are provided,
+     * NOT (eventually) for /browse/ page where faceting results will be controlled by back-end.
+     */
+    static getPassedExperiments(
+        allExperiments,
+        filters = null, // aka expSetFilters (available in redux store)
+        getIgnoredFiltersMethod = 'single-term',
+        facets = null,  // Required if want to get ignored filters by missing facet(s).
+        useSet = false  // Return as array instead of set.
+    ){
+        if (!Array.isArray(allExperiments)){
+                // no experiments
+                if (useSet) return new Set();
+                return [];
+        }
+        // TODO: If filters === null then filters = store.getState().expSetFilters ?
+        if (Array.isArray(allExperiments[0].experiments_in_set)){
+            // We got experiment sets, not experiments. Lets fix that (convert to arr of experiments).
+            allExperiments = _.flatten(_.map(allExperiments, function(es){ return es.experiments_in_set; }), true);
+        }
+        if (typeof filters !== 'object' || !filters || Object.keys(filters).length === 0){
+            if (useSet) return new Set(allExperiments);
+            else return allExperiments;
+        }
+        var ignoredFilters = null;
+        if (getIgnoredFiltersMethod === 'missing-facets') {
+            if (Array.isArray(facets) && facets.length > 0) {
+                if (typeof facets[0].restrictions === 'undefined'){
+                    // No restrictions added yet. TODO: Grab & include restrictions object.
+                    facets = FacetList.adjustedFacets(facets);
                 }
-                if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
-                    if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
-                        fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
+                ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, filters);
+            }
+        } else if (getIgnoredFiltersMethod === 'single-term') {
+            // Ignore filters if none in current experiment_set match it so that if coming from
+            // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
+            ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(allExperiments, filters);
+        }
+        if (useSet) return Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
+        else return [...Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array
+    }
+
+    static totalExperimentsCount(experimentArray = null){
+        if (!experimentArray) return null;
+        var experimentsCount = 0;
+        var fileSet = new Set();
+        for (var i = 0; i < experimentArray.length; i++){
+            if (experimentArray[i].files && experimentArray[i].files.length > 0){
+                experimentsCount++; // Exclude empty experiments
+                for (var j = 0; j < experimentArray[i].files.length; j++){
+                    if (!fileSet.has(experimentArray[i].files[j]['@id'])){
+                        fileSet.add(experimentArray[i].files[j]['@id']);
                     }
+                }
+            } else if (experimentArray[i].filesets && experimentArray[i].filesets.length > 0){
+                experimentsCount++;
+                for (var j = 0; j < experimentArray[i].filesets.length; j++){
+                    for (var k = 0; k < experimentArray[i].filesets[j].files_in_set.length; k++){
+                        if (!fileSet.has(experimentArray[i].filesets[j].files_in_set[k]['@id'])){
+                            fileSet.add(experimentArray[i].filesets[j].files_in_set[k]['@id']);
+                        }
+                    }
+                }
+            } else {
+                console.error("Couldn't find files for experiment - excluding from total count", experimentArray[i]);
+            }
+        }
+        return {
+            'experiments' : experimentsCount,
+            'files' : fileSet.size
+        };
+    }
+
+    static visibleExperimentsCount(experimentArray){
+        if (!Array.isArray(experimentArray)) return null;
+        var fileKeys = Object.keys(fileDetailContainer.fileDetail);
+        var experiments = new Set();
+        var fileSet = new Set(fileKeys);
+
+        for (var i = 0; i < fileKeys.length; i++){
+            if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
+                experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
+            }
+            if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
+                if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
+                    fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
                 }
             }
-            return {
-                'experiments' : experiments.size,
-                'files' : fileSet.size,
-                'emptyExperiments' : fileDetailContainer.emptyExps.length
-            };
-        },
+        }
+        return {
+            'experiments' : experiments.size,
+            'files' : fileSet.size,
+            'emptyExperiments' : fileDetailContainer.emptyExps.length
+        };
+    }
 
-        visibleExperimentsCountDeprecated : function(fileDetailContainer){
-            if (!fileDetailContainer) return null;
-            var fileKeys = Object.keys(fileDetailContainer.fileDetail);
-            var experiments = new Set();
-            var fileSet = new Set(fileKeys);
+    static visibleExperimentsCountDeprecated(fileDetailContainer){
+        if (!fileDetailContainer) return null;
+        var fileKeys = Object.keys(fileDetailContainer.fileDetail);
+        var experiments = new Set();
+        var fileSet = new Set(fileKeys);
 
-            for (var i = 0; i < fileKeys.length; i++){
-                if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
-                    experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
-                }
-                if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
-                    if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
-                        fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
-                    }
+        for (var i = 0; i < fileKeys.length; i++){
+            if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
+                experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
+            }
+            if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
+                if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
+                    fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
                 }
             }
-            return {
-                'experiments' : experiments.size,
-                'files' : fileSet.size,
-                'emptyExperiments' : fileDetailContainer.emptyExps.length
-            };
-        },
+        }
+        return {
+            'experiments' : experiments.size,
+            'files' : fileSet.size,
+            'emptyExperiments' : fileDetailContainer.emptyExps.length
+        };
+    }
 
-        StackedBlock : React.createClass({
-
-            statics : {
-
-                Name : React.createClass({
-
-                    statics : {
-
-                        renderBlockLabel : function(labelOptions = {
-                            title       : null,
-                            subtitle    : null,
-                            accession   : null,
-                            inline      : false,
-                            className   : null
-                        }){
-
-                            var { title, subtitle, accession, inline, className } = labelOptions;
-
-                            function titleElement(){
-                                return React.createElement(
-                                    inline ? 'span' : 'div',
-                                    { className : "label-title" },
-                                    title
-                                );
-                            }
-
-                            function subtitleElement(){
-                                if (!accession && !subtitle) return null;
-                                return React.createElement(
-                                    inline ? 'span' : 'div',
-                                    { className : "ext" + (accession ? ' is-accession' : '') },
-                                    accession || subtitle
-                                );
-                            }
-
-                            var fullClassName = "label-ext-info";
-                            if (typeof className === 'string') fullClassName += ' ' + className;
-                            if (subtitle !== null) fullClassName += ' has-subtitle';
-
-                            return (
-                                <div className={fullClassName}>
-                                    { titleElement() }
-                                    { subtitleElement() }
-                                </div>
-                            );
-                        },
-                    },
-
-                    propTypes : {
-                        columnClass : React.PropTypes.string,
-                        colWidthStyles : React.PropTypes.object,
-                        label : React.PropTypes.shape({
-                            title : React.PropTypes.node,
-                            subtitle : React.PropTypes.node,
-                            subtitleVisible : React.PropTypes.bool
-                        }),
-                        visible : React.PropTypes.bool
-                    },
-
-                    getDefaultProps : function(){
-                        return {
-                            visible : true
-                        }
-                    },
-
-                    shouldComponentUpdate : function(nextProps){
-                        if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
-                        return false;
-                    },
-
-                    getColumnWidthStyle : function(){
-                        if (this.props.colWidthStyles && typeof this.props.colWidthStyles[this.props.columnClass] !== 'undefined'){
-                            return this.props.colWidthStyles[this.props.columnClass];
-                        }
-
-                        if (
-                            this.props.expTable &&
-                            this.props.expTable.state &&
-                            Array.isArray(this.props.expTable.state.columnWidths)
-                        ){
-                            var colWidthIndex = _.findIndex(this.props.expTable.columnHeaders(), { 'columnClass' : this.props.columnClass });
-                            if (colWidthIndex > -1) return { 'width' : this.props.expTable.state.columnWidths[colWidthIndex] };
-                        }
-
-                        return null;
-                    },
-
-                    adjustedChildren : function(){
-                        if (React.Children.count(this.props.children) > 1) return this.props.children;
-                        return React.Children.map(this.props.children, function(c){
-                            if (c && c.props && typeof c.props.className === 'string' && c.props.className.indexOf('name-title') === -1){
-                                return React.cloneElement(c, { className : c.props.className + ' name-title' }, c.props.children);
-                            }
-                            return c;
-                        });
-                    },
-
-                    render : function(){
-                        if (!this.props.visible) return null;
-                        var style = null;
-                        var colWidthStyle = this.getColumnWidthStyle();
-                        if (colWidthStyle){
-                            if (this.props.colStyle) style = _.extend(_.clone(colWidthStyle), this.props.colStyle);
-                            else style = colWidthStyle;
-                        }
-                        if (this.props.relativePosition){
-                            if (style) style.position = 'relative';
-                            else style = { 'position' : 'relative' };
-                        }
-                        return (
-                            <div className={"name col-" + this.props.columnClass} style={style}>
-                                { this.props.label ?
-                                    ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, this.props.label, {
-                                        inline : false,
-                                        className : this.props.label.subtitleVisible === true ? 'subtitle-visible' : null
-                                    })) : null }
-                                { this.adjustedChildren() }
-                            </div>
-                        );
-                    }
-                }),
-
-                List : React.createClass({
-
-                    statics : {
-                        ViewMoreButton : React.createClass({
-
-                            propTypes : {
-                                collapsibleChildren : React.PropTypes.array,
-                                collapsed : React.PropTypes.bool,
-                                handleCollapseToggle : React.PropTypes.func
-                                // + those from parent .List
-                            },
-
-                            shouldComponentUpdate : function(nextProps){
-                                if (this.props.collapsed !== nextProps.collapsed) return true;
-                                if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
-                                if (this.props.title !== nextProps.title) return true;
-                                if (this.props.showMoreExtTitle !== nextProps.showMoreExtTitle) return true;
-                                return false;
-                            },
-
-                            render : function(){
-
-                                if (this.props.collapsibleChildren.length === 0) return null;
-
-                                var collapsedMsg = this.props.collapsed &&
-                                (this.props.currentlyCollapsing ?
-                                    (this.props.currentlyCollapsing === this.props.parentID ? false : true)
-                                    :
-                                    true
-                                );
-
-                                function collapseTitle(){
-                                    var title;
-                                    if (collapsedMsg){
-                                        title = "Show " + this.props.collapsibleChildren.length + " More";
-                                    } else {
-                                        title = "Show Less";
-                                    }
-                                    if (this.props.title) title += ' ' + this.props.title;
-
-                                    function extTitle(){
-                                        if (!this.props.showMoreExtTitle || !collapsedMsg) return null;
-                                        return <span className="ext text-400"> { this.props.showMoreExtTitle }</span>;
-                                    }
-
-                                    return <span>{ title }{ extTitle.call(this) }</span>;
-                                }
-
-                                return (
-                                    <div className="view-more-button" onClick={this.props.handleCollapseToggle}>
-                                        <i className={"icon icon-" + (collapsedMsg ? 'plus': 'minus')}></i>
-                                        &nbsp; { collapseTitle.call(this) }
-                                    </div>
-                                );
-                            }
-                        })
-                    },
-
-                    propTypes : {
-                        title : React.PropTypes.string,
-                        showMoreExtTitle : React.PropTypes.string,
-                        collapseLimit : React.PropTypes.number,
-                        collapseShow : React.PropTypes.number,
-                        expTable : React.PropTypes.any
-                    },
-
-                    getDefaultProps : function(){
-                        return {
-                            collapseLimit : 5,
-                            collapseShow : 3
-                        };
-                    },
-
-                    getInitialState : function(){
-                        if (!Array.isArray(this.props.children) || this.props.children.length <= this.props.collapseLimit) return null;
-                        return { 'collapsed' : true };
-                    },
-
-                    shouldComponentUpdate : function(nextProps, nextState){
-                        if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
-                        if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
-                        if (this.state === null) return false;
-                        if (this.state.collapsed !== nextState.collapsed) return true;
-                        return false;
-                    },
-
-                    adjustedChildren : function(){
-                        return React.Children.map(this.props.children, (c)=>{
-                            //if (c.type.displayName !== 'StackedBlock') return c; // Only add props to StackedBlocks
-                            var addedProps = {};
-                            if (this.props.parentIDList && !c.props.parentIDList){
-                                addedProps.parentIDList = this.props.parentIDList;
-                            }
-                            if (this.props.currentlyCollapsing && !c.props.currentlyCollapsing){
-                                addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
-                            }
-                            if (this.props.expTable && !c.props.expTable){
-                                addedProps.expTable = this.props.expTable;
-                            }
-                            if (this.props.colWidthStyles && !c.props.colWidthStyles){
-                                addedProps.colWidthStyles = this.props.colWidthStyles;
-                            }
-                            if (this.props.experimentSetType && !c.props.experimentSetType){
-                                addedProps.experimentSetType = this.props.experimentSetType;
-                            }
-                            if (Object.keys(addedProps).length > 0){
-                                return React.cloneElement(c, addedProps, c.props.children);
-                            }
-                            return c;
-                        });
-                    },
-
-                    handleCollapseToggle : function(){
-                        if (this.props.expTable && this.props.expTable.state && !this.props.expTable.state.collapsing){
-                            this.props.expTable.setState({
-                                'collapsing' : this.props.rootList ? 'root' :
-                                    this.props.parentID || this.props.className || true
-                            }, ()=>{
-                                this.setState({ 'collapsed' : !this.state.collapsed });
-                            });
-                        } else this.setState({ 'collapsed' : !this.state.collapsed });
-                    },
-
-                    render : function(){
-                        var children = this.adjustedChildren();
-
-                        var className = "s-block-list " + this.props.className;
-                        var timeout = 350; // Default
-                        if (!Array.isArray(children) || children.length <= this.props.collapseLimit) {
-                            // Don't have enough items for collapsible element, return plain list.
-                            return <div className={className}>{ children }</div>;
-                        }
-
-                        var collapsibleChildren = children.slice(this.props.collapseShow);
-                        if (collapsibleChildren.length > 18) {
-                            className += ' transition-slow';
-                            timeout = 1000;
-                        } else if (collapsibleChildren.length > 9) {
-                            className += ' transition-med';
-                            timeout = 500;
-                        }
-
-                        var transitionFinish = function(){
-                            if (this.props.expTable && this.props.expTable.state){
-                                this.props.expTable.setState({ 'collapsing' : false });
-                            }
-                        }.bind(this);
-
-                        return (
-                            <div className={className} data-count-collapsed={collapsibleChildren.length}>
-                                { children.slice(0, this.props.collapseShow) }
-                                <Collapse in={!this.state.collapsed} timeout={timeout} onExited={transitionFinish} onEntered={transitionFinish}>
-                                    <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>
-                                </Collapse>
-                                <ExperimentsTable.StackedBlock.List.ViewMoreButton
-                                    collapsibleChildren={collapsibleChildren}
-                                    collapsed={this.state.collapsed}
-                                    handleCollapseToggle={this.handleCollapseToggle}
-                                    {...this.props}
-                                />
-                            </div>
-                        );
-                    },
-
-                }),
-
-            },
-
-            childIDList : null,
-
-            getInitialState : function(){
-                this.childIDList = new Set();
-                return null;
-            },
-
-            adjustedChildren : function(){
-                return React.Children.map(this.props.children, (c) => {
-                    if (c === null) return null;
-                    var addedProps = {};
-
-                    if (!c.props.columnClass && this.props.columnClass) addedProps.columnClass = this.props.columnClass;
-                    if (!c.props.colWidthStyles && this.props.colWidthStyles) addedProps.colWidthStyles = this.props.colWidthStyles;
-                    if (!c.props.label && this.props.label) addedProps.label = this.props.label;
-                    if (!c.props.expTable && this.props.expTable) addedProps.expTable = this.props.expTable;
-                    if (!c.props.experimentSetType && this.props.experimentSetType) addedProps.experimentSetType = this.props.experimentSetType;
-                    if (!c.props.currentlyCollapsing && this.props.currentlyCollapsing) addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
-
-                    if (c.props.children){
-                        // Grab & save child s-block ids (one level deep)
-                        React.Children.forEach(c.props.children, (cc)=>{
-                            if (cc.props && typeof cc.props.id === 'string'){
-                                this.childIDList.add(cc.props.id);
-                            }
-                        });
-                    }
-                    if (this.props.id){
-                        // Pass down (and include self in) parent s-block ids to child elements.
-                        if (this.props.parentIDList){
-                            addedProps.parentIDList = new Set(this.props.parentIDList);
-                        } else {
-                            addedProps.parentIDList = new Set();
-                        }
-                        addedProps.parentIDList.add(this.props.id);
-                        addedProps.parentID = this.props.id;
-                    }
-                    if (Object.keys(addedProps).length > 0){
-                        return React.cloneElement(c, addedProps, c.props.children);
-                    } else return c;
-                });
-            },
-
-            render : function(){
-                var className = this.props.columnClass ? this.props.columnClass + ' ' : '';
-                className += "s-block";
-                if (this.props.hideNameOnHover) className += ' hide-name-on-block-hover';
-                if (typeof this.props.stripe !== 'undefined' && this.props.stripe !== null){
-                    if (this.props.stripe === true || this.props.stripe === 'even') className += ' even';
-                    else className += ' odd';
-                }
-                if (this.props.currentlyCollapsing){
-                    className += ' s-block-list-collapsing collapsing-' + this.props.currentlyCollapsing;
-                    if (
-                        this.props.currentlyCollapsing === this.props.id ||
-                        this.props.currentlyCollapsing === 'root' ||
-                        ((this.props.parentIDList instanceof Set) && this.props.parentIDList.has(this.props.currentlyCollapsing)) ||
-                        ((this.childIDList instanceof Set) && this.childIDList.has(this.props.currentlyCollapsing))
-                    ) className += ' collapsing-child';
-                }
-                return (
-                    <div className={className}>
-                        { this.adjustedChildren() }
-                    </div>
-                );
-            }
-        })
-
-    },
-
-    propTypes : {
-        columnHeaders : React.PropTypes.array,
-        experimentArray : React.PropTypes.array,
-        passExperiments : React.PropTypes.instanceOf(Set),
-        expSetFilters : React.PropTypes.object,
-        selectedFiles : React.PropTypes.instanceOf(Set),
+    static propTypes = {
+        columnHeaders : PropTypes.array,
+        experimentArray : PropTypes.array,
+        passExperiments : PropTypes.instanceOf(Set),
+        expSetFilters : PropTypes.object,
+        selectedFiles : PropTypes.instanceOf(Set),
         parentController : function(props, propName, componentName){
             // Custom validation
             if (props[propName] &&
@@ -559,27 +670,40 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 return new Error('parentController must be a React Component passed in as "this", with "selectedFiles" (Set) and "checked" (bool) in its state.');
             }
         },
-        keepCounts : React.PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
-    },
+        keepCounts : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
+    }
 
-    getDefaultProps : function(){
-        return {
-            keepCounts : false,
-            columnHeaders : [
-                { columnClass: 'biosample',     className: 'text-left',     title : 'Biosample'     },
-                { columnClass: 'experiment',    className: 'text-left',     title : 'Experiment'    },
-                { columnClass: 'file-detail',                               title : 'File Info'     }
-            ]
-        };
-    },
+    static defaultProps = {
+        keepCounts : false,
+        fadeIn : true,
+        width: null,
+        columnHeaders : [
+            { columnClass: 'biosample',     className: 'text-left',     title : 'Biosample'     },
+            { columnClass: 'experiment',    className: 'text-left',     title : 'Experiment'    },
+            { columnClass: 'file-detail',                               title : 'File Info'     }
+        ]
+    }
 
-    cache : null,
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.updateColumnWidths = this.updateColumnWidths.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
+        this.staticColumnHeaders = this.staticColumnHeaders.bind(this);
+        this.customColumnHeaders = this.customColumnHeaders.bind(this);
+        this.columnHeaders = this.columnHeaders.bind(this);
+        this.colWidthStyles = this.colWidthStyles.bind(this);
+        this.selectedFiles = this.selectedFiles.bind(this);
+        this.handleFileUpdate = this.handleFileUpdate.bind(this);
+        this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
+        this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
+        this.renderRootStackedBlockListOfBiosamplesWithExperiments = this.renderRootStackedBlockListOfBiosamplesWithExperiments.bind(this);
+        this.renderers.replicate = this.renderers.replicate.bind(this);
+        this.renderers.default = this.renderers.default.bind(this);
 
-    getInitialState: function() {
+
         this.cache = {
-        //    origColumnWidths : null,
-        //    staticColumnHeaders : null,
-        //    customColumnHeaders : null
             oddExpRow : true
         };
         var initialState = {
@@ -588,18 +712,24 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             mounted : false
         };
         if (!(
-            this.props.parentController &&
-            this.props.parentController.state &&
-            this.props.parentController.state.selectedFiles
+            props.parentController &&
+            props.parentController.state &&
+            props.parentController.state.selectedFiles
         )) initialState.selectedFiles = new Set();
-        return initialState;
-    },
+        this.state = initialState;
+    }
 
-    updateColumnWidths : function(){
+    updateColumnWidths(){
         // Scale/expand width of columns to fit available width, if any.
         var origColumnWidths;
-        if (!this.refs.header) return null;
-        if (this.refs.header && this.refs.header.clientWidth === 0) return null;
+        if (
+            typeof this.props.width !== 'number' && (
+                !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
+            )
+        ){
+            this.setState({ columnWidths : ExperimentsTable.initialColumnWidths(null) })
+            return null;
+        }
         if (!this.cache.origColumnWidths){
             origColumnWidths = _.map(this.refs.header.children, function(c){
                 //if ( // For tests/server-side
@@ -615,7 +745,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             origColumnWidths = this.cache.origColumnWidths;
         }
 
-        var availableWidth = this.refs.header.offsetWidth || 960, // 960 = fallback for tests
+        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960, // 960 = fallback for tests
             totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v }, 0);
 
         if (totalOrigColsWidth > availableWidth){
@@ -634,26 +764,28 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         newColWidths[0] += Math.floor(remainder - 0.5);
 
         this.setState({ columnWidths : newColWidths });
-    },
+    }
 
-    componentDidMount : function(){
+    componentDidMount(){
+
         this.throttledResizeHandler = _.throttle(this.updateColumnWidths, 300);
 
         if (!isServerSide()){
             window.addEventListener('resize', this.throttledResizeHandler);
             this.updateColumnWidths();
         }
-        this.setState({ 'mounted' : true });
-    },
 
-    componentWillUnmount : function(){
+        this.setState({ 'mounted' : true });
+    }
+
+    componentWillUnmount(){
         if (!isServerSide()){
             window.removeEventListener('resize', this.throttledResizeHandler);
         }
-    },
+    }
 
     /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
-    staticColumnHeaders : function(){
+    staticColumnHeaders(){
         if (this.cache.staticColumnHeaders) return this.cache.staticColumnHeaders;
         this.cache.staticColumnHeaders = ExperimentsTable.builtInHeaders(this.props.experimentSetType).map((staticCol) => {
             return _.extend(
@@ -662,23 +794,23 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             );
         });
         return this.cache.staticColumnHeaders;
-    },
+    }
 
     /* Any non built-in (for experimentSetType) headers from props.columnHeaders */
-    customColumnHeaders : function(){
+    customColumnHeaders(){
         if (this.cache.customColumnHeaders) return this.cache.customColumnHeaders;
         this.cache.customColumnHeaders = this.props.columnHeaders.filter((col) => {
             return  !_.contains(_.pluck(ExperimentsTable.builtInHeaders(this.props.experimentSetType), 'title'), col.title);
         });
         return this.cache.customColumnHeaders;
-    },
+    }
 
     /* Combined top row of headers */
-    columnHeaders : function(){
+    columnHeaders(){
         return this.staticColumnHeaders().concat(this.customColumnHeaders());
-    },
+    }
 
-    colWidthStyles : function(){
+    colWidthStyles(){
 
         var colWidthStyles = {
             'experiment' : null,
@@ -697,9 +829,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         }
 
         return colWidthStyles;
-    },
+    }
 
-    selectedFiles : function(){
+    selectedFiles(){
         //if (this.props.selectedFiles) {
         //    return this.props.selectedFiles;
         if (this.props.parentController && this.props.parentController.state.selectedFiles){
@@ -708,9 +840,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             return this.state.selectedFiles;
         }
         return null;
-    },
+    }
 
-    handleFileUpdate: function (uuid, add=true){
+    handleFileUpdate(uuid, add=true){
 
         var selectedFiles = this.selectedFiles();
         if (!selectedFiles) return null;
@@ -734,9 +866,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             });
         }
 
-    },
+    }
 
-    renderExperimentBlock : function(exp,i){
+    renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
 
         var contentsClassName = Array.isArray(exp.file_pairs) ? 'file-pairs' : 'files';
@@ -760,10 +892,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 stripe={this.cache.oddExpRow}
                 id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || exp['@id']}
             >
-                <ExperimentsTable.StackedBlock.Name relativePosition={expFxn.fileCount(exp) > 6}>
+                <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
                     <a href={ exp['@id'] || '#' } className="name-title">{ experimentVisibleName }</a>
-                </ExperimentsTable.StackedBlock.Name>
-                <ExperimentsTable.StackedBlock.List
+                </StackedBlockName>
+                <StackedBlockList
                     className={contentsClassName}
                     title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
                 >
@@ -811,12 +943,12 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                             </ExperimentsTable.StackedBlock.List>
                         </ExperimentsTable.StackedBlock>
                     }
-                </ExperimentsTable.StackedBlock.List>
+                </StackedBlockList>
             </ExperimentsTable.StackedBlock>
         );
-    },
+    }
 
-    renderBiosampleStackedBlockOfExperiments : function(expsWithBiosample,i){
+    renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
 
         var visibleBiosampleTitle = (
@@ -871,7 +1003,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
             </ExperimentsTable.StackedBlock>
         );
-    },
+    }
 
     /**
      * Here we render nested divs for a 'table' of experiments with shared elements spanning multiple rows,
@@ -889,7 +1021,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
      *
      * Much of styling/layouting is defined in CSS.
      */
-    renderRootStackedBlockListOfBiosamplesWithExperiments : function(experimentsGroupedByBiosample){
+    renderRootStackedBlockListOfBiosamplesWithExperiments(experimentsGroupedByBiosample){
         return (
             <ExperimentsTable.StackedBlock.List
                 className="biosamples"
@@ -907,9 +1039,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 }
             />
         );
-    },
+    }
 
-    renderers : {
+    renderers = {
 
         replicate : function(){
 
@@ -940,9 +1072,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 </div>
             );
         }
-    },
+    }
 
-    render : function(){
+    render(){
 
         var renderHeaderItem = function(h, i, arr){
             if (h.visible === false) return null;
@@ -959,7 +1091,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         }.bind(this);
 
         return (
-            <div className={"expset-experiments" + (this.state.mounted ? ' mounted' : '')}>
+            <div className={"expset-experiments" + (this.state.mounted ? ' mounted' : '') + (this.props.fadeIn ? ' fade-in' : '')}>
                 {
                     !Array.isArray(this.props.experimentArray) ?
                     <h6 className="text-center text-400"><em>No experiments</em></h6>
@@ -971,22 +1103,33 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
                 {   !Array.isArray(this.props.experimentArray) ? null :
                     this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ?
-                        this.renderers[this.props.experimentSetType].call(this) : this.renderers.default.call(this)
+                        this.renderers[this.props.experimentSetType]() : this.renderers.default()
                 }
             </div>
         );
     }
 
-});
+}
 
-var FilePairBlock = React.createClass({
 
-    propTypes : {
-        selectedFiles : React.PropTypes.instanceOf(Set),
-        handleFileUpdate : React.PropTypes.func
-    },
+class FilePairBlock extends React.Component {
 
-    updateFileChecked : function(add=true){
+    static propTypes = {
+        selectedFiles : PropTypes.instanceOf(Set),
+        handleFileUpdate : PropTypes.func
+    }
+
+    constructor(props){
+        super(props);
+        this.updateFileChecked = this.updateFileChecked.bind(this);
+        this.isChecked = this.isChecked.bind(this);
+        this.handleCheck = this.handleCheck.bind(this);
+        this.renderFileEntryBlock = this.renderFileEntryBlock.bind(this);
+        this.renderCheckBox = this.renderCheckBox.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    updateFileChecked(add=true){
         if(
             Array.isArray(this.props.files) &&
             this.props.files[0].uuid &&
@@ -994,18 +1137,18 @@ var FilePairBlock = React.createClass({
         ){
             this.props.handleFileUpdate(this.props.files[0].uuid, add);
         }
-    },
+    }
 
-    isChecked : function(){
+    isChecked(){
         if (!Array.isArray(this.props.files) || !(this.props.selectedFiles instanceof Set) || !this.props.files[0].uuid) return null;
         return this.props.selectedFiles.has(this.props.files[0].uuid);
-    },
+    }
 
-    handleCheck: function() {
+    handleCheck() {
         this.updateFileChecked(!this.isChecked());
-    },
+    }
 
-    renderFileEntryBlock: function(file,i){
+    renderFileEntryBlock(file,i){
         return (
             <FileEntryBlock
                 key={file['@id']}
@@ -1018,9 +1161,9 @@ var FilePairBlock = React.createClass({
                 colWidthStyles={this.props.colWidthStyles}
             />
         );
-    },
+    }
 
-    renderCheckBox : function(){
+    renderCheckBox(){
         var checked = this.isChecked();
         if (checked === null) return null;
         return (
@@ -1033,18 +1176,15 @@ var FilePairBlock = React.createClass({
                 onChange={this.handleCheck}
             />
         );
-    },
+    }
 
-    render : function(){
+    render(){
 
         function label(){
             if (typeof this.props.label === 'string'){
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel({
-                    title : 'Pair',
-                    subtitle : this.props.label
-                });
+                return <StackedBlock.Name.Label title="Pair" subtitle={this.props.label} />;
             } else if (typeof this.props.label === 'object' && this.props.label){
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(this.props.label);
+                return <StackedBlock.Name.Label {...this.props.label} />;
             } else return null;
         }
 
@@ -1074,16 +1214,30 @@ var FilePairBlock = React.createClass({
             </div>
         );
     }
-});
 
-var FileEntryBlock  = React.createClass({
 
-    propTypes : {
+}
+
+
+class FileEntryBlock extends React.Component {
+
+    static propTypes = {
         selectedFiles : React.PropTypes.instanceOf(Set),
         handleFileUpdate : React.PropTypes.func
-    },
+    }
 
-    updateFileChecked : function(add=true){
+    constructor(props){
+        super(props);
+        this.updateFileChecked = this.updateFileChecked.bind(this);
+        this.isChecked = this.isChecked.bind(this);
+        this.handleCheck = this.handleCheck.bind(this);
+        this.filledFileRow = this.filledFileRow.bind(this);
+        this.renderCheckBox = this.renderCheckBox.bind(this);
+        this.renderName = this.renderName.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    updateFileChecked(add=true){
         if(
             this.props.file &&
             this.props.file.uuid &&
@@ -1091,18 +1245,18 @@ var FileEntryBlock  = React.createClass({
         ){
             this.props.handleFileUpdate(this.props.file.uuid, add);
         }
-    },
+    }
 
-    isChecked : function(){
+    isChecked(){
         if (!this.props.file || !this.props.file.uuid || !(this.props.selectedFiles instanceof Set)) return null;
         return this.props.selectedFiles.has(this.props.file.uuid);
-    },
+    }
 
-    handleCheck: function() {
+    handleCheck() {
         this.updateFileChecked(!this.isChecked());
-    },
+    }
 
-    filledFileRow : function (file = this.props.file){
+    filledFileRow (file = this.props.file){
 
         var row = [];
         var cols = _.filter(this.props.columnHeaders, (col)=>{
@@ -1140,9 +1294,9 @@ var FileEntryBlock  = React.createClass({
             }
         }
         return row;
-    },
+    }
 
-    renderCheckBox : function(){
+    renderCheckBox(){
         if (!this.props.file) return null; // No file to select.
         if (this.props.pairParent) return null; // Part of pair -- FilePairBlock has own checkbox.
 
@@ -1158,9 +1312,9 @@ var FileEntryBlock  = React.createClass({
                 onChange={this.handleCheck}
             />
         );
-    },
+    }
 
-    renderName : function(){
+    renderName(){
 
         function titleString(){
             if (!this.props.file) return 'No Files';
@@ -1187,15 +1341,16 @@ var FileEntryBlock  = React.createClass({
             };
 
             if (this.props.label) {
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, this.props.label));
+                return <StackedBlock.Name.Label {..._.extend(commonProperties, this.props.label)} />;
             } else if (this.props.type === 'sequence-replicate') {
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
+                return <StackedBlock.Name.Label {..._.extend(commonProperties, this.props.label, {
                     subtitle : this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null
-                }));
+                })} />;
             } else if (this.props.type === 'paired-end') {
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
-                    //subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
-                }));
+                return <StackedBlock.Name.Label {...commonProperties} />;
+                //return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
+                //    //subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
+                //}));
             }
 
             if (Array.isArray(this.props.columnHeaders)) {
@@ -1204,21 +1359,21 @@ var FileEntryBlock  = React.createClass({
                     (this.props.file.file_type || this.props.file.file_format) &&
                     _.intersection(headerTitles,['File Type', 'File Format']).length === 0
                 ){
-                    return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
+                    return <StackedBlock.Name.Label {..._.extend(commonProperties, {
                         subtitle : this.props.file.file_type || this.props.file.file_format,
-                    }));
+                    })} />;
                 }
                 if (
                     this.props.file.instrument &&
                     _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0
                 ){
-                    return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
-                        subtitle : this.props.file.instrument,
-                    }));
+                    return <StackedBlock.Name.Label {..._.extend(commonProperties, {
+                        subtitle : this.props.file.instrument
+                    })} />;
                 }
             }
 
-            return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties));
+            return <StackedBlock.Name.Label {...commonProperties} />;
         }
 
         return (
@@ -1231,9 +1386,9 @@ var FileEntryBlock  = React.createClass({
                 { title.call(this) }
             </div>
         );
-    },
+    }
 
-    render : function(){
+    render(){
         var sBlockClassName = "s-block file";
         if (this.props.hideNameOnHover) sBlockClassName += ' hide-name-on-block-hover';
         if (this.props.isSingleItem) sBlockClassName += ' single-item';
@@ -1244,8 +1399,8 @@ var FileEntryBlock  = React.createClass({
             </div>
         );
     }
+}
 
-});
 
 /**
  * Returns an object containing fileDetail and emptyExps.
@@ -1255,7 +1410,7 @@ var FileEntryBlock  = React.createClass({
  * @return {Object} JS object containing two keys with arrays: 'fileDetail' of experiments with formatted details and 'emptyExps' with experiments with no files.
  */
 
-var getFileDetailContainer = module.exports.getFileDetailContainer = function(experimentArray, passedExperiments = null){
+export function getFileDetailContainer(experimentArray, passedExperiments = null){
 
     var fileDetail = {}; //use @id field as key
     var emptyExps = [];
@@ -1333,215 +1488,3 @@ var getFileDetailContainer = module.exports.getFileDetailContainer = function(ex
     }
     return { 'fileDetail' : fileDetail, 'emptyExps' : emptyExps };
 }
-
-
-var FileEntry = React.createClass({
-
-    // TODO (ideally): Functionality to customize columns (e.g. pass in a schema instead of list of
-    // column names, arrange fields appropriately under them).
-
-    getInitialState: function() {
-        return {
-            checked: this.props.parentChecked
-        };
-    },
-
-    getDefaultProps : function(){
-        return {
-            experimentAccessionEntrySpan : 1
-        };
-    },
-
-    // initial checkbox setting if parent is checked
-    componentWillMount: function(){
-        // if(this.props.exptPassed && _.contains(this.props.filteredFiles, this.props.file.uuid)){
-        //     this.setState({
-        //         checked: true
-        //     });
-        // }
-        if(
-            this.props.info.data &&
-            this.props.info.data['@id'] &&
-            this.state.checked &&
-            typeof this.props.handleFileUpdate == 'function'
-        ){
-            this.props.handleFileUpdate(this.props.info.data.uuid, true);
-        }
-    },
-
-    // update checkboxes if parent has changed
-    componentWillReceiveProps: function(nextProps) {
-        // if(this.props.filteredFiles !== nextProps.filteredFiles || this.props.exptPassed !== nextProps.exptPassed){
-        //     if(nextProps.exptPassed && _.contains(nextProps.filteredFiles, this.props.file.uuid)){
-        //         this.setState({
-        //             checked: true
-        //         });
-        //     }
-        // }
-
-        if(this.props.parentChecked !== nextProps.parentChecked){
-            this.setState({
-                checked: nextProps.parentChecked
-            });
-        }
-    },
-
-    // update parent checked state
-    componentWillUpdate(nextProps, nextState){
-        if(
-            (nextState.checked !== this.state.checked || this.props.expSetFilters !== nextProps.expSetFilters) &&
-            nextProps.info.data &&
-            nextProps.info.data['@id']
-        ){
-            this.props.handleFileUpdate(nextProps.info.data.uuid, nextState.checked);
-        }
-    },
-
-    handleCheck: function() {
-        this.setState({
-            checked: !this.state.checked
-        });
-    },
-
-    fastQFilePairRow : function(file, relatedFile, columnsOffset = 3){
-
-        var columnHeadersShortened = this.props.columnHeaders.slice(columnsOffset);
-
-        var fileOne;
-        var fileTwo;
-        var fileID;
-
-        function fillFileRow(file, paired, exists = true){
-            var f = [];
-            for (var i = 0; i < columnHeadersShortened.length; i++){
-
-                if (columnHeadersShortened[i] == 'File Accession'){
-                    if (!exists) {
-                        f.push(<td>No files</td>);
-                        continue;
-                    }
-                    f.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
-                }
-
-                if (!exists) {
-                    f.push(<td></td>);
-                    continue;
-                }
-
-                if (columnHeadersShortened[i] == 'File Type'){
-                    f.push(<td>{file.file_format}</td>);
-                    continue;
-                }
-
-                if (columnHeadersShortened[i] == 'File Info'){
-                    if (paired) {
-                        f.push(<td>Paired end {file.paired_end}</td>);
-                    } else if (file.file_format === 'fastq' || file.file_format === 'fasta') {
-                        f.push(<td>Unpaired</td>);
-                    } else {
-                        f.push(<td></td>);
-                    }
-                    continue;
-                }
-            }
-            return f;
-        }
-
-        // code embarrasingly specific to fastq file pairs
-        if(file){
-            if(file.paired_end && file.paired_end === '1'){
-                fileOne = fillFileRow(file, true, true);
-            }else if(file.paired_end && file.paired_end === '2'){
-                fileTwo = fillFileRow(file, true, true);
-            }else{
-                if(file['@id']){
-                    fileOne = fillFileRow(file, false, true);
-                }else{
-                    fileOne = fillFileRow(file, false, false);
-                }
-            }
-            fileID = this.state.checked + "~" + true + "~" + file.file_format + "~" + file.uuid;
-        }
-        if(relatedFile){
-            if(relatedFile.paired_end && relatedFile.paired_end === '1'){
-                fileOne = fillFileRow(relatedFile, true, true);
-            }else if(relatedFile.paired_end && relatedFile.paired_end === '2'){
-                fileTwo = fillFileRow(relatedFile, true, true);
-            }else{
-                fileTwo = fillFileRow(relatedFile, true, true);
-            }
-        }
-        return {
-            'fileOne' : fileOne,
-            'fileTwo' : fileTwo,
-            'fileID'  : fileID
-        }
-    },
-
-    render: function(){
-        var info = this.props.info;
-        var file = info.data ? info.data : null;
-        var relationship = info.related ? info.related : null;
-        var relatedFile = null;
-
-        if(relationship && relationship.data){
-            relatedFile = relationship.data;
-        }
-
-        var fileInfo = this.fastQFilePairRow(file, relatedFile);
-        // Maybe later can do like switch...case for which function to run (fastQFilePairRow or other)
-        // to fill fileInfo according to type of file or experiment type.
-        var fileOne = fileInfo.fileOne;
-        var fileTwo = fileInfo.fileTwo;
-        var fileID  = fileInfo.fileID;
-
-        var experimentAccessionCell = null;
-
-        // Will need to separate out <tbody> before rowSpan will work correctly
-        //if (this.props.experimentAccessionEntrySpan > 0){
-            experimentAccessionCell = (
-                <td rowSpan={2/* * this.props.experimentAccessionEntrySpan */} className="expset-exp-cell expset-exp-accession-title-cell">
-                    <a href={
-                        info['@id']  ? info['@id'] :
-                        info['accession'] ? '/experiments/' + info['accession'] :
-                        '#'
-                    }>
-                        {info.accession || info.uuid}
-                    </a>
-                </td>
-            );
-        //}
-
-        return(
-            <tbody>
-                <tr className='expset-sublist-entry'>
-                    { file['@id'] ?
-                        <td rowSpan="2" className="expset-exp-cell expset-checkbox-cell">
-                            <Checkbox validationState='warning' checked={this.state.checked} name="file-checkbox" id={fileID} className='expset-checkbox-sub' onChange={this.handleCheck}/>
-                        </td>
-                    :
-                        <td rowSpan="2" className="expset-exp-cell expset-checkbox-cell">
-                            <Checkbox checked={false} disabled={true} className='expset-checkbox-sub' />
-                        </td>
-                    }
-                    { experimentAccessionCell }
-                    <td rowSpan="2" className="expset-exp-cell">
-                        <a href={info.biosample_id || '#'}>
-                            {info.biosample}
-                        </a>
-                    </td>
-                    {(fileOne && fileOne[0]) ? fileOne[0] : null}
-                    {(fileOne && fileOne[1]) ? fileOne[1] : null}
-                    {(fileOne && fileOne[2]) ? fileOne[2] : null}
-                </tr>
-                {fileTwo ?
-                <tr>
-                    {fileTwo[0]}
-                    {fileTwo[1]}
-                    {fileTwo[2]}
-                </tr>
-                : null}
-            </tbody>
-        );
-    }
-});

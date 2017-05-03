@@ -454,7 +454,7 @@ var App = React.createClass({
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
-                    console.log('changed state: %s', key, this.state[key]);
+                    console.log('changed state: %s', key);
                 }
             }
         }

@@ -26,7 +26,6 @@ export default class Item extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        console.log(props);
     }
 
     //getChildContext     : AuditMixin.getChildContext,

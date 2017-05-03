@@ -2,7 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
-var Markdown = require('markdown-to-jsx');
+import Markdown from './../lib/markdown-to-jsx';
 var TableOfContents = require('./table-contents');
 var { CSVMatrixView } = require('./components');
 var globals = require('./../globals');
@@ -302,7 +302,7 @@ var StaticPageBase = module.exports = {
                 return <CSVMatrixView csv={content} options={this.props.content.options} />;
             } else if (placeholder || filetype === 'md'){
                 content = StaticPageBase.correctRelativeLinks(content, this.props.context);
-                console.log(this.props.section, content, this.props.context);
+                //console.log(this.props.section, content, this.props.context);
                 return <div className={className}>{ content }</div>;
             } else {
                 return <div className={className} dangerouslySetInnerHTML={{__html: content }}></div>;

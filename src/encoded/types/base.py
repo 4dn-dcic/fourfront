@@ -106,6 +106,21 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
         ]
 
 
+def get_item_if_you_can(request, value):
+    # import pdb; pdb.set_trace()
+    try:
+        value.get('uuid')
+        return value
+    except AttributeError:
+        svalue = str(value)
+        if not svalue.startswith('/'):
+            svalue = '/' + value
+        try:
+            return request.embed(svalue, '@@object')
+        except:
+            return value
+
+
 class AbstractCollection(snovault.AbstractCollection):
     """smth."""
 
@@ -122,7 +137,7 @@ class AbstractCollection(snovault.AbstractCollection):
         heres' and example of why this is the way it is:
         ontology terms have uuid or term_id as unique ID keys
         and if neither of those are included in post, try to
-        use prefered_name such that:
+        use term_name such that:
         No - fail load with non-existing term message
         Multiple - fail load with ‘ambiguous name - more than 1 term with that name exist use ID’
         Single result - get uuid and use that for post/patch
@@ -209,6 +224,7 @@ class Item(snovault.Item):
         # for file
         'obsolete': ONLY_ADMIN_VIEW,
         'uploading': ALLOW_LAB_SUBMITTER_EDIT,
+        'to be uploaded by workflow': ALLOW_LAB_SUBMITTER_EDIT,
         'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
         'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
 

@@ -142,7 +142,8 @@
                 "revoked",
                 "released",
                 "in review by project",
-                "released to project"
+                "released to project",
+                "to be uploaded by workflow"
             ]
         },
         "quality_metric": {
