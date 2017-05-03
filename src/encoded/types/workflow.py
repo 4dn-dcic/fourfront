@@ -24,6 +24,7 @@ class Workflow(Item):
     embedded = ['workflow_steps.step',
                 'workflow_steps.step_name',
                 'arguments',
+                'analysis_steps',
                 'arguments.argument_mapping']
 
 
@@ -32,8 +33,7 @@ class Workflow(Item):
         "type": "array",
         "items": {
             "title": "Analysis Step",
-            "type": "string",
-            "linkTo": "AnalysisStep"
+            "type": "object",
         }
     }, category='page')
     def analysis_steps(self, request):
@@ -64,12 +64,15 @@ class Workflow(Item):
         ]
 
         steps = list(map(
-            lambda uuid: request.embed('/analysis_step/' + uuid), # Embed steps' JSON
+            lambda uuid: self.collection.get(uuid),
             steps
         ))
 
+        stepsJSON = []
+
         # Distribute arguments into steps' "inputs" and "outputs" arrays.
-        for step in steps:
+        for stepObj in steps:
+            step = stepObj.__json__(request)
             step['inputs'] = []
             step['outputs'] = []
             for arg in self.properties['arguments']:
@@ -78,7 +81,7 @@ class Workflow(Item):
                     continue
                 for mappingIndex, mappedArg in enumerate(mapping):
 
-                    if mappedArg.get('workflow_step') == step['uuid']:
+                    if mappedArg.get('workflow_step') == str(stepObj.uuid):
 
                         if (mappedArg.get('step_argument_type') == 'Input file' or
                             mappedArg.get('step_argument_type') == 'Input file or parameter' or
@@ -137,9 +140,10 @@ class Workflow(Item):
                                 })
 
                             step["outputs"].append(outputNode)
+            
+            stepsJSON.append(step)
 
-
-        return steps
+        return stepsJSON
 
 
 @collection(
@@ -154,6 +158,8 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow',
+                'workflow.analysis_steps',
+                'workflow.analysis_steps.inputs',
                 'input_files.workflow_argument_name',
                 'input_files.value',
                 'input_files.value.file_format',
@@ -162,6 +168,43 @@ class WorkflowRun(Item):
                 'output_files.value.file_format',
                 'output_quality_metrics.name',
                 'output_quality_metrics.value']
+
+    @calculated_property(schema={
+        "title": "Workflow Analysis Steps",
+        "type": "array",
+        "items": {
+            "title": "Analysis Step",
+            "type": "object",
+        }
+    }, category="page")
+    def analysis_steps(self, request):
+        workflow = self.properties.get('workflow')
+        if workflow is None:
+            return
+
+        workflow = self.collection.get(workflow)
+        analysis_steps = workflow.analysis_steps(request)
+
+        for step in analysis_steps:
+            # Add output file metadata to step outputs & inputs, based on workflow_argument_name v step output target name.
+
+            for output in step['outputs']:
+                for outputTarget in output.get('target',[]):
+                    for file in self.properties.get('output_files',[]):
+                        if outputTarget['name'] == file.get('workflow_argument_name'):
+                            output['run_data'] = {
+                                "file" : request.embed('/' + file.get('value'), '@@embedded')
+                            }
+
+            for input in step['inputs']:
+                for inputSource in input.get('source',[]):
+                    for file in self.properties.get('input_files',[]):
+                        if inputSource['name'] == file.get('workflow_argument_name'):
+                            input['run_data'] = {
+                                "file" : request.embed('/' + file.get('value'), '@@embedded')
+                            }
+
+        return analysis_steps
 
 
 @collection(

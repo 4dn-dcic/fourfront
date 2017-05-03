@@ -190,6 +190,9 @@ export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem){
 
 }
 
+export function addRunDataToAnalysisSteps(analysis_steps, workflow_run){
+    
+}
 
 export class Graph extends React.Component {
 
