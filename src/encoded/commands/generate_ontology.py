@@ -436,10 +436,6 @@ def connect2server(keyfile, keyname, app=None):
         assert app is not None
         s3bucket = app.registry.settings['system_bucket']
         keyfile = get_key(bucket=s3bucket)
-        # force server to be localhost, cause this run on
-        # aws potentially before load balancer has switch over
-        keyfile['default']['server'] = 'http://localhost'
-        keyname = 'default'
 
     key = FDN_Key(keyfile, keyname)
     connection = FDN_Connection(key)
@@ -607,7 +603,8 @@ def download_and_process_owl(ontology, connection, terms):
     synonym_terms = get_synonym_term_uris(connection, ontology)
     definition_terms = get_definition_term_uris(connection, ontology)
     data = Owler(ontology['download_url'])
-    terms = {}
+    if not terms:
+        terms = {}
     for class_ in data.allclasses:
         if isBlankNode(class_):
             terms = process_blank_node(class_, data, terms)

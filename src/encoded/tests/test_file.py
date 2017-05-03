@@ -254,3 +254,23 @@ def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq_
         assert True
     else:
         assert False
+
+
+def test_workflowrun_output_rev_link(testapp, fastq_json, workflow_run_json):
+    res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
+    workflow_run_json['output_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
+
+    new_file = testapp.get(res['@id']).json
+    assert new_file['workflow_run_outputs'][0]['@id'] == res2['@id']
+
+
+def test_workflowrun_input_rev_link(testapp, fastq_json, workflow_run_json):
+    res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
+    workflow_run_json['input_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
+
+    new_file = testapp.get(res['@id']).json
+    assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
+
+
