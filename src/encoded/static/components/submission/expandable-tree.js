@@ -102,6 +102,10 @@ class SubmissionLeaf extends React.Component{
         }else{
             if(masterValid[key] == 0){
                 style.backgroundColor = '#fcd19c';
+            }else if(masterValid[key] == 1){
+                style.backgroundColor = '#e2b6b6';
+            }else if(masterValid[key] == 2){
+                style.backgroundColor = '#acd1ec';
             }
             if(parseInt(key) === parseInt(this.props.currKey)){
                 style.fontWeight = "bold";

@@ -38,7 +38,9 @@ export default class SubmissionView extends React.Component{
         'keyIter': 0, // serves as key versions for child objects. 0 is reserved for principal
         'currKey': null, // start with viewing principle object (key = 0),
         'keyHierarchy': {},
-        'navigationIsOpen': false
+        'navigationIsOpen': false,
+        'processingFetch': false,
+        'errorCount': 0
     }
 
     // run async request to get frame=object context to fill the forms
@@ -148,6 +150,10 @@ export default class SubmissionView extends React.Component{
         typesCopy[keyIdx] = type;
         contextCopy[keyIdx] = buildContext({}, this.props.schemas[type]);
         masterDisplay[keyIdx] = 'New ' + type + ' ' + keyIdx;
+        // get rid of any hanging errors
+        for(var i=0; i<this.state.errorCount; i++){
+            Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
+        }
         this.setState({
             'masterContext': contextCopy,
             'masterValid': validCopy,
@@ -156,7 +162,8 @@ export default class SubmissionView extends React.Component{
             'currKey': keyIdx,
             'keyIter': keyIdx,
             'keyHierarchy': newHierarchy,
-            'processingFetch': false
+            'processingFetch': false,
+            'errorCount': 0
         });
     }
 
@@ -200,100 +207,129 @@ export default class SubmissionView extends React.Component{
     setMasterState = (key, value) => {
         var newState = this.state;
         if(_.contains(Object.keys(newState),key)){
+            if(key === 'currKey' && value !== this.state.currKey){
+                // get rid of any hanging errors
+                for(var i=0; i<this.state.errorCount; i++){
+                    Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
+                    newState.errorCount = 0;
+                }
+                newState.processingFetch = false;
+            }
             newState[key] = value;
             this.setState({newState});
         }
     }
 
-    // generateValidationButton(){
-    //     var style={'width':'160px'};
-    //     if(this.state.md5Progress && this.state.md5Progress != 100){
-    //         return(
-    //             <Button bsStyle="info" style={style} disabled>
-    //                 {'Calculating md5...'}
-    //             </Button>
-    //         );
-    //     }else if(this.state.validated == 1){
-    //         return(
-    //             <Button bsStyle="info" style={style} disabled>
-    //                 {'Validated'}
-    //             </Button>
-    //         );
-    //     }else if(this.state.processingFetch){
-    //         return(
-    //             <Button bsStyle="info" style={style} disabled>
-    //                 <i className="icon icon-spin icon-circle-o-notch"></i>
-    //             </Button>
-    //         );
-    //     }else if (this.state.validated == 0){
-    //         return(
-    //             <Button bsStyle="info" style={style} onClick={this.testPostNewContext}>
-    //                 {'Test object validity'}
-    //             </Button>
-    //         );
-    //     }else{
-    //         return(
-    //             <Button bsStyle="danger" style={style} onClick={this.testPostNewContext}>
-    //                 {'Failed permissions'}
-    //             </Button>
-    //         );
-    //     }
-    // }
-    //
-    // generatePostButton(){
-    //     var style={'marginLeft':'30px','width':'160px'};
-    //     if(this.state.validated == 1 && !this.state.processingFetch){
-    //         return(
-    //             <Button bsStyle="success" style={style} onClick={this.realPostNewContext}>
-    //                 {this.props.edit ? 'Edit object' : 'Create object'}
-    //             </Button>
-    //         );
-    //     }else if(this.state.validated == 1 && this.state.processingFetch){
-    //         return(
-    //             <Button bsStyle="success" style={style} disabled>
-    //                 <i className="icon icon-spin icon-circle-o-notch"></i>
-    //             </Button>
-    //         );
-    //     }else{
-    //         return(
-    //             <Button bsStyle="success" style={style} disabled>
-    //                 {this.props.edit ? 'Edit object' : 'Create object'}
-    //             </Button>
-    //         );
-    //     }
-    // }
-    //
-    // testPostNewContext = (e) => {
-    //     e.preventDefault();
-    //     this.executePost(true);
-    // }
-    //
-    // realPostNewContext = (e) => {
-    //     e.preventDefault();
-    //     this.executePost();
-    // }
-    //
-    executePost = (test=false) => {
+    generateValidationButton(){
+        var validity = this.state.masterValid[this.state.currKey];
+        var style={'marginLeft':'10px', 'marginBottom':'10px', 'width':'100px'};
+        // if(this.state.md5Progress && this.state.md5Progress != 100){
+        //     return(
+        //         <Button bsStyle="info" style={style} disabled>
+        //             {'Calculating md5...'}
+        //         </Button>
+        //     );
+        // }
+        if(validity == 2){
+            return(
+                <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
+                    {'Validated'}
+                </Button>
+            );
+        }else if(this.state.processingFetch){
+            return(
+                <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
+                    <i className="icon icon-spin icon-circle-o-notch"></i>
+                </Button>
+            );
+        }else if (validity == 0){
+            return(
+                <Button bsSize="xsmall" bsStyle="info" style={style} onClick={this.testPostNewContext}>
+                    {'Validate'}
+                </Button>
+            );
+        }else{
+            return(
+                <Button bsSize="xsmall" bsStyle="danger" style={style} onClick={this.testPostNewContext}>
+                    {'Validate'}
+                </Button>
+            );
+        }
+    }
+
+    generatePostButton(){
+        var validity = this.state.masterValid[this.state.currKey];
+        var style={'marginLeft':'10px', 'marginBottom':'10px', 'width':'100px'};
+        if(validity == 2 && !this.state.processingFetch){
+            return(
+                <Button bsSize="xsmall" bsStyle="success" style={style} onClick={this.realPostNewContext}>
+                    {'Submit'}
+                </Button>
+            );
+        }else if(validity == 2 && this.state.processingFetch){
+            return(
+                <Button bsSize="xsmall" bsStyle="success" style={style} disabled>
+                    <i className="icon icon-spin icon-circle-o-notch"></i>
+                </Button>
+            );
+        }else if(validity == 3){
+            return(
+                <Button bsSize="xsmall" bsStyle="success" style={style} disabled>
+                    {'Submitted'}
+                </Button>
+            );
+        }else{
+            return(
+                <Button bsSize="xsmall" bsStyle="success" style={style} disabled>
+                    {'Submit'}
+                </Button>
+            );
+        }
+    }
+
+    testPostNewContext = (e) => {
+        e.preventDefault();
+        this.executePost(this.state.currKey, true);
+    }
+
+    realPostNewContext = (e) => {
+        e.preventDefault();
+        this.executePost(this.state.currKey);
+    }
+
+    // must remove nulls, which are used to represent an empty value in the
+    // creation process
+    removeNullsFromContext = (inKey) => {
+        var finalizedContext = JSON.parse(JSON.stringify(this.state.masterContext[inKey]));
+        var noNulls = removeNulls(finalizedContext);
+        return noNulls;
+    }
+
+    executePost = (inKey, test=false) => {
         // function to test a POST of the data or actually POST it.
         // validates if test=true, POSTs if test=false.
         var stateToSet = {}; // hold state
+        var masterValid = this.state.masterValid;
+        var currType = this.state.masterTypes[inKey];
+        var currSchema = this.props.schemas[currType];
+        var currContext = this.state.masterContext[inKey];
         // this will always be reset when stateToSet is implemented
         stateToSet.processingFetch = false;
-        // get rid of any hanging errors
-        for(var i=0; i<this.state.errorCount; i++){
-            Alerts.deQueue({ 'title' : "Object validation error " + parseInt(i + 1)});
-            stateToSet.errorCount = 0;
-        }
-        var objType = this.props.context['@type'][0] || 'Item';
+        stateToSet.masterValid = masterValid;
         var lab;
         var award;
-        var finalizedContext = JSON.parse(JSON.stringify(this.state.masterContext[this.state.currKey]));
+        var finalizedContext = this.removeNullsFromContext(inKey);
+        // get rid of any hanging errors
+        for(var i=0; i<this.state.errorCount; i++){
+            Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
+            stateToSet.errorCount = 0;
+        }
         console.log('contextToPOST:', finalizedContext);
         this.setState({'processingFetch': true});
         ajax.promise('/me?frame=embedded').then(data => {
             if(!data || !data.submits_for || data.submits_for.length == 0){
                 console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
-                stateToSet.validated = 2;
+                masterValid[inKey] = 4;
                 this.setState(stateToSet);
                 return;
             }
@@ -303,102 +339,99 @@ export default class SubmissionView extends React.Component{
             ajax.promise(lab).then(lab_data => {
                 if(!lab || !lab_data.awards || lab_data.awards.length == 0){
                     console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
-                    stateToSet.validated = 2;
+                    masterValid[inKey] = 1;
                     this.setState(stateToSet);
                     return;
                 }
                 // should we really always use the first award?
                 award = lab_data.awards[0];
                 // if editing, use pre-existing award, lab, and submitted_by
-                if(this.props.edit && this.state.newContext.award && this.state.newContext.lab){
-                    finalizedContext.award = this.state.newContext.award;
-                    finalizedContext.lab = this.state.newContext.lab;
+                if(this.props.edit && currContext.award && currContext.lab){
+                    finalizedContext.award = currContext.award;
+                    finalizedContext.lab = currContext.lab;
                     // an admin is editing. Use the pre-existing submitted_by
                     // otherwise, permissions won't let us change this field
                     if(data.groups && _.contains(data.groups, 'admin')){
-                        finalizedContext.submitted_by = this.state.newContext.submitted_by;
+                        finalizedContext.submitted_by = currContext.submitted_by;
                     }
                 }else{ // use info of person creating/cloning
-                    if(this.state.thisSchema.properties.award){
+                    if(currSchema.properties.award){
                         finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
                     }
-                    if(this.state.thisSchema.properties.lab){
+                    if(currSchema.properties.lab){
                         finalizedContext.lab = lab;
                     }
                 }
                 // if testing validation, use check_only=True (see /types/base.py)
-                var destination = test ? '/' + objType + '/?check_only=True' : '/' + objType;
+                var destination = test ? '/' + currType + '/?check_only=True' : '/' + currType;
                 var actionMethod = 'POST';
                 // see if this is not a test and we're editing
                 if(!test && this.props.edit){
                     actionMethod = 'PUT';
-                    destination = this.state.newContext['@id'];
+                    destination = currContext['@id'];
                     // must add uuid (and accession, if available) to PUT body
-                    finalizedContext.uuid = this.state.newContext.uuid;
+                    finalizedContext.uuid = currContext.uuid;
                     // not all objects have accessions
-                    if(this.state.newContext.accession){
-                        finalizedContext.accession = this.state.newContext.accession;
+                    if(currContext.accession){
+                        finalizedContext.accession = currContext.accession;
                     }
                 }
-                this.context.fetch(destination, {
-                    method: actionMethod,
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(finalizedContext)
-                })
-                .then(response => {
-                    if (response.status && response.status !== 'success') throw response;
-                    return response;
-                })
-                .then(response => {
-                    var response_data;
-                    if(test){
-                        console.log('OBJECT SUCCESSFULLY TESTED!');
-                        stateToSet.validated = 1;
+                var payload = JSON.stringify(finalizedContext);
+                ajax.promise(destination, actionMethod, {}, payload).then(response => {
+                    if (response.status && response.status !== 'success'){ // error
+                        masterValid[inKey] = 1;
+                        console.log('ERROR IN OBJECT VALIDATION!');
+                        var errorList = response.errors || [response.detail] || [];
+                        // make an alert for each error description
+                        stateToSet.errorCount = errorList.length;
+                        for(var i=0; i<errorList.length; i++){
+                            var detail = errorList[i].description || errorList[i] || "Unidentified error";
+                            if(errorList[i].name && errorList[i].name.length > 0){
+                                detail += ('. See ' + errorList[i].name[0] + ' in ' + this.state.masterDisplay[inKey]);
+                            }else{
+                                detail += ('. See ' + this.state.masterDisplay[inKey]);
+                            }
+                            Alerts.queue({
+                                'title' : "Validation error " + parseInt(i + 1),
+                                'message': detail,
+                                'style': 'danger'
+                            });
+                        }
+                        setTimeout(layout.animateScrollTo(0), 100);
                         this.setState(stateToSet);
-                        return;
                     }else{
-                        response_data = response['@graph'][0];
-                        if(!this.props.edit){
-                            destination = response_data['@id'];
+                        var response_data;
+                        if(test){
+                            console.log('OBJECT SUCCESSFULLY TESTED!');
+                            masterValid[inKey] = 2;
+                            this.setState(stateToSet);
+                            return;
+                        }else{
+                            response_data = response['@graph'][0];
+                            if(!this.props.edit){
+                                destination = response_data['@id'];
+                            }
+                        }
+                        // handle file upload if this is a file
+                        if(this.state.file && response_data['upload_credentials']){
+                            // add important info to result from finalizedContext
+                            // that is not added from /types/file.py get_upload
+                            var creds = response_data['upload_credentials'];
+                            var upload_manager = s3UploadFile(this.state.file, creds);
+                            var upload_info = {
+                                'context': response_data,
+                                'manager': upload_manager
+                            };
+                            // Passes upload_manager to uploads.js through app.js
+                            this.props.updateUploads(destination, upload_info);
+                            alert('Success! Navigating to the uploads page.');
+                            this.props.navigate('/uploads');
+                        }else{
+                            console.log('ACTION SUCCESSFUL!');
+                            alert('Success! Navigating to the object page.');
+                            this.props.navigate(destination);
                         }
                     }
-                    // handle file upload if this is a file
-                    if(this.state.file && response_data['upload_credentials']){
-                        // add important info to result from finalizedContext
-                        // that is not added from /types/file.py get_upload
-                        var creds = response_data['upload_credentials'];
-                        var upload_manager = s3UploadFile(this.state.file, creds);
-                        var upload_info = {
-                            'context': response_data,
-                            'manager': upload_manager
-                        };
-                        // Passes upload_manager to uploads.js through app.js
-                        this.props.updateUploads(destination, upload_info);
-                        alert('Success! Navigating to the uploads page.');
-                        this.context.navigate('/uploads');
-                    }else{
-                        console.log('ACTION SUCCESSFUL!');
-                        alert('Success! Navigating to the object page.');
-                        this.context.navigate(destination);
-                    }
-                }, error => {
-                    stateToSet.validated = 0;
-                    console.log('ERROR IN OBJECT VALIDATION!');
-                    var errorList = error.errors || [error.detail] || [];
-                    // make an alert for each error description
-                    stateToSet.errorCount = errorList.length;
-                    for(var i=0; i<errorList.length; i++){
-                        var detail = errorList[i].description || errorList[i] || "Unidentified error";
-                        if(errorList[i].name && errorList[i].name.length > 0){
-                            detail += ('. See: ' + errorList[i].name[0]);
-                        }
-                        Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': detail, 'style': 'danger' });
-                    }
-                    setTimeout(layout.animateScrollTo(0), 100);
-                    this.setState(stateToSet);
                 });
             });
         });
@@ -437,7 +470,11 @@ export default class SubmissionView extends React.Component{
                         />
                     </div>
                     <div className="col-sm-7 col-md-7 col-lg-7">
-                        <h3 style={{'textAlign':'right', 'paddingRight':'10px'}}>{'Working on: ' + currObjDisplay}</h3>
+                        <div className="pull-right" style={{'marginTop':'10px'}}>
+                            <h3 style={{'display':'inline'}}>{'Working on: ' + currObjDisplay}</h3>
+                            {this.generateValidationButton()}
+                            {this.generatePostButton()}
+                        </div>
                     </div>
                 </div>
                 <RoundOneObject
@@ -1010,6 +1047,17 @@ var trimHierarchy = function myself(hierarchy, keyIdx){
         });
     }
     return hierarchy;
+}
+
+var removeNulls = function myself(context){
+    Object.keys(context).forEach(function(key, index){
+        if(context[key] === null){
+            delete context[key];
+        }else if(context[key] instanceof Object){
+            context[key] = myself(context[key]);
+        }
+    });
+    return context;
 }
 
 class InfoIcon extends React.Component{
