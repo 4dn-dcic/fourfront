@@ -16,7 +16,8 @@ describe('Testing experiments-table.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        ExperimentsTable = require('../experiments-table').ExperimentsTable;
+
+        ExperimentsTable = require('../experiments-table').default;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
@@ -43,6 +44,7 @@ describe('Testing experiments-table.js', function() {
                             replicateExpsArray={context.replicate_exps}
                             experimentSetType={context.experimentset_type}
                             parentController={this}
+                            width={960}
                         />
                     </div>
                 );
@@ -80,10 +82,12 @@ describe('Testing experiments-table.js', function() {
 
     it('Header columns have width styles which fit available width', function() {
         var headers = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');
-        var availableWidthForTests = 960; // Defined as a fallback in ExperimentsTable.prototype.updateColumnWidths.
-        var orderedHeaderWidths = _.pluck(headers, 'style').map(function(hStyle, i){
-            var w = parseInt(hStyle._values.width); 
-            if (Number.isNaN(w)) return 120; // Default
+        var availableWidthForTests = 960;
+        var orderedHeaderWidths = headers.map(function(h, i){
+            var w = parseInt(h.style._values.width); 
+            if (Number.isNaN(w)){
+                return ExperimentsTable.initialColumnWidths(h.getAttribute('data-column-class')) || 120;
+            }
             return w;
         });
 
@@ -99,8 +103,8 @@ describe('Testing experiments-table.js', function() {
         var headerWidths = _.object(
             _.map(headers, function(h, i){
                 var w = parseInt(h.style._values.width);
-                if (Number.isNaN(w)) w = 120; // Default
                 var columnClassName = h.getAttribute('data-column-class');
+                if (Number.isNaN(w)) w = ExperimentsTable.initialColumnWidths(columnClassName) || 120; // Default
                 return [columnClassName, w];
             })
         ); // Returns { 'biosample' : 201, 'experiment' : 253, ... }
