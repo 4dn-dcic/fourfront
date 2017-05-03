@@ -21,7 +21,7 @@ if (env === 'production') {
         }
     }));
     // uglify code for production
-    plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
+    plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true, compress: { warnings: false}}));
     // add chunkhash to chunk names for production only (it's slower)
     chunkFilename = '[name].[chunkhash].js';
     devTool = 'source-map';
