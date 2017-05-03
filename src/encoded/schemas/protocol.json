@@ -32,15 +32,11 @@
             "description": "The category that best describes the protocol.",
             "type": "string",
             "enum": [
-                "experimental protocol",
-                "cell growth protocol",
-                "tissue preparation protocol",
-                "cell differentiation protocol",
-                "treatment protocol",
-                "modification protocol",
-                "transfection protocol",
-                "cell isolation protocol",
-                "other"
+                "Cell culture protocol",
+                "Cell sorting protocol",
+                "Biosample preparation protocol",
+                "Experimental protocol",
+                "Other"
             ]
         }
     }
