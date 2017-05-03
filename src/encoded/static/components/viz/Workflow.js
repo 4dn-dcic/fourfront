@@ -10,6 +10,7 @@ var vizUtil = require('./utilities');
 import { console, object, isServerSide, expFxn, Filters, layout, navigate, ajax } from './../util';
 var ReactTooltip = require('react-tooltip');
 import { ItemDetailList } from './../item-pages/components';
+import { getTitleStringFromContext } from './../item-pages/item';
 
 
 export function parseAnalysisSteps(analysis_steps){
@@ -355,7 +356,12 @@ export class Graph extends React.Component {
 class DetailPane extends React.Component {
 
     static defaultProps = {
-        'minHeight' : 500
+        'minHeight' : 500,
+        'keyTitleDescriptionMap' : {
+            '@id' : {
+                'title' : 'Link'
+            }
+        }
     }
 
     constructor(props){
@@ -366,16 +372,31 @@ class DetailPane extends React.Component {
 
     body(){
         var node = this.props.selectedNode;
+        
         if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file['@id']){
+            // File
+            var file = node.meta.run_data.file;
+            var fileTitle = getTitleStringFromContext(file);
             return (
-                <ItemDetailList context={node.meta.run_data.file} schemas={this.props.schemas} minHeight={this.props.minHeight} />
+                <div>
+                    <div className="information">
+                        <a href={file['@id']}>{ fileTitle }</a>
+                    </div>
+                    <hr/>
+                    <h4 className="text-400">File Details</h4>
+                    <ItemDetailList
+                        context={node.meta.run_data.file}
+                        schemas={this.props.schemas}
+                        minHeight={this.props.minHeight}
+                    />
+                </div>
             )
         }
         if (node.meta && node.meta.run_data && (typeof node.meta.run_data.value === 'number' || typeof node.meta.run_data.value === 'string')){
             return (
                 <div style={typeof this.props.minHeight === 'number' ? { minHeight : this.props.minHeight } : null}>
                     <h4 className="text-400">
-                        <small>Value: </small> { node.meta.run_data.value }
+                        <small>Value: </small> <code>{ node.meta.run_data.value }</code>
                     </h4>
                 </div>
             )

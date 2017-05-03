@@ -130,48 +130,6 @@ class SubItemView extends React.Component {
  * @memberof module:item-pages/components.ItemDetailList
  */
 export class Detail extends React.Component {
-
-    static propTypes = {
-        'schemas' : PropTypes.object.isRequired,
-        'context' : PropTypes.object.isRequired,
-        'keyTitleDescriptionMap' : PropTypes.object
-    }
-
-    static defaultProps = {
-        'keyTitleDescriptionMap' : null,
-        'excludedKeys' : [
-            '@context', 'actions', 'audit',
-            // Visible elsewhere on page
-            'lab', 'award', 'description',
-            '@id', 'link_id', 'display_title'
-        ],
-        'stickyKeys' : [
-            // Experiment Set
-            'experimentset_type', 'date_released',
-            // Experiment
-            'experiment_type', 'experiment_summary', 'experiment_sets', 'files', 'filesets',
-            'protocol', 'biosample', 'digestion_enzyme', 'digestion_temperature',
-            'digestion_time', 'ligation_temperature', 'ligation_time', 'ligation_volume',
-            'tagging_method',
-            // Biosample
-            'biosource','biosource_summary','biosample_protocols','modifications_summary',
-            'treatments_summary',
-            // File
-            'file_type', 'file_format', 'filename', 'href', 'notes', 'flowcell_details',
-            // Lab
-            'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',
-            // Award
-            'end_date', 'project', 'uri',
-            // Document
-            'attachment',
-            // Things to go at bottom consistently
-            'aliases', 
-        ],
-        'alwaysCollapsibleKeys' : [
-            '@type', 'accession', 'schema_version', 'uuid', 'replicate_exps', 'dbxrefs', 'status', 'external_references', 'date_created'
-        ],
-        'open' : null
-    }
     
     /**
      * Formats the correct display for each metadata field.
@@ -298,6 +256,48 @@ export class Detail extends React.Component {
 
     static SubItem = SubItem
     static SubItemView = SubItemView
+
+    static propTypes = {
+        'schemas' : PropTypes.object.isRequired,
+        'context' : PropTypes.object.isRequired,
+        'keyTitleDescriptionMap' : PropTypes.object
+    }
+
+    static defaultProps = {
+        'keyTitleDescriptionMap' : null,
+        'excludedKeys' : [
+            '@context', 'actions', 'audit',
+            // Visible elsewhere on page
+            'lab', 'award', 'description',
+            '@id', 'link_id', 'display_title'
+        ],
+        'stickyKeys' : [
+            // Experiment Set
+            'experimentset_type', 'date_released',
+            // Experiment
+            'experiment_type', 'experiment_summary', 'experiment_sets', 'files', 'filesets',
+            'protocol', 'biosample', 'digestion_enzyme', 'digestion_temperature',
+            'digestion_time', 'ligation_temperature', 'ligation_time', 'ligation_volume',
+            'tagging_method',
+            // Biosample
+            'biosource','biosource_summary','biosample_protocols','modifications_summary',
+            'treatments_summary',
+            // File
+            'file_type', 'file_format', 'filename', 'href', 'notes', 'flowcell_details',
+            // Lab
+            'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',
+            // Award
+            'end_date', 'project', 'uri',
+            // Document
+            'attachment',
+            // Things to go at bottom consistently
+            'aliases', 
+        ],
+        'alwaysCollapsibleKeys' : [
+            '@type', 'accession', 'schema_version', 'uuid', 'replicate_exps', 'dbxrefs', 'status', 'external_references', 'date_created'
+        ],
+        'open' : null
+    }
 
     render(){
         var context = this.props.context;
