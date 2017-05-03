@@ -406,7 +406,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             );
         }
 
-        console.log('SCHEMAS AT RENDER', this.props.schemas);
+        if (this.props.debug) console.log('FacetCharts SCHEMAS AT RENDER', this.props.schemas);
 
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
