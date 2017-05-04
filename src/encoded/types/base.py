@@ -26,6 +26,7 @@ from snovault.validators import (
     validate_item_content_put,
     validate_item_content_patch
 )
+from snovault.interfaces import CONNECTION
 from snovault.etag import if_match_tid
 
 
@@ -93,16 +94,17 @@ ALLOW_SUBMITTER_ADD = [
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
-    """smth."""
+    """filter out status that shouldn't be visible.
+    Also convert path to str as functions like rev_links return uuids"""
     if include is not None:
         return [
             path for path in paths
-            if traverse(request.root, path)['context'].__json__(request).get('status') in include
+            if traverse(request.root, str(path))['context'].__json__(request).get('status') in include
         ]
     else:
         return [
             path for path in paths
-            if traverse(request.root, path)['context'].__json__(request).get('status') not in exclude
+            if traverse(request.root, str(path))['context'].__json__(request).get('status') not in exclude
         ]
 
 
@@ -224,6 +226,7 @@ class Item(snovault.Item):
         # for file
         'obsolete': ONLY_ADMIN_VIEW,
         'uploading': ALLOW_LAB_SUBMITTER_EDIT,
+        'to be uploaded by workflow': ALLOW_LAB_SUBMITTER_EDIT,
         'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
         'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
 
@@ -238,6 +241,7 @@ class Item(snovault.Item):
         self.update_embeds()
         # update registry embedded
         self.registry.embedded = self.embedded;
+
 
     @property
     def __name__(self):
@@ -373,6 +377,11 @@ class Item(snovault.Item):
                     self.calc_props_schema[calc_props_key] = calc_props_val.schema
         total_schema.update(self.calc_props_schema)
         self.embedded = add_default_embeds(self.embedded, total_schema)
+
+    def rev_link_atids(self, request, rev_name):
+        conn = request.registry[CONNECTION]
+        return [ request.resource_path(conn[uuid]) for uuid in
+                paths_filtered_by_status(request, self.get_rev_links(rev_name))]
 
 
 class SharedItem(Item):

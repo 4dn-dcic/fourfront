@@ -17,7 +17,7 @@
             "description": "The local file name used at time of submission. Must be alphanumeric, with the exception of the following special characters: '+=,.@-_'",
             "s3Upload": true,
             "type": "string",
-            "pattern": "^[\\w+=,.@-]*$",
+            "pattern": "^[\\w+=,.@-_]*$",
             "exclude_from": ["submit4dn"],
             "comment": "ultimately uploaded filename will be uuid/accession, but filename with no directory will be store in metadata as passed in"
         },
@@ -142,13 +142,15 @@
                 "revoked",
                 "released",
                 "in review by project",
-                "released to project"
+                "released to project",
+                "to be uploaded by workflow"
             ]
         },
         "quality_metric": {
           "type": "string",
           "title": "Quality metric",
           "description": "The associated qc reports",
+          "exclude_from": ["submit4dn", "FFedit-create"],
           "linkTo": "QualityMetric"
         }
     },

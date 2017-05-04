@@ -57,7 +57,7 @@ var Aggregator = module.exports = React.createClass({
         if (this.props.debug) console.log("Aggregator Next Props > ", nextProps);
 
         var doFieldsDiffer = aggregationFxn.doFieldsDiffer(nextProps.fields, this.props.fields);
-        console.log('do fields differ', doFieldsDiffer);
+        if (this.props.debug) console.log('Aggregator Do Next Props fields differ', doFieldsDiffer);
         if (
             (nextProps.showType !== this.props.showType && nextProps.showType === 'all') ||
             (nextProps.filteredExperiments !== this.props.filteredExperiments && !nextProps.filteredExperiments)
