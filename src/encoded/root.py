@@ -190,12 +190,32 @@ def health_check(config):
         '/health'
     )
     def health_page_view(request):
+
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
         settings = request.registry.settings
+
+        # how much stuff in database
         db = request.registry['dbsession']
-        count = db.scalar("""SELECT count(*) FROM "propsheets";""")
+        db_count = db.scalar("""SELECT count(*) FROM "propsheets";""")
+
+        # how much stuff in elasticsearch
         es_index = settings.get('snovault.elasticsearch.index')
+        es = request.registry['elasticsearch']
+        query = {"aggs":
+                 { "count_by_type":
+                  {"terms": { "field": "_type"}}
+                 }
+                }
+        es_count = es.search(index=es_index, body=query, size=0)
+
+        # when ontologies were imported
+        try:
+            si =  request.embed('/sysinfos/ffsysinfo')
+            ont_date = si.json['ontology_updated']
+        except:  # pylint:disable
+            ont_date = "Never Generated"
+
         responseDict = {
             "file_upload_bucket" : settings.get('file_upload_bucket'),
             "blob_bucket" : settings.get('blob_bucket'),
@@ -203,13 +223,14 @@ def health_check(config):
             "elasticserach" : settings.get('elasticsearch.server') + '/' +es_index,
             "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
-            'es_count': request.registry['elasticsearch'].count(index=es_index),
-            'db_count': count,
+            'ontology_updated': ont_date,
             "@type" : [ "Health", "Portal" ],
             "@context" : "/health",
             "@id" : "/health",
             "content" : None,
-            "display_title" : "Health Status"
+            "display_title" : "Health Status",
+            'es_count': es_count,
+            'db_count': db_count,
         }
 
         return responseDict

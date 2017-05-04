@@ -49,7 +49,7 @@
         "biosample_protocols": {
             "title": "Biosample Protocols",
             "description": "Information about biosample preparation protocols.",
-            "comment": "eg. cell culture protocol info",
+            "comment": "eg. treatment and/or modifications protocols",
             "type": "array",
             "items": {
                 "title": "Protocols",

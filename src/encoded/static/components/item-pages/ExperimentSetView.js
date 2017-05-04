@@ -5,7 +5,7 @@ var _ = require('underscore');
 var Panel = require('react-bootstrap').Panel;
 var { ajax, console, DateUtility, object, isServerSide } = require('./../util');
 var globals = require('./../globals');
-var { ExperimentsTable } = require('./../experiments-table');
+import ExperimentsTable from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditView } from './components';
 var FacetList = require('./../facetlist');
 

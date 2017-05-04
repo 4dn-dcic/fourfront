@@ -556,7 +556,6 @@ var Search = search.Search = React.createClass({
 
     render: function() {
         var context = this.props.context;
-        console.log(JSON.stringify(this.props.context));
         var results = context['@graph'];
         var notification = context['notification'];
         var searchBase = url.parse(this.context.location_href).search || '';

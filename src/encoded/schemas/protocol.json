@@ -27,15 +27,17 @@
             "type": "string",
             "default": ""
         },
-        "protocol_documents": {
-          "title": "This Field Will be Deleted After Update",
-          "type": "array",
-          "items": {
-            "title": "Protocol Document",
-            "description": "A protocol specific document.",
+        "protocol_type": {
+            "title": "Type",
+            "description": "The category that best describes the protocol.",
             "type": "string",
-            "linkTo": "Document"
-          }
-       }
+            "enum": [
+                "Cell culture protocol",
+                "Cell sorting protocol",
+                "Biosample preparation protocol",
+                "Experimental protocol",
+                "Other"
+            ]
+        }
     }
 }

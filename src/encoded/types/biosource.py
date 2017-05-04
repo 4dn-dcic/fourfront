@@ -4,8 +4,18 @@ from snovault import (
     collection,
     load_schema,
 )
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_patch,
+    validate_item_content_put,
+)
+from snovault.etag import if_match_tid
+from pyramid.view import view_config
 from .base import (
-    Item
+    Item,
+    collection_add,
+    get_item_if_you_can,
+    item_edit,
     # paths_filtered_by_status,
 )
 
@@ -27,57 +37,53 @@ class Biosource(Item):
 
     def _update(self, properties, sheets=None):
         name2info = {
-            'H1-hESC': ['Tier 1', 'EFO_0003042'],
-            'GM12878': ['Tier 1', 'EFO_0002784'],
-            'IMR-90': ['Tier 1', 'EFO_0001196'],
-            'HFF-hTERT': ['Tier 1', None],
-            'F121-9-CASTx129': ['Tier 2', None],
-            'K562': ['Tier 2', 'EFO_0002067'],
-            'HEK293': ['Tier 2', 'EFO_0001182'],
-            'HAP-1': ['Tier 2', 'EFO_0007598'],
-            'H9': ['Tier 2', 'EFO_0003045'],
-            'U2OS': ['Tier 2', 'EFO_0002869'],
-            'RPE-hTERT': ['Tier 2', None],
-            'WTC-11': ['Tier 2', None],
-            'F123-CASTx129': ['Tier 2', None],
-            'HHF': ['Unclassified', None],
-            'HHFc6': ['Tier 1', None],
-            "CC-2551": ['Unclassified', None],
-            "CH12-LX": ['Unclassified', 'EFO:0005233'],
-            "KBM-7": ['Unclassified', 'EFO_0005903'],
-            "192627": ['Unclassified', None],
-            "CC-2517": ['Unclassified', 'EFO:0002795'],
-            "HeLa-S3": ['Unclassified', 'EFO:0002791'],
-            "SK-N-DZ": ['Unclassified', 'EFO:0005721'],
-            "A549": ['Unclassified', 'EFO:0001086'],
-            "NCI-H460": ['Unclassified', 'EFO:0003044'],
-            "SK-N-MC": ['Unclassified', 'EFO:0002860'],
-            "T47D": ['Unclassified', 'EFO:0001247'],
-            "SK-MEL-5": ['Unclassified', 'EFO:0005720'],
-            "G401": ['Unclassified', 'EFO:0002179'],
-            "Panc1": ['Unclassified', 'EFO:0002713'],
-            "Caki2": ['Unclassified', 'EFO:0002150'],
-            "LNCaP clone FGC": ['Unclassified', 'EFO:0005726'],
-            "RPMI-7951": ['Unclassified', 'EFO:0005712'],
-            "SJCRH30": ['Unclassified', 'EFO:0005722'],
-            "GM19238": ['Unclassified', 'EFO:0002788'],
-            "GM19239": ['Unclassified', 'EFO:0002789'],
-            "GM19240": ['Unclassified', 'EFO:0002790'],
-            "HG00731": ['Unclassified', None],
-            "HG00732": ['Unclassified', None],
-            "HG00733": ['Unclassified', None],
-            "HG00512": ['Unclassified', None],
-            "HG00513": ['Unclassified', None],
-            "HG00514": ['Unclassified', None],
+            'H1-hESC': 'EFO_0003042',
+            'GM12878': 'EFO_0002784',
+            'IMR-90': 'EFO_0001196',
+            'HFF-hTERT': None,
+            'F121-9-CASTx129': None,
+            'K562': 'EFO_0002067',
+            'HEK293': 'EFO_0001182',
+            'HAP-1': 'EFO_0007598',
+            'H9': 'EFO_0003045',
+            'U2OS': 'EFO_0002869',
+            'RPE-hTERT': None,
+            'WTC-11': None,
+            'F123-CASTx129': None,
+            'HCT116': 'EFO:0002824',
+            "CC-2551": None,
+            "CH12-LX": 'EFO:0005233',
+            "KBM-7": 'EFO_0005903',
+            "192627": None,
+            "CC-2517": 'EFO:0002795',
+            "HeLa-S3": 'EFO:0002791',
+            "SK-N-DZ": 'EFO:0005721',
+            "A549": 'EFO:0001086',
+            "NCI-H460": 'EFO:0003044',
+            "SK-N-MC": 'EFO:0002860',
+            "T47D": 'EFO:0001247',
+            "SK-MEL-5": 'EFO:0005720',
+            "G401": 'EFO:0002179',
+            "Panc1": 'EFO:0002713',
+            "Caki2": 'EFO:0002150',
+            "LNCaP clone FGC": 'EFO:0005726',
+            "RPMI-7951": 'EFO:0005712',
+            "SJCRH30": 'EFO:0005722',
+            "GM19238": 'EFO:0002788',
+            "GM19239": 'EFO:0002789',
+            "GM19240": 'EFO:0002790',
+            "HG00731": None,
+            "HG00732": None,
+            "HG00733": None,
+            "HG00512": None,
+            "HG00513": None,
+            "HG00514": None,
         }
         if 'cell_line' in properties:
             if properties['cell_line'] in name2info:
-                termid = None
-                info = name2info.get(properties['cell_line'])
-                if info is not None:
-                    termid = info[1]
-                    if termid is not None:
-                        properties['cell_line_termid'] = termid
+                termid = name2info.get(properties['cell_line'])
+                if termid is not None:
+                    properties['cell_line_termid'] = termid
 
         super(Biosource, self)._update(properties, sheets)
 
@@ -116,3 +122,59 @@ class Biosource(Item):
     def display_title(self, request, biosource_type, individual=None,
                       cell_line=None, cell_line_tier=None, tissue=None):
         return self.biosource_name(request, biosource_type, individual, cell_line, cell_line_tier, tissue)
+
+    class Collection(Item.Collection):
+        pass
+
+
+# validator for tissue field
+def validate_biosource_tissue(context, request):
+    # import pdb; pdb.set_trace()
+    data = request.json
+    if 'tissue' not in data:
+        return
+    term_ok = False
+    tissue = data['tissue']
+    # print(tissue)
+    tissue = get_item_if_you_can(request, tissue)
+    ontology = None
+    ontology_name = None
+    try:
+        ontology = tissue.get('source_ontology')
+    except AttributeError:
+        pass
+
+    if ontology is not None:
+        ontology = get_item_if_you_can(request, ontology)
+        try:
+            ontology_name = ontology.get('ontology_name')
+        except AttributeError:
+            pass
+
+    if ontology_name is not None and (
+            ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
+        term_ok = True
+    if not term_ok:
+        try:
+            tissuename = tissue.get('term_name')
+        except AttributeError:
+            tissuename = str(tissue)
+        request.errors.add('body', None, 'Term: ' + tissuename + ' is not found in UBERON')
+    else:
+        request.validated.update({})
+
+
+@view_config(context=Biosource.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_biosource_tissue])
+def biosource_add(context, request, render=None):
+    return collection_add(context, request, render)
+
+
+@view_config(context=Biosource, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_biosource_tissue],
+             decorator=if_match_tid)
+@view_config(context=Biosource, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_biosource_tissue],
+             decorator=if_match_tid)
+def biosource_edit(context, request, render=None):
+    return item_edit(context, request, render)

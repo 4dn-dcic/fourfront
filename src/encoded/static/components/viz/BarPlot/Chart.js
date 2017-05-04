@@ -505,7 +505,7 @@ var Chart = module.exports = React.createClass({
             //allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.fullHeightCount
         );
 
-        console.log('BARDATA', this.props.showType, barData, this.props.aggregatedData, this.props.aggregatedFilteredData);
+        //console.log('BARDATA', this.props.showType, barData, this.props.aggregatedData, this.props.aggregatedFilteredData);
 
         /*
         /* For showing FILTERED vs ALL
