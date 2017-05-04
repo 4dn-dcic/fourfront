@@ -818,7 +818,10 @@ $download-button-width : 100px;
 			margin-top: 20px;
 			margin-bottom: 20px;
 			> h3 {
-				margin-top: 0px;
+				margin-top: 1px;
+				> pre {
+					margin-top: 2px;
+				}
 			}
 		}
 	}

@@ -390,12 +390,16 @@ class DetailPane extends React.Component {
             var fileTitle = getTitleStringFromContext(file);
             var className = null;
             if (fileTitle === file.accession){
-                className = 'mono-text';
+                //className = 'mono-text';
             }
             return (
                 <div>
                     <div className="information">
-                        File
+                        File {
+                            node.type === 'output' ? 'Generated' :
+                                node.type === 'input' ? 'Used' :
+                                    null
+                        }
                         <h3 className="text-400">
                             <a href={file['@id']} className={className}>{ fileTitle }</a>
                         </h3>
@@ -412,9 +416,12 @@ class DetailPane extends React.Component {
         if (node.meta && node.meta.run_data && (typeof node.meta.run_data.value === 'number' || typeof node.meta.run_data.value === 'string')){
             return (
                 <div style={typeof this.props.minHeight === 'number' ? { minHeight : this.props.minHeight } : null}>
-                    <h4 className="text-400">
-                        <small>Value: </small> <code>{ node.meta.run_data.value }</code>
-                    </h4>
+                    <div className="information">
+                        Value Used
+                        <h3 className="text-400">
+                            <pre>{ node.meta.run_data.value }</pre>
+                        </h3>
+                    </div>
                 </div>
             )
         }

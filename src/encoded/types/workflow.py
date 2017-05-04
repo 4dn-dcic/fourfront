@@ -182,45 +182,48 @@ class WorkflowRun(Item):
 
         fileCache = {}
 
+        def handleSourceTargetFile(inputOrOutput, sourceOrTarget, ownProperty):
+            '''
+            Add file metadata in form of 'run_data' : { 'file' : { '@id', 'display_title', etc. } } to AnalysisStep dict's 'input' or 'output' list item dict
+            if one of own input or output files' workflow_argument_name matches the AnalysisStep dict's input or output's sourceOrTarget.workflow_argument_name.
+            '''
+            if 'Workflow' in sourceOrTarget.get('type', ''):
+                for file in self.properties.get(ownProperty,[]):
+                    if sourceOrTarget['name'] == file.get('workflow_argument_name'):
+                        fileUUID = file.get('value')
+                        if fileUUID:
+                            fileData = fileCache.get(fileUUID)
+                            if not fileData:
+                                fileData = request.embed('/' + file.get('value'), '@@embedded')
+                                fileCache[file.get('value')] = fileData
+                            inputOrOutput['run_data'] = { "file" : fileData }
+                            return True
+            return False
+
+
         for step in analysis_steps:
             # Add output file metadata to step outputs & inputs, based on workflow_argument_name v step output target name.
 
             for output in step['outputs']:
                 found = False
                 for outputTarget in output.get('target',[]):
-                    if 'Workflow' in outputTarget.get('type', ''):
-                        for file in self.properties.get('output_files',[]):
-                            if outputTarget['name'] == file.get('workflow_argument_name'):
-                                output['run_data'] = {
-                                    "file" : fileCache.get(file.get('value')) or request.embed('/' + file.get('value'), '@@embedded')
-                                }
-                                fileCache[file.get('value')] = output["run_data"]["file"]
-                                found = True
-                                break
+                    found = handleSourceTargetFile(output, outputTarget, 'output_files')
                     if found:
                         break
 
             for input in step['inputs']:
                 found = False
                 for inputSource in input.get('source',[]):
-                    if 'Workflow' in inputSource.get('type',''):
-                        for file in self.properties.get('input_files',[]):
-                            if inputSource['name'] == file.get('workflow_argument_name'):
+                    found = handleSourceTargetFile(input, inputSource, 'input_files')
+                    # If we don't have an input file yet for this workflow input, see if have a param
+                    if not found and 'Workflow' in inputSource.get('type',''):
+                        for param in self.properties.get('parameters',[]):
+                            if inputSource['name'] == param.get('workflow_argument_name'):
                                 input['run_data'] = {
-                                    "file" : fileCache.get(file.get('value')) or request.embed('/' + file.get('value'), '@@embedded')
+                                    "value" : param.get('value')
                                 }
-                                fileCache[file.get('value')] = input["run_data"]["file"]
                                 found = True
                                 break
-
-                        if not found:
-                            for param in self.properties.get('parameters',[]):
-                                if inputSource['name'] == param.get('workflow_argument_name'):
-                                    input['run_data'] = {
-                                        "value" : param.get('value')
-                                    }
-                                    found = True
-                                    break
                     if found:
                         break
 
