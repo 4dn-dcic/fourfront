@@ -36,7 +36,7 @@ module.exports.layout       = require('./layout');
 module.exports.ajax         = require('./ajax');
 
 /** Patches over browser window's console and disables logging (e.g. console.log) on production. Just import from this module to patch. */
-module.exports.console      = require('./patched-console');
+module.exports.console      = require('./patched-console').default;
 
 /** Functions related to JWT encoding/decoding/storage. Prevent name interference with 'jwt' NPM package */
 module.exports.JWT          = require('./json-web-token');

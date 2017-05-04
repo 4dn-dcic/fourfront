@@ -125,6 +125,7 @@ class GraphSection extends React.Component {
                 : 180}
                 schemas={this.props.schemas}
                 isNodeDisabled={GraphSection.isNodeDisabled}
+                href={this.props.href}
             />
         );
     }
@@ -138,6 +139,7 @@ class GraphSection extends React.Component {
                 edges={graphData.edges}
                 schemas={this.props.schemas}
                 isNodeDisabled={GraphSection.isNodeDisabled}
+                href={this.props.href}
             />
         );
     }

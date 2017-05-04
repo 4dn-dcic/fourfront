@@ -283,7 +283,7 @@ export class Detail extends React.Component {
             'biosource','biosource_summary','biosample_protocols','modifications_summary',
             'treatments_summary',
             // File
-            'file_type', 'file_format', 'filename', 'href', 'notes', 'flowcell_details',
+            'filename', 'file_type', 'file_format', 'href', 'notes', 'flowcell_details',
             // Lab
             'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',
             // Award

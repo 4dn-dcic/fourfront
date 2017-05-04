@@ -3,7 +3,7 @@
 var _ = require('underscore');
 var url = require('url');
 var { isServerSide } = require('./misc');
-var console = require('./patched-console');
+var console = require('./patched-console').default;
 var Filters = require('./experiments-filters');
 var navigate = require('./navigate').default;
 var object = require('./object');

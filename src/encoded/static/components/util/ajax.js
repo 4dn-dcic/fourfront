@@ -2,7 +2,7 @@
 
 var _ = require('underscore');
 var jwt = require('./json-web-token');
-var console = require('./patched-console');
+var console = require('./patched-console').default;
 
 /**
  * @private

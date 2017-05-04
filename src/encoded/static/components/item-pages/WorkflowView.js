@@ -230,6 +230,8 @@ class GraphSection extends React.Component {
             <Graph
                 nodes={graphData.nodes}
                 edges={graphData.edges}
+                href={this.props.href}
+                schemas={this.props.schemas}
             />
         );
     }
@@ -244,6 +246,8 @@ class GraphSection extends React.Component {
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
+                href={this.props.href}
+                schemas={this.props.schemas}
             />
         );
     }
@@ -255,6 +259,8 @@ class GraphSection extends React.Component {
             <Graph
                 nodes={graphData.nodes}
                 edges={graphData.edges}
+                href={this.props.href}
+                schemas={this.props.schemas}
             />
         );
     }

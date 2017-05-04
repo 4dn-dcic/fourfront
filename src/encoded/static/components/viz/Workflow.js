@@ -4,6 +4,7 @@ var React = require('react');
 import PropTypes from 'prop-types';
 var _ = require('underscore');
 var d3 = require('d3');
+var url = require('url');
 import { Fade } from 'react-bootstrap';
 var store = require('./../../store');
 var vizUtil = require('./utilities');
@@ -210,6 +211,14 @@ export class Graph extends React.Component {
         'pathArrows'    : true,
         'detailPane'    : true,
         'rowSpacingType': 'wide',
+        'onNodeClick'   : function(node, selectedNode, evt){
+            console.log(node, selectedNode, evt);
+            if (node !== selectedNode){
+                navigate('#' + node.name, { inPlace: true, skipRequest : true });
+            } else {
+                navigate('#', { inPlace: true, skipRequest : true });
+            }
+        },
         'innerMargin'   : {
             'top' : 20,
             'bottom' : 48,
@@ -336,6 +345,8 @@ export class Graph extends React.Component {
                             pathArrows={this.props.pathArrows}
                             schemas={this.props.schemas}
                             isNodeDisabled={this.props.isNodeDisabled}
+                            href={this.props.href}
+                            onNodeClick={this.props.onNodeClick}
                         >
                             <ScrollContainer>
                                 <EdgesLayer />
@@ -377,13 +388,19 @@ class DetailPane extends React.Component {
             // File
             var file = node.meta.run_data.file;
             var fileTitle = getTitleStringFromContext(file);
+            var className = null;
+            if (fileTitle === file.accession){
+                className = 'mono-text';
+            }
             return (
                 <div>
                     <div className="information">
-                        <a href={file['@id']}>{ fileTitle }</a>
+                        File
+                        <h3 className="text-400">
+                            <a href={file['@id']} className={className}>{ fileTitle }</a>
+                        </h3>
                     </div>
                     <hr/>
-                    <h4 className="text-400">File Details</h4>
                     <ItemDetailList
                         context={node.meta.run_data.file}
                         schemas={this.props.schemas}
@@ -424,9 +441,9 @@ class DetailPane extends React.Component {
                 <h5 className="text-500">
                     { type }
                 </h5>
-                <h3 className="text-300">
+                <h4 className="text-300">
                     <span>{ node.name }</span>
-                </h3>
+                </h4>
                 <div className="detail-pane-body">
                     { this.body() }
                 </div>
@@ -458,28 +475,88 @@ class ScrollContainer extends React.Component {
 
 class StateContainer extends React.Component {
 
+    static defaultProps = {
+        'checkHrefForSelectedNode' : true,
+        'checkWindowLocationHref' : true,
+        'onNodeClick' : function(node, selectedNode, evt){
+            this.setState({ 'selectedNode' : node });
+        }
+    }
+
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
         this.handleNodeClick = this.handleNodeClick.bind(this);
+        this.href = this.href.bind(this);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.state = {
+
+        var state = {
             'selectedNode' : null
         };
+
+        if (props.checkHrefForSelectedNode){
+            var href = this.href(props.href, props.checkWindowLocationHref);
+            if (typeof href === 'string' && Array.isArray(props.nodes)){
+                var parts = url.parse(href);
+                var foundNode = typeof parts.hash === 'string' && parts.hash.length > 0 && _.findWhere(props.nodes, { 'name' : parts.hash.slice(1) });
+                if (foundNode){
+                    state.selectedNode = foundNode;
+                }
+            }
+        }
+
+        this.state = state;
+    }
+
+    href(
+        fallbackHref = (this.props && this.props.href) || null,
+        checkWindowLocationHref = (this.props && typeof this.props.checkWindowLocationHref === 'boolean') ? this.props.checkWindowLocationHref : true
+    ){
+        var href = fallbackHref;
+        if (checkWindowLocationHref && !isServerSide() && window.location && window.location.href) href = window.location.href;
+        return href;
     }
 
     componentWillReceiveProps(nextProps){
-        if (
-            nextProps.nodes.length !== this.props.nodes.length ||
-            nextProps.edges.length !== this.props.edges.length
-        ){
-            this.setState({ 'selectedNode' : null });
+
+        var newState = {};
+
+        if (typeof nextProps.href === 'string' && nextProps.checkHrefForSelectedNode){
+            // Update selectedNode from location hash.
+            var newParts = url.parse(this.href(nextProps.href));
+            var oldParts = url.parse(this.props.href);
+            if (typeof newParts.hash === 'string' && newParts.hash.length > 0){
+                var foundNode = _.findWhere(nextProps.nodes, { 'name' : newParts.hash.slice(1) });
+                if (newParts.hash !== oldParts.hash && foundNode){
+                    newState.selectedNode = foundNode;
+                }
+                if (!foundNode){
+                    newState.selectedNode = null;
+                    if (window && window.location && window.location.hash) window.location.hash = '';
+                }
+            } else if (!newParts.hash || (typeof newParts.hash === 'string' && newParts.hash.length === 0) && newParts.hash !== oldParts.hash){
+                newState.selectedNode = null;
+            }
         }
+
+        // Update own selectedNode to latest v, if still exists & new one not otherwise set.
+        if (typeof newState.selectedNode === 'undefined' && this.state.selectedNode){
+            var find = { 'name' : this.state.selectedNode.name };
+            if (this.state.selectedNode.id) find.id = this.state.selectedNode.id;
+            var foundNode = _.findWhere(this.props.nodes, find);
+            if (foundNode){
+                newState.selectedNode = foundNode;
+            } else {
+                newState.selectedNode = null;
+            }
+        }
+
+        if (_.keys(newState).length > 0) this.setState(newState);
     }
 
     handleNodeClick(node, evt){
-        console.log(node);
-        this.setState({ 'selectedNode' : node });
+        this.props.onNodeClick.call(this, node, this.state.selectedNode, evt);
+        //this.setState({ 'selectedNode' : node });
     }
 
     render(){
@@ -488,7 +565,7 @@ class StateContainer extends React.Component {
             {
                 React.Children.map(this.props.children, (child)=>{
                     return React.cloneElement(child, _.extend(
-                        { onNodeClick : this.handleNodeClick }, _.omit(this.props, 'children'), this.state
+                        _.omit(this.props, 'children'), { onNodeClick : this.handleNodeClick }, this.state
                     ))
                 })
             }
@@ -504,12 +581,14 @@ class Node extends React.Component {
     static isSelected(currentNode, selectedNode){
         if (!selectedNode) return false;
         if (selectedNode === currentNode) return true;
-        if (
-            _.isEqual(
-                _.omit(selectedNode, 'nodesInColumn', 'x', 'y', 'column'),
-                _.omit(currentNode, 'nodesInColumn', 'x', 'y', 'column')
-            )
-        ) return true;
+        if (selectedNode.id && currentNode.id && selectedNode.id === currentNode.id) return true;
+        if (selectedNode.name && currentNode.name && selectedNode.name === currentNode.name) return true;
+        //if (
+        //    _.isEqual(
+        //        _.omit(selectedNode, 'nodesInColumn', 'x', 'y', 'column'),
+        //        _.omit(currentNode, 'nodesInColumn', 'x', 'y', 'column')
+        //    )
+        //) return true;
         return false;
     }
 
@@ -992,7 +1071,11 @@ class EdgesLayer extends React.Component {
                                 return 0;
                             }
                         }).map((edge)=>
-                            <Edge {...this.props} edge={edge} key={(edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name)} />
+                            <Edge
+                                {...this.props}
+                                edge={edge}
+                                key={(edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name)}
+                            />
                         )
                     }
                 </svg>
