@@ -33,6 +33,8 @@ var BuildField = module.exports.BuildField = React.createClass({
             'placeholder': "No value"
         };
         var otherProps = {
+            'id' : this.props.field,
+            'value' : this.props.value,
             'field': this.props.field,
             'collection': this.props.schema.linkTo,
             'modifyNewContext': this.props.modifyNewContext,
@@ -74,19 +76,19 @@ var BuildField = module.exports.BuildField = React.createClass({
                 </span>
             );
             case 'linked object' : return (
-                <LinkedObj {...inputProps} {...otherProps}/>
+                <LinkedObj {...otherProps}/>
             );
             case 'array' : return (
-                <ArrayField {...inputProps} {...otherProps}/>
+                <ArrayField {...otherProps}/>
             );
             case 'object' : return (
-                <ObjectField {...inputProps} {...otherProps}/>
+                <ObjectField {...otherProps}/>
             );
             case 'attachment' : return (
-                <AttachmentInput {...inputProps} {...otherProps}/>
+                <AttachmentInput {...otherProps}/>
             );
             case 'file upload' : return (
-                <S3FileInput {...inputProps} {...otherProps}/>
+                <S3FileInput {...otherProps}/>
             );
         }
         // Fallback
@@ -110,7 +112,6 @@ var BuildField = module.exports.BuildField = React.createClass({
     handleChange: function(e){
         var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var currValue = inputElement.value;
-        // TODO: add case for array
         if (this.props.fieldType == 'integer'){
             if(!isNaN(parseInt(currValue))){
                 currValue = parseInt(currValue);
@@ -128,9 +129,22 @@ var BuildField = module.exports.BuildField = React.createClass({
         e.preventDefault();
         if(this.props.isArray){
             this.props.arrayDelete(this.props.field);
+        }else if(this.props.fieldType === 'linked object'){
+            this.props.modifyNewContext(this.props.field, null, false, true);
         }else{
             this.props.modifyNewContext(this.props.field, null);
         }
+    },
+
+    // this needs to live in BuildField for styling purposes
+    pushArrayValue: function(e){
+        e.preventDefault();
+        if(this.props.fieldType !== 'array'){
+            return;
+        }
+        var valueCopy = this.props.value ? this.props.value.slice() : [];
+        valueCopy.push(null);
+        this.props.modifyNewContext(this.props.field, valueCopy);
     },
 
     render: function(){
@@ -148,46 +162,75 @@ var BuildField = module.exports.BuildField = React.createClass({
         // array items don't need fieldnames/tooltips
         if(isArrayItem){
             return(
-                <div style={{'paddingTop':'10px','paddingBottom':'10px','marginLeft':'25px'}}>
-                    <h5 className="facet-title" style={{'paddingBottom':'2px', 'marginBottom':"2px", "border":"none"}}>
-                        <span className="inline-block">{this.props.title + ' #' + parseInt(this.props.field + 1)}</span>
-                        <InfoIcon children={this.props.fieldTip}/>
-                        <div className="pull-right" style={{'display':'inline-block','marginRight':'5px'}}>
-                            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} onClick={this.deleteField}>
-                                {'Delete item'}
-                            </Button>
-                        </div>
-                    </h5>
-                    <div style={{'paddingTop':'2px'}}>
-                        {this.displayField(this.props.fieldType)}
-                    </div>
+                <div style={{'paddingTop':'10px','paddingBottom':'10px','marginLeft':'15px'}}>
+                        {this.props.fieldType === 'object' ?
+                            <h5 className="facet-title" style={{"border":"none",'paddingBottom':'0px','marginBottom':'0px'}}>
+                                <div style={{'width':'80%','display':'inline-block'}}>
+                                    <div style={{'width':'80%','paddingLeft':'10px','paddingRight':'10px'}}>
+                                        {this.displayField(this.props.fieldType)}
+                                    </div>
+                                    <div className="pull-right" style={{'marginTop':'-29px'}}>
+                                        <Button bsSize="xsmall" bsStyle="danger" style={{'width':'90px'}} onClick={this.deleteField}>
+                                            {'Delete item'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </h5>
+                            :
+                            <h5 className="facet-title" style={{"border":"none",'paddingBottom':'0px','marginBottom':'0px'}}>
+                                <span className="inline-block">{this.props.title + ' #' + parseInt(this.props.field + 1)}</span>
+                                <InfoIcon children={this.props.fieldTip}/>
+                                <div style={{'width':'80%','display':'inline-block'}}>
+                                    <div style={{'width':'80%','paddingLeft':'10px','paddingRight':'10px'}}>
+                                        {this.displayField(this.props.fieldType)}
+                                    </div>
+                                    <div className="pull-right" style={{'marginTop':'-23px'}}>
+                                        <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} onClick={this.deleteField}>
+                                            {'Delete item'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </h5>
+                        }
                 </div>
             );
         }
         // in render, below: don't include Fade for delete if an array.
         return(
-            <div className="row facet" style={{'marginBottom':'10px', 'overflow':'visible'}}>
-                <h5 className="facet-title" style={{'paddingBottom':'2px', 'marginBottom':"2px", "border":"none"}}>
+            <div className="row facet" style={{'overflow':'visible'}}>
+                <h5 className="facet-title" style={{"border":"none",'paddingBottom':'0px','marginBottom':'0px'}}>
                     <span className="inline-block">{this.props.title}</span>
                     <InfoIcon children={this.props.fieldTip}/>
                     {this.props.required ?
                         <span style={{'color':'#a94442', 'marginLeft':'6px'}}>Required</span>
                         : null
                     }
-                    {this.props.fieldType !== 'array' ?
-                        <Fade in={showDelete}>
-                            <div className="pull-right" style={{'display':'inline-block'}}>
-                                <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px', "marginRight":"5px"}} disabled={!showDelete} onClick={this.deleteField}>
-                                    {'Delete'}
-                                </Button>
+                    {this.props.fieldType === 'array' ?
+                        <Button bsSize="xsmall" style={{'width':'80px', "marginLeft":"10px"}} onClick={this.pushArrayValue}>
+                            {'Add item'}
+                        </Button>
+                        :
+                        null
+                    }
+                    {this.props.fieldType === 'array' ?
+                        <div>
+                            {this.displayField(this.props.fieldType)}
+                        </div>
+                        :
+                        <div style={{'width':'80%','display':'inline-block'}}>
+                            <div style={{'width':'80%','paddingLeft':'10px','paddingRight':'10px'}}>
+                                {this.displayField(this.props.fieldType)}
                             </div>
-                        </Fade>
-                        : null
+                            <Fade in={showDelete}>
+                                <div className="pull-right" style={{'marginTop':'-23px'}}>
+                                    <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
+                                        {'Delete'}
+                                    </Button>
+                                </div>
+                            </Fade>
+                        </div>
                     }
                 </h5>
-                <div style={{'paddingTop':'2px'}}>
-                    {this.displayField(this.props.fieldType)}
-                </div>
             </div>
         );
     }
@@ -315,20 +358,13 @@ upwards using this.props.modifyNewContext*/
 var ArrayField = React.createClass({
 
     modifyArrayContent: function(idx, value){
-        var valueCopy = this.props.value.slice();
+        var valueCopy = this.props.value ? this.props.value.slice() : [];
         valueCopy[idx] = value;
         this.props.modifyNewContext(this.props.field, valueCopy);
     },
 
-    pushArrayValue: function(e){
-        e.preventDefault();
-        var valueCopy = this.props.value.slice() || [];
-        valueCopy.push(null);
-        this.props.modifyNewContext(this.props.field, valueCopy);
-    },
-
     deleteArrayValue: function(idx){
-        var valueCopy = this.props.value.slice();
+        var valueCopy = this.props.value ? this.props.value.slice() : [];
         valueCopy.splice(idx, 1);
         // an empty array should be represented as null
         if(valueCopy.length === 0){
@@ -343,6 +379,9 @@ var ArrayField = React.createClass({
         // use arrayIdx as stand-in value for field
         var arrayIdx = arrayInfo[2];
         var fieldTip = fieldSchema.description || null;
+        if(fieldSchema.comment){
+            fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
+        }
         var title = fieldSchema.title || 'Item';
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
         var enumValues = [];
@@ -359,12 +398,13 @@ var ArrayField = React.createClass({
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
         }
-        var style = {'marginBottom':'5px'};
+        var style = {};
         // stripe every other item for ease of visibility
         if(arrayIdx % 2 == 0){
-            style.backgroundColor = '#f4f4f4'
+            style.backgroundColor = '#f4f4f4';
         }else{
-            style.backgroundColor = '#fff'
+            style.backgroundColor = '#fff';
+            style.border = "1px solid #ccc";
         }
         var arrayIdxList;
         if(this.props.arrayIdx){
@@ -409,12 +449,13 @@ var ArrayField = React.createClass({
         }
         return(
             <div>
-                <Button className="pull-right" bsSize="xsmall" style={{'width':'80px', "marginTop":"-24px", "marginRight":"5px"}} onClick={this.pushArrayValue}>
-                    {'Add item'}
-                </Button>
-                <div style={{'marginLeft':'50px','paddingTop':'13px'}}>
-                    {arrayInfo.map((entry) => this.initiateArrayField(entry))}
-                </div>
+                {this.props.value ?
+                    <div style={{'marginLeft':'50px','marginTop':'8px'}}>
+                        {arrayInfo.map((entry) => this.initiateArrayField(entry))}
+                    </div>
+                    :
+                    null
+                }
             </div>
         );
     }
@@ -466,6 +507,9 @@ var ObjectField = React.createClass({
         var field = fieldInfo[0];
         var fieldSchema = fieldInfo[1];
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
+        if(fieldSchema.comment){
+            fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
+        }
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
         var title = fieldSchema.title || field;
         var fieldValue;

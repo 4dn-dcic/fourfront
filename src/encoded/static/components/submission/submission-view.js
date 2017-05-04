@@ -4,7 +4,7 @@ var globals = require('../globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide, layout } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
-var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} = require('react-bootstrap');
+var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
 var BuildField = require('./submission-fields').BuildField;
 var makeTitle = require('../item-pages/item').title;
 var Alerts = require('../alerts');
@@ -40,7 +40,11 @@ export default class SubmissionView extends React.Component{
         'keyHierarchy': {},
         'navigationIsOpen': false,
         'processingFetch': false,
-        'errorCount': 0
+        'errorCount': 0,
+        'creatingIdx': null,
+        'creatingType': null,
+        'creatingAlias': '',
+        'creatingAliasMessage': null
     }
 
     // run async request to get frame=object context to fill the forms
@@ -101,7 +105,9 @@ export default class SubmissionView extends React.Component{
                 'masterTypes': initType,
                 'masterDisplay': initDisplay,
                 'currKey': 0,
-                'keyHierarchy': hierarchy
+                'keyHierarchy': hierarchy,
+                'creatingIdx': 0,
+                'creatingType': principalTypes[0]
             });
             return;
         }
@@ -114,7 +120,9 @@ export default class SubmissionView extends React.Component{
                     'masterTypes': initType,
                     'masterDisplay': initDisplay,
                     'currKey': 0,
-                    'keyHierarchy': hierarchy
+                    'keyHierarchy': hierarchy,
+                    'creatingIdx': 0,
+                    'creatingType': principalTypes[0]
                 });
             }else{
                 // something went wrong with fetching context. Just use an empty object
@@ -125,13 +133,70 @@ export default class SubmissionView extends React.Component{
                     'masterTypes': initType,
                     'masterDisplay': initDisplay,
                     'currKey': 0,
-                    'keyHierarchy': hierarchy
+                    'keyHierarchy': hierarchy,
+                    'creatingIdx': 0,
+                    'creatingType': principalTypes[0]
                 });
             }
         });
     }
 
-    createObj = (type, newIdx) => {
+    initCreateObj = (type, newIdx) => {
+        this.setState({
+            'creatingIdx': newIdx,
+            'creatingType': type
+        });
+    }
+
+    handleAliasChange = (e) => {
+        var inputElement = e.target;
+        var currValue = inputElement.value;
+        this.setState({'creatingAlias': currValue});
+    }
+
+    submitAlias = (e) =>{
+        e.preventDefault();
+        var type = this.state.creatingType;
+        var schema = this.props.schemas[type];
+        var newIdx = this.state.creatingIdx;
+        if(type === null || newIdx === null){
+            return;
+        }
+        var alias = this.state.creatingAlias;
+        // check if created object supports aliases
+        var hasAlias = schema && schema.properties && schema.properties.aliases;
+        if(alias.length > 0 && hasAlias){
+            var patt = new RegExp('\\S+:\\S+');
+            var regexRes = patt.test(alias);
+            if(!regexRes){
+                this.setState({
+                    'creatingAliasMessage': 'ERROR. Aliases must be formatted as: <text>:<text> (e.g. dcic-lab:42).'
+                });
+                return;
+            }
+            for(var key in this.state.masterDisplay){
+                if(this.state.masterDisplay[key] === alias){
+                    this.setState({
+                        'creatingAliasMessage': 'You have already used this alias.'
+                    });
+                    return;
+                }
+            }
+            // see if the input alias is already being used
+            ajax.promise('/' + alias).then(data => {
+                if (data && data.title && data.title === "Not Found"){
+                    this.createObj(type, newIdx, alias);
+                }else{
+                    this.setState({
+                        'creatingAliasMessage': 'ERROR. That alias is already taken.'
+                    });
+                    return;
+                }
+            });
+        }
+    }
+
+    createObj = (type, newIdx, alias) => {
         var contextCopy = this.state.masterContext;
         var validCopy = this.state.masterValid;
         var typesCopy = this.state.masterTypes;
@@ -140,16 +205,25 @@ export default class SubmissionView extends React.Component{
         var masterDisplay = this.state.masterDisplay;
         // increase key iter by 1 for a unique key
         // this is used as a key for masterContext, masterValid, and masterTypes
-        var keyIdx = this.state.keyIter + 1;
-        if(newIdx !== keyIdx){
-            console.log('ERROR: key index inconsistencies!')
-            return;
+        var keyIdx;
+        var newHierarchy;
+        if(newIdx === 0){ // initial object creation
+            keyIdx = 0;
+            newHierarchy = hierarchy;
+        }else{
+            keyIdx = this.state.keyIter + 1;
+            if(newIdx !== keyIdx){
+                console.log('ERROR: key index inconsistencies!')
+                return;
+            }
+            newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
+            validCopy[keyIdx] = 0;
+            typesCopy[keyIdx] = type;
         }
-        var newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
-        validCopy[keyIdx] = 0;
-        typesCopy[keyIdx] = type;
-        contextCopy[keyIdx] = buildContext({}, this.props.schemas[type]);
-        masterDisplay[keyIdx] = 'New ' + type + ' ' + keyIdx;
+        var addAlias = contextCopy[keyIdx] ? contextCopy[keyIdx] : {};
+        addAlias.aliases = addAlias.aliases ? addAlias.aliases.push(alias) : [alias];
+        contextCopy[keyIdx] = buildContext(addAlias, this.props.schemas[type], true);
+        masterDisplay[keyIdx] = alias;
         // get rid of any hanging errors
         for(var i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
@@ -163,7 +237,11 @@ export default class SubmissionView extends React.Component{
             'keyIter': keyIdx,
             'keyHierarchy': newHierarchy,
             'processingFetch': false,
-            'errorCount': 0
+            'errorCount': 0,
+            'creatingIdx': null,
+            'creatingType': null,
+            'creatingAlias': '',
+            'creatingAliasMessage': null
         });
     }
 
@@ -216,7 +294,7 @@ export default class SubmissionView extends React.Component{
                 newState.processingFetch = false;
             }
             newState[key] = value;
-            this.setState({newState});
+            this.setState(newState);
         }
     }
 
@@ -445,6 +523,7 @@ export default class SubmissionView extends React.Component{
         if(!this.state.masterContext || currKey === null){
             return null;
         }
+        var aliasModal = this.state.creatingIdx !== null && this.state.creatingType !== null;
         var currType = this.state.masterTypes[currKey];
         var currSchema = this.props.schemas[currType];
         var currContext = this.state.masterContext[currKey];
@@ -457,6 +536,34 @@ export default class SubmissionView extends React.Component{
         var currObjDisplay = this.state.masterDisplay[currKey] || currType;
         return(
             <div>
+                <Modal show={aliasModal}>
+                    <Modal.Header>
+                        <Modal.Title>{'Give your new object an alias'}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p style={{'marginBottom':'15px'}}>
+                            {'Aliases are lab specific identifiers to reference an object. The format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).'}
+                        </p>
+                        <div className="input-wrapper" style={{'marginBottom':'15px'}}>
+                            <input
+                                id="aliasInput"
+                                type="text"
+                                inputMode="latin"
+                                autoFocus={true}
+                                placeholder={'Enter a new alias'}
+                                onChange={this.handleAliasChange}
+                            />
+                        </div>
+                        <Collapse in={this.state.creatingAliasMessage !== null}>
+                            <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
+                                {this.state.creatingAliasMessage}
+                            </div>
+                        </Collapse>
+                        <Button bsSize="xsmall" bsStyle="success" disabled={this.state.creatingAlias.length == 0} onClick={this.submitAlias}>
+                            Submit
+                        </Button>
+                    </Modal.Body>
+                </Modal>
                 <div className="clearfix row">
                     <div className="col-sm-5 col-md-5 col-lg-5">
                         <SubmissionTree
@@ -471,7 +578,7 @@ export default class SubmissionView extends React.Component{
                     </div>
                     <div className="col-sm-7 col-md-7 col-lg-7">
                         <div className="pull-right" style={{'marginTop':'10px'}}>
-                            <h3 style={{'display':'inline'}}>{'Working on: ' + currObjDisplay}</h3>
+                            <h3 style={{'display':'inline'}}>{currObjDisplay}</h3>
                             {this.generateValidationButton()}
                             {this.generatePostButton()}
                         </div>
@@ -484,7 +591,7 @@ export default class SubmissionView extends React.Component{
                     schema={currSchema}
                     currContext={currContext}
                     modifyMasterContext={this.modifyMasterContext}
-                    createObj={this.createObj}
+                    initCreateObj={this.initCreateObj}
                     removeObj={this.removeObj}
                     addExistingObj={this.addExistingObj}
                     masterDisplay={this.state.masterDisplay}
@@ -526,7 +633,7 @@ class RoundOneObject extends React.Component{
         }
     }
 
-    modifyNewContext = (field, value, addExistingObj=false) => {
+    modifyNewContext = (field, value, addExistingObj=false, objDelete=false) => {
         var splitField = field.split('.');
         var contextCopy = this.props.currContext;
         var pointer = contextCopy;
@@ -539,7 +646,9 @@ class RoundOneObject extends React.Component{
             }
         }
         var prevValue = pointer[splitField[splitField.length-1]];
-        this.checkObjectRemoval(value, prevValue);
+        if(objDelete){
+            this.checkObjectRemoval(value, prevValue);
+        }
         pointer[splitField[splitField.length-1]] = value;
         this.props.modifyMasterContext(this.props.currKey, contextCopy);
         if(addExistingObj){
@@ -661,10 +770,10 @@ class RoundOneObject extends React.Component{
                 pointer[splitField[splitField.length-1]] = newIdx;
             }
             this.props.modifyMasterContext(this.props.currKey, contextCopy);
-            this.props.createObj(type, newIdx);
+            this.props.initCreateObj(type, newIdx);
         }else{
             this.modifyNewContext(this.state.selectField, newIdx);
-            this.props.createObj(type, newIdx);
+            this.props.initCreateObj(type, newIdx);
         }
     }
 
@@ -739,6 +848,9 @@ class RoundOneObject extends React.Component{
         var fieldSchema = object.getNestedProperty(this.props.schema, ['properties', field], true);
         if (!fieldSchema) return null;
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
+        if(fieldSchema.comment){
+            fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
+        }
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
         var fieldValue = this.props.currContext[field] || null;
         var fieldTitle = fieldSchema.title || field;

@@ -76,7 +76,8 @@ class SubmissionLeaf extends React.Component{
 
     callBack = (e) => {
         e.preventDefault();
-        this.props.setMasterState('currKey', this.props.keyIdx);
+        var intKey = parseInt(this.props.keyIdx);
+        this.props.setMasterState('currKey', intKey);
         this.props.setMasterState('navigationIsOpen', false);
     }
 
