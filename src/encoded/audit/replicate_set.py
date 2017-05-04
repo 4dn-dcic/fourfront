@@ -101,50 +101,48 @@ def audit_replicate_sets_consistency_check(value, system):
     the experiments present in a replicate set must be consistent
     with regard to their shared fields in biosample and experiment
     '''
-    fields2ignore = [
-        '@id',
-        '@type',
-        'display_title',
-        'link_id',
-        'accession',
-        'aliases',
-        'alternate_accessions',
-        'audit',
-        'award',
-        'date_created',
-        'dbxrefs',
-        'description',
-        'notes',
-        'documents',
-        'experiment_sets',
-        'external_references',
+
+    fields2check = [
         'lab',
-        'references',
-        'schema_version',
-        'sop_mapping',
-        'status',
-        'submitted_by',
-        'uuid',
-        'bio_rep_no',
-        'experiment_relation',
-        'files',
-        'filesets',
+        'award',
+        'biosample',
+        'experiment_type',
+        'crosslinking_method',
+        'crosslinking_time',
+        'crosslinking_temperature',
+        'digestion_enzyme',
+        'enzyme_lot_number',
+        'digestion_time',
+        'digestion_temperature',
+        'tagging_method',
+        'ligation_time',
+        'ligation_temperature',
+        'ligation_volume',
+        'biotin_removed',
+        'protocol',
+        'protocol_variation',
+        'follows_sop',
         'average_fragment_size',
         'fragment_size_range',
-        'experiment_summary',
-        'biosample_relation',
-        'biosource_summary',
-        'modifications_summary',
-        'modifications_summary_short',
-        'treatments_summary',
-        'karyotype_image',
-        'morphology_image',
-        'passage_number',
-        'protocol_additional',
-        'culture_start_date',
-        'culture_harvest_date',
-        'culture_duration',
-        'culture_duration_units'
+        'fragmentation_method',
+        'fragment_size_selection_method',
+        'rna_tag',
+        'target_regions',
+        'dna_label',
+        'labeling_time',
+        'antibody',
+        'antibody_lot_id',
+        'cell_cycle_phase',
+        'stage_fraction',
+        'cell_sorting_protocol',
+        'microscopy_technique',
+        'imaging_paths',
+        'biosource',
+        'biosample_protocols',
+        'cell_culture_details',
+        'modifications',
+        'treatments',
+        'differentiation_state'
     ]
 
     def merge_items(merged, mergee):
@@ -167,7 +165,7 @@ def audit_replicate_sets_consistency_check(value, system):
                 return [str(x) for x in l]
 
     def find_conflict(field, value):
-        if field not in fields2ignore:
+        if field in fields2check:
             stringified = stringify(value)
             if len(set(stringified)) != 1:
                 return field
