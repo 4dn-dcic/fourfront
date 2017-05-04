@@ -4,7 +4,6 @@ import json
 from snovault import (
     collection,
     load_schema,
-    calculated_property
 )
 from .base import (
     Item
@@ -202,12 +201,9 @@ class Publication(Item):
             properties['url'] = url
         if date:
             properties['date_published'] = date
-
-        # super(Publication, self)._update(properties, sheets)
-        esets = []
-
         if journal:
             properties['journal'] = journal
+
         super(Publication, self)._update(properties, sheets)
         return
 
