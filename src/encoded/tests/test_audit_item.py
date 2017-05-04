@@ -80,3 +80,9 @@ def test_audit_item_status_mismatch(testapp, experiment, embed_testapp):
     print(res)
     errors_list = res.json['audit']
     assert any(error['category'] == 'mismatched status' for error in errors_list)
+
+
+def test_audit_item_obsolete_ontology_term(testapp, experiment):
+    res = testapp.get(experiment['@id'] + '/@@audit-self')
+    print(res)
+    errors = res.json['audit']

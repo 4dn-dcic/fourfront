@@ -103,6 +103,13 @@ def audit_item_status(value, system):
             yield AuditFailure('mismatched status', detail, level='INTERNAL_ACTION')
 
 
-@audit_checker('Item', condition=find_ontology_terms, frame='object')
+def find_ontology_term_linkTos(value, system):
+    import pdb; pdb.set_trace()
+    for t in system['types']:
+        print(t)
+    pass
+
+
+@audit_checker('Item', condition=find_ontology_term_linkTos, frame='object')
 def audit_item_obsolete_ontology_terms(value, system):
     pass
