@@ -130,7 +130,6 @@ class Experiment(Item):
         if reps:
             return reps[0].get('produced_in_pub')
 
-
     @calculated_property(schema={
         "title": "Publications",
         "description": "Publications associated with this Experiment.",
@@ -145,8 +144,8 @@ class Experiment(Item):
         esets = [request.embed('/', str(uuid), '@@object') for uuid in
                  self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
         import itertools
-        pubs = list(itertools.chain.from_iterable([eset.get('publications_of_set',[])
-                                                    for eset in esets]))
+        pubs = list(set(itertools.chain.from_iterable([eset.get('publications_of_set', [])
+                                                      for eset in esets])))
         return pubs
 
 
@@ -308,6 +307,7 @@ class ExperimentMic(Experiment):
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None):
         return self.experiment_summary(request, experiment_type, biosample)
+
 
 @calculated_property(context=Experiment, category='action')
 def clone(context, request):

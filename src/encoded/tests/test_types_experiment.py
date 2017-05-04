@@ -415,7 +415,7 @@ def test_calculated_expt_produced_in_pub_for_two_exp_two_expset_two_pubs(
     pub1_data['exp_sets_prod_in_pub'] = [repset_w_exp1['@id']]
     pub2_data['exp_sets_prod_in_pub'] = [custset_w_exp2['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
-    pub2res = testapp.post_json('/publication', pub2_data, status=201)
+    testapp.post_json('/publication', pub2_data, status=201)
     responses = [testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp']),
                  testapp.get(custset_w_exp2['experiments_in_set'][0])]
     assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == responses[0].json['produced_in_pub']['@id']
@@ -441,7 +441,7 @@ def test_calculated_publications_in_experiment_no_data(
     responses = [testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp']),
                  testapp.get(custset_w_exp2['experiments_in_set'][0])]
     for response in responses:
-        response.json['publications_of_exp'] is None
+        assert response.json['publications_of_exp'] == []
 
 
 def test_calculated_publications_in_expt_w_repset_in_both_fields(
