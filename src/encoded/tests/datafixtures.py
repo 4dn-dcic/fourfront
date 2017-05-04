@@ -7,9 +7,10 @@ def lab(testapp, award):
         'name': 'encode-lab',
         'title': 'ENCODE lab',
         'status': 'current',
-        'awards':[award['@id']]
+        'awards': [award['@id']]
     }
     return testapp.post_json('/lab', item).json['@graph'][0]
+
 
 @pytest.fixture
 def admin(testapp):
@@ -375,8 +376,7 @@ def analysis_step(testapp, software, lab, award):
 def document(testapp, lab, award):
     item = {
         'award': award['@id'],
-        'lab': lab['@id'],
-        'document_type': 'growth protocol',
+        'lab': lab['@id']
     }
     return testapp.post_json('/document', item).json['@graph'][0]
 
@@ -393,9 +393,8 @@ def workflow_run_sbg(testapp, lab, award, workflow_bam):
             'lab': lab['@id'],
             'sbg_mounted_volume_ids': ['4dn_s32gkz1s7x', '4dn_s33xkquabu'],
             'run_status': 'started',
-           }
+            }
     return testapp.post_json('/workflow_run_sbg', item).json['@graph'][0]
-
 
 
 @pytest.fixture
@@ -410,7 +409,8 @@ def workflow_run_json(testapp, lab, award, workflow_bam):
             'lab': lab['@id'],
             'sbg_mounted_volume_ids': ['4dn_s32gkz1s7x', '4dn_s33xkquabu'],
             'run_status': 'started',
-           }
+            }
+
 
 @pytest.fixture
 def human_biosample(testapp, human_biosource, lab, award):
