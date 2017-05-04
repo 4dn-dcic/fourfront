@@ -150,6 +150,7 @@
           "type": "string",
           "title": "Quality Metric",
           "description": "The associated QC reports",
+          "exclude_from": ["submit4dn", "FFedit-create"],
           "linkTo": "QualityMetric"
         }
     },
