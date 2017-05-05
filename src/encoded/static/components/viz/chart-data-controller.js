@@ -2,6 +2,7 @@
 
 /** @ignore */
 var React = require('react');
+import PropTypes from 'prop-types';
 var _ = require('underscore');
 var { expFxn, Filters, ajax, console, layout, isServerSide, navigate } = require('./../util');
 
@@ -184,6 +185,12 @@ function notifyLoadStartCallbacks(){
     });
 }
 
+function reFetchContext(){
+    console.info('ChartDataController -> Refetching');
+    navigate('', { inPlace : true });
+    return true;
+}
+
 
 /**
  * Holds unsubcribe callback to Redux store subscription.
@@ -199,6 +206,9 @@ var reduxSubscription = null;
  * @type {boolean}
  */
 var isInitialized = false;
+
+
+var isInitialLoadComplete = false;
 
 /**
  * @private
@@ -223,78 +233,80 @@ var isWindowActive = false;
 
 
 /**
+ * Use this React component to wrap individual charts and provide them with source of experiments data via
+ * their props.experiments and props.filteredExperiments. Also provides props.expSetFilters from redux store.
+ * 
+ * @class Provider
+ * @type {Component}
+ * @memberof module:viz/chart-data-controller
+ * 
+ * @prop {string} id - Unique ID.
+ * @prop {Object} children - Must be a Chart or Chart controller component.
+ */
+class Provider extends React.Component {
+
+    static propTypes = {
+        'id' : React.PropTypes.string.isRequired,
+        'children' : React.PropTypes.object.isRequired
+    }
+
+    /**
+     * Registers a callback function, which itself calls this.forceUpdate(), with module-viz_chart-data-controller_
+     * using ChartDataController.registerUpdateCallback(cb, this.props.id).
+     * 
+     * @memberof module:viz/chart-data-controller.Provider
+     * @private
+     * @instance
+     * @this module:viz/chart-data-controller.Provider
+     * @returns {undefined} Nothing
+     */
+    componentWillMount(){
+        ChartDataController.registerUpdateCallback(()=>{
+            this.forceUpdate();
+        }, this.props.id);
+    }
+
+    /**
+     * Unregisters itself using ChartDataController.unregisterUpdateCallback(this.props.id).
+     * 
+     * @memberof module:viz/chart-data-controller.Provider
+     * @private
+     * @instance
+     * @this module:viz/chart-data-controller.Provider
+     * @returns {undefined} Nothing
+     */
+    componentWillUnmount(){
+        ChartDataController.unregisterUpdateCallback(this.props.id);
+    }
+
+    /**
+     * Sets 'experiments' and 'filteredExperiments' props on props.children.
+     * 
+     * @returns {Component} Cloned & adjusted props.children.
+     * @memberof module:viz/chart-data-controller.Provider
+     * @private
+     * @instance
+     */
+    render(){
+        var childChartProps = _.extend({}, this.props.children.props);
+        childChartProps.experiments = state.experiments;
+        childChartProps.filteredExperiments = state.filteredExperiments;
+        childChartProps.expSetFilters = refs.expSetFilters;
+        
+
+        return React.cloneElement(this.props.children, childChartProps);
+    }
+
+}
+
+
+/**
  * @type {Object}
  * @alias module:viz/chart-data-controller
  */
-var ChartDataController = module.exports = {
+export const ChartDataController = {
 
-    /**
-     * Use this React component to wrap individual charts and provide them with source of experiments data via
-     * their props.experiments and props.filteredExperiments. Also provides props.expSetFilters from redux store.
-     * 
-     * @namespace
-     * @type {Component}
-     * @memberof module:viz/chart-data-controller
-     * 
-     * @prop {string} id - Unique ID.
-     * @prop {Object} children - Must be a Chart or Chart controller component.
-     */
-    Provider : React.createClass({
-
-        /** @ignore */
-        propTypes : {
-            'id' : React.PropTypes.string.isRequired,
-            'children' : React.PropTypes.object.isRequired
-        },
-
-        /**
-         * Registers a callback function, which itself calls this.forceUpdate(), with module-viz_chart-data-controller_
-         * using ChartDataController.registerUpdateCallback(cb, this.props.id).
-         * 
-         * @memberof module:viz/chart-data-controller.Provider
-         * @private
-         * @instance
-         * @this module:viz/chart-data-controller.Provider
-         * @returns {undefined} Nothing
-         */
-        componentWillMount : function(){
-            ChartDataController.registerUpdateCallback(()=>{
-                this.forceUpdate();
-            }, this.props.id);
-        },
-
-        /**
-         * Unregisters itself using ChartDataController.unregisterUpdateCallback(this.props.id).
-         * 
-         * @memberof module:viz/chart-data-controller.Provider
-         * @private
-         * @instance
-         * @this module:viz/chart-data-controller.Provider
-         * @returns {undefined} Nothing
-         */
-        componentWillUnmount : function(){
-            ChartDataController.unregisterUpdateCallback(this.props.id);
-        },
-
-        /**
-         * Sets 'experiments' and 'filteredExperiments' props on props.children.
-         * 
-         * @returns {Component} Cloned & adjusted props.children.
-         * @memberof module:viz/chart-data-controller.Provider
-         * @private
-         * @instance
-         */
-        render : function(){
-            var childChartProps = _.extend({}, this.props.children.props);
-            childChartProps.experiments = state.experiments;
-            childChartProps.filteredExperiments = state.filteredExperiments;
-            childChartProps.expSetFilters = refs.expSetFilters;
-            
-
-            return React.cloneElement(this.props.children, childChartProps);
-        }
-
-    }),
+    Provider : Provider,
 
     /** 
      * This function must be called before this component is used anywhere else.
@@ -341,6 +353,7 @@ var ChartDataController = module.exports = {
         isInitialized = true;
 
         ChartDataController.sync(function(){
+            isInitialLoadComplete = true;
             callback(state);
         });
 
@@ -475,18 +488,32 @@ var ChartDataController = module.exports = {
      * @returns {*} Result of callback, or undefined.
      */
     setState : function(updatedState = {}, callback = null){
+
+        var allExpsChanged = (
+            updatedState.experiments !== state.experiments ||
+            updatedState.experiments.length !== state.experiments.length ||
+            !_.isEqual(updatedState.experiments, state.experiments)
+        );
         
-        var expsChanged = (
-            updatedState.experiments !== state.experiments || updatedState.filteredExperiments !== state.filteredExperiments ||
-            !_.isEqual(updatedState.experiments, state.experiments) || !_.isEqual(updatedState.filteredExperiments, state.filteredExperiments)
+        var allOrFilteredExpsChanged = (
+            allExpsChanged ||
+            updatedState.filteredExperiments !== state.filteredExperiments ||
+            updatedState.filteredExperiments.length !== state.filteredExperiments.length ||
+            !_.isEqual(updatedState.filteredExperiments, state.filteredExperiments)
         );
 
         _.extend(state, updatedState);
 
-        if (expsChanged){
+        if (allOrFilteredExpsChanged){
             ChartDataController.updateStats();
             notifyUpdateCallbacks();
         }
+
+        if (allExpsChanged && isInitialLoadComplete){
+            // Update browse page results or w/e.
+            reFetchContext();
+        }
+
         if (typeof callback === 'function' && callback !== notifyUpdateCallbacks){
             return callback(state);
         }
@@ -622,7 +649,7 @@ var ChartDataController = module.exports = {
                 if (errResp && typeof errResp === 'object' &&
                     (errResp.code === 403 || errResp.total === 0)
                 ){
-                    navigate('', { inPlace : true });
+                    reFetchContext();
                 }
             }
         );

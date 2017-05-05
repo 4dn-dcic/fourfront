@@ -694,7 +694,6 @@ export class LimitAndPageControls extends React.Component {
     }
 
     render(){
-        console.log(this.props);
         var { page, limit, maxPage, changingPage, changePage, changeLimit } = this.props;
         return (
             <div>
@@ -803,8 +802,8 @@ export class ResultTable extends React.Component {
         this.formatExperimentSetListings = this.formatExperimentSetListings.bind(this);
     }
 
-    getTemplate(type){ 
-        var setType = this.props.context['@graph'][0].experimentset_type;
+    getTemplate(type, setType = null){ 
+        if (!setType) setType = this.props.context['@graph'][0].experimentset_type;
         if (type === 'column'){
             return expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
         } else if (type === 'additional-info'){
@@ -813,7 +812,6 @@ export class ResultTable extends React.Component {
     }
 
     formatColumnHeaders(columnTemplate){
-        console.log(columnTemplate, this.props.sortColumn);
         return _.pairs(columnTemplate).map((pair)=>
             <th key={pair[1]}>
                 <ColumnSorter
@@ -855,7 +853,6 @@ export class ResultTable extends React.Component {
             if (lookup.slice(0,19) === 'experiments_in_set.'){
                 lookup = lookup.slice(19);
             }
-            console.log(lookup);
             return [p[0], lookup];
         }));
 
@@ -962,6 +959,7 @@ export class ResultTableContainer extends React.Component {
 
         this.componentDidMount = this.componentDidMount.bind(this);
         this.totalResultCount = this.totalResultCount.bind(this);
+        this.visibleResultCount = this.visibleResultCount.bind(this);
         this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.setOverflowingRight = this.setOverflowingRight.bind(this);
@@ -982,8 +980,12 @@ export class ResultTableContainer extends React.Component {
     }
 
     totalResultCount(){
+        return (this.props.context && typeof this.props.context.total === 'number' && this.props.context.total) || 0;
+    }
+
+    visibleResultCount(){
         // account for empty expt sets
-        var resultCount = this.props.context['@graph'].length;
+        var resultCount = (this.props.context && Array.isArray(this.props.context['@graph']) && this.props.context['@graph'].length) || 0;
         this.props.context['@graph'].map(function(r){
             if (r.experiments_in_set == 0) resultCount--;
         });
@@ -1052,7 +1054,7 @@ export class ResultTableContainer extends React.Component {
                 <div className="row above-chart-row">
                     <div className="col-sm-5 col-xs-12">
                         <h5 className='browse-title'>
-                            {'99999'} of { this.props.context.total } Experiment Sets
+                            { this.visibleResultCount() } of { this.totalResultCount() } Experiment Sets
                         </h5>
                     </div>
                     <div className="col-sm-7 col-xs-12">
