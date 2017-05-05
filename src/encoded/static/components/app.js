@@ -611,7 +611,7 @@ var App = React.createClass({
                 'href': href
             };
             if (event.state){
-                d.context = event.state;
+                d.context = event.state;       
             }
             store.dispatch({
                 type: d
