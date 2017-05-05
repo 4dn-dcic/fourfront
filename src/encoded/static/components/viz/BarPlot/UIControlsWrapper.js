@@ -204,7 +204,6 @@ var UIControlsWrapper = module.exports = React.createClass({
     },
 
     handleDropDownToggle : function(id, isOpen, evt, source){
-        console.log(id, isOpen, evt);
         if (isOpen){
             setTimeout(this.setState.bind(this), 10, { 'openDropdown' : id });
         } else {
@@ -266,24 +265,31 @@ var UIControlsWrapper = module.exports = React.createClass({
 
                     <div className="y-axis-top-label" style={{
                         width : this.props.chartHeight,
-                        top: this.props.chartHeight - 40
+                        top: this.props.chartHeight - 4
                     }}>
-                        <DropdownButton
-                            id="select-barplot-aggregate-type"
-                            bsSize="xsmall"
-                            onSelect={this.handleAggregateTypeSelect}
-                            title={(() => {
-                                if (this.state.openDropdown === 'yAxis'){
-                                    return 'Y-Axis Aggregation';
-                                }
-                                return this.titleMap(this.state.aggregateType);
-                            })()}
-                            onToggle={this.handleDropDownToggle.bind(this, 'yAxis')}
-                            children={this.renderDropDownMenuItems(
-                                ['experiment_sets','experiments','files'],
-                                this.state.aggregateType
-                            )}
-                        />
+                        <div className="row" style={{ maxWidth : 210, float: 'right' }}>
+                            <div className="col-xs-3" style={{ width : 51 }}>
+                                <h6 className="dropdown-heading">Y Axis</h6>
+                            </div>
+                            <div className="col-xs-9" style={{ width : 159, textAlign : 'left' }}>
+                                <DropdownButton
+                                    id="select-barplot-aggregate-type"
+                                    bsSize="xsmall"
+                                    onSelect={this.handleAggregateTypeSelect}
+                                    title={(() => {
+                                        //if (this.state.openDropdown === 'yAxis'){
+                                        //    return 'Y-Axis Aggregation';
+                                        //}
+                                        return this.titleMap(this.state.aggregateType);
+                                    })()}
+                                    onToggle={this.handleDropDownToggle.bind(this, 'yAxis')}
+                                    children={this.renderDropDownMenuItems(
+                                        ['experiment_sets','experiments','files'],
+                                        this.state.aggregateType
+                                    )}
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     { this.renderShowTypeToggle(windowGridSize) }
@@ -298,13 +304,14 @@ var UIControlsWrapper = module.exports = React.createClass({
                         <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
                             this.props.chartHeight - 49 : null
                         }}>
+                            <h6 className="dropdown-heading">Group Bars By</h6>
                             <DropdownButton
                                 id="select-barplot-field-1"
                                 onSelect={this.handleFieldSelect.bind(this, 1)}
                                 title={(()=>{
-                                    if (this.state.openDropdown === 'subdivisionField'){
-                                        return <em className="dropdown-open-title">Color Bars by</em>;
-                                    }
+                                    //if (this.state.openDropdown === 'subdivisionField'){
+                                    //    return <em className="dropdown-open-title">Color Bars by</em>;
+                                    //}
                                     var field = this.getFieldAtIndex(1);
                                     if (!field) return "None";
                                     return field.title || Filters.Field.toName(field.field);
@@ -343,28 +350,36 @@ var UIControlsWrapper = module.exports = React.createClass({
                             />
                         </div>
                         <div className="x-axis-right-label">
-                            <DropdownButton
-                                id="select-barplot-field-0"
-                                onSelect={this.handleFieldSelect.bind(this, 0)}
-                                title={(()=>{
-                                    if (this.state.openDropdown === 'xAxisField'){
-                                        return <em className="dropdown-open-title">X-Axis Field</em>;
-                                    }
-                                    var field = this.getFieldAtIndex(0);
-                                    return field.title || Filters.Field.toName(field.field);
-                                })()}
-                                onToggle={this.handleDropDownToggle.bind(this, 'xAxisField')}
-                                children={this.renderDropDownMenuItems(
-                                    this.props.availableFields_XAxis.map(function(field){
-                                        return [
-                                            field.field,
-                                            field.title || Filters.Field.toName(field.field),
-                                            field.description || null
-                                        ]; // key, title, subtitle
-                                    }),
-                                    this.state.fields[0].field
-                                )}
-                            />
+                            <div className="row">
+                                <div className="col-xs-3" style={{ width : 51 }}>
+                                    <h6 className="dropdown-heading">X Axis</h6>
+                                </div>
+                                <div className="col-xs-9 pull-right" style={{ width : (layout.gridContainerWidth() * (windowGridSize !== 'xs' ? 3/12 : 1)) + 5 - 52 }}>
+                                    <DropdownButton
+                                        id="select-barplot-field-0"
+                                        onSelect={this.handleFieldSelect.bind(this, 0)}
+                                        title={(()=>{
+                                            //if (this.state.openDropdown === 'xAxisField'){
+                                            //    return <em className="dropdown-open-title">X-Axis Field</em>;
+                                            //}
+                                            var field = this.getFieldAtIndex(0);
+                                            return <span>{(field.title || Filters.Field.toName(field.field))}</span>;
+                                        })()}
+                                        onToggle={this.handleDropDownToggle.bind(this, 'xAxisField')}
+                                        children={this.renderDropDownMenuItems(
+                                            this.props.availableFields_XAxis.map(function(field){
+                                                return [
+                                                    field.field,
+                                                    field.title || Filters.Field.toName(field.field),
+                                                    field.description || null
+                                                ]; // key, title, subtitle
+                                            }),
+                                            this.state.fields[0].field
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                            
                         </div>
 
                     </div>

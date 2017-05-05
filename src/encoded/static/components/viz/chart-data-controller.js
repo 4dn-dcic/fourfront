@@ -379,7 +379,7 @@ export const ChartDataController = {
             resyncInterval = setInterval(function(){
                 if (!isWindowActive) return;
                 console.info('Resyncing experiments & filteredExperiments for ChartDataController.');
-                ChartDataController.sync();
+                ChartDataController.sync(null, { 'fromInterval' : true, 'fromSync' : true });
             }, resync);
 
             isWindowActive = true;
@@ -487,7 +487,7 @@ export const ChartDataController = {
      * @param {function} [callback] - Optional callback function.
      * @returns {*} Result of callback, or undefined.
      */
-    setState : function(updatedState = {}, callback = null){
+    setState : function(updatedState = {}, callback = null, opts = {}){
 
         var allExpsChanged = (
             updatedState.experiments !== state.experiments ||
@@ -509,7 +509,7 @@ export const ChartDataController = {
             notifyUpdateCallbacks();
         }
 
-        if (allExpsChanged && isInitialLoadComplete){
+        if (allExpsChanged && isInitialLoadComplete && opts.fromInterval){
             // Update browse page results or w/e.
             reFetchContext();
         }
@@ -527,9 +527,10 @@ export const ChartDataController = {
      * @param {function} [callback] - Function to be called after sync complete.
      * @returns {undefined}
      */
-    sync : function(callback){
+    sync : function(callback, syncOpts = {}){
         if (!isInitialized) throw Error("Not initialized.");
         lastTimeSyncCalled = Date.now();
+        if (!syncOpts.fromSync) syncOpts.fromSync = true;
         ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
     },
 
@@ -612,7 +613,7 @@ export const ChartDataController = {
      * @param {function} [callback] - Optional callback function to call after setting updated state.
      * @returns {undefined} Nothing
      */
-    fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null){
+    fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null, opts = {}){
         if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
             reduxStoreState = refs.store.getState();
         }
@@ -629,7 +630,7 @@ export const ChartDataController = {
             ChartDataController.setState({
                 'experiments' : experiments,
                 'filteredExperiments' : filteredExperiments
-            }, callback);
+            }, callback, opts);
 
         });
 
@@ -681,14 +682,14 @@ export const ChartDataController = {
      * @param {function} [callback] - Optional callback function.
      * @returns {undefined} Nothing
      */
-    fetchAndSetUnfilteredExperiments : function(callback = null){
+    fetchAndSetUnfilteredExperiments : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
         ajax.load(
             refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(allExpsContext){
                 ChartDataController.setState({
                     'experiments' : expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph'])
-                }, callback);
+                }, callback, opts);
             }
         );
     },
@@ -702,14 +703,14 @@ export const ChartDataController = {
      * @param {function} [callback] - Optional callback function.
      * @returns {undefined} Nothing
      */
-    fetchAndSetFilteredExperiments : function(callback = null){
+    fetchAndSetFilteredExperiments : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
         ajax.load(
             ChartDataController.getFilteredContextHref() + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(filteredContext){
                 ChartDataController.setState({
                     'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
-                }, callback);
+                }, callback, opts);
             },
             'GET',
             function(){
