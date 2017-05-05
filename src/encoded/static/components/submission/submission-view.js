@@ -20,11 +20,6 @@ for submitting data. Passes the appropriate data downwards to the individual
 object views.
 */
 export default class SubmissionView extends React.Component{
-    contextTypes: {
-        fetch: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
-        navigate: React.PropTypes.func
-    }
 
     constructor(props){
         super(props);
@@ -196,6 +191,27 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    modifyAlias = (aliases) => {
+        var masterDisplay = this.state.masterDisplay;
+        var masterTypes = this.state.masterTypes;
+        var currKey = this.state.currKey;
+        var currAlias = masterDisplay[currKey];
+        console.log('-->', aliases, 'CURR:', currAlias);
+        // no aliases
+        if(aliases === null){
+            masterDisplay[currKey] = 'My ' + masterTypes[currKey] + ' ' + currKey;
+        }else if(!_.contains(aliases, currAlias)){
+            var lastAlias = aliases[aliases.length-1];
+            if(lastAlias !== null){
+                masterDisplay[currKey] = lastAlias;
+            }else{
+                masterDisplay[currKey] = 'My ' + masterTypes[currKey] + ' ' + currKey;
+            }
+        }
+        console.log('NEW:', masterDisplay[currKey]);
+        this.setState({'masterDisplay': masterDisplay});
+    }
+
     createObj = (type, newIdx, alias) => {
         var contextCopy = this.state.masterContext;
         var validCopy = this.state.masterValid;
@@ -221,7 +237,12 @@ export default class SubmissionView extends React.Component{
             typesCopy[keyIdx] = type;
         }
         var addAlias = contextCopy[keyIdx] ? contextCopy[keyIdx] : {};
-        addAlias.aliases = addAlias.aliases ? addAlias.aliases.push(alias) : [alias];
+        if(addAlias.aliases){
+            addAlias.aliases.push(alias)
+        }else{
+            addAlias.aliases = [alias];
+        }
+        console.log('ERROR ON EDIT:', addAlias.aliases);
         contextCopy[keyIdx] = buildContext(addAlias, this.props.schemas[type], true);
         masterDisplay[keyIdx] = alias;
         // get rid of any hanging errors
@@ -596,6 +617,7 @@ export default class SubmissionView extends React.Component{
                     addExistingObj={this.addExistingObj}
                     masterDisplay={this.state.masterDisplay}
                     setMasterState={this.setMasterState}
+                    modifyAlias={this.modifyAlias}
                 />
             </div>
         );
@@ -648,6 +670,9 @@ class RoundOneObject extends React.Component{
         var prevValue = pointer[splitField[splitField.length-1]];
         if(objDelete){
             this.checkObjectRemoval(value, prevValue);
+        }
+        if(field === 'aliases'){
+            this.props.modifyAlias(value);
         }
         pointer[splitField[splitField.length-1]] = value;
         this.props.modifyMasterContext(this.props.currKey, contextCopy);

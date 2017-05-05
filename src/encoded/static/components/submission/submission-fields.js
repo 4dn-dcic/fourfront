@@ -54,41 +54,52 @@ var BuildField = module.exports.BuildField = React.createClass({
         };
         switch(field_case){
             case 'text' : return (
-                <div className="input-wrapper">
+                <div className="input-wrapper" style={{'display':'inline'}}>
                     <input type="text" inputMode="latin" {...inputProps} />
                 </div>
             );
             case 'integer' : return (
-                <div className="input-wrapper">
+                <div className="input-wrapper" style={{'display':'inline'}}>
                     <input id="intNumber" type="number" inputMode="latin" {...inputProps} />
                 </div>
             );
             case 'number' : return (
-                <div className="input-wrapper">
+                <div className="input-wrapper" style={{'display':'inline'}}>
                     <input id="floatNumber" type="number" inputMode="latin" {...inputProps} />
                 </div>
             );
             case 'enum' : return (
-                <span className="input-wrapper">
+                <span className="input-wrapper" style={{'display':'inline'}}>
                     <DropdownButton bsSize="xsmall" id="dropdown-size-extra-small" title={this.props.value || "No value"}>
                         {this.props.enumValues.map((val) => this.buildEnumEntry(val))}
                     </DropdownButton>
                 </span>
             );
             case 'linked object' : return (
-                <LinkedObj {...otherProps}/>
+                <div style={{'display':'inline-block'}}>
+                    <LinkedObj {...otherProps}/>
+                </div>
             );
             case 'array' : return (
-                <ArrayField {...otherProps}/>
+                <div style={{'display':'inline'}}>
+                    <ArrayField {...otherProps}/>
+                </div>
+
             );
             case 'object' : return (
-                <ObjectField {...otherProps}/>
+                <div style={{'display':'inline'}}>
+                    <ObjectField {...otherProps}/>
+                </div>
             );
             case 'attachment' : return (
-                <AttachmentInput {...otherProps}/>
+                <div style={{'display':'inline'}}>
+                    <AttachmentInput {...otherProps}/>
+                </div>
             );
             case 'file upload' : return (
-                <S3FileInput {...otherProps}/>
+                <div style={{'display':'inline'}}>
+                    <S3FileInput {...otherProps}/>
+                </div>
             );
         }
         // Fallback
@@ -161,68 +172,75 @@ var BuildField = module.exports.BuildField = React.createClass({
         var isArrayItem = this.props.isArray ? true : false;
         // array items don't need fieldnames/tooltips
         if(isArrayItem){
-            return(
-                <div style={{'paddingTop':'10px','paddingBottom':'10px','marginLeft':'15px'}}>
-                        {this.props.fieldType === 'object' ?
-                            <h5 className="facet-title" style={{"border":"none",'paddingBottom':'0px','marginBottom':'0px'}}>
-                                <div style={{'width':'80%','display':'inline-block'}}>
-                                    <div style={{'width':'80%','paddingLeft':'10px','paddingRight':'10px'}}>
-                                        {this.displayField(this.props.fieldType)}
-                                    </div>
-                                    <div className="pull-right" style={{'marginTop':'-29px'}}>
+            if(this.props.fieldType === 'object'){
+                return(
+                    <div className="row facet" style={{'overflow':'visible'}}>
+                        <div className="col-sm-12">
+                            <div>
+                                {this.displayField(this.props.fieldType)}
+                                <div>
+                                    <div className="pull-right">
                                         <Button bsSize="xsmall" bsStyle="danger" style={{'width':'90px'}} onClick={this.deleteField}>
                                             {'Delete item'}
                                         </Button>
                                     </div>
                                 </div>
-                            </h5>
-                            :
-                            <h5 className="facet-title" style={{"border":"none",'paddingBottom':'0px','marginBottom':'0px'}}>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }else{
+                return(
+                    <div className="row facet" style={{'overflow':'visible'}}>
+                        <div className="col-sm-12 col-md-3">
+                            <h5 className="facet-title submission-field-title">
                                 <span className="inline-block">{this.props.title + ' #' + parseInt(this.props.field + 1)}</span>
                                 <InfoIcon children={this.props.fieldTip}/>
-                                <div style={{'width':'80%','display':'inline-block'}}>
-                                    <div style={{'width':'80%','paddingLeft':'10px','paddingRight':'10px'}}>
-                                        {this.displayField(this.props.fieldType)}
-                                    </div>
-                                    <div className="pull-right" style={{'marginTop':'-23px'}}>
-                                        <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} onClick={this.deleteField}>
-                                            {'Delete item'}
-                                        </Button>
-                                    </div>
-                                </div>
                             </h5>
-                        }
-                </div>
-            );
+                        </div>
+                        <div className="col-sm-12 col-md-9">
+                            <div>
+                                {this.displayField(this.props.fieldType)}
+                                <div className="pull-right">
+                                    <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} onClick={this.deleteField}>
+                                        {'Delete item'}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
         }
-        // in render, below: don't include Fade for delete if an array.
         return(
             <div className="row facet" style={{'overflow':'visible'}}>
-                <h5 className="facet-title" style={{"border":"none",'paddingBottom':'0px','marginBottom':'0px'}}>
-                    <span className="inline-block">{this.props.title}</span>
-                    <InfoIcon children={this.props.fieldTip}/>
-                    {this.props.required ?
-                        <span style={{'color':'#a94442', 'marginLeft':'6px'}}>Required</span>
-                        : null
-                    }
-                    {this.props.fieldType === 'array' ?
-                        <Button bsSize="xsmall" style={{'width':'80px', "marginLeft":"10px"}} onClick={this.pushArrayValue}>
-                            {'Add item'}
-                        </Button>
-                        :
-                        null
-                    }
+                <div className="col-sm-12 col-md-3">
+                    <h5 className="facet-title submission-field-title">
+                        <span className="inline-block">{this.props.title}</span>
+                        <InfoIcon children={this.props.fieldTip}/>
+                        {this.props.required ?
+                            <span style={{'color':'#a94442', 'marginLeft':'6px'}}>Required</span>
+                            : null
+                        }
+                        {this.props.fieldType === 'array' ?
+                            <Button bsSize="xsmall" style={{'width':'80px', "marginLeft":"10px"}} onClick={this.pushArrayValue}>
+                                {'Add item'}
+                            </Button>
+                            :
+                            null
+                        }
+                    </h5>
+                </div>
+                <div className="col-sm-12 col-md-9">
                     {this.props.fieldType === 'array' ?
                         <div>
                             {this.displayField(this.props.fieldType)}
                         </div>
                         :
-                        <div style={{'width':'80%','display':'inline-block'}}>
-                            <div style={{'width':'80%','paddingLeft':'10px','paddingRight':'10px'}}>
-                                {this.displayField(this.props.fieldType)}
-                            </div>
+                        <div>
+                            {this.displayField(this.props.fieldType)}
                             <Fade in={showDelete}>
-                                <div className="pull-right" style={{'marginTop':'-23px'}}>
+                                <div className="pull-right">
                                     <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
                                         {'Delete'}
                                     </Button>
@@ -230,7 +248,7 @@ var BuildField = module.exports.BuildField = React.createClass({
                             </Fade>
                         </div>
                     }
-                </h5>
+                </div>
             </div>
         );
     }
@@ -450,7 +468,7 @@ var ArrayField = React.createClass({
         return(
             <div>
                 {this.props.value ?
-                    <div style={{'marginLeft':'50px','marginTop':'8px'}}>
+                    <div>
                         {arrayInfo.map((entry) => this.initiateArrayField(entry))}
                     </div>
                     :

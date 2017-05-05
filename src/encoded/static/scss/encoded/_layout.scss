@@ -547,6 +547,7 @@ p, input {
 	span {
 		margin-left: 12px;
 	}
+	margin-bottom: 0px !important;
 }
 
 .submission-nav-tree{
@@ -584,4 +585,11 @@ p, input {
 	a{
 		padding: 3px 5px 0px 5px;
 	}
+}
+
+.submission-field-title{
+	border: none !important;
+	padding-bottom: 0px !important;
+	margin-bottom: 0px !important;
+	padding-top: 5px !important;
 }
