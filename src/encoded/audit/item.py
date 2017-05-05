@@ -104,12 +104,18 @@ def audit_item_status(value, system):
 
 
 def find_ontology_term_linkTos(value, system):
-    import pdb; pdb.set_trace()
-    for t in system['types']:
-        print(t)
-    pass
+    # import pdb; pdb.set_trace()
+    # system includes registry, context (might be object)
+    schema = system['context'].schema
+    props = schema['properties']
+    for field, val in props.items():
+        if 'linkTo' in val:
+            if val['linkTo'] == 'OntologyTerm':
+                return True
+    return False
 
 
 @audit_checker('Item', condition=find_ontology_term_linkTos, frame='object')
 def audit_item_obsolete_ontology_terms(value, system):
+    assert False
     pass
