@@ -56,7 +56,9 @@ describe('Testing browse.js for experiment set browser', function() {
         var UseBrowse = connect(mapStateToProps)(Browse);
         page = TestUtils.renderIntoDocument(
             <Wrapper>
-                <Provider store={store}><UseBrowse context={context}/></Provider>
+                <Provider store={store}>
+                    <UseBrowse context={context} href="http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate" />
+                </Provider>
             </Wrapper>
         );
     });

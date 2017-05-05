@@ -1334,7 +1334,7 @@ export class Browse extends React.Component {
                     {...this.props}
                     key="controlsAndResults"
                     fileFormats={fileFormats}
-                    href={this.props.href || this.context.location_href}
+                    href={this.props.href}
                     useAjax={true}
                     schemas={this.props.schemas}
                 />
