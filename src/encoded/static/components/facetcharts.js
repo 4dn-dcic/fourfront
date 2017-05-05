@@ -11,7 +11,7 @@ var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util')
 var FacetList = require('./facetlist');
 var vizUtil = require('./viz/utilities');
 var { SVGFilters, FetchingView, Legend } = require('./viz/components');
-var ChartDataController = require('./viz/chart-data-controller');
+import { ChartDataController } from './viz/chart-data-controller';
 var BarPlot = require('./viz/BarPlot');
 
 /**

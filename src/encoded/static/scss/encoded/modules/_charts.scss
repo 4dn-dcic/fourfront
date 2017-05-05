@@ -547,6 +547,12 @@
 
     position: relative;
 
+    .dropdown-heading {
+        margin-bottom: 5px;
+        margin-top: 5px;
+        font-weight: 400;
+    }
+
     .overlay {
         position: absolute;
         left: 0;
@@ -560,7 +566,40 @@
             transform-origin: 0 100%;
             z-index: 100;
             @media screen and (min-width: 1250px){
-                left: -10px;
+                left: -5px;
+            }
+
+            > .row {
+                //text-align: center;
+                //display: inline-block;
+                > div:first-child {
+                    padding-right: 5px;
+                }
+                > div:last-child {
+                    padding-left: 3px;
+                    .dropdown.btn-group {
+                        width: 100%;
+                        .dropdown-toggle.btn.btn-xs {
+                            width: 100%;
+                            padding-right: 20px;
+                            text-align: left;
+                            padding-left: 10px;
+
+                            span.caret {
+                                position: absolute;
+                                top: 9px;
+                                right: 10px;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .dropdown-heading {
+                margin: 0;
+                line-height: 22px;
+                white-space: nowrap;
+                text-align: right;
             }
 
             .dropdown-toggle.btn.btn-xs {
@@ -571,6 +610,7 @@
             .dropdown-menu {
                 transform: rotate3d(0,0,1,90deg);
                 top: 54px;
+                left: 10px;
                 z-index: 100;
             }
         }
@@ -624,6 +664,24 @@
     }
 
     .chart-aside{
+        
+        .x-axis-right-label {
+            > .row > div {
+                &:last-child {
+                    padding-left: 5px;
+                }
+                &:first-child {
+                    padding-right: 5px;
+                }
+            }
+            .dropdown-heading {
+                margin: 0;
+                line-height: 33px;
+                white-space: nowrap;
+                text-align: right;
+                font-weight: 400;
+            }
+        }
         .dropdown {
             width : 100%;
             > button {

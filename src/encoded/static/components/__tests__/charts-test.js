@@ -16,7 +16,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         FacetCharts = require('./../facetcharts').FacetCharts;
-        ChartDataController = require('./../viz/chart-data-controller');
+        ChartDataController = require('./../viz/chart-data-controller').ChartDataController;
         context = require('../testdata/browse/context-limited-fields'); // We need to sinon fake server to give us this.
         href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
 

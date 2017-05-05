@@ -7,7 +7,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    paths_filtered_by_status
 )
 
 
@@ -23,7 +24,11 @@ class Experiment(Item):
 
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
-    embedded = ["protocol", "protocol_variation", "lab", "award",
+    rev = {
+        'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
+    }
+    embedded = ["protocol", "protocol_variation", "lab", "award", "experiment_sets",
+                "produced_in_pub", "publications_of_exp",
                 "biosample", "biosample.biosource", "biosample.modifications",
                 "biosample.treatments", "biosample.biosource.individual.organism"]
     name_key = 'accession'
@@ -102,25 +107,46 @@ class Experiment(Item):
         "type": "array",
         "items": {
             "title": "Experiment Set",
-            "type": "string",
-            "linkTo": "ExperimentSet"
+            "type": ["string", "object"],
+            "linkFrom": "ExperimentSet.experiments_in_set"
         }
     })
-    def experiment_sets(self, request):
-        exp_set_coll = list(self.registry['collections']['ExperimentSet'])
-        exp_set_coll.extend(list(self.registry['collections']['ExperimentSetReplicate']))
-        sets = []
-        for uuid in exp_set_coll:
-            eset = self.collection.get(uuid)
-            for exp in eset.properties['experiments_in_set']:
-                if str(exp) == str(self.uuid):
-                    ty = eset.properties['experimentset_type']
-                    prefix = '/experiment_set/'
-                    if ty == 'replicate':
-                        prefix = '/experiment_set_replicate/'
-                    s = prefix + str(uuid)
-                    sets.append(s)
-        return list(set(sets))
+    def experiment_sets(self, request, experiment_sets):
+        paths = paths_filtered_by_status(request, experiment_sets)
+        return paths
+
+    @calculated_property(schema={
+        "title": "Produced in Publication",
+        "description": "The Publication in which this Experiment was produced.",
+        "type": "string",
+        "linkTo": "Publication"
+    })
+    def produced_in_pub(self, request):
+        esets = [request.embed('/', str(uuid), '@@object') for uuid in
+                 self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
+
+        # replicate experiment set is the boss
+        reps = [eset for eset in esets if 'ExperimentSetReplicate' in eset['@type']]
+        if reps:
+            return reps[0].get('produced_in_pub')
+
+    @calculated_property(schema={
+        "title": "Publications",
+        "description": "Publications associated with this Experiment.",
+        "type": "array",
+        "items": {
+            "title": "Publication",
+            "type": "string",
+            "linkTo": "Publication"
+        }
+    })
+    def publications_of_exp(self, request):
+        esets = [request.embed('/', str(uuid), '@@object') for uuid in
+                 self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
+        import itertools
+        pubs = list(set(itertools.chain.from_iterable([eset.get('publications_of_set', [])
+                                                      for eset in esets])))
+        return pubs
 
 
 @collection(
@@ -281,6 +307,7 @@ class ExperimentMic(Experiment):
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None):
         return self.experiment_summary(request, experiment_type, biosample)
+
 
 @calculated_property(context=Experiment, category='action')
 def clone(context, request):

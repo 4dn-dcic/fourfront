@@ -17,7 +17,7 @@ var { Filters, ajax, JWT, console, isServerSide, navigate, analytics } = require
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
-var ChartDataController = require('./viz/chart-data-controller');
+import { ChartDataController } from './viz/chart-data-controller';
 var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var makeTitle = require('./item-pages/item').title;
 var ReactTooltip = require('react-tooltip');

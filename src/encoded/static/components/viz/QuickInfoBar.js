@@ -9,7 +9,7 @@ var vizUtil = require('./utilities');
 var { expFxn, Filters, console, object, isServerSide, layout, analytics } = require('../util');
 var ActiveFiltersBar = require('./components/ActiveFiltersBar');
 var MosaicChart = require('./MosaicChart');
-var ChartDataController = require('./chart-data-controller');
+import { ChartDataController } from './chart-data-controller';
 var ReactTooltip = require('react-tooltip');
 
 /**

@@ -12,25 +12,11 @@ from snovault import (
 from snovault.calculated import calculate_properties
 
 from .base import (
-    Item
+    Item,
+    paths_filtered_by_status
 )
 
 import datetime
-
-
-def is_newer_than(d1, d2):
-    '''Takes 2 strings in format YYYY-MM-DD and tries to convert to date
-        and if successful returns True if first string is more recent than
-        second string, otherwise returns False
-    '''
-    try:
-        date1 = datetime.datetime.strptime(d1, '%Y-%m-%d').date()
-        date2 = datetime.datetime.strptime(d2, '%Y-%m-%d').date()
-        if date1 > date2:
-            return True
-    except:
-        pass
-    return False
 
 
 def invalidate_linked_items(item, field, updates=None):
@@ -42,7 +28,11 @@ def invalidate_linked_items(item, field, updates=None):
     '''
     request = get_current_request()
     registry = item.registry
-    properties = item.properties
+    try:
+        properties = item.properties
+    except KeyError:
+        # if I try to invalidate an object that isn't yet fully stored, exit
+        return
     if field in properties:
         links = properties[field]
         if hasattr(links, 'lower'):
@@ -72,10 +62,14 @@ class ExperimentSet(Item):
     item_type = 'experiment_set'
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "accession"
+    rev = {
+        'publications_using': ('Publication', 'exp_sets_used_in_pub'),
+        'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
+    }
     embedded = ["award",
                 "lab",
                 "produced_in_pub",
-                "publications",
+                "publications_of_set",
                 "experiments_in_set",
                 "experiments_in_set.protocol",
                 "experiments_in_set.protocol_variation",
@@ -102,8 +96,8 @@ class ExperimentSet(Item):
                 release_date = datetime.datetime.now().strftime("%Y-%m-%d")
                 properties['date_released'] = release_date
         super(ExperimentSet, self)._update(properties, sheets)
-        if 'experiments_in_set' in properties:
-            invalidate_linked_items(self, 'experiments_in_set')
+        # if 'experiments_in_set' in properties:
+        #    invalidate_linked_items(self, 'experiments_in_set')
 
     @calculated_property(schema={
         "title": "Produced in Publication",
@@ -112,21 +106,12 @@ class ExperimentSet(Item):
         "linkTo": "Publication"
     })
     def produced_in_pub(self, request):
-        pub_coll = list(self.registry['collections']['Publication'])
-        ppub = None
-        newest = None
-        for uuid in pub_coll:
-            pub = self.collection.get(uuid)
-            if pub.properties.get('exp_sets_prod_in_pub'):
-                for eset in pub.properties['exp_sets_prod_in_pub']:
-                    if str(eset) == str(self.uuid):
-                        pubdate = pub.properties['date_published']
-                        if not newest or is_newer_than(pubdate, newest):
-                            newest = pubdate
-                            ppub = str(uuid)
-        if ppub is not None:
-            ppub = '/publications/' + ppub + '/'
-        return ppub
+        uuids = [str(pub) for pub in self.get_rev_links('publications_produced')]
+        pubs = [request.embed('/', uuid, '@@object')
+                for uuid in paths_filtered_by_status(request, uuids)]
+        if pubs:
+            return sorted(pubs, key=lambda pub: pub.get('date_released', pub['date_created']),
+                          reverse=True)[0].get('@id')
 
     @calculated_property(schema={
         "title": "Publications",
@@ -139,19 +124,11 @@ class ExperimentSet(Item):
         }
     })
     def publications_of_set(self, request):
-        pub_coll = list(self.registry['collections']['Publication'])
-        pubs = []
-        for uuid in pub_coll:
-            expsets = []
-            pub = self.collection.get(uuid)
-            if pub.properties.get('exp_sets_prod_in_pub'):
-                expsets.extend(pub.properties['exp_sets_prod_in_pub'])
-            if pub.properties.get('exp_sets_used_in_pub'):
-                expsets.extend(pub.properties['exp_sets_used_in_pub'])
-            for expset in expsets:
-                if str(expset) == str(self.uuid):
-                    pubs.append('/publications/' + str(uuid) + '/')
-        return list(set(pubs))
+        pubs = set([str(pub) for pub in self.get_rev_links('publications_produced') +
+                self.get_rev_links('publications_using')])
+        pubs = [request.embed('/', uuid, '@@object')
+                for uuid in paths_filtered_by_status(request, pubs )]
+        return [pub['@id'] for pub in pubs]
 
 
 @collection(

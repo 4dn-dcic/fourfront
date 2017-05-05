@@ -162,9 +162,7 @@ class File(Item):
         }
     })
     def workflow_run_inputs(self, request):
-        return [run['@id'] for run in
-                [request.embed('/' ,uuid, '@@object') for uuid in
-        [str(uuid) for uuid in self.get_rev_links('workflow_run_inputs')]]]
+        return self.rev_link_atids(request, "workflow_run_inputs")
 
     @calculated_property(schema={
         "title": "Output of Workflow Runs",
@@ -177,9 +175,7 @@ class File(Item):
         }
     })
     def workflow_run_outputs(self, request):
-        return [run['@id'] for run in
-                [request.embed('/' ,uuid, '@@object') for uuid in
-        [str(uuid) for uuid in self.get_rev_links('workflow_run_outputs')]]]
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
     def _update(self, properties, sheets=None):
