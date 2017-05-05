@@ -103,19 +103,31 @@ def audit_item_status(value, system):
             yield AuditFailure('mismatched status', detail, level='INTERNAL_ACTION')
 
 
-def find_ontology_term_linkTos(value, system):
-    # import pdb; pdb.set_trace()
-    # system includes registry, context (might be object)
-    schema = system['context'].schema
-    props = schema['properties']
+def find_ontology_term_linkTos(props):
+    fields = []
     for field, val in props.items():
         if 'linkTo' in val:
             if val['linkTo'] == 'OntologyTerm':
-                return True
+                fields.append(field)
+    return fields
+
+
+def has_ontology_term_linkTos(value, system):
+    props = system['context'].schema['properties']
+    field = find_ontology_term_linkTos(props)
+    if field:
+        return True
     return False
 
 
-@audit_checker('Item', condition=find_ontology_term_linkTos, frame='object')
+@audit_checker('Item', condition=has_ontology_term_linkTos, frame='object')
 def audit_item_obsolete_ontology_terms(value, system):
-    assert False
-    pass
+    import pdb; pdb.set_trace()
+    item = system['context']
+    request = system['request']
+    props = item.schema['properties']
+    fields = find_ontology_term_linkTos(props)
+    for f in fields:
+        val = item.properties[f]
+        linked_item = request.embed(val + '@@object')
+        print(linked_item)
