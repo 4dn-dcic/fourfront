@@ -138,10 +138,10 @@ var BuildField = module.exports.BuildField = React.createClass({
     // call modifyNewContext from parent to delete the value in the field
     deleteField : function(e){
         e.preventDefault();
-        if(this.props.isArray){
+        if(this.props.fieldType === 'linked object'){
+            this.props.modifyNewContext(this.props.field, null, true);
+        }else if(this.props.isArray){
             this.props.arrayDelete(this.props.field);
-        }else if(this.props.fieldType === 'linked object'){
-            this.props.modifyNewContext(this.props.field, null, false, true);
         }else{
             this.props.modifyNewContext(this.props.field, null);
         }
@@ -213,18 +213,19 @@ var BuildField = module.exports.BuildField = React.createClass({
             }
         }
         return(
+
             <div className="row facet" style={{'overflow':'visible'}}>
                 <div className="col-sm-12 col-md-3">
                     <h5 className="facet-title submission-field-title">
                         <span className="inline-block">{this.props.title}</span>
                         <InfoIcon children={this.props.fieldTip}/>
                         {this.props.required ?
-                            <span style={{'color':'#a94442', 'marginLeft':'6px'}}>Required</span>
+                            <span style={{'color':'#a94442', "marginRight":"6px"}}>Required</span>
                             : null
                         }
                         {this.props.fieldType === 'array' ?
-                            <Button bsSize="xsmall" style={{'width':'80px', "marginLeft":"10px"}} onClick={this.pushArrayValue}>
-                                {'Add item'}
+                            <Button bsSize="xsmall" onClick={this.pushArrayValue}>
+                                {'Add'}
                             </Button>
                             :
                             null
@@ -313,6 +314,7 @@ var LinkedObj = React.createClass({
                 return(
                     <div>
                         <a href={this.props.value} target="_blank">{thisDisplay}</a>
+                        <i style={{'paddingLeft':'4px'}} className={"icon icon-external-link"}></i>
                     </div>
                 );
             }else{
@@ -378,7 +380,7 @@ var ArrayField = React.createClass({
     modifyArrayContent: function(idx, value){
         var valueCopy = this.props.value ? this.props.value.slice() : [];
         valueCopy[idx] = value;
-        this.props.modifyNewContext(this.props.field, valueCopy);
+        this.props.modifyNewContext(this.props.field, valueCopy, true);
     },
 
     deleteArrayValue: function(idx){
@@ -388,7 +390,7 @@ var ArrayField = React.createClass({
         if(valueCopy.length === 0){
             valueCopy = null;
         }
-        this.props.modifyNewContext(this.props.field, valueCopy);
+        this.props.modifyNewContext(this.props.field, valueCopy, true);
     },
 
     initiateArrayField: function(arrayInfo) {
@@ -496,7 +498,7 @@ var ObjectField = React.createClass({
             valueCopy = JSON.parse(JSON.stringify(this.props.value));
         }
         valueCopy[field] = value;
-        this.props.modifyNewContext(this.props.field, valueCopy);
+        this.props.modifyNewContext(this.props.field, valueCopy, true);
     },
 
     includeField : function(schema, field){
@@ -753,7 +755,7 @@ class InfoIcon extends React.Component{
     render() {
         if (!this.props.children) return null;
         return (
-            <i className="icon icon-info-circle" data-tip={this.props.children}/>
+            <i style={{"marginRight":"6px"}} className="icon icon-info-circle" data-tip={this.props.children}/>
         );
     }
 }

@@ -15,27 +15,16 @@ export default class SubmissionTree extends React.Component{
         super(props);
     }
 
-    handleToggle = (e) => {
-        e.preventDefault();
-        this.props.setMasterState('navigationIsOpen', !this.props.navigationIsOpen);
-    }
-
     render() {
         const{
             keyIdx,
             ...others
         } = this.props;
         return(
-            <div style={{'marginTop':'10px'}}>
-                <Button className="icon-container" onClick={this.handleToggle}>
-                        {'Toggle object navigation'}
-                </Button>
-                <div className="submission-nav-tree">
-                    <Collapse in={this.props.navigationIsOpen}>
-                        <div style={{'paddingLeft':'20px'}}>
-                            <SubmissionLeaf {...others} keyIdx={0} open={true}/>
-                        </div>
-                    </Collapse>
+            <div className="submission-nav-tree" style={{'marginTop':'10px'}}>
+                <h4>Navigation</h4>
+                <div>
+                    <SubmissionLeaf {...others} keyIdx={0} open={true}/>
                 </div>
             </div>
         );
@@ -74,6 +63,31 @@ class SubmissionLeaf extends React.Component{
         );
     }
 
+    generatePlaceholder = (unused) =>{
+        var style = {
+            'marginLeft': '-15px',
+            'overflow': 'hidden',
+            'whiteSpace': 'nowrap',
+            'textOverflow': 'ellipsis',
+            'fontSize': '0.8em'
+        };
+        var buttonStyle = {
+            'height': '15px',
+            'width': '15px',
+            'padding':'4px 7px 0px 3px'
+        };
+        return(
+            <div key={unused} className="submission-nav-leaf">
+                <div className="clearfix" style={style}>
+                    <Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" disabled/>
+                    <span style={{'padding':'1px 5px'}}>
+                        {unused}
+                    </span>
+                </div>
+            </div>
+        );
+    }
+
     callBack = (e) => {
         e.preventDefault();
         var intKey = parseInt(this.props.keyIdx);
@@ -86,12 +100,26 @@ class SubmissionLeaf extends React.Component{
         var masterValid = this.props.masterValid;
         var masterTypes = this.props.masterTypes;
         var children = Object.keys(this.props.hierarchy[key]).map((childKey) => this.generateChild(childKey));
+        var placeholders;
+        if(this.props.unusedLinks[key]){
+            placeholders = this.props.unusedLinks[key].map((link) => this.generatePlaceholder(link))
+        }
         var style = {
-                        'marginLeft':'-20px',
-                        'overflow': 'hidden',
-                        'whiteSpace': 'nowrap',
-                        'textOverflow': 'ellipsis'
-                    };
+            'marginLeft': '-15px',
+            'overflow': 'hidden',
+            'whiteSpace': 'nowrap',
+            'textOverflow': 'ellipsis',
+            'fontSize': '0.8em'
+        };
+        var buttonStyle = {
+            'height': '15px',
+            'width': '15px',
+            'padding':'4px 7px 0px 3px'
+        };
+        var iconStyle = {
+            'fontSize': '0.8em',
+            'verticalAlign': 'super'
+        };
         var title;
         var titleText = this.props.masterDisplay[key] || key;
         // if key is not a number (i.e. path), the object is not a custom one
@@ -114,21 +142,24 @@ class SubmissionLeaf extends React.Component{
                             {titleText}
                         </span>);
             }else{
-                title = (<span style={{'padding':'1px 5px'}} onClick={this.callBack}>
+                title = (<span style={{'padding':'1px 5px','cursor': 'pointer'}} onClick={this.callBack}>
                             {titleText}
                         </span>);
             }
         }
         var leftButton;
-        if(children.length > 0){
+        if(parseInt(key) == 0){
+            style.marginLeft = 0;
+            leftButton = null;
+        }else if(children.length > 0 || (placeholders && placeholders.length > 0)){
             // Button to expand children
-            leftButton = (<Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
-                            <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
+            leftButton = (<Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
+                            <i style={iconStyle} className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                         </Button>);
         }else if(isNaN(key)){
             // Button to let you open obj in a new tab
             leftButton=(
-                <Button bsSize="xsmall" className="icon-container pull-left" onClick={function(e){
+                <Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" onClick={function(e){
                     e.preventDefault();
                     var win = window.open(key, '_blank');
                     if(win){
@@ -137,12 +168,12 @@ class SubmissionLeaf extends React.Component{
                         alert('Object page popup blocked!');
                     }
                 }.bind(this)}>
-                    <i className={"icon icon-external-link"}></i>
+                    <i style={iconStyle} className={"icon icon-external-link"}></i>
                 </Button>);
         }else{
             // dummy Button
             leftButton=(
-                <Button bsSize="xsmall" className="icon-container pull-left" disabled></Button>
+                <Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" disabled></Button>
             );
         }
         return(
@@ -152,7 +183,8 @@ class SubmissionLeaf extends React.Component{
                     {title}
                 </div>
                 <Collapse in={this.state.open}>
-                    <div style={{'paddingLeft':'20px'}}>
+                    <div style={{'paddingLeft':'15px'}}>
+                        {placeholders}
                         {children}
                     </div>
                 </Collapse>
