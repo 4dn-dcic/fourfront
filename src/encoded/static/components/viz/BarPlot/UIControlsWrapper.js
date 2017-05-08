@@ -71,6 +71,13 @@ var UIControlsWrapper = module.exports = React.createClass({
             )
         ){
             this.setState({ 'showState' : 'filtered' });
+        } else if (
+            this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters) &&
+            !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters) && (
+                this.state.showState === 'filtered'
+            )
+        ){
+            this.setState({ 'showState' : 'all' });
         }
         //if (this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters)){
         //    this.setState({ 'showState' : 'all' });
