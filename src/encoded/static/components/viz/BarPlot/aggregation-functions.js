@@ -32,7 +32,7 @@ var { console, object, expFxn } = require('./../../util');
 export function genChartData(
     experiments = [],
     fields = [{ 'name' : 'Biosample' , field : 'experiments_in_set.biosample.biosource_summary' }],
-    aggregate = 'experiments',
+    aggregate = 'experiments', // No longer needed.
     experimentsOrSets = 'experiments',
     useOnlyPopulatedFields = false
 ){
@@ -50,10 +50,10 @@ export function genChartData(
         });
     });
 
-    aggregateByType(fields, experiments, aggregate);
+    aggregateByType(fields, experiments);
 
     if (fields.length === 1) return fields;
-    return partitionFields(fields, experiments, aggregate, useOnlyPopulatedFields);
+    return partitionFields(fields, experiments, useOnlyPopulatedFields);
 }
 
 
@@ -67,29 +67,12 @@ function createZeroCountTermObj(){
 
 
 /**
- * @static
- * @ignore
- */
-function countTermForFieldFromExperimentByAggregateType(fieldObj, experiment, term, aggregate){
-    if (!aggregate || aggregate === 'experiments'){
-        countFieldTerm(fieldObj, term);
-        //experiments.forEach(countFieldsTermsForExperiment.bind(this, fields));
-    } else if ( aggregate === 'experiment_sets' ){
-        throw new Error("Not yet built.");
-
-    } else if ( aggregate === 'files' ){
-        countFieldTerm(fieldObj, term, true, expFxn.fileCount(experiment));
-    }
-}
-
-
-/**
  * Performs the INITIAL aggregation (along the X-Axis) for field(s).
  *
  * @static
  * @ignore
  */
-function aggregateByType(fields, experiments, aggregate){
+function aggregateByType(fields, experiments){
 
     // Experiments
     experiments.forEach(function(exp){
@@ -200,7 +183,7 @@ export function getUniqueMatchedTermsFromExpsInSetWhereFieldIsTerm(experiments_i
  * @param {string} aggregate - Deprecated. What to aggregate by.
  * @param {boolean} [useOnlyPopulatedFields=false] - Whether to search for populated fields or not.
  */
-function partitionFields(fields, experiments, aggregate, useOnlyPopulatedFields = false){
+function partitionFields(fields, experiments, useOnlyPopulatedFields = false){
     var topIndex, nextIndex;
     if (!Array.isArray(fields) || fields.length < 2) throw new Error("Need at least 2 fields.");
     if (useOnlyPopulatedFields){
@@ -215,7 +198,7 @@ function partitionFields(fields, experiments, aggregate, useOnlyPopulatedFields 
         nextIndex = 1;
     }
     fields[topIndex].childField = fields[nextIndex];
-    return combinedFieldTermsForExperiments(fields, experiments, aggregate);
+    return combinedFieldTermsForExperiments(fields, experiments);
 }
 
 
@@ -293,7 +276,7 @@ export function getTermsForFieldsFromExperiment(fields, exp){
  * @static
  * @ignore
  */
-function combinedFieldTermsForExperiments(fields, experiments, aggregate){
+function combinedFieldTermsForExperiments(fields, experiments){
     var field;
     var fieldIndex;
     if (Array.isArray(fields)){ // Fields can be array or single field object.
@@ -392,32 +375,6 @@ function combinedFieldTermsForExperiments(fields, experiments, aggregate){
         });
     
     });
-
-        
-
-        /*
-        var expSets = expFxn.groupExperimentsIntoExperimentSets(experiments);
-
-        _.forEach(expSets, function(expsInSet){
-            var aggrValue = 1 / expsInSet.length;
-
-            expsInSet.forEach(function(exp){
-                aggregateExp(exp, aggrValue);
-            });
-            
-        });
-
-        // Finally, round resulting counts because JS might leave as 0.99999999999 instead of 1.
-        _.forEach(_.keys(field.terms), function(topFieldTerm){
-            _.forEach(_.keys(field.terms[topFieldTerm].terms), function(lowerFieldTerm){
-                field.terms[topFieldTerm].terms[lowerFieldTerm] = Math.round(field.terms[topFieldTerm].terms[lowerFieldTerm] * 100) / 100;
-            });
-            field.terms[topFieldTerm].total = Math.round(field.terms[topFieldTerm].total * 100) / 100;
-        });
-        */
-
-    //}
-    
 
     if (Array.isArray(fields)){
         fields[fieldIndex] = field; // Probably not needed as field already simply references fields[fieldIndex];

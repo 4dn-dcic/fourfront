@@ -297,18 +297,17 @@ export default class UIControlsWrapper extends React.Component {
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
         var contextualView = this.contextualView();
-        var fieldsForLegend = (this.props.experiments && this.state.fields[1] ? (
-            Legend.experimentsAndFieldsToLegendData(
-                this.state.showState === 'filtered' ? 
-                    (this.props.filteredExperiments || this.props.experiments)
-                    : this.props.experiments,
-                [this.state.fields[1]],
-                this.props.schemas
-            )
-        ) : null);
+
+        var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
+            !this.props.experiments || !this.state.fields[1] ? null :
+                Legend.aggregegateBarPlotData(
+                    this.state.showState === 'filtered' ? (this.props.filteredExperiments || this.props.experiments) :
+                        this.props.experiments,
+                    [this.state.fields[1]]
+                )
+        );
 
         this.shouldUpdate = false;
-        console.log(fieldsForLegend);
         if (fieldsForLegend && fieldsForLegend.length > 0 && fieldsForLegend[0] &&
             fieldsForLegend[0].terms && fieldsForLegend[0].terms.length > 0 &&
             fieldsForLegend[0].terms[0] && fieldsForLegend[0].terms[0].color === null){

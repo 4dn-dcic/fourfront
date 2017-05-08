@@ -3,6 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
+var barAggrFxn = require('./../BarPlot/aggregation-functions');
 var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, object } = require('./../../util');
 
@@ -90,14 +91,52 @@ export default class Legend extends React.Component {
     static Term = Term
     static Field = Field
 
+    static aggregegateBarPlotData(experiments, fields){
+        return barAggrFxn.genChartData(
+            experiments,
+            fields,
+            null,
+            'experiments',
+            false
+        );
+    }
 
+    static barPlotFieldDataToLegendFieldsData(field){
+        if (Array.isArray(field) && field.length > 0 && field[0] && typeof field[0] === 'object'){
+            return field.map(Legend.barPlotFieldDataToLegendFieldsData);
+        }
+        var terms = _.pairs(field.terms).map(function(p){ // p[0] = term, p[1] = term counts
+            return {
+                'field' : field.field,
+                'name' : Filters.Term.toName(field.field, p[0]),
+                'term' : p[0],
+                'color' : vizUtil.colorForNode({
+                    'term' : p[0],
+                    'field' : field.field
+                }, true, 'muted', null, true),
+                'experiment_sets' : p[1].experiment_sets,
+                'experiments' : p[1].experiments,
+                'files' : p[1].files
+            };
+        });
+
+        var adjustedField = _.extend({}, field, { 'terms' : terms });
+
+        return _.extend(adjustedField, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(adjustedField) });
+    }
+
+    /**
+     * @deprecated
+     */
     static experimentsAndFieldsToLegendData(experiments, fields, schemas = null){
         return fields.map(function(field){
             return Legend.experimentsAndFieldToLegendDataItem(experiments, field, schemas);
         });
     }
 
-
+    /**
+     * @deprecated
+     */
     static experimentsAndFieldToLegendDataItem(experiments, field, schemas = null){
 
         var legendFieldItem = {
@@ -168,7 +207,6 @@ export default class Legend extends React.Component {
         while (_.keys(groups).length > 0){
             result = result.concat(getSortedTermsSection());
         }
-        console.log(field.terms, result);
 
         return result;
 
