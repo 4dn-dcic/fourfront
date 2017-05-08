@@ -1053,7 +1053,7 @@
         position: relative;
         top: 1px;
         background-color: transparent; // Default
-        transition: opacity .25s, background-color .25s;
+        transition: opacity .25s, background-color .5s ease-out;
         //border: 1px solid #000;
     }
 

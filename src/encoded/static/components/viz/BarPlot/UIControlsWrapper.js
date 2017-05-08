@@ -101,7 +101,7 @@ export default class UIControlsWrapper extends React.Component {
         if (this.shouldUpdate){
             setTimeout(()=>{
                 this.forceUpdate();
-            }, 500);
+            }, 750);
         }
     }
 
