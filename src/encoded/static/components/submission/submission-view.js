@@ -83,27 +83,17 @@ export default class SubmissionView extends React.Component{
         }
     }
 
-    modifyMasterContext = (objKey, newContext, del=false) => {
+    modifyMasterContext = (objKey, newContext) => {
         // function that modifies new context and sets validation state whenever
         // a modification occurs. Is passed down to child elements representing
         // individual fields
-        // deleting edited fields is difficult because of patching
         var contextCopy = this.state.masterContext;
         var validCopy = this.state.masterValid;
-        var typesCopy = this.state.masterTypes;
-        if(del){
-            delete contextCopy[objKey];
-            delete validCopy[objKey];
-            delete typesCopy[objKey];
-        }else{
-            contextCopy[objKey] = newContext;
-            validCopy[objKey] = 0;
-        }
-        console.log('newContext:', contextCopy);
+        contextCopy[objKey] = newContext;
+        validCopy[objKey] = 0;
         this.setState({
             'masterContext': contextCopy,
-            'masterValid': validCopy,
-            'masterTypes': typesCopy
+            'masterValid': validCopy
         });
     }
 
@@ -118,6 +108,8 @@ export default class SubmissionView extends React.Component{
         var initDisplay = {0: principalDisplay};
         var initUnused = {};
         var unusedList = [];
+        var creatingIdx = 0;
+        var creatingType = principalTypes[0];
         var schema = schemas[principalTypes[0]];
         var hierarchy = this.state.keyHierarchy;
         hierarchy[0] = {};
@@ -125,50 +117,48 @@ export default class SubmissionView extends React.Component{
         if(!contextID || this.props.create){
             initContext[0] = buildContext({}, schema, unusedList, this.props.edit, this.props.create);
             initUnused[0] = unusedList;
-            this.setState({
-                'masterContext': initContext,
-                'masterValid': initValid,
-                'masterTypes': initType,
-                'masterDisplay': initDisplay,
-                'currKey': 0,
-                'keyHierarchy': hierarchy,
-                'unusedLinks': initUnused,
-                'creatingIdx': 0,
-                'creatingType': principalTypes[0]
+        }else{
+            ajax.promise(contextID + '?frame=object').then(response => {
+                if (response['@id'] && response['@id'] === contextID){
+                    initContext[0] = buildContext(response, schema, unusedList, this.props.edit, this.props.create);
+                    initUnused[0] = unusedList;
+                    if(this.props.edit && response.aliases && response.aliases.length > 0){
+                        // we already have an alias for editing, so use it for title
+                        // setting creatingIdx and creatingType to null prevents alias creation
+                        creatingIdx = null;
+                        creatingType = null;
+                        initDisplay[0] = response.aliases[0];
+                    }
+                    this.setState({
+                        'masterContext': initContext,
+                        'masterValid': initValid,
+                        'masterTypes': initType,
+                        'masterDisplay': initDisplay,
+                        'currKey': 0,
+                        'keyHierarchy': hierarchy,
+                        'unusedLinks': initUnused,
+                        'creatingIdx': creatingIdx,
+                        'creatingType': creatingType
+                    });
+                    return;
+                }else{
+                    // something went wrong with fetching context. Just use an empty object
+                    initContext[0] = buildContext({}, schema, unusedList, this.props.edit, this.props.create);
+                    initUnused[0] = unusedList;
+                }
+
             });
-            return;
         }
-        ajax.promise(contextID + '?frame=object').then(response => {
-            if (response['@id'] && response['@id'] === contextID){
-                initContext[0] = buildContext(response, schema, unusedList, this.props.edit, this.props.create);
-                initUnused[0] = unusedList;
-                this.setState({
-                    'masterContext': initContext,
-                    'masterValid': initValid,
-                    'masterTypes': initType,
-                    'masterDisplay': initDisplay,
-                    'currKey': 0,
-                    'keyHierarchy': hierarchy,
-                    'unusedLinks': initUnused,
-                    'creatingIdx': 0,
-                    'creatingType': principalTypes[0]
-                });
-            }else{
-                // something went wrong with fetching context. Just use an empty object
-                initContext[0] = buildContext({}, schema, unusedList, this.props.edit, this.props.create);
-                initUnused[0] = unusedList;
-                this.setState({
-                    'masterContext': initContext,
-                    'masterValid': initValid,
-                    'masterTypes': initType,
-                    'masterDisplay': initDisplay,
-                    'currKey': 0,
-                    'keyHierarchy': hierarchy,
-                    'unusedLinks': initUnused,
-                    'creatingIdx': 0,
-                    'creatingType': principalTypes[0]
-                });
-            }
+        this.setState({
+            'masterContext': initContext,
+            'masterValid': initValid,
+            'masterTypes': initType,
+            'masterDisplay': initDisplay,
+            'currKey': 0,
+            'keyHierarchy': hierarchy,
+            'unusedLinks': initUnused,
+            'creatingIdx': creatingIdx,
+            'creatingType': creatingType
         });
     }
 
@@ -227,13 +217,14 @@ export default class SubmissionView extends React.Component{
         }
     }
 
-    modifyAlias = (aliases) => {
+    modifyAlias = () => {
         var masterDisplay = this.state.masterDisplay;
         var masterTypes = this.state.masterTypes;
         var currKey = this.state.currKey;
         var currAlias = masterDisplay[currKey];
+        var aliases = this.state.masterContext[currKey].aliases || null;
         // no aliases
-        if(aliases === null){
+        if(aliases === null || aliases === []){
             masterDisplay[currKey] = 'My ' + masterTypes[currKey] + ' ' + currKey;
         }else if(!_.contains(aliases, currAlias)){
             var lastAlias = aliases[aliases.length-1];
@@ -320,7 +311,6 @@ export default class SubmissionView extends React.Component{
         if(masterDisplay[key]){
             var hierarchy = this.state.keyHierarchy;
             var newHierarchy = trimHierarchy(hierarchy, key);
-            delete masterDisplay[key];
             if(unusedCopy[key]){
                 delete unusedCopy[key];
             }
@@ -751,28 +741,52 @@ class RoundOneObject extends React.Component{
     // if objDelete is true, check to see if the value could be an object
     // getting removed. If field == 'aliases', change masterDisplay to reflect
     // the new alias name.
-    modifyNewContext = (field, value, objDelete=false) => {
+    modifyNewContext = (field, value, fieldType, arrayIdx=null, type=null) => {
         var splitField = field.split('.');
+        var arrayIdxPointer = 0;
         var contextCopy = this.props.currContext;
         var pointer = contextCopy;
+        if(fieldType === 'new linked object'){
+            value = this.props.keyIter + 1;
+        }
+        var prevValue = null;
         for (var i=0; i<(splitField.length-1); i++){
             if(pointer[splitField[i]]){
                 pointer = pointer[splitField[i]];
-            } else {
+            }else{
                 console.log('PROBLEM CREATING NEW CONTEXT WITH: ', field, value);
                 return;
             }
+            if(pointer instanceof Array){
+                pointer = pointer[arrayIdx[arrayIdxPointer]];
+                arrayIdxPointer += 1;
+            }
         }
-        var prevValue = pointer[splitField[splitField.length-1]];
-        if(objDelete){
+        if(pointer[splitField[splitField.length-1]] instanceof Array && fieldType !== 'array'){
+            // move pointer into array
+            pointer = pointer[splitField[splitField.length-1]];
+            prevValue = pointer[arrayIdx[arrayIdxPointer]];
+            if(value === null){ // delete this array item
+                pointer.splice(arrayIdx[arrayIdxPointer], 1);
+            }else{
+                pointer[arrayIdx[arrayIdxPointer]] = value;
+            }
+        }else{ // value we're trying to set is not inside an array at this point
+            var prevValue = pointer[splitField[splitField.length-1]];
+            pointer[splitField[splitField.length-1]] = value;
+        }
+        // actually change value
+        this.props.modifyMasterContext(this.props.currKey, contextCopy);
+        if(fieldType === 'new linked object'){
+            // value is new key index in this case
+            this.props.initCreateObj(type, value);
+        }
+        if(fieldType === 'linked object'){
             this.checkObjectRemoval(value, prevValue);
         }
         if(field === 'aliases'){
-            this.props.modifyAlias(value);
+            this.props.modifyAlias();
         }
-        // actually change value
-        pointer[splitField[splitField.length-1]] = value;
-        this.props.modifyMasterContext(this.props.currKey, contextCopy);
     }
 
     fetchObjTitle = (value, type) => {
@@ -785,46 +799,10 @@ class RoundOneObject extends React.Component{
         });
     }
 
-    checkObjectRemoval = (value, prevValue) =>{
-        // If deleting, check array and object cases to see if the removed
-        // value is a key to a custom/existing linked object; update top-level
-        // state if so.
-        // Must repeatedly check for arrays/objects
-        if(prevValue instanceof Array){
-            prevValue.forEach(function(arrayValue, index){
-                if(arrayValue instanceof Array || arrayValue instanceof Object){
-                    var nextValue;
-                    if(value === null){
-                        nextValue = null;
-                    }else{
-                        // this might be a problem in some edge cases
-                        nextValue = value[index];
-                    }
-                    this.checkObjectRemoval(nextValue, arrayValue);
-                }else if(value === null || !_.contains(value, arrayValue)){
-                    //ARRAYS NOT REMOVING PROPERLY
-                    console.log('ARR removal err!',value,prevValue);
-                    this.props.removeObj(arrayValue);
-                }
-            }.bind(this));
-        }else if(prevValue instanceof Object){
-            Object.keys(prevValue).map(function(key){
-                if(prevValue[key] instanceof Array || prevValue[key] instanceof Object){
-                    var nextValue;
-                    if(value === null){
-                        nextValue = null;
-                    }else{
-                        nextValue = value[key];
-                    }
-                    this.checkObjectRemoval(nextValue, prevValue[key]);
-                }else if(value === null || (prevValue[key] !== null && value[key] === null)){
-                    this.props.removeObj(prevValue[key]);
-                }
-            }.bind(this));
-        }else if(value === null){
+    checkObjectRemoval = (value, prevValue) => {
+         if(value === null){
             this.props.removeObj(prevValue);
         }
-
     }
 
     getFieldValue = (field) => {
@@ -864,45 +842,6 @@ class RoundOneObject extends React.Component{
         }
     }
 
-    // initializes creation of a new object. Value is effectively
-    // the new currKey index. Complex because it must handle arrays and
-    // objects.
-    createObj = (type, nestedField, arrayIdx) => {
-        if(arrayIdx !== null){
-            // we have arrays involved
-            // use an array of array indexes and nested field structure
-            // made by the BuildFields to set the context correctly.
-            var splitField = nestedField.split('.');
-            var arrayIdxPointer = 0;
-            var contextCopy = this.props.currContext;
-            var pointer = contextCopy;
-            var newIdx = this.props.keyIter + 1;
-            for (var i=0; i<(splitField.length-1); i++){
-                if(pointer[splitField[i]]){
-                    pointer = pointer[splitField[i]];
-                }else{
-                    return;
-                }
-                if(pointer instanceof Array){
-                    pointer = pointer[arrayIdx[arrayIdxPointer]];
-                    arrayIdxPointer += 1;
-                }
-            }
-            if(pointer[splitField[splitField.length-1]] instanceof Array){
-                // move pointer into array
-                pointer = pointer[splitField[splitField.length-1]];
-                pointer[arrayIdx[arrayIdxPointer]] = newIdx;
-            }else{ // must be a dict
-                pointer[splitField[splitField.length-1]] = newIdx;
-            }
-            this.props.modifyMasterContext(this.props.currKey, contextCopy);
-            this.props.initCreateObj(type, newIdx);
-        }else{
-            this.modifyNewContext(this.state.selectField, newIdx);
-            this.props.initCreateObj(type, newIdx);
-        }
-    }
-
     // use when selecting a new object
     selectObj = (type, data, field, array=null) => {
         setTimeout(layout.animateScrollTo(0), 100);
@@ -919,47 +858,16 @@ class RoundOneObject extends React.Component{
     // callback passed to Search when selecting existing object
     // when value is null, function is delete
     selectComplete = (value) => {
-        if(this.state.selectField){
-            if(this.state.selectArrayIdx !== null){
-                // we have arrays involved
-                // use an array of array indexes and nested field structure
-                // made by the BuildFields to set the context correctly.
-                var splitField = this.state.selectField.split('.');
-                var arrayIdxPointer = 0;
-                var contextCopy = this.props.currContext;
-                var pointer = contextCopy;
-                for (var i=0; i<(splitField.length-1); i++){
-                    if(pointer[splitField[i]]){
-                        pointer = pointer[splitField[i]];
-                    } else {
-                        this.setState({
-                            'selectType': null,
-                            'selectData': null,
-                            'selectQuery': null,
-                            'selectField': null,
-                            'selectArrayIdx': null
-                        });
-                        this.props.setMasterState('fullScreen', false);
-                        return;
-                    }
-                    if(pointer instanceof Array){
-                        pointer = pointer[this.state.selectArrayIdx[arrayIdxPointer]];
-                        arrayIdxPointer += 1;
-                    }
-                }
-                if(pointer[splitField[splitField.length-1]] instanceof Array){
-                    // move pointer into array
-                    pointer = pointer[splitField[splitField.length-1]];
-                    pointer[this.state.selectArrayIdx[arrayIdxPointer]] = value;
-                }else{ // must be a dict
-                    pointer[splitField[splitField.length-1]] = value;
-                }
-                this.props.modifyMasterContext(this.props.currKey, contextCopy);
-                this.fetchObjTitle(value, this.state.selectType);
-            }else{
-                this.modifyNewContext(this.state.selectField, value);
-                this.fetchObjTitle(value, this.state.selectType);
-            }
+        var isRepeat = false;
+        var current = this.props.currContext[this.state.selectField];
+        if(current instanceof Array && _.contains(Object.keys(current), value)){
+            isRepeat = true;
+        }
+        if(this.state.selectField && !isRepeat){
+            this.modifyNewContext(this.state.selectField, value, 'existing linked object', this.state.selectArrayIdx);
+            this.fetchObjTitle(value, this.state.selectType);
+        }else{
+            this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectArrayIdx);
         }
         this.setState({
             'selectType': null,
@@ -1031,6 +939,7 @@ class RoundOneObject extends React.Component{
                 field={field}
                 fieldType={fieldType}
                 fieldTip={fieldTip}
+                nestedField={field}
                 enumValues={enumValues}
                 disabled={false}
                 modifyNewContext={this.modifyNewContext}
@@ -1038,10 +947,11 @@ class RoundOneObject extends React.Component{
                 modifyMD5Progess={null}
                 md5Progress={null}
                 getFieldValue={this.getFieldValue}
-                required={required} isLinked={isLinked}
+                required={required}
+                isLinked={isLinked}
                 selectObj={this.selectObj}
-                createObj={this.createObj}
                 title={fieldTitle}
+                arrayIdx={null}
                 edit={this.props.edit}
                 create={this.props.create}
                 masterDisplay={this.props.masterDisplay}
@@ -1057,7 +967,7 @@ class RoundOneObject extends React.Component{
             selecting = true;
         }
         // get the fields from passed down context
-        var fields = Object.keys(this.props.currContext) || [];
+        var fields = this.props.currContext ? Object.keys(this.props.currContext) : [];
         var buildFields = [];
         var linkedObjs = [];
         for (var i=0; i<fields.length; i++){

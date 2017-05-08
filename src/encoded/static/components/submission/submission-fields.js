@@ -40,10 +40,8 @@ var BuildField = module.exports.BuildField = React.createClass({
             'modifyNewContext': this.props.modifyNewContext,
             'getFieldValue': this.props.getFieldValue,
             'selectObj': this.props.selectObj,
-            'createObj': this.props.createObj,
             'arrayIdx': this.props.arrayIdx,
             'isArray': this.props.isArray,
-            'arrayField': this.props.arrayField,
             'nestedField': this.props.nestedField,
             'schema': this.props.schema,
             'md5Progress': this.props.md5Progress,
@@ -116,8 +114,7 @@ var BuildField = module.exports.BuildField = React.createClass({
     },
 
     submitEnumVal: function(eventKey){
-        //TODO: add an option to remove the value?
-        this.props.modifyNewContext(this.props.field, eventKey);
+        this.props.modifyNewContext(this.props.nestedField, eventKey, this.props.fieldType, this.props.arrayIdx);
     },
 
     handleChange: function(e){
@@ -132,19 +129,13 @@ var BuildField = module.exports.BuildField = React.createClass({
                 currValue = parseFloat(currValue);
             }
         }
-        this.props.modifyNewContext(this.props.field, currValue);
+        this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.arrayIdx);
     },
 
     // call modifyNewContext from parent to delete the value in the field
     deleteField : function(e){
         e.preventDefault();
-        if(this.props.fieldType === 'linked object'){
-            this.props.modifyNewContext(this.props.field, null, true);
-        }else if(this.props.isArray){
-            this.props.arrayDelete(this.props.field);
-        }else{
-            this.props.modifyNewContext(this.props.field, null);
-        }
+        this.props.modifyNewContext(this.props.nestedField, null, this.props.fieldType, this.props.arrayIdx);
     },
 
     // this needs to live in BuildField for styling purposes
@@ -155,7 +146,7 @@ var BuildField = module.exports.BuildField = React.createClass({
         }
         var valueCopy = this.props.value ? this.props.value.slice() : [];
         valueCopy.push(null);
-        this.props.modifyNewContext(this.props.field, valueCopy);
+        this.props.modifyNewContext(this.props.nestedField, valueCopy, this.props.fieldType, this.props.arrayIdx);
     },
 
     render: function(){
@@ -165,59 +156,44 @@ var BuildField = module.exports.BuildField = React.createClass({
         var showDelete = false;
         // don't show delet button unless:
         // 1. not in hardcoded cannot delete list AND 2. has a value (non-null)
-        // AND 3. is not an array (individual values get deleted)
-        if(!_.contains(cannot_delete,this.props.field) && this.props.value && this.props.fieldType !== 'array'){
+        // AND 3. is not an object or non-empty array element (individual values get deleted)
+        if(!_.contains(cannot_delete, this.props.field) && this.props.value !== null && this.props.fieldType !== 'array'){
             showDelete = true;
         }
-        var isArrayItem = this.props.isArray ? true : false;
         // array items don't need fieldnames/tooltips
-        if(isArrayItem){
+        if(this.props.isArray){
+            // if we've got an object that's inside inside an array, only allow
+            // the array to be deleted if ALL individual fields are null
             if(this.props.fieldType === 'object'){
-                return(
-                    <div className="row facet" style={{'overflow':'visible'}}>
-                        <div className="col-sm-12">
-                            <div>
-                                {this.displayField(this.props.fieldType)}
-                                <div>
-                                    <div className="pull-right">
-                                        <Button bsSize="xsmall" bsStyle="danger" style={{'width':'90px'}} onClick={this.deleteField}>
-                                            {'Delete item'}
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }else{
-                return(
-                    <div className="row facet" style={{'overflow':'visible'}}>
-                        <div className="col-sm-12 col-md-3">
-                            <h5 className="facet-title submission-field-title">
-                                <span className="inline-block">{this.props.title + ' #' + parseInt(this.props.field + 1)}</span>
-                                <InfoIcon children={this.props.fieldTip}/>
-                            </h5>
-                        </div>
-                        <div className="col-sm-12 col-md-9">
-                            <div>
-                                {this.displayField(this.props.fieldType)}
+                var valueCopy = this.props.value ? JSON.parse(JSON.stringify(this.props.value)) : {};
+                var nullItems = Object.keys(valueCopy).filter(item => valueCopy[item] === null);
+                if( Object.keys(valueCopy).length !== nullItems.length){
+                    showDelete = false;
+                }
+            }
+            return(
+                <div className="row facet" style={{'overflow':'visible'}}>
+                    <div className="col-sm-12">
+                        <div>
+                            {this.displayField(this.props.fieldType)}
+                            <Fade in={showDelete}>
                                 <div className="pull-right">
-                                    <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} onClick={this.deleteField}>
+                                    <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
                                         {'Delete item'}
                                     </Button>
                                 </div>
-                            </div>
+                            </Fade>
                         </div>
                     </div>
-                );
-            }
+                </div>
+            );
         }
         return(
 
             <div className="row facet" style={{'overflow':'visible'}}>
                 <div className="col-sm-12 col-md-3">
                     <h5 className="facet-title submission-field-title">
-                        <span className="inline-block">{this.props.title}</span>
+                        <span style={{'marginRight': '6px'}} className="inline-block">{this.props.title}</span>
                         <InfoIcon children={this.props.fieldTip}/>
                         {this.props.required ?
                             <span style={{'color':'#a94442', "marginRight":"6px"}}>Required</span>
@@ -233,22 +209,16 @@ var BuildField = module.exports.BuildField = React.createClass({
                     </h5>
                 </div>
                 <div className="col-sm-12 col-md-9">
-                    {this.props.fieldType === 'array' ?
-                        <div>
-                            {this.displayField(this.props.fieldType)}
-                        </div>
-                        :
-                        <div>
-                            {this.displayField(this.props.fieldType)}
-                            <Fade in={showDelete}>
-                                <div className="pull-right">
-                                    <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                        {'Delete'}
-                                    </Button>
-                                </div>
-                            </Fade>
-                        </div>
-                    }
+                    <div>
+                        {this.displayField(this.props.fieldType)}
+                        <Fade in={showDelete}>
+                            <div className="pull-right">
+                                <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
+                                    {'Delete'}
+                                </Button>
+                            </div>
+                        </Fade>
+                    </div>
                 </div>
             </div>
         );
@@ -289,7 +259,6 @@ var LinkedObj = React.createClass({
                         state['data'] = data;
                     }
                 }else{
-                    console.log('Available object failed. See LinkedObj in create.js');
                     state['data'] = null;
                     state['type'] = null;
                 }
@@ -313,8 +282,10 @@ var LinkedObj = React.createClass({
                 thisDisplay = masterDisplay ? masterDisplay[this.props.value] : this.props.value;
                 return(
                     <div>
-                        <a href={this.props.value} target="_blank">{thisDisplay}</a>
-                        <i style={{'paddingLeft':'4px'}} className={"icon icon-external-link"}></i>
+                        <a href={this.props.value} target="_blank">
+                            <span>{thisDisplay}</span>
+                            <i style={{'paddingLeft':'4px'}} className={"icon icon-external-link"}></i>
+                        </a>
                     </div>
                 );
             }else{
@@ -334,22 +305,12 @@ var LinkedObj = React.createClass({
             }
 
         }
-        // pass LinkedObj field to RoundOneObject with nested field format
-        // such as, arguments.argument_mapping.workflow_step
-        var nestedField;
-        if(this.props.nestedField){
-            nestedField = this.props.nestedField;
-        }else if(this.props.isArray){
-            nestedField = this.props.arrayField;
-        }else{
-            nestedField = this.props.field;
-        }
         return(
             <div>
                 {this.state.data ?
                     <Button bsSize="xsmall" style={style} onClick={function(e){
                             e.preventDefault();
-                            this.props.selectObj(this.state.collection, this.state.data, nestedField, this.props.arrayIdx);
+                            this.props.selectObj(this.state.collection, this.state.data, this.props.nestedField, this.props.arrayIdx);
                         }.bind(this)}>
                         {'Select existing'}
                     </Button>
@@ -360,7 +321,7 @@ var LinkedObj = React.createClass({
                 }
                 <Button bsSize="xsmall" style={style}onClick={function(e){
                         e.preventDefault();
-                        this.props.createObj(this.state.type, nestedField, this.props.arrayIdx);
+                        this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.arrayIdx, this.state.type);
                     }.bind(this)}>
                     {'Create new'}
                 </Button>
@@ -376,22 +337,6 @@ which essentially aggregates the context of the elements are propogates them
 upwards using this.props.modifyNewContext*/
 
 var ArrayField = React.createClass({
-
-    modifyArrayContent: function(idx, value){
-        var valueCopy = this.props.value ? this.props.value.slice() : [];
-        valueCopy[idx] = value;
-        this.props.modifyNewContext(this.props.field, valueCopy, true);
-    },
-
-    deleteArrayValue: function(idx){
-        var valueCopy = this.props.value ? this.props.value.slice() : [];
-        valueCopy.splice(idx, 1);
-        // an empty array should be represented as null
-        if(valueCopy.length === 0){
-            valueCopy = null;
-        }
-        this.props.modifyNewContext(this.props.field, valueCopy, true);
-    },
 
     initiateArrayField: function(arrayInfo) {
         var value = arrayInfo[0] || null;
@@ -438,21 +383,18 @@ var ArrayField = React.createClass({
                 <BuildField
                     value={value}
                     schema={fieldSchema}
-                    field={arrayIdx}
+                    field={this.props.field}
                     fieldType={fieldType}
                     fieldTip={fieldTip}
                     title={title}
                     enumValues={enumValues}
                     disabled={false}
-                    modifyNewContext={this.modifyArrayContent}
+                    modifyNewContext={this.props.modifyNewContext}
                     required={false}
-                    arrayDelete={this.deleteArrayValue}
                     selectObj={this.props.selectObj}
-                    createObj={this.props.createObj}
                     arrayIdx={arrayIdxList}
                     nestedField={this.props.nestedField}
                     isArray={true}
-                    arrayField={this.props.field}
                     masterDisplay={this.props.masterDisplay}
                     setMasterState= {this.props.setMasterState}
                 />
@@ -487,18 +429,7 @@ var ObjectField = React.createClass({
     componentDidMount: function(){
         // initialize with empty dictionary
         var initVal = this.props.value || {};
-        this.props.modifyNewContext(this.props.field, initVal);
-    },
-
-    modifyObjectContent: function(field, value){
-        var valueCopy;
-        if(!this.props.value || this.props.value == '' || this.props.value == 'No value'){
-            valueCopy = {};
-        }else{
-            valueCopy = JSON.parse(JSON.stringify(this.props.value));
-        }
-        valueCopy[field] = value;
-        this.props.modifyNewContext(this.props.field, valueCopy, true);
+        this.props.modifyNewContext(this.props.nestedField, initVal, 'object', this.props.arrayIdx);
     },
 
     includeField : function(schema, field){
@@ -554,15 +485,7 @@ var ObjectField = React.createClass({
         }
         // format field as <this_field>.<next_field> so top level modification
         // happens correctly
-        var nestedField;
-        if(this.props.nestedField){
-            nestedField = this.props.nestedField;
-        }else if(this.props.isArray){
-            nestedField = this.props.arrayField;
-        }else{
-            nestedField = this.props.field;
-        }
-        nestedField = nestedField + '.' + field;
+        var nestedField = this.props.nestedField + '.' + field;
         return(
             <BuildField
                 value={fieldValue}
@@ -573,10 +496,9 @@ var ObjectField = React.createClass({
                 fieldTip={fieldTip}
                 enumValues={enumValues}
                 disabled={false}
-                modifyNewContext={this.modifyObjectContent}
+                modifyNewContext={this.props.modifyNewContext}
                 required={false}
                 selectObj={this.props.selectObj}
-                createObj={this.props.createObj}
                 title={title}
                 nestedField={nestedField}
                 isArray={false}
@@ -632,7 +554,7 @@ var AttachmentInput = React.createClass({
         var attachment_props = {};
         var file = e.target.files[0];
         if(!file){
-            this.props.modifyNewContext(this.props.field, null);
+            this.props.modifyNewContext(this.props.nestedField, null, 'attachment', this.props.arrayIdx);
             return;
         }
         attachment_props.type = file.type;
@@ -649,7 +571,7 @@ var AttachmentInput = React.createClass({
             }
 
         }.bind(this);
-        this.props.modifyNewContext(this.props.field, attachment_props);
+        this.props.modifyNewContext(this.props.nestedField, null, 'attachment', this.props.arrayIdx);
     },
 
     render: function(){
@@ -693,7 +615,7 @@ var S3FileInput = React.createClass({
         }else{
             var filename = file.name ? file.name : "unknown";
             getLargeMD5(file, this.props.modifyMD5Progess).then((hash) => {
-                this.props.modifyNewContext('md5sum',hash);
+                this.props.modifyNewContext('md5sum', hash, 'file upload', this.props.arrayIdx);
                 console.log('HASH SET TO:', hash, 'FOR FILE:', this.props.value);
                 this.props.modifyMD5Progess(null);
             }).catch((error) => {
@@ -701,7 +623,7 @@ var S3FileInput = React.createClass({
                 // TODO: should file upload fail on a md5 error?
                 this.props.modifyMD5Progess(null);
             });
-            this.props.modifyNewContext(this.props.field, filename);
+            this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.arrayIdx);
             // calling modifyFile changes the 'file' state of top level component
             this.props.modifyFile(file);
         }
@@ -755,7 +677,7 @@ class InfoIcon extends React.Component{
     render() {
         if (!this.props.children) return null;
         return (
-            <i style={{"marginRight":"6px"}} className="icon icon-info-circle" data-tip={this.props.children}/>
+            <i style={{"marginRight":"6px",'marginLeft':'0px'}} className="icon icon-info-circle" data-tip={this.props.children}/>
         );
     }
 }

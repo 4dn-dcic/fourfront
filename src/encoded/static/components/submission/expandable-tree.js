@@ -114,7 +114,7 @@ class SubmissionLeaf extends React.Component{
         var buttonStyle = {
             'height': '15px',
             'width': '15px',
-            'padding':'4px 7px 0px 3px'
+            'padding':'3px 6px 1px 4px'
         };
         var iconStyle = {
             'fontSize': '0.8em',
