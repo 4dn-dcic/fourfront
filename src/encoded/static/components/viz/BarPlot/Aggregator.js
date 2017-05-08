@@ -27,7 +27,7 @@ var aggregationFxn = require('./aggregation-functions');
 export default class Aggregator extends React.Component {
     
     static defaultProps = {
-        'debug' : true
+        'debug' : false
     }
 
     static updatedStateFromProps(nextProps, pastProps){
