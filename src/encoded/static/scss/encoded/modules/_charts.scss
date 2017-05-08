@@ -1052,7 +1052,8 @@
         margin-right: 6px;
         position: relative;
         top: 1px;
-        transition: opacity .25s;
+        background-color: transparent; // Default
+        transition: opacity .25s, background-color .25s;
         //border: 1px solid #000;
     }
 

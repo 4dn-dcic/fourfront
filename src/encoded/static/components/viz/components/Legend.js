@@ -72,6 +72,8 @@ var Legend = module.exports = React.createClass({
              * @private
              */
             render : function(){
+                var color = this.props.color;
+                if (!color) color = 'transparent';
                 return (
                     <div
                         className="term"
@@ -80,7 +82,7 @@ var Legend = module.exports = React.createClass({
                         <div
                             className="color-patch no-highlight-color"
                             data-term={this.props.term}
-                            style={{ backgroundColor : this.props.color }}
+                            style={{ backgroundColor : color }}
                         />
                         { this.props.name || Filters.Term.toName(this.props.field, this.props.term) }
                     </div>
@@ -126,7 +128,7 @@ var Legend = module.exports = React.createClass({
                     'color' : vizUtil.colorForNode({
                         'term' : term,
                         'field' : field.field
-                    }, true),
+                    }, true, 'muted', null, true),
                     'term' : term,
                     'name' : Filters.Term.toName(field.field, term)
                 };
@@ -172,6 +174,10 @@ var Legend = module.exports = React.createClass({
             'width' : null,
             'title' : null //<h4 className="text-500">Legend</h4>
         };
+    },
+
+    componentDidUpdate : function(pastProps, pastState){
+        console.log('LEG', this.props.fields, pastProps.fields);
     },
 
     /**

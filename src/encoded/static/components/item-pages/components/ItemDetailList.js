@@ -95,7 +95,6 @@ class SubItemView extends React.Component {
         var schemas = this.props.schemas;
         var item = this.props.content;
         var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap || {};
-        console.log(keyTitleDescriptionMap);
         return (
             <div className="sub-panel data-display panel-body-with-header">
                 <div className="key-value sub-descriptions">

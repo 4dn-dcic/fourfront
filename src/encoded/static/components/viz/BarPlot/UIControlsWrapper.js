@@ -39,6 +39,8 @@ export default class UIControlsWrapper extends React.Component {
     constructor(props){
         super(props);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.updateIfShould = this.updateIfShould.bind(this);
         this.filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected.bind(this);
         this.titleMap = this.titleMap.bind(this);
         this.adjustedChildChart = this.adjustedChildChart.bind(this);
@@ -80,6 +82,26 @@ export default class UIControlsWrapper extends React.Component {
             )
         ){
             this.setState({ 'showState' : 'all' });
+        }
+    }
+    
+    componentDidUpdate(pastProps, pastState){
+        this.updateIfShould();
+    }
+
+    componentDidMount(){
+        this.updateIfShould();
+    }
+
+    /**
+     * Do a forceUpdate() in case we set this.shouldUpdate = true in an initial render.
+     * this.shouldUpdate would be set if legend fields do not have colors yet from cache.
+     */
+    updateIfShould(){
+        if (this.shouldUpdate){
+            setTimeout(()=>{
+                this.forceUpdate();
+            }, 500);
         }
     }
 
@@ -275,6 +297,23 @@ export default class UIControlsWrapper extends React.Component {
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
         var contextualView = this.contextualView();
+        var fieldsForLegend = (this.props.experiments && this.state.fields[1] ? (
+            Legend.experimentsAndFieldsToLegendData(
+                this.state.showState === 'filtered' ? 
+                    (this.props.filteredExperiments || this.props.experiments)
+                    : this.props.experiments,
+                [this.state.fields[1]],
+                this.props.schemas
+            )
+        ) : null);
+
+        this.shouldUpdate = false;
+        console.log(fieldsForLegend);
+        if (fieldsForLegend && fieldsForLegend.length > 0 && fieldsForLegend[0] &&
+            fieldsForLegend[0].terms && fieldsForLegend[0].terms.length > 0 &&
+            fieldsForLegend[0].terms[0] && fieldsForLegend[0].terms[0].color === null){
+            this.shouldUpdate = true;
+        }
 
         return (
             <div className="bar-plot-chart-controls-wrapper">
@@ -356,17 +395,7 @@ export default class UIControlsWrapper extends React.Component {
                         }}>
                             
                             <Legend
-                                fields={(
-                                    this.props.experiments && this.state.fields[1] ? (
-                                        Legend.experimentsAndFieldsToLegendData(
-                                            this.state.showState === 'filtered' ? 
-                                                (this.props.filteredExperiments || this.props.experiments)
-                                                : this.props.experiments,
-                                            [this.state.fields[1]],
-                                            this.props.schemas
-                                        )
-                                    ) : null
-                                )}
+                                fields={fieldsForLegend}
                                 includeFieldTitles={false}
                                 schemas={this.props.schemas}
                                 width={layout.gridContainerWidth() * (3/12) - 20}

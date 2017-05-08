@@ -364,6 +364,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			display: inline-block;
 			> .link {
 				color: #00cca3; // temporary?
+				cursor: pointer;
 				&:hover,&:focus {
 					color: #00cca3;
 				}

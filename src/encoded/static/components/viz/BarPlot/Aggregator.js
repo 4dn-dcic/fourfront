@@ -86,7 +86,7 @@ export default class Aggregator extends React.Component {
         
         if (this.state.aggregatedData && this.state.aggregatedData[1]){
             // Pre-cache colors.
-            console.log(this.preCacheColors(this.state.aggregatedData[1]));
+            this.preCacheColors(this.state.aggregatedData[1]);
         }
 
     }
@@ -124,11 +124,6 @@ export default class Aggregator extends React.Component {
     componentWillReceiveProps(nextProps){
 
         var state = Aggregator.updatedStateFromProps(nextProps, this.props);
-
-        // If this is initial run, pre-cache 'all' colors.
-        if (state.aggregatedData && !this.state.aggregatedData){
-            console.log('AGGRDATA', state.aggregatedData);
-        }
 
         if (_.keys(state).length > 0){
             if (this.props.debug) console.log('Aggregator > WILL UPDATE STATE (new, old:)', state, this.state);
