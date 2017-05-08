@@ -1,7 +1,7 @@
 """The type file for the workflow related items.
 """
 from snovault import (
-    # calculated_property,
+    calculated_property,
     collection,
     load_schema,
 )
@@ -22,7 +22,123 @@ class Workflow(Item):
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
     embedded = ['workflow_steps.step',
-                'workflow_steps.step_name']
+                'workflow_steps.step_name',
+                'arguments',
+                'analysis_steps',
+                'arguments.argument_mapping']
+
+
+    @calculated_property(schema={
+        "title": "Workflow Analysis Steps",
+        "type": "array",
+        "items": {
+            "title": "Analysis Step",
+            "type": "object",
+        }
+    }, category='page')
+    def analysis_steps(self, request):
+        """smth."""
+        if not request.has_permission('view_details'):
+            return
+
+        if self.properties.get('arguments') is None:
+            return
+
+        steps = []
+
+        # Find all unique steps in arguments, order of occurrence.
+        for arg in self.properties['arguments']:
+            mapping = arg.get('argument_mapping')
+            if mapping is None:
+                continue
+            for mappedArg in mapping:
+                step = mappedArg.get('workflow_step')
+                if step is not None:
+                    steps.append(step)
+
+        # Unique-ify steps list while preserving list order
+        unique_steps_unordered = set()
+        unique_add = unique_steps_unordered.add
+        steps = [
+            step for step in steps if not (step in unique_steps_unordered or unique_add(step))
+        ]
+
+        steps = list(map(
+            lambda uuid: request.embed('/' + str(uuid), '@@embedded'),
+            steps
+        ))
+
+        # Distribute arguments into steps' "inputs" and "outputs" arrays.
+        for step in steps:
+            step['inputs'] = []
+            step['outputs'] = []
+            for arg in self.properties['arguments']:
+                mapping = arg.get('argument_mapping')
+                if mapping is None:
+                    continue
+                for mappingIndex, mappedArg in enumerate(mapping):
+
+                    if mappedArg.get('workflow_step') == step['uuid']:
+
+                        if (mappedArg.get('step_argument_type') == 'Input file' or
+                            mappedArg.get('step_argument_type') == 'Input file or parameter' or
+                            mappedArg.get('step_argument_type') == 'parameter' ):
+
+                            inputNode = {
+                                "name" : mappedArg.get('step_argument_name'),
+                                "source" : []
+                            }
+
+                            doesOutputMappingExist = len([ mp for mp in mapping if mp.get('step_argument_type') == 'Output file' or mp.get('step_argument_type') == 'Output file or parameter' ]) > 0
+
+                            if arg.get("workflow_argument_name") is not None and not doesOutputMappingExist:
+                                source = { "name" : arg["workflow_argument_name"] }
+                                if mappedArg['step_argument_type'] == 'parameter':
+                                    source["type"] = "Workflow Parameter"
+                                else:
+                                    source["type"] = "Workflow Input File"
+                                inputNode["source"].append(source)
+                            if len(mapping) > 1:
+                                otherIndex = 0
+                                if mappingIndex == 0:
+                                    otherIndex = 1
+                                inputNode["source"].append({
+                                    "name" : mapping[otherIndex]["step_argument_name"],
+                                    "step" : mapping[otherIndex]["workflow_step"],
+                                    "type" : mapping[otherIndex].get("step_argument_type")
+                                })
+
+                            step["inputs"].append(inputNode)
+
+                        elif (mappedArg.get('step_argument_type') == 'Output file' or
+                            mappedArg.get('step_argument_type') == 'Output file or parameter' ):
+
+                            outputNode = {
+                                "name" : mappedArg.get("step_argument_name"),
+                                "target" : []
+                            }
+
+                            if arg.get("workflow_argument_name") is not None:
+                                target = {}
+                                target["name"] = arg["workflow_argument_name"]
+                                if mappedArg['step_argument_type'] == 'parameter': # shouldn't happen, but just in case
+                                    target["type"] = "Workflow Output Parameter"
+                                else:
+                                    target["type"] = "Workflow Output File"
+                                outputNode["target"].append(target)
+                            if len(mapping) > 1:
+                                otherIndex = 0
+                                if mappingIndex == 0:
+                                    otherIndex = 1
+                                outputNode["target"].append({
+                                    "name" : mapping[otherIndex]["step_argument_name"],
+                                    "step" : mapping[otherIndex]["workflow_step"],
+                                    "type" : mapping[otherIndex].get("step_argument_type")
+                                })
+
+                            step["outputs"].append(outputNode)
+
+        return steps
 
 
 @collection(
@@ -37,6 +153,8 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow',
+                'workflow.analysis_steps',
+                'workflow.analysis_steps.inputs',
                 'input_files.workflow_argument_name',
                 'input_files.value',
                 'input_files.value.file_format',
@@ -45,6 +163,71 @@ class WorkflowRun(Item):
                 'output_files.value.file_format',
                 'output_quality_metrics.name',
                 'output_quality_metrics.value']
+
+    @calculated_property(schema={
+        "title": "Workflow Analysis Steps",
+        "type": "array",
+        "items": {
+            "title": "Analysis Step",
+            "type": "object",
+        }
+    }, category="page")
+    def analysis_steps(self, request):
+        workflow = self.properties.get('workflow')
+        if workflow is None:
+            return
+
+        workflow = self.collection.get(workflow)
+        analysis_steps = workflow.analysis_steps(request)
+
+        fileCache = {}
+
+        def handleSourceTargetFile(inputOrOutput, sourceOrTarget, ownProperty):
+            '''
+            Add file metadata in form of 'run_data' : { 'file' : { '@id', 'display_title', etc. } } to AnalysisStep dict's 'input' or 'output' list item dict
+            if one of own input or output files' workflow_argument_name matches the AnalysisStep dict's input or output's sourceOrTarget.workflow_argument_name.
+            '''
+            if 'Workflow' in sourceOrTarget.get('type', ''):
+                for file in self.properties.get(ownProperty,[]):
+                    if sourceOrTarget['name'] == file.get('workflow_argument_name'):
+                        fileUUID = file.get('value')
+                        if fileUUID:
+                            fileData = fileCache.get(fileUUID)
+                            if not fileData:
+                                fileData = request.embed('/' + file.get('value'), '@@embedded')
+                                fileCache[file.get('value')] = fileData
+                            inputOrOutput['run_data'] = { "file" : fileData }
+                            return True
+            return False
+
+
+        for step in analysis_steps:
+            # Add output file metadata to step outputs & inputs, based on workflow_argument_name v step output target name.
+
+            for output in step['outputs']:
+                found = False
+                for outputTarget in output.get('target',[]):
+                    found = handleSourceTargetFile(output, outputTarget, 'output_files')
+                    if found:
+                        break
+
+            for input in step['inputs']:
+                found = False
+                for inputSource in input.get('source',[]):
+                    found = handleSourceTargetFile(input, inputSource, 'input_files')
+                    # If we don't have an input file yet for this workflow input, see if have a param
+                    if not found and 'Workflow' in inputSource.get('type',''):
+                        for param in self.properties.get('parameters',[]):
+                            if inputSource['name'] == param.get('workflow_argument_name'):
+                                input['run_data'] = {
+                                    "value" : param.get('value')
+                                }
+                                found = True
+                                break
+                    if found:
+                        break
+
+        return analysis_steps
 
 
 @collection(
