@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 var { Checkbox, Collapse } = require('react-bootstrap');
 var _ = require('underscore');
 var FacetList = require('./facetlist'); // Only used for statics.
-var { expFxn, Filters, console, isServerSide } = require('./util');
+var { expFxn, Filters, console, isServerSide, analytics } = require('./util');
 
 
 
@@ -59,8 +59,16 @@ class StackedBlockNameLabel extends React.Component {
                 var msg = successful ? 'successful' : 'unsuccessful';
                 console.log('Copying text command was ' + msg);
                 this.flashEffect();
+                analytics.event('ExperimentsTable', 'Copy', {
+                    'eventLabel' : 'Accession',
+                    'name' : this.props.accession
+                });
             } catch (err) {
                 console.error('Oops, unable to copy');
+                analytics.event('ExperimentsTable', 'ERROR', {
+                    'eventLabel' : 'Unable to copy accession',
+                    'name' : this.props.accession
+                });
             }
         }
 

@@ -157,18 +157,16 @@ class File(Item):
         "type": "array",
         "items": {
             "title": "Input of Workflow Run",
-            "type": "string",
+            "type": ["string", "object"],
             "linkTo": "WorkflowRun"
         }
     })
     def workflow_run_inputs(self, request):
-        return [run['@id'] for run in
-                [request.embed('/' ,uuid, '@@object') for uuid in
-        [str(uuid) for uuid in self.get_rev_links('workflow_run_inputs')]]]
+        return self.rev_link_atids(request, "workflow_run_inputs")
 
 
     @calculated_property(schema={
-        "title": "Outputs of Workflow Runs",
+        "title": "Output of Workflow Runs",
         "description": "All workflow runs that this file serves as an output from",
         "type": "array",
         "items": {
@@ -178,9 +176,7 @@ class File(Item):
         }
     })
     def workflow_run_outputs(self, request):
-        return [run['@id'] for run in
-                [request.embed('/' ,uuid, '@@object') for uuid in
-        [str(uuid) for uuid in self.get_rev_links('workflow_run_outputs')]]]
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
     def _update(self, properties, sheets=None):
@@ -264,6 +260,7 @@ class File(Item):
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
+        "description" : "Accession of this file"
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
@@ -279,7 +276,7 @@ class File(Item):
         return request.resource_path(self) + '@@download/' + filename
 
     @calculated_property(schema={
-        "title": "Upload key",
+        "title": "Upload Key",
         "type": "string",
     })
     def upload_key(self, request):
