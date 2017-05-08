@@ -355,10 +355,7 @@ var UIControlsWrapper = module.exports = React.createClass({
                     </div>
                     <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
                         { this.renderShowTypeDropdown(contextualView) }
-                        <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
-                            this.props.chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) : null
-                        }}>
-                        
+                        <div className="field-1-change-section">
                             <h6 className="dropdown-heading">Group By</h6>
                             <DropdownButton
                                 id="select-barplot-field-1"
@@ -387,6 +384,11 @@ var UIControlsWrapper = module.exports = React.createClass({
                                     (this.state.fields[1] && this.state.fields[1].field) || "none"
                                 )}
                             />
+                        </div>
+                        <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
+                            this.props.chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 50 : null
+                        }}>
+                            
                             <Legend
                                 fields={(
                                     this.props.experiments && this.state.fields[1] ? (
