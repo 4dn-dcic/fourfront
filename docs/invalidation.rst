@@ -30,7 +30,7 @@ Alternatively, >curl -XDELETE 'http://localhost:9200/encoded/' will delete the e
 
 
 
-Back references
+Back references (rev-links)
 ---------------
 
 In a parent-child relationship, it is the child object that references the parent object. A parent response often renders a list of child objects, and that list my be filtered to remove deleted or unpublished child objects.
@@ -39,6 +39,8 @@ We want to ensure that parent responses are invalidated when a child object's st
 
 We must also invalidate a parent response when a new child is added (either a new object of changing the parent referenced.) This is done adding the parent uuid to the list of updated_uuids recorded on the transaction adding/modifying the child. (See indexing.py ``invalidate_new_back_revs``.)
 
+
+SEE ALSO rev-links.md for more information about how to setup rev links
 
 Isolation level considerations
 ------------------------------
