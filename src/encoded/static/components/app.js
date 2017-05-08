@@ -1128,6 +1128,7 @@ var App = React.createClass({
                                     session={this.state.session}
                                     expSetFilters={this.props.expSetFilters}
                                     ref="navigation"
+                                    schemas={this.state.schemas}
                                 />
                                 <div id="content" className="container">
                                     <FacetCharts

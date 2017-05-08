@@ -10,7 +10,7 @@
  */
 
 
-module.exports.ActiveFiltersBar = require('./ActiveFiltersBar');
+module.exports.ActiveFiltersBar = require('./ActiveFiltersBar').default;
 module.exports.SVGFilters = require('./SVGFilters');
 module.exports.FetchingView = require('./FetchingView');
 
