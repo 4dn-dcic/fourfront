@@ -64,6 +64,14 @@ var UIControlsWrapper = module.exports = React.createClass({
      * @memberof module:viz/BarPlot.UIControlsWrapper
      */
     componentWillReceiveProps : function(nextProps){
+        if (
+            this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters) &&
+            !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters) && (
+                this.state.showState === 'all'
+            )
+        ){
+            this.setState({ 'showState' : 'filtered' });
+        }
         //if (this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters)){
         //    this.setState({ 'showState' : 'all' });
         //}
@@ -74,11 +82,7 @@ var UIControlsWrapper = module.exports = React.createClass({
      * @memberof module:viz/BarPlot.UIControlsWrapper
      */
     filterObjExistsAndNoFiltersSelected : function(expSetFilters = this.props.expSetFilters){
-        return (
-            typeof expSetFilters === 'object'
-            && expSetFilters !== null
-            && _.keys(expSetFilters).length === 0
-        );
+        return Filters.filterObjExistsAndNoFiltersSelected(expSetFilters);
     },
 
     /**
@@ -176,6 +180,17 @@ var UIControlsWrapper = module.exports = React.createClass({
         return this.state.fields[fieldIndex];
     },
 
+    contextualView : function(){
+        if (this.props.href){
+            // Hide on homepage.
+            var hrefParts = url.parse(this.props.href);
+            if (hrefParts.pathname === '/' || hrefParts.pathname === '/home'){
+                return 'home';
+            }
+        }
+        return 'browse';
+    },
+
     /**
      * @ignore
      * @memberof module:viz/BarPlot.UIControlsWrapper
@@ -213,13 +228,7 @@ var UIControlsWrapper = module.exports = React.createClass({
 
     renderShowTypeToggle : function(windowGridSize){
 
-        if (this.props.href){
-            // Hide on homepage.
-            var hrefParts = url.parse(this.props.href);
-            if (hrefParts.pathname === '/' || hrefParts.pathname === '/home'){
-                return null;
-            }
-        }
+        if (this.contextualView() === 'home') return null;
 
         return (
             <div className={"toggle-zoom" + (/*filterObjExistsAndNoFiltersSelected ? ' no-click' : */'')} onClick={(e)=>{
@@ -246,6 +255,42 @@ var UIControlsWrapper = module.exports = React.createClass({
         );
     },
 
+    renderShowTypeDropdown : function(contextualView){
+        if (contextualView === 'home') return null;
+        var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected();
+        return (
+            <div className="show-type-change-section">
+                <h6 className="dropdown-heading">Show</h6>
+                <DropdownButton
+                    id="select-barplot-show-type"
+                    onSelect={this.handleExperimentsShowType}
+                    bsSize='xsmall'
+                    title={(()=>{
+                        //if (this.state.openDropdown === 'subdivisionField'){
+                        //    return <em className="dropdown-open-title">Color Bars by</em>;
+                        //}
+                        var aggrType = this.titleMap(this.state.aggregateType);
+                        var showString = (this.state.showState === 'all' || isSelectedDisabled) ? 'All' : 'Selected';
+                        return (
+                            <span>
+                                <span className="text-600">{ showString }</span> { aggrType }
+                            </span>
+                        );
+                    })()}
+                    onToggle={this.handleDropDownToggle.bind(this, 'showType')}
+                    children={this.renderDropDownMenuItems([
+                        ['all', <span>
+                            <span className="text-500">All</span> { this.titleMap(this.state.aggregateType) }
+                        </span>],
+                        ['filtered', <span className="inline-block" data-place="left" data-tip={isSelectedDisabled ? 'No filters currently set' : null}>
+                            <span className="text-500">Selected</span> { this.titleMap(this.state.aggregateType) }
+                        </span>, null, isSelectedDisabled]
+                    ], this.state.showState)}
+                />
+            </div>
+        );
+    },
+
     /**
      * @ignore
      * @memberof module:viz/BarPlot.UIControlsWrapper
@@ -256,6 +301,7 @@ var UIControlsWrapper = module.exports = React.createClass({
         
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
+        var contextualView = this.contextualView();
 
         return (
             <div className="bar-plot-chart-controls-wrapper">
@@ -292,7 +338,7 @@ var UIControlsWrapper = module.exports = React.createClass({
                         </div>
                     </div>
 
-                    { this.renderShowTypeToggle(windowGridSize) }
+                    {/* this.renderShowTypeToggle(windowGridSize) */}
 
                 </div>
 
@@ -301,10 +347,12 @@ var UIControlsWrapper = module.exports = React.createClass({
                         { this.adjustedChildChart() }
                     </div>
                     <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
+                        { this.renderShowTypeDropdown(contextualView) }
                         <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
-                            this.props.chartHeight - 49 : null
+                            this.props.chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) : null
                         }}>
-                            <h6 className="dropdown-heading">Group Bars By</h6>
+                        
+                            <h6 className="dropdown-heading">Group By</h6>
                             <DropdownButton
                                 id="select-barplot-field-1"
                                 onSelect={this.handleFieldSelect.bind(this, 1)}

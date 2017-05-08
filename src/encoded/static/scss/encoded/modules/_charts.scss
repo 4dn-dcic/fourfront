@@ -548,9 +548,12 @@
     position: relative;
 
     .dropdown-heading {
-        margin-bottom: 5px;
-        margin-top: 5px;
+        margin-bottom: 4px;
+        margin-top: 10px;
         font-weight: 400;
+        &:first-child {
+            margin-top: 0;
+        }
     }
 
     .overlay {
@@ -664,6 +667,10 @@
     }
 
     .chart-aside{
+
+        .show-type-change-section {
+            padding-bottom: 10px;
+        }
         
         .x-axis-right-label {
             > .row > div {
@@ -691,6 +698,14 @@
                     position: absolute;
                     right: 12px;
                     top: 14px;
+                }
+            }
+            &.btn-group-xs {
+                > button {
+                    span.caret {
+                        top: 9px;
+                    }
+                    padding-left: 12px;
                 }
             }
         }
