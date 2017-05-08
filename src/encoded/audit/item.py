@@ -120,14 +120,16 @@ def has_ontology_term_linkTos(value, system):
     return False
 
 
-@audit_checker('Item', condition=has_ontology_term_linkTos, frame='object')
+@audit_checker('Item', condition=has_ontology_term_linkTos, frame='embedded')
 def audit_item_obsolete_ontology_terms(value, system):
-    import pdb; pdb.set_trace()
     item = system['context']
-    request = system['request']
     props = item.schema['properties']
     fields = find_ontology_term_linkTos(props)
     for f in fields:
-        val = item.properties[f]
-        linked_item = request.embed(val + '@@object')
-        print(linked_item)
+        term = value.get(f)
+        status = term.get('status')
+        if status == 'obsolete':
+            detail = 'In {} '.format(value['@type'].pop(0)) + ': {}'.format(value['@id']) + \
+                     ' - link to obsolete Ontology Term ' + \
+                     '{}'.format(term['term_id'])
+            yield AuditFailure('link to obsolete ontology term', detail, level='WARNING')

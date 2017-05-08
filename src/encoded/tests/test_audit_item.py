@@ -82,7 +82,24 @@ def test_audit_item_status_mismatch(testapp, experiment, embed_testapp):
     assert any(error['category'] == 'mismatched status' for error in errors_list)
 
 
-def test_audit_item_obsolete_ontology_term(testapp, lung_biosource):
-    res = testapp.get(lung_biosource['@id'] + '/@@audit-self')
-    print(res)
-    errors = res.json['audit']
+def test_audit_item_obsolete_ontology_term_no_term_linkTos(experiment, embed_testapp):
+    res = embed_testapp.get(experiment['@id'] + '/@@audit-self')
+    errors_list = res.json['audit']
+    assert not any(error['name'] == 'link to obsolete ontology term' for error in errors_list)
+
+
+def test_audit_item_obsolete_ontology_term_not_obsolete(lung_biosource, embed_testapp):
+    res = embed_testapp.get(lung_biosource['@id'] + '/@@audit-self')
+    errors_list = res.json['audit']
+    assert not any(error['name'] == 'link to obsolete ontology term' for error in errors_list)
+
+
+def test_audit_item_obsolete_ontology_term_obsolete(
+        oterm, lung_biosource, embed_testapp, testapp):
+    oterm['status'] = 'obsolete'
+    testterm = testapp.post_json('/ontology_term', oterm).json['@graph'][0]
+    res = embed_testapp.get(testterm['@id'] + '/@@audit-self')
+    errors_list = res.json['audit']
+    for error in errors:
+        print(error)
+        assert any(error['name'] == 'link to obsolete ontology term')  # for error in errors_list)
