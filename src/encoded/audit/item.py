@@ -58,8 +58,9 @@ STATUS_LEVEL = {
     'in review by lab': 1,
     'deleted': 0,
     'replaced': 0,
-
+    'obsolete': 0,
     # additional file statuses
+    'to be uploaded by workflow': 1,
     'uploading': 1,
     'uploaded': 1,
     'upload failed': 1,
