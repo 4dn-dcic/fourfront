@@ -20,26 +20,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         context = require('../testdata/browse/context-limited-fields'); // We need to sinon fake server to give us this.
         href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
 
-        var fieldsToFetch = [
-            'accession',
-            'experiments_in_set.experiment_summary',
-            'experiments_in_set.experiment_type',
-            'experiments_in_set.accession',
-            //'experiments_in_set.status',
-            //'experiments_in_set.files.file_type',
-            'experiments_in_set.files.accession',
-            'experiments_in_set.filesets.files_in_set.accession',
-            //'experiments_in_set.biosample.description',
-            //'experiments_in_set.biosample.modifications_summary_short',
-            'experiments_in_set.biosample.biosource_summary',
-            //'experiments_in_set.biosample.accession',
-            //'experiments_in_set.biosample.biosource.description',
-            'experiments_in_set.biosample.biosource.biosource_name',
-            'experiments_in_set.biosample.biosource.biosource_type',
-            'experiments_in_set.biosample.biosource.individual.organism.name',
-            'experiments_in_set.biosample.biosource.individual.organism.scientific_name',
-            'experiments_in_set.digestion_enzyme.name'
-        ];
+        var fieldsToFetch = ChartDataController.getRefs().fieldsToFetch;
 
         sinon = require('sinon');
         server = sinon.fakeServer.create();
@@ -93,9 +74,9 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         jest.runAllTimers();
         var bars = TestUtils.scryRenderedDOMComponentsWithClass(page, 'chart-bar');
         var barParts = TestUtils.scryRenderedDOMComponentsWithClass(page, 'bar-part');
+        console.log('CHARTS-TEST: Found ' + bars.length + ' bars divided into ' + barParts.length + ' bar parts.');
         expect(bars.length).toBeGreaterThan(1);
         expect(barParts.length).toBeGreaterThan(1);
-        console.log('CHARTS-TEST: Found ' + bars.length + ' bars divided into ' + barParts.length + ' bar parts.');
         bars.forEach(function(b){
             expect(b.children[0].className === 'bar-top-label').toBe(true);
         });

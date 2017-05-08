@@ -489,15 +489,27 @@ export const ChartDataController = {
 
         var allExpsChanged = (
             updatedState.experiments !== state.experiments ||
-            updatedState.experiments.length !== state.experiments.length ||
-            !_.isEqual(updatedState.experiments, state.experiments)
+            (Array.isArray(updatedState.experiments) && !Array.isArray(state.experiments)) ||
+            (!Array.isArray(updatedState.experiments) && Array.isArray(state.experiments)) ||
+            (Array.isArray(updatedState.experiments) && Array.isArray(state.experiments) &&
+                (
+                    updatedState.experiments.length !== state.experiments.length ||
+                    !_.isEqual(updatedState.experiments, state.experiments)
+                )
+            )
         );
         
         var allOrFilteredExpsChanged = (
             allExpsChanged ||
             updatedState.filteredExperiments !== state.filteredExperiments ||
-            updatedState.filteredExperiments.length !== state.filteredExperiments.length ||
-            !_.isEqual(updatedState.filteredExperiments, state.filteredExperiments)
+            (Array.isArray(updatedState.filteredExperiments) && !Array.isArray(state.filteredExperiments)) ||
+            (!Array.isArray(updatedState.filteredExperiments) && Array.isArray(state.filteredExperiments)) ||
+            (Array.isArray(updatedState.filteredExperiments) && Array.isArray(state.filteredExperiments) &&
+                (
+                    updatedState.filteredExperiments.length !== state.filteredExperiments.length ||
+                    !_.isEqual(updatedState.filteredExperiments, state.filteredExperiments)
+                )
+            )
         );
 
         _.extend(state, updatedState);
@@ -749,5 +761,9 @@ export const ChartDataController = {
         }
         return Filters.filtersToHref(expSetFilters, href, 0, 'all', '/browse/');
     },
+
+    getRefs : function(){
+        return refs;
+    }
 
 };
