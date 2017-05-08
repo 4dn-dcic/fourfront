@@ -24,7 +24,7 @@ export const Term = {
         }
     }
 
-}
+};
 
 export const Field = {
 
@@ -97,7 +97,7 @@ export const Field = {
 
     }
 
-}
+};
 
 /**
  * Get current expSetFilters from store. Utility method to use from other components if don't want to pass expSetFilters down as prop.

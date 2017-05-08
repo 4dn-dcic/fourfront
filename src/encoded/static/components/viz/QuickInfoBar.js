@@ -65,7 +65,7 @@ export default class QuickInfoBar extends React.Component {
             'mounted'               : false,
             'show'                  : false,
             'reallyShow'            : false
-        }
+        };
     }
 
     /**
