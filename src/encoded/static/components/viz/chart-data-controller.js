@@ -5,6 +5,7 @@ var React = require('react');
 import PropTypes from 'prop-types';
 var _ = require('underscore');
 var { expFxn, Filters, ajax, console, layout, isServerSide, navigate } = require('./../util');
+var vizUtil = require('./utilities');
 
 
 /** 
@@ -36,13 +37,10 @@ var refs = {
         'experiments_in_set.filesets.files_in_set.accession',
         //'experiments_in_set.biosample.description',
         //'experiments_in_set.biosample.modifications_summary_short',
-        'experiments_in_set.biosample.biosource_summary',
-        //'experiments_in_set.biosample.accession',
-        //'experiments_in_set.biosample.biosource.description',
-        'experiments_in_set.biosample.biosource.biosource_name',
-        'experiments_in_set.biosample.biosource.biosource_type',
+        'experiments_in_set.biosample.biosource_summary', // AKA Biosource
+        //'experiments_in_set.biosample.biosource.biosource_name', // AKA Biosource
+        'experiments_in_set.biosample.biosource.biosource_type', // AKA Biosource Type
         'experiments_in_set.biosample.biosource.individual.organism.name',
-        'experiments_in_set.biosample.biosource.individual.organism.scientific_name',
         'experiments_in_set.digestion_enzyme.name'
     ],
     expSetFilters : null,
@@ -355,7 +353,7 @@ export const ChartDataController = {
         ChartDataController.sync(function(){
             isInitialLoadComplete = true;
             callback(state);
-        });
+        }, { isInitial : true });
 
         // Resync periodically if resync interval supplied.
         if (typeof resync === 'number' && !isServerSide()){

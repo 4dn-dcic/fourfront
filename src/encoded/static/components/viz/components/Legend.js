@@ -126,7 +126,7 @@ var Legend = module.exports = React.createClass({
                     'color' : vizUtil.colorForNode({
                         'term' : term,
                         'field' : field.field
-                    }),
+                    }, true),
                     'term' : term,
                     'name' : Filters.Term.toName(field.field, term)
                 };

@@ -8,17 +8,90 @@ var { console, object, expFxn } = require('./../../util');
 var { unhighlightTerms } = require('./../../facetlist');
 var aggregationFxn = require('./aggregation-functions');
 
+/**
+ * This is an optional component which may be placed between BarPlot.Chart and UIControlsWrapper.
+ * It will store the result of aggregation into state and then pass it as a prop down to BarPlot.Chart.
+ * Primarily this is to redrawing performance. Utilizes shouldComponentUpdate and componentWillReceiveProps.
+ * 
+ * Accepts the same props as BarPlot.Chart, save for own 'aggregatedData' and 'aggregatedFilteredData'.
+ * 
+ * @class
+ * @type {Component}
+ * @prop {Object[]} experiments - "All" experiments, passed from ChartDataController[.Provider].
+ * @prop {Object[]} filteredExperiments - "Selected" experiments, if expSetFilters are set in Redux store. Passed from ChartDataController[.Provider].
+ * @prop {Object[]} fields - Passed from UIControlsWrapper.
+ * @prop {string} aggregateType - Passed from UIControlsWrapper.
+ * @prop {string} showType - Passed from UIControlsWrapper.
+ * @prop {BarPlot.Chart} children - Must contain a BarPlotChart as the single child element.
+ */
+export default class Aggregator extends React.Component {
+    
+    static defaultProps = {
+        'debug' : true
+    }
 
-var Aggregator = module.exports = React.createClass({
+    static updatedStateFromProps(nextProps, pastProps){
+        var state = {};
 
-    getInitialState : function(){
-        return {
-            aggregatedData : null,
-            aggregatedFilteredData : null
-        };
-    },
+        if (nextProps.debug) console.log("Aggregator Next Props > ", nextProps);
 
-    shouldComponentUpdate : function(nextProps){
+        var doFieldsDiffer = aggregationFxn.doFieldsDiffer(nextProps.fields, pastProps.fields);
+        if (nextProps.debug) console.log('Aggregator Do Next Props fields differ', doFieldsDiffer);
+        if (
+            (nextProps.showType !== pastProps.showType && nextProps.showType === 'all') ||
+            (nextProps.filteredExperiments !== pastProps.filteredExperiments && !nextProps.filteredExperiments)
+        ){
+            state.aggregatedFilteredData = null;
+        } else if (
+            (
+                nextProps.filteredExperiments !== pastProps.filteredExperiments ||
+                !_.isEqual(nextProps.filteredExperiments, pastProps.filteredExperiments) ||
+                doFieldsDiffer ||
+                (nextProps.showType !== pastProps.showType && nextProps.showType !== 'all')
+            ) && Array.isArray(nextProps.filteredExperiments)
+        ){
+            state.aggregatedFilteredData = aggregationFxn.genChartData(
+                nextProps.filteredExperiments,
+                nextProps.fields,
+                nextProps.aggregateType,
+                'experiments',
+                nextProps.useOnlyPopulatedFields
+            );
+        }
+
+        if (
+            nextProps.experiments !== pastProps.experiments ||
+            !_.isEqual(nextProps.experiments, pastProps.experiments) ||
+            doFieldsDiffer
+        ){
+            state.aggregatedData = aggregationFxn.genChartData(
+                nextProps.experiments,
+                nextProps.fields,
+                nextProps.aggregateType,
+                'experiments',
+                nextProps.useOnlyPopulatedFields
+            );
+        }
+
+        return state;
+    }
+
+    constructor(props){
+        super(props);
+        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.render = this.render.bind(this);
+
+        this.state = Aggregator.updatedStateFromProps(props, {});
+        
+        if (this.state.aggregatedData && this.state.aggregatedData[1]){
+            // Pre-cache colors.
+            console.log(this.preCacheColors(this.state.aggregatedData[1]));
+        }
+
+    }
+
+    shouldComponentUpdate(nextProps){
         if (
             nextProps.aggregateType !== this.props.aggregateType ||
             aggregationFxn.doFieldsDiffer(nextProps.fields, this.props.fields) ||
@@ -38,79 +111,59 @@ var Aggregator = module.exports = React.createClass({
         }
         if (this.props.debug) console.log("Aggregator > WILL NOT UPDATE");
         return false;
-    },
-    
+    }
+
     /**
      * Here we re-aggregate terms to fields and save result in own state.
      * We decide whether to re-aggregate depending on changed props.
      * If fields, showType, filteredExperiments, or experiments change, we re-aggregate.
      * Otherwise we re-use.
      * 
-     * @private
-     * @instance
      * @param {Object} nextProps - The next props passed to this component.
      */
-    componentWillReceiveProps : function(nextProps){
+    componentWillReceiveProps(nextProps){
 
-        var state = {};
+        var state = Aggregator.updatedStateFromProps(nextProps, this.props);
 
-        if (this.props.debug) console.log("Aggregator Next Props > ", nextProps);
-
-        var doFieldsDiffer = aggregationFxn.doFieldsDiffer(nextProps.fields, this.props.fields);
-        if (this.props.debug) console.log('Aggregator Do Next Props fields differ', doFieldsDiffer);
-        if (
-            (nextProps.showType !== this.props.showType && nextProps.showType === 'all') ||
-            (nextProps.filteredExperiments !== this.props.filteredExperiments && !nextProps.filteredExperiments)
-        ){
-            state.aggregatedFilteredData = null;
-        } else if (
-            (
-                nextProps.filteredExperiments !== this.props.filteredExperiments ||
-                !_.isEqual(nextProps.filteredExperiments, this.props.filteredExperiments) ||
-                doFieldsDiffer ||
-                (nextProps.showType !== this.props.showType && nextProps.showType !== 'all')
-            ) && Array.isArray(nextProps.filteredExperiments)
-        ){
-            state.aggregatedFilteredData = aggregationFxn.genChartData(
-                nextProps.filteredExperiments,
-                nextProps.fields,
-                nextProps.aggregateType,
-                'experiments',
-                nextProps.useOnlyPopulatedFields
-            );
-        }
-
-        if (
-            nextProps.experiments !== this.props.experiments ||
-            !_.isEqual(nextProps.experiments, this.props.experiments) ||
-            doFieldsDiffer
-        ){
-            state.aggregatedData = aggregationFxn.genChartData(
-                nextProps.experiments,
-                nextProps.fields,
-                nextProps.aggregateType,
-                'experiments',
-                nextProps.useOnlyPopulatedFields
-            );
+        // If this is initial run, pre-cache 'all' colors.
+        if (state.aggregatedData && !this.state.aggregatedData){
+            console.log('AGGRDATA', state.aggregatedData);
         }
 
         if (_.keys(state).length > 0){
             if (this.props.debug) console.log('Aggregator > WILL UPDATE STATE (new, old:)', state, this.state);
+            if (state.aggregatedData && state.aggregatedData[1]){
+                this.preCacheColors(state.aggregatedData[1]);
+            }
             this.setState(state);
         } else if (this.props.debug){
-            console.log('Aggregator > WILL NOT UPDATE STATE');
+            console.log('Aggregator > WILL NOT UPDATE STATE', this.state);
         }
 
-    },
+    }
+
+    preCacheColors(fieldUsedForLegend){
+        return _.sortBy(
+            _.keys(fieldUsedForLegend.terms).map((termName)=>{
+                return {
+                    'field' : fieldUsedForLegend.field,
+                    'term' : termName,
+                    'count' : -fieldUsedForLegend.terms[termName][this.props.aggregateType || 'experiment_sets']
+                }
+            }),
+            'count'
+        ).map(function(fauxNode){
+            fauxNode.color = vizUtil.colorForNode(fauxNode);
+            return fauxNode;
+        });
+    }
 
     /**
      * Clones props.children -- which is expected to be a BarPlotChart -- and adds own state to its props.
      * 
-     * @instance
-     * @private
      * @returns {BarPlotChart} - A BarPlotChart with aggregated field/term data props.
      */
-    render : function(){
+    render(){
         return (
             React.cloneElement(
                 this.props.children,
@@ -126,4 +179,4 @@ var Aggregator = module.exports = React.createClass({
         );
     }
 
-});
+}

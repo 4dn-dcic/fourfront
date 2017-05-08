@@ -273,6 +273,8 @@ var aggregationFxn = module.exports = {
 
 
     doFieldsDiffer : function(fields1, fields2){
+        if (Array.isArray(fields1) && !Array.isArray(fields2)) return true;
+        if (!Array.isArray(fields1) && Array.isArray(fields2)) return true;
         if (fields1.length !== fields2.length) return true;
         if (fields1 !== fields2) return true;
         var combos = _.zip(_.pluck(fields1, 'field'), _.pluck(fields2, 'field'));

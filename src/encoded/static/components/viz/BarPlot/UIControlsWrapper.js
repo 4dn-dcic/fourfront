@@ -9,61 +9,63 @@ var { console, object, isServerSide, expFxn, Filters, layout } = require('./../.
 var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
 var { Toggle } = require('./../../inputs');
 
-var UIControlsWrapper = module.exports = React.createClass({
+export default class UIControlsWrapper extends React.Component {
 
-    /**
-     * Default props for the UIControlsWrapper.
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     * @instance
-     */
-    getDefaultProps : function(){
-        return {
-            'titleMap' : {
-                // Aggr type
-                'experiment_sets' : "Experiment Sets",
-                'experiments' : 'Experiments',
-                'files' : "Files",
-                // Show state
-                'all' : 'All',
-                'filtered' : 'Selected',
-                'both' : 'All & Selected'
-            },
-            'availableFields_XAxis' : [
-                { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
-                { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
-                { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' }
-            ],
-            'availableFields_Subdivision' : [
-                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-                { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
-            ],
-            'legend' : false,
-            'chartHeight' : 300
-        };
-    },
+    static defaultProps = {
+        'titleMap' : {
+            // Aggr type
+            'experiment_sets' : "Experiment Sets",
+            'experiments' : 'Experiments',
+            'files' : "Files",
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    getInitialState : function(){
-        return {
+            // Show state
+            'all' : 'All',
+            'filtered' : 'Selected',
+            'both' : 'All & Selected'
+        },
+        'availableFields_XAxis' : [
+            { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+            { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
+            { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' }
+        ],
+        'availableFields_Subdivision' : [
+            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
+        ],
+        'legend' : false,
+        'chartHeight' : 300
+    }
+
+    constructor(props){
+        super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected.bind(this);
+        this.titleMap = this.titleMap.bind(this);
+        this.adjustedChildChart = this.adjustedChildChart.bind(this);
+        this.handleAggregateTypeSelect = _.throttle(this.handleAggregateTypeSelect.bind(this), 750);
+        this.handleExperimentsShowType = _.throttle(this.handleExperimentsShowType.bind(this), 750, { trailing : false });
+        this.handleFieldSelect = _.throttle(this.handleFieldSelect.bind(this), 300);
+        this.getFieldAtIndex = this.getFieldAtIndex.bind(this);
+        this.contextualView = this.contextualView.bind(this);
+        this.renderDropDownMenuItems = this.renderDropDownMenuItems.bind(this);
+        this.handleDropDownToggle = this.handleDropDownToggle.bind(this);
+        this.renderShowTypeToggle = this.renderShowTypeToggle.bind(this);
+        this.renderShowTypeDropdown = this.renderShowTypeDropdown.bind(this);
+        this.render = this.render.bind(this);
+
+        this.state = {
             'fields' : [
-                this.props.availableFields_XAxis[0],
-                this.props.availableFields_Subdivision[0],
+                props.availableFields_XAxis[0],
+                props.availableFields_Subdivision[0],
                 //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'aggregateType' : 'experiment_sets',
-            'showState' : 'all',
+            'showState' : this.filterObjExistsAndNoFiltersSelected(props.expSetFilters) ? 'all' : 'filtered',
             'openDropdown' : null
-        };
-    },
+        }
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    componentWillReceiveProps : function(nextProps){
+    componentWillReceiveProps(nextProps){
         if (
             this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters) &&
             !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters) && (
@@ -79,24 +81,13 @@ var UIControlsWrapper = module.exports = React.createClass({
         ){
             this.setState({ 'showState' : 'all' });
         }
-        //if (this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters)){
-        //    this.setState({ 'showState' : 'all' });
-        //}
-    },
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    filterObjExistsAndNoFiltersSelected : function(expSetFilters = this.props.expSetFilters){
+    filterObjExistsAndNoFiltersSelected(expSetFilters = this.props.expSetFilters){
         return Filters.filterObjExistsAndNoFiltersSelected(expSetFilters);
-    },
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    titleMap : function(key = null, fromDropdown = false){
+    titleMap(key = null, fromDropdown = false){
         if (!key) return this.props.titleMap;
         var title = this.props.titleMap[key];
         if (fromDropdown && ['all','filtered'].indexOf(key) > -1){
@@ -105,15 +96,14 @@ var UIControlsWrapper = module.exports = React.createClass({
             return 'Both';
         }
         return title;
-    },
+    }
 
     /**
      * Clones props.children, expecting a Chart React Component as the sole child, and extends Chart props with 'fields', 'showType', and 'aggregateType'.
-     * @instance
+     *
      * @returns {React.Component} Cloned & extended props.children.
-     * @memberof module:viz/BarPlot.UIControlsWrapper
      */
-    adjustedChildChart : function(){
+    adjustedChildChart(){
         // TODO: validate that props.children is a BarPlot.Chart
 
         return React.cloneElement(
@@ -130,29 +120,18 @@ var UIControlsWrapper = module.exports = React.createClass({
                 }
             )
         );
-    },
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    handleAggregateTypeSelect : _.throttle(function(eventKey, event){
+
+    handleAggregateTypeSelect(eventKey, event){
         this.setState({ aggregateType : eventKey });
-    }, 750),
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    handleExperimentsShowType : _.throttle(function(eventKey, event){
+    handleExperimentsShowType(eventKey, event){
         this.setState({ showState : eventKey });
-    }, 750, {trailing : false}),
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    handleFieldSelect : _.throttle(function(fieldIndex, newFieldKey, event){
+    handleFieldSelect(fieldIndex, newFieldKey, event){
         var newFields;
         if (newFieldKey === "none"){ // Only applies to subdivision (fieldIndex 1)
             newFields = this.state.fields.slice(0,1);
@@ -173,21 +152,16 @@ var UIControlsWrapper = module.exports = React.createClass({
         newFields[fieldIndex] = newField;
         if (newFields.length > 1) newFields[otherFieldIndex] = this.state.fields[otherFieldIndex];
         this.setState({ fields : newFields });
-        //this.setState({ showState : eventKey });
-    }, 300),
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    getFieldAtIndex : function(fieldIndex){
+    getFieldAtIndex(fieldIndex){
         if (!this.state.fields) return null;
         if (!Array.isArray(this.state.fields)) return null;
         if (this.state.fields.length < fieldIndex + 1) return null;
         return this.state.fields[fieldIndex];
-    },
+    }
 
-    contextualView : function(){
+    contextualView(){
         if (this.props.href){
             // Hide on homepage.
             var hrefParts = url.parse(this.props.href);
@@ -196,13 +170,9 @@ var UIControlsWrapper = module.exports = React.createClass({
             }
         }
         return 'browse';
-    },
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    renderDropDownMenuItems : function(keys, active = null){
+    renderDropDownMenuItems(keys, active = null){
         return keys.map((key)=>{
             var subtitle = null;
             var title = null;
@@ -223,17 +193,17 @@ var UIControlsWrapper = module.exports = React.createClass({
                 disabled={disabled}
             />;
         });
-    },
+    }
 
-    handleDropDownToggle : function(id, isOpen, evt, source){
+    handleDropDownToggle(id, isOpen, evt, source){
         if (isOpen){
             setTimeout(this.setState.bind(this), 10, { 'openDropdown' : id });
         } else {
             this.setState({ 'openDropdown' : null });
         }
-    },
+    }
 
-    renderShowTypeToggle : function(windowGridSize){
+    renderShowTypeToggle(windowGridSize){
 
         if (this.contextualView() === 'home') return null;
 
@@ -260,9 +230,9 @@ var UIControlsWrapper = module.exports = React.createClass({
                 
             </div>
         );
-    },
+    }
 
-    renderShowTypeDropdown : function(contextualView){
+    renderShowTypeDropdown(contextualView){
         if (contextualView === 'home') return null;
         var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected();
         return (
@@ -296,13 +266,9 @@ var UIControlsWrapper = module.exports = React.createClass({
                 />
             </div>
         );
-    },
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    render : function(){
+    render(){
 
         if (!this.props.experiments) return null;
         
@@ -445,4 +411,4 @@ var UIControlsWrapper = module.exports = React.createClass({
         );
     }
 
-});
+}
