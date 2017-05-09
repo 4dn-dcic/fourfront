@@ -53,6 +53,7 @@ export default class QuickInfoBar extends React.Component {
         this.isInvisible = this.isInvisible.bind(this);
         this.anyFiltersSet = this.anyFiltersSet.bind(this);
         this.className = this.className.bind(this);
+        this.onIconMouseEnter = _.debounce(this.onIconMouseEnter.bind(this), 500, true);
         this.renderStats = this.renderStats.bind(this);
         this.renderHoverBar = this.renderHoverBar.bind(this);
         this.state = {
@@ -198,6 +199,16 @@ export default class QuickInfoBar extends React.Component {
         return cn;
     }
 
+    onIconMouseEnter(e){
+        var areAnyFiltersSet = this.anyFiltersSet();
+        if (this.timeout) clearTimeout(this.timeout);
+        if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
+        analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
+            'eventLabel' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
+            'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
+        });
+    }
+
     renderStats(){
         var areAnyFiltersSet = this.anyFiltersSet();
         var stats;
@@ -264,14 +275,7 @@ export default class QuickInfoBar extends React.Component {
                     <div
                         className="any-filters glance-label"
                         data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"}
-                        onMouseEnter={_.debounce(()=>{
-                            if (this.timeout) clearTimeout(this.timeout);
-                            if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
-                            analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
-                                'eventLabel' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
-                                'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
-                            });
-                        }, 100)}
+                        onMouseEnter={this.onIconMouseEnter}
                     >
                         <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
                     </div>

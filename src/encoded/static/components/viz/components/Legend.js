@@ -278,25 +278,8 @@ export default class Legend extends React.Component {
             console.warn("No colors assigned to legend terms, skipping sorting. BarPlot.UIControlsWrapper or w/e should catch lack of color and force update within 1s.");
             return field.terms;
         }
-        var groups = _.groupBy(field.terms, 'color');
-
-        function getSortedTermsSection(){
-            return _.map(orderedColorList, function(color){
-                var term = groups[color] && groups[color].shift();
-                if (groups[color] && groups[color].length === 0) delete groups[color];
-                return term;
-            }).filter(function(term){
-                if (!term) return false;
-                return true;
-            });
-        }
-    
-        var result = [];
-        while (_.keys(groups).length > 0){
-            result = result.concat(getSortedTermsSection());
-        }
-
-        return result;
+        
+        return vizUtil.sortObjectsByColorPalette(field.terms, palette);
 
     }
 
@@ -332,6 +315,7 @@ export default class Legend extends React.Component {
             <CursorViewBounds
                 eventCategory="BarPlotLegend"
                 actions={this.props.cursorDetailActions}
+                highlightTerm
                 clickCoordsFxn={(node, containerPosition, boundsHeight, isOnRightSide)=>{
 
                     var margin = 260;

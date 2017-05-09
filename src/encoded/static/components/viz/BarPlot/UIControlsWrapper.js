@@ -25,13 +25,18 @@ export default class UIControlsWrapper extends React.Component {
             'both' : 'All & Selected'
         },
         'availableFields_XAxis' : [
+            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+            { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+            { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
+            { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" }
+        ],
+        'availableFields_Subdivision' : [
+            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
+            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
             { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' }
-        ],
-        'availableFields_Subdivision' : [
-            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
         ],
         'legend' : false,
         'chartHeight' : 300
@@ -52,7 +57,6 @@ export default class UIControlsWrapper extends React.Component {
         this.contextualView = this.contextualView.bind(this);
         this.renderDropDownMenuItems = this.renderDropDownMenuItems.bind(this);
         this.handleDropDownToggle = this.handleDropDownToggle.bind(this);
-        this.renderShowTypeToggle = this.renderShowTypeToggle.bind(this);
         this.renderShowTypeDropdown = this.renderShowTypeDropdown.bind(this);
         this.render = this.render.bind(this);
 
@@ -200,12 +204,18 @@ export default class UIControlsWrapper extends React.Component {
             var subtitle = null;
             var title = null;
             var disabled = null;
+            var tooltip = null;
             if (Array.isArray(key)){
                 // Assume we have [key, title, subtitle].
                 title = key[1] || null;
                 subtitle = key[2] || null;
                 disabled = key[3] || false;
+                tooltip = key[4] || null;
                 key = key[0];
+            }
+
+            if (typeof title === 'string' && typeof tooltip === 'string'){
+                title = <span className="inline-block" data-tip={tooltip} data-place="left">{ title }</span>;
             }
 
             return <MenuItem
@@ -224,35 +234,6 @@ export default class UIControlsWrapper extends React.Component {
         } else {
             this.setState({ 'openDropdown' : null });
         }
-    }
-
-    renderShowTypeToggle(windowGridSize){
-
-        if (this.contextualView() === 'home') return null;
-
-        return (
-            <div className={"toggle-zoom" + (/*filterObjExistsAndNoFiltersSelected ? ' no-click' : */'')} onClick={(e)=>{
-                e.preventDefault();
-                this.handleExperimentsShowType(this.state.showState === 'all' ? 'filtered' : 'all')
-            }} 
-                data-tip="Toggle between <span class='text-600'>all</span> data <em>or</em> data <span class='text-600'>selected via filters</span> below."
-                data-place={ windowGridSize === 'xs' ? 'bottom' : "left" } data-html data-delay-show={600}
-            >
-            {/*
-                <div className="text">
-                    <small>Viewing</small><br/>
-                    {this.state.showState === 'all' ? 'All' : 'Selected'}
-                </div>
-                */}
-                
-                <i className="icon icon-filter"/>
-                <span className="text">View Selected</span>
-                <span className="inline-block toggle-container">
-                    <Toggle checked={this.state.showState === 'filtered'} />
-                </span>
-                
-            </div>
-        );
     }
 
     renderShowTypeDropdown(contextualView){
@@ -286,6 +267,43 @@ export default class UIControlsWrapper extends React.Component {
                             <span className="text-500">Selected</span> { this.titleMap(this.state.aggregateType) }
                         </span>, null, isSelectedDisabled]
                     ], this.state.showState)}
+                />
+            </div>
+        );
+    }
+
+    renderGroupByFieldDropdown(contextualView){
+        return (
+            <div className="field-1-change-section">
+                <h6 className="dropdown-heading">Group By</h6>
+                <DropdownButton
+                    id="select-barplot-field-1"
+                    onSelect={this.handleFieldSelect.bind(this, 1)}
+                    title={(()=>{
+                        //if (this.state.openDropdown === 'subdivisionField'){
+                        //    return <em className="dropdown-open-title">Color Bars by</em>;
+                        //}
+                        var field = this.getFieldAtIndex(1);
+                        if (!field) return "None";
+                        return field.title || Filters.Field.toName(field.field);
+                    })()}
+                    onToggle={this.handleDropDownToggle.bind(this, 'subdivisionField')}
+                    children={this.renderDropDownMenuItems(
+                        this.props.availableFields_Subdivision.concat([{
+                            title : <em>None</em>,
+                            field : "none"
+                        }]).map((field)=>{
+                            var isDisabled = this.state.fields[0] && this.state.fields[0].field === field.field;
+                            return [
+                                field.field,                                        // Field
+                                field.title || Filters.Field.toName(field.field),   // Title
+                                field.description || null,                          // Description
+                                isDisabled,                                         // Disabled
+                                isDisabled ? "Field already selected for X-Axis" : null
+                            ]; // key, title, subtitle, disabled
+                        }),
+                        (this.state.fields[1] && this.state.fields[1].field) || "none"
+                    )}
                 />
             </div>
         );
@@ -360,36 +378,7 @@ export default class UIControlsWrapper extends React.Component {
                     </div>
                     <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
                         { this.renderShowTypeDropdown(contextualView) }
-                        <div className="field-1-change-section">
-                            <h6 className="dropdown-heading">Group By</h6>
-                            <DropdownButton
-                                id="select-barplot-field-1"
-                                onSelect={this.handleFieldSelect.bind(this, 1)}
-                                title={(()=>{
-                                    //if (this.state.openDropdown === 'subdivisionField'){
-                                    //    return <em className="dropdown-open-title">Color Bars by</em>;
-                                    //}
-                                    var field = this.getFieldAtIndex(1);
-                                    if (!field) return "None";
-                                    return field.title || Filters.Field.toName(field.field);
-                                })()}
-                                onToggle={this.handleDropDownToggle.bind(this, 'subdivisionField')}
-                                children={this.renderDropDownMenuItems(
-                                    this.props.availableFields_Subdivision.concat([{
-                                        title : <em>None</em>,
-                                        field : "none"
-                                    }]).map(function(field){
-                                        return [
-                                            field.field,                                        // Field
-                                            field.title || Filters.Field.toName(field.field),   // Title
-                                            field.description || null,                          // Description
-                                            false                                               // Disabled
-                                        ]; // key, title, subtitle
-                                    }),
-                                    (this.state.fields[1] && this.state.fields[1].field) || "none"
-                                )}
-                            />
-                        </div>
+                        { this.renderGroupByFieldDropdown(contextualView) }
                         <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
                             this.props.chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 50 : null
                         }}>
@@ -421,11 +410,14 @@ export default class UIControlsWrapper extends React.Component {
                                         })()}
                                         onToggle={this.handleDropDownToggle.bind(this, 'xAxisField')}
                                         children={this.renderDropDownMenuItems(
-                                            this.props.availableFields_XAxis.map(function(field){
+                                            this.props.availableFields_XAxis.map((field)=>{
+                                                var isDisabled = this.state.fields[1] && this.state.fields[1].field === field.field;
                                                 return [
                                                     field.field,
                                                     field.title || Filters.Field.toName(field.field),
-                                                    field.description || null
+                                                    field.description || null,
+                                                    isDisabled,
+                                                    isDisabled ? 'Field is already selected for "Group By"' : null
                                                 ]; // key, title, subtitle
                                             }),
                                             this.state.fields[0].field

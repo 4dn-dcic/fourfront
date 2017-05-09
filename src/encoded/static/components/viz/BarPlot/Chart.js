@@ -349,7 +349,7 @@ var Chart = module.exports = React.createClass({
                                 term : b.term,
                                 x: b.attr.x,
                                 opacity : 1, //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
-                                color : vizUtil.colorForNode(b, true, null, null, true)
+                                //color : vizUtil.colorForNode(b, true, null, null, true)
                             }; 
                         })}
                         labelClassName="y-axis-label no-highlight-color"

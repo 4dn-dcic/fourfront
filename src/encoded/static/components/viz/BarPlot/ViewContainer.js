@@ -50,7 +50,7 @@ class BarSection extends React.Component {
      */
     render(){
         var d               = this.props.node;
-        var color           = vizUtil.colorForNode(d);
+        var color           = d.color || vizUtil.colorForNode(d);
         var isSelected      = this.isSelected(),
             isHoveredOver   = this.isHoveredOver();
         
@@ -167,7 +167,21 @@ class Bar extends React.Component {
 
         if (!cachedBarSections[d.term]) cachedBarSections[d.term] = {};
 
-        var barSections = Array.isArray(d.bars) ? d.bars : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })];
+        var hasSubSections = Array.isArray(d.bars);
+
+        var barSections = (hasSubSections ?
+            d.bars : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
+        );
+
+        barSections = _.sortBy(barSections.slice(0), this.props.aggregateType || 'term').reverse();
+
+        if (hasSubSections){
+            barSections = vizUtil.sortObjectsByColorPalette(
+                barSections.map(function(b){
+                    return _.extend(b, { 'color' : vizUtil.colorForNode(b) });
+                })
+            );
+        }
 
         // If transitioning, add existing bar sections to fade out.
         if (this.props.transitioning && cachedPastBarSections[d.term]) barSections = barSections.concat(
@@ -219,7 +233,7 @@ class Bar extends React.Component {
                 </span>
                 : null }
                 {
-                    _.sortBy(barSections, 'term').map(this.renderBarSection)
+                    barSections.map(this.renderBarSection)
                 }
             </div>
         );
