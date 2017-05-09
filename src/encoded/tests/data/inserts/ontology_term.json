@@ -729,5 +729,23 @@
         "term_name": "skin of body",
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002097",
         "uuid": "111188bc-8535-4448-903e-854af460a233"
+    },
+    {
+    "is_slim_for": "cell",
+    "namespace": "http://www.ebi.ac.uk/efo",
+    "term_id": "EFO:0000322",
+    "term_name": "cell line",
+    "uuid": "111189bc-8535-4448-903e-854af460a233",
+    "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+    "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
+    },
+    {
+    "is_slim_for": "cell",
+    "namespace": "http://www.ebi.ac.uk/efo",
+    "term_id": "EFO:0003064",
+    "term_name": "primary cell line",
+    "uuid": "111190bc-8535-4448-903e-854af460a233",
+    "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+    "term_url": "http://www.ebi.ac.uk/efo/EFO_0003064"
     }
 ]
