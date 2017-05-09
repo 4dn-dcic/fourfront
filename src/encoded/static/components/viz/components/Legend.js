@@ -66,18 +66,19 @@ class Term extends React.Component {
         var color = this.props.color;
         if (!color) color = 'transparent';
         return (
-            <div
-                className="term"
-                onMouseEnter={this.onMouseEnter}
-                onMouseLeave={this.onMouseLeave}
-                onClick={this.onClick}
-            >
-                <div
-                    className="color-patch no-highlight-color"
-                    data-term={this.props.term}
-                    style={{ backgroundColor : color }}
-                />
-                { this.props.name || Filters.Term.toName(this.props.field, this.props.term) }
+            <div className="term">
+                <span
+                    onMouseEnter={this.onMouseEnter}
+                    onMouseLeave={this.onMouseLeave}
+                    onClick={this.onClick}
+                >
+                    <div
+                        className="color-patch no-highlight-color"
+                        data-term={this.props.term}
+                        style={{ backgroundColor : color }}
+                    />
+                    { this.props.name || Filters.Term.toName(this.props.field, this.props.term) }
+                </span>
             </div>
         );
     }
