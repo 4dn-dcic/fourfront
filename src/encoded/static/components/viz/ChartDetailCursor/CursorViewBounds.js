@@ -30,7 +30,7 @@ export default class CursorViewBounds extends React.Component {
     static defaultProps = {
         'cursorContainerMargin' : 100,
         // Return an object with 'x', 'y'.
-        'clickCoordsFxn' : function(node, containerPosition, boundsHeight){
+        'clickCoordsFxn' : function(node, containerPosition, boundsHeight, isOnRightSide){
             var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
             var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
 
@@ -230,7 +230,7 @@ export default class CursorViewBounds extends React.Component {
                 var mouseXInContainer = (evt.pageX || evt.clientX) - containerPos.left;
                 var isPopoverOnRightSide = mouseXInContainer > (this.refs.container.clientWidth / 2);
 
-                var coords = this.props.clickCoordsFxn(node, containerPos, this.refs.container.clientHeight);
+                var coords = this.props.clickCoordsFxn(node, containerPos, this.refs.container.clientHeight, isPopoverOnRightSide);
 
                 // Manually update popover coords then update its contents
                 ChartDetailCursor.setCoords({

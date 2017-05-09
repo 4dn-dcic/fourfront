@@ -334,6 +334,92 @@ export class ViewContainer extends React.Component {
 }
 
 
+export const barPlotCursorActions = [
+    {
+        'title' : function(cursorProps){
+            if (navigate.isBrowseHref(cursorProps.href)){
+                //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
+                return "Explore";
+            }
+            return "Browse";
+        },
+        'function' : function(showType = 'all', cursorProps, mouseEvt){
+            var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
+            var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHref(cursorProps.href) || null;
+
+            // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
+            var currentExpSetFilters = showType === 'all' ? {} : Filters.currentExpSetFilters();
+
+            var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
+                // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
+                if (
+                    expSetFilters && expSetFilters[node.field] &&
+                    expSetFilters[node.field].has(node.term)
+                ){
+                    return expSetFilters;
+                }
+                return Filters.changeFilter(
+                    node.field,
+                    node.term,
+                    'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
+                    expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
+                    null,               // Callback
+                    true,               // Only return new expSetFilters vs saving them == set to TRUE
+                );
+            }, currentExpSetFilters);
+
+            // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
+            analytics.event('BarPlot', 'Set Filter', {
+                'eventLabel' : analytics.eventLabelFromChartNode(cursorProps.path[cursorProps.path.length - 1]), // 'New' filters logged here.
+                'currentFilters' : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()) // 'Existing' filters, or filters at time of action, go here.
+            });
+
+            Filters.saveChangedFilters(
+                newExpSetFilters,
+                true,
+                href,
+                function(){
+                    // Scroll to top of page after navigation is complete.
+                    setTimeout(layout.animateScrollTo, 100, 360, Math.abs(document.body.scrollTop - 360) * 2, 0);
+                }
+            );
+
+        },
+        'disabled' : function(cursorProps){
+            var expSetFilters = store.getState().expSetFilters;
+
+            if (expSetFilters && typeof expSetFilters === 'object'){
+                if (
+                    Array.isArray(cursorProps.path) &&
+                    (cursorProps.path[0] && cursorProps.path[0].field) &&
+                    expSetFilters[cursorProps.path[0].field] instanceof Set &&
+                    expSetFilters[cursorProps.path[0].field].has(cursorProps.path[0].term) &&
+                    (
+                        !cursorProps.path[1] || (
+                            cursorProps.path[1].field &&
+                            expSetFilters[cursorProps.path[1].field] instanceof Set &&
+                            expSetFilters[cursorProps.path[1].field].has(cursorProps.path[1].term)
+                        )
+                    )
+                ) return true;
+            }
+            return false;
+        }
+    }
+];
+
+export function boundActions(to, showType = null){
+    if (!showType) showType = to.props.showType;
+    return barPlotCursorActions.map((action)=>{
+        var clonedAction = _.clone(action);
+        if (typeof action.function === 'function') clonedAction.function = action.function.bind(to, showType);
+        if (typeof action.title === 'function') clonedAction.title = action.title.bind(to);
+        if (typeof action.disabled === 'function') clonedAction.disabled = action.disabled.bind(to);
+        return clonedAction;
+    });
+}
+
+
 /**
  * Wraps ViewContainer with PopoverViewBounds, which feeds it
  * props.onNodeMouseEnter(node, evt), props.onNodeMouseLeave(node, evt), props.onNodeClick(node, evt),
@@ -361,80 +447,7 @@ export class PopoverViewContainer extends React.Component {
     }
 
     cursorDetailActions(){
-        return this.props.cursorDetailActions.concat([
-            {
-                'title' : function(cursorProps){
-                    if (navigate.isBrowseHref(cursorProps.href)){
-                        //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
-                        return "Explore";
-                    }
-                    return "Browse";
-                },
-                'function' : (cursorProps, mouseEvt) => {
-
-                    var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
-                    var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHref(cursorProps.href) || null;
-
-                    // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
-                    var currentExpSetFilters = this.props.showType === 'all' ? {} : Filters.currentExpSetFilters();
-
-                    var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
-                        // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
-                        if (
-                            expSetFilters && expSetFilters[node.field] &&
-                            expSetFilters[node.field].has(node.term)
-                        ){
-                            return expSetFilters;
-                        }
-                        return Filters.changeFilter(
-                            node.field,
-                            node.term,
-                            'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
-                            expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
-                            null,               // Callback
-                            true,               // Only return new expSetFilters vs saving them == set to TRUE
-                        );
-                    }, currentExpSetFilters);
-
-                    // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
-                    analytics.event('BarPlot', 'Set Filter', {
-                        'eventLabel' : analytics.eventLabelFromChartNode(cursorProps.path[cursorProps.path.length - 1]), // 'New' filters logged here.
-                        'currentFilters' : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()) // 'Existing' filters, or filters at time of action, go here.
-                    });
-
-                    Filters.saveChangedFilters(
-                        newExpSetFilters,
-                        true,
-                        href,
-                        function(){
-                            // Scroll to top of page after navigation is complete.
-                            setTimeout(layout.animateScrollTo, 100, 360, Math.abs(document.body.scrollTop - 360) * 2, 0);
-                        }
-                    );
-
-                },
-                'disabled' : (cursorProps)=>{
-                    var expSetFilters = store.getState().expSetFilters;
-
-                    if (expSetFilters && typeof expSetFilters === 'object'){
-                        if (
-                            Array.isArray(cursorProps.path) &&
-                            (cursorProps.path[0] && cursorProps.path[0].field) &&
-                            expSetFilters[cursorProps.path[0].field] instanceof Set &&
-                            expSetFilters[cursorProps.path[0].field].has(cursorProps.path[0].term) &&
-                            (
-                                !cursorProps.path[1] || (
-                                    cursorProps.path[1].field &&
-                                    expSetFilters[cursorProps.path[1].field] instanceof Set &&
-                                    expSetFilters[cursorProps.path[1].field].has(cursorProps.path[1].term)
-                                )
-                            )
-                        ) return true;
-                    }
-                    return false;
-                }
-            }
-        ]);
+        return this.props.cursorDetailActions.concat(boundActions(this));
     }
 
     render(){
@@ -442,10 +455,37 @@ export class PopoverViewContainer extends React.Component {
             <CursorViewBounds
                 height={this.props.height}
                 width={this.props.width}
-                actions={this.props.cursorDetailActions || this.cursorDetailActions()}
+                actions={this.cursorDetailActions.call(this)}
                 cursorContainerMargin={this.props.cursorContainerMargin}
                 eventCategory="BarPlot" // For Analytics events
                 highlightTerm
+                clickCoordsFxn={(node, containerPosition, boundsHeight)=>{
+                    var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
+                    var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
+
+                    var barYPos = node.attr.height;
+
+                    if (node.parent){
+                        var done = false;
+                        barYPos = _.reduce(
+                            _.sortBy(node.parent.bars, 'term').reverse(),
+                            function(m, siblingNode){
+                                if (done) return m;
+                                if (siblingNode.term === node.term){
+                                    done = true;
+                                }
+                                return m + siblingNode.attr.height;
+                            },
+                            0
+                        );
+                    }
+
+                    return {
+                        x : containerPosition.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
+                        y : containerPosition.top + boundsHeight - bottomOffset - barYPos,
+                    };
+
+                }}
             >
                 <ViewContainer {...this.props} />
             </CursorViewBounds>

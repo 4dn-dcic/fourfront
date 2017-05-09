@@ -8,6 +8,7 @@ var { RotatedLabel, Legend } = require('./../components');
 var { console, object, isServerSide, expFxn, Filters, layout } = require('./../../util');
 var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
 var { Toggle } = require('./../../inputs');
+import { boundActions } from './ViewContainer';
 
 export default class UIControlsWrapper extends React.Component {
 
@@ -398,6 +399,8 @@ export default class UIControlsWrapper extends React.Component {
                                 includeFieldTitles={false}
                                 schemas={this.props.schemas}
                                 width={layout.gridContainerWidth() * (3/12) - 20}
+                                hasPopover
+                                cursorDetailActions={boundActions(this, this.state.showState)}
                             />
                         </div>
                         <div className="x-axis-right-label">
