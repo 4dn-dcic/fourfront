@@ -6,7 +6,6 @@ var d3 = require('d3');
 var store = require('./../../../store');
 var vizUtil = require('./../utilities');
 var { RotatedLabel } = require('./../components');
-var ChartDetailCursor = require('./../ChartDetailCursor');
 var { console, object, isServerSide, expFxn, Filters, layout, navigate } = require('./../../util');
 var { unhighlightTerms, highlightTerm } = require('./../../facetlist');
 var aggregationFxn = require('./aggregation-functions');

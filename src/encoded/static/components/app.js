@@ -18,7 +18,7 @@ var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
 import { ChartDataController } from './viz/chart-data-controller';
-var ChartDetailCursor = require('./viz/ChartDetailCursor');
+import ChartDetailCursor from './viz/ChartDetailCursor';
 var makeTitle = require('./item-pages/item').title;
 var ReactTooltip = require('react-tooltip');
 

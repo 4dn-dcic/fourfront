@@ -3,10 +3,10 @@
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
-var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide } = require('./../util');
-var { highlightTerm, unhighlightTerms } = require('./../facetlist');
-var { CursorComponent } = require('./components');
+var vizUtil = require('./../utilities');
+var { expFxn, Filters, console, object, isServerSide } = require('./../../util');
+var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
+var CursorComponent = require('./CursorComponent');
 var { Button } = require('react-bootstrap');
 
 /**

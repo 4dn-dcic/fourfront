@@ -6,7 +6,6 @@ var url = require('url');
 var querystring = require('querystring');
 var d3 = require('d3');
 var MosaicChart = require('./viz/MosaicChart');
-var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
 var vizUtil = require('./viz/utilities');
