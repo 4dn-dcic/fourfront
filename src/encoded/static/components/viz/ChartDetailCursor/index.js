@@ -1,6 +1,6 @@
 'use strict';
 
-var ChartDetailCursor = require('./ChartDetailCursor');
+var ChartDetailCursor = require('./ChartDetailCursor').default;
 
 export default ChartDetailCursor;
 

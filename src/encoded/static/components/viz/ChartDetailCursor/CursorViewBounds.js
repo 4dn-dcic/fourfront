@@ -3,10 +3,33 @@
 var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
-var ChartDetailCursor = require('./ChartDetailCursor');
+var ChartDetailCursor = require('./ChartDetailCursor').default;
 var { console, isServerSide, Filters, layout, analytics } = require('./../../util');
 var { highlightTerm } = require('./../../facetlist');
 
+/**
+ * Use this Component to wrap a chart or other view which displays any sort of Experiment Set 'Node'(s).
+ * A "Node" here implies an object with properties: 'field', 'term', 'experiment_sets', 'experiments', and 'files'.
+ * Optionally may have a 'parent' node also, and any other metada.
+ * 
+ * This components adjusts child Component to pass down props:
+ * {function} onNodeMouseEnter(node, evt)
+ * {function} onNodeMouseLeave(node, evt)
+ * {function} onNodeClick(node, evt)
+ * {string} selectedTerm
+ * {string} selectedParentTerm
+ * {string} hoverTerm
+ * {string} hoverParentTerm
+ * 
+ * The added prop callback functions should be used in the view whenever a "Node" element is hovered over or clicked on,
+ * to pass node to them for the popover display.
+ * 
+ * Added prop strings should be used alongside CursorViewBounds.isSelected or similar to determine to highlight a node element that is selected, or something.
+ * 
+ * @export
+ * @class CursorViewBounds
+ * @extends {React.Component}
+ */
 export default class CursorViewBounds extends React.Component {
 
     /**
