@@ -144,7 +144,8 @@ var CursorComponent = module.exports = React.createClass({
                 onMouseLeave : this.props.onMouseLeave,
                 style : this.props.style,
                 children : this.props.children,
-                sticky : this.props.sticky
+                sticky : this.props.sticky,
+                schemas : this.props.schemas
             }, state)), this.portalElement);
 
         });

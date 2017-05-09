@@ -1158,6 +1158,7 @@ var App = React.createClass({
                     }} />
                     <ChartDetailCursor
                         href={this.props.href}
+                        schemas={this.state.schemas}
                         verticalAlign="center" /* cursor position relative to popover */
                         //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
                     />

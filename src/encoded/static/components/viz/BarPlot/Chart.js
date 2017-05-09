@@ -10,7 +10,7 @@ var ChartDetailCursor = require('./../ChartDetailCursor');
 var { console, object, isServerSide, expFxn, Filters, layout, navigate } = require('./../../util');
 var { unhighlightTerms, highlightTerm } = require('./../../facetlist');
 var aggregationFxn = require('./aggregation-functions');
-var ViewContainer = require('./ViewContainer');
+import { PopoverViewContainer } from './ViewContainer';
 
 
 var Chart = module.exports = React.createClass({
@@ -535,7 +535,7 @@ var Chart = module.exports = React.createClass({
         */
 
         return (
-            <ViewContainer
+            <PopoverViewContainer
                 leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts)}
                 bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, barData.bars, styleOpts)}
                 topLevelField={this.props.fields[barData.fieldIndex].field}

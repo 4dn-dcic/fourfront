@@ -77,7 +77,6 @@ var ChartDetailCursor = module.exports = React.createClass({
         return {
             'title' : 'Title',
             'term' : 'Title',
-            'field' : 'Field',
             'filteredOut' : false,
             'includeTitleDescendentPrefix' : true,
             'primaryCount' : 'experiment_sets',
@@ -93,19 +92,6 @@ var ChartDetailCursor = module.exports = React.createClass({
             'actions' : null,
             'xCoordOverride' : null
         };
-    },
-
-    /** Prevent updates when stickied. Unless it's to unsticky. */
-    shouldComponentUpdate : function(nextProps, nextState){
-        return true;
-        if (this.state.sticky === true){
-            if (nextState.sticky === false || this.overrideSticky){
-                this.overrideSticky = false;
-                return true;
-            }
-            return false;
-        }
-        return true;
     },
 
     componentDidMount : function(){
@@ -201,7 +187,6 @@ var ChartDetailCursor = module.exports = React.createClass({
         if (!isVisible){
             return null;
         }
-        
         return (
             <CursorComponent
                 {...containDims}
@@ -331,14 +316,13 @@ var ChartDetailCursor = module.exports = React.createClass({
                         var offsetPerDescendent = 10;
                         var isEmpty = this.props.path.length < 2;
                         if (isEmpty) return null;
-
                         //var maxSkewOffset = (this.props.path.length - 2) * offsetPerCrumb;
                         
                         return (
                             <div className={'detail-crumbs' + (isEmpty ? ' no-children' : '')}>
                                 {/* this.header(isEmpty) */}
                                 {
-                                    this.props.path.slice(0,-1).map(function(n, i){
+                                    this.props.path.slice(0,-1).map((n, i)=>{
                                         return (
                                             <div
                                                 data-depth={i}
@@ -346,7 +330,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                                                 key={i}
                                             >
                                                 <div className="field col-xs-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
-                                                    { Filters.Field.toName(n.field) }
+                                                    { Filters.Field.toName(n.field, this.props.schemas) }
                                                 </div>
                                                 <div className="name col-xs-5">
                                                     { n.name || n.term }
@@ -464,15 +448,16 @@ var ChartDetailCursor = module.exports = React.createClass({
                     return null;
                 }
                 var leafNode = this.props.path[this.props.path.length - 1];
+                var leafNodeFieldTitle = Filters.Field.toName(leafNode.field, this.props.schemas);
                 return (
                     <div className="mosaic-cursor-body">
-                        <ChartDetailCursor.Body.Crumbs path={this.props.path} />
+                        <ChartDetailCursor.Body.Crumbs path={this.props.path} schemas={this.props.schemas} />
                         <h6 className="field-title">
                             { this.primaryCountLabel() }
                             { 
                                 this.props.includeTitleDescendentPrefix && this.props.path.length > 1 ?
                                 <small className="descendent-prefix"> &gt; </small> : null
-                            }{ this.props.field || leafNode.field }
+                            }{ leafNodeFieldTitle }
                             {/* this.props.filteredOut ?
                                 <small className="filtered-out-label"> (filtered out)</small>
                             : null */}
