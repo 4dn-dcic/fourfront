@@ -161,7 +161,7 @@ var CursorComponent = module.exports = React.createClass({
         var scrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
         
         var onRightSide = this.props.horizontalAlign === 'auto' && e.clientX + scrollX > (
-            (this.props.containingElement && this.props.containingElement.clientWidth) || 
+            //(this.props.containingElement && this.props.containingElement.clientWidth) || 
             (document && document.body && document.body.clientWidth) ||
             (window && window.innerWidth)
         ) / 2;

@@ -441,6 +441,8 @@
         .bar-part {
             opacity: 1;
             transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s, -webkit-filter .5s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s, filter .5s;
             //outline-offset: 5px;
             //outline: 1px solid transparent;
             box-shadow : none;
@@ -470,6 +472,14 @@
             }
         }
 
+        &.highlight {
+            > .bar-part:not(.highlight) {
+                opacity : 0.33;
+                filter: saturate(0%);
+                -webkit-filter: saturate(0%);
+            }
+        }
+
         &:hover,
         &.selected {
 
@@ -481,7 +491,7 @@
         }
 
     }
-
+    /*
     &.highlight {
         .chart-bar > rect {
             fill-opacity: 0.4;
@@ -523,6 +533,7 @@
             }
         }
     }
+    */
 
     .silhouette {
         opacity : 0.75;
@@ -706,6 +717,9 @@
                         top: 9px;
                     }
                     padding-left: 12px;
+                    padding-right: 24px;
+                    overflow-x: hidden;
+                    text-overflow: ellipsis;
                 }
             }
         }
@@ -1039,6 +1053,30 @@
     transition: opacity .75s;
     //border: 1px solid #eee;
     //border-radius: 1px;
+
+    > .expand-toggle {
+        float: right;
+        width: 20px;
+        line-height: 20px;
+        margin-right: -2px;
+        opacity : 0.33;
+        cursor: pointer;
+        &:hover {
+            opacity : 1;
+        }
+    }
+
+    &.expanded {
+        position: absolute;
+        top: 0;
+        z-index: 10;
+        background: #fff;
+        box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        padding-top: 11px;
+        > .expand-toggle {
+            opacity: 1;
+        }
+    }
 
     .legend-title {
         margin-bottom: 1px;

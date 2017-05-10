@@ -71,6 +71,7 @@ class Term extends React.Component {
                     onMouseEnter={this.onMouseEnter}
                     onMouseLeave={this.onMouseLeave}
                     onClick={this.onClick}
+                    className="inline-block"
                 >
                     <div
                         className="color-patch no-highlight-color"
@@ -129,17 +130,56 @@ class Field extends React.Component {
 
 
 class LegendViewContainer extends React.Component {
+
+    static defaultProps = {
+        'expandable' : false,
+        'expandableAfter' : 5
+    }
+
+    static totalTermsCount(fields){
+        return _.reduce(fields, function(m,field){ return m + (field.terms || []).length; }, 0);
+    }
+
+    constructor(props){
+        super(props);
+        this.handleExpandToggle = _.throttle(this.handleExpandToggle.bind(this), 500);
+        this.toggleIcon = this.toggleIcon.bind(this);
+        this.render = this.render.bind(this);
+        if (props.expandable){
+            this.state = {
+                expanded : false
+            };
+        }
+    }
+
+    handleExpandToggle(evt){
+        this.setState({ 'expanded' : !this.state.expanded });
+    }
+
+    toggleIcon(){
+        if (!this.state || LegendViewContainer.totalTermsCount(this.props.fields) < this.props.expandableAfter) return null;
+        var iconClass = this.state.expanded ? 'compress' : 'expand';
+        return (
+            <div className="expand-toggle text-center" onClick={this.handleExpandToggle}>
+                <i className={"icon icon-fw icon-" + iconClass}/>
+            </div>
+        );
+    }
+
     /**
      * @returns {Element} Div element containing props.title and list of {@link module:viz/components.Legend.Field} components.
      */
     render(){
         if (!this.props.fields) return null;
+        var className = 'legend ' + this.props.className;
+        if (this.state && this.state.expanded) className += ' expanded';
         return (
-            <div className={"legend " + this.props.className} id={this.props.id} style={{
+            <div className={className} id={this.props.id} style={{
                 opacity : !Array.isArray(this.props.fields) ? 0 : 1,
                 width : this.props.width || null
             }}>
                 { this.props.title }
+                { this.toggleIcon() }
                 { Array.isArray(this.props.fields) ?
                     Legend.parseFieldNames(this.props.fields, this.props.schemas || null)
                     .map((field)=>
@@ -188,9 +228,9 @@ export default class Legend extends React.Component {
         );
     }
 
-    static barPlotFieldDataToLegendFieldsData(field){
+    static barPlotFieldDataToLegendFieldsData(field, sortBy = null){
         if (Array.isArray(field) && field.length > 0 && field[0] && typeof field[0] === 'object'){
-            return field.map(Legend.barPlotFieldDataToLegendFieldsData);
+            return field.map(function(f){ return Legend.barPlotFieldDataToLegendFieldsData(f, sortBy); });
         }
         if (!field) return null;
         var terms = _.pairs(field.terms).map(function(p){ // p[0] = term, p[1] = term counts
@@ -209,57 +249,13 @@ export default class Legend extends React.Component {
         });
 
         var adjustedField = _.extend({}, field, { 'terms' : terms });
+        _.extend(adjustedField, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(adjustedField) });
 
-        return _.extend(adjustedField, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(adjustedField) });
-    }
+        if (sortBy){
+            adjustedField.terms = _.sortBy(adjustedField.terms, sortBy);
+        }
 
-    /**
-     * @deprecated
-     */
-    static experimentsAndFieldsToLegendData(experiments, fields, schemas = null){
-        return fields.map(function(field){
-            return Legend.experimentsAndFieldToLegendDataItem(experiments, field, schemas);
-        });
-    }
-
-    /**
-     * @deprecated
-     */
-    static experimentsAndFieldToLegendDataItem(experiments, field, schemas = null){
-
-        var legendFieldItem = {
-            'field' : field.field,
-            'name' : field.title || field.name || Filters.Field.toName(field.field, schemas),
-            'terms' : {}
-        };
-
-        experiments.forEach(function(exp){
-            var term = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
-            if (!term) term = "None";
-            if (Array.isArray(term)){
-                term = _.uniq(term);
-                if (term.length === 1) term = term[0];
-                else {
-                    console.warn('Multiple unique terms for field ' + field.field, term);
-                    term = term[0];
-                }
-            }
-            if (typeof legendFieldItem.terms[term] === 'object') return; // aka continue.
-            if (!legendFieldItem.terms[term]){
-                legendFieldItem.terms[term] = {
-                    'color' : vizUtil.colorForNode({
-                        'term' : term,
-                        'field' : field.field
-                    }, true, 'muted', null, true),
-                    'term' : term,
-                    'name' : Filters.Term.toName(field.field, term)
-                };
-            }
-        });
-
-        legendFieldItem.terms = _.values(legendFieldItem.terms);
-        return _.extend(legendFieldItem, { 'terms' : Legend.sortLegendFieldTermsByColorPalette(legendFieldItem) });
-        
+        return adjustedField;
     }
 
     static sortLegendFieldsTermsByColorPalette(fields, palette = 'muted'){
@@ -306,6 +302,8 @@ export default class Legend extends React.Component {
         'id' : null,
         'className' : 'chart-color-legend',
         'width' : null,
+        'expandable': false,
+        'expandableAfter' : 5,
         'title' : null //<h4 className="text-500">Legend</h4>
     }
 

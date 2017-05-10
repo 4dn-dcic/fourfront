@@ -458,6 +458,19 @@ var Chart = module.exports = React.createClass({
         
     },
 
+    genChartData : function(){
+        return aggregationFxn.genChartData( // Get counts by term per field.
+            (
+                this.props.showType === 'all' ?
+                this.props.experiments : this.props.filteredExperiments || this.props.experiments
+            ),
+            this.props.fields,
+            this.props.aggregateType,
+            'experiments',
+            this.props.useOnlyPopulatedFields
+        );
+    },
+
     /** 
      * Parses props.experiments and/or props.filterExperiments, depending on props.showType, aggregates experiments into fields,
      * generates data for chart bars, and then draws and returns chart wrapped in a div React element.
@@ -483,16 +496,7 @@ var Chart = module.exports = React.createClass({
 
         var chartData = (
             (this.props.showType === 'all' ? this.props.aggregatedData : this.props.aggregatedFilteredData) || this.props.aggregatedData
-        ) || aggregationFxn.genChartData( // Get counts by term per field.
-            (
-                this.props.showType === 'all' ?
-                this.props.experiments : this.props.filteredExperiments || this.props.experiments
-            ),
-            this.props.fields,
-            this.props.aggregateType,
-            'experiments',
-            this.props.useOnlyPopulatedFields
-        );
+        ) || this.genChartData();
 
         var barData = Chart.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             chartData,

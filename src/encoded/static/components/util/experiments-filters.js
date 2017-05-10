@@ -38,6 +38,7 @@ export const Field = {
         'accession' : 'Experiment Set',
         'experiments_in_set.digestion_enzyme.name' : 'Enzyme',
         'experiments_in_set.biosample.biosource_summary' : 'Biosource',
+        'experiments_in_set.lab.title' : 'Lab'
     },
 
     toName : function(field, schemas, schemaOnly = false){

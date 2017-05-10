@@ -29,14 +29,16 @@ export default class UIControlsWrapper extends React.Component {
             { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
-            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" }
+            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
+            { title : "Lab", field : "experiments_in_set.lab.title" }
         ],
         'availableFields_Subdivision' : [
             { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
             { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
             { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
-            { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' }
+            { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+            { title : "Lab", field : "experiments_in_set.lab.title" }
         ],
         'legend' : false,
         'chartHeight' : 300
@@ -351,6 +353,7 @@ export default class UIControlsWrapper extends React.Component {
                                 filteredExperiments={this.props.filteredExperiments}
                                 fields={this.state.fields}
                                 showType={this.state.showState}
+                                aggregateType={this.state.aggregateType}
                                 schemas={this.props.schemas}
                             />
                         </div>
@@ -429,15 +432,24 @@ class AggregatedLegend extends React.Component {
         }
     }
 
+    width(){
+        if (this.refs && this.refs.container && this.refs.container.offsetWidth){
+            return this.refs.container.offsetWidth;
+        }
+        return layout.gridContainerWidth() * (3/12) - 15;
+    }
+
     render(){
 
         var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
-            !this.props.experiments || !this.props.fields[1] ? null :
+            (!this.props.experiments || !this.props.fields[1] ? null :
                 Legend.aggregegateBarPlotData(
                     this.props.showType === 'filtered' ? (this.props.filteredExperiments || this.props.experiments) :
                         this.props.experiments,
                     [this.props.fields[1]]
                 )
+            ),
+            term => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
         );
 
         this.shouldUpdate = false;
@@ -448,14 +460,17 @@ class AggregatedLegend extends React.Component {
         }
 
         return (
-            <Legend
-                fields={fieldsForLegend}
-                includeFieldTitles={false}
-                schemas={this.props.schemas}
-                width={layout.gridContainerWidth() * (3/12) - 20}
-                hasPopover
-                cursorDetailActions={boundActions(this, this.props.showType)}
-            />
+            <div className="legend-container-inner" ref="container">
+                <Legend
+                    fields={fieldsForLegend}
+                    includeFieldTitles={false}
+                    schemas={this.props.schemas}
+                    width={this.width()}
+                    hasPopover
+                    expandable
+                    cursorDetailActions={boundActions(this, this.props.showType)}
+                />
+            </div>
         );
     }
 }

@@ -53,13 +53,17 @@ class BarSection extends React.Component {
         var color           = d.color || vizUtil.colorForNode(d);
         var isSelected      = this.isSelected(),
             isHoveredOver   = this.isHoveredOver();
+
+        var className = "bar-part";
+        if (d.parent) className += ' multiple-parts';
+        if (isSelected) className += ' selected';
+        if (isHoveredOver) className += ' hover';
+        if (!this.props.canBeHighlighted) className += ' no-highlight';
+        else className += ' no-highlight-color';
         
         return (
             <div
-                className={
-                    "bar-part no-highlight" + (d.parent ? ' multiple-parts' : '')
-                    + (isSelected ? ' selected' : '') + (isHoveredOver ? ' hover' : '')
-                }
+                className={className}
                 style={{
                     height : this.props.isNew || this.props.isRemoving ? 0 : d.attr.height,
                     //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
@@ -152,6 +156,7 @@ class Bar extends React.Component {
                 hoverTerm={this.props.hoverTerm}
                 isNew={isNew}
                 isRemoving={d.removing}
+                canBeHighlighted={this.props.canBeHighlighted}
             />
         );
     }
@@ -173,15 +178,20 @@ class Bar extends React.Component {
             d.bars : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
         );
 
-        barSections = _.sortBy(barSections.slice(0), this.props.aggregateType || 'term').reverse();
-
         if (hasSubSections){
-            barSections = vizUtil.sortObjectsByColorPalette(
+            barSections = d.bars = vizUtil.sortObjectsByColorPalette(
                 barSections.map(function(b){
                     return _.extend(b, { 'color' : vizUtil.colorForNode(b) });
                 })
             );
         }
+
+        barSections = d.bars = _.sortBy(barSections.slice(0), (b)=>{
+            if (typeof b[this.props.aggregateType] === 'number'){
+                return -b[this.props.aggregateType];
+            }
+            return 'term';
+        });
 
         // If transitioning, add existing bar sections to fade out.
         if (this.props.transitioning && cachedPastBarSections[d.term]) barSections = barSections.concat(
@@ -208,12 +218,16 @@ class Bar extends React.Component {
             })
         )
 
+        var className = "chart-bar";
+        if (!this.props.canBeHighlighted) className += ' no-highlight';
+        else className += ' no-highlight-color';
+
         return (
             <div
-                className="chart-bar no-highlight"
+                className={className}
                 onMouseLeave={()=>{
-                    if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
-                    else unhighlightTerms(d.field);
+                    //if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
+                    //else unhighlightTerms(d.field);
                 }}
                 data-term={d.term}
                 data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
@@ -245,6 +259,10 @@ export class ViewContainer extends React.Component {
 
     static Bar = Bar
     static BarSection = BarSection
+
+    static defaultProps = {
+        canBeHighlighted : true
+    }
 
     constructor(props){
         super(props);
@@ -306,6 +324,7 @@ export class ViewContainer extends React.Component {
                 onBarPartMouseLeave={this.props.onNodeMouseLeave}
                 onBarPartClick={this.props.onNodeClick}
 
+                canBeHighlighted={this.props.canBeHighlighted}
             />
         );
     }
@@ -472,7 +491,7 @@ export class PopoverViewContainer extends React.Component {
                 actions={this.cursorDetailActions.call(this)}
                 cursorContainerMargin={this.props.cursorContainerMargin}
                 eventCategory="BarPlot" // For Analytics events
-                highlightTerm
+                //highlightTerm
                 clickCoordsFxn={(node, containerPosition, boundsHeight)=>{
                     var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
                     var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
@@ -482,7 +501,8 @@ export class PopoverViewContainer extends React.Component {
                     if (node.parent){
                         var done = false;
                         barYPos = _.reduce(
-                            _.sortBy(node.parent.bars, 'term').reverse(),
+                            node.parent.bars,//.slice(0).reverse(),
+                            //_.sortBy(node.parent.bars, 'term').reverse(),
                             function(m, siblingNode){
                                 if (done) return m;
                                 if (siblingNode.term === node.term){

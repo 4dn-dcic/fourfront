@@ -40,6 +40,7 @@ var refs = {
         'experiments_in_set.biosample.biosource_summary', // AKA Biosource
         //'experiments_in_set.biosample.biosource.biosource_name', // AKA Biosource
         'experiments_in_set.biosample.biosource.biosource_type', // AKA Biosource Type
+        'experiments_in_set.lab.title',
         'experiments_in_set.biosample.biosource.individual.organism.name',
         'experiments_in_set.digestion_enzyme.name'
     ],
@@ -634,7 +635,8 @@ export const ChartDataController = {
         }
 
         var filtersSet = _.keys(reduxStoreState.expSetFilters).length > 0;
-        var experiments = null, filteredExperiments = null;
+        var experiments = null,
+            filteredExperiments = null;
 
         var cb = _.after(filtersSet ? 2 : 1, function(){
             ChartDataController.setState({
@@ -652,17 +654,21 @@ export const ChartDataController = {
                 experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
                 cb();
             }, 'GET', function(errResp){
-                experiments = null;
-                cb();
+                opts.error = true;
 
                 // If received a 403 or a 404 (no expsets returned) we're likely logged out, so reload current href / context
                 // Reload/navigation will also receive 403 and then trigger JWT unset, logged out alert, & refresh.
-                if (errResp && typeof errResp === 'object' &&
-                    (errResp.code === 403 || errResp.total === 0)
-                ){
-                    console.warn('403 or 404 Error, refetching.');
-                    reFetchContext();
+                if (errResp && typeof errResp === 'object'){
+                    if (typeof errResp.total === 'number' && errResp.total > 0){
+                        experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
+                    }
+                    //if (errResp.code === 403 || errResp.total === 0){
+                    //    console.warn('403 or 404 Error, refetching.');
+                    //    reFetchContext();
+                    //}
                 }
+                reFetchContext();
+                cb();
             }
         );
 
@@ -675,7 +681,6 @@ export const ChartDataController = {
                     filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
                     cb();
                 }, 'GET', function(){
-                    filteredExperiments = null;
                     cb();
                 }
             );

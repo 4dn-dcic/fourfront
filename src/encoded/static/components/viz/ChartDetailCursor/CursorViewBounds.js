@@ -54,29 +54,10 @@ export default class CursorViewBounds extends React.Component {
         'cursorContainerMargin' : 100,
         // Return an object with 'x', 'y'.
         'clickCoordsFxn' : function(node, containerPosition, boundsHeight, isOnRightSide){
-            var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
-            var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
-
-            var barYPos = node.attr.height;
-
-            if (node.parent){
-                var done = false;
-                barYPos = _.reduce(
-                    _.sortBy(node.parent.bars, 'term').reverse(),
-                    function(m, siblingNode){
-                        if (done) return m;
-                        if (siblingNode.term === node.term){
-                            done = true;
-                        }
-                        return m + siblingNode.attr.height;
-                    },
-                    0
-                );
-            }
 
             return {
-                x : containerPosition.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
-                y : containerPosition.top + boundsHeight - bottomOffset - barYPos,
+                x : containerPosition.left,
+                y : containerPosition.top + boundsHeight,
             };
 
         }
@@ -88,9 +69,12 @@ export default class CursorViewBounds extends React.Component {
         this.updateDetailCursorFromNode = this.updateDetailCursorFromNode.bind(this);
         this.handleMouseMoveToUnsticky = this.handleMouseMoveToUnsticky.bind(this);
         this.handleClickAnywhere = this.handleClickAnywhere.bind(this);
+        this.sendHoverEvent = _.debounce(this.sendHoverEvent.bind(this), 3000);
+        this.registerHoverEvent = this.registerHoverEvent.bind(this);
         this.onNodeMouseEnter = this.onNodeMouseEnter.bind(this);
         this.onNodeMouseLeave = this.onNodeMouseLeave.bind(this);
         this.onNodeClick = this.onNodeClick.bind(this);
+        this.hovers = [];
         this.state = {
             'selectedParentTerm' : null,
             'selectedTerm' : null,
@@ -192,6 +176,22 @@ export default class CursorViewBounds extends React.Component {
         });
     }
 
+    sendHoverEvent(node){
+        setTimeout(()=>{
+            analytics.event(this.props.eventCategory || 'CursorViewBounds', 'Hover Node', {
+                eventLabel : analytics.eventLabelFromChartNodes(this.hovers),
+                currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()),
+                eventValue : this.hovers.length
+            });
+            this.hovers = [];
+        }, 10);
+    }
+
+    registerHoverEvent(node){
+        this.hovers.push(node);
+        this.sendHoverEvent();
+    }
+
     onNodeMouseEnter(node, evt){
         // Cancel if same node as selected.
         if (CursorViewBounds.isSelected(node, this.state.selectedTerm, this.state.selectedParentTerm)){
@@ -210,12 +210,7 @@ export default class CursorViewBounds extends React.Component {
         });
 
         if (_.keys(newOwnState).length > 0){
-            this.setState(newOwnState, function(){
-                analytics.event(this.props.eventCategory || 'CursorViewBounds', 'Hover Node', {
-                    eventLabel : analytics.eventLabelFromChartNode(node),
-                    currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters())
-                });
-            });
+            this.setState(newOwnState, this.registerHoverEvent.bind(this, node));
         }
 
         if (this.props.highlightTerm && typeof highlightTerm === 'function') highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
@@ -250,8 +245,17 @@ export default class CursorViewBounds extends React.Component {
                 var bottomOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
                 var leftOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
 
-                var mouseXInContainer = (evt.pageX || evt.clientX) - containerPos.left;
-                var isPopoverOnRightSide = mouseXInContainer > (this.refs.container.clientWidth / 2);
+                //var mouseXInContainer = (evt.pageX || evt.clientX) - containerPos.left;
+
+                // Try to use window width.
+                var containerWidth;
+                if (!isServerSide() && window && window.innerWidth){
+                    containerWidth = window.clientWidth || window.innerWidth;
+                } else {
+                    containerWidth = this.refs.container.clientWidth;
+                }
+
+                var isPopoverOnRightSide = (evt.pageX || evt.clientX) > (containerWidth / 2);
 
                 var coords = this.props.clickCoordsFxn(node, containerPos, this.refs.container.clientHeight, isPopoverOnRightSide);
 
@@ -269,10 +273,12 @@ export default class CursorViewBounds extends React.Component {
                 'selectedParentTerm' : (node.parent && node.parent.term) || null
             }, function(){
                 // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
-                analytics.event(this.props.eventCategory || 'CursorViewBounds', 'Select Node', {
-                    eventLabel : analytics.eventLabelFromChartNode(node),
-                    currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters())
-                });
+                setTimeout(()=>{
+                    analytics.event(this.props.eventCategory || 'CursorViewBounds', 'Select Node', {
+                        eventLabel : analytics.eventLabelFromChartNode(node),
+                        currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters())
+                    });
+                }, 10);
             });
 
         }
