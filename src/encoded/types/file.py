@@ -12,7 +12,8 @@ from snovault.validators import validate_item_content_post
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
-    collection_add
+    collection_add,
+    paths_filtered_by_status
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -35,7 +36,7 @@ import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
 
 def show_upload_credentials(request=None, context=None, status=None):
-    if request is None or status not in ('uploading', 'upload failed'):
+    if request is None or status not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
         return False
     return request.has_permission('edit', context)
 
@@ -145,6 +146,38 @@ class File(Item):
     schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab', 'file_format', 'related_files.file']
     name_key = 'accession'
+    rev = {
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    }
+
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
+
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -156,7 +189,7 @@ class File(Item):
         new_creds = old_creds
 
         # don't get new creds
-        if properties.get('status',None) in ('uploading', 'upload failed'):
+        if properties.get('status',None) in ('uploading', 'to be uploaded by workflow', 'upload failed'):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
 
@@ -227,6 +260,7 @@ class File(Item):
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
+        "description" : "Accession of this file"
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
@@ -242,7 +276,7 @@ class File(Item):
         return request.resource_path(self) + '@@download/' + filename
 
     @calculated_property(schema={
-        "title": "Upload key",
+        "title": "Upload Key",
         "type": "string",
     })
     def upload_key(self, request):
@@ -290,7 +324,7 @@ class File(Item):
 
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
-        if properties.get('status') == 'uploading':
+        if properties.get('status') in ('uploading', 'to be uploaded by workflow'):
             sheets = {} if sheets is None else sheets.copy()
             sheets['external'] = cls.build_external_creds(registry, uuid, properties)
         return super(File, cls).create(registry, uuid, properties, sheets)
@@ -397,7 +431,7 @@ def get_upload(context, request):
              permission='edit', validators=[schema_validator({"type": "object"})])
 def post_upload(context, request):
     properties = context.upgrade_properties()
-    if properties['status'] not in ('uploading', 'upload failed'):
+    if properties['status'] not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
 
     accession_or_external = properties.get('accession')

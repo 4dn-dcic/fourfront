@@ -498,6 +498,14 @@ $open-expset-table-side-border-color : #e4e4e4;
 					padding-top: 4px;
 					padding-bottom: 4px;
 					transition : height .5s, border-top-color .35s;
+					&:last-child:after {
+						content: '';
+						height: 100%;
+						position: absolute;
+						right: 0;
+						top: 0;
+						border-right: 1px solid transparent;
+					}
 				}
 			}
 
@@ -513,6 +521,13 @@ $open-expset-table-side-border-color : #e4e4e4;
 			> tr > td {
 				/* background-color: rgba(0,0,0,0.05); */
 				background-color: rgba(36, 139, 172, 0.05);
+			}
+		}
+
+		> tr.expset-addinfo-row {
+			> td {
+				padding: 0;
+				border-top: 1px solid #f4f4f4;
 			}
 		}
 
@@ -561,12 +576,6 @@ $open-expset-table-side-border-color : #e4e4e4;
 						top: 0;
 						border-right: 1px solid $open-expset-table-side-border-color;
 					}
-				}
-			}
-			> tr.expset-addinfo-row {
-				> td {
-					padding: 0;
-					border-top: 1px solid #f4f4f4;
 				}
 			}
 
@@ -661,14 +670,17 @@ tr.expset-addinfo-row {
 	.experiment-set-info-wrapper {
 
 		margin-left: 38px;
-		border-bottom: 1px solid #808080;
+		border-bottom: 1px solid transparent;
 		box-shadow : 0 4px 4px -4px rgba(0,0,0,.25);
 		position: relative;
 		z-index: 1;
+		transition: border-bottom .3s ease-out;
+		border-right: 1px solid transparent;
 
 		tbody.open & {
 			//border-left: 1px solid $open-expset-table-side-border-color;
-			border-right: 1px solid $open-expset-table-side-border-color;
+			border-right-color: $open-expset-table-side-border-color;
+			border-bottom-color: #808080;
 		}
 
 		.expset-addinfo {
@@ -786,7 +798,7 @@ $small-label-accession-font-size : 0.75rem;
 		min-width: $expset-full-width;
 		transition: opacity .35s;
 
-		&:not(.mounted){
+		&.fade-in:not(.mounted){
 			opacity: 0;
 		}
 
@@ -891,6 +903,7 @@ $small-label-accession-font-size : 0.75rem;
 					display: inline-block;
 					vertical-align: middle;
 				}
+				position: relative;
 				padding: 7px 12px;
 				text-align: center;
 				line-height: 20px;
@@ -926,6 +939,12 @@ $small-label-accession-font-size : 0.75rem;
 					opacity: 0.1;
 					&.is-accession {
 						font-size: $small-label-accession-font-size;
+						i.icon-copy {
+							opacity : 0;
+							transition: opacity .25s;
+							font-size: 9px;
+							cursor: pointer;
+						}
 					}
 				}
 
@@ -985,7 +1004,7 @@ $small-label-accession-font-size : 0.75rem;
 			.s-block:hover > .name > .label-ext-info {
 				opacity: 1 !important;
 				color: #000;
-				transform: scale3d(0.875,0.875,1) translate3d(-6%,12%,0);
+				transform: scale3d(1,1,1) translate3d(0%,20%,0);
 			}
 			.s-block:hover > .name:not(:hover) > .label-ext-info {
 				transform: scale3d(1, 1, 1) translate3d(1%, 20%, 0);
@@ -993,7 +1012,7 @@ $small-label-accession-font-size : 0.75rem;
 			.s-block.hide-name-on-block-hover:hover > .name:not(:hover) > .label-ext-info {
 				top: 50%;
     			margin-top: -9px;
-				transform: scale3d(1, 1, 1) translate3d(1%, 20%, 0);
+				transform: scale3d(1, 1, 1) translate3d(1%, 12%, 0);
 			}
 			.s-block.hide-name-on-block-hover:hover > .name:not(:hover) > .label-ext-info.has-subtitle {
     			margin-top: -13px;
@@ -1019,8 +1038,13 @@ $small-label-accession-font-size : 0.75rem;
 			}
 			.s-block:hover > .name:hover > .label-ext-info > .ext {
 				opacity: 1;
+				transform: scale3d(1,1,1);
 				/* transform: scale3d(1.125, 1.125, 1) translate3d(6%, 0, 0) !important; */
 				font-weight: 600;
+				i.icon-copy {
+					opacity: 1;
+					cursor: pointer;
+				}
 			}
 
 			.s-block.hide-name-on-block-hover .name.col-file > .exp-table-checkbox {

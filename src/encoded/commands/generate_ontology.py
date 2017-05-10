@@ -417,12 +417,14 @@ def get_ontologies(connection, ont_list):
         ontologies = [get_FDN('ontologys/' + ontology, connection, frame='embedded') for ontology in ont_list]
 
     # removing item not found cases with reporting
+    if not isinstance(ontologies, (list, tuple)):
+        print("we must not have got ontolgies... bailing")
+        import sys
+        sys.exit()
     for i, ontology in enumerate(ontologies):
         if 'Ontology' not in ontology['@type']:
             ontologies.pop(i)
     return ontologies
-
-
 
 
 def connect2server(keyfile, keyname, app=None):
@@ -434,7 +436,6 @@ def connect2server(keyfile, keyname, app=None):
         assert app is not None
         s3bucket = app.registry.settings['system_bucket']
         keyfile = get_key(bucket=s3bucket)
-        keyname = 'default'
 
     key = FDN_Key(keyfile, keyname)
     connection = FDN_Connection(key)
@@ -503,7 +504,7 @@ def _terms_match(t1, t2):
     return True
 
 
-def id_post_and_patch(terms, dbterms, rm_unchanged=True):
+def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsoletes=True):
     '''compares terms to terms that are already in db - if no change
         removes them from the list of updates, if new adds to post dict,
         if changed adds uuid and add to patch dict
@@ -526,6 +527,23 @@ def id_post_and_patch(terms, dbterms, rm_unchanged=True):
             else:
                 term['uuid'] = uuid
                 to_patch[uuid] = term
+
+    if set_obsoletes:
+        # go through db terms and find which aren't in terms and set status
+        # to obsolete by adding to to_patch
+        # need a way to exclude our own terms and synonyms and definitions
+        ontids = [o['uuid'] for o in ontologies]
+
+        for tid, term in dbterms.items():
+            if tid not in terms:
+                if not term.get('source_ontology') or term['source_ontology'] not in ontids:
+                    # don't obsolete terms that aren't in one of the ontologies being processed
+                    continue
+                dbuid = term['uuid']
+                # add simple term with only status and uuid to to_patch
+                to_patch[dbuid] = {'status': 'obsolete', 'uuid': dbuid}
+                tid2uuid[term['term_id']] = dbuid
+
     return {'post': to_post, 'patch': to_patch, 'idmap': tid2uuid}
 
 
@@ -602,7 +620,8 @@ def download_and_process_owl(ontology, connection, terms):
     synonym_terms = get_synonym_term_uris(connection, ontology)
     definition_terms = get_definition_term_uris(connection, ontology)
     data = Owler(ontology['download_url'])
-    terms = {}
+    if not terms:
+        terms = {}
     for class_ in data.allclasses:
         if isBlankNode(class_):
             terms = process_blank_node(class_, data, terms)
@@ -747,6 +766,9 @@ def main():
     # fourfront connection
     connection = connect2server(args.keyfile, args.key, app)
     ontologies = get_ontologies(connection, args.ontologies)
+    for i, o in enumerate(ontologies):
+        if o['ontology_name'].startswith('4DN'):
+            ontologies.pop(i)
     slim_terms = get_slim_terms(connection)
     db_terms = get_existing_ontology_terms(connection)
     db_terms = {t['term_id']: t for t in db_terms}
@@ -766,7 +788,7 @@ def main():
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        partitioned_terms = id_post_and_patch(terms, db_terms, filter_unchanged)
+        partitioned_terms = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
         terms2write = add_uuids(partitioned_terms)
 
         write_outfile(terms2write[0], postfile)
@@ -777,7 +799,7 @@ def main():
                                 args.outdir + s3_postfile,
                                 args.outdir + s3_patchfile)
 
-        if args.s3upload: # upload file to s3
+        if args.s3upload:  # upload file to s3
             with open(postfile, 'rb') as postedfile:
                 s3_put(postedfile, s3_postfile, app)
             with open(patchfile, 'rb') as patchedfile:
