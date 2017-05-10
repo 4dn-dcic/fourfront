@@ -144,11 +144,49 @@ def protocol(testapp, lab, award):
 
 
 @pytest.fixture
-def F123_biosource(testapp, lab, award):
+def cell_line_term(testapp, ontology):
+    item = {
+        "is_slim_for": "cell",
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "term_id": "EFO:0000322",
+        "term_name": "cell line",
+        "uuid": "111189bc-8535-4448-903e-854af460a233",
+        "source_ontology": ontology['@id'],
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def f123_oterm(testapp, ontology, cell_line_term):
+    item = {
+        "uuid": "530036bc-8535-4448-903e-854af460b254",
+        "term_name": "F123-CASTx129",
+        "term_id": "EFO:0000008",
+        "source_ontology": ontology['@id'],
+        "slim_terms": [cell_line_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def gm12878_oterm(testapp, ontology, cell_line_term):
+    item = {
+        "uuid": "530056bc-8535-4448-903e-854af460b111",
+        "term_name": "GM12878",
+        "term_id": "EFO:0000009",
+        "source_ontology": ontology['@id'],
+        "slim_terms": [cell_line_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def F123_biosource(testapp, lab, award, f123_oterm):
     item = {
         "accession": "4DNSR000AAQ2",
         "biosource_type": "stem cell",
-        "cell_line": "F123-CASTx129",
+        "cell_line": f123_oterm['@id'],
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -558,7 +596,7 @@ def ontology(testapp):
 @pytest.fixture
 def oterm(uberon_ont):
     return {
-        "uuid": "530036bc-8535-4448-903e-854af460b254",
+        "uuid": "530036bc-8535-4448-903e-854af460b222",
         "preferred_name": "preferred lung name",
         "term_name": "lung",
         "term_id": "UBERON:0002048",

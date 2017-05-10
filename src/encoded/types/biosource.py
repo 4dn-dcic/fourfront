@@ -33,6 +33,7 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
+<<<<<<< 94113dca3469414eaa8b38cf489259a335506a5a
     embedded = ["individual.*", "individual.organism.*", "tissue.*"]
 
     def _update(self, properties, sheets=None):
@@ -86,6 +87,9 @@ class Biosource(Item):
                     properties['cell_line_termid'] = termid
 
         super(Biosource, self)._update(properties, sheets)
+=======
+    embedded = ["individual", "individual.organism", "tissue", "cell_line"]
+>>>>>>> FF-734 #comment Convert cell_line to ontology term - requires quite a few changes, got rid of update method in biosource.py, got rid of enum in cell_line field (might want to figure out a way to add a partial enum back?), modified inserts, modified tests; still working on validator
 
     @calculated_property(schema={
         "title": "Biosource name",
@@ -101,10 +105,11 @@ class Biosource(Item):
                 return request.embed(tissue, '@@object').get('term_name')
         elif biosource_type in cell_line_types:
             if cell_line:
+                cell_line_name = request.embed(cell_line, '@@object').get('term_name')
                 if cell_line_tier:
                     if cell_line_tier != 'Unclassified':
-                        return cell_line + ' (' + cell_line_tier + ')'
-                return cell_line
+                        return cell_line_name + ' (' + cell_line_tier + ')'
+                return cell_line_name
         elif biosource_type == "whole organisms":
             if individual:
                 individual_props = request.embed(individual, '@@object')
@@ -164,17 +169,54 @@ def validate_biosource_tissue(context, request):
         request.validated.update({})
 
 
+# validator for cell_line field
+def validate_biosource_cell_line(context, request):
+    # import pdb; pdb.set_trace()
+    data = request.json
+    if 'cell_line' not in data:
+        return
+    term_ok = False
+    cell_line = data['cell_line']
+    cell_line = get_item_if_you_can(request, cell_line)
+    slims = None
+    try:
+        slims = cell_line.get('slim_terms')
+    except AttributeError:
+        pass
+
+    if slims is not None:
+        for slim in slims:
+            slim_for = None
+            slim_term = get_item_if_you_can(request, slim)
+            try:
+                slimfor = slim_term.get('is_slim_for')
+            except AttributeError:
+                pass
+
+            if slimfor is not None and slimfor == 'cell':
+                term_ok = True
+
+    if not term_ok:
+        try:
+            cellname = cell_line.get('term_name')
+        except AttributeError:
+            cellname = str(cell_line)
+        request.errors.add('body', None, 'Term: ' + cellname + ' is not a known valid cell line')
+    else:
+        request.validated.update({})
+
+
 @view_config(context=Biosource.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post, validate_biosource_tissue])
+             validators=[validate_item_content_post, validate_biosource_tissue])  # , validate_biosource_cell_line])
 def biosource_add(context, request, render=None):
     return collection_add(context, request, render)
 
 
 @view_config(context=Biosource, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put, validate_biosource_tissue],
+             validators=[validate_item_content_put, validate_biosource_tissue],  # , validate_biosource_cell_line],
              decorator=if_match_tid)
 @view_config(context=Biosource, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_biosource_tissue],
+             validators=[validate_item_content_patch, validate_biosource_tissue],  # validate_biosource_cell_line],
              decorator=if_match_tid)
 def biosource_edit(context, request, render=None):
     return item_edit(context, request, render)
