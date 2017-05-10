@@ -299,6 +299,9 @@ export default class UIControlsWrapper extends React.Component {
         var windowGridSize = layout.responsiveGridState();
         var contextualView = this.contextualView();
 
+        var legendContainerHeight = windowGridSize === 'xs' ? null :
+            this.props.chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 50;
+
         return (
             <div className="bar-plot-chart-controls-wrapper">
                 <div className="overlay" style={{
@@ -345,11 +348,10 @@ export default class UIControlsWrapper extends React.Component {
                     <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
                         { this.renderShowTypeDropdown(contextualView) }
                         { this.renderGroupByFieldDropdown(contextualView) }
-                        <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
-                            this.props.chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 50 : null
-                        }}>
+                        <div className="legend-container" style={{ height : legendContainerHeight }}>
                             <AggregatedLegend
                                 experiments={this.props.experiments}
+                                height={legendContainerHeight}
                                 filteredExperiments={this.props.filteredExperiments}
                                 fields={this.state.fields}
                                 showType={this.state.showState}
@@ -409,6 +411,8 @@ class AggregatedLegend extends React.Component {
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.updateIfShould = this.updateIfShould.bind(this);
+        this.width = this.width.bind(this);
+        this.height = this.height.bind(this);
         this.shouldUpdate = false;
     }
 
@@ -439,6 +443,14 @@ class AggregatedLegend extends React.Component {
         return layout.gridContainerWidth() * (3/12) - 15;
     }
 
+    height(){
+        if (this.props.height) return this.props.height;
+        if (this.refs && this.refs.container && this.refs.container.offsetHeight){
+            return this.refs.container.offsetHeight;
+        }
+        return null;
+    }
+
     render(){
 
         var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
@@ -466,6 +478,7 @@ class AggregatedLegend extends React.Component {
                     includeFieldTitles={false}
                     schemas={this.props.schemas}
                     width={this.width()}
+                    height={this.height()}
                     hasPopover
                     expandable
                     cursorDetailActions={boundActions(this, this.props.showType)}

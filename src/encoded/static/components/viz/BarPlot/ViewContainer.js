@@ -178,21 +178,6 @@ class Bar extends React.Component {
             d.bars : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
         );
 
-        if (hasSubSections){
-            barSections = d.bars = vizUtil.sortObjectsByColorPalette(
-                barSections.map(function(b){
-                    return _.extend(b, { 'color' : vizUtil.colorForNode(b) });
-                })
-            );
-        }
-
-        barSections = d.bars = _.sortBy(barSections.slice(0), (b)=>{
-            if (typeof b[this.props.aggregateType] === 'number'){
-                return -b[this.props.aggregateType];
-            }
-            return 'term';
-        });
-
         // If transitioning, add existing bar sections to fade out.
         if (this.props.transitioning && cachedPastBarSections[d.term]) barSections = barSections.concat(
             _.filter(_.pairs(cachedPastBarSections[d.term]), function(pastNodePair){

@@ -290,7 +290,7 @@ export function unsetAllTermsForField(field, expSetFilters, save = true, href = 
  * @param {string}  [hrefPath]       Override the /path/ in URL returned, e.g. to /browse/.
  * @returns {string} URL which can be used to request filtered results from back-end, e.g. http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&from=0&limit=50&field.name=term1&field2.something=term2[...]
  */
-export function filtersToHref(expSetFilters, currentHref, page = null, limit = null, hrefPath = null){
+export function filtersToHref(expSetFilters, currentHref, page = null, limit = null, sortColumn = null, sortReverse = false, hrefPath = null){
     var baseHref = getBaseHref(currentHref, hrefPath);
 
     // Include a '?' or '&' if needed.
@@ -305,12 +305,34 @@ export function filtersToHref(expSetFilters, currentHref, page = null, limit = n
     if (!page)   page = getPage();
     if (!limit) limit = getLimit();
 
-    return (
+    var urlString = (
         baseHref +
         sep+'limit=' + limit +
         '&from=' + (Math.max(page - 1, 0) * (typeof limit === 'number' ? limit : 0)) +
         (filterQuery.length > 0 ? '&' + filterQuery : '')
     );
+
+    if (!sortColumn){
+        var parts = url.parse(currentHref, true);
+        if (parts.query && typeof parts.query.sort === 'string'){
+            if (parts.query.sort.charAt(0) === '-'){
+                sortReverse = true;
+                sortColumn = part.query.sort.slice(1);
+            } else {
+                sortColumn = parts.query.sort;
+            }
+        }
+    }
+
+    if (typeof sortColumn === 'string'){
+        if (sortReverse){
+            urlString += ('&sort=-' + sortColumn);
+        } else {
+            urlString += ('&sort=' + sortColumn);
+        }
+    }
+
+    return urlString;
 }
 
 

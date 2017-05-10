@@ -7,6 +7,7 @@ var barAggrFxn = require('./../BarPlot/aggregation-functions');
 var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, object } = require('./../../util');
 import { CursorViewBounds } from './../ChartDetailCursor';
+import ReactTooltip from 'react-tooltip';
 
 
 /**
@@ -136,31 +137,26 @@ class LegendViewContainer extends React.Component {
         'expandableAfter' : 5
     }
 
-    static totalTermsCount(fields){
-        return _.reduce(fields, function(m,field){ return m + (field.terms || []).length; }, 0);
-    }
-
     constructor(props){
         super(props);
-        this.handleExpandToggle = _.throttle(this.handleExpandToggle.bind(this), 500);
+        this.showToggleIcon = this.showToggleIcon.bind(this);
         this.toggleIcon = this.toggleIcon.bind(this);
         this.render = this.render.bind(this);
-        if (props.expandable){
-            this.state = {
-                expanded : false
-            };
+    }
+
+    componentDidUpdate(){
+        if (this.showToggleIcon()){
+            ReactTooltip.rebuild();
         }
     }
 
-    handleExpandToggle(evt){
-        this.setState({ 'expanded' : !this.state.expanded });
-    }
+    showToggleIcon(){ return this.props.expandable && Legend.totalTermsCount(this.props.fields) > this.props.expandableAfter; }
 
     toggleIcon(){
-        if (!this.state || LegendViewContainer.totalTermsCount(this.props.fields) < this.props.expandableAfter) return null;
-        var iconClass = this.state.expanded ? 'compress' : 'expand';
+        if (!this.showToggleIcon()) return null;
+        var iconClass = this.props.expanded ? 'compress' : 'expand';
         return (
-            <div className="expand-toggle text-center" onClick={this.handleExpandToggle}>
+            <div className="expand-toggle text-center" onClick={this.props.onToggleExpand} data-tip={this.props.expanded ? "Collapse" : "Expand" } data-place="left">
                 <i className={"icon icon-fw icon-" + iconClass}/>
             </div>
         );
@@ -172,7 +168,7 @@ class LegendViewContainer extends React.Component {
     render(){
         if (!this.props.fields) return null;
         var className = 'legend ' + this.props.className;
-        if (this.state && this.state.expanded) className += ' expanded';
+        if (this.props && this.props.expanded) className += ' expanded';
         return (
             <div className={className} id={this.props.id} style={{
                 opacity : !Array.isArray(this.props.fields) ? 0 : 1,
@@ -279,6 +275,10 @@ export default class Legend extends React.Component {
 
     }
 
+    static totalTermsCount(fields){
+        return _.reduce(fields, function(m,field){ return m + (field.terms || []).length; }, 0);
+    }
+
     /**
      * @param {Object[]} fields - List of field objects, each containing at least a title, name, or field.
      * @param {{Object}} schemas - Schemas object passed down from app.state. 
@@ -302,18 +302,53 @@ export default class Legend extends React.Component {
         'id' : null,
         'className' : 'chart-color-legend',
         'width' : null,
+        'height' : null,
         'expandable': false,
         'expandableAfter' : 5,
+        'defaultExpanded' : false,
         'title' : null //<h4 className="text-500">Legend</h4>
     }
 
     render(){
-        if (!this.props.hasPopover) return <LegendViewContainer {...this.props} />;
+        return <LegendExpandContainer {...this.props} />
+    }
+
+}
+
+class LegendExpandContainer extends React.Component {
+
+    static defaultProps = {
+        'expandableAfter' : 5,
+        'expandable' : false,
+        'defaultExpanded' : false,
+        'hasPopover' : false
+    }
+
+    constructor(props){
+        super(props);
+        this.handleExpandToggle = _.throttle(this.handleExpandToggle.bind(this), 500);
+        if (this.props.expandable){
+            this.state = {
+                'expanded' : props.defaultExpanded
+            }
+        }
+    }
+
+    handleExpandToggle(evt){
+        this.setState({ 'expanded' : !this.state.expanded });
+    }
+
+    legendComponent(){
+        var propsToPass = _.clone(this.props);
+        propsToPass.onToggleExpand = this.handleExpandToggle;
+        propsToPass.expanded = (this.state && this.state.expanded) || false;
+        if (!this.props.hasPopover) return <LegendViewContainer {...propsToPass} />;
         return (
             <CursorViewBounds
                 eventCategory="BarPlotLegend"
                 actions={this.props.cursorDetailActions}
                 highlightTerm
+                width={this.props.width}
                 clickCoordsFxn={(node, containerPosition, boundsHeight, isOnRightSide)=>{
 
                     var margin = 260;
@@ -325,9 +360,23 @@ export default class Legend extends React.Component {
 
                 }}
             >
-                <LegendViewContainer {...this.props} />
+                <LegendViewContainer {...propsToPass} />
             </CursorViewBounds>
         );
+    }
+
+    render(){
+        if (!this.props.expandable || !this.state){
+            return this.legendComponent();
+        } else {
+            var className = "legend-expand-container";
+            if (this.state.expanded) className += ' expanded';
+            return (
+                <div className={className}>
+                    { this.legendComponent() }
+                </div>
+            );
+        }
     }
 
 }

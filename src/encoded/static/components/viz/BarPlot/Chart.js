@@ -112,6 +112,30 @@ var Chart = module.exports = React.createClass({
                 'fullHeightCount' : largestExpCountForATerm
             };
 
+            barData.bars.forEach(function(bar){
+
+                var hasSubSections = Array.isArray(bar.bars);
+
+                if (!hasSubSections) return;
+
+                var sortByAggrCount = function(b){
+                    if (typeof b[aggregateType] === 'number'){
+                        return -b[aggregateType];
+                    }
+                    return b.term;
+                };
+
+                bar.bars = vizUtil.sortObjectsByColorPalette(
+                    bar.bars.map(function(b){
+                        return _.extend(b, { 'color' : vizUtil.colorForNode(b) });
+                    })
+                );
+
+                bar.bars = _.sortBy(bar.bars, sortByAggrCount);
+
+            });
+
+
             return barData;
         },
 

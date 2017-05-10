@@ -488,30 +488,8 @@ export const ChartDataController = {
      */
     setState : function(updatedState = {}, callback = null, opts = {}){
 
-        var allExpsChanged = (
-            updatedState.experiments !== state.experiments ||
-            (Array.isArray(updatedState.experiments) && !Array.isArray(state.experiments)) ||
-            (!Array.isArray(updatedState.experiments) && Array.isArray(state.experiments)) ||
-            (Array.isArray(updatedState.experiments) && Array.isArray(state.experiments) &&
-                (
-                    updatedState.experiments.length !== state.experiments.length ||
-                    !_.isEqual(updatedState.experiments, state.experiments)
-                )
-            )
-        );
-        
-        var allOrFilteredExpsChanged = (
-            allExpsChanged ||
-            updatedState.filteredExperiments !== state.filteredExperiments ||
-            (Array.isArray(updatedState.filteredExperiments) && !Array.isArray(state.filteredExperiments)) ||
-            (!Array.isArray(updatedState.filteredExperiments) && Array.isArray(state.filteredExperiments)) ||
-            (Array.isArray(updatedState.filteredExperiments) && Array.isArray(state.filteredExperiments) &&
-                (
-                    updatedState.filteredExperiments.length !== state.filteredExperiments.length ||
-                    !_.isEqual(updatedState.filteredExperiments, state.filteredExperiments)
-                )
-            )
-        );
+        var allExpsChanged = ChartDataController.checkIfExperimentArraysDiffer(updatedState.experiments, state.experiments);
+        var allOrFilteredExpsChanged = allExpsChanged || ChartDataController.checkIfExperimentArraysDiffer(updatedState.filteredExperiments, state.filteredExperiments);
 
         _.extend(state, updatedState);
 
@@ -561,6 +539,31 @@ export const ChartDataController = {
         } else {
             ChartDataController.fetchAndSetFilteredExperiments(callback);
         }
+    },
+
+    checkIfExperimentArraysDiffer : function(exps1, exps2){
+        if (exps1 === null && exps2 === null) return false;
+        if (!Array.isArray(exps1) && !Array.isArray(exps2)) return false;
+        if (
+            (Array.isArray(exps1) && !Array.isArray(exps2)) ||
+            (!Array.isArray(exps1) && Array.isArray(exps2))
+        ) {
+            return true;
+        }
+        if (exps1.length !== exps2.length) return true;
+        var len = exps1.length;
+
+
+        for (var i = 0; i < exps1.length; i++){
+
+            if (!_.isEqual(exps1[i], exps2[i])){
+                console.log(exps1[i], exps2[i]);
+                return true;
+            }
+            
+        }
+
+        return false;
     },
 
     /**
@@ -765,7 +768,7 @@ export const ChartDataController = {
             if (!expSetFilters) expSetFilters = storeState.expSetFilters;
             if (!href)          href = storeState.href;
         }
-        return Filters.filtersToHref(expSetFilters, href, 0, 'all', '/browse/');
+        return Filters.filtersToHref(expSetFilters, href, 0, 'all', 'experiments_in_set.accession', false, '/browse/');
     },
 
     getRefs : function(){

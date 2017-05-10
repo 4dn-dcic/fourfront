@@ -213,7 +213,9 @@ var vizUtil = module.exports = {
         return vizUtil.colorCache[nodeName];
     },
 
-    sortObjectsByColorPalette : function(objects, palette = 'muted'){
+    sortObjectsByColorPalette : function(objects, palette = null){
+        if (!palette) palette = 'muted';
+        
         var orderedColorList = vizUtil.colorPalettes[palette];
         if (!orderedColorList) {
             console.error("No palette " + palette + ' found.');

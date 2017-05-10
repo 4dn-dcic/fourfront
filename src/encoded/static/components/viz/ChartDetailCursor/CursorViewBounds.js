@@ -287,7 +287,7 @@ export default class CursorViewBounds extends React.Component {
 
     render(){
         return (
-            <div className="popover-bounds-container" ref="container" style={{ height: this.props.height }}>
+            <div className="popover-bounds-container" ref="container" style={{ height: this.props.height, width : this.props.width }}>
             {
                 React.cloneElement(this.props.children, _.extend({}, _.omit(this.props, 'children'), {
                     selectedTerm : this.state.selectedTerm,

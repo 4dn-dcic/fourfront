@@ -40,7 +40,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 return false;
             },
             'views' : ['small', 'large'],
-            'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
+            'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0&sort=experiments_in_set.accession',
             'colWidthPerScreenSize' : {
                 /* Previous, for mosaic: */
                 'small' : [
