@@ -81,7 +81,7 @@ function aggregateByType(fields, experiments){
             countFieldTerm(fields[i], fieldTermPair[1], true, 'experiments');
         });
     });
-        
+      
     // Experiment Sets
     _.forEach(
         expFxn.groupExperimentsIntoExperimentSets(experiments), // = [ [set1exp1, set1exp2, set1exp3], [set2exp1, set2exp2, ...], ...]

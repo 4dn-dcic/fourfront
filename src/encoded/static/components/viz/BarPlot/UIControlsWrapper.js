@@ -481,6 +481,7 @@ class AggregatedLegend extends React.Component {
                     height={this.height()}
                     hasPopover
                     expandable
+                    expandableAfter={8}
                     cursorDetailActions={boundActions(this, this.props.showType)}
                 />
             </div>

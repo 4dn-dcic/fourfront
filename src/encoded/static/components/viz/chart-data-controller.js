@@ -60,15 +60,6 @@ var state = {
     filteredExperiments : null,
     fetching            : false,
 
-    // the below field definitions will likely be moved out of here eventually
-    /** @ignore */
-    chartFieldsBarPlot  : [
-        { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
-        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" }
-        //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
-    ],
-    /** @ignore */
     chartFieldsHierarchy: [
         //{ 
         //    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
@@ -185,8 +176,13 @@ function notifyLoadStartCallbacks(){
 }
 
 function reFetchContext(){
-    console.info('ChartDataController -> Refetching');
-    navigate('', { inPlace : true });
+    console.info('ChartDataController -> Refetch Context Called');
+    try {
+        navigate('', { inPlace : true });
+    } catch (e){
+        console.warn(e);
+        return false;
+    }
     return true;
 }
 
@@ -649,10 +645,15 @@ export const ChartDataController = {
 
         });
 
+        var allExpsHref = refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart();
+        var filteredExpsHref = ChartDataController.getFilteredContextHref(
+            reduxStoreState.expSetFilters, reduxStoreState.href
+        ) + ChartDataController.getFieldsRequiredURLQueryPart();
+
         notifyLoadStartCallbacks();
 
         ajax.load(
-            refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
+            allExpsHref,
             function(allExpsContext){
                 experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
                 cb();
@@ -677,9 +678,7 @@ export const ChartDataController = {
 
         if (filtersSet){
             ajax.load(
-                ChartDataController.getFilteredContextHref(
-                    reduxStoreState.expSetFilters, reduxStoreState.href
-                ) + ChartDataController.getFieldsRequiredURLQueryPart(),
+                filteredExpsHref,
                 function(filteredContext){
                     filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
                     cb();

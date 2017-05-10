@@ -24,11 +24,20 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
 
         sinon = require('sinon');
         server = sinon.fakeServer.create();
+
+        if (typeof context === 'object'){
+            context = JSON.stringify(context);
+        }
+
+        var chartRequestHref = (
+            "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate" +
+            "&limit=all&from=0&sort=experiments_in_set.accession" +
+            ChartDataController.getFieldsRequiredURLQueryPart()
+        );
         
         server.respondWith(
             "GET",
-            "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0"
-                + ChartDataController.getFieldsRequiredURLQueryPart(fieldsToFetch),
+            chartRequestHref,
             [
                 200, 
                 { "Content-Type" : "application/json" },
@@ -40,7 +49,6 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
             <FacetCharts
                 href={href}
                 expSetFilters={{}}
-                navigate={function(){ return; }}
                 updateStats={function(stats){ console.log("CHARTS-TEST: props.updateStats called by FacetCharts (good) with: ", stats); }}
                 schemas={null}
                 fieldsToFetch={fieldsToFetch} />
