@@ -660,6 +660,7 @@ export const ChartDataController = {
                 if (errResp && typeof errResp === 'object' &&
                     (errResp.code === 403 || errResp.total === 0)
                 ){
+                    console.warn('403 or 404 Error, refetching.');
                     reFetchContext();
                 }
             }

@@ -18,11 +18,16 @@ export const Term = {
     toName : function(field, term){
         switch (field) {
             case 'experiments_in_set.biosample.biosource.individual.organism.name':
-                return term.charAt(0).toUpperCase() + term.slice(1);
+                return Term.capitalize(term);
+            case 'experiments_in_set.biosample.biosource.biosource_type':
+                return Term.capitalizeSentence(term);
             default:
                 return term;
         }
-    }
+    },
+
+    capitalize : function(word)        { return word.charAt(0).toUpperCase() + word.slice(1);  },
+    capitalizeSentence : function(sen) { return sen.split(' ').map(Term.capitalize).join(' '); }
 
 };
 

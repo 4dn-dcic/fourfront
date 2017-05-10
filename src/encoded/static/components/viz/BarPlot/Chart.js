@@ -78,7 +78,7 @@ var Chart = module.exports = React.createClass({
                         var maxYForBar = parent ? parent.count : largestExpCountForATerm;
                         var barHeight = maxYForBar === 0 ? 0 : (termCount / maxYForBar) * outerDims.height;
                         var barNode = {
-                            'name' : termKey,
+                            'name' : Filters.Term.toName(fieldObj.field, termKey),
                             'term' : termKey,
                             'count' : termCount,
                             'field' : fieldObj.field,

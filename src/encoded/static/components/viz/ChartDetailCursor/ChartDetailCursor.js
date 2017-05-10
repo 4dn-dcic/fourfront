@@ -159,7 +159,7 @@ class Body extends React.Component {
                         style={{ color : leafNode.color || vizUtil.colorForNode(leafNode) }}
                     />
                     { this.primaryCount(leafNode) }
-                    <span>{ leafNode.name || leafNode.title || leafNode.term || this.props.title }</span>
+                    <span>{ Filters.Term.toName(leafNode.field, leafNode.term) }</span>
                     
                 </h3>
                 <div className="details row">
@@ -214,7 +214,7 @@ class Crumbs extends React.Component {
                                     { Filters.Field.toName(n.field, this.props.schemas) }
                                 </div>
                                 <div className="name col-xs-5">
-                                    { n.name || n.term }
+                                    { n.name || Filters.Term.toName(n.field, n.term) }
                                 </div>
                                 <div className="count col-xs-2 pull-right text-right">
                                     { n.experiment_sets }
@@ -406,9 +406,9 @@ export default class ChartDetailCursor extends React.Component {
      */
     update(state = {}, cb = null, overrideSticky = false){
         if (overrideSticky) this.overrideSticky = true; // Unset this on subsequent update.
-        if (state.field) state.field = Filters.Field.toName(state.field);
+        if (state.field) state.field = Filters.Field.toName(state.field, this.props.schemas);
         else if (Array.isArray(state.path) && state.path.length > 0 && state.path[state.path.length - 1].field){
-            state.field = Filters.Field.toName(state.path[state.path.length - 1].field);
+            state.field = Filters.Field.toName(state.path[state.path.length - 1].field, this.props.schemas);
         }
         if (this.props.debugStyle && state.path && state.path.length === 0) return null;
         return this.setState(state, cb);

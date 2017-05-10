@@ -284,11 +284,11 @@ export class ViewContainer extends React.Component {
             barsToRender = barsToRemove.concat(currentBars);
         }
 
-        return barsToRender.sort(function(a,b){
-            return a.term < b.term ? -1 : 1;
+        return barsToRender.sort(function(a,b){ // key will be term or name, if available
+            return (a.term || a.name) < (b.term || b.name) ? -1 : 1;
         }).map((d,i,a) =>
             <Bar
-                key={d.term || i}
+                key={d.term || d.name || i}
                 node={d}
                 showBarCount={true /*!allExpsBarDataContainer */}
 

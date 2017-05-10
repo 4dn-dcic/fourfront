@@ -45,8 +45,6 @@ export default class UIControlsWrapper extends React.Component {
     constructor(props){
         super(props);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.updateIfShould = this.updateIfShould.bind(this);
         this.filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected.bind(this);
         this.titleMap = this.titleMap.bind(this);
         this.adjustedChildChart = this.adjustedChildChart.bind(this);
@@ -87,26 +85,6 @@ export default class UIControlsWrapper extends React.Component {
             )
         ){
             this.setState({ 'showState' : 'all' });
-        }
-    }
-    
-    componentDidUpdate(pastProps, pastState){
-        this.updateIfShould();
-    }
-
-    componentDidMount(){
-        this.updateIfShould();
-    }
-
-    /**
-     * Do a forceUpdate() in case we set this.shouldUpdate = true in an initial render.
-     * this.shouldUpdate would be set if legend fields do not have colors yet from cache.
-     */
-    updateIfShould(){
-        if (this.shouldUpdate){
-            setTimeout(()=>{
-                this.forceUpdate();
-            }, 750);
         }
     }
 
@@ -178,7 +156,9 @@ export default class UIControlsWrapper extends React.Component {
         }
         newFields[fieldIndex] = newField;
         if (newFields.length > 1) newFields[otherFieldIndex] = this.state.fields[otherFieldIndex];
-        this.setState({ fields : newFields });
+        setTimeout(()=>{
+            this.setState({ fields : newFields });
+        });
     }
 
     getFieldAtIndex(fieldIndex){
@@ -298,8 +278,8 @@ export default class UIControlsWrapper extends React.Component {
                                 field.field,                                        // Field
                                 field.title || Filters.Field.toName(field.field),   // Title
                                 field.description || null,                          // Description
-                                isDisabled,                                         // Disabled
-                                isDisabled ? "Field already selected for X-Axis" : null
+                                //isDisabled,                                         // Disabled
+                                //isDisabled ? "Field already selected for X-Axis" : null
                             ]; // key, title, subtitle, disabled
                         }),
                         (this.state.fields[1] && this.state.fields[1].field) || "none"
@@ -316,22 +296,6 @@ export default class UIControlsWrapper extends React.Component {
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
         var contextualView = this.contextualView();
-
-        var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
-            !this.props.experiments || !this.state.fields[1] ? null :
-                Legend.aggregegateBarPlotData(
-                    this.state.showState === 'filtered' ? (this.props.filteredExperiments || this.props.experiments) :
-                        this.props.experiments,
-                    [this.state.fields[1]]
-                )
-        );
-
-        this.shouldUpdate = false;
-        if (fieldsForLegend && fieldsForLegend.length > 0 && fieldsForLegend[0] &&
-            fieldsForLegend[0].terms && fieldsForLegend[0].terms.length > 0 &&
-            fieldsForLegend[0].terms[0] && fieldsForLegend[0].terms[0].color === null){
-            this.shouldUpdate = true;
-        }
 
         return (
             <div className="bar-plot-chart-controls-wrapper">
@@ -382,14 +346,12 @@ export default class UIControlsWrapper extends React.Component {
                         <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
                             this.props.chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 50 : null
                         }}>
-                            
-                            <Legend
-                                fields={fieldsForLegend}
-                                includeFieldTitles={false}
+                            <AggregatedLegend
+                                experiments={this.props.experiments}
+                                filteredExperiments={this.props.filteredExperiments}
+                                fields={this.state.fields}
+                                showType={this.state.showState}
                                 schemas={this.props.schemas}
-                                width={layout.gridContainerWidth() * (3/12) - 20}
-                                hasPopover
-                                cursorDetailActions={boundActions(this, this.state.showState)}
                             />
                         </div>
                         <div className="x-axis-right-label">
@@ -416,8 +378,8 @@ export default class UIControlsWrapper extends React.Component {
                                                     field.field,
                                                     field.title || Filters.Field.toName(field.field),
                                                     field.description || null,
-                                                    isDisabled,
-                                                    isDisabled ? 'Field is already selected for "Group By"' : null
+                                                    //isDisabled,
+                                                    //isDisabled ? 'Field is already selected for "Group By"' : null
                                                 ]; // key, title, subtitle
                                             }),
                                             this.state.fields[0].field
@@ -434,4 +396,66 @@ export default class UIControlsWrapper extends React.Component {
         );
     }
 
+}
+
+class AggregatedLegend extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.updateIfShould = this.updateIfShould.bind(this);
+        this.shouldUpdate = false;
+    }
+
+    componentDidMount(){
+        this.updateIfShould();
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        this.updateIfShould();
+    }
+
+    /**
+     * Do a forceUpdate() in case we set this.shouldUpdate = true in an initial render.
+     * this.shouldUpdate would be set if legend fields do not have colors yet from cache.
+     */
+    updateIfShould(){
+        if (this.shouldUpdate){
+            setTimeout(()=>{
+                this.forceUpdate();
+            }, 750);
+        }
+    }
+
+    render(){
+
+        var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
+            !this.props.experiments || !this.props.fields[1] ? null :
+                Legend.aggregegateBarPlotData(
+                    this.props.showType === 'filtered' ? (this.props.filteredExperiments || this.props.experiments) :
+                        this.props.experiments,
+                    [this.props.fields[1]]
+                )
+        );
+
+        this.shouldUpdate = false;
+        if (fieldsForLegend && fieldsForLegend.length > 0 && fieldsForLegend[0] &&
+            fieldsForLegend[0].terms && fieldsForLegend[0].terms.length > 0 &&
+            fieldsForLegend[0].terms[0] && fieldsForLegend[0].terms[0].color === null){
+            this.shouldUpdate = true;
+        }
+
+        return (
+            <Legend
+                fields={fieldsForLegend}
+                includeFieldTitles={false}
+                schemas={this.props.schemas}
+                width={layout.gridContainerWidth() * (3/12) - 20}
+                hasPopover
+                cursorDetailActions={boundActions(this, this.props.showType)}
+            />
+        );
+    }
 }
