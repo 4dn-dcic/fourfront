@@ -3,11 +3,11 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def GM12878_biosource(testapp, lab, award):
+def GM12878_biosource(testapp, lab, award, gm12878_oterm):
     item = {
         "accession": "4DNSR000AAQ1",
         "biosource_type": "immortalized cell line",
-        "cell_line": "GM12878",
+        "cell_line": gm12878_oterm['@id'],
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -37,16 +37,6 @@ def biosources(cell_lines, lung_biosource, whole_biosource):
     return bs
 
 
-def test_biosource_update_termids(cell_lines):
-    acc2termid = {'4DNSR000AAQ1': 'EFO_0002784', '4DNSR000AAQ2': None}
-    for cell in cell_lines:
-        if cell['accession'] in acc2termid:
-            if acc2termid[cell['accession']] is not None:
-                assert cell['cell_line_termid'] == acc2termid[cell['accession']]
-            else:
-                assert 'cell_line_termid' not in cell
-
-
 def test_calculated_biosource_name(biosources):
     for biosource in biosources:
         biotype = biosource['biosource_type']
@@ -61,11 +51,11 @@ def test_calculated_biosource_name(biosources):
             assert name == 'whole human'
 
 
-def test_validate_biosource_tissue_no_tissue(testapp, award, lab):
+def test_validate_biosource_tissue_no_tissue(testapp, award, lab, gm12878_oterm):
     biosource = {'award': award['@id'],
                  'lab': lab['@id'],
                  'biosource_type': 'immortalized cell line',
-                 'cell_line': 'GM12878'}
+                 'cell_line': gm12878_oterm['@id']}
     res = testapp.post_json('/biosource', biosource, status=201)
     assert not res.json.get('errors')
 

@@ -5,7 +5,8 @@
         "term_name": "GM12878",
         "term_id": "EFO:0002784",
         "source_ontology": "530006bc-8535-4448-903e-854af460b254",
-        "term_url": "http://www.ebi.ac.uk/efo/EFO_0002784"
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0002784",
+        "slim_terms": ["111189bc-8535-4448-903e-854af460a233"]
     },
     {
         "uuid": "530056bc-8535-4448-903e-854af460b254",
