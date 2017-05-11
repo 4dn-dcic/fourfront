@@ -224,7 +224,7 @@ class Item(snovault.Item):
         'in review by project': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'released to project': ALLOW_VIEWING_GROUP_VIEW,
         # for file
-        'obsolete': ONLY_ADMIN_VIEW,
+        'obsolete': DELETED,
         'uploading': ALLOW_LAB_SUBMITTER_EDIT,
         'to be uploaded by workflow': ALLOW_LAB_SUBMITTER_EDIT,
         'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
