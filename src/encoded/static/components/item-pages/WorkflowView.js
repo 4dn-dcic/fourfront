@@ -7,7 +7,7 @@ var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, Attri
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 var { console, object, DateUtility, Filters, isServerSide } = require('./../util');
-import { Graph, parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 var { DropdownButton, MenuItem } = require('react-bootstrap');
 
 
