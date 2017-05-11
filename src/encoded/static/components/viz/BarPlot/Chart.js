@@ -6,11 +6,10 @@ var d3 = require('d3');
 var store = require('./../../../store');
 var vizUtil = require('./../utilities');
 var { RotatedLabel } = require('./../components');
-var ChartDetailCursor = require('./../ChartDetailCursor');
 var { console, object, isServerSide, expFxn, Filters, layout, navigate } = require('./../../util');
 var { unhighlightTerms, highlightTerm } = require('./../../facetlist');
 var aggregationFxn = require('./aggregation-functions');
-var ViewContainer = require('./ViewContainer');
+import { PopoverViewContainer } from './ViewContainer';
 
 
 var Chart = module.exports = React.createClass({
@@ -79,7 +78,7 @@ var Chart = module.exports = React.createClass({
                         var maxYForBar = parent ? parent.count : largestExpCountForATerm;
                         var barHeight = maxYForBar === 0 ? 0 : (termCount / maxYForBar) * outerDims.height;
                         var barNode = {
-                            'name' : termKey,
+                            'name' : Filters.Term.toName(fieldObj.field, termKey),
                             'term' : termKey,
                             'count' : termCount,
                             'field' : fieldObj.field,
@@ -112,6 +111,30 @@ var Chart = module.exports = React.createClass({
                 'fields'          : fields,
                 'fullHeightCount' : largestExpCountForATerm
             };
+
+            barData.bars.forEach(function(bar){
+
+                var hasSubSections = Array.isArray(bar.bars);
+
+                if (!hasSubSections) return;
+
+                var sortByAggrCount = function(b){
+                    if (typeof b[aggregateType] === 'number'){
+                        return -b[aggregateType];
+                    }
+                    return b.term;
+                };
+
+                bar.bars = vizUtil.sortObjectsByColorPalette(
+                    bar.bars.map(function(b){
+                        return _.extend(b, { 'color' : vizUtil.colorForNode(b) });
+                    })
+                );
+
+                bar.bars = _.sortBy(bar.bars, sortByAggrCount);
+
+            });
+
 
             return barData;
         },
@@ -350,7 +373,7 @@ var Chart = module.exports = React.createClass({
                                 term : b.term,
                                 x: b.attr.x,
                                 opacity : 1, //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
-                                color : vizUtil.colorForNode(b, true, null, null, true)
+                                //color : vizUtil.colorForNode(b, true, null, null, true)
                             }; 
                         })}
                         labelClassName="y-axis-label no-highlight-color"
@@ -459,6 +482,19 @@ var Chart = module.exports = React.createClass({
         
     },
 
+    genChartData : function(){
+        return aggregationFxn.genChartData( // Get counts by term per field.
+            (
+                this.props.showType === 'all' ?
+                this.props.experiments : this.props.filteredExperiments || this.props.experiments
+            ),
+            this.props.fields,
+            this.props.aggregateType,
+            'experiments',
+            this.props.useOnlyPopulatedFields
+        );
+    },
+
     /** 
      * Parses props.experiments and/or props.filterExperiments, depending on props.showType, aggregates experiments into fields,
      * generates data for chart bars, and then draws and returns chart wrapped in a div React element.
@@ -484,16 +520,7 @@ var Chart = module.exports = React.createClass({
 
         var chartData = (
             (this.props.showType === 'all' ? this.props.aggregatedData : this.props.aggregatedFilteredData) || this.props.aggregatedData
-        ) || aggregationFxn.genChartData( // Get counts by term per field.
-            (
-                this.props.showType === 'all' ?
-                this.props.experiments : this.props.filteredExperiments || this.props.experiments
-            ),
-            this.props.fields,
-            this.props.aggregateType,
-            'experiments',
-            this.props.useOnlyPopulatedFields
-        );
+        ) || this.genChartData();
 
         var barData = Chart.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             chartData,
@@ -535,7 +562,7 @@ var Chart = module.exports = React.createClass({
         */
 
         return (
-            <ViewContainer
+            <PopoverViewContainer
                 leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts)}
                 bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, barData.bars, styleOpts)}
                 topLevelField={this.props.fields[barData.fieldIndex].field}

@@ -17,8 +17,8 @@ var { Filters, ajax, JWT, console, isServerSide, navigate, analytics } = require
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
-var ChartDataController = require('./viz/chart-data-controller');
-var ChartDetailCursor = require('./viz/ChartDetailCursor');
+import { ChartDataController } from './viz/chart-data-controller';
+import ChartDetailCursor from './viz/ChartDetailCursor';
 var makeTitle = require('./item-pages/item').title;
 var ReactTooltip = require('react-tooltip');
 
@@ -1128,6 +1128,7 @@ var App = React.createClass({
                                     session={this.state.session}
                                     expSetFilters={this.props.expSetFilters}
                                     ref="navigation"
+                                    schemas={this.state.schemas}
                                 />
                                 <div id="content" className="container">
                                     <FacetCharts
@@ -1157,6 +1158,7 @@ var App = React.createClass({
                     }} />
                     <ChartDetailCursor
                         href={this.props.href}
+                        schemas={this.state.schemas}
                         verticalAlign="center" /* cursor position relative to popover */
                         //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
                     />
