@@ -69,7 +69,7 @@ export function load(url, callback, method = 'GET', fallback = null, data = null
 
 export function promise(url, method = 'GET', headers = {}, data = null, cache = true, debugResponse = false){
     var xhr;
-    var promise = new Promise(function(resolve, reject) {
+    var promiseInstance = new Promise(function(resolve, reject) {
         xhr = new XMLHttpRequest();
         xhr.onload = function() {
             var response = null;
@@ -99,9 +99,9 @@ export function promise(url, method = 'GET', headers = {}, data = null, cache = 
         }
         return xhr;
     });
-    promise.xhr = xhr;
-    promise.abort = function(){
-        if (promise.xhr.readyState !== 4) promise.xhr.abort();
+    promiseInstance.xhr = xhr;
+    promiseInstance.abort = function(){
+        if (promiseInstance.xhr.readyState !== 4) promiseInstance.xhr.abort();
     };
-    return promise;
+    return promiseInstance;
 }
