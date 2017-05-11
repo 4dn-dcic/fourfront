@@ -157,7 +157,7 @@ class File(Item):
         "type": "array",
         "items": {
             "title": "Input of Workflow Run",
-            "type": "string",
+            "type": ["string", "object"],
             "linkTo": "WorkflowRun"
         }
     })
@@ -166,7 +166,7 @@ class File(Item):
 
 
     @calculated_property(schema={
-        "title": "Outputs of Workflow Runs",
+        "title": "Output of Workflow Runs",
         "description": "All workflow runs that this file serves as an output from",
         "type": "array",
         "items": {
@@ -260,6 +260,7 @@ class File(Item):
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
+        "description" : "Accession of this file"
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
@@ -275,7 +276,7 @@ class File(Item):
         return request.resource_path(self) + '@@download/' + filename
 
     @calculated_property(schema={
-        "title": "Upload key",
+        "title": "Upload Key",
         "type": "string",
     })
     def upload_key(self, request):
