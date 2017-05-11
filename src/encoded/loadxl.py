@@ -579,6 +579,9 @@ PHASE1_PIPELINES = {
     ],
     'publication_tracking': [
         remove_keys('experiment_sets_in_pub'),
+    ],
+    'biosource': [
+        remove_keys('cell_line')
     ]
 }
 
@@ -629,6 +632,9 @@ PHASE2_PIPELINES = {
     ],
     'publication_tracking': [
         skip_rows_missing_all_keys('experiment_sets_in_pub'),
+    ],
+    'biosource': [
+        skip_rows_missing_all_keys('cell_line')
     ]
 }
 
