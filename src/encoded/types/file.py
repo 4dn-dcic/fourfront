@@ -164,7 +164,6 @@ class File(Item):
     def workflow_run_inputs(self, request):
         return self.rev_link_atids(request, "workflow_run_inputs")
 
-
     @calculated_property(schema={
         "title": "Output of Workflow Runs",
         "description": "All workflow runs that this file serves as an output from",

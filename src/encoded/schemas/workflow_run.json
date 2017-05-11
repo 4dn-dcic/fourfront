@@ -137,7 +137,7 @@
             "linkTo": "Workflow"
         },
         "run_status": {
-            "title": "Status",
+            "title": "Run Status",
             "type": "string",
             "default": "started",
             "enum" : [

@@ -95,6 +95,7 @@ class SubItemView extends React.Component {
         var schemas = this.props.schemas;
         var item = this.props.content;
         var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap || {};
+
         return (
             <div className="sub-panel data-display panel-body-with-header">
                 <div className="key-value sub-descriptions">
@@ -111,6 +112,7 @@ class SubItemView extends React.Component {
                                 'link_id', 'schema_version'
                             ])
                         }
+
                         keyTitleDescriptionMap={_.extend({}, keyTitleDescriptionMap, {
                             // Extend schema properties
                             '@id' : {

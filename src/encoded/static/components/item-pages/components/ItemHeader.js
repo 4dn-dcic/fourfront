@@ -190,7 +190,7 @@ export class TopRow extends React.Component {
         return (
             <div className="row clearfix top-row">
                 <h5 className="col-sm-6 item-label-title">
-                    { this.typeInfoLabel() }
+                    { this.typeInfoLabel(this.props.typeInfo || null) }
                     { this.props.context.accession ?
                         <span className="accession inline-block" data-tip={accessionTooltip}>{ this.props.context.accession }</span>
                     : null }
