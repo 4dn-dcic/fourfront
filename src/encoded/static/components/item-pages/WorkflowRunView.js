@@ -3,12 +3,13 @@
 var React = require('react');
 var globals = require('./../globals');
 var _ = require('underscore');
+var { DropdownButton, MenuItem } = require('react-bootstrap');
 var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 var { console, object, DateUtility, Filters, isServerSide } = require('./../util');
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-var { DropdownButton, MenuItem } = require('react-bootstrap');
+import { onItemPageNodeClick } from './WorkflowView';
 
 
 
@@ -126,6 +127,7 @@ class GraphSection extends React.Component {
                 schemas={this.props.schemas}
                 isNodeDisabled={GraphSection.isNodeDisabled}
                 href={this.props.href}
+                onNodeClick={onItemPageNodeClick}
             />
         );
     }
@@ -140,6 +142,7 @@ class GraphSection extends React.Component {
                 schemas={this.props.schemas}
                 isNodeDisabled={GraphSection.isNodeDisabled}
                 href={this.props.href}
+                onNodeClick={onItemPageNodeClick}
             />
         );
     }

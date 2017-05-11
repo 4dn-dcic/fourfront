@@ -12,17 +12,16 @@ export default class StateContainer extends React.Component {
     static defaultProps = {
         'checkHrefForSelectedNode' : true,
         'checkWindowLocationHref' : true,
-        'onNodeClick' : function(node, selectedNode, evt){
-            this.setState({ 'selectedNode' : node });
-        }
+        'onNodeClick' : null
     }
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
+        this.defaultOnNodeClick = this.defaultOnNodeClick.bind(this);
         this.handleNodeClick = this.handleNodeClick.bind(this);
         this.href = this.href.bind(this);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.render = this.render.bind(this);
 
         var state = {
             'selectedNode' : null
@@ -40,6 +39,10 @@ export default class StateContainer extends React.Component {
         }
 
         this.state = state;
+    }
+
+    defaultOnNodeClick(node, selectedNode, evt){
+        this.setState({ 'selectedNode' : node });
     }
 
     href(
@@ -89,8 +92,11 @@ export default class StateContainer extends React.Component {
     }
 
     handleNodeClick(node, evt){
-        this.props.onNodeClick.call(this, node, this.state.selectedNode, evt);
-        //this.setState({ 'selectedNode' : node });
+        if (typeof this.props.onNodeClick === 'function'){
+            this.props.onNodeClick.call(this, node, this.state.selectedNode, evt);
+        } else {
+            this.defaultOnNodeClick(node, this.state.selectedNode, evt);
+        }
     }
 
     render(){

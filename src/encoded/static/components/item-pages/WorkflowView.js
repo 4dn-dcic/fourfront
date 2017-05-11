@@ -6,10 +6,26 @@ var _ = require('underscore');
 var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
-var { console, object, DateUtility, Filters, isServerSide } = require('./../util');
+var { console, object, DateUtility, Filters, isServerSide, navigate } = require('./../util');
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 var { DropdownButton, MenuItem } = require('react-bootstrap');
 
+
+/**
+ * Pass this to props.onNodeClick for Graph.
+ * 
+ * @export
+ * @param {Object} node - Node clicked on.
+ * @param {Object|null} selectedNode - Node currently selected, if any.
+ * @param {MouseEvent} evt - onClick MouseEvent.
+ */
+export function onItemPageNodeClick(node, selectedNode, evt){
+    if (node !== selectedNode){
+        navigate('#' + node.name, { inPlace: true, skipRequest : true });
+    } else {
+        navigate('#', { inPlace: true, skipRequest : true });
+    }
+}
 
 
 /**
@@ -62,7 +78,7 @@ export class WorkflowView extends React.Component {
         return (
             <div className={itemClass}>
 
-                <ItemPageTitle context={context} />
+                <ItemPageTitle context={context} schemas={schemas} />
                 <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
                     <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
                     <ItemHeader.MiddleRow />
@@ -232,6 +248,7 @@ class GraphSection extends React.Component {
                 edges={graphData.edges}
                 href={this.props.href}
                 schemas={this.props.schemas}
+                onNodeClick={onItemPageNodeClick}
             />
         );
     }
@@ -248,6 +265,7 @@ class GraphSection extends React.Component {
                 : 180}
                 href={this.props.href}
                 schemas={this.props.schemas}
+                onNodeClick={onItemPageNodeClick}
             />
         );
     }
@@ -261,6 +279,7 @@ class GraphSection extends React.Component {
                 edges={graphData.edges}
                 href={this.props.href}
                 schemas={this.props.schemas}
+                onNodeClick={onItemPageNodeClick}
             />
         );
     }

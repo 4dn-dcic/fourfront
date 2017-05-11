@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 var d3 = require('d3');
 import { Fade } from 'react-bootstrap';
-import { console, isServerSide, navigate } from './../../util';
+import { console, isServerSide } from './../../util';
 
 import StateContainer from './StateContainer';
 import ScrollContainer from './ScrollContainer';
@@ -13,17 +13,61 @@ import NodesLayer from './NodesLayer';
 import EdgesLayer from './EdgesLayer';
 import DetailPane from './DetailPane';
 
-
+/**
+ * Primary/entry component for the Workflow graph.
+ * 
+ * @export
+ * @class Graph
+ * @extends {React.Component}
+ * @prop {Object[]} nodes                   Array of node objects to plot. Both nodes and edges can be generated from a CWL-like structure using static functions, including the provided 'parseAnalysisSteps'. See propTypes in class def below for object structure.
+ * @prop {Object[]} edges                   Array of edge objects to plot. See propTypes in class def below for object structure.
+ * @prop {React.Component} [detailPane]     Provide a React Component instance (e.g. as JSX) to use to display node metadata at bottom of graph. A default pane applicable to 4DN is used if not provided.
+ * @prop {function} [onNodeClick]           A function to be executed each time a node is clicked. 'this' will refer to internal statecontainer. Should accept params: {Object} 'node', {Object|null} 'selectedNode', and {MouseEvent} 'evt'. By default, it changes internal state's selectedNode. You should either disable props.checkHrefForSelectedNode -or- change href in this function.
+ * @prop {function} [isNodeDisabled]        Function which accepts a 'node' object and returns a boolean.
+ * @prop {boolean} [checkHrefForSelectedNode=true] - If true, will check props.href or window.location.href on updates as well as mounting and update selectedNode if '#' + node.name is in URL. Recommended to leave as true and in props.onNodeClick, to change href to contain '#' + node.name.
+ * @prop {boolean} [checkWindowLocationHref=true] - If true, checks window.location.href on updates instead of props.href. Must still trigger component update on page or href changes.
+ * @prop {string} [href]                    Must provide current HREF of page, if setting props.checkHrefForSelectedNode to true and turning off props.checkWindowLocationHref.
+ * @prop {Object} [innerMargin={top : 20, bottom: 48, left: 15, right: 15}]     Provide this object, containing numbers for 'top', 'bottom', 'left', and 'right', if want to adjust chart margins.
+ * @prop {boolean} [pathArrows=true]        Whether to display arrows at the end side of edges.
+ * @prop {number} [columnSpacing=56]        Adjust default spacing between columns, where edges are drawn.
+ * @prop {number} [columnWidth=150]         Adjust width of columns, where nodes are drawn.
+ * @prop {number} [rowSpacing=56]           Adjust vertical spacing between node centers (NOT between their bottom/top).
+ */
 export default class Graph extends React.Component {
 
     static propTypes = {
-        'isNodeDisabled' : PropTypes.func,
-        'innerMargin' : PropTypes.shape({
-            'top' : PropTypes.number.isRequired,
-            'bottom' : PropTypes.number.isRequired,
-            'left' : PropTypes.number.isRequired,
-            'right' : PropTypes.number.isRequired
+        'isNodeDisabled'    : PropTypes.func,
+        'innerMargin'       : PropTypes.shape({
+            'top'               : PropTypes.number.isRequired,
+            'bottom'            : PropTypes.number.isRequired,
+            'left'              : PropTypes.number.isRequired,
+            'right'             : PropTypes.number.isRequired
         }).isRequired,
+        'detailPane'        : PropTypes.element,
+        'nodes'             : PropTypes.arrayOf(PropTypes.shape({
+            'column'            : PropTypes.number.isRequired,
+            'name'              : PropTypes.string.isRequired,
+            'type'              : PropTypes.string.isRequired,
+            'id'                : PropTypes.string,
+            'outputOf'          : PropTypes.object,  // Unused currently
+            'inputOf'           : PropTypes.object,   // Unused currently
+            'description'       : PropTypes.string,
+            'meta'              : PropTypes.oneOfType([
+                                    PropTypes.object,
+                                    PropTypes.shape({
+                                        'target' : PropTypes.arrayOf(PropTypes.shape({
+                                            'name' : PropTypes.string.isRequired,
+                                            'type' : PropTypes.string.isRequired,
+                                            'step' : PropTypes.string
+                                        }))
+                                    })
+                                ])
+                            })).isRequired,
+        'edges'             : PropTypes.arrayOf(PropTypes.shape({
+            'source'            : PropTypes.object.isRequired,
+            'target'            : PropTypes.object.isRequired,
+            'capacity'          : PropTypes.string
+                            })).isRequired
     }
 
     static defaultProps = {
@@ -33,16 +77,9 @@ export default class Graph extends React.Component {
         'columnWidth'   : 150,
         'rowSpacing'    : 56,
         'pathArrows'    : true,
-        'detailPane'    : true,
+        'detailPane'    : <DetailPane />,
         'rowSpacingType': 'wide',
-        'onNodeClick'   : function(node, selectedNode, evt){
-            console.log(node, selectedNode, evt);
-            if (node !== selectedNode){
-                navigate('#' + node.name, { inPlace: true, skipRequest : true });
-            } else {
-                navigate('#', { inPlace: true, skipRequest : true });
-            }
-        },
+        'onNodeClick'   : null,
         'innerMargin'   : {
             'top' : 20,
             'bottom' : 48,
@@ -176,9 +213,7 @@ export default class Graph extends React.Component {
                                 <EdgesLayer />
                                 <NodesLayer />
                             </ScrollContainer>
-                            { this.props.detailPane ?
-                                <DetailPane />
-                            : null }
+                            { this.props.detailPane }
                         </StateContainer>
                     </div>
                 </Fade>
