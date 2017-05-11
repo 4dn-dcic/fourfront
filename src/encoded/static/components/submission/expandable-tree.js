@@ -124,17 +124,24 @@ class SubmissionLeaf extends React.Component{
         var titleText = this.props.masterDisplay[key] || key;
         // if key is not a number (i.e. path), the object is not a custom one
         if(isNaN(key)){
-            style.backgroundColor = '#b7e1bb';
+            // dark green bg with white text - same as a submitted obj
+            style.backgroundColor = '#4c994c';
+            style.color = '#fff'
             title = (<span style={{'padding':'1px 5px'}}>
                         {titleText}
                     </span>);
         }else{
             if(masterValid[key] == 0){
-                style.backgroundColor = '#fcd19c';
+                style.backgroundColor = '#fcd19c'; // orange
             }else if(masterValid[key] == 1){
-                style.backgroundColor = '#e2b6b6';
+                style.backgroundColor = '#acd1ec'; // blue
             }else if(masterValid[key] == 2){
-                style.backgroundColor = '#acd1ec';
+                style.backgroundColor = '#e2b6b6'; // red
+            }else if(masterValid[key] == 3){
+                style.backgroundColor = '#b7e1bb'; // light green
+            }else if(masterValid[key] == 4){
+                style.backgroundColor = '#4c994c'; // darker green
+                style.color = '#fff' // white text
             }
             if(parseInt(key) === parseInt(this.props.currKey)){
                 style.fontWeight = "bold";

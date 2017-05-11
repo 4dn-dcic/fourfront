@@ -33,7 +33,8 @@ export default class SubmissionView extends React.Component{
     *   acts as a switch for the states.
     * - masterContext (idx: currKey) stores the context for each new object
     * - masterValid (idx: currKey) stores the validation status for each new object
-        0 is unvalidated, 1 is error, 2 is validated, and 3 is submitted.
+        0 is cannot yet validate (incomplete children), 1 is ready to validate,
+        2 is validation error, 3 is successfully validated, 4 is submitted
     * - masterDisplay (idx: currKey) stores the formatted titles for each object
     * - keyIter (type: int) is a reference to the current maximum currKey. Is
     *   used to iterate to add more keys.
@@ -224,7 +225,7 @@ export default class SubmissionView extends React.Component{
         var currAlias = masterDisplay[currKey];
         var aliases = this.state.masterContext[currKey].aliases || null;
         // no aliases
-        if(aliases === null || aliases === []){
+        if(aliases === null || (aliases instanceof Array && aliases.length == 0)){
             masterDisplay[currKey] = 'My ' + masterTypes[currKey] + ' ' + currKey;
         }else if(!_.contains(aliases, currAlias)){
             var lastAlias = aliases[aliases.length-1];
@@ -383,7 +384,7 @@ export default class SubmissionView extends React.Component{
         //         </Button>
         //     );
         // }
-        if(validity == 2){
+        if(validity == 3 || validity == 4){
             return(
                 <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
                     {'Validated'}
@@ -395,7 +396,13 @@ export default class SubmissionView extends React.Component{
                     <i className="icon icon-spin icon-circle-o-notch"></i>
                 </Button>
             );
-        }else if (validity == 0){
+        }else if (validity == 2){
+            return(
+                <Button bsSize="xsmall" bsStyle="danger" style={style} onClick={this.testPostNewContext}>
+                    {'Validate'}
+                </Button>
+            );
+        }else if (validity == 1){
             return(
                 <Button bsSize="xsmall" bsStyle="info" style={style} onClick={this.testPostNewContext}>
                     {'Validate'}
@@ -403,7 +410,7 @@ export default class SubmissionView extends React.Component{
             );
         }else{
             return(
-                <Button bsSize="xsmall" bsStyle="danger" style={style} onClick={this.testPostNewContext}>
+                <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
                     {'Validate'}
                 </Button>
             );
@@ -413,19 +420,19 @@ export default class SubmissionView extends React.Component{
     generatePostButton(){
         var validity = this.state.masterValid[this.state.currKey];
         var style={'width':'100px','marginLeft':'10px'};
-        if(validity == 2 && !this.state.processingFetch){
+        if(validity == 3 && !this.state.processingFetch){
             return(
                 <Button bsSize="xsmall" bsStyle="success" style={style} onClick={this.realPostNewContext}>
                     {'Submit'}
                 </Button>
             );
-        }else if(validity == 2 && this.state.processingFetch){
+        }else if(validity == 3 && this.state.processingFetch){
             return(
                 <Button bsSize="xsmall" bsStyle="success" style={style} disabled>
                     <i className="icon icon-spin icon-circle-o-notch"></i>
                 </Button>
             );
-        }else if(validity == 3){
+        }else if(validity == 4){
             return(
                 <Button bsSize="xsmall" bsStyle="success" style={style} disabled>
                     {'Submitted'}
@@ -784,7 +791,7 @@ class RoundOneObject extends React.Component{
         if(fieldType === 'linked object'){
             this.checkObjectRemoval(value, prevValue);
         }
-        if(field === 'aliases'){
+        if(splitField[splitField.length-1] === 'aliases'){
             this.props.modifyAlias();
         }
     }

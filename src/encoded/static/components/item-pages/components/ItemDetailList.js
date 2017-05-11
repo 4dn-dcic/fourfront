@@ -66,7 +66,11 @@ class SubItem extends React.Component {
     }
 
     render() {
-        var { schemas, content, title, popLink, keyTitleDescriptionMap } = this.props;
+        var schemas = this.props.schemas;
+        var content = this.props.content;
+        var title = this.props.title;
+        var popLink = this.props.popLink;
+        var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap;
         return (
             <span>
                 { this.toggleLink(title, this.state.isOpen) }
@@ -188,7 +192,7 @@ export class Detail extends React.Component {
                 <ol>
                     {   item.length === 0 ? <li><em>None</em></li>
                         :   item.map(function(it, i){
-                                return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
+                                return <li key={i}>{ Detail.formValue(schemas, it, popLink, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
                             })
                     }
                 </ol>
@@ -226,11 +230,19 @@ export class Detail extends React.Component {
             }
         } else if (typeof item === 'string'){
             if (keyPrefix === '@id'){
-                return (
-                    <a key={item} href={item}>
-                        {item}
-                    </a>
-                );
+                if(popLink){
+                    return (
+                        <a key={item} href={item} target="_blank">
+                            {item}
+                        </a>
+                    );
+                }else{
+                    return (
+                        <a key={item} href={item}>
+                            {item}
+                        </a>
+                    );
+                }
             }
             if(item.indexOf('@@download') > -1/* || item.charAt(0) === '/'*/){
                 // this is a download link. Format appropriately
@@ -242,11 +254,19 @@ export class Detail extends React.Component {
                     </a>
                 );
             } else if (item.charAt(0) === '/') {
-                return (
-                    <a key={item} href={item}>
-                        {item}
-                    </a>
-                );
+                if(popLink){
+                    return (
+                        <a key={item} href={item} target="_blank">
+                            {item}
+                        </a>
+                    );
+                }else{
+                    return (
+                        <a key={item} href={item}>
+                            {item}
+                        </a>
+                    );
+                }
             } else if (item.slice(0,4) === 'http') {
                 // Is a URL. Check if we should render it as a link/uri.
                 var schemaProperty = Filters.Field.getSchemaProperty(keyPrefix, schemas, atType);
