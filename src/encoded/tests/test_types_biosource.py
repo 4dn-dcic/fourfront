@@ -3,18 +3,6 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def GM12878_biosource(testapp, lab, award, gm12878_oterm):
-    item = {
-        "accession": "4DNSR000AAQ1",
-        "biosource_type": "immortalized cell line",
-        "cell_line": gm12878_oterm['@id'],
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
 def cell_lines(GM12878_biosource, F123_biosource):
     return [GM12878_biosource, F123_biosource]
 

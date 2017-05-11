@@ -50,7 +50,6 @@ def test_linkto_ontology_term_by_preffered_name(testapp, lab, award, oterm):
     item = {
         "accession": "4DNSR000AAQ1",
         "biosource_type": "immortalized cell line",
-        "cell_line": "GM12878",
         'award': award['@id'],
         'lab': lab['@id'],
         'tissue': oterm['term_name']
@@ -59,4 +58,3 @@ def test_linkto_ontology_term_by_preffered_name(testapp, lab, award, oterm):
     res = testapp.post_json('/ontology_term', oterm).json['@graph'][0]
     res_biosource = testapp.post_json('/biosource', item).json['@graph'][0]
     assert res['@id'] == res_biosource['tissue']
-
