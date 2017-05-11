@@ -19,7 +19,7 @@ describe('Testing viz/QuickInfoBar.js', function() {
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         context = require('../testdata/browse/context');
-        QuickInfoBar = require('./../viz/QuickInfoBar');
+        QuickInfoBar = require('./../viz/QuickInfoBar').default;
         href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
 
         page = TestUtils.renderIntoDocument(

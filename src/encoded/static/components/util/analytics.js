@@ -309,6 +309,10 @@ var analytics = {
         return labelData.join(', ');
     },
 
+    eventLabelFromChartNodes : function(nodes){
+        return nodes.map(analytics.eventLabelFromChartNode).join('; ');
+    },
+
     getStringifiedCurrentFilters : function(filters, contextFilters = null){
         if (typeof filters === 'string'){
             filters = Filters.hrefToFilters(filters, contextFilters);

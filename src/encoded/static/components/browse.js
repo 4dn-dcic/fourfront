@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+import PropTypes from 'prop-types';
 var ReactDOM = require('react-dom');
 var url = require('url');
 var querystring = require('querystring');
@@ -10,7 +11,7 @@ var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, But
 var store = require('../store');
 var FacetList = require('./facetlist');
 import ExperimentsTable from './experiments-table';
-var { isServerSide, expFxn, Filters } = require('./util');
+var { isServerSide, expFxn, Filters, navigate, object } = require('./util');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
 var { FlexibleDescriptionBox } = require('./experiment-common');
 
@@ -18,12 +19,12 @@ var expSetColumnLookup={
     // all arrays will be handled by taking the first item
     'replicate':{
         'Accession': 'accession',
-        'Exp Type':'experiment_type',
+        'Exp Type':'experiments_in_set.experiment_type',
         'Exps': '',
-        'Organism': 'biosample.biosource.individual.organism.name',
-        'Biosource': 'biosample.biosource_summary',
-        'Enzyme': 'digestion_enzyme.name',
-        'Modifications':'biosample.modifications_summary_short'
+        'Organism': 'experiments_in_set.biosample.biosource.individual.organism.name',
+        'Biosource': 'experiments_in_set.biosample.biosource_summary',
+        'Enzyme': 'experiments_in_set.digestion_enzyme.name',
+        'Modifications':'experiments_in_set.biosample.modifications_summary_short'
 
     },
     'other':[]
@@ -45,8 +46,8 @@ var expSetAdditionalInfo={
     'other':[]
 };
 
-var IndeterminateCheckbox = React.createClass({
-    render: function(){
+class IndeterminateCheckbox extends React.Component {
+    render(){
         var props = this.props;
         return(
             <input
@@ -58,33 +59,44 @@ var IndeterminateCheckbox = React.createClass({
             />
         );
     }
-});
+}
 
-var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
+export class ExperimentSetRow extends React.Component {
 
-    propTypes : {
-        addInfo : React.PropTypes.object,
-        columns : React.PropTypes.object.isRequired,
-        expSetFilters : React.PropTypes.object,
-        experimentArray : React.PropTypes.array.isRequired,
-        href : React.PropTypes.string,
-        passExperiments : React.PropTypes.instanceOf(Set),
-        targetFiles : React.PropTypes.instanceOf(Set),
-        rowNumber : React.PropTypes.number,
-        facets : React.PropTypes.array,
-        selectAllFilesInitially : React.PropTypes.bool,
-        useAjax : React.PropTypes.bool
-    },
+    static propTypes = {
+        'addInfo'           : PropTypes.object.isRequired,
+        'experimentSet'     : PropTypes.object.isRequired,
+        'columns'           : PropTypes.object.isRequired,
+        'expSetFilters'     : PropTypes.object,
+        'targetFiles'       : PropTypes.instanceOf(Set),
+        'rowNumber'         : PropTypes.number,
+        'facets'            : PropTypes.array,
+        'selectAllFilesInitially' : PropTypes.bool,
+        'useAjax'           : PropTypes.bool
+    }
 
-    getInitialState : function(){
-        return {
+    static defaultProps = {
+        'selectAllFilesInitially' : true,
+        'useAjax' : true
+    }
+
+    constructor(props){
+        super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.pairsAndFiles = this.pairsAndFiles.bind(this);
+        this.allFileIDs = this.allFileIDs.bind(this);
+        this.handleToggle = _.throttle(this.handleToggle.bind(this), 500);
+        this.handleCheck = this.handleCheck.bind(this);
+        this.render = this.render.bind(this);
+        this.state = {
             open : false,
             reallyOpen : false,
             selectedFiles : this.props.selectAllFilesInitially ? new Set(this.allFileIDs(this.props)) : new Set()
-        };
-    },
+        }
+    }
 
-    componentWillReceiveProps: function(nextProps) {
+    componentWillReceiveProps(nextProps) {
 
         if(this.props.expSetFilters !== nextProps.expSetFilters){
             this.setState({
@@ -92,43 +104,41 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             });
         }
 
-        // var newTargets = [];
-        // for(var i=0; i<this.state.files.length; i++){
-        //     if(nextProps.targetFiles.has(this.state.files[i].file_format)){
-        //         newTargets.push(this.state.files[i].uuid);
-        //     }
-        // }
-        // if(newTargets.length !== this.state.filteredFiles.length){
-        //     this.setState({
-        //         filteredFiles: newTargets
-        //     });
-        // }
-    },
+    }
 
-    componentDidUpdate: function(pastProps, pastState){
+    componentDidUpdate(pastProps, pastState){
         if (pastState.open === true && this.state.open === false && this.state.reallyOpen === true){
             setTimeout(()=>{
                 this.setState({ reallyOpen : false });
             }, 300);
         }
-    },
+    }
 
-    pairsAndFiles : function(props = this.props){
-        // Combine file pairs and unpaired files into one array. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
-        // Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
-        return expFxn.listAllFilePairs(props.experimentArray).concat(
-            expFxn.listAllUnpairedFiles(props.experimentArray)
-        ); // (can always _.flatten() this or map out first file per pair, e.g. for targetFiles below)
-    },
+    /**
+     * Combine file pairs and unpaired files into one array. 
+     * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
+     * 
+     * Can always _.flatten() this or map out first file per pair.
+     * 
+     * @param {any} [props=this.props] 
+     * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
+     * 
+     * @memberof ExperimentSetRow
+     */
+    pairsAndFiles(props = this.props){
+        return expFxn.listAllFilePairs(props.experimentSet.experiments_in_set).concat(
+            expFxn.listAllUnpairedFiles(props.experimentSet.experiments_in_set)
+        );
+    }
 
-    allFileIDs : function(props = this.props){
+    allFileIDs(props = this.props){
         return this.pairsAndFiles(props).map(function(f){
             if (Array.isArray(f)) return f[0].uuid;
             else return f.uuid;
         });
-    },
+    }
 
-    handleToggle: _.throttle(function (e) {        
+    handleToggle(e) {        
         var willOpen = !this.state.open;
         var state = {
             open : willOpen
@@ -137,9 +147,9 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             state.reallyOpen = true;
         }
         this.setState(state);
-    }, 500),
+    }
 
-    handleCheck: function(e) {
+    handleCheck(e) {
         var newChecked = e.target.checked;
         var selectedFiles;
 
@@ -152,9 +162,9 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         this.setState({
             selectedFiles : selectedFiles
         });
-    },
+    }
 
-    render: function() {
+    render() {
 
         // unused for now... when format selection is added back in, adapt code below:
         // var filteredFiles = [];
@@ -164,20 +174,22 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         //     }
         // }
 
+        var expSet = this.props.experimentSet;
+        var expSetLink = object.atIdFromObject(expSet);
 
         function formattedColumns(){
-            return Object.keys(this.props.columns).map((key)=>{
+            return _.keys(this.props.columns).map((key)=>{
                 if(key === "Accession"){
                     return (
-                        <td key={key+this.props.href} className="expset-table-cell mono-text">
-                            <a className="expset-entry" href={this.props.href}>
+                        <td key={key+expSetLink} className="expset-table-cell mono-text">
+                            <a className="expset-entry" href={expSetLink}>
                                 {this.props.columns[key]}
                             </a>
                         </td>
                     );
                 } else {
                     return(
-                        <td key={key+this.props.href} className="expset-table-cell">
+                        <td key={key+expSetLink} className="expset-table-cell">
                             <div>
                                 {this.props.columns[key]}
                             </div>
@@ -194,14 +206,14 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                         <div className="col-sm-6 addinfo-description-section">
                             <label className="text-500 description-label">Description</label>
                             <FlexibleDescriptionBox
-                                description={ this.props.description }
+                                description={ expSet.description }
                                 fitTo="self"
                                 textClassName="text-medium"
                                 dimensions={null}
                             />
                         </div>
                         <div className="col-sm-6 addinfo-properties-section">
-                        { Object.keys(this.props.addInfo).map((key)=>
+                        { _.keys(this.props.addInfo).map((key)=>
                             <div key={key}>
                                 <span className="expset-addinfo-key">{key}:</span>
                                 <span className="expset-addinfo-val">{this.props.addInfo[key]}</span>
@@ -229,9 +241,9 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                         { columnClass: 'file-detail', title : 'File Type'},
                         { columnClass: 'file-detail', title : 'File Info'}
                     ]}
-                    experimentArray={[...this.props.passExperiments] /* Convert set to array */}
-                    replicateExpsArray={this.props.replicateExpsArray}
-                    experimentSetType={this.props.experimentSetType}
+                    experimentArray={expSet.experiments_in_set}
+                    replicateExpsArray={expSet.replicate_exps}
+                    experimentSetType={expSet.experimentset_type}
                     parentController={this}
                     useAjax={this.props.useAjax}
                     width={expTableWidth}
@@ -247,7 +259,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
-            <tbody data-key={this.props['data-key']} className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber} ref="tbody">
+            <tbody data-key={expSetLink} className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber} ref="tbody">
                 <tr className="expset-table-row">
                     <td className="expset-table-cell dropdown-button-cell">
                         <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
@@ -267,7 +279,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     { formattedColumns.call(this) }
                 </tr>
                 <tr className="expset-addinfo-row" style={{ display : !(this.state.open || this.state.reallyOpen) ? 'none' : null }}>
-                    <td className="expsets-table-hidden" colSpan={Object.keys(this.props.columns).length + 2}>
+                    <td className="expsets-table-hidden" colSpan={_.keys(this.props.columns).length + 2}>
                         <div className="experiment-set-info-wrapper">
                             <Collapse in={this.state.open} mountOnEnter>
                                 <div>
@@ -281,7 +293,9 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             </tbody>
         );
     }
-});
+
+}
+
 
 // Use the href to determine if this is the experiment setType selected.
 // If multiple selected (i.e. forced url), use the first
@@ -356,16 +370,13 @@ function findFiles(fileFormats) {
     return fileStats;
 }
 
-var Term = browse.Term = React.createClass({
-    contextTypes: {
-        navigate: React.PropTypes.func
-    },
+var Term = React.createClass({
 
     componentWillMount: function(){
         var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', this.props.facet['field'], this.props.term['key']);
         if(this.props.typeTitle === this.props.term['key'] && fullHref !== this.props.searchBase){
             if(typeof document !== 'undefined'){
-                this.context.navigate(fullHref);
+                navigate(fullHref);
             }
         }
     },
@@ -391,8 +402,10 @@ var Term = browse.Term = React.createClass({
     }
 });
 
+export var Term;
+
 //Dropdown facet for experimentset_type
-var DropdownFacet = browse.DropdownFacet = React.createClass({
+var DropdownFacet = React.createClass({
     getDefaultProps: function() {
         return {width: 'inherit'};
     },
@@ -430,62 +443,26 @@ var DropdownFacet = browse.DropdownFacet = React.createClass({
     }
 });
 
+export var DropdownFacet;
 
 
-var ColumnSorter = React.createClass({
+export class PageLimitSortController extends React.Component {
 
-    sortClickFxn: function(e){
-        e.preventDefault();
-        var reverse = this.props.sortColumn === this.props.val;
-        this.props.sortByFxn(this.props.val, reverse);
-    },
-
-    getDefaultProps : function(){
-        return {
-            descend : false
-        };
-    },
-
-    iconStyle : function(style = 'descend'){
-        if (style === 'descend'){
-            return <i className="icon icon-sort-desc" style={{ transform: 'translateY(-1px)' }}></i>;
-        } else if (style === 'ascend'){
-            return <i className="icon icon-sort-asc" style={{ transform: 'translateY(2px)' }}></i>;
-        }
-    },
-
-    icon : function(){
-        var style = !this.props.descend && this.props.sortColumn === this.props.val ? 'ascend' : 'descend';
-        var linkClass = this.props.sortColumn === this.props.val ? 'expset-column-sort-used' : 'expset-column-sort';
-        return <a href="#" className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</a>;
-    },
-
-    render: function(){
-        return(
-            <span>
-                <span>{this.props.val}</span>&nbsp;&nbsp;{ this.icon() }
-            </span>
-        );
-    }
-});
-
-var ResultTable = browse.ResultTable = React.createClass({
-
-    propTypes : {
-        // Props' type validation based on contents of this.props during render.
+    static propTypes = {
         href            : React.PropTypes.string.isRequired,
         context         : React.PropTypes.object.isRequired,
-        expSetFilters   : React.PropTypes.object.isRequired,
-        fileFormats     : React.PropTypes.array,
-        fileStats       : React.PropTypes.object,
-        targetFiles     : React.PropTypes.instanceOf(Set),
-        onChange        : React.PropTypes.func,
-        useAjax         : React.PropTypes.bool,
-        navigate        : React.PropTypes.func.isRequired
-    },
+    }
 
-    getPageAndLimitFromURL : function(href){
-        // Grab limit & page (via '(from / limit) + 1 ) from URL, if available.
+    /**
+     * Grab limit & page (via '(from / limit) + 1 ) from URL, if available.
+     * 
+     * @static
+     * @param {string} href - Current page href, with query.
+     * @returns {Object} { 'page' : int, 'limit' : int }
+     * 
+     * @memberof PageLimitSortController
+     */
+    static getPageAndLimitFromURL(href){
         var urlParts = url.parse(href, true);
         var limit = parseInt(urlParts.query.limit || Filters.getLimit() || 25);
         var from  = parseInt(urlParts.query.from  || 0);
@@ -496,80 +473,104 @@ var ResultTable = browse.ResultTable = React.createClass({
             'page' : (from / limit) + 1,
             'limit' : limit
         }
-    },
+    }
 
-    getInitialState: function(){
-        // Grab limit & page (via '(from' / 'limit') + 1 ) from URL, if available.
-        var pageAndLimit = this.getPageAndLimitFromURL(this.props.href);
+    static getSortColumnAndReverseFromURL(href){
+        var urlParts = url.parse(href, true);
+        var sortParam = urlParts.query.sort;
+        var reverse = false;
+        if (typeof sortParam !== 'string') return {
+            sortColumn : null,
+            sortReverse : reverse
+        };
+        if (sortParam.charAt(0) === '-'){
+            reverse = true;
+            sortParam = sortParam.slice(1);
+        }
+        
+        return {
+            'sortColumn' : sortParam,
+            'sortReverse' : reverse
+        }
+    }
+
+    constructor(props){
+        super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.sortBy = this.sortBy.bind(this);
+        this.changePage = _.throttle(this.changePage.bind(this), 250);
+        this.changeLimit = _.throttle(this.changeLimit.bind(this), 250);
+
+        // State
 
         // Have Filters use our state.limit, until another component overrides.
         Filters.getLimit = function(){
             return (this && this.state && this.state.limit) || 25;
         }.bind(this);
-        
-        return _.extend({
-            sortColumn: null,
-            sortReverse: false,
-            overflowingRight : false,
-            // We need to get the below outta state once graph-ql is in; temporarily stored in state for performance.
-            passedExperiments : 
-                this.props.useAjax ? null :
-                    ExperimentsTable.getPassedExperiments(
-                        this.props.context['@graph'],
-                        this.props.expSetFilters,
-                        'missing-facets',
-                        this.props.context.facets,
-                        true
-                    )
-        }, this.getPageAndLimitFromURL(this.props.href));
-    },
 
-    getDefaultProps: function() {
-        // 'restrictions' object migrated to facetlist.js > FacetList
-        return {
-            'href': '/browse/',
-            'debug' : false,
-            'useAjax' : true
-        };
-    },
+        this.state = _.extend(
+            { changingPage : false },
+            PageLimitSortController.getSortColumnAndReverseFromURL(props.href),
+            PageLimitSortController.getPageAndLimitFromURL(props.href)
+        );
+    }
 
-    componentDidMount : function(){
-        this.setOverflowingRight();
-        var debouncedSetOverflowRight = _.debounce(this.setOverflowingRight, 300);
-        window.addEventListener('resize', debouncedSetOverflowRight);
-    },
-
-    componentWillReceiveProps : function(newProps){
+    componentWillReceiveProps(newProps){
         var newState = {};
-
-        // Update visible experiments via client-side filtering IF not using ajax.
-        if (this.props.expSetFilters !== newProps.expSetFilters || this.props.context !== newProps.context){
-            if (!this.props.useAjax){
-                newState.passedExperiments = ExperimentsTable.getPassedExperiments(
-                    newProps.context['@graph'],
-                    newProps.expSetFilters,
-                    'missing-facets',
-                    newProps.context.facets,
-                    true
-                );
-            }
-        }
 
         // Update page re: href.
         if (this.props.href !== newProps.href){
-            var pageAndLimit = this.getPageAndLimitFromURL(newProps.href);
+            var pageAndLimit = PageLimitSortController.getPageAndLimitFromURL(newProps.href);
             if (pageAndLimit.page !== this.state.page) newState.page = pageAndLimit.page;
             if (pageAndLimit.limit !== this.state.limit) newState.limit = pageAndLimit.limit;
+
+            var { sortColumn, sortReverse } = PageLimitSortController.getSortColumnAndReverseFromURL(newProps.href);
+            if (sortColumn !== this.state.sortColumn) newState.sortColumn = sortColumn;
+            if (sortReverse !== this.state.sortReverse) newState.sortReverse = sortReverse;
         }
 
-        if (Object.keys(newState).length > 0){
+        if (_.keys(newState).length > 0){
             this.setState(newState);
         }
-    },
+    }
 
-    changePage : _.throttle(function(page = null){
+    sortBy(key, reverse) {
+
+        if (typeof navigate !== 'function') throw new Error("No navigate function.");
+        if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
+
+        var urlParts = url.parse(this.props.href, true);
+        //var previousLimit = parseInt(urlParts.query.limit || this.state.limit || 25);
+        //urlParts.query.limit = previousLimit + '';
+        urlParts.query.from = '0';
+        if (key){
+            urlParts.query.sort = (reverse ? '-' : '' ) + key;
+        } else {
+            urlParts.query.sort = null;
+        }
+        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        var newHref = url.format(urlParts);
+
+        this.setState({ 'changingPage' : true }, ()=>{
+            navigate(
+                newHref,
+                { 'replace' : true },
+                ()=>{
+                    this.setState({ 
+                        'sortColumn' : key,
+                        'sortReverse' : reverse,
+                        'changingPage' : false,
+                        'page' : 1
+                    }
+                );
+            });
+        });
+
+    }
+
+    changePage(page = null){
         
-        if (typeof this.props.navigate !== 'function') throw new Error("Browse doesn't have props.navigate()");
+        if (typeof navigate !== 'function') throw new Error("No navigate function");
         if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
 
         page = Math.min( // Correct page, so don't go past # available or under 1.
@@ -595,7 +596,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         }
         urlParts.search = '?' + querystring.stringify(urlParts.query);
         this.setState({ 'changingPage' : true }, ()=>{
-            this.props.navigate(
+            navigate(
                 url.format(urlParts),
                 { 'replace' : true },
                 ()=>{
@@ -606,11 +607,11 @@ var ResultTable = browse.ResultTable = React.createClass({
                 );
             });
         });
-    }, 250),
+    }
 
-    changeLimit : _.throttle(function(limit = 25){
+    changeLimit(limit = 25){
         
-        if (typeof this.props.navigate !== 'function') throw new Error("Browse doesn't have props.navigate()");
+        if (typeof navigate !== 'function') throw new Error("No navigate function.");
         if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
 
         var urlParts = url.parse(this.props.href, true);
@@ -632,7 +633,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         var newHref = url.format(urlParts);
 
         this.setState({ 'changingPage' : true }, ()=>{
-            this.props.navigate(
+            navigate(
                 newHref,
                 { 'replace' : true },
                 ()=>{
@@ -643,103 +644,217 @@ var ResultTable = browse.ResultTable = React.createClass({
                 );
             });
         });
-    }, 250),
+    }
 
-    shouldComponentUpdate : function(nextProps, nextState){
-        if (this.props.context !== nextProps.context) return true;
-        if (this.state.page !== nextState.page) return true;
-        if (this.state.changingPage !== nextState.changingPage) return true;
-        if (this.state.passedExperiments !== nextState.passedExperiments) return true;
-        if (this.state.sortColumn !== nextState.sortColumn) return true;
-        if (this.state.sortReverse !== nextState.sortReverse) return true;
-        if (this.state.overflowingRight !== nextState.overflowingRight) return true;
-        if (this.props.searchBase !== nextProps.searchBase) return true;
-        if (this.props.schemas !== nextProps.schemas) return true;
-        return false;
-    },
+    render(){
+        return(
+            <div>
+                { 
+                    React.Children.map(this.props.children, (c)=>{
+                        return React.cloneElement(c, _.extend({
+                            'maxPage' : Math.ceil(this.props.context.total / this.state.limit),
+                            'sortBy' : this.sortBy,
+                            'changePage' : this.changePage,
+                            'changeLimit' : this.changeLimit
+                        }, this.state));
+                    })
+                }
+            </div>
+        );
+    }
 
-    componentDidUpdate : function(pastProps, pastState){
-        if (this.props.debug) { 
-            console.log('ResultTable updated.');
+
+}
+
+export class LimitAndPageControls extends React.Component {
+
+    static propTypes = {
+        'limit'         : PropTypes.number.isRequired,
+        'page'          : PropTypes.number.isRequired,
+        'maxPage'       : PropTypes.number.isRequired,
+        'changingPage'  : PropTypes.bool,
+        'changeLimit'   : PropTypes.func.isRequired,
+        'changePage'    : PropTypes.func.isRequired
+    }
+
+    static defaultProps = {
+        'changingPage' : false
+    }
+
+    constructor(props){
+        super(props);
+        this.handleLimitSelect = this.handleLimitSelect.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+
+    handleLimitSelect(eventKey, evt){
+        evt.target.blur();
+        return this.props.changeLimit(eventKey);
+    }
+
+    render(){
+        var { page, limit, maxPage, changingPage, changePage, changeLimit } = this.props;
+        return (
+            <div>
+                <ButtonToolbar className="pull-right">
+                            
+                    <DropdownButton title={
+                        <span className="text-small">
+                            <i className="icon icon-list icon-fw" style={{ fontSize: '0.825rem' }}></i> Show {limit}
+                        </span>
+                    } id="bg-nested-dropdown">
+                        <MenuItem eventKey={10} onSelect={this.handleLimitSelect}>Show 10</MenuItem>
+                        <MenuItem eventKey={25} onSelect={this.handleLimitSelect}>Show 25</MenuItem>
+                        <MenuItem eventKey={50} onSelect={this.handleLimitSelect}>Show 50</MenuItem>
+                        <MenuItem eventKey={100} onSelect={this.handleLimitSelect}>Show 100</MenuItem>
+                        <MenuItem eventKey={250} onSelect={this.handleLimitSelect}>Show 250</MenuItem>
+                    </DropdownButton>
+                    
+                    <ButtonGroup>
+                        
+                        <Button disabled={changingPage || page === 1} onClick={changingPage === true ? null : (e)=>{
+                            changePage(page - 1);
+                        }}><i className="icon icon-angle-left icon-fw"></i></Button>
+                    
+                        <Button disabled style={{ minWidth : 120 }}>
+                            { changingPage === true ? 
+                                <i className="icon icon-spin icon-circle-o-notch" style={{ opacity : 0.5 }}></i>
+                                : 'Page ' + page + ' of ' + maxPage
+                            }
+                        </Button>
+                    
+                        <Button disabled={changingPage || page === maxPage} onClick={changingPage === true ? null : (e)=>{
+                            changePage(page + 1);
+                        }}><i className="icon icon-angle-right icon-fw"></i></Button>
+                        
+                    </ButtonGroup>
+
+                </ButtonToolbar>
+            </div>
+        )
+    }
+
+}
+
+class ColumnSorter extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.sortClickFxn = this.sortClickFxn.bind(this);
+    }
+
+    defaultProps = {
+        descend : false
+    }
+
+    sortClickFxn(e){
+        e.preventDefault();
+        var reverse = this.props.sortColumn === this.props.val && !this.props.descend;
+        this.props.sortByFxn(this.props.val, reverse);
+    }
+
+    iconStyle(style = 'descend'){
+        if (style === 'descend')        return <i className="icon icon-sort-desc" style={{ transform: 'translateY(-1px)' }}/>;
+        else if (style === 'ascend')    return <i className="icon icon-sort-asc" style={{ transform: 'translateY(2px)' }}/>;
+    }
+
+    icon(){
+        var val = this.props.val;
+        if (typeof val !== 'string' || val.length === 0) {
+            return null;
         }
-    },
+        var style = !this.props.descend && this.props.sortColumn === val ? 'ascend' : 'descend';
+        var linkClass = this.props.sortColumn === val ? 'expset-column-sort-used' : 'expset-column-sort';
+        return <a href="#" className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</a>;
+    }
 
-    setOverflowingRight : function(){
-        if (isServerSide()) return;
-        if (this.refs.expSetTableContainer){
-            if (this.refs.expSetTableContainer.offsetWidth < this.refs.expSetTableContainer.scrollWidth){
-                this.setState({ overflowingRight : true });
-            } else {
-                this.setState({ overflowingRight : false });
-            }
-        }
-    },
+    render(){
+        return(
+            <span>
+                <span>{this.props.title || this.props.val}</span>&nbsp;&nbsp;{ this.icon() }
+            </span>
+        );
+    }
 
-    sortBy: function(key, reverse) {
-        if (reverse) {
-            this.setState({
-                sortColumn: key,
-                sortReverse: !this.state.sortReverse
-            });
-        } else {
-            this.setState({
-                sortColumn: key,
-                sortReverse: false
-            });
-        }
+}
 
-    },
+export class ResultTable extends React.Component {
 
-    totalResultCount : function(){
-        // account for empty expt sets
-        var resultCount = this.props.context['@graph'].length;
-        this.props.context['@graph'].map(function(r){
-            if (r.experiments_in_set == 0) resultCount--;
-        });
-        return resultCount;
-    },
+    static propTypes = {
+        'context' : PropTypes.object.isRequired,
+        'sortReverse' : PropTypes.bool.isRequired,
+        'sortColumn' : PropTypes.string.isRequired,
+        'sortBy' : PropTypes.func.isRequired,
+        'expSetFilters' : PropTypes.object,
 
-    formatColumnHeaders : function(columnTemplate){
-        return Object.keys(columnTemplate).map(function(key){
-            return (
-                <th key={key}>
-                    <ColumnSorter
-                        descend={this.state.sortReverse}
-                        sortColumn={this.state.sortColumn}
-                        sortByFxn={this.sortBy}
-                        val={key}
-                    />
-                </th>
-            );
-        }.bind(this));
-    },
+        fileStats : PropTypes.any,
+        targetFiles : PropTypes.any
+    }
 
-    getTemplate : function(type){ 
-        var setType = this.props.context['@graph'][0].experimentset_type;
+    constructor(props){
+        super(props);
+        
+        this.getTemplate = this.getTemplate.bind(this);
+        this.formatColumnHeaders = this.formatColumnHeaders.bind(this);
+        this.getAdditionaInfoSection = this.getAdditionaInfoSection.bind(this);
+        this.getColumnValues = this.getColumnValues.bind(this);
+        this.formatExperimentSetListings = this.formatExperimentSetListings.bind(this);
+    }
+
+    getTemplate(type, setType = null){ 
+        if (!setType) setType = this.props.context['@graph'][0].experimentset_type;
         if (type === 'column'){
             return expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
         } else if (type === 'additional-info'){
             return expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
         }
-    },
+    }
 
-    getSelectedFiles : function(){
-        if (!this.experimentSetRows) return null;
-        return _(this.experimentSetRows).chain()
-            .pairs()
-            .map(function(expRow){
-                return [expRow[0], expRow[1].state.selectedFiles];
-            })
-            .object()
-            .value();
-    },
+    formatColumnHeaders(columnTemplate){
+        return _.pairs(columnTemplate).map((pair)=>
+            <th key={pair[1]}>
+                <ColumnSorter
+                    descend={this.props.sortReverse}
+                    sortColumn={this.props.sortColumn}
+                    sortByFxn={this.props.sortBy}
+                    title={pair[0]}
+                    val={pair[1]}
+                />
+            </th>
+        );
+    }
 
-    getColumnValues : function(experiment_set){
+    getAdditionaInfoSection(firstExp){
+        // Experiment Set Row Add'l Info (Lab, etc.)
+        var addInfoTemplate = this.getTemplate('additional-info');
+        var addInfo = {};
+        for (var i=0; i<Object.keys(addInfoTemplate).length;i++){
+            var splitFilters = addInfoTemplate[Object.keys(addInfoTemplate)[i]].split('.');
+            var valueProbe = firstExp;
+            for (var j=0; j<splitFilters.length;j++){
+                valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
+            }
+            addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
+        }
+
+        return addInfo;
+    }
+
+    getColumnValues(experiment_set){
         var experimentArray = experiment_set.experiments_in_set;
         var columnTemplate = this.getTemplate('column');
         var columns = {};
         var firstExp = experimentArray[0]; // use only for replicates
         var accession = experiment_set.accession ? experiment_set.accession : "Experiment Set";
+
+        columnTemplate = _.object(_.map(_.pairs(columnTemplate), function(p){
+            var lookup = p[1];
+            if (lookup.slice(0,19) === 'experiments_in_set.'){
+                lookup = lookup.slice(19);
+            }
+            return [p[0], lookup];
+        }));
 
         // Experiment Set Row Columns
         for (var i=0; i<Object.keys(columnTemplate).length;i++) {
@@ -764,117 +879,170 @@ var ResultTable = browse.ResultTable = React.createClass({
         }
 
         return columns;
-    },
+    }
 
-    getAdditionaInfoSection : function(firstExp){
-        // Experiment Set Row Add'l Info (Lab, etc.)
-        var addInfoTemplate = this.getTemplate('additional-info');
-        var addInfo = {};
-        for (var i=0; i<Object.keys(addInfoTemplate).length;i++){
-            var splitFilters = addInfoTemplate[Object.keys(addInfoTemplate)[i]].split('.');
-            var valueProbe = firstExp;
-            for (var j=0; j<splitFilters.length;j++){
-                valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
-            }
-            addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
-        }
 
-        return addInfo;
-    },
-
-    formatExperimentSetListings : function(facets = null){
+    formatExperimentSetListings(facets = null){
 
         if (!Array.isArray(this.props.context['@graph']) || this.props.context['@graph'].length === 0) return null;
         
         var resultCount = 0;
 
-        function buildRowComponent(experiment_set, passExps = null){
-
+        return this.props.context['@graph'].map((experiment_set, i) => { 
             var columns = this.getColumnValues(experiment_set);
             var addInfo = this.getAdditionaInfoSection(experiment_set.experiments_in_set[0]);
 
             return <ExperimentSetRow
-                    ref={(r)=>{
-                        // Cache component instance.
-                        this.experimentSetRows[experiment_set['@id']] = r;
-                    }}
-                    addInfo={addInfo}
-                    description={experiment_set.description}
-                    columns={columns}
-                    expSetFilters={this.props.expSetFilters}
-                    experimentSetType={experiment_set.experimentset_type}
-                    selectAllFilesInitially={true}
-                    targetFiles={this.props.targetFiles}
-                    href={experiment_set['@id']}
-                    experimentArray={experiment_set.experiments_in_set}
-                    replicateExpsArray={experiment_set.replicate_exps}
-                    passExperiments={passExps || new Set(experiment_set.experiments_in_set) }
-                    sort-value={this.state.sortColumn ? columns[this.state.sortColumn] : experiment_set['@id']}
-                    key={experiment_set['@id']}
-                    data-key={experiment_set['@id']}
-                    rowNumber={resultCount++}
-                    facets={facets || FacetList.adjustedFacets(this.props.context.facets)}
-                    fileStats={this.props.fileStats}
-                    useAjax={this.props.useAjax}
-                />;
-        }
+                ref={(r)=>{
+                    // Cache component instance.
+                    this.experimentSetRows[experiment_set['@id']] = r;
+                }}
+                experimentSet={experiment_set}
+                addInfo={addInfo}
+                columns={columns}
+                expSetFilters={this.props.expSetFilters}
+                targetFiles={this.props.targetFiles}
+                key={experiment_set['@id']}
+                rowNumber={resultCount++}
+                facets={facets || FacetList.adjustedFacets(this.props.context.facets)}
+                fileStats={this.props.fileStats}
+            />;
+        });
+    }
 
-        var sortFxn = function(a,b){
-            a = a.props['sort-value'];
-            b = b.props['sort-value'];
-            if (this.state.sortReverse) {
-                var b2 = b;
-                b = a;
-                a = b2;
-            }
-            if(!isNaN(a)){
-                return (a - b);
+    render(){
+        this.experimentSetRows = {};
+        return(
+            <Table className="expset-table expsets-table" condensed id="result-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        { this.formatColumnHeaders(this.getTemplate('column')) }
+                    </tr>
+                </thead>
+                { this.formatExperimentSetListings() }
+            </Table>
+        );
+    }
+
+}
+
+/**
+ * Handles state for Browse results, including page & limit.
+ * 
+ * @export
+ * @class ResultTableContainer
+ * @extends {React.Component}
+ */
+export class ResultTableContainer extends React.Component {
+
+    static propTypes = {
+        // Props' type validation based on contents of this.props during render.
+        href            : React.PropTypes.string.isRequired,
+        context         : React.PropTypes.object.isRequired,
+        expSetFilters   : React.PropTypes.object.isRequired,
+        fileFormats     : React.PropTypes.array,
+        fileStats       : React.PropTypes.object,
+        targetFiles     : React.PropTypes.instanceOf(Set),
+        useAjax         : React.PropTypes.bool
+    }
+
+    static defaultProps = {
+        'href'      : '/browse/',
+        'debug'     : false,
+        'useAjax'   : true
+    }
+
+    constructor(props){
+        super(props);
+
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.totalResultCount = this.totalResultCount.bind(this);
+        this.visibleResultCount = this.visibleResultCount.bind(this);
+        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.setOverflowingRight = this.setOverflowingRight.bind(this);
+        this.getSelectedFiles = this.getSelectedFiles.bind(this);
+        this.renderTable = this.renderTable.bind(this);
+        this.render = this.render.bind(this);
+
+        this.state = {
+            overflowingRight : false,
+        };
+
+    }
+
+    componentDidMount(){
+        this.setOverflowingRight();
+        var debouncedSetOverflowRight = _.debounce(this.setOverflowingRight, 300);
+        window.addEventListener('resize', debouncedSetOverflowRight);
+    }
+
+    totalResultCount(){
+        return (this.props.context && typeof this.props.context.total === 'number' && this.props.context.total) || 0;
+    }
+
+    visibleResultCount(){
+        // account for empty expt sets
+        var resultCount = (this.props.context && Array.isArray(this.props.context['@graph']) && this.props.context['@graph'].length) || 0;
+        this.props.context['@graph'].map(function(r){
+            if (r.experiments_in_set == 0) resultCount--;
+        });
+        return resultCount;
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+        if (this.props.context !== nextProps.context) return true;
+        if (this.props.page !== nextProps.page) return true;
+        if (this.props.limit !== nextProps.limit) return true;
+        if (this.props.changingPage !== nextProps.changingPage) return true;
+        if (this.props.sortColumn !== nextProps.sortColumn) return true;
+        if (this.props.sortReverse !== nextProps.sortReverse) return true;
+        if (this.state.overflowingRight !== nextState.overflowingRight) return true;
+        if (this.props.searchBase !== nextProps.searchBase) return true;
+        if (this.props.schemas !== nextProps.schemas) return true;
+        return false;
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (this.props.debug) { 
+            console.log('ResultTableContainer updated.');
+        }
+    }
+
+    setOverflowingRight(){
+        if (isServerSide()) return;
+        if (this.refs.expSetTableContainer){
+            if (this.refs.expSetTableContainer.offsetWidth < this.refs.expSetTableContainer.scrollWidth){
+                this.setState({ overflowingRight : true });
             } else {
-                //return(a.localeCompare(b));
-                // Above doesn't assign consistently right values to letters/numbers, e.g. sometimes an int > a letter
-                // Not sure how important.
-                if (a < b) return -1;
-                else if (a > b) return 1;
-                else return 0;
+                this.setState({ overflowingRight : false });
             }
-        }.bind(this);
-
-
-        if (this.props.useAjax){
-            return this.props.context['@graph']
-                .map((expSet) => buildRowComponent.call(this, expSet))
-                .sort(sortFxn);
-        } else {
-            return this.props.context['@graph']
-                .filter(function(expSet){ return expSet.experiments_in_set.length > 0; })
-                .map(function(expSet){
-                    return { 
-                        'intersection' : new Set(expSet.experiments_in_set.filter(x => this.state.passExperiments.has(x))),
-                        'set' : expSet
-                    };
-                })
-                .filter(function(expSetContainer){
-                    return expSetContainer.intersection.size > 0;
-                })
-                .map((expSetContainer) => buildRowComponent.call(this, expSetContainer.set, expSetContainer.intersection))
-                .sort(sortFxn);
         }
-    },
+    }
 
-    renderTable : function(){
-        if (this.props.debug) console.log('Rendering ResultTable.');
-        var formattedExperimentSetListings = this.formatExperimentSetListings();
-        if (!formattedExperimentSetListings) return null;
+
+
+    getSelectedFiles(){
+        if (!this.experimentSetRows) return null;
+        return _(this.experimentSetRows).chain()
+            .pairs()
+            .map(function(expRow){
+                return [expRow[0], expRow[1].state.selectedFiles];
+            })
+            .object()
+            .value();
+    }
+
+
+
+    renderTable(){
+        if (this.props.debug) console.log('Rendering ResultTableContainer.');
 
         //console.log('RENDER TABLE EXP LISTINGS', formattedExperimentSetListings);
 
         this.experimentSetRows = {}; // ExperimentSetRow instances stored here, keyed by @id, to get selectFiles from (?).
-        var maxPage = Math.ceil(this.props.context.total / this.state.limit);
-
-        var handleLimitSelect = function(eventKey, e){
-            e.target.blur();
-            return this.changeLimit(eventKey);
-        }.bind(this);
 
         return (
             <div className={
@@ -886,65 +1054,37 @@ var ResultTable = browse.ResultTable = React.createClass({
                 <div className="row above-chart-row">
                     <div className="col-sm-5 col-xs-12">
                         <h5 className='browse-title'>
-                            {formattedExperimentSetListings.length} of { this.props.context.total } Experiment Sets
+                            { this.visibleResultCount() } of { this.totalResultCount() } Experiment Sets
                         </h5>
                     </div>
                     <div className="col-sm-7 col-xs-12">
                         
-                        <ButtonToolbar className="pull-right">
-                            
-                                <DropdownButton title={
-                                    <span className="text-small">
-                                        <i className="icon icon-list icon-fw" style={{ fontSize: '0.825rem' }}></i> Show {this.state.limit}
-                                    </span>
-                                } id="bg-nested-dropdown">
-                                    <MenuItem eventKey={10} onSelect={handleLimitSelect}>Show 10</MenuItem>
-                                    <MenuItem eventKey={25} onSelect={handleLimitSelect}>Show 25</MenuItem>
-                                    <MenuItem eventKey={50} onSelect={handleLimitSelect}>Show 50</MenuItem>
-                                    <MenuItem eventKey={100} onSelect={handleLimitSelect}>Show 100</MenuItem>
-                                    <MenuItem eventKey={250} onSelect={handleLimitSelect}>Show 250</MenuItem>
-                                </DropdownButton>
-                            
-                            <ButtonGroup>
-                                
-                                <Button disabled={this.state.changingPage || this.state.page === 1} onClick={this.state.changingPage === true ? null : (e)=>{
-                                    this.changePage(this.state.page - 1);
-                                }}><i className="icon icon-angle-left icon-fw"></i></Button>
-                            
-                                <Button disabled style={{ minWidth : 120 }}>
-                                    { this.state.changingPage === true ? 
-                                        <i className="icon icon-spin icon-circle-o-notch" style={{ opacity : 0.5 }}></i>
-                                        : 'Page ' + this.state.page + ' of ' + maxPage
-                                    }
-                                </Button>
-                            
-                                <Button disabled={this.state.changingPage || this.state.page === maxPage} onClick={this.state.changingPage === true ? null : (e)=>{
-                                    this.changePage(this.state.page + 1);
-                                }}><i className="icon icon-angle-right icon-fw"></i></Button>
-                                
-                            </ButtonGroup>
-                        </ButtonToolbar>
+                        <LimitAndPageControls
+                            limit={this.props.limit}
+                            page={this.props.page}
+                            maxPage={this.props.maxPage}
+                            changingPage={this.props.changingPage}
+                            changePage={this.props.changePage}
+                            changeLimit={this.props.changeLimit}
+                        />
+
                     </div>
                 </div>
                 <div className="row">
                     <div className="expset-table-container col-sm-12" ref="expSetTableContainer">
-                        <Table className="expset-table expsets-table" condensed id="result-table">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th></th>
-                                    { this.formatColumnHeaders(this.getTemplate('column')) }
-                                </tr>
-                            </thead>
-                            { formattedExperimentSetListings }
-                        </Table>
+                        <ResultTable
+                            context={this.props.context}
+                            sortBy={this.props.sortBy}
+                            sortColumn={this.props.sortColumn}
+                            sortReverse={this.props.sortReverse}
+                        />
                     </div>
                 </div>
             </div>
         );
-    },
+    }
 
-    render: function() {
+    render() {
         var facets = FacetList.adjustedFacets(this.props.context.facets);
         var ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
         return (
@@ -964,7 +1104,6 @@ var ResultTable = browse.ResultTable = React.createClass({
                             ignoredFilters={ignoredFilters}
                             className="with-header-bg"
                             href={this.props.href}
-                            navigate={this.props.navigate}
                             useAjax={true}
                             schemas={this.props.schemas}
                         />
@@ -976,7 +1115,9 @@ var ResultTable = browse.ResultTable = React.createClass({
             </div>
         );
     }
-});
+
+}
+
 
 var FileButton = browse.FileButton = React.createClass({
 
@@ -1073,19 +1214,19 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
     },
 
     getSelectedFiles : function(){
-        if (!this.refs.resultTable) return null;
-        return this.refs.resultTable.getSelectedFiles();
+        if (!this.refs.resultTableContainer) return null;
+        return this.refs.resultTableContainer.getSelectedFiles();
     },
 
     render: function(){
         var fileStats = this.state.fileStats;
         var targetFiles = this.state.filesToFind;
-        var selectorButtons = this.props.fileFormats.map(function (format, idx) {
-            var count = fileStats.formats[format] ? fileStats.formats[format].size : 0;
-            return(
-                <FileButton key={format} defaults={targetFiles} fxn={this.selectFiles} format={format} count={count}/>
-            );
-        }.bind(this));
+        //var selectorButtons = this.props.fileFormats.map(function (format, idx) {
+        //    var count = fileStats.formats[format] ? fileStats.formats[format].size : 0;
+        //    return(
+        //        <FileButton key={format} defaults={targetFiles} fxn={this.selectFiles} format={format} count={count}/>
+        //    );
+        //}.bind(this));
         // var deselectButton = <Button className="expset-selector-button" bsSize="xsmall">Deselect</Button>;
         var downloadButton = <Button className="expset-selector-button" bsSize="xsmall" onClick={this.downloadFiles}>Download</Button>;
         return(
@@ -1118,18 +1259,19 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                     </div>
                 </div>*/}
 
-                <ResultTable
-                    ref="resultTable"
-                    targetFiles={targetFiles}
-                    fileStats={this.state.fileStats}
-                    context={this.props.context}
-                    expSetFilters={this.props.expSetFilters}
-                    session={this.props.session}
-                    href={this.props.href}
-                    navigate={this.props.navigate}
-                    useAjax={this.props.useAjax}
-                    schemas={this.props.schemas}
-                />
+                <PageLimitSortController href={this.props.href} context={this.props.context}>
+                    <ResultTableContainer
+                        ref="resultTableContainer"
+                        targetFiles={targetFiles}
+                        fileStats={this.state.fileStats}
+                        context={this.props.context}
+                        expSetFilters={this.props.expSetFilters}
+                        session={this.props.session}
+                        href={this.props.href}
+                        useAjax={this.props.useAjax}
+                        schemas={this.props.schemas}
+                    />
+                </PageLimitSortController>
 
             </div>
 
@@ -1137,35 +1279,26 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
     }
 });
 
-var Browse = browse.Browse = React.createClass({
+export class Browse extends React.Component {
 
-    contextTypes: {
-        location_href: React.PropTypes.string,
-        navigate: React.PropTypes.func
-    },
+    static propTypes = {
+        'context' : PropTypes.object.isRequired,
+        'expSetFilters' : PropTypes.object,
+        'session' : PropTypes.bool,
+        'schemas' : PropTypes.object,
+        'href' : PropTypes.string.isRequired
+    }
 
-    propTypes : {
-        'context' : React.PropTypes.object.isRequired,
-        'expSetFilters' : React.PropTypes.object,
-        'session' : React.PropTypes.bool,
-        'schemas' : React.PropTypes.object,
-        'navigate' : React.PropTypes.func,
-    },
-
-    shouldComponentUpdate : function(nextProps, nextState){
+    shouldComponentUpdate(nextProps, nextState){
         if (this.props.context !== nextProps.context) return true;
         if (this.props.expSetFilters !== nextProps.expSetFilters) return true;
         if (this.props.session !== nextProps.session) return true;
         if (this.props.href !== nextProps.href) return true;
         if (this.props.schemas !== nextProps.schemas) return true;
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
-    },
+    }
 
-    componentWillMount: function() {
-        //var searchBase = url.parse(this.context.location_href).search || '';
-    },
-
-    render: function() {
+    render() {
         //console.log('BROWSE PROPS', this.props);
         var context = this.props.context;
         var fileFormats = findFormats(context['@graph']);
@@ -1201,9 +1334,7 @@ var Browse = browse.Browse = React.createClass({
                     {...this.props}
                     key="controlsAndResults"
                     fileFormats={fileFormats}
-                    href={this.props.href || this.context.location_href}
-                    onChange={this.context.navigate}
-                    navigate={this.props.navigate || this.context.navigate}
+                    href={this.props.href}
                     useAjax={true}
                     schemas={this.props.schemas}
                 />
@@ -1211,6 +1342,7 @@ var Browse = browse.Browse = React.createClass({
             </div>
         );
     }
-});
+
+}
 
 globals.content_views.register(Browse, 'Browse');

@@ -6,7 +6,7 @@ var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bo
 var _ = require('underscore');
 var store = require('../store');
 var { JWT, console, layout, isServerSide } = require('./util');
-var QuickInfoBar = require('./viz/QuickInfoBar');
+import QuickInfoBar from './viz/QuickInfoBar';
 var TestWarning = require('./testwarning');
 var productionHost = require('./globals').productionHost;
 
@@ -273,7 +273,7 @@ export default class Navigation extends React.Component {
                             {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>
                     </Navbar>
-                    <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={this.props.expSetFilters} />
+                    <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={this.props.expSetFilters} schemas={this.props.schemas} />
                 </div>
             </div>
         );

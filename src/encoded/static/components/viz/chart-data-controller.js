@@ -2,8 +2,10 @@
 
 /** @ignore */
 var React = require('react');
+import PropTypes from 'prop-types';
 var _ = require('underscore');
 var { expFxn, Filters, ajax, console, layout, isServerSide, navigate } = require('./../util');
+var vizUtil = require('./utilities');
 
 
 /** 
@@ -35,13 +37,11 @@ var refs = {
         'experiments_in_set.filesets.files_in_set.accession',
         //'experiments_in_set.biosample.description',
         //'experiments_in_set.biosample.modifications_summary_short',
-        'experiments_in_set.biosample.biosource_summary',
-        //'experiments_in_set.biosample.accession',
-        //'experiments_in_set.biosample.biosource.description',
-        'experiments_in_set.biosample.biosource.biosource_name',
-        'experiments_in_set.biosample.biosource.biosource_type',
+        'experiments_in_set.biosample.biosource_summary', // AKA Biosource
+        //'experiments_in_set.biosample.biosource.biosource_name', // AKA Biosource
+        'experiments_in_set.biosample.biosource.biosource_type', // AKA Biosource Type
+        'experiments_in_set.lab.title',
         'experiments_in_set.biosample.biosource.individual.organism.name',
-        'experiments_in_set.biosample.biosource.individual.organism.scientific_name',
         'experiments_in_set.digestion_enzyme.name'
     ],
     expSetFilters : null,
@@ -60,15 +60,6 @@ var state = {
     filteredExperiments : null,
     fetching            : false,
 
-    // the below field definitions will likely be moved out of here eventually
-    /** @ignore */
-    chartFieldsBarPlot  : [
-        { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
-        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" }
-        //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
-    ],
-    /** @ignore */
     chartFieldsHierarchy: [
         //{ 
         //    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
@@ -184,6 +175,17 @@ function notifyLoadStartCallbacks(){
     });
 }
 
+function reFetchContext(){
+    console.info('ChartDataController -> Refetch Context Called');
+    try {
+        navigate('', { inPlace : true });
+    } catch (e){
+        console.warn(e);
+        return false;
+    }
+    return true;
+}
+
 
 /**
  * Holds unsubcribe callback to Redux store subscription.
@@ -199,6 +201,9 @@ var reduxSubscription = null;
  * @type {boolean}
  */
 var isInitialized = false;
+
+
+var isInitialLoadComplete = false;
 
 /**
  * @private
@@ -223,78 +228,80 @@ var isWindowActive = false;
 
 
 /**
+ * Use this React component to wrap individual charts and provide them with source of experiments data via
+ * their props.experiments and props.filteredExperiments. Also provides props.expSetFilters from redux store.
+ * 
+ * @class Provider
+ * @type {Component}
+ * @memberof module:viz/chart-data-controller
+ * 
+ * @prop {string} id - Unique ID.
+ * @prop {Object} children - Must be a Chart or Chart controller component.
+ */
+class Provider extends React.Component {
+
+    static propTypes = {
+        'id' : React.PropTypes.string.isRequired,
+        'children' : React.PropTypes.object.isRequired
+    }
+
+    /**
+     * Registers a callback function, which itself calls this.forceUpdate(), with module-viz_chart-data-controller_
+     * using ChartDataController.registerUpdateCallback(cb, this.props.id).
+     * 
+     * @memberof module:viz/chart-data-controller.Provider
+     * @private
+     * @instance
+     * @this module:viz/chart-data-controller.Provider
+     * @returns {undefined} Nothing
+     */
+    componentWillMount(){
+        ChartDataController.registerUpdateCallback(()=>{
+            this.forceUpdate();
+        }, this.props.id);
+    }
+
+    /**
+     * Unregisters itself using ChartDataController.unregisterUpdateCallback(this.props.id).
+     * 
+     * @memberof module:viz/chart-data-controller.Provider
+     * @private
+     * @instance
+     * @this module:viz/chart-data-controller.Provider
+     * @returns {undefined} Nothing
+     */
+    componentWillUnmount(){
+        ChartDataController.unregisterUpdateCallback(this.props.id);
+    }
+
+    /**
+     * Sets 'experiments' and 'filteredExperiments' props on props.children.
+     * 
+     * @returns {Component} Cloned & adjusted props.children.
+     * @memberof module:viz/chart-data-controller.Provider
+     * @private
+     * @instance
+     */
+    render(){
+        var childChartProps = _.extend({}, this.props.children.props);
+        childChartProps.experiments = state.experiments;
+        childChartProps.filteredExperiments = state.filteredExperiments;
+        childChartProps.expSetFilters = refs.expSetFilters;
+        
+
+        return React.cloneElement(this.props.children, childChartProps);
+    }
+
+}
+
+
+/**
  * @type {Object}
  * @alias module:viz/chart-data-controller
  */
-var ChartDataController = module.exports = {
+export const ChartDataController = {
 
-    /**
-     * Use this React component to wrap individual charts and provide them with source of experiments data via
-     * their props.experiments and props.filteredExperiments. Also provides props.expSetFilters from redux store.
-     * 
-     * @namespace
-     * @type {Component}
-     * @memberof module:viz/chart-data-controller
-     * 
-     * @prop {string} id - Unique ID.
-     * @prop {Object} children - Must be a Chart or Chart controller component.
-     */
-    Provider : React.createClass({
-
-        /** @ignore */
-        propTypes : {
-            'id' : React.PropTypes.string.isRequired,
-            'children' : React.PropTypes.object.isRequired
-        },
-
-        /**
-         * Registers a callback function, which itself calls this.forceUpdate(), with module-viz_chart-data-controller_
-         * using ChartDataController.registerUpdateCallback(cb, this.props.id).
-         * 
-         * @memberof module:viz/chart-data-controller.Provider
-         * @private
-         * @instance
-         * @this module:viz/chart-data-controller.Provider
-         * @returns {undefined} Nothing
-         */
-        componentWillMount : function(){
-            ChartDataController.registerUpdateCallback(()=>{
-                this.forceUpdate();
-            }, this.props.id);
-        },
-
-        /**
-         * Unregisters itself using ChartDataController.unregisterUpdateCallback(this.props.id).
-         * 
-         * @memberof module:viz/chart-data-controller.Provider
-         * @private
-         * @instance
-         * @this module:viz/chart-data-controller.Provider
-         * @returns {undefined} Nothing
-         */
-        componentWillUnmount : function(){
-            ChartDataController.unregisterUpdateCallback(this.props.id);
-        },
-
-        /**
-         * Sets 'experiments' and 'filteredExperiments' props on props.children.
-         * 
-         * @returns {Component} Cloned & adjusted props.children.
-         * @memberof module:viz/chart-data-controller.Provider
-         * @private
-         * @instance
-         */
-        render : function(){
-            var childChartProps = _.extend({}, this.props.children.props);
-            childChartProps.experiments = state.experiments;
-            childChartProps.filteredExperiments = state.filteredExperiments;
-            childChartProps.expSetFilters = refs.expSetFilters;
-            
-
-            return React.cloneElement(this.props.children, childChartProps);
-        }
-
-    }),
+    Provider : Provider,
 
     /** 
      * This function must be called before this component is used anywhere else.
@@ -341,8 +348,9 @@ var ChartDataController = module.exports = {
         isInitialized = true;
 
         ChartDataController.sync(function(){
+            isInitialLoadComplete = true;
             callback(state);
-        });
+        }, { isInitial : true });
 
         // Resync periodically if resync interval supplied.
         if (typeof resync === 'number' && !isServerSide()){
@@ -366,7 +374,7 @@ var ChartDataController = module.exports = {
             resyncInterval = setInterval(function(){
                 if (!isWindowActive) return;
                 console.info('Resyncing experiments & filteredExperiments for ChartDataController.');
-                ChartDataController.sync();
+                ChartDataController.sync(null, { 'fromInterval' : true, 'fromSync' : true });
             }, resync);
 
             isWindowActive = true;
@@ -474,19 +482,23 @@ var ChartDataController = module.exports = {
      * @param {function} [callback] - Optional callback function.
      * @returns {*} Result of callback, or undefined.
      */
-    setState : function(updatedState = {}, callback = null){
-        
-        var expsChanged = (
-            updatedState.experiments !== state.experiments || updatedState.filteredExperiments !== state.filteredExperiments ||
-            !_.isEqual(updatedState.experiments, state.experiments) || !_.isEqual(updatedState.filteredExperiments, state.filteredExperiments)
-        );
+    setState : function(updatedState = {}, callback = null, opts = {}){
+
+        var allExpsChanged = ChartDataController.checkIfExperimentArraysDiffer(updatedState.experiments, state.experiments);
+        var allOrFilteredExpsChanged = allExpsChanged || ChartDataController.checkIfExperimentArraysDiffer(updatedState.filteredExperiments, state.filteredExperiments);
 
         _.extend(state, updatedState);
 
-        if (expsChanged){
+        if (allOrFilteredExpsChanged){
             ChartDataController.updateStats();
             notifyUpdateCallbacks();
         }
+
+        if (allExpsChanged && isInitialLoadComplete && opts.fromInterval){
+            // Update browse page results or w/e.
+            reFetchContext();
+        }
+
         if (typeof callback === 'function' && callback !== notifyUpdateCallbacks){
             return callback(state);
         }
@@ -500,9 +512,10 @@ var ChartDataController = module.exports = {
      * @param {function} [callback] - Function to be called after sync complete.
      * @returns {undefined}
      */
-    sync : function(callback){
+    sync : function(callback, syncOpts = {}){
         if (!isInitialized) throw Error("Not initialized.");
         lastTimeSyncCalled = Date.now();
+        if (!syncOpts.fromSync) syncOpts.fromSync = true;
         ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
     },
 
@@ -522,6 +535,31 @@ var ChartDataController = module.exports = {
         } else {
             ChartDataController.fetchAndSetFilteredExperiments(callback);
         }
+    },
+
+    checkIfExperimentArraysDiffer : function(exps1, exps2){
+        if (exps1 === null && exps2 === null) return false;
+        if (!Array.isArray(exps1) && !Array.isArray(exps2)) return false;
+        if (
+            (Array.isArray(exps1) && !Array.isArray(exps2)) ||
+            (!Array.isArray(exps1) && Array.isArray(exps2))
+        ) {
+            return true;
+        }
+        if (exps1.length !== exps2.length) return true;
+        var len = exps1.length;
+
+
+        for (var i = 0; i < exps1.length; i++){
+
+            if (!_.isEqual(exps1[i], exps2[i])){
+                console.log(exps1[i], exps2[i]);
+                return true;
+            }
+            
+        }
+
+        return false;
     },
 
     /**
@@ -585,7 +623,7 @@ var ChartDataController = module.exports = {
      * @param {function} [callback] - Optional callback function to call after setting updated state.
      * @returns {undefined} Nothing
      */
-    fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null){
+    fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null, opts = {}){
         if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
             reduxStoreState = refs.store.getState();
         }
@@ -596,47 +634,55 @@ var ChartDataController = module.exports = {
         }
 
         var filtersSet = _.keys(reduxStoreState.expSetFilters).length > 0;
-        var experiments = null, filteredExperiments = null;
+        var experiments = null,
+            filteredExperiments = null;
 
         var cb = _.after(filtersSet ? 2 : 1, function(){
             ChartDataController.setState({
                 'experiments' : experiments,
                 'filteredExperiments' : filteredExperiments
-            }, callback);
+            }, callback, opts);
 
         });
+
+        var allExpsHref = refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart();
+        var filteredExpsHref = ChartDataController.getFilteredContextHref(
+            reduxStoreState.expSetFilters, reduxStoreState.href
+        ) + ChartDataController.getFieldsRequiredURLQueryPart();
 
         notifyLoadStartCallbacks();
 
         ajax.load(
-            refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
+            allExpsHref,
             function(allExpsContext){
                 experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
                 cb();
             }, 'GET', function(errResp){
-                experiments = null;
-                cb();
+                opts.error = true;
 
                 // If received a 403 or a 404 (no expsets returned) we're likely logged out, so reload current href / context
                 // Reload/navigation will also receive 403 and then trigger JWT unset, logged out alert, & refresh.
-                if (errResp && typeof errResp === 'object' &&
-                    (errResp.code === 403 || errResp.total === 0)
-                ){
-                    navigate('', { inPlace : true });
+                if (errResp && typeof errResp === 'object'){
+                    if (typeof errResp.total === 'number' && errResp.total > 0){
+                        experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
+                    }
+                    //if (errResp.code === 403 || errResp.total === 0){
+                    //    console.warn('403 or 404 Error, refetching.');
+                    //    reFetchContext();
+                    //}
                 }
+                reFetchContext();
+                cb();
             }
         );
 
         if (filtersSet){
             ajax.load(
-                ChartDataController.getFilteredContextHref(
-                    reduxStoreState.expSetFilters, reduxStoreState.href
-                ) + ChartDataController.getFieldsRequiredURLQueryPart(),
+                filteredExpsHref,
                 function(filteredContext){
                     filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
                     cb();
                 }, 'GET', function(){
-                    filteredExperiments = null;
                     cb();
                 }
             );
@@ -654,14 +700,14 @@ var ChartDataController = module.exports = {
      * @param {function} [callback] - Optional callback function.
      * @returns {undefined} Nothing
      */
-    fetchAndSetUnfilteredExperiments : function(callback = null){
+    fetchAndSetUnfilteredExperiments : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
         ajax.load(
             refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(allExpsContext){
                 ChartDataController.setState({
                     'experiments' : expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph'])
-                }, callback);
+                }, callback, opts);
             }
         );
     },
@@ -675,14 +721,14 @@ var ChartDataController = module.exports = {
      * @param {function} [callback] - Optional callback function.
      * @returns {undefined} Nothing
      */
-    fetchAndSetFilteredExperiments : function(callback = null){
+    fetchAndSetFilteredExperiments : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
         ajax.load(
             ChartDataController.getFilteredContextHref() + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(filteredContext){
                 ChartDataController.setState({
                     'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
-                }, callback);
+                }, callback, opts);
             },
             'GET',
             function(){
@@ -721,7 +767,11 @@ var ChartDataController = module.exports = {
             if (!expSetFilters) expSetFilters = storeState.expSetFilters;
             if (!href)          href = storeState.href;
         }
-        return Filters.filtersToHref(expSetFilters, href, 0, 'all', '/browse/');
+        return Filters.filtersToHref(expSetFilters, href, 0, 'all', 'experiments_in_set.accession', false, '/browse/');
     },
+
+    getRefs : function(){
+        return refs;
+    }
 
 };
