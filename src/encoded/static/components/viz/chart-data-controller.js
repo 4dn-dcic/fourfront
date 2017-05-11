@@ -5,6 +5,7 @@ var React = require('react');
 import PropTypes from 'prop-types';
 var _ = require('underscore');
 var { expFxn, Filters, ajax, console, layout, isServerSide, navigate } = require('./../util');
+var vizUtil = require('./utilities');
 
 
 /** 
@@ -36,13 +37,11 @@ var refs = {
         'experiments_in_set.filesets.files_in_set.accession',
         //'experiments_in_set.biosample.description',
         //'experiments_in_set.biosample.modifications_summary_short',
-        'experiments_in_set.biosample.biosource_summary',
-        //'experiments_in_set.biosample.accession',
-        //'experiments_in_set.biosample.biosource.description',
-        'experiments_in_set.biosample.biosource.biosource_name',
-        'experiments_in_set.biosample.biosource.biosource_type',
+        'experiments_in_set.biosample.biosource_summary', // AKA Biosource
+        //'experiments_in_set.biosample.biosource.biosource_name', // AKA Biosource
+        'experiments_in_set.biosample.biosource.biosource_type', // AKA Biosource Type
+        'experiments_in_set.lab.title',
         'experiments_in_set.biosample.biosource.individual.organism.name',
-        'experiments_in_set.biosample.biosource.individual.organism.scientific_name',
         'experiments_in_set.digestion_enzyme.name'
     ],
     expSetFilters : null,
@@ -61,15 +60,6 @@ var state = {
     filteredExperiments : null,
     fetching            : false,
 
-    // the below field definitions will likely be moved out of here eventually
-    /** @ignore */
-    chartFieldsBarPlot  : [
-        { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
-        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" }
-        //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
-    ],
-    /** @ignore */
     chartFieldsHierarchy: [
         //{ 
         //    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
@@ -186,8 +176,13 @@ function notifyLoadStartCallbacks(){
 }
 
 function reFetchContext(){
-    console.info('ChartDataController -> Refetching');
-    navigate('', { inPlace : true });
+    console.info('ChartDataController -> Refetch Context Called');
+    try {
+        navigate('', { inPlace : true });
+    } catch (e){
+        console.warn(e);
+        return false;
+    }
     return true;
 }
 
@@ -355,7 +350,7 @@ export const ChartDataController = {
         ChartDataController.sync(function(){
             isInitialLoadComplete = true;
             callback(state);
-        });
+        }, { isInitial : true });
 
         // Resync periodically if resync interval supplied.
         if (typeof resync === 'number' && !isServerSide()){
@@ -489,18 +484,8 @@ export const ChartDataController = {
      */
     setState : function(updatedState = {}, callback = null, opts = {}){
 
-        var allExpsChanged = (
-            updatedState.experiments !== state.experiments ||
-            updatedState.experiments.length !== state.experiments.length ||
-            !_.isEqual(updatedState.experiments, state.experiments)
-        );
-        
-        var allOrFilteredExpsChanged = (
-            allExpsChanged ||
-            updatedState.filteredExperiments !== state.filteredExperiments ||
-            updatedState.filteredExperiments.length !== state.filteredExperiments.length ||
-            !_.isEqual(updatedState.filteredExperiments, state.filteredExperiments)
-        );
+        var allExpsChanged = ChartDataController.checkIfExperimentArraysDiffer(updatedState.experiments, state.experiments);
+        var allOrFilteredExpsChanged = allExpsChanged || ChartDataController.checkIfExperimentArraysDiffer(updatedState.filteredExperiments, state.filteredExperiments);
 
         _.extend(state, updatedState);
 
@@ -550,6 +535,31 @@ export const ChartDataController = {
         } else {
             ChartDataController.fetchAndSetFilteredExperiments(callback);
         }
+    },
+
+    checkIfExperimentArraysDiffer : function(exps1, exps2){
+        if (exps1 === null && exps2 === null) return false;
+        if (!Array.isArray(exps1) && !Array.isArray(exps2)) return false;
+        if (
+            (Array.isArray(exps1) && !Array.isArray(exps2)) ||
+            (!Array.isArray(exps1) && Array.isArray(exps2))
+        ) {
+            return true;
+        }
+        if (exps1.length !== exps2.length) return true;
+        var len = exps1.length;
+
+
+        for (var i = 0; i < exps1.length; i++){
+
+            if (!_.isEqual(exps1[i], exps2[i])){
+                console.log(exps1[i], exps2[i]);
+                return true;
+            }
+            
+        }
+
+        return false;
     },
 
     /**
@@ -624,7 +634,8 @@ export const ChartDataController = {
         }
 
         var filtersSet = _.keys(reduxStoreState.expSetFilters).length > 0;
-        var experiments = null, filteredExperiments = null;
+        var experiments = null,
+            filteredExperiments = null;
 
         var cb = _.after(filtersSet ? 2 : 1, function(){
             ChartDataController.setState({
@@ -634,37 +645,44 @@ export const ChartDataController = {
 
         });
 
+        var allExpsHref = refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart();
+        var filteredExpsHref = ChartDataController.getFilteredContextHref(
+            reduxStoreState.expSetFilters, reduxStoreState.href
+        ) + ChartDataController.getFieldsRequiredURLQueryPart();
+
         notifyLoadStartCallbacks();
 
         ajax.load(
-            refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
+            allExpsHref,
             function(allExpsContext){
                 experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
                 cb();
             }, 'GET', function(errResp){
-                experiments = null;
-                cb();
+                opts.error = true;
 
                 // If received a 403 or a 404 (no expsets returned) we're likely logged out, so reload current href / context
                 // Reload/navigation will also receive 403 and then trigger JWT unset, logged out alert, & refresh.
-                if (errResp && typeof errResp === 'object' &&
-                    (errResp.code === 403 || errResp.total === 0)
-                ){
-                    reFetchContext();
+                if (errResp && typeof errResp === 'object'){
+                    if (typeof errResp.total === 'number' && errResp.total > 0){
+                        experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
+                    }
+                    //if (errResp.code === 403 || errResp.total === 0){
+                    //    console.warn('403 or 404 Error, refetching.');
+                    //    reFetchContext();
+                    //}
                 }
+                reFetchContext();
+                cb();
             }
         );
 
         if (filtersSet){
             ajax.load(
-                ChartDataController.getFilteredContextHref(
-                    reduxStoreState.expSetFilters, reduxStoreState.href
-                ) + ChartDataController.getFieldsRequiredURLQueryPart(),
+                filteredExpsHref,
                 function(filteredContext){
                     filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
                     cb();
                 }, 'GET', function(){
-                    filteredExperiments = null;
                     cb();
                 }
             );
@@ -749,7 +767,11 @@ export const ChartDataController = {
             if (!expSetFilters) expSetFilters = storeState.expSetFilters;
             if (!href)          href = storeState.href;
         }
-        return Filters.filtersToHref(expSetFilters, href, 0, 'all', '/browse/');
+        return Filters.filtersToHref(expSetFilters, href, 0, 'all', 'experiments_in_set.accession', false, '/browse/');
     },
+
+    getRefs : function(){
+        return refs;
+    }
 
 };

@@ -1,13 +1,14 @@
 'use strict';
 
 var React = require('react');
+import PropTypes from 'prop-types';
 var _ = require('underscore');
 var d3 = require('d3');
 var store = require('./../../../store');
 var vizUtil = require('./../utilities');
-var ChartDetailCursor = require('./../ChartDetailCursor');
+import ChartDetailCursor, { CursorViewBounds } from './../ChartDetailCursor';
 var { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } = require('./../../util');
-var { unhighlightTerms, highlightTerm } = require('./../../facetlist');
+var { unhighlightTerms } = require('./../../facetlist');
 
 // Used for transitioning
 var cachedBars = {},
@@ -15,438 +16,244 @@ var cachedBars = {},
     cachedBarSections = {},
     cachedPastBarSections = {};
 
-var ViewContainer = module.exports = React.createClass({
 
-        statics : {
+/**
+ * Outputs a section of a bar.
+ * 
+ * @class BarSection
+ * @type {Component}
+ */
+class BarSection extends React.Component {
 
-        /**
-         * Outputs a section of a bar.
-         * 
-         * @memberof module:viz/BarPlot.ViewContainer
-         * @namespace
-         * @type {Component}
-         */
-        BarSection : React.createClass({
-
-            statics : {
-
-                /**
-                 * Check if 'node' is currently selected.
-                 * 
-                 * @memberof module:viz/BarPlot.ViewContainer.BarSection
-                 * @public
-                 * @static
-                 * @param {Object} node - A 'node' containing at least 'field', 'term', and 'parent' if applicable.
-                 * @param {string} selectedBarSectionTerm - Currently selected subdivision field term.
-                 * @param {string} selectedBarSectionParentTerm - Currently selected X-Axis field term.
-                 * @returns {boolean} True if node (and node.parent, if applicable) matches selectedBarSectionTerm & selectedBarSectionParentTerm.
-                 */
-                isSelected : function(node, selectedBarSectionTerm, selectedBarSectionParentTerm){
-                    if (
-                        node.term === selectedBarSectionTerm && (
-                            ((node.parent && node.parent.term) || null) === (selectedBarSectionParentTerm || null)
-                        )
-                    ) return true;
-                    return false;
-                },
-
-            },
-
-            /**
-             * Check if component (aka props.node) is selected.
-             * Calls ViewContainer.BarSection.isSelected(..) internally.
-             * 
-             * @instance
-             * @memberof module:viz/BarPlot.ViewContainer.BarSection
-             * @returns {boolean} - True if selected.
-             */
-            isSelected : function(){
-                return ViewContainer.BarSection.isSelected(this.props.node, this.props.selectedBarSectionTerm, this.props.selectedBarSectionParentTerm);
-            },
-
-            isHoveredOver : function(){
-                return ViewContainer.BarSection.isSelected(this.props.node, this.props.hoverBarSectionTerm, this.props.hoverBarSectionParentTerm);
-            },
-
-            getInitialState : function(){
-                return {
-                    'hover' : false
-                };
-            },
-
-            /**
-             * @instance
-             * @memberof module:viz/BarPlot.ViewContainer.BarSection
-             * @returns {Element} - A div element representing a bar section.
-             */
-            render : function(){
-                var d               = this.props.node;
-                var color           = vizUtil.colorForNode(d);
-                var isSelected      = this.isSelected(),
-                    isHoveredOver   = this.isHoveredOver();
-                
-                return (
-                    <div
-                        className={
-                            "bar-part no-highlight" + (d.parent ? ' multiple-parts' : '')
-                            + (isSelected ? ' selected' : '') + (isHoveredOver ? ' hover' : '')
-                        }
-                        style={{
-                            height : this.props.isNew || this.props.isRemoving ? 0 : d.attr.height,
-                            //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
-                            backgroundColor : color,
-                            
-                        }}
-                        ref={(r)=>{
-                            if (this.props.isNew) setTimeout(function(){
-                                vizUtil.requestAnimationFrame(function(){
-                                    r.style.height = d.attr.height + 'px';
-                                });
-                            }, 0);
-                        }}
-                        data-color={color}
-                        data-target-height={d.attr.height}
-                        key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
-                        data-term={d.parent ? d.term : null}
-                        onMouseEnter={(e)=>{
-                            //this.setState({'hover' : true});
-                            if (typeof this.props.onMouseEnter === 'function') this.props.onMouseEnter(d, e);
-                        }}
-                        onMouseLeave={(e)=>{
-                            //this.setState({'hover' : false});
-                            if (typeof this.props.onMouseLeave === 'function') this.props.onMouseLeave(d, e);
-                        }}
-                        onClick={(e)=>{
-                            if (typeof this.props.onClick === 'function') this.props.onClick(d, e);
-                        }}
-                    />
-                );
-            },
-
-        }),
-
-        /**
-         * Outputs a vertical bar containing bar sections.
-         * 
-         * @memberof module:viz/BarPlot.ViewContainer
-         * @namespace
-         * @type {Component}
-         */
-        Bar : React.createClass({
-
-            barStyle : function(){
-                var style = {};
-                var d = this.props.node;
-                var styleOpts = this.props.styleOptions;
-
-                // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-                if ((d.removing) && this.props.transitioning){
-                    style.opacity = 0;
-                    style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
-                } else {
-                    // 'Default' (no transitioning) style
-                    style.opacity = 1;
-                    style.transform = vizUtil.style.translate3d(d.attr.x,0,0);
-                }
-                style.left = styleOpts.offset.left;
-                style.bottom = styleOpts.offset.bottom;
-                style.width = d.attr.width;
-
-                //if (
-                //    ( this.props.hoverBarSectionParentTerm    || this.props.hoverBarSectionTerm    ) === d.term ||
-                //    ( this.props.selectedBarSectionParentTerm || this.props.selectedBarSectionTerm ) === d.term
-                //){
-                    // Set style.outlineColor here or something.
-                //}
-                return style;
-            },
-
-            renderBarSection : function(d,i){
-                var parentBarTerm = (d.parent || d).term;
-                cachedBarSections[parentBarTerm][d.term] = d;
-                var isNew = false;
-                if (this.props.transitioning && (!cachedPastBarSections[parentBarTerm] || !cachedPastBarSections[parentBarTerm][d.term])){
-                    isNew = true;
-                }
-
-                return (
-                    <ViewContainer.BarSection
-                        key={d.term || i}
-                        node={d}
-                        onClick={this.props.onBarPartClick}
-                        onMouseEnter={this.props.onBarPartMouseEnter}
-                        onMouseLeave={this.props.onBarPartMouseLeave}
-                        aggregateType={this.props.aggregateType}
-                        selectedBarSectionParentTerm={this.props.selectedBarSectionParentTerm}
-                        selectedBarSectionTerm={this.props.selectedBarSectionTerm}
-                        hoverBarSectionParentTerm={this.props.hoverBarSectionParentTerm}
-                        hoverBarSectionTerm={this.props.hoverBarSectionTerm}
-                        isNew={isNew}
-                        isRemoving={d.removing}
-                    />
-                );
-            },
-
-            render : function(){
-                var d = this.props.node;
-
-                var transitioning = this.props.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
-                var styleOpts = this.props.styleOptions;
-
-                var prevBarData = null;
-                if (d.existing && transitioning && cachedPastBars) prevBarData = cachedPastBars[d.term].__data__;
-
-                if (!cachedBarSections[d.term]) cachedBarSections[d.term] = {};
-
-                var barSections = Array.isArray(d.bars) ? d.bars : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })];
-
-                // If transitioning, add existing bar sections to fade out.
-                if (this.props.transitioning && cachedPastBarSections[d.term]) barSections = barSections.concat(
-                    _.filter(_.pairs(cachedPastBarSections[d.term]), function(pastNodePair){
-                        if (
-                            _.filter(barSections, function(barNode){ // Find existing bars out of current barSections, set them to have existing : true.
-                                //if (typeof barNode.pastWidth !== 'number'){
-                                //    barNode.pastWidth = (pastNodePair[1].parent || pastNodePair[1]).attr.width;
-                                //}
-                                if (barNode.term === pastNodePair[0]){
-                                    barNode.existing = true;
-                                    return true;
-                                }
-                                return false;
-                            })
-                            .length === 0) return true;
-                        return false;
-                    }).map(function(pastNodePair){
-                        var pastNode = pastNodePair[1];
-                        pastNode.removing = true;
-                        //pastNode.attr.width = d.attr.width;
-                        //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
-                        return pastNode;
-                    })
-                )
-
-                return (
-                    <div
-                        className="chart-bar no-highlight"
-                        onMouseLeave={()=>{
-                            if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
-                            else unhighlightTerms(d.field);
-                        }}
-                        data-term={d.term}
-                        data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
-                        key={"bar-" + d.term}
-                        style={this.barStyle()}
-                        ref={(r) => {
-                            if (typeof cachedBars !== 'undefined' && r !== null){
-                                // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
-                                d3.select(r).datum(d);
-                                if (!(d.removing && !transitioning)) cachedBars[d.term] = r;
-                            }
-                        }}
-                    >
-                        { this.props.showBarCount ?
-                        <span className="bar-top-label" key="text-label">
-                            { d.count }
-                        </span>
-                        : null }
-                        {
-                            _.sortBy(barSections, 'term').map(this.renderBarSection)
-                        }
-                    </div>
-                );
-            }
-
-        }),
-
-    },
-
-    getInitialState : function(){
-        return {
-            'selectedBarSectionParentTerm' : null,
-            'selectedBarSectionTerm' : null,
-            'hoverBarSectionTerm' : null,
-            'hoverBarSectionParentTerm' : null
-        };
-    },
-
-    getDefaultProps : function(){
-        return { 
-            'cursorContainerMargin' : 100,
-            'cursorDetailActions' : []
-        };
-    },
-
-    cursorDetailActions : function(){
-        return this.props.cursorDetailActions.concat([
-            {
-                'title' : function(cursorProps){
-                    if (navigate.isBrowseHref(cursorProps.href)){
-                        //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
-                        return "Explore";
-                    }
-                    return "Browse";
-                },
-                'function' : (cursorProps, mouseEvt) => {
-
-                    var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
-                    var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHref(cursorProps.href) || null;
-
-                    // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
-                    var currentExpSetFilters = this.props.showType === 'all' ? {} : Filters.currentExpSetFilters();
-
-                    var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
-                        // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
-                        if (
-                            expSetFilters && expSetFilters[node.field] &&
-                            expSetFilters[node.field].has(node.term)
-                        ){
-                            return expSetFilters;
-                        }
-                        return Filters.changeFilter(
-                            node.field,
-                            node.term,
-                            'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
-                            expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
-                            null,               // Callback
-                            true,               // Only return new expSetFilters vs saving them == set to TRUE
-                        );
-                    }, currentExpSetFilters);
-
-                    // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
-                    analytics.event('BarPlot', 'Set Filter', {
-                        'eventLabel' : analytics.eventLabelFromChartNode(cursorProps.path[cursorProps.path.length - 1]), // 'New' filters logged here.
-                        'currentFilters' : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()) // 'Existing' filters, or filters at time of action, go here.
-                    });
-
-                    Filters.saveChangedFilters(
-                        newExpSetFilters,
-                        true,
-                        href,
-                        function(){
-                            // Scroll to top of page after navigation is complete.
-                            setTimeout(layout.animateScrollTo, 100, 360, Math.abs(document.body.scrollTop - 360) * 2, 0);
-                        }
-                    );
-
-                },
-                'disabled' : (cursorProps)=>{
-                    var expSetFilters = store.getState().expSetFilters;
-
-                    if (expSetFilters && typeof expSetFilters === 'object'){
-                        if (
-                            Array.isArray(cursorProps.path) &&
-                            (cursorProps.path[0] && cursorProps.path[0].field) &&
-                            expSetFilters[cursorProps.path[0].field] instanceof Set &&
-                            expSetFilters[cursorProps.path[0].field].has(cursorProps.path[0].term) &&
-                            (
-                                !cursorProps.path[1] || (
-                                    cursorProps.path[1].field &&
-                                    expSetFilters[cursorProps.path[1].field] instanceof Set &&
-                                    expSetFilters[cursorProps.path[1].field].has(cursorProps.path[1].term)
-                                )
-                            )
-                        ) return true;
-                    }
-                    return false;
-                }
-            }
-        ]);
-    },
-
-    handleClickAnywhere : function(evt){
-        // Don't do anything if clicked on DetailCursor. UNLESS it's a button.
-        if (
-            //evt.target.className &&
-            //evt.target.className.split(' ').indexOf('btn') === -1 &&
-            ChartDetailCursor.isTargetDetailCursor(evt.target)
-        ){
-            return false;
-        }
-
-        this.setState({
-            'selectedBarSectionParentTerm' : null,
-            'selectedBarSectionTerm' : null
-        });
-    },
-
-    handleMouseMoveToUnsticky : function(evt){
-        if (this.refs && this.refs.container){
-
-            var containerOffset = layout.getElementOffset(this.refs.container);
-            var marginTop   = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.top) || this.props.cursorContainerMargin || 0,
-                marginBottom= (this.props.cursorContainerMargin && this.props.cursorContainerMargin.bottom) || marginTop || 0,
-                marginLeft  = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.left) || marginTop || 0,
-                marginRight = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.right) || marginLeft || 0;
-
-
-            if (
-                (evt.pageY || evt.clientY) < containerOffset.top - marginTop ||
-                (evt.pageY || evt.clientY) > containerOffset.top + this.refs.container.clientHeight + marginBottom ||
-                (evt.pageX || evt.clientX) < containerOffset.left - marginLeft ||
-                (evt.pageX || evt.clientX) > containerOffset.left + this.refs.container.clientWidth + marginRight
-            ){
-                this.setState({
-                    'selectedBarSectionParentTerm' : null,
-                    'selectedBarSectionTerm' : null
-                });
-                return true;
-            }
-            return false;
-        } else {
-            return false;
-        }
-    },
+    constructor(props){
+        super(props);
+        this.isSelected = this.isSelected.bind(this);
+        this.isHoveredOver = this.isHoveredOver.bind(this);
+    }
 
     /**
-     * Important lifecycle method.
-     * Checks if a selected bar section (via state.selectedBarSectionTerm) has been set or unset.
-     * Then passes that to the ChartDetailCursor's 'sticky' state.
+     * Check if component (aka props.node) is selected.
+     * Calls CursorViewBounds.isSelected(..) internally.
      * 
-     * Also enables or disables a 'click' event listener to cancel out stickiness/selected section.
-     * 
-     * @private
-     * @instance
-     * @param {Object} pastProps - Previous props of this component.
-     * @param {Object} pastState - Previous state of this component.
+     * @returns {boolean} - True if selected.
      */
-    componentDidUpdate : function(pastProps, pastState){
-        if (pastState.selectedBarSectionTerm !== this.state.selectedBarSectionTerm){
-            
-            // If we now have a selected bar section, enable click listener.
-            // Otherwise, disable it.
-            // And set ChartDetailCursor to be 'stickied'. This is the only place where the ChartDetailCursor state should be updated.
-            if (typeof this.state.selectedBarSectionTerm === 'string'){
-                ChartDetailCursor.update({ 'sticky' : true });
-                setTimeout(window.addEventListener, 100, 'click', this.handleClickAnywhere);
-                setTimeout(window.addEventListener, 100, 'mousemove', this.handleMouseMoveToUnsticky);
-                //window.addEventListener('click', this.handleClickAnywhere);
-            } else {
-                window.removeEventListener('click', this.handleClickAnywhere);
-                window.removeEventListener('mousemove', this.handleMouseMoveToUnsticky);
-                if (!this.state.hoverBarSectionTerm){
-                    ChartDetailCursor.reset();
-                } else {
-                    ChartDetailCursor.update({ 'sticky' : false });
-                }
-            }
+    isSelected(){
+        return CursorViewBounds.isSelected(this.props.node, this.props.selectedTerm, this.props.selectedParentTerm);
+    }
 
-        }
-    },
+    isHoveredOver(){
+        return CursorViewBounds.isSelected(this.props.node, this.props.hoverTerm, this.props.hoverParentTerm);
+    }
 
-    updateDetailCursorFromNode : function(node, overrideSticky = false, cursorId = 'default'){
-        var newCursorDetailState = {
-            'path' : [],
-            'includeTitleDescendentPrefix' : false,
-            'actions' : this.props.actions || this.cursorDetailActions() || null,
-        };
+    /**
+     * @returns {Element} - A div element representing a bar section.
+     */
+    render(){
+        var d               = this.props.node;
+        var color           = d.color || vizUtil.colorForNode(d);
+        var isSelected      = this.isSelected(),
+            isHoveredOver   = this.isHoveredOver();
+
+        var className = "bar-part";
+        if (d.parent) className += ' multiple-parts';
+        if (isSelected) className += ' selected';
+        if (isHoveredOver) className += ' hover';
+        if (!this.props.canBeHighlighted) className += ' no-highlight';
+        else className += ' no-highlight-color';
         
-        if (node.parent) newCursorDetailState.path.push(node.parent);
-        if (typeof this.props.aggregateType === 'string') {
-            newCursorDetailState.primaryCount = this.props.aggregateType;
+        return (
+            <div
+                className={className}
+                style={{
+                    height : this.props.isNew || this.props.isRemoving ? 0 : d.attr.height,
+                    //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
+                    backgroundColor : color,
+                    
+                }}
+                ref={(r)=>{
+                    if (this.props.isNew) setTimeout(function(){
+                        vizUtil.requestAnimationFrame(function(){
+                            r.style.height = d.attr.height + 'px';
+                        });
+                    }, 0);
+                }}
+                data-color={color}
+                data-target-height={d.attr.height}
+                key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
+                data-term={d.parent ? d.term : null}
+                onMouseEnter={(e)=>{
+                    //this.setState({'hover' : true});
+                    if (typeof this.props.onMouseEnter === 'function') this.props.onMouseEnter(d, e);
+                }}
+                onMouseLeave={(e)=>{
+                    //this.setState({'hover' : false});
+                    if (typeof this.props.onMouseLeave === 'function') this.props.onMouseLeave(d, e);
+                }}
+                onClick={(e)=>{
+                    if (typeof this.props.onClick === 'function') this.props.onClick(d, e);
+                }}
+            />
+        );
+    }
+}
+
+
+/**
+ * Outputs a vertical bar containing bar sections.
+ * 
+ * @class Bar
+ * @type {Component}
+ */
+class Bar extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.barStyle = this.barStyle.bind(this);
+        this.renderBarSection = this.renderBarSection.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    barStyle(){
+        var style = {};
+        var d = this.props.node;
+        var styleOpts = this.props.styleOptions;
+
+        // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
+        if ((d.removing) && this.props.transitioning){
+            style.opacity = 0;
+            style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
+        } else {
+            // 'Default' (no transitioning) style
+            style.opacity = 1;
+            style.transform = vizUtil.style.translate3d(d.attr.x,0,0);
         }
-        newCursorDetailState.path.push(node);
-        ChartDetailCursor.update(newCursorDetailState, cursorId, null, overrideSticky);
-    },
+        style.left = styleOpts.offset.left;
+        style.bottom = styleOpts.offset.bottom;
+        style.width = d.attr.width;
+
+        return style;
+    }
+
+    renderBarSection(d,i){
+        var parentBarTerm = (d.parent || d).term;
+        cachedBarSections[parentBarTerm][d.term] = d;
+        var isNew = false;
+        if (this.props.transitioning && (!cachedPastBarSections[parentBarTerm] || !cachedPastBarSections[parentBarTerm][d.term])){
+            isNew = true;
+        }
+
+        return (
+            <BarSection
+                key={d.term || i}
+                node={d}
+                onClick={this.props.onBarPartClick}
+                onMouseEnter={this.props.onBarPartMouseEnter}
+                onMouseLeave={this.props.onBarPartMouseLeave}
+                aggregateType={this.props.aggregateType}
+                selectedParentTerm={this.props.selectedParentTerm}
+                selectedTerm={this.props.selectedTerm}
+                hoverParentTerm={this.props.hoverParentTerm}
+                hoverTerm={this.props.hoverTerm}
+                isNew={isNew}
+                isRemoving={d.removing}
+                canBeHighlighted={this.props.canBeHighlighted}
+            />
+        );
+    }
+
+    render(){
+        var d = this.props.node;
+
+        var transitioning = this.props.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
+        var styleOpts = this.props.styleOptions;
+
+        var prevBarData = null;
+        if (d.existing && transitioning && cachedPastBars) prevBarData = cachedPastBars[d.term].__data__;
+
+        if (!cachedBarSections[d.term]) cachedBarSections[d.term] = {};
+
+        var hasSubSections = Array.isArray(d.bars);
+
+        var barSections = (hasSubSections ?
+            d.bars : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
+        );
+
+        // If transitioning, add existing bar sections to fade out.
+        if (this.props.transitioning && cachedPastBarSections[d.term]) barSections = barSections.concat(
+            _.filter(_.pairs(cachedPastBarSections[d.term]), function(pastNodePair){
+                if (
+                    _.filter(barSections, function(barNode){ // Find existing bars out of current barSections, set them to have existing : true.
+                        //if (typeof barNode.pastWidth !== 'number'){
+                        //    barNode.pastWidth = (pastNodePair[1].parent || pastNodePair[1]).attr.width;
+                        //}
+                        if (barNode.term === pastNodePair[0]){
+                            barNode.existing = true;
+                            return true;
+                        }
+                        return false;
+                    })
+                    .length === 0) return true;
+                return false;
+            }).map(function(pastNodePair){
+                var pastNode = pastNodePair[1];
+                pastNode.removing = true;
+                //pastNode.attr.width = d.attr.width;
+                //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
+                return pastNode;
+            })
+        )
+
+        var className = "chart-bar";
+        if (!this.props.canBeHighlighted) className += ' no-highlight';
+        else className += ' no-highlight-color';
+
+        return (
+            <div
+                className={className}
+                onMouseLeave={()=>{
+                    //if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
+                    //else unhighlightTerms(d.field);
+                }}
+                data-term={d.term}
+                data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
+                key={"bar-" + d.term}
+                style={this.barStyle()}
+                ref={(r) => {
+                    if (typeof cachedBars !== 'undefined' && r !== null){
+                        // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
+                        d3.select(r).datum(d);
+                        if (!(d.removing && !transitioning)) cachedBars[d.term] = r;
+                    }
+                }}
+            >
+                { this.props.showBarCount ?
+                <span className="bar-top-label" key="text-label">
+                    { d.count }
+                </span>
+                : null }
+                {
+                    barSections.map(this.renderBarSection)
+                }
+            </div>
+        );
+    }
+}
+
+
+export class ViewContainer extends React.Component {
+
+    static Bar = Bar
+    static BarSection = BarSection
+
+    static defaultProps = {
+        canBeHighlighted : true
+    }
+
+    constructor(props){
+        super(props);
+        this.renderBars = this.renderBars.bind(this);
+        this.render = this.render.bind(this);
+    }
 
     /**
      * Passes props to and renders child 'Bar' Components.
@@ -455,8 +262,7 @@ var ViewContainer = module.exports = React.createClass({
      * 
      * @returns {Component[]} Array of 'Bar' React Components.
      */
-
-    renderBars : function(){
+    renderBars(){
 
         cachedPastBars = _.clone(cachedBars);
         cachedBars = {};
@@ -481,156 +287,34 @@ var ViewContainer = module.exports = React.createClass({
             barsToRender = barsToRemove.concat(currentBars);
         }
 
-        return barsToRender.sort(function(a,b){
-            return a.term < b.term ? -1 : 1;
+        return barsToRender.sort(function(a,b){ // key will be term or name, if available
+            return (a.term || a.name) < (b.term || b.name) ? -1 : 1;
         }).map((d,i,a) =>
-            <ViewContainer.Bar
-                key={d.term || i}
+            <Bar
+                key={d.term || d.name || i}
                 node={d}
                 showBarCount={true /*!allExpsBarDataContainer */}
 
-                selectedBarSectionParentTerm={this.state.selectedBarSectionParentTerm}
-                selectedBarSectionTerm={this.state.selectedBarSectionTerm}
-                hoverBarSectionParentTerm={this.state.hoverBarSectionParentTerm}
-                hoverBarSectionTerm={this.state.hoverBarSectionTerm}
+                selectedParentTerm={this.props.selectedParentTerm}
+                selectedTerm={this.props.selectedTerm}
+                hoverParentTerm={this.props.hoverParentTerm}
+                hoverTerm={this.props.hoverTerm}
 
                 styleOptions={this.props.styleOptions}
                 transitioning={this.props.transitioning}
                 aggregateType={this.props.aggregateType}
                 showType={this.props.showType}
 
-                onBarPartMouseEnter={(node, evt)=>{
+                onBarPartMouseEnter={this.props.onNodeMouseEnter}
+                onBarPartMouseLeave={this.props.onNodeMouseLeave}
+                onBarPartClick={this.props.onNodeClick}
 
-                    // Cancel if same node as selected.
-                    if (ViewContainer.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
-                        return false;
-                    }
-
-                    // Cancel if any node still selected
-                    //if (this.state.selectedBarSectionTerm !== null) return false;
-
-                    //var xCoordOverride = null;
-                    /*
-                    if (this.refs && this.refs.container){
-                        xCoordOverride = (
-                            layout.getElementOffset(this.refs.container).left
-                            + this.props.styleOptions.offset.left
-                            + ((node.attr.width / 2)
-                            + (node.parent || node).attr.x)
-                        );
-                    }
-                    */
-
-
-                    if (this.state.selectedBarSectionTerm === null){
-                        this.updateDetailCursorFromNode(node, false);
-                    }
-
-                    var newOwnState = {};
-
-                    // Unset selected nodes.
-                    //if (this.state.selectedBarSectionTerm !== null){
-                    //    _.extend(newOwnState, {
-                    //        'selectedBarSectionTerm' : null,
-                    //        'selectedBarSectionParentTerm' : null
-                    //    });
-                    //}
-
-                    // Update hover state
-                    _.extend(newOwnState, {
-                        'hoverBarSectionTerm' : node.term || null,
-                        'hoverBarSectionParentTerm' : (node.parent && node.parent.term) || null,
-                    });
-
-                    if (_.keys(newOwnState).length > 0){
-                        this.setState(newOwnState, function(){
-                            analytics.event('BarPlot', 'Hover Bar Section', {
-                                eventLabel : analytics.eventLabelFromChartNode(node),
-                                currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters())
-                            });
-                        });
-                    }
-
-                    highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
-                }}
-                onBarPartMouseLeave={(node, evt)=>{
-
-                    // Update hover state
-                    this.setState({
-                        'hoverBarSectionTerm' : null,
-                        'hoverBarSectionParentTerm' : null
-                    });
-
-                    if (!ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
-                        ChartDetailCursor.reset(false);
-                    }
-                }}
-                onBarPartClick={(node, evt)=>{
-                    evt.preventDefault();
-                    evt.stopPropagation(); // Prevent this event from being captured by this.handleClickAnywhere() listener.
-                    // If this section already selected:
-                    if (ViewContainer.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
-                        this.setState({
-                            'selectedBarSectionTerm' : null,
-                            'selectedBarSectionParentTerm' : null
-                        });
-                    } else {
-                        // Manually adjust popover position if a different bar section is already selected.
-                        if (this.state.selectedBarSectionTerm) {
-
-                            var containerPos = layout.getElementOffset(this.refs.container);
-                            var bottomOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
-                            var leftOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
-
-                            var mouseXInContainer = (evt.pageX || evt.clientX) - containerPos.left;
-                            var barYPos = node.attr.height;
-                            var isPopoverOnRightSide = mouseXInContainer > (this.refs.container.clientWidth / 2);
-
-                            if (node.parent){
-                                var done = false;
-                                barYPos = _.reduce(
-                                    _.sortBy(node.parent.bars, 'term').reverse(),
-                                    function(m, siblingNode){
-                                        if (done) return m;
-                                        if (siblingNode.term === node.term){
-                                            done = true;
-                                        }
-                                        return m + siblingNode.attr.height;
-                                    },
-                                    0
-                                );
-                            }
-
-                            // Manually update popover coords then update its contents
-                            ChartDetailCursor.setCoords({
-                                x : containerPos.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
-                                y : containerPos.top + this.refs.container.clientHeight - bottomOffset - barYPos,
-                                onRightSide : isPopoverOnRightSide
-                            }, this.updateDetailCursorFromNode.bind(this, node, true, 'default'));
-
-                        }
-                        // Set new selected bar part.
-                        this.setState({
-                            'selectedBarSectionTerm' : node.term || null,
-                            'selectedBarSectionParentTerm' : (node.parent && node.parent.term) || null
-                        }, function(){
-                            // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
-                            analytics.event('BarPlot', 'Select Bar Section', {
-                                eventLabel : analytics.eventLabelFromChartNode(node),
-                                currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters())
-                            });
-                        });
-
-                    }
-                    if (typeof oldOnClickFxn === 'function') return oldOnClickFxn(node, evt);
-                    return false;
-                }}
-
+                canBeHighlighted={this.props.canBeHighlighted}
             />
         );
-    },
+    }
 
-    render: function(){
+    render(){
 
         return (
             <div
@@ -665,5 +349,165 @@ var ViewContainer = module.exports = React.createClass({
 
     }
 
-});
+}
 
+
+export const barPlotCursorActions = [
+    {
+        'title' : function(cursorProps){
+            if (navigate.isBrowseHref(cursorProps.href)){
+                //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
+                return "Explore";
+            }
+            return "Browse";
+        },
+        'function' : function(showType = 'all', cursorProps, mouseEvt){
+            var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
+            var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHref(cursorProps.href) || null;
+
+            // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
+            var currentExpSetFilters = showType === 'all' ? {} : Filters.currentExpSetFilters();
+
+            var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
+                // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
+                if (
+                    expSetFilters && expSetFilters[node.field] &&
+                    expSetFilters[node.field].has(node.term)
+                ){
+                    return expSetFilters;
+                }
+                return Filters.changeFilter(
+                    node.field,
+                    node.term,
+                    'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
+                    expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
+                    null,               // Callback
+                    true,               // Only return new expSetFilters vs saving them == set to TRUE
+                );
+            }, currentExpSetFilters);
+
+            // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
+            analytics.event('BarPlot', 'Set Filter', {
+                'eventLabel' : analytics.eventLabelFromChartNode(cursorProps.path[cursorProps.path.length - 1]), // 'New' filters logged here.
+                'currentFilters' : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()) // 'Existing' filters, or filters at time of action, go here.
+            });
+
+            Filters.saveChangedFilters(
+                newExpSetFilters,
+                true,
+                href,
+                function(){
+                    // Scroll to top of page after navigation is complete.
+                    setTimeout(layout.animateScrollTo, 100, 360, Math.abs(document.body.scrollTop - 360) * 2, 0);
+                }
+            );
+
+        },
+        'disabled' : function(cursorProps){
+            var expSetFilters = store.getState().expSetFilters;
+
+            if (expSetFilters && typeof expSetFilters === 'object'){
+                if (
+                    Array.isArray(cursorProps.path) &&
+                    (cursorProps.path[0] && cursorProps.path[0].field) &&
+                    expSetFilters[cursorProps.path[0].field] instanceof Set &&
+                    expSetFilters[cursorProps.path[0].field].has(cursorProps.path[0].term) &&
+                    (
+                        !cursorProps.path[1] || (
+                            cursorProps.path[1].field &&
+                            expSetFilters[cursorProps.path[1].field] instanceof Set &&
+                            expSetFilters[cursorProps.path[1].field].has(cursorProps.path[1].term)
+                        )
+                    )
+                ) return true;
+            }
+            return false;
+        }
+    }
+];
+
+export function boundActions(to, showType = null){
+    if (!showType) showType = to.props.showType;
+    return barPlotCursorActions.map((action)=>{
+        var clonedAction = _.clone(action);
+        if (typeof action.function === 'function') clonedAction.function = action.function.bind(to, showType);
+        if (typeof action.title === 'function') clonedAction.title = action.title.bind(to);
+        if (typeof action.disabled === 'function') clonedAction.disabled = action.disabled.bind(to);
+        return clonedAction;
+    });
+}
+
+
+/**
+ * Wraps ViewContainer with PopoverViewBounds, which feeds it
+ * props.onNodeMouseEnter(node, evt), props.onNodeMouseLeave(node, evt), props.onNodeClick(node, evt),
+ * props.selectedTerm, props.selectedParentTerm, props.hoverTerm, and props.hoverParentTerm.
+ * 
+ * @export
+ * @class PopoverViewContainer
+ * @extends {React.Component}
+ */
+export class PopoverViewContainer extends React.Component {
+
+    static propTypes = {
+        'height' : PropTypes.number,
+        'width'  : PropTypes.number,
+        'cursorDetailActions': PropTypes.arrayOf(PropTypes.shape({
+            'title' : PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
+            'function' : PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
+            'disabled' : PropTypes.oneOfType([PropTypes.bool, PropTypes.func]).isRequired,
+        }))
+    }
+
+    static defaultProps = {
+        'cursorDetailActions' : [],
+        'cursorContainerMargin' : 100
+    }
+
+    cursorDetailActions(){
+        return this.props.cursorDetailActions.concat(boundActions(this));
+    }
+
+    render(){
+        return (
+            <CursorViewBounds
+                height={this.props.height}
+                width={this.props.width}
+                actions={this.cursorDetailActions.call(this)}
+                cursorContainerMargin={this.props.cursorContainerMargin}
+                eventCategory="BarPlot" // For Analytics events
+                //highlightTerm
+                clickCoordsFxn={(node, containerPosition, boundsHeight)=>{
+                    var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
+                    var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
+
+                    var barYPos = node.attr.height;
+
+                    if (node.parent){
+                        var done = false;
+                        barYPos = _.reduce(
+                            node.parent.bars,//.slice(0).reverse(),
+                            //_.sortBy(node.parent.bars, 'term').reverse(),
+                            function(m, siblingNode){
+                                if (done) return m;
+                                if (siblingNode.term === node.term){
+                                    done = true;
+                                }
+                                return m + siblingNode.attr.height;
+                            },
+                            0
+                        );
+                    }
+
+                    return {
+                        x : containerPosition.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
+                        y : containerPosition.top + boundsHeight - bottomOffset - barYPos,
+                    };
+
+                }}
+            >
+                <ViewContainer {...this.props} />
+            </CursorViewBounds>
+        );
+    }
+}

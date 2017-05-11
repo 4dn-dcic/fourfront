@@ -213,6 +213,46 @@ var vizUtil = module.exports = {
         return vizUtil.colorCache[nodeName];
     },
 
+    sortObjectsByColorPalette : function(objects, palette = null){
+        if (!palette) palette = 'muted';
+        
+        var orderedColorList = vizUtil.colorPalettes[palette];
+        if (!orderedColorList) {
+            console.error("No palette " + palette + ' found.');
+            return objects;
+        }
+        if (objects && objects[0] && !objects[0].color){
+            console.warn("No colors assigned to objects.");
+            return objects;
+        }
+
+        var groups = _.groupBy(objects, 'color');
+        var runs = 0;
+
+        function getSortedSection(){
+            return _.map(orderedColorList, function(color){
+                var o = groups[color] && groups[color].shift();
+                if (groups[color] && groups[color].length === 0) delete groups[color];
+                return o;
+            }).filter(function(o){
+                if (!o) return false;
+                return true;
+            });
+        }
+    
+        var result = [];
+        while (_.keys(groups).length > 0 && runs < 20){
+            result = result.concat(getSortedSection());
+            runs++;
+        }
+
+        if (runs > 1){
+            console.warn("sortObjectsByColorPalette took longer than 1 run: " + runs, groups);
+        }
+
+        return result;
+    },
+
     extendStyleOptions : function(propsStyleOpts, defaultStyleOpts){
         if (!defaultStyleOpts) throw new Error("No default style options provided.");
         if (!propsStyleOpts) return defaultStyleOpts;

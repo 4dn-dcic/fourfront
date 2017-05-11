@@ -8,84 +8,93 @@ var { RotatedLabel, Legend } = require('./../components');
 var { console, object, isServerSide, expFxn, Filters, layout } = require('./../../util');
 var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
 var { Toggle } = require('./../../inputs');
+import { boundActions } from './ViewContainer';
 
-var UIControlsWrapper = module.exports = React.createClass({
+export default class UIControlsWrapper extends React.Component {
 
-    /**
-     * Default props for the UIControlsWrapper.
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     * @instance
-     */
-    getDefaultProps : function(){
-        return {
-            'titleMap' : {
-                // Aggr type
-                'experiment_sets' : "Experiment Sets",
-                'experiments' : 'Experiments',
-                'files' : "Files",
-                // Show state
-                'all' : 'All',
-                'filtered' : 'Selected',
-                'both' : 'All & Selected'
-            },
-            'availableFields_XAxis' : [
-                { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
-                { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
-                { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' }
-            ],
-            'availableFields_Subdivision' : [
-                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-                { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
-            ],
-            'legend' : false,
-            'chartHeight' : 300
-        };
-    },
+    static defaultProps = {
+        'titleMap' : {
+            // Aggr type
+            'experiment_sets' : "Experiment Sets",
+            'experiments' : 'Experiments',
+            'files' : "Files",
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    getInitialState : function(){
-        return {
+            // Show state
+            'all' : 'All',
+            'filtered' : 'Selected',
+            'both' : 'All & Selected'
+        },
+        'availableFields_XAxis' : [
+            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+            { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+            { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
+            { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
+            { title : "Lab", field : "experiments_in_set.lab.title" }
+        ],
+        'availableFields_Subdivision' : [
+            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
+            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+            { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+            { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
+            { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+            { title : "Lab", field : "experiments_in_set.lab.title" }
+        ],
+        'legend' : false,
+        'chartHeight' : 300
+    }
+
+    constructor(props){
+        super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected.bind(this);
+        this.titleMap = this.titleMap.bind(this);
+        this.adjustedChildChart = this.adjustedChildChart.bind(this);
+        this.handleAggregateTypeSelect = _.throttle(this.handleAggregateTypeSelect.bind(this), 750);
+        this.handleExperimentsShowType = _.throttle(this.handleExperimentsShowType.bind(this), 750, { trailing : false });
+        this.handleFieldSelect = _.throttle(this.handleFieldSelect.bind(this), 300);
+        this.getFieldAtIndex = this.getFieldAtIndex.bind(this);
+        this.contextualView = this.contextualView.bind(this);
+        this.renderDropDownMenuItems = this.renderDropDownMenuItems.bind(this);
+        this.handleDropDownToggle = this.handleDropDownToggle.bind(this);
+        this.renderShowTypeDropdown = this.renderShowTypeDropdown.bind(this);
+        this.render = this.render.bind(this);
+
+        this.state = {
             'fields' : [
-                this.props.availableFields_XAxis[0],
-                this.props.availableFields_Subdivision[0],
+                props.availableFields_XAxis[0],
+                props.availableFields_Subdivision[0],
                 //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'aggregateType' : 'experiment_sets',
-            'showState' : 'all',
+            'showState' : this.filterObjExistsAndNoFiltersSelected(props.expSetFilters) ? 'all' : 'filtered',
             'openDropdown' : null
-        };
-    },
+        }
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    componentWillReceiveProps : function(nextProps){
-        //if (this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters)){
-        //    this.setState({ 'showState' : 'all' });
-        //}
-    },
+    componentWillReceiveProps(nextProps){
+        if (
+            this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters) &&
+            !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters) && (
+                this.state.showState === 'all'
+            )
+        ){
+            this.setState({ 'showState' : 'filtered' });
+        } else if (
+            this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters) &&
+            !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters) && (
+                this.state.showState === 'filtered'
+            )
+        ){
+            this.setState({ 'showState' : 'all' });
+        }
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    filterObjExistsAndNoFiltersSelected : function(expSetFilters = this.props.expSetFilters){
-        return (
-            typeof expSetFilters === 'object'
-            && expSetFilters !== null
-            && _.keys(expSetFilters).length === 0
-        );
-    },
+    filterObjExistsAndNoFiltersSelected(expSetFilters = this.props.expSetFilters){
+        return Filters.filterObjExistsAndNoFiltersSelected(expSetFilters);
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    titleMap : function(key = null, fromDropdown = false){
+    titleMap(key = null, fromDropdown = false){
         if (!key) return this.props.titleMap;
         var title = this.props.titleMap[key];
         if (fromDropdown && ['all','filtered'].indexOf(key) > -1){
@@ -94,15 +103,14 @@ var UIControlsWrapper = module.exports = React.createClass({
             return 'Both';
         }
         return title;
-    },
+    }
 
     /**
      * Clones props.children, expecting a Chart React Component as the sole child, and extends Chart props with 'fields', 'showType', and 'aggregateType'.
-     * @instance
+     *
      * @returns {React.Component} Cloned & extended props.children.
-     * @memberof module:viz/BarPlot.UIControlsWrapper
      */
-    adjustedChildChart : function(){
+    adjustedChildChart(){
         // TODO: validate that props.children is a BarPlot.Chart
 
         return React.cloneElement(
@@ -119,29 +127,18 @@ var UIControlsWrapper = module.exports = React.createClass({
                 }
             )
         );
-    },
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    handleAggregateTypeSelect : _.throttle(function(eventKey, event){
+
+    handleAggregateTypeSelect(eventKey, event){
         this.setState({ aggregateType : eventKey });
-    }, 750),
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    handleExperimentsShowType : _.throttle(function(eventKey, event){
+    handleExperimentsShowType(eventKey, event){
         this.setState({ showState : eventKey });
-    }, 750, {trailing : false}),
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    handleFieldSelect : _.throttle(function(fieldIndex, newFieldKey, event){
+    handleFieldSelect(fieldIndex, newFieldKey, event){
         var newFields;
         if (newFieldKey === "none"){ // Only applies to subdivision (fieldIndex 1)
             newFields = this.state.fields.slice(0,1);
@@ -161,36 +158,46 @@ var UIControlsWrapper = module.exports = React.createClass({
         }
         newFields[fieldIndex] = newField;
         if (newFields.length > 1) newFields[otherFieldIndex] = this.state.fields[otherFieldIndex];
-        this.setState({ fields : newFields });
-        //this.setState({ showState : eventKey });
-    }, 300),
+        setTimeout(()=>{
+            this.setState({ fields : newFields });
+        });
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    getFieldAtIndex : function(fieldIndex){
+    getFieldAtIndex(fieldIndex){
         if (!this.state.fields) return null;
         if (!Array.isArray(this.state.fields)) return null;
         if (this.state.fields.length < fieldIndex + 1) return null;
         return this.state.fields[fieldIndex];
-    },
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    renderDropDownMenuItems : function(keys, active = null){
+    contextualView(){
+        if (this.props.href){
+            // Hide on homepage.
+            var hrefParts = url.parse(this.props.href);
+            if (hrefParts.pathname === '/' || hrefParts.pathname === '/home'){
+                return 'home';
+            }
+        }
+        return 'browse';
+    }
+
+    renderDropDownMenuItems(keys, active = null){
         return keys.map((key)=>{
             var subtitle = null;
             var title = null;
             var disabled = null;
+            var tooltip = null;
             if (Array.isArray(key)){
                 // Assume we have [key, title, subtitle].
                 title = key[1] || null;
                 subtitle = key[2] || null;
                 disabled = key[3] || false;
+                tooltip = key[4] || null;
                 key = key[0];
+            }
+
+            if (typeof title === 'string' && typeof tooltip === 'string'){
+                title = <span className="inline-block" data-tip={tooltip} data-place="left">{ title }</span>;
             }
 
             return <MenuItem
@@ -201,61 +208,99 @@ var UIControlsWrapper = module.exports = React.createClass({
                 disabled={disabled}
             />;
         });
-    },
+    }
 
-    handleDropDownToggle : function(id, isOpen, evt, source){
+    handleDropDownToggle(id, isOpen, evt, source){
         if (isOpen){
             setTimeout(this.setState.bind(this), 10, { 'openDropdown' : id });
         } else {
             this.setState({ 'openDropdown' : null });
         }
-    },
+    }
 
-    renderShowTypeToggle : function(windowGridSize){
-
-        if (this.props.href){
-            // Hide on homepage.
-            var hrefParts = url.parse(this.props.href);
-            if (hrefParts.pathname === '/' || hrefParts.pathname === '/home'){
-                return null;
-            }
-        }
-
+    renderShowTypeDropdown(contextualView){
+        if (contextualView === 'home') return null;
+        var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected();
         return (
-            <div className={"toggle-zoom" + (/*filterObjExistsAndNoFiltersSelected ? ' no-click' : */'')} onClick={(e)=>{
-                e.preventDefault();
-                this.handleExperimentsShowType(this.state.showState === 'all' ? 'filtered' : 'all')
-            }} 
-                data-tip="Toggle between <span class='text-600'>all</span> data <em>or</em> data <span class='text-600'>selected via filters</span> below."
-                data-place={ windowGridSize === 'xs' ? 'bottom' : "left" } data-html data-delay-show={600}
-            >
-            {/*
-                <div className="text">
-                    <small>Viewing</small><br/>
-                    {this.state.showState === 'all' ? 'All' : 'Selected'}
-                </div>
-                */}
-                
-                <i className="icon icon-filter"/>
-                <span className="text">View Selected</span>
-                <span className="inline-block toggle-container">
-                    <Toggle checked={this.state.showState === 'filtered'} />
-                </span>
-                
+            <div className="show-type-change-section">
+                <h6 className="dropdown-heading">Show</h6>
+                <DropdownButton
+                    id="select-barplot-show-type"
+                    onSelect={this.handleExperimentsShowType}
+                    bsSize='xsmall'
+                    title={(()=>{
+                        //if (this.state.openDropdown === 'subdivisionField'){
+                        //    return <em className="dropdown-open-title">Color Bars by</em>;
+                        //}
+                        var aggrType = this.titleMap(this.state.aggregateType);
+                        var showString = (this.state.showState === 'all' || isSelectedDisabled) ? 'All' : 'Selected';
+                        return (
+                            <span>
+                                <span className="text-600">{ showString }</span> { aggrType }
+                            </span>
+                        );
+                    })()}
+                    onToggle={this.handleDropDownToggle.bind(this, 'showType')}
+                    children={this.renderDropDownMenuItems([
+                        ['all', <span>
+                            <span className="text-500">All</span> { this.titleMap(this.state.aggregateType) }
+                        </span>],
+                        ['filtered', <span className="inline-block" data-place="left" data-tip={isSelectedDisabled ? 'No filters currently set' : null}>
+                            <span className="text-500">Selected</span> { this.titleMap(this.state.aggregateType) }
+                        </span>, null, isSelectedDisabled]
+                    ], this.state.showState)}
+                />
             </div>
         );
-    },
+    }
 
-    /**
-     * @ignore
-     * @memberof module:viz/BarPlot.UIControlsWrapper
-     */
-    render : function(){
+    renderGroupByFieldDropdown(contextualView){
+        return (
+            <div className="field-1-change-section">
+                <h6 className="dropdown-heading">Group By</h6>
+                <DropdownButton
+                    id="select-barplot-field-1"
+                    onSelect={this.handleFieldSelect.bind(this, 1)}
+                    title={(()=>{
+                        //if (this.state.openDropdown === 'subdivisionField'){
+                        //    return <em className="dropdown-open-title">Color Bars by</em>;
+                        //}
+                        var field = this.getFieldAtIndex(1);
+                        if (!field) return "None";
+                        return field.title || Filters.Field.toName(field.field);
+                    })()}
+                    onToggle={this.handleDropDownToggle.bind(this, 'subdivisionField')}
+                    children={this.renderDropDownMenuItems(
+                        this.props.availableFields_Subdivision.concat([{
+                            title : <em>None</em>,
+                            field : "none"
+                        }]).map((field)=>{
+                            var isDisabled = this.state.fields[0] && this.state.fields[0].field === field.field;
+                            return [
+                                field.field,                                        // Field
+                                field.title || Filters.Field.toName(field.field),   // Title
+                                field.description || null,                          // Description
+                                //isDisabled,                                         // Disabled
+                                //isDisabled ? "Field already selected for X-Axis" : null
+                            ]; // key, title, subtitle, disabled
+                        }),
+                        (this.state.fields[1] && this.state.fields[1].field) || "none"
+                    )}
+                />
+            </div>
+        );
+    }
+
+    render(){
 
         if (!this.props.experiments) return null;
         
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
+        var contextualView = this.contextualView();
+
+        var legendContainerHeight = windowGridSize === 'xs' ? null :
+            this.props.chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 50;
 
         return (
             <div className="bar-plot-chart-controls-wrapper">
@@ -292,7 +337,7 @@ var UIControlsWrapper = module.exports = React.createClass({
                         </div>
                     </div>
 
-                    { this.renderShowTypeToggle(windowGridSize) }
+                    {/* this.renderShowTypeToggle(windowGridSize) */}
 
                 </div>
 
@@ -301,52 +346,17 @@ var UIControlsWrapper = module.exports = React.createClass({
                         { this.adjustedChildChart() }
                     </div>
                     <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
-                        <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
-                            this.props.chartHeight - 49 : null
-                        }}>
-                            <h6 className="dropdown-heading">Group Bars By</h6>
-                            <DropdownButton
-                                id="select-barplot-field-1"
-                                onSelect={this.handleFieldSelect.bind(this, 1)}
-                                title={(()=>{
-                                    //if (this.state.openDropdown === 'subdivisionField'){
-                                    //    return <em className="dropdown-open-title">Color Bars by</em>;
-                                    //}
-                                    var field = this.getFieldAtIndex(1);
-                                    if (!field) return "None";
-                                    return field.title || Filters.Field.toName(field.field);
-                                })()}
-                                onToggle={this.handleDropDownToggle.bind(this, 'subdivisionField')}
-                                children={this.renderDropDownMenuItems(
-                                    this.props.availableFields_Subdivision.concat([{
-                                        title : <em>None</em>,
-                                        field : "none"
-                                    }]).map(function(field){
-                                        return [
-                                            field.field,                                        // Field
-                                            field.title || Filters.Field.toName(field.field),   // Title
-                                            field.description || null,                          // Description
-                                            false                                               // Disabled
-                                        ]; // key, title, subtitle
-                                    }),
-                                    (this.state.fields[1] && this.state.fields[1].field) || "none"
-                                )}
-                            />
-                            <Legend
-                                fields={(
-                                    this.props.experiments && this.state.fields[1] ? (
-                                        Legend.experimentsAndFieldsToLegendData(
-                                            this.state.showState === 'filtered' ? 
-                                                (this.props.filteredExperiments || this.props.experiments)
-                                                : this.props.experiments,
-                                            [this.state.fields[1]],
-                                            this.props.schemas
-                                        )
-                                    ) : null
-                                )}
-                                includeFieldTitles={false}
+                        { this.renderShowTypeDropdown(contextualView) }
+                        { this.renderGroupByFieldDropdown(contextualView) }
+                        <div className="legend-container" style={{ height : legendContainerHeight }}>
+                            <AggregatedLegend
+                                experiments={this.props.experiments}
+                                height={legendContainerHeight}
+                                filteredExperiments={this.props.filteredExperiments}
+                                fields={this.state.fields}
+                                showType={this.state.showState}
+                                aggregateType={this.state.aggregateType}
                                 schemas={this.props.schemas}
-                                width={layout.gridContainerWidth() * (3/12) - 20}
                             />
                         </div>
                         <div className="x-axis-right-label">
@@ -367,11 +377,14 @@ var UIControlsWrapper = module.exports = React.createClass({
                                         })()}
                                         onToggle={this.handleDropDownToggle.bind(this, 'xAxisField')}
                                         children={this.renderDropDownMenuItems(
-                                            this.props.availableFields_XAxis.map(function(field){
+                                            this.props.availableFields_XAxis.map((field)=>{
+                                                var isDisabled = this.state.fields[1] && this.state.fields[1].field === field.field;
                                                 return [
                                                     field.field,
                                                     field.title || Filters.Field.toName(field.field),
-                                                    field.description || null
+                                                    field.description || null,
+                                                    //isDisabled,
+                                                    //isDisabled ? 'Field is already selected for "Group By"' : null
                                                 ]; // key, title, subtitle
                                             }),
                                             this.state.fields[0].field
@@ -388,4 +401,90 @@ var UIControlsWrapper = module.exports = React.createClass({
         );
     }
 
-});
+}
+
+class AggregatedLegend extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.updateIfShould = this.updateIfShould.bind(this);
+        this.width = this.width.bind(this);
+        this.height = this.height.bind(this);
+        this.shouldUpdate = false;
+    }
+
+    componentDidMount(){
+        this.updateIfShould();
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        this.updateIfShould();
+    }
+
+    /**
+     * Do a forceUpdate() in case we set this.shouldUpdate = true in an initial render.
+     * this.shouldUpdate would be set if legend fields do not have colors yet from cache.
+     */
+    updateIfShould(){
+        if (this.shouldUpdate){
+            setTimeout(()=>{
+                this.forceUpdate();
+            }, 750);
+        }
+    }
+
+    width(){
+        if (this.refs && this.refs.container && this.refs.container.offsetWidth){
+            return this.refs.container.offsetWidth;
+        }
+        return layout.gridContainerWidth() * (3/12) - 15;
+    }
+
+    height(){
+        if (this.props.height) return this.props.height;
+        if (this.refs && this.refs.container && this.refs.container.offsetHeight){
+            return this.refs.container.offsetHeight;
+        }
+        return null;
+    }
+
+    render(){
+
+        var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
+            (!this.props.experiments || !this.props.fields[1] ? null :
+                Legend.aggregegateBarPlotData(
+                    this.props.showType === 'filtered' ? (this.props.filteredExperiments || this.props.experiments) :
+                        this.props.experiments,
+                    [this.props.fields[1]]
+                )
+            ),
+            term => typeof term[this.props.aggregateType] === 'number' ? -term[this.props.aggregateType] : 'term'
+        );
+
+        this.shouldUpdate = false;
+        if (fieldsForLegend && fieldsForLegend.length > 0 && fieldsForLegend[0] &&
+            fieldsForLegend[0].terms && fieldsForLegend[0].terms.length > 0 &&
+            fieldsForLegend[0].terms[0] && fieldsForLegend[0].terms[0].color === null){
+            this.shouldUpdate = true;
+        }
+
+        return (
+            <div className="legend-container-inner" ref="container">
+                <Legend
+                    fields={fieldsForLegend}
+                    includeFieldTitles={false}
+                    schemas={this.props.schemas}
+                    width={this.width()}
+                    height={this.height()}
+                    hasPopover
+                    expandable
+                    expandableAfter={8}
+                    cursorDetailActions={boundActions(this, this.props.showType)}
+                />
+            </div>
+        );
+    }
+}

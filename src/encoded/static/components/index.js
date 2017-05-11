@@ -24,6 +24,7 @@ require('./item-pages/item');
 require('./item-pages/DefaultItemView');
 require('./item-pages/ExperimentSetView');
 require('./item-pages/FileSetCalibrationView');
+require('./item-pages/HealthView');
 require('./item-pages/UserView');
 require('./item-pages/WorkflowRunView');
 require('./item-pages/WorkflowView');

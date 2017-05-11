@@ -259,6 +259,12 @@ export function eventLabelFromChartNode(node){
     return labelData.join(', ');
 }
 
+
+export function eventLabelFromChartNodes(nodes){
+    return nodes.map(eventLabelFromChartNode).join('; ');
+}
+
+
 /**
  * Converts expSetFilters object or href with query (as string) to stringified JSON representation.
  *

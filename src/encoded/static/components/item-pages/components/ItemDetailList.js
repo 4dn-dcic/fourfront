@@ -66,14 +66,12 @@ class SubItem extends React.Component {
     }
 
     render() {
-        var schemas = this.props.schemas;
-        var item = this.props.content;
-        var title = this.props.title;
+        var { schemas, content, title, keyTitleDescriptionMap } = this.props;
         return (
             <span>
                 { this.toggleLink(title, this.state.isOpen) }
                 { this.state.isOpen ?
-                    <SubItemView schemas={schemas} content={item} title={title}/>
+                    <SubItemView schemas={schemas} content={content} title={title} keyTitleDescriptionMap={keyTitleDescriptionMap} />
                 : null }
             </span>
         );
@@ -96,6 +94,8 @@ class SubItemView extends React.Component {
     render(){
         var schemas = this.props.schemas;
         var item = this.props.content;
+        var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap || {};
+
         return (
             <div className="sub-panel data-display panel-body-with-header">
                 <div className="key-value sub-descriptions">
@@ -112,13 +112,14 @@ class SubItemView extends React.Component {
                                 'link_id', 'schema_version'
                             ])
                         }
-                        keyTitleDescriptionMap={{
+
+                        keyTitleDescriptionMap={_.extend({}, keyTitleDescriptionMap, {
                             // Extend schema properties
                             '@id' : {
                                 'title' : 'Link',
                                 'description' : 'Link to Item'
                             }
-                        }}
+                        })}
                         />
                 </div>
             </div>
@@ -171,7 +172,7 @@ export class Detail extends React.Component {
     * @param {Object} schemas - Object containing schemas for server's JSONized object output.
     * @param {Object|Array|string} item - Item(s) to render recursively.
     */
-    static formValue(schemas, item, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
+    static formValue(schemas, item, keyPrefix = '', atType = 'ExperimentSet', keyTitleDescriptionMap, depth = 0) {
         if (item === null){
             return <span>No Value</span>;
         } else if (Array.isArray(item)) {
@@ -186,7 +187,7 @@ export class Detail extends React.Component {
                 <ol>
                     {   item.length === 0 ? <li><em>None</em></li>
                         :   item.map(function(it, i){
-                                return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, atType, depth + 1) }</li>;
+                                return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
                             })
                     }
                 </ol>
@@ -209,6 +210,7 @@ export class Detail extends React.Component {
                         content={item}
                         key={title}
                         title={title}
+                        keyTitleDescriptionMap={keyTitleDescriptionMap}
                     />
                 );
             }
@@ -326,12 +328,24 @@ export class Detail extends React.Component {
             <PartialList
                 persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
-                        { Detail.formValue(this.props.schemas, context[key], key, context['@type'] && context['@type'][0]) }
+                        { Detail.formValue(
+                            this.props.schemas,
+                            context[key],
+                            key,
+                            context['@type'] && context['@type'][0],
+                            tips
+                        ) }
                     </PartialList.Row>
                 )}
                 collapsible={ collapsibleKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
-                        { Detail.formValue(this.props.schemas, context[key], key, context['@type'] && context['@type'][0]) }
+                        { Detail.formValue(
+                            this.props.schemas,
+                            context[key],
+                            key,
+                            context['@type'] && context['@type'][0],
+                            tips
+                        ) }
                     </PartialList.Row>
                 )}
                 open={this.props.open}
@@ -419,6 +433,7 @@ export default class ItemDetailList extends React.Component {
                             context={this.props.context}
                             schemas={this.props.schemas}
                             open={!collapsed}
+                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
                         />
                         <div className="row">
                             <div className="col-xs-6">{ this.seeMoreButton() }</div>

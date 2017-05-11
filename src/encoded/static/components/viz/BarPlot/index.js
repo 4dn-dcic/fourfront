@@ -28,28 +28,10 @@
  * @namespace
  * @type {Component}
  */
-module.exports.UIControlsWrapper = require('./UIControlsWrapper');
+module.exports.UIControlsWrapper = require('./UIControlsWrapper').default;
 
 
-
-/**
- * This is an optional component which may be placed between BarPlot.Chart and UIControlsWrapper.
- * It will store the result of aggregation into state and then pass it as a prop down to BarPlot.Chart.
- * Primarily this is to redrawing performance. Utilizes shouldComponentUpdate and componentWillReceiveProps.
- * 
- * Accepts the same props as BarPlot.Chart, save for own 'aggregatedData' and 'aggregatedFilteredData'.
- * 
- * @member
- * @namespace
- * @type {Component}
- * @prop {Object[]} experiments - "All" experiments, passed from ChartDataController[.Provider].
- * @prop {Object[]} filteredExperiments - "Selected" experiments, if expSetFilters are set in Redux store. Passed from ChartDataController[.Provider].
- * @prop {Object[]} fields - Passed from UIControlsWrapper.
- * @prop {string} aggregateType - Passed from UIControlsWrapper.
- * @prop {string} showType - Passed from UIControlsWrapper.
- * @prop {BarPlot.Chart} children - Must contain a BarPlotChart as the single child element.
- */
-module.exports.Aggregator = require('./Aggregator');
+module.exports.Aggregator = require('./Aggregator').default;
 
 /**
  * Various aggregation functions which are used by BarPlot.Chart and/or BarPlot.Aggregator to convert & aggregate list of experiments
