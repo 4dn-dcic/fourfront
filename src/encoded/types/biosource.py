@@ -171,7 +171,7 @@ def validate_biosource_tissue(context, request):
 
 # validator for cell_line field
 def validate_biosource_cell_line(context, request):
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     data = request.json
     if 'cell_line' not in data:
         return
@@ -207,16 +207,16 @@ def validate_biosource_cell_line(context, request):
 
 
 @view_config(context=Biosource.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post, validate_biosource_tissue])  # , validate_biosource_cell_line])
+             validators=[validate_item_content_post, validate_biosource_tissue, validate_biosource_cell_line])
 def biosource_add(context, request, render=None):
     return collection_add(context, request, render)
 
 
 @view_config(context=Biosource, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put, validate_biosource_tissue],  # , validate_biosource_cell_line],
+             validators=[validate_item_content_put, validate_biosource_tissue, validate_biosource_cell_line],
              decorator=if_match_tid)
 @view_config(context=Biosource, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_biosource_tissue],  # validate_biosource_cell_line],
+             validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line],
              decorator=if_match_tid)
 def biosource_edit(context, request, render=None):
     return item_edit(context, request, render)
