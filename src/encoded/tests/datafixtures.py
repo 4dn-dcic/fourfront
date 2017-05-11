@@ -194,12 +194,24 @@ def F123_biosource(testapp, lab, award, f123_oterm):
 
 
 @pytest.fixture
-def human_biosource(testapp, human_individual, worthington_biochemical, lab, award):
+def GM12878_biosource(testapp, lab, award, gm12878_oterm):
+    item = {
+        "accession": "4DNSR000AAQ1",
+        "biosource_type": "immortalized cell line",
+        "cell_line": gm12878_oterm['@id'],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def human_biosource(testapp, human_individual, worthington_biochemical, gm12878_oterm, lab, award):
     item = {
         "description": "GM12878 cells",
         "biosource_type": "immortalized cell line",
         "individual": human_individual['@id'],
-        "cell_line": "GM12878",
+        "cell_line": gm12878_oterm['@id'],
         "biosource_vendor": worthington_biochemical['@id'],
         "status": "current",
         'award': award['@id'],
