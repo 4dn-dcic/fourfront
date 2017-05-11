@@ -120,21 +120,22 @@ var f = module.exports = {
                 // TODO : If no experiment sets, add to a 'None' set?
                 throw new Error('Experiment "' + exp.accession + '" (index '+ i +') has no experiment sets.');
             }
-            exp.experiment_sets.forEach(function(expSet){
-                if (typeof expSet.accession !== 'string') throw new Error('experiment_set.accession must be a string, we have:', expSet.accession);
-                if (!(expSets[expSet.accession] instanceof Set)){
-                    expSets[expSet.accession] = new Set();
+            exp.experiment_sets.forEach(function(expSet, i){
+                //if (typeof expSet.accession !== 'string') throw new Error('experiment_set.accession must be a string, we have:' + expSet.accession);
+                var expSetKey = expSet.accession || 'set' + i;
+                if (!(expSets[expSetKey] instanceof Set)){
+                    expSets[expSetKey] = new Set();
                 }
-                expSets[expSet.accession].add(exp);
+                expSets[expSetKey].add(exp);
             });
         });
 
-        var expSetAccessions = _.keys(expSets);
-        var currentAccession = null;
-        while (typeof expSetAccessions[0] !== 'undefined'){
+        var expSetKeys = _.keys(expSets);
+        var currentKey = null;
+        while (typeof expSetKeys[0] !== 'undefined'){
             // Convert Sets to Arrays
-            currentAccession = expSetAccessions.pop();
-            expSets[currentAccession] = [...expSets[currentAccession]];
+            currentKey = expSetKeys.pop();
+            expSets[currentKey] = [...expSets[currentKey]];
         }
         return expSets;
     },

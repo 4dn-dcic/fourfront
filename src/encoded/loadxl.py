@@ -770,7 +770,7 @@ def load_prod_data(app, access_key_loc=None):
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
                                server="https://testportal.4dnucleome.org")
-    store_keys(app, access_key_loc, keys, s3_file_name='illnevertell_prod')
+    store_keys(app, access_key_loc, keys)
 
 
 def load_ontology_terms(app,
