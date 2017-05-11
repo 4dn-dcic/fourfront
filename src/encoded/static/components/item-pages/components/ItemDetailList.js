@@ -353,7 +353,7 @@ export class Detail extends React.Component {
                         { Detail.formValue(
                             this.props.schemas,
                             context[key],
-                            popLink
+                            popLink,
                             key,
                             context['@type'] && context['@type'][0],
                             tips
