@@ -78,6 +78,7 @@
                 "current",
                 "revoked",
                 "deleted",
+                "obsolete",
                 "replaced",
                 "in review by lab",
                 "in review by project",

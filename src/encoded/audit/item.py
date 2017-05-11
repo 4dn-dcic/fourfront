@@ -44,6 +44,7 @@ def audit_item_schema(value, system):
         detail = 'Object {} has schema error {}'.format(value['@id'], error.message)
         yield AuditFailure(category, detail, level='INTERNAL_ACTION')
 
+
 # 4 levels of status 0-3
 # embedded sub items should have an equal or greater level
 # than that of the item in which they are embedded
@@ -57,8 +58,9 @@ STATUS_LEVEL = {
     'in review by lab': 1,
     'deleted': 0,
     'replaced': 0,
-
+    'obsolete': 0,
     # additional file statuses
+    'to be uploaded by workflow': 1,
     'uploading': 1,
     'uploaded': 1,
     'upload failed': 1,
