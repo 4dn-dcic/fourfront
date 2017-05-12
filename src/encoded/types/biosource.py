@@ -171,7 +171,7 @@ def validate_biosource_tissue(context, request):
 
 # validator for cell_line field
 def validate_biosource_cell_line(context, request):
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     data = request.json
     if 'cell_line' not in data:
         return
