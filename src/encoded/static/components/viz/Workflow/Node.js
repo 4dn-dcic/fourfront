@@ -21,11 +21,14 @@ export default class Node extends React.Component {
         return false;
     }
 
+    static propTypes = {
+        'title' : React.PropTypes.func.isRequired
+    }
+
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
         this.icon = this.icon.bind(this);
-        this.title = this.title.bind(this);
         this.tooltip = this.tooltip.bind(this);
         this.isSelected = this.isSelected.bind(this);
     }
@@ -76,25 +79,7 @@ export default class Node extends React.Component {
         return <i className={"icon icon-fw icon-" + iconClass}/>;
     }
 
-    title(){
-        var node = this.props.node;
-        var title = node.title || node.name;
-
-        if (typeof title === 'string'){
-            if (node.type === 'input'){
-                if (typeof node.inputOf === 'object'){
-                    title = title.replace(node.inputOf.id + '.', '');
-                }
-            } else if (node.type === 'output'){
-                if (typeof node.outputOf === 'object'){
-                    title = title.replace(node.outputOf.id + '.', '');
-                }
-            }
-        }
-        return title;
-    }
-
-    tooltip(){
+    tooltip(title = null){
         var node = this.props.node;
         var output = '';
 
@@ -116,7 +101,7 @@ export default class Node extends React.Component {
 
         // Title
         output += '<h5 class="text-600 tooltip-title">' +
-            this.title() +
+            (this.props.title(node, false)) +
             '</h5>';
 
         // Argument Type
@@ -163,11 +148,15 @@ export default class Node extends React.Component {
     }
 
     render(){
-        var node = this.props.node;
-        var disabled = null;
+        var node = this.props.node,
+            title = this.props.title(node, true),
+            tooltip = this.tooltip(title),
+            disabled = null;
+
         if (typeof this.props.isNodeDisabled === 'function'){
             disabled = this.props.isNodeDisabled(node);
         }
+
         return (
             <div 
                 className={"node node-type-" + node.type + (disabled ? ' disabled' : '')}
@@ -186,12 +175,12 @@ export default class Node extends React.Component {
                     style={this.innerStyle()}
                     onMouseEnter={this.props.onMouseEnter}
                     onMouseLeave={this.props.onMouseLeave}
-                    data-tip={this.tooltip()}
+                    data-tip={tooltip}
                     data-place="top"
                     data-html
                     onClick={disabled ? null : this.props.onClick}
                 >
-                    <span className="node-name">{ this.icon() }{ this.title() }</span>
+                    <span className="node-name">{ this.icon() }{ title }</span>
                 </div>
             </div>
         );

@@ -815,8 +815,10 @@ $download-button-width : 100px;
 			}
 		}
 		.information {
-			margin-top: 20px;
+			margin-top: 18px;
 			margin-bottom: 20px;
+			padding-top: 20px;
+			border-top: 1px solid #ccc;
 			> h3 {
 				margin-top: 1px;
 				> pre {

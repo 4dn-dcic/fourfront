@@ -2,6 +2,7 @@
 
 var React = require('react');
 import PropTypes from 'prop-types';
+import { Fade } from 'react-bootstrap';
 import { ItemDetailList } from './../../item-pages/components';
 import { getTitleStringFromContext } from './../../item-pages/item';
 
@@ -99,7 +100,7 @@ export default class WorkflowDetailPane extends React.Component {
                     <span>{ node.name }</span>
                 </h4>
                 <div className="detail-pane-body">
-                    { this.body() }
+                    <Fade transitionAppear in>{ this.body() }</Fade>
                 </div>
             </div>
         );

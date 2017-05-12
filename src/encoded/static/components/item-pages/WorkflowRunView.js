@@ -9,13 +9,13 @@ import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 var { console, object, DateUtility, Filters, isServerSide } = require('./../util');
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { onItemPageNodeClick } from './WorkflowView';
+import { commonGraphPropsFromProps } from './WorkflowView';
 
 
 
 /**
  * @export
- * @class WorkflowView
+ * @class WorkflowRunView
  * @memberof module:item-pages
  * @extends module:item-pages/DefaultItemView.ItemBaseView
  */
@@ -104,23 +104,21 @@ class GraphSection extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
+        this.commonGraphProps = this.commonGraphProps.bind(this);
         this.basicGraph = this.basicGraph.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
         this.dropDownMenu = this.dropDownMenu.bind(this);
         this.body = this.body.bind(this);
+        this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail'
         }
     }
 
     commonGraphProps(){
-        return {
-            'href'        : this.props.href,
-            'onNodeClick' : onItemPageNodeClick,
-            'detailPane'  : <WorkflowDetailPane schemas={this.props.schemas} />,
+        return _.extend(commonGraphPropsFromProps(this.props), {
             'isNodeDisabled' : GraphSection.isNodeDisabled
-        };
+        });
     }
 
     basicGraph(){

@@ -10,11 +10,18 @@ import { console, isServerSide } from './../../util';
 export function findNodeFromHref(href, nodes){
     if (typeof href !== 'string' || !Array.isArray(nodes)) return null;
     var parts = url.parse(href);
-    return (
-        typeof parts.hash === 'string' &&
-        parts.hash.length > 0 &&
-        _.findWhere(nodes, { 'name' : decodeURIComponent(parts.hash.slice(1)) })
-    ) || null;
+    if (typeof parts.hash !== 'string' || parts.hash.length === 0) return null;
+    var findPart = decodeURIComponent(parts.hash.slice(1));
+    return _.find(nodes, function(node){
+        if (typeof node.id === 'string'){
+            if (node.id === findPart) return true;
+            return false;
+        }
+        if (typeof node.name === 'string'){
+            if (node.name === findPart) return true;
+        }
+        return false;
+    }) || null;
 }
 
 

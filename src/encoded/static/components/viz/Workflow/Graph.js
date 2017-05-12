@@ -50,9 +50,9 @@ export default class Graph extends React.Component {
             'column'            : PropTypes.number.isRequired,
             'name'              : PropTypes.string.isRequired,
             'type'              : PropTypes.string.isRequired,
-            'id'                : PropTypes.string,
+            'id'                : PropTypes.string,  // Optional unique ID if node names might be same.
             'outputOf'          : PropTypes.object,  // Unused currently
-            'inputOf'           : PropTypes.object,   // Unused currently
+            'inputOf'           : PropTypes.object,  // Unused currently
             'description'       : PropTypes.string,
             'meta'              : PropTypes.oneOfType([
                                     PropTypes.object,
@@ -73,7 +73,7 @@ export default class Graph extends React.Component {
     }
 
     static defaultProps = {
-        'height'        : null,
+        'height'        : null, // Unused, should be set to nodes count in highest column * rowSpacing + innerMargins.
         'width'         : null,
         'columnSpacing' : 56,
         'columnWidth'   : 150,
@@ -81,7 +81,9 @@ export default class Graph extends React.Component {
         'pathArrows'    : true,
         'detailPane'    : <DefaultDetailPane />,
         'rowSpacingType': 'wide',
-        'onNodeClick'   : null,
+        'nodeElement'   : null, // Use default Node component.
+        'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
+        'nodeTitle'     : function(node, canBeJSX = false){ return node.title || node.name; },
         'innerMargin'   : {
             'top' : 20,
             'bottom' : 48,
@@ -212,7 +214,7 @@ export default class Graph extends React.Component {
                         >
                             <ScrollContainer>
                                 <EdgesLayer edgeElement={this.props.edgeElement} />
-                                <NodesLayer nodeElement={this.props.nodeElement} />
+                                <NodesLayer nodeElement={this.props.nodeElement} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }
                         </StateContainer>

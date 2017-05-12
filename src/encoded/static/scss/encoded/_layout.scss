@@ -287,6 +287,12 @@ h3.submission-subtitle {
 
 }
 
+.text-ellipsis-container {
+	overflow-x: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 /** Extending Bootstrap grid to allow blocks to flow right in a row **/
 
 @media screen                           		 { .col-xs-float-right { float : right; } }

@@ -47,21 +47,23 @@ export default class NodesLayer extends React.Component {
     }
 
     render(){
-        var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
+        var p = this.props;
+        var fullHeight = p.innerHeight + p.innerMargin.top + p.innerMargin.bottom;
         return (
-            <div className="nodes-layer-wrapper" style={{ width : this.props.contentWidth, height : fullHeight }}>
-                <div className="nodes-layer" style={{ width : this.props.contentWidth, height : fullHeight }}>
+            <div className="nodes-layer-wrapper" style={{ width : p.contentWidth, height : fullHeight }}>
+                <div className="nodes-layer" style={{ width : p.contentWidth, height : fullHeight }}>
                     {
-                        NodesLayer.processNodes(this.props.nodes).map((node, i) =>
-                            <Node
-                                {..._.omit(this.props, 'children', 'nodes')}
-                                node={node}
-                                onMouseEnter={this.props.onNodeMouseEnter && this.props.onNodeMouseEnter.bind(this.props.onNodeMouseEnter, node)}
-                                onMouseLeave={this.props.onNodeMouseLeave && this.props.onNodeMouseLeave.bind(this.props.onNodeMouseLeave, node)}
-                                onClick={typeof this.props.onNodeClick === 'function' && this.props.onNodeClick.bind(this.props.onNodeClick, node)}
-                                key={node.id || node.name}
-                            />
-                        )
+                        NodesLayer.processNodes(this.props.nodes).map(function(node, i){
+                            var nodeProps = _.extend( _.omit(p, 'children', 'nodes'), {
+                                node : node,
+                                onMouseEnter : p.onNodeMouseEnter && p.onNodeMouseEnter.bind(p.onNodeMouseEnter, node),
+                                onMouseLeave : p.onNodeMouseLeave && p.onNodeMouseLeave.bind(p.onNodeMouseLeave, node),
+                                onClick : typeof p.onNodeClick === 'function' && p.onNodeClick.bind(p.onNodeClick, node),
+                                key : node.id || node.name || i
+                            });
+                            if (p.nodeElement) return React.cloneElement(p.nodeElement, nodeProps);
+                            else return <Node {...nodeProps} />
+                        })
                     }
                 </div>
             </div>
