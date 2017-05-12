@@ -13,7 +13,7 @@ var FacetList = require('./facetlist');
 import ExperimentsTable from './experiments-table';
 var { isServerSide, expFxn, Filters, navigate, object } = require('./util');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
-var { FlexibleDescriptionBox } = require('./experiment-common');
+var { FlexibleDescriptionBox } = require('./item-pages/components');
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item

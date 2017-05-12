@@ -112,3 +112,5 @@ module.exports.AuditTabView = require('./AuditTabView').default;
 module.exports.AttributionTabView = require('./AttributionTabView').default;
 
 module.exports.WorkflowDetailPane = require('./WorkflowDetailPane').default;
+
+module.exports.FlexibleDescriptionBox = require('./FlexibleDescriptionBox').default;

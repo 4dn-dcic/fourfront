@@ -815,16 +815,50 @@ $download-button-width : 100px;
 			}
 		}
 		.information {
-			margin-top: 18px;
-			margin-bottom: 20px;
-			padding-top: 20px;
+			margin-top: 12px;
+			padding-bottom: 3px;
+			padding-top: 0;
 			border-top: 1px solid #ccc;
-			> h3 {
+			
+
+			& + hr {
+				border-color: #ccc;
+			}
+
+			> h3,
+			> .row > div > h3 {
 				margin-top: 1px;
+				margin-bottom : 0px;
 				> pre {
-					margin-top: 2px;
+					margin-top: 5px;
 				}
 			}
+			> .row > div > h4,
+			> .row > div > h5 {
+				margin-top: 3px;
+				margin-bottom: 3px;
+				> .download-button {
+					margin-top: 3px;
+				}
+			}
+
+			> .row > .box {
+				padding-top : 20px;
+				min-height: 64px;
+			}
+
+			.description-box-container {
+				padding-top: 2px;
+			}
+
+			.file-title {
+				.download-button-container {
+					position: absolute;
+					right: 10px;
+					top: 40px;
+				}
+			}
+
 		}
 	}
 }
