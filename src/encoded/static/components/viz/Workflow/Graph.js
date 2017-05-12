@@ -11,7 +11,7 @@ import StateContainer from './StateContainer';
 import ScrollContainer from './ScrollContainer';
 import NodesLayer from './NodesLayer';
 import EdgesLayer from './EdgesLayer';
-import DetailPane from './DetailPane';
+import DefaultDetailPane from './DefaultDetailPane';
 
 /**
  * Primary/entry component for the Workflow graph.
@@ -21,7 +21,7 @@ import DetailPane from './DetailPane';
  * @extends {React.Component}
  * @prop {Object[]} nodes                   Array of node objects to plot. Both nodes and edges can be generated from a CWL-like structure using static functions, including the provided 'parseAnalysisSteps'. See propTypes in class def below for object structure.
  * @prop {Object[]} edges                   Array of edge objects to plot. See propTypes in class def below for object structure.
- * @prop {React.Component} [detailPane]     Provide a React Component instance (e.g. as JSX) to use to display node metadata at bottom of graph. A default pane applicable to 4DN is used if not provided.
+ * @prop {React.Component} [detailPane]     Provide a React Component instance (e.g. as JSX) to use to display node metadata at bottom of graph. A default pane applicable to 4DN is used if not provided. Pass in null to perform your own logic in onNodeClick.
  * @prop {function} [onNodeClick]           A function to be executed each time a node is clicked. 'this' will refer to internal statecontainer. Should accept params: {Object} 'node', {Object|null} 'selectedNode', and {MouseEvent} 'evt'. By default, it changes internal state's selectedNode. You should either disable props.checkHrefForSelectedNode -or- change href in this function.
  * @prop {function} [isNodeDisabled]        Function which accepts a 'node' object and returns a boolean.
  * @prop {boolean} [checkHrefForSelectedNode=true] - If true, will check props.href or window.location.href on updates as well as mounting and update selectedNode if '#' + node.name is in URL. Recommended to leave as true and in props.onNodeClick, to change href to contain '#' + node.name.
@@ -43,6 +43,8 @@ export default class Graph extends React.Component {
             'left'              : PropTypes.number.isRequired,
             'right'             : PropTypes.number.isRequired
         }).isRequired,
+        'nodeElement'       : PropTypes.element, // !!TODO!! Allow to pass in a Node element in place of default Node component and extend its props. For making reusable.
+        'edgeElement'       : PropTypes.element, // !!TODO!!
         'detailPane'        : PropTypes.element,
         'nodes'             : PropTypes.arrayOf(PropTypes.shape({
             'column'            : PropTypes.number.isRequired,
@@ -77,7 +79,7 @@ export default class Graph extends React.Component {
         'columnWidth'   : 150,
         'rowSpacing'    : 56,
         'pathArrows'    : true,
-        'detailPane'    : <DetailPane />,
+        'detailPane'    : <DefaultDetailPane />,
         'rowSpacingType': 'wide',
         'onNodeClick'   : null,
         'innerMargin'   : {
@@ -204,14 +206,13 @@ export default class Graph extends React.Component {
                             columnWidth={this.props.columnWidth}
                             columnSpacing={this.props.columnSpacing}
                             pathArrows={this.props.pathArrows}
-                            schemas={this.props.schemas}
                             isNodeDisabled={this.props.isNodeDisabled}
                             href={this.props.href}
                             onNodeClick={this.props.onNodeClick}
                         >
                             <ScrollContainer>
-                                <EdgesLayer />
-                                <NodesLayer />
+                                <EdgesLayer edgeElement={this.props.edgeElement} />
+                                <NodesLayer nodeElement={this.props.nodeElement} />
                             </ScrollContainer>
                             { this.props.detailPane }
                         </StateContainer>

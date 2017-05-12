@@ -4,7 +4,7 @@ var React = require('react');
 var globals = require('./../globals');
 var _ = require('underscore');
 var { DropdownButton, MenuItem } = require('react-bootstrap');
-var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ItemFooterRow, WorkflowDetailPane } = require('./components');
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 var { console, object, DateUtility, Filters, isServerSide } = require('./../util');
@@ -114,20 +114,26 @@ class GraphSection extends React.Component {
         }
     }
 
+    commonGraphProps(){
+        return {
+            'href'        : this.props.href,
+            'onNodeClick' : onItemPageNodeClick,
+            'detailPane'  : <WorkflowDetailPane schemas={this.props.schemas} />,
+            'isNodeDisabled' : GraphSection.isNodeDisabled
+        };
+    }
+
     basicGraph(){
         if (!Array.isArray(this.props.context.analysis_steps)) return null;
         var graphData = parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
-                schemas={this.props.schemas}
-                isNodeDisabled={GraphSection.isNodeDisabled}
-                href={this.props.href}
-                onNodeClick={onItemPageNodeClick}
             />
         );
     }
@@ -137,12 +143,9 @@ class GraphSection extends React.Component {
         var graphData = parseAnalysisSteps(this.props.context.analysis_steps);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
-                schemas={this.props.schemas}
-                isNodeDisabled={GraphSection.isNodeDisabled}
-                href={this.props.href}
-                onNodeClick={onItemPageNodeClick}
             />
         );
     }

@@ -29,15 +29,18 @@ export default class Edge extends React.Component {
         );
     }
 
+    static defaultProps = {
+        'edgeStyle' : 'curve',
+        'radius' : 12
+    }
+
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
         this.generatePathDimension = this.generatePathDimension.bind(this);
     }
 
-    generatePathDimension(edge, edgeStyle = 'curve', radius = 12){
-        var startOffset = 5;//(edge.source.type === 'input' || edge.source.type === 'output') ? 0 : 5;
-        var endOffset = -5; //(edge.target.type === 'input' || edge.target.type === 'output') ? 0 : -5;
+    generatePathDimension(edge, edgeStyle = 'curve', radius = 12, startOffset = 5, endOffset = -5){
         if (this.props.pathArrows){
             endOffset -= 8;
         }
@@ -108,7 +111,7 @@ export default class Edge extends React.Component {
         var disabled = Edge.isDisabled(edge, this.props.isNodeDisabled);
         return (
             <path
-                d={this.generatePathDimension(edge)}
+                d={this.generatePathDimension(edge, this.props.edgeStyle, this.props.radius)}
                 className={"edge-path" + (disabled ? ' disabled' : '' )}
                 data-edge-selected={Edge.isSelected(edge, this.props.selectedNode, disabled)}
                 data-source={edge.source.name}

@@ -3,7 +3,7 @@
 var React = require('react');
 var globals = require('./../globals');
 var _ = require('underscore');
-var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane } = require('./components');
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 var { console, object, DateUtility, Filters, isServerSide, navigate } = require('./../util');
@@ -233,6 +233,14 @@ class GraphSection extends React.Component {
         return props.context && props.context.cwl_data && GraphSection.isCwlDataValid(props.context.cwl_data);
     }
 
+    commonGraphProps(){
+        return {
+            'href'        : this.props.href,
+            'onNodeClick' : onItemPageNodeClick,
+            'detailPane'  : <WorkflowDetailPane schemas={this.props.schemas} />
+        };
+    }
+
     cwlGraph(){
         if (!this.cwlDataExists()) return (
             <div>
@@ -244,11 +252,9 @@ class GraphSection extends React.Component {
         );
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
-                href={this.props.href}
-                schemas={this.props.schemas}
-                onNodeClick={onItemPageNodeClick}
             />
         );
     }
@@ -258,14 +264,12 @@ class GraphSection extends React.Component {
         var graphData = parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
-                href={this.props.href}
-                schemas={this.props.schemas}
-                onNodeClick={onItemPageNodeClick}
             />
         );
     }
@@ -275,11 +279,9 @@ class GraphSection extends React.Component {
         var graphData = parseAnalysisSteps(this.props.context.analysis_steps);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
-                href={this.props.href}
-                schemas={this.props.schemas}
-                onNodeClick={onItemPageNodeClick}
             />
         );
     }

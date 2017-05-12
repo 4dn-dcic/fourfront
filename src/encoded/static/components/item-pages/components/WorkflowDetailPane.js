@@ -6,10 +6,15 @@ import { ItemDetailList } from './../../item-pages/components';
 import { getTitleStringFromContext } from './../../item-pages/item';
 
 
-export default class DetailPane extends React.Component {
+export default class WorkflowDetailPane extends React.Component {
+
+    static propTypes = {
+        'selectedNode' : PropTypes.oneOfType([ PropTypes.object, PropTypes.oneOf([null]) ])
+    }
 
     static defaultProps = {
         'minHeight' : 500,
+        'selectedNode' : null,
         'keyTitleDescriptionMap' : {
             '@id' : {
                 'title' : 'Link'
