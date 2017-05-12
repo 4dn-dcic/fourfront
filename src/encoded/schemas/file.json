@@ -87,7 +87,7 @@
             "format": "hex"
         },
         "file_size": {
-            "title": "File size",
+            "title": "File Size",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
             "type": "integer"
@@ -122,7 +122,7 @@
             }
         },
         "restricted": {
-            "title": "Restricted file",
+            "title": "Is Restricted File",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "description": "A flag to indicate whether this file is subject to restricted access",
             "type": "boolean"
@@ -148,8 +148,8 @@
         },
         "quality_metric": {
           "type": "string",
-          "title": "Quality metric",
-          "description": "The associated qc reports",
+          "title": "Quality Metric",
+          "description": "The associated QC reports",
           "exclude_from": ["submit4dn", "FFedit-create"],
           "linkTo": "QualityMetric"
         }
