@@ -330,23 +330,7 @@ def convert2namespace(uri):
     return ns[name]
 
 
-def get_definition_terms1(connection, ontology_id):
-    '''Checks an ontology item for ontology_terms that are used
-        to designate synonyms in that ontology and returns a list
-        of OntologyTerm dicts.
-    '''
-    synterms = None
-    ontologies = get_ontologies(connection, [ontology_id])
-    if ontologies:
-        ontology = ontologies[0]
-        synonym_ids = ontology.get('synonym_terms')
-        if synonym_ids is not None:
-            synterms = [get_FDN(termid, connection) for termid in synonym_ids]
-
-    return synterms
-
-
-def get_syndef_terms_as_uri(connection, ontology, termtype, as_rdf=True):
+def get_syndef_terms_as_uri(ontology, termtype, as_rdf=True):
     '''Checks an ontology item for ontology_terms that are used
         to designate synonyms or definitions in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
@@ -359,22 +343,22 @@ def get_syndef_terms_as_uri(connection, ontology, termtype, as_rdf=True):
     return uris
 
 
-def get_synonym_term_uris(connection, ontology, as_rdf=True):
+def get_synonym_term_uris(ontology, as_rdf=True):
     '''Checks an ontology item for ontology_terms that are used
         to designate synonyms in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
     '''
-    return get_syndef_terms_as_uri(connection, ontology, 'synonym_terms', as_rdf)
+    return get_syndef_terms_as_uri(ontology, 'synonym_terms', as_rdf)
 
 
-def get_definition_term_uris(connection, ontology, as_rdf=True):
+def get_definition_term_uris(ontology, as_rdf=True):
     '''Checks an ontology item for ontology_terms that are used
         to designate definitions in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
     '''
-    return get_syndef_terms_as_uri(connection, ontology, 'definition_terms', as_rdf)
+    return get_syndef_terms_as_uri(ontology, 'definition_terms', as_rdf)
 
 
 def get_slim_terms(connection):
@@ -384,7 +368,7 @@ def get_slim_terms(connection):
     # currently need to hard code the categories of slims but once the ability
     # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
-    slim_categories = ['developmental', 'assay', 'organ', 'system']
+    slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
     search_suffix = 'search/?type=OntologyTerm&limit=all&is_slim_for='
     slim_terms = []
     for cat in slim_categories:
@@ -617,8 +601,8 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms):
 
 
 def download_and_process_owl(ontology, connection, terms):
-    synonym_terms = get_synonym_term_uris(connection, ontology)
-    definition_terms = get_definition_term_uris(connection, ontology)
+    synonym_terms = get_synonym_term_uris(ontology)
+    definition_terms = get_definition_term_uris(ontology)
     data = Owler(ontology['download_url'])
     if not terms:
         terms = {}
@@ -765,6 +749,7 @@ def main():
 
     # fourfront connection
     connection = connect2server(args.keyfile, args.key, app)
+    import pdb; pdb.set_trace()
     ontologies = get_ontologies(connection, args.ontologies)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN'):
