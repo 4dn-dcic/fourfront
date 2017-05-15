@@ -731,6 +731,8 @@
     "workflow_diagram": "",
     "title": "Hi-C processing part B revision 6",
     "description": "Hi-C processing part B revision 6",
-    "accession": "4DNWFSOZLJGI"
+    "accession": "4DNWFSOZLJGI",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab"
 }
 ]
