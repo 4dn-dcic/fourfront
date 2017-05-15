@@ -554,7 +554,7 @@ def add_uuids(partitioned_terms):
                     if p in idmap:
                         puuids.append(idmap[p])
                     else:
-                        print('WARNING - ', p, ' MSSING FROM IDMAP')
+                        print('WARNING - ', p, ' MISSING FROM IDMAP')
                 term['parents'] = puuids
     # and finally do the same for the patches
     patches = partitioned_terms.get('patch', None)
@@ -566,7 +566,7 @@ def add_uuids(partitioned_terms):
                     if p in idmap:
                         puuids.append(idmap[p])
                     else:
-                        print('WARNING - ', p, ' MSSING FROM IDMAP')
+                        print('WARNING - ', p, ' MISSING FROM IDMAP')
                 term['parents'] = puuids
     try:
         post = list(newterms.values())
@@ -749,7 +749,6 @@ def main():
 
     # fourfront connection
     connection = connect2server(args.keyfile, args.key, app)
-    import pdb; pdb.set_trace()
     ontologies = get_ontologies(connection, args.ontologies)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN'):
@@ -776,8 +775,11 @@ def main():
         partitioned_terms = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
         terms2write = add_uuids(partitioned_terms)
 
-        write_outfile(terms2write[0], postfile)
-        write_outfile(terms2write[1], patchfile)
+        pretty = False
+        if args.pretty:
+            pretty = True
+        write_outfile(terms2write[0], postfile, pretty)
+        write_outfile(terms2write[1], patchfile, pretty)
 
         if args.load:  # load em into the database
             load_ontology_terms(app,
