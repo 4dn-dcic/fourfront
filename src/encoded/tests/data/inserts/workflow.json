@@ -650,5 +650,80 @@
         }
     ],
     "description": "Creating a bam and pairs files from a pair of fastq files"
+},
+{
+    "cwl_pointer": "https://github.com/4dn-dcic/pipelines-cwl/blob/master/cwl_sbg/hi-c-processing-partb.6.cwl", 
+    "uuid": "a217d61c-49e5-4c33-afab-9ec90d65faf3", 
+    "arguments": [
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "merge_pairs", 
+                    "step_argument_name": "input_pairs_index", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "input_pairs_index", 
+            "argument_format": "pairs_px2",
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "merge_pairs", 
+                    "step_argument_name": "input_pairs", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "input_pairs", 
+            "argument_format": "pairs",
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "merge_pairs", 
+                    "step_argument_name": "outprefix", 
+                    "step_argument_type": "parameter"
+                }
+            ], 
+            "workflow_argument_name": "outprefix", 
+            "argument_type": "parameter"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "merge_pairs", 
+                    "step_argument_name": "output_pairs_index", 
+                    "step_argument_type": "Output file"
+                }
+            ], 
+            "argument_type": "Output processed file",
+            "workflow_argument_name": "output_pairs_index", 
+            "argument_format": "pairs_px2"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "merge_pairs", 
+                    "step_argument_name": "output_pairs", 
+                    "step_argument_type": "Output file"
+                }
+            ], 
+            "workflow_argument_name": "output_pairs", 
+            "argument_type": "Output processed file",
+            "argument_format": "pairs"
+        }
+    ], 
+    "title": "hi-c-processing-partb/6", 
+    "workflow_steps": [
+        {
+            "step": "e4068c7a-49e5-4c33-afab-9ec90d65faf3", 
+            "step_name": "merge_pairs"
+        }
+    ], 
+    "workflow_type": "Hi-C data analysis", 
+    "workflow_diagram": "", 
+    "description": "Hi-C processing part B revision 6"
 }
 ]
