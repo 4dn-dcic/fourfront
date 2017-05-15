@@ -720,7 +720,7 @@
             "argument_format": "pairs"
         }
     ], 
-    "title": "hi-c-processing-partb/6", 
+    "name": "hi-c-processing-partb/6", 
     "workflow_steps": [
         {
             "step": "e4068c7a-49e5-4c33-afab-9ec90d65faf3",
