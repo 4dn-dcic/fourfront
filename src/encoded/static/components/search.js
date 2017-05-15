@@ -28,10 +28,9 @@ var Listing = function (result, schemas, selectCallback) {
 class ResultTableEntry extends React.Component{
     constructor(props){
         super(props);
-    }
-
-    state = {
-        'open': false
+        this.state = {
+            'open': false
+        }
     }
 
     handleToggle = (e) => {

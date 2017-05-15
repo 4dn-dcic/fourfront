@@ -5,16 +5,16 @@ var _ = require('underscore');
 var { ajax, console, object, isServerSide, layout } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
-var BuildField = require('./submission-fields').BuildField;
 var makeTitle = require('../item-pages/item').title;
 var Alerts = require('../alerts');
 var Search = require('../search').Search;
 var getLargeMD5 = require('../util/file-utility').getLargeMD5;
 var ReactTooltip = require('react-tooltip');
 import SubmissionTree from './expandable-tree';
+import BuildField from './submission-fields';
 
 /*
-Master container component for Submission components.
+Key container component for Submission components.
 Holds object values for all downstream components and owns the methods
 for submitting data. Passes the appropriate data downwards to the individual
 object views.
@@ -23,52 +23,59 @@ export default class SubmissionView extends React.Component{
 
     constructor(props){
         super(props);
-    }
-
-    /*
-    * There are a lot of individual states to keep track of, but most workflow-runs
-    * the same way: they are objects where the key is this.state.currKey and the
-    * content is some information about the object created.
-    * - currKey is an int that is used to index the objects you are creating and
-    *   acts as a switch for the states.
-    * - masterContext (idx: currKey) stores the context for each new object
-    * - masterValid (idx: currKey) stores the validation status for each new object
-        0 is cannot yet validate (incomplete children), 1 is ready to validate,
-        2 is validation error, 3 is successfully validated, 4 is submitted
-    * - masterDisplay (idx: currKey) stores the formatted titles for each object
-    * - keyIter (type: int) is a reference to the current maximum currKey. Is
-    *   used to iterate to add more keys.
-    * - currKey (type: int) controls which object we're manipulating.
-    * - keyHierarchy (type: obj) nested form of object relationships, where values
-    *   are currKey idxs for created objects and @id paths for existing objects.
-    * - unusedLinks (idx: currKey) all possible child object types for a given currKey.
-    * - processingFetch (type: bool) keeps track of whether top level is processing a request
-    * - errorCount (type: int) keeps track of how many validation errors currently exist
-    * - creatingIdx (type: int) has to do with alias creation. Value is equal to a currKey
-    *   index when currently creating an alias, null otherwise.
-    * - creatingType (type: str) similar to creatingIdx, but string object type.
-    * - creatingAlias (type: str) stores input when creating an alias
-    * - creatingAliasMessage (type: str) stores any error messages to display while
-    *   alias creation is occuring.
-    * - fullScreen (type: bool) if true, the whole component rendered is the Search
-    *   page for pre-existing object selection.
-    */
-    state = {
-        'masterContext': null,
-        'masterValid': null,
-        'masterTypes': null,
-        'masterDisplay': null, // serves to hold navigation-formatted names for objs
-        'keyIter': 0, // serves as key versions for child objects. 0 is reserved for principal
-        'currKey': null, // start with viewing principle object (key = 0),
-        'keyHierarchy': {},
-        'unusedLinks': {}, // hold unused LinkTos for each obj key
-        'processingFetch': false,
-        'errorCount': 0,
-        'creatingIdx': null,
-        'creatingType': null,
-        'creatingAlias': '',
-        'creatingAliasMessage': null,
-        'fullScreen': false
+        /*
+        * *** DETAIL ON THIS.STATE ***
+        * There are a lot of individual states to keep track of, but most workflow-runs
+        * the same way: they are objects where the key is this.state.currKey and the
+        * content is some information about the object created.
+        * - currKey is an int that is used to index the objects you are creating and
+        *   acts as a switch for the states.
+        * - keyContext (idx: currKey) stores the context for each new object
+        * - keyValid (idx: currKey) stores the validation status for each new object
+            0 is cannot yet validate (incomplete children), 1 is ready to validate,
+            2 is validation error, 3 is successfully validated, 4 is submitted
+        * - keyDisplay (idx: currKey) stores the formatted titles for each object
+        * - keyComplete (idx: currKey) stores completed custom object's @id path by key.
+        * - keyIter (type: int) is a reference to the current maximum currKey. Is
+        *   used to iterate to add more keys.
+        * - currKey (type: int) controls which object we're manipulating.
+        * - keyHierarchy (type: obj) nested form of object relationships, where values
+        *   are currKey idxs for created objects and @id paths for existing objects.
+        * - keyUnused (idx: currKey) all possible child object types for a given currKey.
+            Stored as schema title, or schema LinkTo if not present.
+        * - keyLinks (idx: currKey) holds the corresponding keyUnused field for each key.
+        * - processingFetch (type: bool) keeps track of whether top level is processing a request
+        * - errorCount (type: int) keeps track of how many validation errors currently exist
+        * - creatingIdx (type: int) has to do with alias creation. Value is equal to a currKey
+        *   index when currently creating an alias, null otherwise.
+        * - creatingType (type: str) similar to creatingIdx, but string object type.
+        * - creatingLink (type: str) similar to creatingIdx, but string link type.
+        * - creatingAlias (type: str) stores input when creating an alias
+        * - creatingAliasMessage (type: str) stores any error messages to display while
+        *   alias creation is occuring.
+        * - fullScreen (type: bool) if true, the whole component rendered is the Search
+        *   page for pre-existing object selection.
+        */
+        this.state = {
+            'keyContext': null,
+            'keyValid': null,
+            'keyTypes': null,
+            'keyDisplay': null, // serves to hold navigation-formatted names for objs
+            'keyComplete': {}, // init to empty dict b/c objs cannot be complete on initialization
+            'keyIter': 0, // serves as key versions for child objects. 0 is reserved for principal
+            'currKey': null, // start with viewing principle object (key = 0),
+            'keyHierarchy': {},
+            'keyUnused': {}, // hold unused LinkTos for each obj key
+            'keyLinks': {}, // associates each non-primary key with a field
+            'processingFetch': false,
+            'errorCount': 0,
+            'creatingIdx': null,
+            'creatingType': null,
+            'creatingLink': null,
+            'creatingAlias': '',
+            'creatingAliasMessage': null,
+            'fullScreen': false
+        }
     }
 
     // run async request to get frame=object context to fill the forms
@@ -84,18 +91,36 @@ export default class SubmissionView extends React.Component{
         }
     }
 
-    modifyMasterContext = (objKey, newContext) => {
-        // function that modifies new context and sets validation state whenever
-        // a modification occurs. Is passed down to child elements representing
-        // individual fields
-        var contextCopy = this.state.masterContext;
-        var validCopy = this.state.masterValid;
+    // function that modifies new context and sets validation state whenever
+    // a modification occurs. Is passed down to child elements representing
+    // individual fields
+    modifyKeyContext = (objKey, newContext) => {
+        var contextCopy = this.state.keyContext;
+        var validCopy = this.state.keyValid;
         contextCopy[objKey] = newContext;
-        validCopy[objKey] = 0;
+        validCopy[objKey] = this.findValidationState(objKey);
         this.setState({
-            'masterContext': contextCopy,
-            'masterValid': validCopy
+            'keyContext': contextCopy,
+            'keyValid': validCopy
         });
+    }
+
+    // use searchHierarchy() to see if the children of the given key
+    // contain any un-submitted custom objects. If they do, return
+    // 1 (ready to validate). Otherwise return 0 (not ready to validate)
+    findValidationState = (keyIdx) => {
+        var hierarchy = JSON.parse(JSON.stringify(this.state.keyHierarchy));
+        var keyHierarchy = searchHierarchy(hierarchy, keyIdx);
+        if(keyHierarchy === null) return 0;
+        var validationReturn = 1;
+        Object.keys(keyHierarchy).forEach(function(key, index){
+            if(!isNaN(key)){
+                if(!this.state.keyComplete[key] && this.state.keyContext[key]){
+                    validationReturn = 0;
+                }
+            }
+        }.bind(this));
+        return validationReturn;
     }
 
     // we need the frame=object context for create, so fetch this
@@ -104,20 +129,29 @@ export default class SubmissionView extends React.Component{
         var contextID = context['@id'] || null;
         var principalTypes = this.props.context['@type'];
         var initType = {0: principalTypes[0]};
-        var initValid = {0: 0};
+        var initValid = {0: 1};
         var principalDisplay = 'New ' + principalTypes[0];
         var initDisplay = {0: principalDisplay};
         var initUnused = {};
         var unusedList = [];
-        var creatingIdx = 0;
-        var creatingType = principalTypes[0];
         var schema = schemas[principalTypes[0]];
         var hierarchy = this.state.keyHierarchy;
+        var existingAlias = false;
         hierarchy[0] = {};
         // if @id cannot be found or we are creating from scratch, start with empty fields
         if(!contextID || this.props.create){
             initContext[0] = buildContext({}, schema, unusedList, this.props.edit, this.props.create);
             initUnused[0] = unusedList;
+            this.setState({
+                'keyContext': initContext,
+                'keyValid': initValid,
+                'keyTypes': initType,
+                'keyDisplay': initDisplay,
+                'currKey': 0,
+                'keyHierarchy': hierarchy,
+                'keyUnused': initUnused
+            });
+            this.initCreateObj(principalTypes[0], 0, 'Primary Object');
         }else{
             ajax.promise(contextID + '?frame=object').then(response => {
                 if (response['@id'] && response['@id'] === contextID){
@@ -126,48 +160,44 @@ export default class SubmissionView extends React.Component{
                     if(this.props.edit && response.aliases && response.aliases.length > 0){
                         // we already have an alias for editing, so use it for title
                         // setting creatingIdx and creatingType to null prevents alias creation
-                        creatingIdx = null;
-                        creatingType = null;
                         initDisplay[0] = response.aliases[0];
+                        existingAlias = true;
                     }
-                    this.setState({
-                        'masterContext': initContext,
-                        'masterValid': initValid,
-                        'masterTypes': initType,
-                        'masterDisplay': initDisplay,
-                        'currKey': 0,
-                        'keyHierarchy': hierarchy,
-                        'unusedLinks': initUnused,
-                        'creatingIdx': creatingIdx,
-                        'creatingType': creatingType
-                    });
-                    return;
                 }else{
                     // something went wrong with fetching context. Just use an empty object
                     initContext[0] = buildContext({}, schema, unusedList, this.props.edit, this.props.create);
                     initUnused[0] = unusedList;
                 }
-
+                this.setState({
+                    'keyContext': initContext,
+                    'keyValid': initValid,
+                    'keyTypes': initType,
+                    'keyDisplay': initDisplay,
+                    'currKey': 0,
+                    'keyHierarchy': hierarchy,
+                    'keyUnused': initUnused,
+                    'keyLinks': initLinks
+                });
+                this.initCreateObj(principalTypes[0], 0, 'Primary Object', existingAlias);
             });
         }
-        this.setState({
-            'masterContext': initContext,
-            'masterValid': initValid,
-            'masterTypes': initType,
-            'masterDisplay': initDisplay,
-            'currKey': 0,
-            'keyHierarchy': hierarchy,
-            'unusedLinks': initUnused,
-            'creatingIdx': creatingIdx,
-            'creatingType': creatingType
-        });
     }
 
-    initCreateObj = (type, newIdx) => {
-        this.setState({
-            'creatingIdx': newIdx,
-            'creatingType': type
-        });
+    initCreateObj = (type, newIdx, newLink, existingAlias=false) => {
+        // don't prompt alias input if an alias already exists or not in schema
+        if(!existingAlias && this.props.schemas){
+            var schema = this.props.schemas[type] || null;
+            if(schema && schema.properties.aliases){
+                this.setState({
+                    'creatingIdx': newIdx,
+                    'creatingType': type,
+                    'creatingLink': newLink
+                });
+            }else{ // schema doesn't support aliases
+                var fallbackAlias = 'My ' + type + ' ' + newIdx;
+                this.createObj(type, newIdx, newLink, fallbackAlias);
+            }
+        }
     }
 
     handleAliasChange = (e) => {
@@ -176,12 +206,13 @@ export default class SubmissionView extends React.Component{
         this.setState({'creatingAlias': currValue});
     }
 
-    submitAlias = (e) =>{
+    submitAlias = (e) => {
         e.preventDefault();
         var type = this.state.creatingType;
         var schema = this.props.schemas[type];
         var newIdx = this.state.creatingIdx;
-        if(type === null || newIdx === null){
+        var newLink = this.state.creatingLink;
+        if(type === null || newIdx === null || newLink === null){
             return;
         }
         var alias = this.state.creatingAlias;
@@ -196,8 +227,8 @@ export default class SubmissionView extends React.Component{
                 });
                 return;
             }
-            for(var key in this.state.masterDisplay){
-                if(this.state.masterDisplay[key] === alias){
+            for(var key in this.state.keyDisplay){
+                if(this.state.keyDisplay[key] === alias){
                     this.setState({
                         'creatingAliasMessage': 'You have already used this alias.'
                     });
@@ -207,7 +238,7 @@ export default class SubmissionView extends React.Component{
             // see if the input alias is already being used
             ajax.promise('/' + alias).then(data => {
                 if (data && data.title && data.title === "Not Found"){
-                    this.createObj(type, newIdx, alias);
+                    this.createObj(type, newIdx, newLink, alias);
                 }else{
                     this.setState({
                         'creatingAliasMessage': 'ERROR. That alias is already taken.'
@@ -219,36 +250,36 @@ export default class SubmissionView extends React.Component{
     }
 
     modifyAlias = () => {
-        var masterDisplay = this.state.masterDisplay;
-        var masterTypes = this.state.masterTypes;
+        var keyDisplay = this.state.keyDisplay;
+        var keyTypes = this.state.keyTypes;
         var currKey = this.state.currKey;
-        var currAlias = masterDisplay[currKey];
-        var aliases = this.state.masterContext[currKey].aliases || null;
+        var currAlias = keyDisplay[currKey];
+        var aliases = this.state.keyContext[currKey].aliases || null;
         // no aliases
         if(aliases === null || (aliases instanceof Array && aliases.length == 0)){
-            masterDisplay[currKey] = 'My ' + masterTypes[currKey] + ' ' + currKey;
+            keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
         }else if(!_.contains(aliases, currAlias)){
             var lastAlias = aliases[aliases.length-1];
             if(lastAlias !== null){
-                masterDisplay[currKey] = lastAlias;
+                keyDisplay[currKey] = lastAlias;
             }else{
-                masterDisplay[currKey] = 'My ' + masterTypes[currKey] + ' ' + currKey;
+                keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
             }
         }
-        this.setState({'masterDisplay': masterDisplay});
+        this.setState({'keyDisplay': keyDisplay});
     }
 
-    createObj = (type, newIdx, alias) => {
-        var contextCopy = this.state.masterContext;
-        var validCopy = this.state.masterValid;
-        var typesCopy = this.state.masterTypes;
+    createObj = (type, newIdx, newLink, alias) => {
+        var contextCopy = this.state.keyContext;
+        var validCopy = this.state.keyValid;
+        var typesCopy = this.state.keyTypes;
         var parentKeyIdx = this.state.currKey;
         var hierarchy = this.state.keyHierarchy;
-        var masterDisplay = this.state.masterDisplay;
-        var unusedCopy = this.state.unusedLinks;
+        var keyDisplay = this.state.keyDisplay;
+        var unusedCopy = this.state.keyUnused;
+        var linksCopy = this.state.keyLinks;
         var unusedList = [];
-        // increase key iter by 1 for a unique key
-        // this is used as a key for masterContext, masterValid, and masterTypes
+        // increase key iter by 1 for a new unique key
         var keyIdx;
         var newHierarchy;
         if(newIdx === 0){ // initial object creation
@@ -261,113 +292,139 @@ export default class SubmissionView extends React.Component{
                 return;
             }
             newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
-            validCopy[keyIdx] = 0;
+            validCopy[keyIdx] = 1; // new object has no incomplete children yet
+            validCopy[parentKeyIdx] = 0; // parent is now not ready for validation
             typesCopy[keyIdx] = type;
         }
-        var addAlias = contextCopy[keyIdx] ? contextCopy[keyIdx] : {};
-        if(addAlias.aliases){
-            addAlias.aliases.push(alias)
+        var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
+        if(contextWithAlias.aliases){
+            contextWithAlias.aliases.push(alias)
         }else{
-            addAlias.aliases = [alias];
+            contextWithAlias.aliases = [alias];
         }
-        contextCopy[keyIdx] = buildContext(addAlias, this.props.schemas[type], unusedList, true);
+        contextCopy[keyIdx] = buildContext(contextWithAlias, this.props.schemas[type], unusedList, true);
         // remove the new object type from parent's unusedList
-        if(_.contains(unusedCopy[parentKeyIdx], type)){
-            var rmIdx = unusedCopy[parentKeyIdx].indexOf(type);
+        if(_.contains(unusedCopy[parentKeyIdx], newLink)){
+            var rmIdx = unusedCopy[parentKeyIdx].indexOf(newLink);
             if(rmIdx > -1){
                 unusedCopy[parentKeyIdx].splice(rmIdx,1)
             }
         }
         unusedCopy[keyIdx] = unusedList;
-        masterDisplay[keyIdx] = alias;
+        linksCopy[keyIdx] = newLink;
+        keyDisplay[keyIdx] = alias;
         // get rid of any hanging errors
         for(var i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
         }
         this.setState({
-            'masterContext': contextCopy,
-            'masterValid': validCopy,
-            'masterTypes': typesCopy,
-            'masterDisplay': masterDisplay,
+            'keyContext': contextCopy,
+            'keyValid': validCopy,
+            'keyTypes': typesCopy,
+            'keyDisplay': keyDisplay,
             'currKey': keyIdx,
             'keyIter': keyIdx,
             'keyHierarchy': newHierarchy,
-            'unusedLinks': unusedCopy,
+            'keyUnused': unusedCopy,
+            'keyLinks': linksCopy,
             'processingFetch': false,
             'errorCount': 0,
             'creatingIdx': null,
             'creatingType': null,
+            'creatingLink': null,
             'creatingAlias': '',
             'creatingAliasMessage': null
         });
     }
 
     // key is @id for exisiting objs, state key idx for custom objs
-    removeObj = (key) => {
-        var contextCopy = this.state.masterContext;
-        var validCopy = this.state.masterValid;
-        var typesCopy = this.state.masterTypes;
-        var masterDisplay = this.state.masterDisplay;
-        var unusedCopy = this.state.unusedLinks;
-        if(masterDisplay[key]){
+    removeObj = (key, newLink) => {
+        var contextCopy = this.state.keyContext;
+        var validCopy = this.state.keyValid;
+        var typesCopy = this.state.keyTypes;
+        var keyDisplay = this.state.keyDisplay;
+        var keyComplete = this.state.keyComplete;
+        var unusedCopy = this.state.keyUnused;
+        var linksCopy = this.state.keyLinks;
+        if(keyDisplay[key]){
             var hierarchy = this.state.keyHierarchy;
             var newHierarchy = trimHierarchy(hierarchy, key);
-            if(unusedCopy[key]){
-                delete unusedCopy[key];
-            }
+            // for housekeeping, remove the key from keyUnused, keyLinks, and keyComplete
+            if(unusedCopy[key]) delete unusedCopy[key];
+            if(linksCopy[key]) delete linksCopy[key];
+            if(keyComplete[key]) delete keyComplete[key];
             // add the deleted type back to the unused links of the current object
-            if(!_.contains(unusedCopy[this.state.currKey], typesCopy[key])){
-                unusedCopy[this.state.currKey].push(typesCopy[key]);
+            if(!_.contains(unusedCopy[this.state.currKey], newLink)){
+                unusedCopy[this.state.currKey].push(newLink);
             }
             delete typesCopy[key];
-            if(contextCopy[key]){ // custom object
+            if(contextCopy[key]){ // true for a new object
                 delete validCopy[key];
                 delete contextCopy[key];
                 delete typesCopy[key];
             }
             this.setState({
                 'keyHierarchy': newHierarchy,
-                'masterDisplay': masterDisplay,
-                'masterContext': contextCopy,
-                'masterValid': validCopy,
-                'masterTypes': typesCopy
+                'keyDisplay': keyDisplay,
+                'keyContext': contextCopy,
+                'keyValid': validCopy,
+                'keyTypes': typesCopy,
+                'keyLinks': linksCopy
             });
         }
     }
 
-    addExistingObj = (path, display, type) => {
+    addExistingObj = (path, display, type, newLink) => {
         var parentKeyIdx = this.state.currKey;
         var hierarchy = this.state.keyHierarchy;
-        var masterDisplay = this.state.masterDisplay;
-        var masterTypes = this.state.masterTypes;
-        var unusedCopy = this.state.unusedLinks;
+        var keyDisplay = this.state.keyDisplay;
+        var keyTypes = this.state.keyTypes;
+        var unusedCopy = this.state.keyUnused;
+        var linksCopy = this.state.keyLinks;
         hierarchy = modifyHierarchy(hierarchy, path, parentKeyIdx);
-        masterDisplay[path] = display;
-        masterTypes[path] = type;
-        if(_.contains(unusedCopy[parentKeyIdx], type)){
-            var rmIdx = unusedCopy[parentKeyIdx].indexOf(type);
+        keyDisplay[path] = display;
+        keyTypes[path] = type;
+        linksCopy[path] = newLink;
+        if(_.contains(unusedCopy[parentKeyIdx], newLink)){
+            var rmIdx = unusedCopy[parentKeyIdx].indexOf(newLink);
             if(rmIdx > -1){
                 unusedCopy[parentKeyIdx].splice(rmIdx,1)
             }
         }
         this.setState({
             'keyHierarchy': hierarchy,
-            'masterDisplay': masterDisplay,
-            'masterTypes': masterTypes,
-            'unusedLinks': unusedCopy
+            'keyDisplay': keyDisplay,
+            'keyTypes': keyTypes,
+            'keyUnused': unusedCopy,
+            'keyLinks': linksCopy
         });
     }
 
-    setMasterState = (key, value) => {
+    setKeyState = (key, value) => {
         var newState = this.state;
         if(_.contains(Object.keys(newState),key)){
+            // this means we're navigating to a new object if true
             if(key === 'currKey' && value !== this.state.currKey){
+                var keyValid = this.state.keyValid;
+                // if current key is ready for validation, first try that
+                // but suppress warning messages
+                if(keyValid[this.state.currKey] == 1){
+                    this.submitObject(this.state.currKey, true, true);
+                }
                 // get rid of any hanging errors
                 for(var i=0; i<this.state.errorCount; i++){
                     Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
                     newState.errorCount = 0;
                 }
                 newState.processingFetch = false;
+                // see if newly-navigated obj is ready for validation
+                if(keyValid[value] == 0){
+                    var validState = this.findValidationState(value);
+                    if(validState == 1){
+                        keyValid[value] = 1;
+                        newState['keyValid'] = keyValid;
+                    }
+                }
             }
             newState[key] = value;
             this.setState(newState);
@@ -375,7 +432,7 @@ export default class SubmissionView extends React.Component{
     }
 
     generateValidationButton(){
-        var validity = this.state.masterValid[this.state.currKey];
+        var validity = this.state.keyValid[this.state.currKey];
         var style={'width':'100px'};
         // if(this.state.md5Progress && this.state.md5Progress != 100){
         //     return(
@@ -418,7 +475,7 @@ export default class SubmissionView extends React.Component{
     }
 
     generatePostButton(){
-        var validity = this.state.masterValid[this.state.currKey];
+        var validity = this.state.keyValid[this.state.currKey];
         var style={'width':'100px','marginLeft':'10px'};
         if(validity == 3 && !this.state.processingFetch){
             return(
@@ -449,33 +506,33 @@ export default class SubmissionView extends React.Component{
 
     testPostNewContext = (e) => {
         e.preventDefault();
-        this.executePost(this.state.currKey, true);
+        this.submitObject(this.state.currKey, true);
     }
 
     realPostNewContext = (e) => {
         e.preventDefault();
-        this.executePost(this.state.currKey);
+        this.submitObject(this.state.currKey);
     }
 
     // must remove nulls, which are used to represent an empty value in the
     // creation process
     removeNullsFromContext = (inKey) => {
-        var finalizedContext = JSON.parse(JSON.stringify(this.state.masterContext[inKey]));
+        var finalizedContext = JSON.parse(JSON.stringify(this.state.keyContext[inKey]));
         var noNulls = removeNulls(finalizedContext);
         return noNulls;
     }
 
-    executePost = (inKey, test=false) => {
+    submitObject = (inKey, test=false, suppressWarnings=false) => {
         // function to test a POST of the data or actually POST it.
         // validates if test=true, POSTs if test=false.
         var stateToSet = {}; // hold state
-        var masterValid = this.state.masterValid;
-        var currType = this.state.masterTypes[inKey];
+        var keyValid = this.state.keyValid;
+        var currType = this.state.keyTypes[inKey];
         var currSchema = this.props.schemas[currType];
-        var currContext = this.state.masterContext[inKey];
+        var currContext = this.state.keyContext[inKey];
         // this will always be reset when stateToSet is implemented
         stateToSet.processingFetch = false;
-        stateToSet.masterValid = masterValid;
+        stateToSet.keyValid = keyValid;
         var lab;
         var award;
         var finalizedContext = this.removeNullsFromContext(inKey);
@@ -484,12 +541,11 @@ export default class SubmissionView extends React.Component{
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
             stateToSet.errorCount = 0;
         }
-        console.log('contextToPOST:', finalizedContext);
         this.setState({'processingFetch': true});
         ajax.promise('/me?frame=embedded').then(data => {
             if(!data || !data.submits_for || data.submits_for.length == 0){
                 console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
-                masterValid[inKey] = 4;
+                keyValid[inKey] = 2;
                 this.setState(stateToSet);
                 return;
             }
@@ -499,7 +555,7 @@ export default class SubmissionView extends React.Component{
             ajax.promise(lab).then(lab_data => {
                 if(!lab || !lab_data.awards || lab_data.awards.length == 0){
                     console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
-                    masterValid[inKey] = 1;
+                    keyValid[inKey] = 2;
                     this.setState(stateToSet);
                     return;
                 }
@@ -539,31 +595,32 @@ export default class SubmissionView extends React.Component{
                 var payload = JSON.stringify(finalizedContext);
                 ajax.promise(destination, actionMethod, {}, payload).then(response => {
                     if (response.status && response.status !== 'success'){ // error
-                        masterValid[inKey] = 1;
-                        console.log('ERROR IN OBJECT VALIDATION!');
-                        var errorList = response.errors || [response.detail] || [];
-                        // make an alert for each error description
-                        stateToSet.errorCount = errorList.length;
-                        for(var i=0; i<errorList.length; i++){
-                            var detail = errorList[i].description || errorList[i] || "Unidentified error";
-                            if(errorList[i].name && errorList[i].name.length > 0){
-                                detail += ('. See ' + errorList[i].name[0] + ' in ' + this.state.masterDisplay[inKey]);
-                            }else{
-                                detail += ('. See ' + this.state.masterDisplay[inKey]);
+                        keyValid[inKey] = 2;
+                        if(!suppressWarnings){
+                            var errorList = response.errors || [response.detail] || [];
+                            // make an alert for each error description
+                            stateToSet.errorCount = errorList.length;
+                            for(var i=0; i<errorList.length; i++){
+                                var detail = errorList[i].description || errorList[i] || "Unidentified error";
+                                if(errorList[i].name && errorList[i].name.length > 0){
+                                    detail += ('. See ' + errorList[i].name[0] + ' in ' + this.state.keyDisplay[inKey]);
+                                }else{
+                                    detail += ('. See ' + this.state.keyDisplay[inKey]);
+                                }
+                                Alerts.queue({
+                                    'title' : "Validation error " + parseInt(i + 1),
+                                    'message': detail,
+                                    'style': 'danger'
+                                });
                             }
-                            Alerts.queue({
-                                'title' : "Validation error " + parseInt(i + 1),
-                                'message': detail,
-                                'style': 'danger'
-                            });
+                            setTimeout(layout.animateScrollTo(0), 100);
                         }
-                        setTimeout(layout.animateScrollTo(0), 100);
                         this.setState(stateToSet);
                     }else{
                         var response_data;
                         if(test){
                             console.log('OBJECT SUCCESSFULLY TESTED!');
-                            masterValid[inKey] = 2;
+                            keyValid[inKey] = 3;
                             this.setState(stateToSet);
                             return;
                         }else{
@@ -585,11 +642,44 @@ export default class SubmissionView extends React.Component{
                             // Passes upload_manager to uploads.js through app.js
                             this.props.updateUploads(destination, upload_info);
                             alert('Success! Navigating to the uploads page.');
-                            this.props.navigate('/uploads');
+                            // this.props.navigate('/uploads');
                         }else{
-                            console.log('ACTION SUCCESSFUL!');
-                            alert('Success! Navigating to the object page.');
-                            this.props.navigate(destination);
+                            keyValid[inKey] = 4;
+                            // Perform final steps when object is submitted
+                            // *** SHOULD THIS STUFF BE BROKEN OUT INTO ANOTHER FXN?
+                            // find key of parent object, starting from top of hierarchy
+                            var parentKey = findParentFromHierarchy(this.state.keyHierarchy, inKey);
+                            // navigate to parent obj if it was found. Else, go to top level
+                            stateToSet.currKey = parentKey !== null ? parentKey : 0;
+                            var keyUnused = this.state.keyUnused;
+                            var hierarchy = JSON.parse(JSON.stringify(this.state.keyHierarchy));
+                            var typesCopy = this.state.keyTypes;
+                            var keyComplete = this.state.keyComplete;
+                            var linksCopy = this.state.keyLinks;
+                            var displayCopy = this.state.keyDisplay;
+                            // update the state storing completed objects.
+                            keyComplete[inKey] = destination;
+                            // delete all unused links for completed objects.
+                            if(keyUnused[inKey]) delete keyUnused[inKey];
+                            // represent the submitted object with its new path
+                            // rather than old keyIdx.
+                            linksCopy[destination] = linksCopy[inKey];
+                            typesCopy[destination] = currType;
+                            displayCopy[destination] = displayCopy[inKey];
+                            var newHierarchy = replaceInHierarchy(hierarchy, inKey, destination);
+                            stateToSet.keyLinks = linksCopy;
+                            stateToSet.keyTypes = typesCopy;
+                            stateToSet.keyHierarchy = newHierarchy;
+                            stateToSet.keyComplete = keyComplete;
+                            stateToSet.keyUnused = keyUnused;
+                            stateToSet.keyDisplay = displayCopy;
+                            if(inKey == 0){ // top level object
+                                alert('Success! Navigating to your new object.');
+                                this.props.navigate(destination);
+                            }else{
+                                alert(this.state.keyDisplay[inKey] + ' was successfully submitted.');
+                                this.setState(stateToSet);
+                            }
                         }
                     }
                 });
@@ -602,13 +692,13 @@ export default class SubmissionView extends React.Component{
         //hard coded for now
         var currKey = this.state.currKey;
         // see if initialized
-        if(!this.state.masterContext || currKey === null){
+        if(!this.state.keyContext || currKey === null){
             return null;
         }
         var aliasModal = this.state.creatingIdx !== null && this.state.creatingType !== null;
-        var currType = this.state.masterTypes[currKey];
+        var currType = this.state.keyTypes[currKey];
         var currSchema = this.props.schemas[currType];
-        var currContext = this.state.masterContext[currKey];
+        var currContext = this.state.keyContext[currKey];
         var navCol = this.state.fullScreen ? 'submission-hidden-nav' : 'col-sm-2';
         var bodyCol = this.state.fullScreen ? 'col-sm-12' : 'col-sm-10';
         var headerStyle = {'marginTop':'10px', 'marginBottom':'10px'};
@@ -621,7 +711,7 @@ export default class SubmissionView extends React.Component{
             navigate,
             ...others
         } = this.props;
-        var currObjDisplay = this.state.masterDisplay[currKey] || currType;
+        var currObjDisplay = this.state.keyDisplay[currKey] || currType;
         return(
             <div>
                 <Modal show={aliasModal}>
@@ -655,13 +745,15 @@ export default class SubmissionView extends React.Component{
                 <div className="clearfix row">
                     <div className={navCol}>
                         <SubmissionTree
-                            setMasterState={this.setMasterState}
+                            setKeyState={this.setKeyState}
                             hierarchy={this.state.keyHierarchy}
-                            masterValid={this.state.masterValid}
-                            masterTypes={this.state.masterTypes}
-                            masterDisplay={this.state.masterDisplay}
+                            keyValid={this.state.keyValid}
+                            keyTypes={this.state.keyTypes}
+                            keyDisplay={this.state.keyDisplay}
+                            keyComplete={this.state.keyComplete}
                             currKey={this.state.currKey}
-                            unusedLinks={this.state.unusedLinks}
+                            keyUnused={this.state.keyUnused}
+                            keyLinks={this.state.keyLinks}
                         />
                     </div>
                     <div className={bodyCol}>
@@ -671,7 +763,7 @@ export default class SubmissionView extends React.Component{
                                     {currType}
                                 </span>
                                 <span>
-                                    {this.state.masterDisplay[currKey]}
+                                    {this.state.keyDisplay[currKey]}
                                 </span>
                             </h3>
                             <div className="pull-right">
@@ -685,13 +777,14 @@ export default class SubmissionView extends React.Component{
                             keyIter={this.state.keyIter}
                             schema={currSchema}
                             currContext={currContext}
-                            modifyMasterContext={this.modifyMasterContext}
+                            modifyKeyContext={this.modifyKeyContext}
                             initCreateObj={this.initCreateObj}
                             removeObj={this.removeObj}
                             addExistingObj={this.addExistingObj}
-                            masterDisplay={this.state.masterDisplay}
-                            setMasterState={this.setMasterState}
+                            keyDisplay={this.state.keyDisplay}
+                            setKeyState={this.setKeyState}
                             modifyAlias={this.modifyAlias}
+                            keyComplete={this.state.keyComplete}
                         />
                     </div>
                 </div>
@@ -710,28 +803,28 @@ class RoundOneObject extends React.Component{
 
     constructor(props){
         super(props);
-    }
-
-    /*
-    * State in this component mostly has to do with selection of existing objs
-    * - selectType (type: str) type of existing object being selected (i.e. ExperimentHiC).
-    * - selectData (type: obj) initial collection context fed to Search, given by
-    *   LinkedObj in submission-fields.js.
-    * - selectQuery (type: str) Search query held by this component for in-place navigation
-    * - selectField (type: str) actual fieldname that we're selecting the existing obj for.
-    *   may be nested in the case of subobjects, e.g. experiments_in_set.experiment
-    * - arrayIdx (type: arr) list of int numbers keeping track of list positions of the
-    *   object we're selecting for. Since you can have arrays within arrays, one
-    *   int won't do. Example: [1,2] would mean the current field is the second item
-    *   within the first item of the array given by the top level field. When null, no arrays involved.
-    */
-    state = {
-        'selectType': null, // type of existing object being selected
-        'selectData': null, // context used for existing object selection
-        'selectQuery': null, // currently held search query
-        'selectField': null, // the actual fieldname that we're selecting for. May be given in nested format for embe
-        'selectArrayIdx': null,
-        'fadeState': false
+        /*
+        * State in this component mostly has to do with selection of existing objs
+        * - selectType (type: str) type of existing object being selected (i.e. ExperimentHiC).
+        * - selectData (type: obj) initial collection context fed to Search, given by
+        *   LinkedObj in submission-fields.js.
+        * - selectQuery (type: str) Search query held by this component for in-place navigation
+        * - selectField (type: str) actual fieldname that we're selecting the existing obj for.
+        *   may be nested in the case of subobjects, e.g. experiments_in_set.experiment
+        * - arrayIdx (type: arr) list of int numbers keeping track of list positions of the
+        *   object we're selecting for. Since you can have arrays within arrays, one
+        *   int won't do. Example: [1,2] would mean the current field is the second item
+        *   within the first item of the array given by the top level field. When null, no arrays involved.
+        */
+        this.state = {
+            'selectType': null, // type of existing object being selected
+            'selectData': null, // context used for existing object selection
+            'selectQuery': null, // currently held search query
+            'selectField': null, // the actual fieldname that we're selecting for
+            'selectLink': null,
+            'selectArrayIdx': null,
+            'fadeState': false
+        }
     }
 
     componentWillReceiveProps(nextProps){
@@ -744,11 +837,11 @@ class RoundOneObject extends React.Component{
         }
     }
 
-    // Takes a field and value and modifies the masterContext held in parent.
+    // Takes a field and value and modifies the keyContext held in parent.
     // if objDelete is true, check to see if the value could be an object
-    // getting removed. If field == 'aliases', change masterDisplay to reflect
+    // getting removed. If field == 'aliases', change keyDisplay to reflect
     // the new alias name.
-    modifyNewContext = (field, value, fieldType, arrayIdx=null, type=null) => {
+    modifyNewContext = (field, value, fieldType, newLink, arrayIdx=null, type=null) => {
         var splitField = field.split('.');
         var arrayIdxPointer = 0;
         var contextCopy = this.props.currContext;
@@ -783,32 +876,32 @@ class RoundOneObject extends React.Component{
             pointer[splitField[splitField.length-1]] = value;
         }
         // actually change value
-        this.props.modifyMasterContext(this.props.currKey, contextCopy);
+        this.props.modifyKeyContext(this.props.currKey, contextCopy);
         if(fieldType === 'new linked object'){
             // value is new key index in this case
-            this.props.initCreateObj(type, value);
+            this.props.initCreateObj(type, value, newLink);
         }
         if(fieldType === 'linked object'){
-            this.checkObjectRemoval(value, prevValue);
+            this.checkObjectRemoval(value, prevValue, newLink);
         }
         if(splitField[splitField.length-1] === 'aliases'){
             this.props.modifyAlias();
         }
     }
 
-    fetchObjTitle = (value, type) => {
+    fetchObjTitle = (value, type, newLink) => {
         ajax.promise(value).then(data => {
             if (data['display_title']){
-                this.props.addExistingObj(value, data['display_title'], type);
+                this.props.addExistingObj(value, data['display_title'], type, newLink);
             }else{
-                this.props.addExistingObj(value, value, type);
+                this.props.addExistingObj(value, value, type, newLink);
             }
         });
     }
 
-    checkObjectRemoval = (value, prevValue) => {
+    checkObjectRemoval = (value, prevValue, newLink) => {
          if(value === null){
-            this.props.removeObj(prevValue);
+            this.props.removeObj(prevValue, newLink);
         }
     }
 
@@ -835,31 +928,39 @@ class RoundOneObject extends React.Component{
                         'selectQuery': dest
                     });
                 }else{
-                    console.log('Available object failed. See LinkedObj in create.js');
                     this.setState({
                         'selectType': null,
                         'selectData': null,
                         'selectQuery': null,
                         'selectField': null,
+                        'selectLink': null,
                         'selectArrayIdx': null
                     });
-                    this.props.setMasterState('fullScreen', false);
+                    this.props.setKeyState('fullScreen', false);
                 }
             });
         }
     }
 
     // use when selecting a new object
-    selectObj = (type, data, field, array=null) => {
-        setTimeout(layout.animateScrollTo(0), 100);
-        this.setState({
-            'selectType': type,
-            'selectData': data,
-            'selectQuery': '?type=' + type,
-            'selectField': field,
-            'selectArrayIdx': array
+    selectObj = (collection, field, newLink, array=null) => {
+        ajax.promise('/' + collection + '/?format=json').then(data => {
+            if (data && data['@graph']){
+                var results = data['@graph'];
+                if(results.length > 0){
+                    setTimeout(layout.animateScrollTo(0), 100);
+                    this.setState({
+                        'selectType': collection,
+                        'selectData': data,
+                        'selectQuery': '?type=' + collection,
+                        'selectField': field,
+                        'selectLink': newLink,
+                        'selectArrayIdx': array
+                    });
+                    this.props.setKeyState('fullScreen', true);
+                }
+            }
         });
-        this.props.setMasterState('fullScreen', true);
     }
 
     // callback passed to Search when selecting existing object
@@ -871,19 +972,20 @@ class RoundOneObject extends React.Component{
             isRepeat = true;
         }
         if(this.state.selectField && !isRepeat){
-            this.modifyNewContext(this.state.selectField, value, 'existing linked object', this.state.selectArrayIdx);
-            this.fetchObjTitle(value, this.state.selectType);
+            this.modifyNewContext(this.state.selectField, value, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
+            this.fetchObjTitle(value, this.state.selectType, this.state.selectLink);
         }else{
-            this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectArrayIdx);
+            this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
         }
         this.setState({
             'selectType': null,
             'selectData': null,
             'selectQuery': null,
             'selectField': null,
+            'selectLink': null,
             'selectArrayIdx': null
         });
-        this.props.setMasterState('fullScreen', false);
+        this.props.setKeyState('fullScreen', false);
     }
 
     // collect props necessary to build create a BuildField child
@@ -909,17 +1011,15 @@ class RoundOneObject extends React.Component{
             enumValues = fieldSchema.enum;
         }
         // check for linkTo if further down in object or array
-        if(fieldType == 'array' || fieldType == 'object'){
-            var linkTo = delveObject(fieldSchema);
-            if(linkTo !== null){
-                isLinked = true;
-            }
+        var linked = delveObject(fieldSchema);
+        if(linked !== null){
+            linked = fieldSchema.title ? fieldSchema.title : linked;
+            isLinked = true;
         }
         // handle a linkTo object on the the top level
         // check if any schema-specific adjustments need to made:
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
-            isLinked = true;
         }else if (fieldSchema.attachment && fieldSchema.attachment === true){
             fieldType = 'attachment';
         }else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
@@ -955,14 +1055,16 @@ class RoundOneObject extends React.Component{
                 md5Progress={null}
                 getFieldValue={this.getFieldValue}
                 required={required}
+                linkType={linked}
                 isLinked={isLinked}
                 selectObj={this.selectObj}
                 title={fieldTitle}
                 arrayIdx={null}
                 edit={this.props.edit}
                 create={this.props.create}
-                masterDisplay={this.props.masterDisplay}
-                setMasterState={this.props.setMasterState}
+                keyDisplay={this.props.keyDisplay}
+                keyComplete={this.props.keyComplete}
+                setKeyState={this.props.setKeyState}
             />
         );
     }
@@ -1016,10 +1118,9 @@ class RoundOneObject extends React.Component{
 class RoundOnePanel extends React.Component{
     constructor(props){
         super(props);
-    }
-
-    state = {
-        'open': false
+        this.state = {
+            'open': false
+        }
     }
 
     componentWillReceiveProps(nextProps){
@@ -1067,11 +1168,10 @@ class RoundTwoObject extends React.Component{
 
     constructor(props){
         super(props);
-    }
-
-    state = {
-        'file': null,
-        'md5Progress': null
+        this.state = {
+            'file': null,
+            'md5Progress': null
+        }
     }
 
     modifyFile = (file) =>{
@@ -1134,8 +1234,9 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
             }
             if(objList !== null){
                 var linked = delveObject(fieldSchema);
-                if(linked !== null && !_.contains(objList, linked)){
-                    objList.push(linked);
+                if(linked !== null){
+                    var listTerm = fieldSchema.title ? fieldSchema.title : linked;
+                    if(!_.contains(objList, listTerm)) objList.push(listTerm);
                 }
             }
         }
@@ -1168,10 +1269,8 @@ function sortPropFields(fields){
     return retFields;
 }
 
-/*
- Function to recursively find whether a json object contains a linkTo field
- anywhere in its nested structure. Returns objec type if found, null otherwise.
-*/
+// Function to recursively find whether a json object contains a linkTo field
+// anywhere in its nested structure. Returns object type if found, null otherwise.
 var delveObject = function myself(json){
     var found_obj = null;
     Object.keys(json).forEach(function(key, index){
@@ -1187,9 +1286,9 @@ var delveObject = function myself(json){
     return found_obj;
 }
 
-// given the parent object key and a new object key, return a version
-// of this.state.keyHierarchy that includes the new parent-child relation
-// recursive function
+// Given the parent object key and a new object key, return a version
+// of this.state.keyHierarchy that includes the new parent-child relation.
+// Recursive function
 var modifyHierarchy = function myself(hierarchy, keyIdx, parentKeyIdx){
     Object.keys(hierarchy).forEach(function(key, index){
         if(key == parentKeyIdx){
@@ -1201,7 +1300,7 @@ var modifyHierarchy = function myself(hierarchy, keyIdx, parentKeyIdx){
     return hierarchy
 }
 
-// remove given key from hierarchy
+// remove given key from hierarchy. Recursive function.
 var trimHierarchy = function myself(hierarchy, keyIdx){
     if(hierarchy[keyIdx]){
         delete hierarchy[keyIdx];
@@ -1213,6 +1312,52 @@ var trimHierarchy = function myself(hierarchy, keyIdx){
     return hierarchy;
 }
 
+// returns the entire hierarchy below for the given keyIdx. keyIdx must be a
+// number (custom object). Recursive function.
+var searchHierarchy = function myself(hierarchy, keyIdx){
+    if(isNaN(keyIdx) || !hierarchy) return null;
+    var found_hierarchy = null;
+    Object.keys(hierarchy).forEach(function(key, index){
+        if(key == keyIdx){
+            found_hierarchy = hierarchy[key];
+        }else{
+            var test = myself(hierarchy[key], keyIdx);
+            if(test !== null){
+                found_hierarchy = test;
+            }
+        }
+    });
+    return found_hierarchy;
+}
+
+var findParentFromHierarchy = function myself(hierarchy, keyIdx){
+    if(isNaN(keyIdx) || !hierarchy) return null;
+    var found_parent = null;
+    Object.keys(hierarchy).forEach(function(key, index){
+        if(_.contains(Object.keys(hierarchy[key]), keyIdx.toString())){
+            found_parent = key;
+        }else{
+            var test = myself(hierarchy[key], keyIdx);
+            if(test !== null) found_parent = test;
+        }
+    });
+    return found_parent;
+}
+
+var replaceInHierarchy = function myself(hierarchy, current, toReplace){
+    Object.keys(hierarchy).forEach(function(key, index){
+        if(key == current){
+            var downstream = hierarchy[key];
+            hierarchy[toReplace] = downstream;
+            delete hierarchy[key];
+        }else{
+            hierarchy[key] = myself(hierarchy[key], current, toReplace);
+        }
+    });
+    return hierarchy
+}
+
+
 var removeNulls = function myself(context){
     Object.keys(context).forEach(function(key, index){
         if(context[key] === null){
@@ -1222,13 +1367,4 @@ var removeNulls = function myself(context){
         }
     });
     return context;
-}
-
-class InfoIcon extends React.Component{
-    render() {
-        if (!this.props.children) return null;
-        return (
-            <i className="icon icon-info-circle" data-tip={this.props.children}/>
-        );
-    }
 }

@@ -15,13 +15,17 @@ This is a key/input pair for any one field. Made to be stateless; changes
  to the newContext state of Action propogate downwards. Also includes a
  description and some validation message based on the schema
  */
-var BuildField = module.exports.BuildField = React.createClass({
+export default class BuildField extends React.Component{
 
-    componentDidMount: function(){
+    constructor(props){
+        super(props);
+    }
+
+    componentDidMount(){
         ReactTooltip.rebuild();
-    },
+    }
 
-    displayField: function(field_case){
+    displayField = (field_case) => {
         var inputProps = {
             'id' : this.props.field,
             'disabled' : this.props.disabled || false,
@@ -47,8 +51,10 @@ var BuildField = module.exports.BuildField = React.createClass({
             'md5Progress': this.props.md5Progress,
             'modifyFile': this.props.modifyFile,
             'modifyMD5Progess': this.props.modifyMD5Progess,
-            'masterDisplay': this.props.masterDisplay,
-            'setMasterState': this.props.setMasterState
+            'keyDisplay': this.props.keyDisplay,
+            'keyComplete': this.props.keyComplete,
+            'setKeyState': this.props.setKeyState,
+            'linkType': this.props.linkType
         };
         switch(field_case){
             case 'text' : return (
@@ -102,22 +108,22 @@ var BuildField = module.exports.BuildField = React.createClass({
         }
         // Fallback
         return <div>No field for this case yet.</div>;
-    },
+    }
 
     // create a dropdown item corresponding to one enum value
-    buildEnumEntry: function(val){
+    buildEnumEntry = (val) => {
         return(
             <MenuItem key={val} title={val || ''} eventKey={val} onSelect={this.submitEnumVal}>
                 {val || ''}
             </MenuItem>
         );
-    },
+    }
 
-    submitEnumVal: function(eventKey){
-        this.props.modifyNewContext(this.props.nestedField, eventKey, this.props.fieldType, this.props.arrayIdx);
-    },
+    submitEnumVal = (eventKey) => {
+        this.props.modifyNewContext(this.props.nestedField, eventKey, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+    }
 
-    handleChange: function(e){
+    handleChange = (e) => {
         var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var currValue = inputElement.value;
         if (this.props.fieldType == 'integer'){
@@ -129,27 +135,27 @@ var BuildField = module.exports.BuildField = React.createClass({
                 currValue = parseFloat(currValue);
             }
         }
-        this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.arrayIdx);
-    },
+        this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+    }
 
     // call modifyNewContext from parent to delete the value in the field
-    deleteField : function(e){
+    deleteField = (e) => {
         e.preventDefault();
-        this.props.modifyNewContext(this.props.nestedField, null, this.props.fieldType, this.props.arrayIdx);
-    },
+        this.props.modifyNewContext(this.props.nestedField, null, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+    }
 
     // this needs to live in BuildField for styling purposes
-    pushArrayValue: function(e){
+    pushArrayValue = (e) => {
         e.preventDefault();
         if(this.props.fieldType !== 'array'){
             return;
         }
         var valueCopy = this.props.value ? this.props.value.slice() : [];
         valueCopy.push(null);
-        this.props.modifyNewContext(this.props.nestedField, valueCopy, this.props.fieldType, this.props.arrayIdx);
-    },
+        this.props.modifyNewContext(this.props.nestedField, valueCopy, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+    }
 
-    render: function(){
+    render(){
         // TODO: come up with a schema based solution for code below?
         // hardcoded fields you can't delete
         var cannot_delete = ['filename'];
@@ -223,63 +229,40 @@ var BuildField = module.exports.BuildField = React.createClass({
             </div>
         );
     }
-});
+}
+
 /*
-Case for a linked object. Fetches the search results for that subobject to
-allow the user to pick one from a displayed table. This component holds the
-state of whether it is currently open and the fetched data.
+Case for a linked object.
 */
-var LinkedObj = React.createClass({
-    contextTypes: {
-        contentTypeIsJSON: React.PropTypes.func
-    },
+class LinkedObj extends React.Component{
 
-    getInitialState: function(){
-        return{
-            'data': {},
-            'type': null,
-            'collection': this.props.collection || null
-        };
-    },
+    constructor(props){
+        super(props);
+    }
 
-    // fetch the appropriate linked object collection
-    componentDidMount: function(){
-        // test for this
-        var state = {};
-        if(this.props.collection){
-            ajax.promise('/' + this.props.collection + '/?format=json').then(data => {
-                if (this.context.contentTypeIsJSON(data) && data['@graph']){
-                    var results = data['@graph'];
-                    if(results.length === 0){
-                        state['data'] = null;
-                        state['type'] = null;
-                    }else{
-                        var type = results[0]['@type'][0];
-                        state['type'] = type;
-                        state['data'] = data;
-                    }
-                }else{
-                    state['data'] = null;
-                    state['type'] = null;
-                }
-                this.propSetState(state);
-            });
+
+    // mechanism for changing value of linked object in parent context
+    // from int keyIdx to string path of newly submitted object
+    componentDidMount(){
+        if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
+            this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
         }
-    },
+    }
 
-    // dummy function needed to set state through componentDidMount
-    propSetState: function(state){
-        this.setState(state);
-    },
+    componentDidUpdate(){
+        if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
+            this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
+        }
+    }
 
-    render: function(){
+    render(){
         var style={'width':'160px', 'marginRight':'10px'};
         // object chosen or being created
         if(this.props.value){
-            var masterDisplay = this.props.masterDisplay;
+            var keyDisplay = this.props.keyDisplay;
             var thisDisplay;
             if(isNaN(this.props.value)){
-                thisDisplay = masterDisplay ? masterDisplay[this.props.value] : this.props.value;
+                thisDisplay = keyDisplay[this.props.value] || this.props.value;
                 return(
                     <div>
                         <a href={this.props.value} target="_blank">
@@ -289,46 +272,62 @@ var LinkedObj = React.createClass({
                     </div>
                 );
             }else{
+                // it's a custom object. Either render a link to editing the object
+                // or a pop-up link to the object if it's already submitted
                 var intKey = parseInt(this.props.value);
-                thisDisplay = masterDisplay ? masterDisplay[intKey] : this.props.value;
-                return(
-                    <div>
-                        <a href="" onClick={function(e){
-                                e.preventDefault();
-                                this.props.setMasterState('currKey', intKey);
-                            }.bind(this)}>
-                            {thisDisplay}
-                        </a>
-                    </div>
-                );
-
+                thisDisplay = keyDisplay[this.props.value] || this.props.value;
+                // this is a fallback - shouldn't be int because value should be
+                // string once the obj is successfully submitted
+                if(this.props.keyComplete[intKey]){
+                    return(
+                        <div>
+                            <a href="" onClick={function(e){
+                                            e.preventDefault();
+                                            var win = window.open(this.props.keyComplete[intKey], '_blank');
+                                            if(win){
+                                                win.focus();
+                                            }else{
+                                                alert('Object page popup blocked!');
+                                            }
+                                        }.bind(this)}>
+                                <span>{thisDisplay}</span>
+                                <i style={{'paddingLeft':'4px'}} className={"icon icon-external-link"}></i>
+                            </a>
+                        </div>
+                    );
+                }else{
+                    return(
+                        <div>
+                            <a href="" onClick={function(e){
+                                    e.preventDefault();
+                                    this.props.setKeyState('currKey', intKey);
+                                }.bind(this)}>
+                                {thisDisplay}
+                            </a>
+                        </div>
+                    );
+                }
             }
-
         }
+        // nothing chosen/created yet
         return(
             <div>
-                {this.state.data ?
-                    <Button bsSize="xsmall" style={style} onClick={function(e){
-                            e.preventDefault();
-                            this.props.selectObj(this.state.collection, this.state.data, this.props.nestedField, this.props.arrayIdx);
-                        }.bind(this)}>
-                        {'Select existing'}
-                    </Button>
-                    :
-                    <Button bsSize="xsmall" style={style} disabled>
-                        {'No existing objects'}
-                    </Button>
-                }
+                <Button bsSize="xsmall" style={style} onClick={function(e){
+                        e.preventDefault();
+                        this.props.selectObj(this.props.collection, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
+                    }.bind(this)}>
+                    {'Select existing'}
+                </Button>
                 <Button bsSize="xsmall" style={style}onClick={function(e){
                         e.preventDefault();
-                        this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.arrayIdx, this.state.type);
+                        this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, this.props.collection);
                     }.bind(this)}>
                     {'Create new'}
                 </Button>
             </div>
         );
     }
-});
+}
 
 
 /* Display fields that are arrays. To do this, use a table of array elements
@@ -336,9 +335,13 @@ made with buildField, but pass in a different function to build new context,
 which essentially aggregates the context of the elements are propogates them
 upwards using this.props.modifyNewContext*/
 
-var ArrayField = React.createClass({
+class ArrayField extends React.Component{
 
-    initiateArrayField: function(arrayInfo) {
+    constructor(props){
+        super(props);
+    }
+
+    initiateArrayField = (arrayInfo) => {
         var value = arrayInfo[0] || null;
         var fieldSchema = arrayInfo[1];
         // use arrayIdx as stand-in value for field
@@ -391,18 +394,20 @@ var ArrayField = React.createClass({
                     disabled={false}
                     modifyNewContext={this.props.modifyNewContext}
                     required={false}
+                    linkType={this.props.linkType}
                     selectObj={this.props.selectObj}
                     arrayIdx={arrayIdxList}
                     nestedField={this.props.nestedField}
                     isArray={true}
-                    masterDisplay={this.props.masterDisplay}
-                    setMasterState= {this.props.setMasterState}
+                    keyDisplay={this.props.keyDisplay}
+                    keyComplete={this.props.keyComplete}
+                    setKeyState= {this.props.setKeyState}
                 />
             </div>
         );
-    },
+    }
 
-    render: function(){
+    render(){
         var schema = this.props.schema.items || {};
         var value = this.props.value || [];
         var arrayInfo = [];
@@ -421,18 +426,22 @@ var ArrayField = React.createClass({
             </div>
         );
     }
-});
+}
 
 /* Builds a field that represents an inline object. Based off of FieldPanel*/
-var ObjectField = React.createClass({
+class ObjectField extends React.Component{
 
-    componentDidMount: function(){
+    constructor(props){
+        super(props);
+    }
+
+    componentDidMount(){
         // initialize with empty dictionary
         var initVal = this.props.value || {};
-        this.props.modifyNewContext(this.props.nestedField, initVal, 'object', this.props.arrayIdx);
-    },
+        this.props.modifyNewContext(this.props.nestedField, initVal, 'object', this.props.linkType, this.props.arrayIdx);
+    }
 
-    includeField : function(schema, field){
+    includeField = (schema, field) => {
         if (!schema) return null;
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
         if (!schemaVal) return null;
@@ -452,9 +461,9 @@ var ObjectField = React.createClass({
             return null;
         }
         return schemaVal;
-    },
+    }
 
-    initiateField: function(fieldInfo) {
+    initiateField = (fieldInfo) => {
         var field = fieldInfo[0];
         var fieldSchema = fieldInfo[1];
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
@@ -498,18 +507,20 @@ var ObjectField = React.createClass({
                 disabled={false}
                 modifyNewContext={this.props.modifyNewContext}
                 required={false}
+                linkType={this.props.linkType}
                 selectObj={this.props.selectObj}
                 title={title}
                 nestedField={nestedField}
                 isArray={false}
                 arrayIdx={this.props.arrayIdx}
-                masterDisplay={this.props.masterDisplay}
-                setMasterState= {this.props.setMasterState}
+                keyDisplay={this.props.keyDisplay}
+                keyComplete={this.props.keyComplete}
+                setKeyState= {this.props.setKeyState}
             />
         );
-    },
+    }
 
-    render: function() {
+    render(){
         var schema = this.props.schema;
         var fields = schema['properties'] ? Object.keys(schema['properties']) : [];
         var buildFields = [];
@@ -525,14 +536,18 @@ var ObjectField = React.createClass({
             </div>
         );
     }
-});
+}
 
 /* For version 1. A simple local file upload that gets the name, type,
 size, and b64 encoded stream in the form of a data url. Upon successful
 upload, adds this information to NewContext*/
-var AttachmentInput = React.createClass({
+class AttachmentInput extends React.Component{
 
-    acceptedTypes: function(){
+    constructor(props){
+        super(props);
+    }
+
+    acceptedTypes(){
         var types = [
             "application/pdf",
             "application/zip",
@@ -548,13 +563,13 @@ var AttachmentInput = React.createClass({
             "text/autosql"
         ];
         return(types.toString());
-    },
+    }
 
-    handleChange: function(e){
+    handleChange = (e) => {
         var attachment_props = {};
         var file = e.target.files[0];
         if(!file){
-            this.props.modifyNewContext(this.props.nestedField, null, 'attachment', this.props.arrayIdx);
+            this.props.modifyNewContext(this.props.nestedField, null, 'attachment', this.props.linkType, this.props.arrayIdx);
             return;
         }
         attachment_props.type = file.type;
@@ -571,10 +586,10 @@ var AttachmentInput = React.createClass({
             }
 
         }.bind(this);
-        this.props.modifyNewContext(this.props.nestedField, null, 'attachment', this.props.arrayIdx);
-    },
+        this.props.modifyNewContext(this.props.nestedField, null, 'attachment', this.props.linkType, this.props.arrayIdx);
+    }
 
-    render: function(){
+    render(){
         var attach_title;
         if(this.props.value && this.props.value.download){
             attach_title = this.props.value.download;
@@ -600,13 +615,18 @@ var AttachmentInput = React.createClass({
             </div>
         );
     }
-});
+}
 
 /* Input for an s3 file upload. Context value set is local value of the filename.
 Also updates this.state.file for the overall component.
 */
-var S3FileInput = React.createClass({
-    handleChange: function(e){
+class S3FileInput extends React.Component{
+
+    constructor(props){
+        super(props);
+    }
+
+    handleChange = (e) => {
         var req_type = null;
         var file = e.target.files[0];
         // file was not chosen
@@ -615,7 +635,7 @@ var S3FileInput = React.createClass({
         }else{
             var filename = file.name ? file.name : "unknown";
             getLargeMD5(file, this.props.modifyMD5Progess).then((hash) => {
-                this.props.modifyNewContext('md5sum', hash, 'file upload', this.props.arrayIdx);
+                this.props.modifyNewContext('md5sum', hash, 'file upload', this.props.linkType, this.props.arrayIdx);
                 console.log('HASH SET TO:', hash, 'FOR FILE:', this.props.value);
                 this.props.modifyMD5Progess(null);
             }).catch((error) => {
@@ -623,13 +643,13 @@ var S3FileInput = React.createClass({
                 // TODO: should file upload fail on a md5 error?
                 this.props.modifyMD5Progess(null);
             });
-            this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.arrayIdx);
+            this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.linkType, this.props.arrayIdx);
             // calling modifyFile changes the 'file' state of top level component
             this.props.modifyFile(file);
         }
-    },
+    }
 
-    render: function(){
+    render(){
         var edit_tip;
         var previous_status = this.props.getFieldValue('status');
         var filename_text = this.props.value ? this.props.value : "No file chosen";
@@ -671,9 +691,14 @@ var S3FileInput = React.createClass({
         );
 
     }
-});
+}
 
 class InfoIcon extends React.Component{
+
+    constructor(props){
+        super(props);
+    }
+
     render() {
         if (!this.props.children) return null;
         return (
