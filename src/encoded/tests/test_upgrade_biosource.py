@@ -16,15 +16,25 @@ def biosource_1(award, lab):
 @pytest.fixture
 def biosource_2(biosource_1):
     item = biosource_1.copy()
-    item.update({
-        'schema_version': '2',
-    })
+    item['cell_line'] = 'blah'
     return item
 
 
 def test_biosource_convert_cell_line_to_link_to_ontology_term(
-        app, biosource_2, gm12878_oterm):
-    migrator = app.registry['upgrader']
-    value = migrator.upgrade('biosource', biosource_2, current_version='1', target_version='2')
+        registry, biosource_1, gm12878_oterm):
+    from snovault import UPGRADER
+    upgrader = registry[UPGRADER]
+    value = upgrader.upgrade('biosource', biosource_1, registry=registry,
+                             current_version='1', target_version='2')
     assert value['schema_version'] == '2'
-    assert value['cell_line'] == gm12878_oterm['@id']
+    assert value['cell_line'] == gm12878_oterm['uuid']
+
+
+def test_biosource_convert_cell_line_w_no_ontology_term(
+        registry, biosource_2):
+    from snovault import UPGRADER
+    upgrader = registry[UPGRADER]
+    value = upgrader.upgrade('biosource', biosource_2, registry=registry,
+                             current_version='1', target_version='2')
+    assert value['schema_version'] == '2'
+    assert 'cell_line' not in value

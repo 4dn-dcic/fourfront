@@ -749,6 +749,7 @@ def main():
 
     # fourfront connection
     connection = connect2server(args.keyfile, args.key, app)
+    import pdb; pdb.set_trace()
     ontologies = get_ontologies(connection, args.ontologies)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN'):

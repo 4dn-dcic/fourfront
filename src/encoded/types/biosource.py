@@ -98,6 +98,7 @@ class Biosource(Item):
     })
     def biosource_name(self, request, biosource_type, individual=None,
                        cell_line=None, cell_line_tier=None, tissue=None):
+        self.upgrade_properties()
         cell_line_types = ['immortalized cell line', 'primary cell', 'in vitro differentiated cells',
                            'induced pluripotent stem cell line', 'stem cell']
         if biosource_type == "tissue":
