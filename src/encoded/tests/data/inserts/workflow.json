@@ -665,6 +665,7 @@
             ], 
             "workflow_argument_name": "input_pairs_index", 
             "argument_format": "pairs_px2",
+            "description": "",
             "argument_type": "Input file"
         }, 
         {
@@ -677,6 +678,7 @@
             ], 
             "workflow_argument_name": "input_pairs", 
             "argument_format": "pairs",
+            "description": "",
             "argument_type": "Input file"
         }, 
         {
@@ -688,6 +690,7 @@
                 }
             ], 
             "workflow_argument_name": "outprefix", 
+            "description": "",
             "argument_type": "parameter"
         }, 
         {
@@ -700,6 +703,7 @@
             ], 
             "argument_type": "Output processed file",
             "workflow_argument_name": "output_pairs_index", 
+            "description": "",
             "argument_format": "pairs_px2"
         }, 
         {
@@ -712,6 +716,7 @@
             ], 
             "workflow_argument_name": "output_pairs", 
             "argument_type": "Output processed file",
+            "description": "",
             "argument_format": "pairs"
         }
     ], 
@@ -724,6 +729,8 @@
     ], 
     "workflow_type": "Hi-C data analysis", 
     "workflow_diagram": "", 
-    "description": "Hi-C processing part B revision 6"
+    "title": "Hi-C processing part B revision 6",
+    "description": "Hi-C processing part B revision 6",
+    "accession": "4DNWFSOZLJGI"
 }
 ]
