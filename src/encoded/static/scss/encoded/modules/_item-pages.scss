@@ -819,6 +819,7 @@ $download-button-width : 100px;
 			padding-bottom: 3px;
 			padding-top: 0;
 			border-top: 1px solid #ccc;
+			overflow-x: hidden;
 			
 
 			& + hr {
@@ -852,6 +853,11 @@ $download-button-width : 100px;
 			}
 
 			.file-title {
+
+				> h3 {
+					overflow: hidden;
+				}
+
 				.download-button-container {
 					position: absolute;
 					right: 10px;

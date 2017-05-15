@@ -148,18 +148,23 @@ export default class Node extends React.Component {
     }
 
     render(){
-        var node = this.props.node,
-            title = this.props.title(node, true),
-            tooltip = this.tooltip(title),
-            disabled = null;
+        var node        = this.props.node,
+            title       = this.props.title(node, true),
+            tooltip     = this.tooltip(title),
+            disabled    = typeof node.disabled !== 'undefined' ? node.disabled : null,
+            className   = "node node-type-" + node.type;
 
-        if (typeof this.props.isNodeDisabled === 'function'){
+        if (disabled === null && typeof this.props.isNodeDisabled === 'function'){
             disabled = this.props.isNodeDisabled(node);
         }
 
+        if      (disabled)                                   className += ' disabled';
+        if      (typeof this.props.className === 'function') className += ' ' + this.props.className(node);
+        else if (typeof this.props.className === 'string'  ) className += ' ' + this.props.className; 
+
         return (
-            <div 
-                className={"node node-type-" + node.type + (disabled ? ' disabled' : '')}
+            <div
+                className={className}
                 data-node-key={node.id || node.name}
                 data-node-type={node.type}
                 data-node-global={node.isGlobal || null}

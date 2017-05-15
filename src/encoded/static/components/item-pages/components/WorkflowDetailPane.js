@@ -2,7 +2,6 @@
 
 var React = require('react');
 import PropTypes from 'prop-types';
-import { Fade } from 'react-bootstrap';
 import ItemDetailList from './ItemDetailList';
 import FlexibleDescriptionBox from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
@@ -60,7 +59,7 @@ class FileDetailBody extends React.Component {
                 <div className="hidden-lg download-button-container">
                     { FileDetailBody.downloadButton(file.href, !this.canDownload(), file.filename, null, 'btn-xs') }
                 </div>
-                <h3 className="text-500">
+                <h3 className="text-500 text-ellipsis-container node-file-title" title={fileTitle}>
                     <a href={object.atIdFromObject(file) || '/' + file.uuid}>{ fileTitle }</a>
                 </h3>
             </div>
@@ -71,7 +70,7 @@ class FileDetailBody extends React.Component {
         var gridSize = layout.responsiveGridState();
         if (gridSize === 'sm' || gridSize === 'xs') return null;
         var file = this.props.file;
-        if (!file.filename && !file.href) return <div className="col-md-6 col-lg-4 box">&nbsp;</div>;
+        if (!file.filename && !file.href) return <div className="col-sm-4 col-lg-2 box">&nbsp;</div>;
 
         var title = file.href ? <span>Download</span> : 'File Name';
         var disabled = !this.canDownload();
@@ -258,7 +257,7 @@ export default class WorkflowDetailPane extends React.Component {
                     { type } <i className="icon icon-fw icon-angle-right"/> <span className="text-400">{ node.name }</span>
                 </h5>
                 <div className="detail-pane-body">
-                    <Fade transitionAppear in>{ this.body() }</Fade>
+                    { this.body() }
                 </div>
             </div>
         );

@@ -208,13 +208,12 @@ export default class Graph extends React.Component {
                             columnWidth={this.props.columnWidth}
                             columnSpacing={this.props.columnSpacing}
                             pathArrows={this.props.pathArrows}
-                            isNodeDisabled={this.props.isNodeDisabled}
                             href={this.props.href}
                             onNodeClick={this.props.onNodeClick}
                         >
                             <ScrollContainer>
-                                <EdgesLayer edgeElement={this.props.edgeElement} />
-                                <NodesLayer nodeElement={this.props.nodeElement} title={this.props.nodeTitle} />
+                                <EdgesLayer edgeElement={this.props.edgeElement} isNodeDisabled={this.props.isNodeDisabled} />
+                                <NodesLayer nodeElement={this.props.nodeElement} isNodeDisabled={this.props.isNodeDisabled} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }
                         </StateContainer>

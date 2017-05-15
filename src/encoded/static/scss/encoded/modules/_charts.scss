@@ -1175,6 +1175,7 @@ $workflow-step-node-lineheight: 18px;
                         position: absolute;
                         transition: top .5s ease-out, left .5s ease-out, width .5s ease-out;
                         transform: translate3d(0,0,0);
+                        cursor: pointer;
 
                         > .inner {
                             background-color: #ddd;

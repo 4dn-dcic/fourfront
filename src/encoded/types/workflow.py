@@ -1,5 +1,6 @@
 """The type file for the workflow related items.
 """
+from itertools import chain
 from snovault import (
     calculated_property,
     collection,
@@ -204,15 +205,15 @@ class WorkflowRun(Item):
             if one of own input or output files' workflow_argument_name matches the AnalysisStep dict's input or output's sourceOrTarget.workflow_argument_name.
             '''
             if 'Workflow' in sourceOrTarget.get('type', ''):
-                for file in runParams:
-                    if sourceOrTarget['name'] == file.get('workflow_argument_name'):
-                        fileUUID = file.get('value')
+                for param in runParams:
+                    if sourceOrTarget['name'] == param.get('workflow_argument_name'):
+                        fileUUID = param.get('value')
                         if fileUUID:
                             fileData = fileCache.get(fileUUID)
                             if not fileData:
-                                fileData = request.embed('/' + file.get('value'), '@@embedded')
-                                fileCache[file.get('value')] = fileData
-                            inputOrOutput['run_data'] = { "file" : fileData }
+                                fileData = request.embed('/' + param.get('value'), '@@embedded')
+                                fileCache[param.get('value')] = fileData
+                            inputOrOutput['run_data'] = { "file" : fileData, "type" : param.get('type') }
                             return True
             return False
 
@@ -232,13 +233,28 @@ class WorkflowRun(Item):
             return resultArgs
 
 
-
-        allOutputs = mergeArgumentsWithSameArgumentName(
-            self.properties.get('output_files',[]) + self.properties.get('output_quality_metrics',[])
+        # Metrics will overwrite output_files in case of duplicate keys.
+        combined_outputs = mergeArgumentsWithSameArgumentName(
+            chain(
+                map(
+                    lambda x: dict(x, **{ "type" : "output" }),
+                    self.properties.get('output_files',[])
+                ),
+                map(
+                    lambda x: dict(x, **{ "type" : "quality_metric" }),
+                    self.properties.get('output_quality_metrics',[])
+                )
+            )
         )
 
-        inputFiles = mergeArgumentsWithSameArgumentName(self.properties.get('input_files',[]))
-        inputParams = mergeArgumentsWithSameArgumentName(self.properties.get('parameters',[]))
+        input_files = mergeArgumentsWithSameArgumentName(
+            map(
+                lambda x: dict(x, **{ "type" : "input" }),
+                self.properties.get('input_files',[])
+            )
+        )
+
+        input_params = mergeArgumentsWithSameArgumentName(self.properties.get('parameters',[]))
 
 
         for step in analysis_steps:
@@ -247,20 +263,21 @@ class WorkflowRun(Item):
             for output in step['outputs']:
                 found = False
                 for outputTarget in output.get('target',[]):
-                    found = handleSourceTargetFile(output, outputTarget, allOutputs)
+                    found = handleSourceTargetFile(output, outputTarget, combined_outputs)
                     if found:
                         break
 
             for input in step['inputs']:
                 found = False
                 for inputSource in input.get('source',[]):
-                    found = handleSourceTargetFile(input, inputSource, inputFiles)
+                    found = handleSourceTargetFile(input, inputSource, input_files)
                     # If we don't have an input file yet for this workflow input, see if have a param
                     if not found and 'Workflow' in inputSource.get('type',''):
-                        for param in inputParams:
+                        for param in input_params:
                             if inputSource['name'] == param.get('workflow_argument_name'):
                                 input['run_data'] = {
-                                    "value" : param.get('value')
+                                    "value" : param.get('value'),
+                                    "type"  : "parameter"
                                 }
                                 found = True
                                 break
