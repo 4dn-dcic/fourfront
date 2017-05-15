@@ -13,6 +13,7 @@ def biosource_1_2(value, system):
         oterm = terms.get(value['cell_line'])
         del value['cell_line']
         if oterm:
+            # if we get something back see if it has a uuid - if not oh well
             try:
                 value['cell_line'] = str(oterm.uuid)
             except:

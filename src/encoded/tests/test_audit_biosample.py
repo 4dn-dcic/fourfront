@@ -3,20 +3,6 @@ pytestmark = pytest.mark.working
 
 
 @pytest.fixture
-def tier1_biosource(testapp, protocol, lab, award, gm12878_oterm):
-    item = {
-        'description': 'Tier 1 cell line Biosource',
-        'biosource_type': 'immortalized cell line',
-        'cell_line': gm12878_oterm['@id'],
-        'SOP_cell_line': protocol['@id'],
-        'cell_line_tier': 'Tier 1',
-        'award': award['@id'],
-        'lab': lab['@id']
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
 def cell_culture(testapp, lab, award):
     '''
     A minimal biosample_cell_culture item with only schema-required field

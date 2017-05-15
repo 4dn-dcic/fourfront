@@ -206,6 +206,20 @@ def GM12878_biosource(testapp, lab, award, gm12878_oterm):
 
 
 @pytest.fixture
+def tier1_biosource(testapp, protocol, lab, award, gm12878_oterm):
+    item = {
+        'description': 'Tier 1 cell line Biosource',
+        'biosource_type': 'immortalized cell line',
+        'cell_line': gm12878_oterm['@id'],
+        'SOP_cell_line': protocol['@id'],
+        'cell_line_tier': 'Tier 1',
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
 def human_biosource(testapp, human_individual, worthington_biochemical, gm12878_oterm, lab, award):
     item = {
         "description": "GM12878 cells",
@@ -223,11 +237,11 @@ def human_biosource(testapp, human_individual, worthington_biochemical, gm12878_
 @pytest.fixture
 def human_data():
     return {
-            'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
-            'name': 'human',
-            'scientific_name': 'Homo sapiens',
-            'taxon_id': '9606',
-           }
+        'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
+        'name': 'human',
+        'scientific_name': 'Homo sapiens',
+        'taxon_id': '9606',
+    }
 
 
 @pytest.fixture
