@@ -28,7 +28,7 @@
             "title": "Description"
         },
         "file_format": {
-            "title": "File format",
+            "title": "File Format",
             "type": "string",
             "default": "zip",
             "enum": [
@@ -38,7 +38,7 @@
             ]
         },
         "file_type": {
-            "title": "File type",
+            "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "default": "calibration file",
             "exclude_from": ["submit4dn", "FFedit-create"],

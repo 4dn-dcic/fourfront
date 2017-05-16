@@ -604,8 +604,18 @@ var App = React.createClass({
 
     handlePopState: function (event) {
         if (this.DISABLE_POPSTATE) return;
-        if (!this.confirmNavigation()) {
-            window.history.pushState(window.state, '', this.props.href);
+        var href = window.location.href;
+        if (!this.confirmNavigation(href)) {
+            //window.history.pushState(window.state, '', this.props.href);
+            var d = {
+                'href': href
+            };
+            if (event.state){
+                d.context = event.state;       
+            }
+            store.dispatch({
+                type: d
+            });
             return;
         }
         if (!this.historyEnabled) {
@@ -646,6 +656,18 @@ var App = React.createClass({
         if(href===this.props.href){
             return false;
         }
+
+        var partsNew = url.parse(href),
+            partsOld = url.parse(this.props.href);
+
+        if (
+            partsNew.path === partsOld.path && (
+                partsNew.path.slice(0,14) === '/workflow-runs' ||
+                partsNew.path.slice(0,11) === '/workflows/'
+        )){
+            return false;
+        }
+
         return true;
     },
 

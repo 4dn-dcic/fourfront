@@ -4,10 +4,18 @@ var moment = require('moment');
 var { isServerSide } = require('./misc');
 
 /**
- * Custom patched console for debugging. Only print out statements if debugging/development environment.
+ * Custom patched console instance for debugging. Only print out statements if debugging/development environment.
  * Prevent potential issues where console might not be available (earlier IE).
+ * 
+ * @example
+ * <caption>Usage:</caption>
+ * import { console } from './util';
+ * - or -
+ * var { console } = require('./util');
+ * - or (from same/local directory) -
+ * var console = require('./patched-console').default;
  */
-var patchedConsole = module.exports = (function(){
+const patchedConsoleInstance = (function(){
 
     if (!isServerSide() && window.patchedConsole) return window.patchedConsole; // Re-use instance if available.
 
@@ -92,3 +100,5 @@ var patchedConsole = module.exports = (function(){
     }
     return patchedConsole;
 })();
+
+export default patchedConsoleInstance;

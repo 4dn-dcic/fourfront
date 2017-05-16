@@ -27,7 +27,7 @@ module.exports.object       = require('./object');
 module.exports.navigate     = require('./navigate').default;
 
 /** Analytics utilities */
-module.exports.analytics    = require('./analytics').default;
+module.exports.analytics    = require('./analytics');
 
 /** Layout utilities */
 module.exports.layout       = require('./layout');
@@ -36,7 +36,7 @@ module.exports.layout       = require('./layout');
 module.exports.ajax         = require('./ajax');
 
 /** Patches over browser window's console and disables logging (e.g. console.log) on production. Just import from this module to patch. */
-module.exports.console      = require('./patched-console');
+module.exports.console      = require('./patched-console').default;
 
 /** Functions related to JWT encoding/decoding/storage. Prevent name interference with 'jwt' NPM package */
 module.exports.JWT          = require('./json-web-token');
