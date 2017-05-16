@@ -14,7 +14,7 @@ var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
 var { Filters, ajax, JWT, console, isServerSide, navigate, analytics } = require('./util');
-var Alerts = require('./alerts');
+import Alerts from './alerts';
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
 import { ChartDataController } from './viz/chart-data-controller';

@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+import PropTypes from 'prop-types';
 var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
@@ -23,158 +24,107 @@ var ReactTooltip = require('react-tooltip');
  * Used to render individual terms in FacetList.
  *
  * @memberof module:facetlist.Facet
- * @namespace
+ * @class Term
  * @type {Component}
  */
-var ExpTerm = React.createClass({
 
-    statics : {
+class Term extends React.Component {
 
-        getPassExpsCount : function(termMatchExps, allExpsOrSets, expsOrSets = 'sets'){
-            var numPassed = 0;
+    /**
+     * For non-AJAX filtration.
+     * 
+     * @param {Set} termMatchExps - Set of matched exps.
+     * @param {Array} allExpsOrSets - All exps or sets.
+     * @param {string} [expsOrSets='sets'] Whether to count expsets or exps.
+     * @returns {number} Count
+     */
+    static getPassExpsCount(termMatchExps, allExpsOrSets, expsOrSets = 'sets'){
+        var numPassed = 0;
 
-            if (expsOrSets == 'sets'){
-                allExpsOrSets.forEach(function(expSet){
-                    for (var i=0; i < expSet.experiments_in_set.length; i++){
-                        if (termMatchExps.has(expSet.experiments_in_set[i])) {
-                            numPassed++;
-                            return;
-                        }
+        if (expsOrSets == 'sets'){
+            allExpsOrSets.forEach(function(expSet){
+                for (var i=0; i < expSet.experiments_in_set.length; i++){
+                    if (termMatchExps.has(expSet.experiments_in_set[i])) {
+                        numPassed++;
+                        return;
                     }
-                }, this);
-            } else {
-                // We have just list of experiments, not experiment sets.
-                for (var i=0; i < allExpsOrSets.length; i++){
-                    if (termMatchExps.has(allExpsOrSets[i])) numPassed++;
                 }
+            }, this);
+        } else {
+            // We have just list of experiments, not experiment sets.
+            for (var i=0; i < allExpsOrSets.length; i++){
+                if (termMatchExps.has(allExpsOrSets[i])) numPassed++;
             }
-
-            return numPassed;
-        },
-
-        isSelected : function(
-            termKey     = (this.state.term || this.props.term || {key:null}).key,
-            facetField  = (this.state.facet || this.props.facet || {field:null}).field,
-            expsOrSets  = this.props.experimentsOrSets || 'sets'
-        ){
-            var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
-            if (
-                this.props.expSetFilters[standardizedFieldKey] &&
-                this.props.expSetFilters[standardizedFieldKey].has(termKey)
-            ){
-                return true;
-            }
-            return false;
         }
 
-    },
+        return numPassed;
+    }
 
-    propTypes : {
-        'facet' : React.PropTypes.shape({
-            'field' : React.PropTypes.string.isRequired
-        }).isRequired,
-        'term' : React.PropTypes.shape({
-            'key' : React.PropTypes.string.isRequired
-        }).isRequired,
-        expSetFilters : React.PropTypes.object.isRequired,
-        experimentsOrSets : React.PropTypes.string
-    },
 
-    getDefaultProps : function(){
-        return {
-            experimentsOrSets : 'sets'
-        };
-    },
-
-    getInitialState: function() {
-
-        // Bind isSelected (vs passing params) as needs no extraneous params
-        this.isSelected = ExpTerm.isSelected.bind(this);
-
-        if (this.props.useAjax){ // Back-end filtering. We (should) have accurate doc_count provided from back-end
-
-            return {
-                'passExpsCount' : (this.props.term && this.props.term.doc_count) || 0,
-                'filtering' : false
-            };
-
-        } else { // Manual client-side filtering.
-
-            /**
-             * props.expSetFilters uses standardized fieldKeys/props.facet.field while
-             * experiment tables & facets do not. Props provided through props.facet
-             * are un-standardized, so run them through func standardizeFieldKey before
-             * checking if in expSetFilters, e.g. as in ExpTerm.isSelected.
-             */
-            var termMatchExps = Filters.siftExperimentsClientSide(
-                this.props.experimentSetListJSON,
-                this.props.expSetFilters,
-                this.props.ignoredFilters,
-                this.props.facet.field,
-                this.props.term.key
-            );
-
-            return {
-                'passExpsCount' : this.getPassExpsCount(termMatchExps),
-                'filtering' : false
-            }
-
-        }
-    },
-
-    componentWillReceiveProps : function(newProps){
-
-        var newState = {};
+    static isSelected(
+        termKey     = (this.state.term || this.props.term || {key:null}).key,
+        facetField  = (this.state.facet || this.props.facet || {field:null}).field,
+        expsOrSets  = this.props.experimentsOrSets || 'sets'
+    ){
+        var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
         if (
-            // Probably only expSetFilters would change (re: faceting) but add other checks to be safe.
-            newProps.term.key !== this.props.term.key ||
-            newProps.facet.field !== this.props.facet.field ||
-            newProps.expSetFilters !== this.props.expSetFilters ||
-            newProps.ignoredFilters !== this.props.ignoredFilters ||
-            !FacetList.compareExperimentLists(newProps.experimentSetListJSON, this.props.experimentSetListJSON)
+            this.props.expSetFilters[standardizedFieldKey] &&
+            this.props.expSetFilters[standardizedFieldKey].has(termKey)
         ){
-
-            if (!this.props.useAjax){
-                var termMatchExps = Filters.siftExperimentsClientSide(
-                    newProps.experimentSetListJSON || this.props.experimentSetListJSON,
-                    newProps.expSetFilters || this.props.expSetFilters,
-                    newProps.ignoredFilters || this.props.ignoredFilters,
-                    (newProps.facet || this.props.facet).field,
-                    (newProps.term || this.props.term).key
-                );
-
-                newState.passExpsCount = this.getPassExpsCount(termMatchExps, newProps.experimentSetListJSON || this.props.experimentSetListJSON);
-            } else {
-                newState.passExpsCount = (newProps.term && newProps.term.doc_count) || 0;
-            }
+            return true;
         }
+        return false;
+    }
 
-        if (Object.keys(newState).length > 0){
-            this.setState(newState);
-        }
 
-    },
+    static propTypes = {
+        'facet'             : PropTypes.shape({
+            'field'             : PropTypes.string.isRequired
+        }).isRequired,
+        'term'              : PropTypes.shape({
+            'key'               : PropTypes.string.isRequired,
+            'doc_count'         : PropTypes.number
+        }).isRequired,
+        'expSetFilters'     : PropTypes.object.isRequired,
+        'experimentsOrSets' : PropTypes.string
+    }
+
+
+    static defaultProps = {
+        'experimentsOrSets' : 'sets'
+    }
+
+    constructor(props){
+        super(props);
+        this.isSelected = Term.isSelected.bind(this);
+        this.experimentSetsCount = this.experimentSetsCount.bind(this);
+        this.standardizeFieldKey = this.standardizeFieldKey.bind(this);
+        this.handleClick = _.debounce(this.handleClick.bind(this), 500, true);
+        this.state = {
+            'filtering' : false
+        };
+    }
+
+    experimentSetsCount(){
+        return (this.props.term && this.props.term.doc_count) || 0;
+    }
+
 
     // Correct field to match that of browse page (ExpSet)
-    standardizeFieldKey : function(field = this.props.facet.field, reverse = false){
+    standardizeFieldKey(field = this.props.facet.field, reverse = false){
         return Filters.standardizeFieldKey(field, this.props.experimentsOrSets, reverse);
-    },
+    }
 
-    // find number of experiments or experiment sets
-    getPassExpsCount : function(termMatchExps = this.state.termMatchExps, allExperiments = this.props.experimentSetListJSON){
-        return ExpTerm.getPassExpsCount(termMatchExps, allExperiments, this.props.experimentsOrSets);
-    },
-
-    handleClick: function(e) {
+    handleClick(e) {
         e.preventDefault();
         var existingFilters = _.clone(this.props.expSetFilters);
-        //this.setState(
-        //    { filtering : true },
-        //    () => {
+        this.setState(
+            { filtering : true },
+            () => {
                 this.props.handleChangeFilter(
                     this.props.facet.field,
                     this.props.term.key,
-                    //() => this.setState({ filtering : false })
+                    () => this.setState({ filtering : false })
                 );
 
                 var isUnset = false;
@@ -188,14 +138,11 @@ var ExpTerm = React.createClass({
                     'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.term.key,
                     'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
                 });
-        //    }
-        //);
-    },
+            }
+        );
+    }
 
-    render: function () {
-
-        //var standardizedFieldKey = this.standardizeFieldKey();
-        //var expCount = this.state.termMatchExps.size;
+    render() {
         var selected = this.isSelected();
         return (
             <li className={"facet-list-element" + (selected ? " selected" : '')} key={this.props.term.key}>
@@ -210,78 +157,70 @@ var ExpTerm = React.createClass({
                     <span className="facet-item">
                         { this.props.title || this.props.term.key }
                     </span>
-                    <span className="facet-count">{this.state.passExpsCount}</span>
+                    <span className="facet-count">{this.experimentSetsCount()}</span>
                 </a>
             </li>
         );
     }
-});
 
+}
+
+
+class InfoIcon extends React.Component{
+    render(){
+        if (!this.props.children) return null;
+        return (
+            <i className="icon icon-info-circle" data-tip={this.props.children}/>
+        );
+    }
+}
 
 /**
  * Used to render individual facet fields and their available terms in FacetList.
  *
  * @memberof module:facetlist
- * @namespace
+ * @class Facet
  * @type {Component}
  */
-var Facet = React.createClass({
-
-    statics : {
-        ExpTerm : ExpTerm, // Allow access to ExpTerm thru Facet.ExpTerm
-
-        /**
-         * @memberof module:facetlist.Facet
-         * @namespace
-         * @type {Component}
-         */
-        InfoIcon : React.createClass({
-            render : function(){
-                if (!this.props.children) return null;
-                return (
-                    <i className="icon icon-info-circle" data-tip={this.props.children}/>
-                );
-            }
-        })
-    },
-
-    propTypes : {
-        'facet' : React.PropTypes.shape({
-            'field' : React.PropTypes.string.isRequired,    // Name of nested field property in experiment objects, using dot-notation.
-            'title' : React.PropTypes.string,               // Human-readable Facet Term
-            'total' : React.PropTypes.number,               // Total experiments (or terms??) w/ field
-            'terms' : React.PropTypes.array.isRequired      // Possible terms
+class Facet extends React.Component {
+    
+    static propTypes = {
+        'facet'                 : PropTypes.shape({
+            'field'                 : PropTypes.string.isRequired,    // Name of nested field property in experiment objects, using dot-notation.
+            'title'                 : PropTypes.string,               // Human-readable Facet Term
+            'total'                 : PropTypes.number,               // Total experiments (or terms??) w/ field
+            'terms'                 : PropTypes.array.isRequired      // Possible terms
         }),
-        defaultFacetOpen : React.PropTypes.bool,
-        experimentSetListJSON : React.PropTypes.array,
-        expSetFilters : React.PropTypes.object.isRequired,
-        ignoredFilters : React.PropTypes.object,
-        changeFilter : React.PropTypes.func,                // Executed on term click
-        experimentsOrSets : React.PropTypes.string,         // Defaults to 'sets'
-        width : React.PropTypes.any,
-        extraClassname : React.PropTypes.string,
-        schemas : React.PropTypes.object
-    },
+        'defaultFacetOpen'      : PropTypes.bool,
+        'experimentSetListJSON' : PropTypes.array,
+        'expSetFilters'         : PropTypes.object.isRequired,
+        'ignoredFilters'        : PropTypes.object,
+        'changeFilter'          : PropTypes.func,           // Executed on term click
+        'experimentsOrSets'     : PropTypes.string,         // Defaults to 'sets'
+        'width'                 : PropTypes.any,
+        'extraClassname'        : PropTypes.string,
+        'schemas'               : PropTypes.object
+    }
 
-    getDefaultProps: function() {
-        return {
-            width: 'inherit'
+    static defaultProps = {
+        width: 'inherit'
+    }
+
+    constructor(props){
+        super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.isStatic = this.isStatic.bind(this);
+        this.isEmpty = this.isEmpty.bind(this);
+        this.isSelected = this.isStatic(props) ? Term.isSelected.bind(this, props.facet.terms[0].key) : () => false;
+        this.handleExpandToggleClick = this.handleExpandToggleClick.bind(this);
+        this.handleStaticClick = this.handleStaticClick.bind(this);
+        this.state = {
+            'facetOpen' : typeof props.defaultFacetOpen === 'boolean' ? props.defaultFacetOpen : true
         };
-    },
+    }
 
-    getInitialState: function () {
-        // Bind class instance to ExpTerm.isSelected to create this.isSelected if static (== 1 term in facet)
-        this.isSelected = this.isStatic() ?
-            Facet.ExpTerm.isSelected.bind(this, this.props.facet.terms[0].key)
-            :
-            () => false;
 
-        return {
-            facetOpen: typeof this.props.defaultFacetOpen === 'boolean' ? this.props.defaultFacetOpen : true // Potential ToDo: store list of open or closed facet field IDs in localstorage.
-        };
-    },
-
-    componentWillReceiveProps : function(nextProps){
+    componentWillReceiveProps(nextProps){
         // We might want to change defaultFacetOpen right after mount, so let us re-do getInitialState.
         if (
             (nextProps.mounted && !this.props.mounted) &&
@@ -289,17 +228,17 @@ var Facet = React.createClass({
         ){
             this.setState({ facetOpen : nextProps.defaultFacetOpen });
         }
-    },
+    }
 
-    isStatic: function(props = this.props){ return !!(props.facet.terms.length === 1); },
-    isEmpty: function(props = this.props){ return !!(props.facet.terms.length === 0); },
+    isStatic(props = this.props){ return !!(props.facet.terms.length === 1); }
+    isEmpty(props = this.props) { return !!(props.facet.terms.length === 0); }
 
-    handleExpandToggleClick: function (e) {
+    handleExpandToggleClick(e) {
         e.preventDefault();
         this.setState({facetOpen: !this.state.facetOpen});
-    },
+    }
 
-    handleStaticClick: function(e) {
+    handleStaticClick(e) {
         e.preventDefault();
         if (!this.isStatic()) return false;
         var existingFilters = _.clone(this.props.expSetFilters);
@@ -325,9 +264,9 @@ var Facet = React.createClass({
                 )
             }
         );
-    },
+    }
 
-    render: function() {
+    render() {
         var facet = this.props.facet;
         var standardizedFieldKey = Filters.standardizeFieldKey(facet.field, this.props.experimentsOrSets);
         var selected = this.isSelected();
@@ -407,7 +346,7 @@ var Facet = React.createClass({
                 <div className="facet-list nav">
                     <div>
                         { facet.terms.map((term)=>
-                            <Facet.ExpTerm
+                            <Term
                                 {...this.props}
                                 key={term.key}
                                 term={term}
@@ -428,11 +367,15 @@ var Facet = React.createClass({
         );
 
     }
-});
+
+}
+
 
 /**
  * @alias module:facetlist
  */
+
+//export default class FacetList extends React.Component {}
 
 var FacetList = module.exports = React.createClass({
 
@@ -736,9 +679,8 @@ var FacetList = module.exports = React.createClass({
         expSetFilters : React.PropTypes.object.isRequired,
         experimentSetListJSON : React.PropTypes.array.isRequired, // JSON data of experiments, if not in context['@graph']
         orientation : React.PropTypes.string,   // 'vertical' or 'horizontal'
-        ignoredFilters : React.PropTypes.any,   // Passed down to ExpTerm
+        ignoredFilters : React.PropTypes.any,   // Passed down to Term
         urlPath : React.PropTypes.string,       // context['@id'], used to get search param.
-        restrictions : React.PropTypes.object,
         experimentsOrSets : React.PropTypes.string,
         expIncompleteFacets : React.PropTypes.array,
         title : React.PropTypes.string,         // Title to put atop FacetList
