@@ -117,7 +117,7 @@ def get_item_if_you_can(request, value, itype=None):
     except AttributeError:
         svalue = str(value)
         if not svalue.startswith('/'):
-            svalue = '/' + value
+            svalue = '/' + svalue
         item = request.embed(svalue, '@@object')
         try:
             item.get('uuid')
