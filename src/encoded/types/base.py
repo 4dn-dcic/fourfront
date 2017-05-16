@@ -110,7 +110,7 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 
 
 def get_item_if_you_can(request, value):
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     try:
         value.get('uuid')
         return value
