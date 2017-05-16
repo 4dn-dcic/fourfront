@@ -5,7 +5,6 @@ var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
 var { console, object, expFxn } = require('./../../util');
-var { unhighlightTerms } = require('./../../facetlist');
 var aggregationFxn = require('./aggregation-functions');
 
 /**

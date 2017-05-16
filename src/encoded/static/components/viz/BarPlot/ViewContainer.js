@@ -8,7 +8,6 @@ var store = require('./../../../store');
 var vizUtil = require('./../utilities');
 import ChartDetailCursor, { CursorViewBounds } from './../ChartDetailCursor';
 var { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } = require('./../../util');
-var { unhighlightTerms } = require('./../../facetlist');
 
 // Used for transitioning
 var cachedBars = {},
@@ -210,10 +209,10 @@ class Bar extends React.Component {
         return (
             <div
                 className={className}
-                onMouseLeave={()=>{
+                //onMouseLeave={()=>{
                     //if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
                     //else unhighlightTerms(d.field);
-                }}
+                //}}
                 data-term={d.term}
                 data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
                 key={"bar-" + d.term}
@@ -476,7 +475,7 @@ export class PopoverViewContainer extends React.Component {
                 actions={this.cursorDetailActions.call(this)}
                 cursorContainerMargin={this.props.cursorContainerMargin}
                 eventCategory="BarPlot" // For Analytics events
-                //highlightTerm
+                highlightTerm
                 clickCoordsFxn={(node, containerPosition, boundsHeight)=>{
                     var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
                     var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;

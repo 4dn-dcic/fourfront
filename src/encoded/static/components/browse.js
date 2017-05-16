@@ -9,7 +9,7 @@ var globals = require('./globals');
 var browse = module.exports;
 var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } = require('react-bootstrap');
 var store = require('../store');
-var FacetList = require('./facetlist');
+import FacetList from './facetlist';
 import ExperimentsTable from './experiments-table';
 var { isServerSide, expFxn, Filters, navigate, object } = require('./util');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
@@ -904,7 +904,7 @@ export class ResultTable extends React.Component {
                 targetFiles={this.props.targetFiles}
                 key={experiment_set['@id']}
                 rowNumber={resultCount++}
-                facets={facets || FacetList.adjustedFacets(this.props.context.facets)}
+                facets={facets || this.props.context.facets}
                 fileStats={this.props.fileStats}
             />;
         });
@@ -1085,8 +1085,7 @@ export class ResultTableContainer extends React.Component {
     }
 
     render() {
-        var facets = FacetList.adjustedFacets(this.props.context.facets);
-        var ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
+        var facets = this.props.context.facets;
         return (
             <div className="row">
                 { facets.length > 0 ?
@@ -1101,11 +1100,11 @@ export class ResultTableContainer extends React.Component {
                                 clear_filters : this.props.context.clear_filters || null
                             }}
                             facets={facets}
-                            ignoredFilters={ignoredFilters}
                             className="with-header-bg"
                             href={this.props.href}
                             useAjax={true}
                             schemas={this.props.schemas}
+                            session={this.props.session}
                         />
                     </div>
                     :
@@ -1141,6 +1140,9 @@ var FileButton = browse.FileButton = React.createClass({
         );
     }
 });
+
+
+
 
 var ControlsAndResults = browse.ControlsAndResults = React.createClass({
 

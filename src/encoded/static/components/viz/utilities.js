@@ -341,3 +341,103 @@ export const mixin = {
     }
 
 };
+
+
+
+const highlightTermFxn = _.debounce(function(
+    field = 'experiments_in_set.biosample.biosource.individual.organism.name',
+    term = 'human',
+    color = ''
+){
+
+    if (isServerSide()) return false;
+    if (!document.querySelectorAll) return false;
+
+    function setHighlightClass(el, off = false){
+        var isSVG, className;
+        //if (el.nodeName.toLowerCase() === 'path') console.log(el);
+        if (el.className.baseVal) {
+            isSVG = true;
+            className = el.className.baseVal;
+            //if (el.nodeName.toLowerCase() === 'path')console.log('isSVG', off);
+        } else {
+            isSVG = false;
+            className = el.className;
+        }
+
+        if (el.classList && el.classList.add){
+            if (!off) el.classList.add('highlight');
+            else el.classList.remove('highlight');
+            return isSVG;
+        }
+
+        if (!off){
+            if (className.indexOf(' highlight') < 0) className = className + ' highlight';
+        } else {
+            if (className.indexOf(' highlight') > -1)   className = className.replace(' highlight', '');
+        }
+
+        if (isSVG)  el.className.baseVal = className;
+        else        el.className = className;
+        return isSVG;
+    }
+
+    requestAnimationFrame(function(){
+
+        var colorIsSet =
+            (color === null || color === false) ? false :
+            (typeof color === 'string') ? color.length > 0 :
+            (typeof color === 'object') ? true : false;
+
+        _.each(document.querySelectorAll('[data-field]:not(.no-highlight)'), function(fieldContainerElement){
+            setHighlightClass(fieldContainerElement, true);
+        });
+
+        if (colorIsSet){
+            _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']:not(.no-highlight)'), function(fieldContainerElement){
+                setHighlightClass(fieldContainerElement, false);
+            });
+        }
+
+        // unhighlight previously selected terms, if any.
+        _.each(document.querySelectorAll('[data-term]:not(.no-highlight)'), function(termElement){
+            var dataField = termElement.getAttribute('data-field');
+            if (field && dataField && dataField === field) return; // Skip, we need to leave as highlighted as also our field container.
+            var isSVG = setHighlightClass(termElement, true);
+            if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = '';
+        });
+
+        if (colorIsSet){
+            _.each(document.querySelectorAll('[data-term="' + term + '"]:not(.no-highlight)'), function(termElement){
+                var isSVG = setHighlightClass(termElement, false);
+                if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = color;
+            });
+        }
+
+    });
+    return true;
+
+}, 50);
+
+
+/**
+ * Highlights all terms on document (changes background color) of given field,term.
+ * @param {string} field - Field, in object dot notation.
+ * @param {string} term - Term to highlight.
+ * @param {string} color - A valid CSS color.
+ */
+export function highlightTerm(
+    field = 'experiments_in_set.biosample.biosource.individual.organism.name',
+    term = 'human',
+    color = ''
+){
+    return highlightTermFxn.apply(this, arguments);
+}
+
+/**
+ * Resets background color of terms.
+ */
+export function unhighlightTerms(field = null){
+    return highlightTermFxn(field, null, '');
+}
+
