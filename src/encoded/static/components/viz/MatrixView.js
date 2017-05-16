@@ -185,9 +185,9 @@ export class MatrixContainer extends React.Component {
     }
 
     constructor(props){
-		super(props);
+        super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
-		this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.registerPostUpdateFxn = this.registerPostUpdateFxn.bind(this);
         this.runPostUpdateFxns = this.runPostUpdateFxns.bind(this);
         this.maxGridWidth = this.maxGridWidth.bind(this);
