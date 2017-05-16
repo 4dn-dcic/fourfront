@@ -776,7 +776,7 @@ def main():
 
     for ontology in ontologies:
         print('Processing: ', ontology['ontology_name'])
-        if ontology['download_url'] is not None:
+        if ontology.get('download_url', None) is not None:
             # get all the terms for an ontology
             terms = download_and_process_owl(ontology, connection, terms)
 
