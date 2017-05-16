@@ -91,7 +91,8 @@ module.exports.TabbedView = require('./TabbedView').default;
  * @namespace
  * @type {Component}
  */
-module.exports.ItemDetailList = require('./ItemDetailList').default;
+export * from './ItemDetailList';
+//module.exports.ItemDetailList = require('./ItemDetailList').default;
 
 /**
  * The list of properties contained within ItemDetailList.
@@ -100,7 +101,7 @@ module.exports.ItemDetailList = require('./ItemDetailList').default;
  * @namespace
  * @type {Component}
  */
-module.exports.Detail = require('./ItemDetailList').Detail;
+//module.exports.Detail = require('./ItemDetailList').Detail;
 
 /**
  * @namespace

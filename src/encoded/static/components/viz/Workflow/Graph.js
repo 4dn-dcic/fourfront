@@ -77,7 +77,7 @@ export default class Graph extends React.Component {
         'width'         : null,
         'columnSpacing' : 56,
         'columnWidth'   : 150,
-        'rowSpacing'    : 56,
+        'rowSpacing'    : 64,
         'pathArrows'    : true,
         'detailPane'    : <DefaultDetailPane />,
         'rowSpacingType': 'wide',
@@ -85,10 +85,10 @@ export default class Graph extends React.Component {
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
         'nodeTitle'     : function(node, canBeJSX = false){ return node.title || node.name; },
         'innerMargin'   : {
-            'top' : 20,
-            'bottom' : 48,
-            'left' : 15,
-            'right' : 15
+            'top' : 32,
+            'bottom' : 60,
+            'left' : 20,
+            'right' : 20
         }
     }
 

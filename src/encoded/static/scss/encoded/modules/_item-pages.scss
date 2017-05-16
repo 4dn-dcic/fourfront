@@ -814,38 +814,45 @@ $download-button-width : 100px;
 				margin-bottom: 0;
 			}
 		}
+		> .detail-pane-body {
+			overflow-x: hidden;
+		}
 		.information {
 			margin-top: 12px;
 			padding-bottom: 3px;
 			padding-top: 0;
 			border-top: 1px solid #ccc;
-			overflow-x: hidden;
 			
 
 			& + hr {
 				border-color: #ccc;
 			}
 
-			> h3,
-			> .row > div > h3 {
-				margin-top: 1px;
-				margin-bottom : 0px;
-				> pre {
-					margin-top: 5px;
-				}
-			}
-			> .row > div > h4,
-			> .row > div > h5 {
-				margin-top: 3px;
-				margin-bottom: 3px;
-				> .download-button {
-					margin-top: 3px;
-				}
-			}
 
 			> .row > .box {
 				padding-top : 20px;
 				min-height: 64px;
+				> h3 {
+					margin-top: 1px;
+					margin-bottom : 0px;
+					> pre {
+						margin-top: 5px;
+					}
+				}
+				> h4, > h5 {
+					margin-top: 3px;
+					margin-bottom: 3px;
+				}
+				> .download-button {
+					margin-top: 6px;
+				}
+
+				&.buttons-container {
+					text-align: left;
+					@media screen and (min-width: $screen-sm-min){
+						text-align: right;
+					}
+				}
 			}
 
 			.description-box-container {
@@ -854,7 +861,7 @@ $download-button-width : 100px;
 
 			.file-title {
 
-				> h3 {
+				> h3.node-file-title {
 					overflow: hidden;
 				}
 
@@ -863,8 +870,44 @@ $download-button-width : 100px;
 					right: 10px;
 					top: 40px;
 				}
+
+				.download-button-container.exists + h3.node-file-title {
+					@media screen and (max-width: $screen-md-max){
+						padding-right: 30px;
+					}
+				}
 			}
 
 		}
 	}
+}
+
+/** MetricsView **/
+
+.metrics-view {
+
+	.metrics-view-item {
+
+		.inner {
+			padding-top: 9px;
+			padding-bottom: 9px;
+
+			border-bottom: 1px solid #f4f4f4;
+
+			.icon-exclamation-circle {
+				color : $audit-color-error;
+			}
+			.icon-warning {
+				color : $audit-color-warning;
+			}
+			.icon-check {
+				color : green;
+			}
+		}
+
+		h1,h2,h3,h4,h5,h6 {
+			margin: 0;
+		}
+	}
+
 }
