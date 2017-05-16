@@ -201,8 +201,8 @@ export class MatrixContainer extends React.Component {
         this.runPostUpdateFxns();
     }
 
-	componentDidUpdate(pastProps, pastState){
-		if (pastProps.mounted === false && this.props.mounted === true){
+    componentDidUpdate(pastProps, pastState){
+        if (pastProps.mounted === false && this.props.mounted === true){
             ReactTooltip.rebuild();
         }
         this.runPostUpdateFxns();
