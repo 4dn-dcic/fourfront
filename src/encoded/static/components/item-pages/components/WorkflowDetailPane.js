@@ -142,6 +142,11 @@ class FileDetailBody extends React.Component {
         ]
     }
 
+    doesDescriptionOrNotesExist(){
+        var file = this.props.file;
+        return !!(file.description || file.notes || false);
+    }
+
     canDownload(){
         if (this.props.canDownloadStatuses.indexOf(this.props.file.status) > -1){
             return true;
@@ -153,8 +158,12 @@ class FileDetailBody extends React.Component {
         var node = this.props.node;
         var file = this.props.file;
         var fileTitle = getTitleStringFromContext(file);
+        var colClassName = "col-sm-6 col-lg-4";
+        if (!this.doesDescriptionOrNotesExist()){
+            colClassName = "col-sm-6 col-lg-6";
+        }
         return (
-            <div className="col-sm-6 col-lg-4 file-title box">
+            <div className={colClassName + " file-title box"}>
                 <span className="text-600">
                     {
                     node.type === 'output' ? 'Generated' :
@@ -183,8 +192,13 @@ class FileDetailBody extends React.Component {
             :
             <span>{ file.filename || file.href }</span>;
 
+        var colClassName = "col-sm-6 col-lg-4";
+        if (!this.doesDescriptionOrNotesExist()){
+            colClassName = "col-sm-6 col-lg-6";
+        }
+
         return (
-            <div className="col-xs-12 col-sm-6 col-lg-4 right box buttons-container">
+            <div className={colClassName + " right box buttons-container"}>
                 <ViewMetricButton node={this.props.node} file={file}/> { content }
             </div>
         );
@@ -193,6 +207,7 @@ class FileDetailBody extends React.Component {
     descriptionBox(){
         var file = this.props.file;
         var gridSize = layout.responsiveGridState();
+        if (!this.doesDescriptionOrNotesExist()) return null;
         return (
             <div className="col-xs-12 col-lg-4 box">
                 <span className="text-600">{ file.description ? 'Description' : (file.notes ? 'Notes' : 'Description') }</span>
@@ -274,6 +289,132 @@ class FileDetailBody extends React.Component {
 }
 
 
+class AnalysisStepDetailBody extends React.Component {
+
+    stepTitleBox(){
+        var step = this.props.step;
+        return (
+            <div className="col-sm-6 col-md-4 box">
+                <span className="text-600">Step Name</span>
+                <h3 className="text-400 text-ellipsis-container">
+                    <a href={object.atIdFromObject(step) || '/' + step.uuid}>
+                        { step.name || step.title || step.display_title || step.uuid }
+                    </a>
+                </h3>
+            </div>
+        );
+    }
+
+    purposesBox(){
+        var step = this.props.step;
+        var purposeList = step.analysis_step_types;
+        var elementType = 'h5';
+        if (purposeList.length  === 1) elementType = 'h4';
+        return(
+            <div className="col-sm-6 col-md-8 box">
+                <span className="text-600">Purpose{ purposeList.length > 1 ? 's' : '' }</span>
+                { React.createElement(elementType, { 'className' : 'text-400' }, purposeList.map(function(p, i){
+                    return <span className="text-capitalize">{ p }{ i !== purposeList.length - 1 ? ', ' : '' }</span>;
+                })) }
+            </div>
+        );
+    }
+
+    softwareUsedBox(){
+        var step = this.props.step;
+        var soft = step.software_used;
+        var link = object.atIdFromObject(soft);
+        var title;
+        if (soft.name && soft.version){
+            title = soft.name + ' v' + soft.version;
+        } else if (soft.title) {
+            title = soft.title;
+        } else {
+            title = link;
+        }
+
+        return (
+            <div className="col-sm-6 col-md-4 box">
+                <span className="text-600">Software Used</span>
+                <h4 className="text-400 text-ellipsis-container">
+                    <a href={link}>{ title }</a>
+                </h4>
+            </div>
+        );
+    }
+
+    softwareBody(){
+        var step = this.props.step;
+        var soft = step.software_used;
+        var link = object.atIdFromObject(soft);
+        var title;
+        if (soft.name && soft.version){
+            title = soft.name + ' v' + soft.version;
+        } else if (soft.title) {
+            title = soft.title;
+        } else {
+            title = link;
+        }
+
+        return (
+            <div>
+                <span className="text-600">Software Used</span>
+                <div>
+                    <h4 className="text-400"><a href={link}>{ title }</a></h4>
+                </div>
+                <ItemDetailList
+                    context={step.software_used}
+                    schemas={this.props.schemas}
+                    minHeight={this.props.minHeight}
+                    keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                />
+            </div>
+        );
+    }
+
+    softwareLinkBox(){
+        var step = this.props.step;
+        var soft = step.software_used;
+        if (!soft) return null;
+        if (!soft.source_url) return null;
+        return (
+            <div className="col-sm-6 col-md-8 box">
+                <span className="text-600">Software Source</span>
+                <h5 className="text-400 text-ellipsis-container">
+                    <a href={soft.source_url} title={soft.source_url}>{ soft.source_url }</a>
+                </h5>
+            </div>
+        );
+    }
+
+    render(){
+        var node = this.props.node;
+        
+        return(
+            <div style={{ minHeight : this.props.minHeight }}>
+                <div className="information">
+                    <div className="row">
+
+                        { this.stepTitleBox() }
+                        { this.purposesBox() }
+
+                    </div>
+                    <hr/>
+                    <div className="row">
+
+                        { this.softwareUsedBox() }
+                        { this.softwareLinkBox() }
+
+                    </div>
+                </div>
+                <hr/>
+            </div>
+        );
+    }
+
+}
+
+
 export default class WorkflowDetailPane extends React.Component {
 
     static propTypes = {
@@ -325,8 +466,7 @@ export default class WorkflowDetailPane extends React.Component {
             return (
                 <div style={typeof this.props.minHeight === 'number' ? { minHeight : this.props.minHeight } : null}>
                     <div className="information">
-                        <br/>
-                        Value Used
+                        <div className="text-600" style={{ paddingTop : 10 }}>Value Used</div>
                         <h3 className="text-500">
                             <pre>{ node.meta.run_data.value }</pre>
                         </h3>
@@ -336,40 +476,14 @@ export default class WorkflowDetailPane extends React.Component {
         }
         if (node.type === 'step' && node.meta && node.meta.uuid){
             return (
-                <div>
-                    <div className="information">
-
-                        <div className="row">
-
-
-                            <div className="col-md-6 col-lg-4 box">
-                                <span>Step Name</span>
-                                <h3 className="text-500">
-                                    <a href={object.atIdFromObject(node.meta) || '/' + node.meta.uuid} className={className}>
-                                        { node.meta.name || node.meta.title || node.meta.display_title || node.meta.uuid }
-                                    </a>
-                                </h3>
-                            </div>
-
-                            <div className="col-md-6 col-lg-4 box">
-                                <span>Step Name</span>
-                                <h3 className="text-400">
-                                    <a href={object.atIdFromObject(node.meta) || '/' + node.meta.uuid} className={className}>
-                                        { node.meta.name || node.meta.title || node.meta.display_title || node.meta.uuid }
-                                    </a>
-                                </h3>
-                            </div>
-
-
-                        </div>
-
-                        
-                    </div>
-                    <hr/>
-                    <ItemDetailList context={node.meta} schemas={this.props.schemas} minHeight={this.props.minHeight} />
-
-                </div>
-            )
+                <AnalysisStepDetailBody
+                    step={node.meta}
+                    node={node}
+                    schemas={this.props.schemas}
+                    minHeight={this.props.minHeight}
+                    keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                />
+            );
         }
     }
 
