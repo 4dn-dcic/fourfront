@@ -109,7 +109,7 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
         ]
 
 
-def get_item_if_you_can(request, value):
+def get_item_if_you_can(request, value, itype=None):
     import pdb; pdb.set_trace()
     try:
         value.get('uuid')
@@ -118,10 +118,17 @@ def get_item_if_you_can(request, value):
         svalue = str(value)
         if not svalue.startswith('/'):
             svalue = '/' + value
+        item = request.embed(svalue, '@@object')
         try:
-            return request.embed(svalue, '@@object')
-        except:
-            return value
+            item.get('uuid')
+            return item
+        except AttributeError:
+            if itype is not None:
+                svalue = '/' + itype + svalue
+                try:
+                    return request.embed(svalue, '@@object')
+                except:
+                    return value
 
 
 class AbstractCollection(snovault.AbstractCollection):
