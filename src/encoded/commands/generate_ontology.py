@@ -464,12 +464,12 @@ def _terms_match(t1, t2):
         if k not in t2:
             return False
         else:
-            if k == 'parents':
-                if len(val) != len(t2['parents']):
+            if k == 'parents' or k == 'slim_terms':
+                if len(val) != len(t2[k]):
                     return False
                 for p1 in val:
                     found = False
-                    for p2 in t2['parents']:
+                    for p2 in t2[k]:
                         # this bit depends on the {link_id: val, display_title: val}
                         # form of embedded info - may need to make more complex to deal with
                         # other scenarios like a list of uuids or fully embedded terms
@@ -481,6 +481,10 @@ def _terms_match(t1, t2):
                 # same as above comment to potentially deal with different response
                 t2ont = t2['source_ontology']['link_id']
                 if val not in t2ont:
+                    return False
+            elif k == 'synonyms':
+                t2syns = t2.get('synonyms')
+                if not t2syns or (set(t2syns) != set(val)):
                     return False
             else:
                 if val != t2[k]:

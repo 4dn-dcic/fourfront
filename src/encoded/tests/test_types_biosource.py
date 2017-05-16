@@ -43,7 +43,7 @@ def test_validate_biosource_tissue_no_tissue(testapp, award, lab, gm12878_oterm)
     biosource = {'award': award['@id'],
                  'lab': lab['@id'],
                  'biosource_type': 'immortalized cell line',
-                 'cell_line': gm12878_oterm['@id']}
+                 'cell_line': 'GM12878'}
     res = testapp.post_json('/biosource', biosource, status=201)
     assert not res.json.get('errors')
 
