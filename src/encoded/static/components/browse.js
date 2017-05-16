@@ -1142,85 +1142,20 @@ var FileButton = browse.FileButton = React.createClass({
 });
 
 
+export class ControlsAndResults extends React.Component {
 
+    constructor(props){
+        super(props);
+        this.getSelectedFiles = this.getSelectedFiles.bind(this);
+        this.render = this.render.bind(this);
+    }
 
-var ControlsAndResults = browse.ControlsAndResults = React.createClass({
-
-    // TODO: ADJUST THIS!!! SELECTED FILES ARE NO LONGER GUARANTEED TO BE IN DOM!!!!!
-    // They are now in ExperimentSetRows state. We need to grab state.selectedFiles from each.
-    // We may in future store selectedFiles completely in Redux store or localStorage to allow a 'shopping cart' -like experience.
-
-    getInitialState: function(){
-        var initStats = {};
-        initStats['checked'] = new Set();
-        initStats['formats'] = {};
-        initStats['uuids'] = new Set();
-        var defaultFormats = new Set();
-        for(var i=0; i<this.props.fileFormats.length; i++){
-            defaultFormats.add(this.props.fileFormats[i]);
-        }
-        return{
-            fileStats: initStats,
-            filesToFind: defaultFormats
-        }
-    },
-
-    componentDidMount: function(){
-        var currStats = findFiles(this.props.fileFormats);
-        this.setState({
-            fileStats: currStats
-        });
-        // update after initiating
-        this.forceUpdate();
-    },
-
-    componentDidUpdate: function(nextProps, nextState){
-        if (nextProps.expSetFilters !== this.props.expSetFilters || nextProps.context !== this.props.context){
-            // reset file filters when changing set type
-            var currStats = findFiles(this.props.fileFormats);
-            if(this.state.fileStats.formats !== currStats.formats){
-                this.setState({
-                    fileStats: currStats
-                });
-            }
-        }
-    },
-
-    deselectFiles: function(e){
-        e.preventDefault();
-    },
-
-    /** 
-     * DEPRECATED (probably), get current selected files sets via this.getSelectedFiles(), keyed by experiment set @id. 
-     * Use _.flatten(_.values(this.getSelectedFiles())) to get single array of selected files, maybe also wrapped in a _.uniq() if files might be shared between expsets.
-     */
-    downloadFiles: function(e){
-        e.preventDefault();
-        var currStats = findFiles(this.props.fileFormats);
-        var checkedFiles = currStats['checked'] ? currStats['checked'] : new Set();
-        console.log('____DOWNLOAD THESE ' + checkedFiles.size + ' FILES____');
-        console.log(checkedFiles);
-    },
-
-    /** DEPRECATED */
-    selectFiles: function(format, selected){
-        var newSet = this.state.filesToFind;
-        if(newSet.has(format) && selected){
-            newSet.delete(format);
-        }else if(!selected){
-            newSet.add(format);
-        }
-        this.setState({
-            filesToFind: newSet
-        });
-    },
-
-    getSelectedFiles : function(){
+    getSelectedFiles(){
         if (!this.refs.resultTableContainer) return null;
         return this.refs.resultTableContainer.getSelectedFiles();
-    },
+    }
 
-    render: function(){
+    render(){
         var fileStats = this.state.fileStats;
         var targetFiles = this.state.filesToFind;
         //var selectorButtons = this.props.fileFormats.map(function (format, idx) {
@@ -1279,7 +1214,78 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
 
         );
     }
-});
+
+}
+
+
+//var ControlsAndResults = browse.ControlsAndResults = React.createClass({
+
+    // TODO: ADJUST THIS!!! SELECTED FILES ARE NO LONGER GUARANTEED TO BE IN DOM!!!!!
+    // They are now in ExperimentSetRows state. We need to grab state.selectedFiles from each.
+    // We may in future store selectedFiles completely in Redux store or localStorage to allow a 'shopping cart' -like experience.
+
+    //getInitialState: function(){
+    //    var initStats = {};
+    //    initStats['checked'] = new Set();
+    //    initStats['formats'] = {};
+    //    initStats['uuids'] = new Set();
+    //    var defaultFormats = new Set();
+    //    for(var i=0; i<this.props.fileFormats.length; i++){
+    //        defaultFormats.add(this.props.fileFormats[i]);
+    //    }
+    //    return{
+    //        fileStats: initStats,
+    //        filesToFind: defaultFormats
+    //    }
+    //},
+
+    //componentDidMount: function(){
+    //    var currStats = findFiles(this.props.fileFormats);
+    //    this.setState({
+    //        fileStats: currStats
+    //    });
+    //    // update after initiating
+    //    this.forceUpdate();
+    //},
+
+    //componentDidUpdate: function(nextProps, nextState){
+    //    if (nextProps.expSetFilters !== this.props.expSetFilters || nextProps.context !== this.props.context){
+    //        // reset file filters when changing set type
+    //        var currStats = findFiles(this.props.fileFormats);
+    //        if(this.state.fileStats.formats !== currStats.formats){
+    //            this.setState({
+    //                fileStats: currStats
+    //            });
+    //        }
+    //    }
+    //},
+
+    /** 
+     * DEPRECATED (probably), get current selected files sets via this.getSelectedFiles(), keyed by experiment set @id. 
+     * Use _.flatten(_.values(this.getSelectedFiles())) to get single array of selected files, maybe also wrapped in a _.uniq() if files might be shared between expsets.
+     */
+    //downloadFiles: function(e){
+    //    e.preventDefault();
+    //    var currStats = findFiles(this.props.fileFormats);
+    //    var checkedFiles = currStats['checked'] ? currStats['checked'] : new Set();
+    //    console.log('____DOWNLOAD THESE ' + checkedFiles.size + ' FILES____');
+    //    console.log(checkedFiles);
+    //},
+
+    /** DEPRECATED */
+    //selectFiles: function(format, selected){
+    //    var newSet = this.state.filesToFind;
+    //    if(newSet.has(format) && selected){
+    //        newSet.delete(format);
+    //    }else if(!selected){
+    //        newSet.add(format);
+    //    }
+    //    this.setState({
+    //        filesToFind: newSet
+    //    });
+    //},
+
+//});
 
 export class Browse extends React.Component {
 

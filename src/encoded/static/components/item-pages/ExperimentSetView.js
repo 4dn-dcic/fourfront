@@ -1,14 +1,14 @@
 'use strict';
 
 var React = require('react');
+import PropTypes from 'prop-types';
 var _ = require('underscore');
 var Panel = require('react-bootstrap').Panel;
-import PropTypes from 'prop-types';
 var { ajax, console, DateUtility, object, isServerSide } = require('./../util');
 var globals = require('./../globals');
 import ExperimentsTable from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView } from './components';
-var FacetList = require('./../facetlist');
+import FacetList from './../facetlist';
 
 /**
  * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.

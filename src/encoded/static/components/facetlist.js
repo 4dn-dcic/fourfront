@@ -455,7 +455,7 @@ export default class FacetList extends React.Component {
         var facets = cachedEmptyFacets.slice(0);
         if (facets.length > 0){
             return FacetList.fillFacetTermsAndCountFromExps(
-                facets,
+                facets.filter(function(f){ return props.filterFacetsFxn(f, props, {}); }),
                 props.experimentSetListJSON
             );
         }
@@ -547,7 +547,7 @@ export default class FacetList extends React.Component {
 
         if (this.props.debug) console.log(
             'Mounted FacetList on ' + (this.props.urlPath || 'unknown page.'),
-            '\nFacets Provided: ' + this.isUsingProvidedFacets(),
+            '\nFacets Provided: ' + this.props.facets,
             'Facets Loaded: ' + this.state.facetsLoaded
         );
 
@@ -555,7 +555,7 @@ export default class FacetList extends React.Component {
             this.loadFacets((facets) => {
                 cachedEmptyFacets = facets;
                 facets = FacetList.fillFacetTermsAndCountFromExps(
-                    cachedEmptyFacets.slice(0),
+                    this.filterFacets(cachedEmptyFacets),
                     this.props.experimentSetListJSON
                 );
                 if (Array.isArray(facets) && facets.length > 0){
@@ -585,7 +585,6 @@ export default class FacetList extends React.Component {
             !_.isEqual(nextProps.facets, this.props.facets) ||
             !_.isEqual(this.state.facets, nextState.facets) ||
             this.state.facetsLoaded !== nextState.facetsLoaded ||
-            !_.isEqual(nextProps.expIncompleteFacets, this.props.expIncompleteFacets) ||
             nextProps.schemas !== this.props.schemas
         ){
             if (this.props.debug) console.log('%cWill','color: green', 'update FacetList');
@@ -649,6 +648,13 @@ export default class FacetList extends React.Component {
     }
 
 
+    filterFacets(facets){
+        return facets.filter((f)=>{
+            return this.props.filterFacetsFxn(f, this.props, this.state);
+        });
+    }
+
+
     renderFacets(facets){
         return facets
             .filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state))
@@ -681,7 +687,7 @@ export default class FacetList extends React.Component {
             facets = this.state.facets || null;
         }
         if (!facets || !facets.length) {
-            if (!this.state.facetsLoaded && !this.isUsingProvidedFacets()) {
+            if (!this.state.facetsLoaded && (!Array.isArray(this.props.facets) || this.props.facets.length === 0)) {
                 return (
                     <div className="text-center" style={{ padding : "162px 0", fontSize : '26px', color : "#aaa" }}>
                         <i className="icon icon-spin icon-circle-o-notch"></i>
