@@ -361,7 +361,6 @@ export default class SubmissionView extends React.Component{
         var unusedCopy = this.state.keyUnused;
         var linksCopy = this.state.keyLinks;
         var unusedList = [];
-        var needsRoundTwo = [];
         // increase key iter by 1 for a new unique key
         var keyIdx;
         var newHierarchy;
@@ -385,8 +384,7 @@ export default class SubmissionView extends React.Component{
         }else{
             contextWithAlias.aliases = [alias];
         }
-        contextCopy[keyIdx] = buildContext(contextWithAlias, this.props.schemas[type], unusedList, true, false, needsRoundTwo);
-        if(needsRoundTwo.length > 0) this.addRoundTwoKey(keyIdx);
+        contextCopy[keyIdx] = buildContext(contextWithAlias, this.props.schemas[type], unusedList, true, false);
         // remove the new object type from parent's unusedList
         if(_.contains(unusedCopy[parentKeyIdx], newLink)){
             var rmIdx = unusedCopy[parentKeyIdx].indexOf(newLink);
@@ -425,7 +423,7 @@ export default class SubmissionView extends React.Component{
     }
 
     // key is @id for exisiting objs, state key idx for custom objs
-    removeObj = (key, newLink) => {
+    removeObj = (key) => {
         var contextCopy = this.state.keyContext;
         var validCopy = this.state.keyValid;
         var typesCopy = this.state.keyTypes;
@@ -434,40 +432,55 @@ export default class SubmissionView extends React.Component{
         var unusedCopy = this.state.keyUnused;
         var linksCopy = this.state.keyLinks;
         var roundTwoCopy = this.state.roundTwoKeys.slice();
-        if(keyDisplay[key]){
-            var hierarchy = this.state.keyHierarchy;
-            var newHierarchy = trimHierarchy(hierarchy, key);
-            // for housekeeping, remove the key from keyUnused, keyLinks, and keyComplete
-            if(unusedCopy[key]) delete unusedCopy[key];
-            if(linksCopy[key]) delete linksCopy[key];
-            if(keyComplete[key]) delete keyComplete[key];
-            // remove key from roundTwoKeys if necessary
-            if(_.contains(roundTwoCopy, key)){
-                var rmIdx = roundTwoCopy.indexOf(key);
-                if(rmIdx > -1){
-                    roundTwoCopy.splice(rmIdx,1)
-                }
-            }
+        var hierarchy = this.state.keyHierarchy;
+        var dummyHierarchy = JSON.parse(JSON.stringify(hierarchy));
+        // find hierachy below the object being deleted
+        dummyHierarchy = searchHierarchy(dummyHierarchy, key);
+        // get a list of all keys to remove
+        var toDelete = flattenHierarchy(dummyHierarchy);
+        toDelete.push(key); // add this key
+        console.log('DELETING:', toDelete);
+        // trimming the hierarchy effectively removes objects from creation process
+        var newHierarchy = trimHierarchy(hierarchy, key);
+        // for housekeeping, remove the keys from keyUnused, keyLinks, and keyComplete
+        if(key in linksCopy){
+            var delLink = linksCopy[key];
             // add the deleted type back to the unused links of the current object
-            if(!_.contains(unusedCopy[this.state.currKey], newLink)){
-                unusedCopy[this.state.currKey].push(newLink);
+            if(!_.contains(unusedCopy[this.state.currKey], delLink)){
+                unusedCopy[this.state.currKey].push(delLink);
             }
-            delete typesCopy[key];
-            if(contextCopy[key]){ // true for a new object
-                delete validCopy[key];
-                delete contextCopy[key];
-                delete typesCopy[key];
-            }
-            this.setState({
-                'keyHierarchy': newHierarchy,
-                'keyDisplay': keyDisplay,
-                'keyContext': contextCopy,
-                'keyValid': validCopy,
-                'keyTypes': typesCopy,
-                'keyLinks': linksCopy,
-                'roundTwoKeys': roundTwoCopy
-            });
         }
+        for(var i=0; i<toDelete.length; i++){
+            // only remove creation data for non-sumbitted, non-preexisiting objs
+            if(!isNaN(toDelete[i])){
+                // remove key from roundTwoKeys if necessary
+                // NOTE: submitted custom objects will NOT be removed from this
+                // after deletion. Still give user opportunity for second round edits
+                if(_.contains(roundTwoCopy, toDelete[i])){
+                    var rmIdx = roundTwoCopy.indexOf(toDelete[i]);
+                    if(rmIdx > -1){
+                        roundTwoCopy.splice(rmIdx,1)
+                    }
+                }
+                delete typesCopy[toDelete[i]];
+                delete validCopy[toDelete[i]];
+                delete contextCopy[toDelete[i]];
+                delete typesCopy[toDelete[i]];
+                delete linksCopy[toDelete[i]];
+                delete unusedCopy[toDelete[i]];
+                delete keyComplete[toDelete[i]];
+            }
+        }
+        this.setState({
+            'keyHierarchy': newHierarchy,
+            'keyDisplay': keyDisplay,
+            'keyContext': contextCopy,
+            'keyValid': validCopy,
+            'keyTypes': typesCopy,
+            'keyLinks': linksCopy,
+            'keyUnused': unusedCopy,
+            'roundTwoKeys': roundTwoCopy
+        });
     }
 
     addExistingObj = (path, display, type, newLink) => {
@@ -524,16 +537,6 @@ export default class SubmissionView extends React.Component{
             }
             newState[key] = value;
             this.setState(newState);
-        }
-    }
-
-    addRoundTwoKey = (key) => {
-        var roundTwoCopy = this.state.roundTwoKeys.slice();
-        if(!_.contains(roundTwoCopy, key)){
-            roundTwoCopy.push(key);
-            this.setState({
-                'roundTwoKeys': roundTwoCopy
-            });
         }
     }
 
@@ -789,6 +792,7 @@ export default class SubmissionView extends React.Component{
                             var displayCopy = this.state.keyDisplay;
                             // set contextCopy to returned data from POST
                             var contextCopy = this.state.keyContext;
+                            var roundTwoCopy = this.state.roundTwoKeys.slice();
                             // update the state storing completed objects.
                             keyComplete[inKey] = destination;
                             // delete all unused links for completed objects.
@@ -807,21 +811,29 @@ export default class SubmissionView extends React.Component{
                             stateToSet.keyUnused = keyUnused;
                             stateToSet.keyDisplay = displayCopy;
                             stateToSet.keyContext = contextCopy;
+                            // update context with response data and check if submitted object needs a round two
+                            var needsRoundTwo = [];
+                            contextCopy[inKey] = buildContext(responseData, currSchema, [], this.props.edit, this.props.create, needsRoundTwo);
+                            // update roundTwoKeys if necessary
+                            if(needsRoundTwo.length > 0){
+                                if(!_.contains(roundTwoCopy, inKey)){
+                                    roundTwoCopy.push(inKey);
+                                    stateToSet.roundTwoKeys = roundTwoCopy;
+                                }
+                            }
                             // inKey is 0 for the primary object
                             if(inKey == 0){
                                 // see if we need to go into round two submission
-                                if(this.state.roundTwoKeys.length === 0){
+                                if(roundTwoCopy === 0){
                                     alert('Success! Navigating to your new object.');
                                     this.props.navigate(destination);
                                 }else{
                                     stateToSet.roundTwo = true;
-                                    stateToSet.currKey = this.state.roundTwoKeys[0];
+                                    stateToSet.currKey = roundTwoCopy[0];
                                     alert('Success! All objects were submitted. However, some of them have additional fields that can be only filled in second round submission. You will now be guided through this process for each object.');
                                     this.setState(stateToSet);
                                 }
                             }else{
-                                // reset context for this key (could be needed for round two)
-                                contextCopy[inKey] = buildContext(responseData, currSchema, [], this.props.edit, this.props.create);
                                 alert(this.state.keyDisplay[inKey] + ' was successfully submitted.');
                                 this.setState(stateToSet);
                             }
@@ -1060,7 +1072,7 @@ class RoundOneObject extends React.Component{
             this.props.initCreateObj(type, value, newLink);
         }
         if(fieldType === 'linked object'){
-            this.checkObjectRemoval(value, prevValue, newLink);
+            this.checkObjectRemoval(value, prevValue);
         }
         if(splitField[splitField.length-1] === 'aliases'){
             this.props.modifyAlias();
@@ -1077,9 +1089,9 @@ class RoundOneObject extends React.Component{
         });
     }
 
-    checkObjectRemoval = (value, prevValue, newLink) => {
+    checkObjectRemoval = (value, prevValue) => {
          if(value === null){
-            this.props.removeObj(prevValue, newLink);
+            this.props.removeObj(prevValue);
         }
     }
 
@@ -1499,7 +1511,7 @@ var trimHierarchy = function myself(hierarchy, keyIdx){
 // returns the entire hierarchy below for the given keyIdx. keyIdx must be a
 // number (custom object). Recursive function.
 var searchHierarchy = function myself(hierarchy, keyIdx){
-    if(isNaN(keyIdx) || !hierarchy) return null;
+    if(!hierarchy) return null;
     var found_hierarchy = null;
     Object.keys(hierarchy).forEach(function(key, index){
         if(key == keyIdx){
@@ -1539,6 +1551,16 @@ var replaceInHierarchy = function myself(hierarchy, current, toReplace){
         }
     });
     return hierarchy
+}
+
+// return a list of all keys contained within a given hierarchy
+var flattenHierarchy = function myself(hierarchy){
+    var found_keys = [];
+    Object.keys(hierarchy).forEach(function(key, index){
+        var sub_keys = myself(hierarchy[key]);
+        found_keys = _.union(found_keys, sub_keys, [key]);
+    });
+    return found_keys
 }
 
 
