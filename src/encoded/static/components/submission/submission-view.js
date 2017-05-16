@@ -13,6 +13,16 @@ var ReactTooltip = require('react-tooltip');
 import SubmissionTree from './expandable-tree';
 import BuildField from './submission-fields';
 
+// global variable holding hard-coded object optiosn for ambiguous linkTos
+var linkToLookup = {
+    'Experiment': ['ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq'],
+    'ExperimentSet': ['ExperimentSet', 'ExperimentSetReplicate'],
+    'File': ['FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference'],
+    'FileSet': ['FileSet', 'FileSetCalibration'],
+    'Individual': ['IndividualHuman', 'IndividualMouse'],
+    'Treatment': ['TreatmentChemical', 'TreatmentRnai']
+};
+
 /*
 Key container component for Submission components.
 Holds object values for all downstream components and owns the methods
@@ -46,6 +56,10 @@ export default class SubmissionView extends React.Component{
         * - keyLinks (idx: currKey) holds the corresponding keyUnused field for each key.
         * - processingFetch (type: bool) keeps track of whether top level is processing a request
         * - errorCount (type: int) keeps track of how many validation errors currently exist
+        * - ambiguousIdx (type: int) has to do with linkTo selection when multiple object
+            types are associated with a single linkTo (example: File -> FileProcessed, FileFastq...)
+        * - ambiguousType (type: str) originally selected ambiguous linkTo type
+        * - ambiguousSelected (type: str) selected type to resolve ambiguity
         * - creatingIdx (type: int) has to do with alias creation. Value is equal to a currKey
         *   index when currently creating an alias, null otherwise.
         * - creatingType (type: str) similar to creatingIdx, but string object type.
@@ -55,6 +69,12 @@ export default class SubmissionView extends React.Component{
         *   alias creation is occuring.
         * - fullScreen (type: bool) if true, the whole component rendered is the Search
         *   page for pre-existing object selection.
+        * - md5Progress (type: int) md5 percentage complete for uploading files.
+            Equals null if no current md5 calcuation.
+        * - roundTwo (type: bool) begins false, true only when first round submissions
+            is done AND there are second round submission fields.
+        * - roundTwoKeys (type: array) list of key idxs that need round two submission
+        * - file (type: object) holds currently uploading file info (round two)
         */
         this.state = {
             'keyContext': null,
@@ -69,12 +89,19 @@ export default class SubmissionView extends React.Component{
             'keyLinks': {}, // associates each non-primary key with a field
             'processingFetch': false,
             'errorCount': 0,
+            'ambiguousIdx': null,
+            'ambiguousType': null,
+            'ambiguousSelected': null,
             'creatingIdx': null,
             'creatingType': null,
             'creatingLink': null,
             'creatingAlias': '',
             'creatingAliasMessage': null,
-            'fullScreen': false
+            'fullScreen': false,
+            'md5Progress': null,
+            'roundTwo': false,
+            'roundTwoKeys': [],
+            'file': null
         }
     }
 
@@ -184,11 +211,33 @@ export default class SubmissionView extends React.Component{
     }
 
     initCreateObj = (type, newIdx, newLink, existingAlias=false) => {
+        // check to see if we have an ambiguous linkTo type.
+        // this means there could be multiple types of linked objects for a
+        // given type. let the user choose one.
+        if(this.props.schemas){
+            if(type in linkToLookup){
+                // ambiguous linkTo type found
+                this.setState({
+                    'ambiguousIdx': newIdx,
+                    'ambiguousType': type,
+                    'ambiguousSelected': null,
+                    'creatingLink': newLink
+                });
+            }else{
+                this.initCreateAlias(type, newIdx, newLink, existingAlias);
+            }
+        }
+    }
+
+    initCreateAlias = (type, newIdx, newLink, existingAlias) => {
         // don't prompt alias input if an alias already exists or not in schema
         if(!existingAlias && this.props.schemas){
             var schema = this.props.schemas[type] || null;
             if(schema && schema.properties.aliases){
                 this.setState({
+                    'ambiguousIdx': null,
+                    'ambiguousType': null,
+                    'ambiguousSelected': null,
                     'creatingIdx': newIdx,
                     'creatingType': type,
                     'creatingLink': newLink
@@ -198,6 +247,39 @@ export default class SubmissionView extends React.Component{
                 this.createObj(type, newIdx, newLink, fallbackAlias);
             }
         }
+    }
+
+    submitAmbiguousType = (e) => {
+        e.preventDefault();
+        var type = this.state.ambiguousSelected;
+        var schema = this.props.schemas[type];
+        var newIdx = this.state.ambiguousIdx;
+        var newLink = this.state.creatingLink;
+        // safety check to ensure schema exists for selected type
+        if(schema && type){
+            this.initCreateAlias(type, newIdx, newLink, false);
+        }else{
+            // abort
+            this.setState({
+                'ambiguousIdx': null,
+                'ambiguousType': null,
+                'ambiguousSelected': null
+            });
+        }
+    }
+
+    buildAmbiguousEnumEntry = (val) => {
+        return(
+            <MenuItem key={val} title={val || ''} eventKey={val} onSelect={this.handleTypeSelection}>
+                {val || ''}
+            </MenuItem>
+        );
+    }
+
+    handleTypeSelection = (e) => {
+        this.setState({
+            'ambiguousSelected': e
+        });
     }
 
     handleAliasChange = (e) => {
@@ -279,6 +361,7 @@ export default class SubmissionView extends React.Component{
         var unusedCopy = this.state.keyUnused;
         var linksCopy = this.state.keyLinks;
         var unusedList = [];
+        var needsRoundTwo = [];
         // increase key iter by 1 for a new unique key
         var keyIdx;
         var newHierarchy;
@@ -288,7 +371,7 @@ export default class SubmissionView extends React.Component{
         }else{
             keyIdx = this.state.keyIter + 1;
             if(newIdx !== keyIdx){
-                console.log('ERROR: key index inconsistencies!')
+                console.log('ERROR: KEY INDEX INCONSISTENCY!');
                 return;
             }
             newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
@@ -302,7 +385,8 @@ export default class SubmissionView extends React.Component{
         }else{
             contextWithAlias.aliases = [alias];
         }
-        contextCopy[keyIdx] = buildContext(contextWithAlias, this.props.schemas[type], unusedList, true);
+        contextCopy[keyIdx] = buildContext(contextWithAlias, this.props.schemas[type], unusedList, true, false, needsRoundTwo);
+        if(needsRoundTwo.length > 0) this.addRoundTwoKey(keyIdx);
         // remove the new object type from parent's unusedList
         if(_.contains(unusedCopy[parentKeyIdx], newLink)){
             var rmIdx = unusedCopy[parentKeyIdx].indexOf(newLink);
@@ -329,6 +413,9 @@ export default class SubmissionView extends React.Component{
             'keyLinks': linksCopy,
             'processingFetch': false,
             'errorCount': 0,
+            'ambiguousIdx': null,
+            'ambiguousType': null,
+            'ambiguousSelected': null,
             'creatingIdx': null,
             'creatingType': null,
             'creatingLink': null,
@@ -346,6 +433,7 @@ export default class SubmissionView extends React.Component{
         var keyComplete = this.state.keyComplete;
         var unusedCopy = this.state.keyUnused;
         var linksCopy = this.state.keyLinks;
+        var roundTwoCopy = this.state.roundTwoKeys.slice();
         if(keyDisplay[key]){
             var hierarchy = this.state.keyHierarchy;
             var newHierarchy = trimHierarchy(hierarchy, key);
@@ -353,6 +441,13 @@ export default class SubmissionView extends React.Component{
             if(unusedCopy[key]) delete unusedCopy[key];
             if(linksCopy[key]) delete linksCopy[key];
             if(keyComplete[key]) delete keyComplete[key];
+            // remove key from roundTwoKeys if necessary
+            if(_.contains(roundTwoCopy, key)){
+                var rmIdx = roundTwoCopy.indexOf(key);
+                if(rmIdx > -1){
+                    roundTwoCopy.splice(rmIdx,1)
+                }
+            }
             // add the deleted type back to the unused links of the current object
             if(!_.contains(unusedCopy[this.state.currKey], newLink)){
                 unusedCopy[this.state.currKey].push(newLink);
@@ -369,7 +464,8 @@ export default class SubmissionView extends React.Component{
                 'keyContext': contextCopy,
                 'keyValid': validCopy,
                 'keyTypes': typesCopy,
-                'keyLinks': linksCopy
+                'keyLinks': linksCopy,
+                'roundTwoKeys': roundTwoCopy
             });
         }
     }
@@ -402,7 +498,7 @@ export default class SubmissionView extends React.Component{
 
     setKeyState = (key, value) => {
         var newState = this.state;
-        if(_.contains(Object.keys(newState),key)){
+        if(key in newState){
             // this means we're navigating to a new object if true
             if(key === 'currKey' && value !== this.state.currKey){
                 var keyValid = this.state.keyValid;
@@ -431,28 +527,45 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    addRoundTwoKey = (key) => {
+        var roundTwoCopy = this.state.roundTwoKeys.slice();
+        if(!_.contains(roundTwoCopy, key)){
+            roundTwoCopy.push(key);
+            this.setState({
+                'roundTwoKeys': roundTwoCopy
+            });
+        }
+    }
+
     generateValidationButton(){
         var validity = this.state.keyValid[this.state.currKey];
         var style={'width':'100px'};
-        // if(this.state.md5Progress && this.state.md5Progress != 100){
-        //     return(
-        //         <Button bsStyle="info" style={style} disabled>
-        //             {'Calculating md5...'}
-        //         </Button>
-        //     );
-        // }
-        if(validity == 3 || validity == 4){
+        if(this.state.md5Progress && this.state.md5Progress != 100){
+            return(
+                <Button bsStyle="info" style={style} disabled>
+                    {'Calculating md5'}
+                </Button>
+            );
+        }else if(validity == 3 || validity == 4){
             return(
                 <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
                     {'Validated'}
                 </Button>
             );
         }else if(this.state.processingFetch){
-            return(
-                <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
-                    <i className="icon icon-spin icon-circle-o-notch"></i>
-                </Button>
-            );
+            if (validity == 2){
+                return(
+                    <Button bsSize="xsmall" bsStyle="danger" style={style} disabled>
+                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                    </Button>
+                );
+            }else{
+                return(
+                    <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
+                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                    </Button>
+                );
+            }
         }else if (validity == 2){
             return(
                 <Button bsSize="xsmall" bsStyle="danger" style={style} onClick={this.testPostNewContext}>
@@ -581,16 +694,27 @@ export default class SubmissionView extends React.Component{
                 // if testing validation, use check_only=True (see /types/base.py)
                 var destination = test ? '/' + currType + '/?check_only=True' : '/' + currType;
                 var actionMethod = 'POST';
-                // see if this is not a test and we're editing
-                if(!test && this.props.edit){
-                    actionMethod = 'PUT';
-                    destination = currContext['@id'];
-                    // must add uuid (and accession, if available) to PUT body
-                    finalizedContext.uuid = currContext.uuid;
-                    // not all objects have accessions
-                    if(currContext.accession){
-                        finalizedContext.accession = currContext.accession;
+                // change actionMethod and destination based on edit/round two
+                if(!test){
+                    if(this.state.roundTwo){
+                        actionMethod = 'PUT';
+                        destination = this.state.keyComplete[inKey];
+                        var submittedData = this.state.keyContext[destination];
+                        finalizedContext.uuid = submittedData.uuid;
+                        if(submittedData.accession){
+                            finalizedContext.accession = submittedData.accession;
+                        }
+                    }else if(this.props.edit){
+                        actionMethod = 'PUT';
+                        destination = currContext['@id'];
+                        // must add uuid (and accession, if available) to PUT body
+                        finalizedContext.uuid = currContext.uuid;
+                        // not all objects have accessions
+                        if(currContext.accession){
+                            finalizedContext.accession = currContext.accession;
+                        }
                     }
+
                 }
                 var payload = JSON.stringify(finalizedContext);
                 ajax.promise(destination, actionMethod, {}, payload).then(response => {
@@ -617,32 +741,38 @@ export default class SubmissionView extends React.Component{
                         }
                         this.setState(stateToSet);
                     }else{
-                        var response_data;
+                        var responseData;
                         if(test){
                             console.log('OBJECT SUCCESSFULLY TESTED!');
                             keyValid[inKey] = 3;
                             this.setState(stateToSet);
                             return;
                         }else{
-                            response_data = response['@graph'][0];
+                            responseData = response['@graph'][0];
                             if(!this.props.edit){
-                                destination = response_data['@id'];
+                                destination = responseData['@id'];
                             }
                         }
-                        // handle file upload if this is a file
-                        if(this.state.file && response_data['upload_credentials']){
-                            // add important info to result from finalizedContext
-                            // that is not added from /types/file.py get_upload
-                            var creds = response_data['upload_credentials'];
-                            var upload_manager = s3UploadFile(this.state.file, creds);
-                            var upload_info = {
-                                'context': response_data,
-                                'manager': upload_manager
-                            };
-                            // Passes upload_manager to uploads.js through app.js
-                            this.props.updateUploads(destination, upload_info);
-                            alert('Success! Navigating to the uploads page.');
-                            // this.props.navigate('/uploads');
+                        // handle submission for round two
+                        if(this.state.roundTwo){
+                            // there is a file
+                            if(this.state.file && responseData['upload_credentials']){
+                                // add important info to result from finalizedContext
+                                // that is not added from /types/file.py get_upload
+                                var creds = responseData['upload_credentials'];
+                                var upload_manager = s3UploadFile(this.state.file, creds);
+                                var upload_info = {
+                                    'context': responseData,
+                                    'manager': upload_manager
+                                };
+                                // Passes upload_manager to uploads.js through app.js
+                                this.props.updateUploads(destination, upload_info);
+                                alert('Success! Navigating to the uploads page.');
+                                // this.props.navigate('/uploads');
+                            }else{
+                                // splice out element 0 of roundTwoKeys
+                                this.setState(stateToSet);
+                            }
                         }else{
                             keyValid[inKey] = 4;
                             // Perform final steps when object is submitted
@@ -657,6 +787,8 @@ export default class SubmissionView extends React.Component{
                             var keyComplete = this.state.keyComplete;
                             var linksCopy = this.state.keyLinks;
                             var displayCopy = this.state.keyDisplay;
+                            // set contextCopy to returned data from POST
+                            var contextCopy = this.state.keyContext;
                             // update the state storing completed objects.
                             keyComplete[inKey] = destination;
                             // delete all unused links for completed objects.
@@ -666,6 +798,7 @@ export default class SubmissionView extends React.Component{
                             linksCopy[destination] = linksCopy[inKey];
                             typesCopy[destination] = currType;
                             displayCopy[destination] = displayCopy[inKey];
+                            contextCopy[destination] = responseData;
                             var newHierarchy = replaceInHierarchy(hierarchy, inKey, destination);
                             stateToSet.keyLinks = linksCopy;
                             stateToSet.keyTypes = typesCopy;
@@ -673,10 +806,22 @@ export default class SubmissionView extends React.Component{
                             stateToSet.keyComplete = keyComplete;
                             stateToSet.keyUnused = keyUnused;
                             stateToSet.keyDisplay = displayCopy;
-                            if(inKey == 0){ // top level object
-                                alert('Success! Navigating to your new object.');
-                                this.props.navigate(destination);
+                            stateToSet.keyContext = contextCopy;
+                            // inKey is 0 for the primary object
+                            if(inKey == 0){
+                                // see if we need to go into round two submission
+                                if(this.state.roundTwoKeys.length === 0){
+                                    alert('Success! Navigating to your new object.');
+                                    this.props.navigate(destination);
+                                }else{
+                                    stateToSet.roundTwo = true;
+                                    stateToSet.currKey = this.state.roundTwoKeys[0];
+                                    alert('Success! All objects were submitted. However, some of them have additional fields that can be only filled in second round submission. You will now be guided through this process for each object.');
+                                    this.setState(stateToSet);
+                                }
                             }else{
+                                // reset context for this key (could be needed for round two)
+                                contextCopy[inKey] = buildContext(responseData, currSchema, [], this.props.edit, this.props.create);
                                 alert(this.state.keyDisplay[inKey] + ' was successfully submitted.');
                                 this.setState(stateToSet);
                             }
@@ -695,7 +840,12 @@ export default class SubmissionView extends React.Component{
         if(!this.state.keyContext || currKey === null){
             return null;
         }
-        var aliasModal = this.state.creatingIdx !== null && this.state.creatingType !== null;
+        var ambiguousModal = this.state.ambiguousIdx !== null && this.state.ambiguousType !== null;
+        var ambiguousDescrip = null;
+        if(this.state.ambiguousSelected !== null && this.props.schemas[this.state.ambiguousSelected].description){
+            ambiguousDescrip = this.props.schemas[this.state.ambiguousSelected].description;
+        }
+        var aliasModal = !ambiguousModal && this.state.creatingIdx !== null && this.state.creatingType !== null;
         var currType = this.state.keyTypes[currKey];
         var currSchema = this.props.schemas[currType];
         var currContext = this.state.keyContext[currKey];
@@ -714,9 +864,36 @@ export default class SubmissionView extends React.Component{
         var currObjDisplay = this.state.keyDisplay[currKey] || currType;
         return(
             <div>
+                <Modal show={ambiguousModal}>
+                    <Modal.Header>
+                        <Modal.Title>{'Multiple object types found for your new ' + this.state.ambiguousType}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p style={{'marginBottom':'15px'}}>
+                            {'Please select a specific object type from the menu below.'}
+                        </p>
+                        <div className="input-wrapper" style={{'marginBottom':'15px'}}>
+                            <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={this.state.ambiguousSelected || "No value"}>
+                                {this.state.ambiguousType !== null ?
+                                    linkToLookup[this.state.ambiguousType].map((val) => this.buildAmbiguousEnumEntry(val))
+                                    :
+                                    null
+                                }
+                            </DropdownButton>
+                        </div>
+                        <Collapse in={ambiguousDescrip !== null}>
+                            <div style={{'marginBottom':'15px', 'fontSize':'1.2em'}}>
+                                {'Description: ' + ambiguousDescrip}
+                            </div>
+                        </Collapse>
+                        <Button bsSize="xsmall" bsStyle="success" disabled={this.state.ambiguousSelected === null} onClick={this.submitAmbiguousType}>
+                            Submit
+                        </Button>
+                    </Modal.Body>
+                </Modal>
                 <Modal show={aliasModal}>
                     <Modal.Header>
-                        <Modal.Title>{'Give your new ' + currType +' an alias'}</Modal.Title>
+                        <Modal.Title>{'Give your new ' + this.state.creatingType +' an alias'}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <p style={{'marginBottom':'15px'}}>
@@ -811,10 +988,11 @@ class RoundOneObject extends React.Component{
         * - selectQuery (type: str) Search query held by this component for in-place navigation
         * - selectField (type: str) actual fieldname that we're selecting the existing obj for.
         *   may be nested in the case of subobjects, e.g. experiments_in_set.experiment
-        * - arrayIdx (type: arr) list of int numbers keeping track of list positions of the
+        * - selectArrayIdx (type: arr) list of int numbers keeping track of list positions of the
         *   object we're selecting for. Since you can have arrays within arrays, one
         *   int won't do. Example: [1,2] would mean the current field is the second item
         *   within the first item of the array given by the top level field. When null, no arrays involved.
+        * - fadeState (type: bool) controls whether a fade animation should be triggered in render
         */
         this.state = {
             'selectType': null, // type of existing object being selected
@@ -968,7 +1146,7 @@ class RoundOneObject extends React.Component{
     selectComplete = (value) => {
         var isRepeat = false;
         var current = this.props.currContext[this.state.selectField];
-        if(current instanceof Array && _.contains(Object.keys(current), value)){
+        if(current instanceof Array && _.contains(current, value)){
             isRepeat = true;
         }
         if(this.state.selectField && !isRepeat){
@@ -991,7 +1169,11 @@ class RoundOneObject extends React.Component{
     // collect props necessary to build create a BuildField child
     initiateField = (field) => {
         var fieldSchema = object.getNestedProperty(this.props.schema, ['properties', field], true);
-        if (!fieldSchema) return null;
+        if(!fieldSchema) return null;
+        if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
+            // register that this object will need round 2 submission
+            return null;
+        }
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
@@ -1023,17 +1205,16 @@ class RoundOneObject extends React.Component{
         }else if (fieldSchema.attachment && fieldSchema.attachment === true){
             fieldType = 'attachment';
         }else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
-            return null;
-            // // only render file upload input if status is 'uploading' or 'upload_failed'
-            // if(this.props.edit && this.props.baseContext.status){
-            //     if(this.props.baseContext.status == 'uploading' || this.props.baseContext.status == 'upload failed'){
-            //         fieldType = 'file upload';
-            //     }else{
-            //         return null;
-            //     }
-            // }else{
-            //     fieldType = 'file upload';
-            // }
+            // only render file upload input if status is 'uploading' or 'upload_failed'
+            if(this.props.edit && this.props.baseContext.status){
+                if(this.props.baseContext.status == 'uploading' || this.props.baseContext.status == 'upload failed'){
+                    fieldType = 'file upload';
+                }else{
+                    return null;
+                }
+            }else{
+                fieldType = 'file upload';
+            }
         }
         // set a required flag if this field is required
         var required = _.contains(this.props.schema.required, field);
@@ -1070,12 +1251,6 @@ class RoundOneObject extends React.Component{
     }
 
     render(){
-        var schema = this.props.schema;
-        var selecting = false;
-        if(this.state.selectData !== null){
-            selecting = true;
-        }
-        // get the fields from passed down context
         var fields = this.props.currContext ? Object.keys(this.props.currContext) : [];
         var buildFields = [];
         var linkedObjs = [];
@@ -1088,8 +1263,12 @@ class RoundOneObject extends React.Component{
             }
         }
         // sort fields first by requirement and secondly alphabetically
-        linkedObjs = sortPropFields(linkedObjs);
-        buildFields = sortPropFields(buildFields);
+        var linkedObjs = sortPropFields(linkedObjs);
+        var buildFields = sortPropFields(buildFields);
+        var selecting = false;
+        if(this.state.selectData !== null){
+            selecting = true;
+        }
         return(
             <div>
                 <Fade in={selecting} transitionAppear={true}>
@@ -1192,7 +1371,7 @@ class RoundTwoObject extends React.Component{
 
 /***** MISC. FUNCIONS *****/
 
-export function buildContext(context, schema, objList=null, edit=false, create=true){
+export function buildContext(context, schema, objList=null, edit=false, create=true, roundTwoSwitch=null){
     // Build context based off an object's and populate values from
     // pre-existing context. Empty fields are given null value
     // All linkTo fields are added to objList
@@ -1215,16 +1394,20 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
             if (fieldSchema.permission && fieldSchema.permission == "import_items"){
                 continue;
             }
+            if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
+                // register that this object will need round 2 submission
+                if(roundTwoSwitch !== null) roundTwoSwitch.push(fieldSchema);
+            }
             // set value to context value if editing/cloning.
             // if creating or value not present, set to null
             if(edit){
-                if(!context[fields[i]] || (fieldSchema.ff_clear && fieldSchema.ff_clear == "edit")){
+                if(!context[fields[i]] || (fieldSchema.ff_flag && fieldSchema.ff_flag == "clear edit")){
                     built[fields[i]] = null;
                 }else{
                     built[fields[i]] = context[fields[i]];
                 }
             }else if(!create){ //clone
-                if(!context[fields[i]] || (!fieldSchema.ff_clear && fieldSchema.ff_clear == "clone")){
+                if(!context[fields[i]] || (!fieldSchema.ff_flag && fieldSchema.ff_flag == "clear clone")){
                     built[fields[i]] = null;
                 }else{
                     built[fields[i]] = context[fields[i]];
@@ -1232,9 +1415,10 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
             }else{
                 built[fields[i]] = null;
             }
-            if(objList !== null){
+            if(objList !== null ){
                 var linked = delveObject(fieldSchema);
-                if(linked !== null){
+                var roundTwoExclude = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
+                if(linked !== null && !roundTwoExclude){
                     var listTerm = fieldSchema.title ? fieldSchema.title : linked;
                     if(!_.contains(objList, listTerm)) objList.push(listTerm);
                 }
@@ -1334,7 +1518,7 @@ var findParentFromHierarchy = function myself(hierarchy, keyIdx){
     if(isNaN(keyIdx) || !hierarchy) return null;
     var found_parent = null;
     Object.keys(hierarchy).forEach(function(key, index){
-        if(_.contains(Object.keys(hierarchy[key]), keyIdx.toString())){
+        if(keyIdx in hierarchy[key]){
             found_parent = key;
         }else{
             var test = myself(hierarchy[key], keyIdx);
@@ -1358,12 +1542,20 @@ var replaceInHierarchy = function myself(hierarchy, current, toReplace){
 }
 
 
+// remove any field with a null value from given json context.
+// also remove empty arrays and objects
 var removeNulls = function myself(context){
     Object.keys(context).forEach(function(key, index){
         if(context[key] === null){
             delete context[key];
+        }else if(context[key] instanceof Array && context[key].length == 0){
+            delete context[key];
         }else if(context[key] instanceof Object){
-            context[key] = myself(context[key]);
+            if(Object.keys(context[key]).length == 0){
+                delete context[key];
+            }else{
+                context[key] = myself(context[key]);
+            }
         }
     });
     return context;

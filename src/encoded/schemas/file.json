@@ -16,6 +16,7 @@
             "title": "File Name",
             "description": "The local file name used at time of submission. Must be alphanumeric, with the exception of the following special characters: '+=,.@-_'",
             "s3Upload": true,
+            "ff_flag": "second round",
             "type": "string",
             "pattern": "^[\\w+=,.@-]*$",
             "exclude_from": ["submit4dn"],
@@ -75,7 +76,7 @@
             "comment": "This can vary for files of same content gzipped at different times",
             "type": "string",
             "exclude_from": ["submit4dn"],
-            "ff_clear":"edit",
+            "ff_flag":"clear edit",
             "format": "hex"
         },
         "content_md5sum": {
