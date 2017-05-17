@@ -944,14 +944,12 @@ export class ResultTableContainer extends React.Component {
         expSetFilters   : React.PropTypes.object.isRequired,
         fileFormats     : React.PropTypes.array,
         fileStats       : React.PropTypes.object,
-        targetFiles     : React.PropTypes.instanceOf(Set),
-        useAjax         : React.PropTypes.bool
+        targetFiles     : React.PropTypes.instanceOf(Set)
     }
 
     static defaultProps = {
         'href'      : '/browse/',
-        'debug'     : false,
-        'useAjax'   : true
+        'debug'     : false
     }
 
     constructor(props){
@@ -1102,7 +1100,6 @@ export class ResultTableContainer extends React.Component {
                             facets={facets}
                             className="with-header-bg"
                             href={this.props.href}
-                            useAjax={true}
                             schemas={this.props.schemas}
                             session={this.props.session}
                         />
@@ -1156,8 +1153,8 @@ export class ControlsAndResults extends React.Component {
     }
 
     render(){
-        var fileStats = this.state.fileStats;
-        var targetFiles = this.state.filesToFind;
+        //var fileStats = this.state.fileStats;
+        //var targetFiles = this.state.filesToFind;
         //var selectorButtons = this.props.fileFormats.map(function (format, idx) {
         //    var count = fileStats.formats[format] ? fileStats.formats[format].size : 0;
         //    return(
@@ -1199,13 +1196,10 @@ export class ControlsAndResults extends React.Component {
                 <PageLimitSortController href={this.props.href} context={this.props.context}>
                     <ResultTableContainer
                         ref="resultTableContainer"
-                        targetFiles={targetFiles}
-                        fileStats={this.state.fileStats}
                         context={this.props.context}
                         expSetFilters={this.props.expSetFilters}
                         session={this.props.session}
                         href={this.props.href}
-                        useAjax={this.props.useAjax}
                         schemas={this.props.schemas}
                     />
                 </PageLimitSortController>
