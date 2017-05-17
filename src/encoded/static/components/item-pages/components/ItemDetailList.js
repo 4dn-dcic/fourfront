@@ -7,8 +7,8 @@ import { Collapse, Button } from 'react-bootstrap';
 var ReactTooltip = require('react-tooltip');
 var { console, object, Filters } = require('./../../util');
 var globals = require('./../../globals');
-import PartialList from './PartialList';
-var FilesInSetTable = require('./FilesInSetTable');
+import { PartialList } from './PartialList';
+import { FilesInSetTable } from './FilesInSetTable';
 import { getTitleStringFromContext } from './../item';
 import JSONTree from 'react-json-tree';
 
@@ -143,7 +143,11 @@ class SubItemView extends React.Component {
 }
 
 /**
- * @memberof module:item-pages/components.ItemDetailList
+ * The list of properties contained within ItemDetailList.
+ * Isolated to allow use without existing in ItemDetailList parent.
+ *
+ * @class Detail
+ * @type {Component}
  */
 export class Detail extends React.Component {
     
@@ -364,7 +368,14 @@ export class Detail extends React.Component {
 
 }
 
-
+/**
+ * A list of properties which belong to Item shown by ItemView.
+ * Shows 'persistentKeys' fields & values stickied near top of list,
+ * 'excludedKeys' never, and 'hiddenKeys' only when "See More Info" button is clicked.
+ *
+ * @class
+ * @type {Component}
+ */
 export class ItemDetailList extends React.Component {
 
     static Detail = Detail

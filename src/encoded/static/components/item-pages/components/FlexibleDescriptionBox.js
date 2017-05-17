@@ -1,11 +1,10 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
-var { console, layout, isServerSide } = require('./../../util');
-var vizUtil = require('./../../viz/utilities');
-
+import _ from 'underscore';
+import { console, layout, isServerSide } from './../../util';
+import * as vizUtil from './../../viz/utilities';
 
 
 export class FlexibleCharacterCountBox extends React.Component {
@@ -102,7 +101,7 @@ class FlexibleCharacterCountString extends React.Component {
  * @class FlexibleDescriptionBox
  * @extends {React.Component}
  */
-export default class FlexibleDescriptionBox extends React.Component {
+export class FlexibleDescriptionBox extends React.Component {
 
     static defaultDimensions = {
         'paddingWidth'  : 0,

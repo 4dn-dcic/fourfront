@@ -1,11 +1,10 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 var globals = require('./../globals');
-var _ = require('underscore');
-var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
-var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
-var { console, object, DateUtility, Filters } = require('./../util');
+import _ from 'underscore';
+import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } from './components';
+import { console, object, DateUtility, Filters } from './../util';
 
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific

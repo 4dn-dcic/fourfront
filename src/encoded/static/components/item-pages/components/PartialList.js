@@ -73,7 +73,7 @@ Row.defaultProps = {
  * @prop {string}  className     - Class name for outermost element.
  * @prop {string}  containerType - Type of element to use as container for the two lists. Defaults to 'div'.
  */
-export default class PartialList extends React.Component{
+export class PartialList extends React.Component{
 
     static Row = Row
 

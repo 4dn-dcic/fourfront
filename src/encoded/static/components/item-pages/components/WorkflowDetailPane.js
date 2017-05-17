@@ -415,7 +415,7 @@ class AnalysisStepDetailBody extends React.Component {
 }
 
 
-export default class WorkflowDetailPane extends React.Component {
+export class WorkflowDetailPane extends React.Component {
 
     static propTypes = {
         'selectedNode' : PropTypes.oneOfType([ PropTypes.object, PropTypes.oneOf([null]) ])

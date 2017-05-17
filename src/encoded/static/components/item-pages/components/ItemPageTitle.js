@@ -1,10 +1,10 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
 var globals = require('./../../globals');
-var { Filters } = require('./../../util');
-var _ = require('underscore');
+import { Filters, console } from './../../util';
+import _ from 'underscore';
 import { title, isDisplayTitleAccession, getItemTypeTitle } from './../item';
 
 /**
@@ -17,7 +17,7 @@ import { title, isDisplayTitleAccession, getItemTypeTitle } from './../item';
  * @prop {Object} schemas - Schemas passed down from App.
  * @prop {boolean} [showAccessionTitles] - If true, will render title if it is the accession. Otherwise, beyond Item type, the title will be hidden.
  */
-export default class ItemPageTitle extends React.Component {
+export class ItemPageTitle extends React.Component {
 
     static propTypes = {
         'context' : PropTypes.object.isRequired,

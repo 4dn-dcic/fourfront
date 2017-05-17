@@ -1,9 +1,9 @@
 'use strict';
 
-var React = require('react');
-var url = require('url');
+import React from 'react';
+import url from 'url';
 var globals = require('./../globals');
-var { console, object, Filters } = require('./../util');
+import { console, object, Filters } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
 
 /**
@@ -23,7 +23,7 @@ export class Fallback extends React.Component {
 
     render() {
         var context = this.props.context;
-        var title = typeof context.title == "string" ? context.title : url.parse(this.context.location_href).path;
+        var title = typeof context.title == "string" ? context.title : url.parse(this.props.href || this.context.location_href).path;
         return (
             <div className="view-item">
                 <ItemPageTitle context={context} showType={false} />

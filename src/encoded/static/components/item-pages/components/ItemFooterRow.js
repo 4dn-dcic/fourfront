@@ -14,7 +14,7 @@ var ExternalReferenceLink = require('./ExternalReferenceLink');
  * @prop {Object} context - JSON representation of current Item object. Should be available through Redux store's context.
  * @prop {Object} schemas - JSON representation of sitewide schemas.
  */
-export default class ItemFooterRow extends React.Component {
+export class ItemFooterRow extends React.Component {
 
     constructor(props){
         super(props);

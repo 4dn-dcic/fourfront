@@ -1,14 +1,14 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var url = require('url');
-var queryString = require('query-string');
-var _ = require('underscore');
+import url from 'url';
+import queryString from 'query-string';
+import _ from 'underscore';
 var store = require('../store');
-var { ajax, console, object, isServerSide, Filters, layout, analytics } = require('./util');
-var vizUtil = require('./viz/utilities');
-var ReactTooltip = require('react-tooltip');
+import { ajax, console, object, isServerSide, Filters, layout, analytics } from './util';
+import * as vizUtil from './viz/utilities';
+import ReactTooltip from 'react-tooltip';
 
 /**
  * Component to render out the FacetList for the Browse and ExperimentSet views.

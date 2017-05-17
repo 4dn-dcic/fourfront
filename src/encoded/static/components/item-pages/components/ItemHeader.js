@@ -5,10 +5,28 @@ var _ = require('underscore');
 var url = require('url');
 var querystring = require('querystring');
 var { console, DateUtility, Filters } = require('./../../util');
-import FlexibleDescriptionBox from './FlexibleDescriptionBox';
+import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getItemType, getBaseItemType, getTitleForType, getSchemaForItemType } from './../item';
 
-
+/**
+ * Object containing components required to build header shown on Item pages.
+ * Includes title, description, date created, status, action buttons, [...].
+ *
+ * Use by combining other components together within an ItemHeader.Wrapper component. See example.
+ *
+ * @module
+ * @type {Object}
+ * @example
+ * <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
+ *     <ItemHeader.TopRow>
+ *         <span data-tip="Experiment Type" className="inline-block">
+ *             { this.props.context.experimentset_type }
+ *         </span>
+ *     </ItemHeader.TopRow>
+ *     <ItemHeader.MiddleRow />
+ *     <ItemHeader.BottomRow />
+ * </ItemHeader.Wrapper>
+ */
 
 
 /**************

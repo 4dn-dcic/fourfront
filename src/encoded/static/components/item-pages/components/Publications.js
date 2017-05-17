@@ -7,8 +7,8 @@ var querystring = require('querystring');
 var { Button } = require('react-bootstrap');
 var ReactTooltip = require('react-tooltip');
 var { console, DateUtility, object } = require('./../../util');
-import FlexibleDescriptionBox from './FlexibleDescriptionBox';
-import PartialList from './PartialList';
+import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
+import { PartialList } from './PartialList';
 
 /*
 var testData = [ // Use this to test list view(s) as none defined in test data.
@@ -288,15 +288,11 @@ class ShortAttribution extends React.Component {
  * Shows publications for current Item.
  * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView .
  * 
- * @memberof module:item-pages/components
- * @export
  * @class Publications
- * @type {Component}
- * @extends {React.Component}
  * 
  * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
  */
-export default class Publications extends React.Component {
+export class Publications extends React.Component {
 
     static ListBlock = ListBlock;
     static DetailBlock = DetailBlock;

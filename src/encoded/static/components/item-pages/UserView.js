@@ -3,16 +3,17 @@
 
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var { Modal, Alert } = require('react-bootstrap');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import { Modal, Alert } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
-var { ItemStore } = require('./../lib/store');
+import { ItemStore } from './../lib/store';
 var globals = require('./../globals');
 var store = require('./../../store');
-var { ajax, JWT, console, DateUtility } = require('./../util');
-var FormattedInfoBlock = require('./components/FormattedInfoBlock');
-var { EditableField, FieldSet } = require('./../forms');
+import { ajax, JWT, console, DateUtility } from './../util';
+import { FormattedInfoBlock } from './components';
+import { EditableField, FieldSet } from './../forms';
 
 
 /**
@@ -47,29 +48,44 @@ class AccessKeyStore extends ItemStore {
  * @type {Component}
  * @private
  */
+
+
+class AccssKeyTable extends React.Component {
+
+    static propTypes = {
+        'access_keys' : PropTypes.array.isRequired,
+        'session' : PropTypes.bool,
+        'user' : PropTypes.shape({
+            '@id' : PropTypes.string.isRequired,
+            'access_keys' : PropTypes.array.isRequired,
+            'email' : PropTypes.string,
+            'first_name' : PropTypes.string,
+            'last_name' : PropTypes.string,
+            'groups' : PropTypes.array,
+            'status' : PropTypes.string,
+            'timezone' : PropTypes.string,
+            'job_title' : PropTypes.string,
+            'submits_for' : PropTypes.array
+        })
+    }
+
+    constructor(props){
+        super(props);
+        this.store = new AccessKeyStore(access_keys, this, 'access_keys');
+        this.state = {
+
+        };
+    }
+
+}
+
+
 var AccessKeyTable = React.createClass({
 
     /** @ignore */
-    propTypes : {
-        access_keys : React.PropTypes.array.isRequired,
-        user : React.PropTypes.shape({
-            '@id' : React.PropTypes.string.isRequired,
-            'access_keys' : React.PropTypes.array.isRequired,
-            'email' : React.PropTypes.string,
-            'first_name' : React.PropTypes.string,
-            'last_name' : React.PropTypes.string,
-            'groups' : React.PropTypes.array,
-            'status' : React.PropTypes.string,
-            'timezone' : React.PropTypes.string,
-            'job_title' : React.PropTypes.string,
-            'submits_for' : React.PropTypes.array
-        })
-    },
-
-    /** @ignore */
     contextTypes: {
-        fetch: React.PropTypes.func,
-        session: React.PropTypes.bool
+        fetch: PropTypes.func,
+        session: PropTypes.bool
     },
 
     /** @ignore */
@@ -299,29 +315,29 @@ var UserView = module.exports.UserView = React.createClass({
 
     /** @ignore */
     propTypes : {
-        'context' : React.PropTypes.shape({
-            '@id' : React.PropTypes.string.isRequired,
-            'access_keys' : React.PropTypes.array,
-            'email' : React.PropTypes.string,
-            'first_name' : React.PropTypes.string,
-            'last_name' : React.PropTypes.string,
-            'title' : React.PropTypes.string,
-            'groups' : React.PropTypes.array,
-            'lab' : React.PropTypes.object,
-            'status' : React.PropTypes.string,
-            'timezone' : React.PropTypes.string,
-            'job_title' : React.PropTypes.string
+        'context' : PropTypes.shape({
+            '@id' : PropTypes.string.isRequired,
+            'access_keys' : PropTypes.array,
+            'email' : PropTypes.string,
+            'first_name' : PropTypes.string,
+            'last_name' : PropTypes.string,
+            'title' : PropTypes.string,
+            'groups' : PropTypes.array,
+            'lab' : PropTypes.object,
+            'status' : PropTypes.string,
+            'timezone' : PropTypes.string,
+            'job_title' : PropTypes.string
         }),
-        'schemas' : React.PropTypes.shape({
-            'User' : React.PropTypes.shape({
-                'required' : React.PropTypes.array,
-                'properties' : React.PropTypes.shape({
-                    'first_name' : React.PropTypes.object,
-                    'last_name' : React.PropTypes.object,
-                    'email' : React.PropTypes.object,
-                    'phone1' : React.PropTypes.object,
-                    'fax' : React.PropTypes.object,
-                    'skype' : React.PropTypes.object,
+        'schemas' : PropTypes.shape({
+            'User' : PropTypes.shape({
+                'required' : PropTypes.array,
+                'properties' : PropTypes.shape({
+                    'first_name' : PropTypes.object,
+                    'last_name' : PropTypes.object,
+                    'email' : PropTypes.object,
+                    'phone1' : PropTypes.object,
+                    'fax' : PropTypes.object,
+                    'skype' : PropTypes.object,
                     // etc.
                 })
             })
@@ -330,7 +346,7 @@ var UserView = module.exports.UserView = React.createClass({
 
     /** @ignore */
     contextTypes : {
-        listActionsFor : React.PropTypes.func
+        listActionsFor : PropTypes.func
     },
 
     /** @ignore */
@@ -723,8 +739,8 @@ var ImpersonateUserForm = React.createClass({
 
     /** @ignore */
     contextTypes: {
-        navigate: React.PropTypes.func,
-        updateUserInfo: React.PropTypes.func
+        navigate: PropTypes.func,
+        updateUserInfo: PropTypes.func
     },
 
     /** @ignore */

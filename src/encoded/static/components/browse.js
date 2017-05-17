@@ -1,19 +1,20 @@
 'use strict';
-var React = require('react');
+
+import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-var ReactDOM = require('react-dom');
-var url = require('url');
-var querystring = require('querystring');
-var _ = require('underscore');
+import url from 'url';
+import queryString from 'querystring';
+import _ from 'underscore';
 var globals = require('./globals');
 var browse = module.exports;
-var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } = require('react-bootstrap');
+import { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 var store = require('../store');
 import FacetList from './facetlist';
 import ExperimentsTable from './experiments-table';
-var { isServerSide, expFxn, Filters, navigate, object } = require('./util');
+import { isServerSide, expFxn, Filters, navigate, object } from './util';
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
-var { FlexibleDescriptionBox } = require('./item-pages/components');
+import { FlexibleDescriptionBox } from './item-pages/components';
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
