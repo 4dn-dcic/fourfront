@@ -77,7 +77,8 @@
                    "quantification",
                    "open chromatin region identification",
                    "read trimming",
-                   "interaction calling"
+                   "interaction calling",
+                   "file merging"
                  ]
              }
         },

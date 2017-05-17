@@ -67,5 +67,13 @@
         "name": "pairix",
         "software_type": ["file format converter", "indexer"],
         "version": "0.1.1"
+    },
+    {
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a13131",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "fastqc",
+        "software_type": ["quality metric generator"],
+        "version": "0.11.4"
     }
 ]
