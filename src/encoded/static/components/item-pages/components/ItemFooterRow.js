@@ -1,8 +1,8 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var ExternalReferenceLink = require('./ExternalReferenceLink');
+import React from 'react';
+import _ from 'underscore';
+import ExternalReferenceLink from './ExternalReferenceLink';
 
 /**
  * Component for showing Aliases, External References, etc.

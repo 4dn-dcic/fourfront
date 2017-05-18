@@ -161,6 +161,8 @@ export const CSVParsingUtilities = {
 
 /**
  * Extends MatrixView Component to accept a 'csv' {string} prop which can be parsed into Matrix data.
+ * Component which takes in a CSV string as a prop, transforms it into a 2D array, and plots on a matrix.
+ * See src/encoded/static/data/static_pages.json to see options which may be configured (pass as 'options' prop).
  * 
  * @export
  * @class CSVMatrixView
@@ -168,7 +170,7 @@ export const CSVParsingUtilities = {
  * @prop {string} csv - String representation of a CSV file.
  * @prop {Object} options - Options for parsing CSV. TODO: typedef
  */
-export default class CSVMatrixView extends MatrixView {
+export class CSVMatrixView extends MatrixView {
 
     constructor(props){
 		super(props);

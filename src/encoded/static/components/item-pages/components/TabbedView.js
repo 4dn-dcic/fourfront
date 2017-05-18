@@ -1,8 +1,7 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-
+import React from 'react';
+import _ from 'underscore';
 import Tabs, { TabPane, TabContent } from './../../lib/rc-tabs';
 import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
 

@@ -2,7 +2,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-var globals = require('./../../globals');
 import { Filters, console } from './../../util';
 import _ from 'underscore';
 import { title, isDisplayTitleAccession, getItemTypeTitle } from './../item';

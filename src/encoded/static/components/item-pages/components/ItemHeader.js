@@ -1,10 +1,10 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var url = require('url');
-var querystring = require('querystring');
-var { console, DateUtility, Filters } = require('./../../util');
+import React from 'react';
+import _ from 'underscore';
+import url from 'url';
+import queryString from 'querystring';
+import { console, DateUtility, Filters } from './../../util';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getItemType, getBaseItemType, getTitleForType, getSchemaForItemType } from './../item';
 
@@ -101,7 +101,7 @@ export class TopRow extends React.Component {
         if (!this.props.href) return null;
 
         var urlParts = url.parse(this.props.href, true);
-        urlParts.search = '?' + querystring.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
+        urlParts.search = '?' + queryString.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
         var viewUrl = url.format(urlParts);
         return (
             <div className="expset-indicator right view-ajax-button">

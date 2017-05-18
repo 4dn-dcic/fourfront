@@ -2,7 +2,7 @@
 
 import React from 'react';
 import url from 'url';
-var globals = require('./../globals');
+import { content_views } from './../globals';
 import { console, object, Filters } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
 
@@ -39,6 +39,6 @@ Fallback.contextTypes = {
 }
 
 // Use this view as a fallback for anything we haven't registered
-globals.content_views.fallback = function () {
+content_views.fallback = function () {
     return Fallback;
 };

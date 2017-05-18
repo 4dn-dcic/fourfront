@@ -1,10 +1,10 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var url = require('url');
-var globals = require('./../globals');
-var { console, object, Filters } = require('./../util');
+import url from 'url';
+import { content_views } from './../globals';
+import { console, object, Filters } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
 
 /**
@@ -87,4 +87,4 @@ HealthView.contextTypes = {
     location_href: React.PropTypes.string
 }
 
-globals.content_views.register(HealthView, 'Health');
+content_views.register(HealthView, 'Health');

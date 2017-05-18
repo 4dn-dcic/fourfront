@@ -1,9 +1,9 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
 import { ItemDetailList, TooltipInfoIconContainer } from './ItemDetailList';
-import FlexibleDescriptionBox from './FlexibleDescriptionBox';
+import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
 import { console, object, layout } from './../../util';
 

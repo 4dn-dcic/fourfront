@@ -549,7 +549,7 @@ export class PageLimitSortController extends React.Component {
         } else {
             urlParts.query.sort = null;
         }
-        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        urlParts.search = '?' + queryString.stringify(urlParts.query);
         var newHref = url.format(urlParts);
 
         this.setState({ 'changingPage' : true }, ()=>{
@@ -595,7 +595,7 @@ export class PageLimitSortController extends React.Component {
         } else {
             urlParts.query.from = (Filters.getLimit() * (page - 1)) + '';
         }
-        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        urlParts.search = '?' + queryString.stringify(urlParts.query);
         this.setState({ 'changingPage' : true }, ()=>{
             navigate(
                 url.format(urlParts),
@@ -630,7 +630,7 @@ export class PageLimitSortController extends React.Component {
 
         urlParts.query.limit = limit + '';
         urlParts.query.from = parseInt(Math.max(Math.floor(previousFrom / limit), 0) * limit);
-        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        urlParts.search = '?' + queryString.stringify(urlParts.query);
         var newHref = url.format(urlParts);
 
         this.setState({ 'changingPage' : true }, ()=>{

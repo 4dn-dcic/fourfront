@@ -1,8 +1,9 @@
 'use strict';
 
 var React = require('react');
+import PropTypes from 'prop-types';
 var _ = require('underscore');
-import Markdown from './../lib/markdown-to-jsx';
+import { compiler } from './../lib/markdown-to-jsx';
 var TableOfContents = require('./table-contents');
 var { CSVMatrixView } = require('./components');
 var globals = require('./../globals');
@@ -12,35 +13,37 @@ var { layout, console } = require('./../util');
  * These are a set of 'mixin' functions which can be used directly on Static Page components.
  * Simply reference the component method to the relevant method below in React.createClass(..)
  */
-var StaticPageBase = module.exports = {
+//var StaticPageBase = module.exports = {
 
-    getDefaultProps : function(){
-        return {
-            "context" : {
-                "title" : "Page Title",
-                "content" : {
-                    "sectionNameID1" : {
-                        "order"      : 0,
-                        "title"      : "Section Title 1",
-                        "content"    : "<h2>Hello</h2>",
-                        "filetype"   : "html"
-                    },
-                    "sectionNameID2" : {
-                        "order"      : 1,
-                        "title"      : "Section Title 2",
-                        "content"    : "<h2>World</h2>",
-                        "filetype"   : "html"
-                    }
+    export const defaultProps = {
+        "context" : {
+            "title" : "Page Title",
+            "content" : {
+                "sectionNameID1" : {
+                    "order"      : 0,
+                    "title"      : "Section Title 1",
+                    "content"    : "<h2>Hello</h2>",
+                    "filetype"   : "html"
+                },
+                "sectionNameID2" : {
+                    "order"      : 1,
+                    "title"      : "Section Title 2",
+                    "content"    : "<h2>World</h2>",
+                    "filetype"   : "html"
                 }
             }
-        };
-    },
+        }
+    }    
 
-    sortedSections : function(){
+    export function getDefaultProps(){
+        return _.clone(defaultProps);
+    }
+
+    export function sortedSections(){
         if (!this.props.context || !this.props.context.content) return null;
-    },
+    }
 
-    renderSections : function(renderMethod, context){
+    export function renderSections(renderMethod, context){
         if (!context || !context.content) return null;
         return _(context.content).chain()
             .pairs()
@@ -56,9 +59,9 @@ var StaticPageBase = module.exports = {
                 );
             })
             .value();
-    },
+    }
 
-    parseSectionsContent : function(context = this.props.context){
+    export function parseSectionsContent(context = this.props.context){
 
         return _.extend(
             {},
@@ -69,19 +72,21 @@ var StaticPageBase = module.exports = {
                     .map(function(sectionPair){
                         var s = sectionPair[1];
                         if (s.filetype === 'md'){
+                            var content = compiler(s.content, {
+                                'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
+                                    .map(function(type){
+                                        return [type, {
+                                            component : Entry.Heading,
+                                            props : { 'type' : type }
+                                        }];
+                                    })
+                                    .object()
+                                    .value()
+                                }
+                            );
                             s =  _.extend(
                                 {}, s, {
-                                    'content' : Markdown.compiler(s.content, {
-                                        'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
-                                            .map(function(type){
-                                                return [type, {
-                                                    component : StaticPageBase.Entry.Heading,
-                                                    props : { 'type' : type }
-                                                }];
-                                            })
-                                            .object()
-                                            .value()
-                                        })
+                                    'content' : content
                                 }
                             );
                         }
@@ -91,7 +96,7 @@ var StaticPageBase = module.exports = {
                     .value()
             }
         );
-    },
+    }
 
     /**
      * Converts links to other files into links to sections from a React element and its children.
@@ -99,7 +104,7 @@ var StaticPageBase = module.exports = {
      * @param {Element} content - A high-level React element representation of some content which might have relative links.
      * 
      */
-    correctRelativeLinks : function(elem, context, depth = 0){
+    export function correctRelativeLinks(elem, context, depth = 0){
         if (typeof elem !== 'object' || !elem) return elem; // Could be a string, or null.
         if (elem.type === 'a'){
             var href = elem.props.href;
@@ -144,76 +149,74 @@ var StaticPageBase = module.exports = {
                 elem,
                 _.omit(elem.props, 'children'),
                 React.Children.map(elem.props.children, function(child){
-                    return StaticPageBase.correctRelativeLinks(child, context, depth + 1);
+                    return correctRelativeLinks(child, context, depth + 1);
                 })
             );
         } else {
             return elem;
         }
-    },
+    }
 
     // TODO: fix ugly hack, wherein I set id in the h3 above actual spot because the usual way of doing anchors cut off entries
-    render: {
+    export const render = {
 
         base : function(){
-            var context = StaticPageBase.parseSectionsContent(this.props.context);
+            var context = parseSectionsContent(this.props.context);
             return (
-                <StaticPageBase.Wrapper
+                <Wrapper
                     title={context.title}
                     tableOfContents={typeof context.toc === 'undefined' || context.toc.enabled === false ? false : true}
                     context={context}
                     navigate={this.props.navigate}
                     href={this.props.href}
                 >
-                    { StaticPageBase.renderSections(this.entryRenderFxn, context) }
-                </StaticPageBase.Wrapper>
+                    { renderSections(this.entryRenderFxn, context) }
+                </Wrapper>
             );
         },
 
         simple : function() {
-            var context = StaticPageBase.parseSectionsContent(this.props.context);
+            var context = parseSectionsContent(this.props.context);
             return (
-                <StaticPageBase.Wrapper title={context.title}>
-                    { StaticPageBase.renderSections(this.entryRenderFxn, context) }
-                </StaticPageBase.Wrapper>
+                <Wrapper title={context.title}>
+                    { renderSections(this.entryRenderFxn, context) }
+                </Wrapper>
             );
         },
 
         withTableOfContents : function(){
 
-            var context = StaticPageBase.parseSectionsContent(this.props.context);
+            var context = parseSectionsContent(this.props.context);
             return (
-                <StaticPageBase.Wrapper
+                <Wrapper
                     title={context.title}
                     tableOfContents={true}
                     context={context}
                     navigate={this.props.navigate}
                     href={this.props.href}
                 >
-                    { StaticPageBase.renderSections(this.entryRenderFxn, context) }
-                </StaticPageBase.Wrapper>
+                    { renderSections(this.entryRenderFxn, context) }
+                </Wrapper>
             );
         },
-    },
+    }
 
-    Wrapper : React.createClass({
+    export class Wrapper extends React.Component {
 
-        getDefaultProps : function(){
-            return {
-                'contentColSize' : 12,
-                'tableOfContents' : false,
-                'tocListStyles' : ['decimal', 'lower-alpha', 'lower-roman']
-            };
-        },
+        static defaultProps = {
+            'contentColSize' : 12,
+            'tableOfContents' : false,
+            'tocListStyles' : ['decimal', 'lower-alpha', 'lower-roman']
+        }
 
-        contentColSize : function(){
+        contentColSize(){
             return Math.min(
                 this.props.tableOfContents ? 9 : 12,
                 Math.max(6, this.props.contentColSize) // Min 6.
             );
-        },
+        }
 
-        renderToC : function(){
+        renderToC(){
             if (!this.props.tableOfContents || this.props.tableOfContents.enabled === false) return null;
             var contentColSize = this.contentColSize();
             var context = this.props.context;
@@ -233,9 +236,9 @@ var StaticPageBase = module.exports = {
                     />
                 </div>
             );
-        },
+        }
 
-        render : function(){
+        render(){
 
             var title = this.props.title || (this.props.context && this.props.context.title) || null;
             var contentColSize = this.contentColSize();
@@ -253,27 +256,35 @@ var StaticPageBase = module.exports = {
                 </div>
             );
         }
-    }),
+    }
 
-    Entry : {
+    export const Entry = {
 
-        Heading : React.createClass({
-            getDefaultProps : function(){
-                return {
-                    'type' : 'h1',
-                    'id' : null
-                };
-            },
-            getID : function(set = false){
+        Heading : class Heading extends React.Component {
+
+            static defaultProps = {
+                'type' : 'h1',
+                'id' : null
+            }
+
+            constructor(props){
+                super(props);
+                this.getID = this.getID.bind(this);
+                this.render = this.render.bind(this);
+            }
+
+            getID(set = false){
                 if (typeof this.id === 'string') return this.id;
                 var id = (this.props && this.props.id) || TableOfContents.slugifyReactChildren(this.props.children);
                 if (set){
                     this.id = id;
                 }
                 return id;
-            },
-            componentWillUnmount : function(){ delete this.id; },
-            render : function(){
+            }
+
+            componentWillUnmount(){ delete this.id; }
+
+            render(){
                 return React.createElement(
                     this.props.type,
                     {
@@ -283,7 +294,7 @@ var StaticPageBase = module.exports = {
                     }
                 );
             }
-        }),
+        },
 
         renderEntryContent : function(baseClassName){
             var content  = (this.props.content && this.props.content.content)  || null;
@@ -301,7 +312,7 @@ var StaticPageBase = module.exports = {
             if (filetype === 'csv'){
                 return <CSVMatrixView csv={content} options={this.props.content.options} />;
             } else if (placeholder || filetype === 'md'){
-                content = StaticPageBase.correctRelativeLinks(content, this.props.context);
+                content = correctRelativeLinks(content, this.props.context);
                 //console.log(this.props.section, content, this.props.context);
                 return <div className={className}>{ content }</div>;
             } else {
@@ -324,53 +335,55 @@ var StaticPageBase = module.exports = {
 
     }
 
-};
+class EntryExample extends React.Component {
 
-var StaticPageExample = React.createClass({
+    static defaultProps = {
+        'section'   : null,
+        'content'   : null,
+        'entryType' : 'help',
+        'className' : null
+    }
 
-    statics : {
+    constructor(props){
+        super(props);
+        this.renderEntryContent = Entry.renderEntryContent.bind(this);
+        this.render = Entry.render.bind(this);
+    }
 
-        Entry : React.createClass({
+    replacePlaceholder(placeholderString){
+        return placeholderString;
+    }
 
-            getDefaultProps : function(){
-                return {
-                    'section'   : null,
-                    'content'   : null,
-                    'entryType' : 'help',
-                    'className' : null
-                };
-            },
+}
 
-            replacePlaceholder : function(placeholderString){
-                return content;
-            },
+class StaticPageExample extends React.Component {
 
-            renderEntryContent : StaticPageBase.Entry.renderEntryContent,
-            render : StaticPageBase.Entry.render
-        })
+    static Entry = EntryExample
 
-    },
+    static defaultProps = _.clone(defaultProps);
 
-    propTypes : {
-        context : React.PropTypes.shape({
-            "title" : React.PropTypes.string,
-            "content" : React.PropTypes.shape({
-                "sectionID1" : React.PropTypes.object,
-                "sectionID2" : React.PropTypes.object,
-                "sectionID3" : React.PropTypes.object,
-                "sectionIDFour" : React.PropTypes.object
+    static propTypes = {
+        context : PropTypes.shape({
+            "title" : PropTypes.string,
+            "content" : PropTypes.shape({
+                "sectionID1" : PropTypes.object,
+                "sectionID2" : PropTypes.object,
+                "sectionID3" : PropTypes.object,
+                "sectionIDFour" : PropTypes.object
             }).isRequired
         }).isRequired
-    },
+    }
 
-    entryRenderFxn : function(key, content, context){
-        return <StaticPageExample.Entry key={key} section={key} content={content} context={context} />;
-    },
+    constructor(props){
+        super(props);
+        this.renderSections = renderSections.bind(this);
+        this.render = render.simple.bind(this);
+    }
+    
+    entryRenderFxn(key, content, context){
+        return <EntryExample key={key} section={key} content={content} context={context} />;
+    }
 
-    /** Use common funcs for rendering body. Create own for more custom behavior/layouts, using these funcs as base. */
-    getDefaultProps : StaticPageBase.getDefaultProps,
-    renderSections  : StaticPageBase.renderSections,
-    render          : StaticPageBase.render.simple
-});
+}
 
 globals.content_views.register(StaticPageExample, 'StaticPage');

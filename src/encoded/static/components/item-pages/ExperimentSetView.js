@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Panel } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide } from './../util';
-var globals = require('./../globals');
+import * as globals from './../globals';
 import ExperimentsTable from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView } from './components';
 import FacetList from './../facetlist';

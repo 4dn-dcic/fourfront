@@ -1,12 +1,11 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var url = require('url');
-var querystring = require('querystring');
-var { Button } = require('react-bootstrap');
-var ReactTooltip = require('react-tooltip');
-var { console, DateUtility, object } = require('./../../util');
+import React from 'react';
+import _ from 'underscore';
+import url from 'url';
+import { Button } from 'react-bootstrap';
+import ReactTooltip from 'react-tooltip';
+import { console, DateUtility, object } from './../../util';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { PartialList } from './PartialList';
 

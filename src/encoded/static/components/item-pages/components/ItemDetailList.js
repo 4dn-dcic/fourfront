@@ -1,12 +1,11 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
+import _ from 'underscore';
 import { Collapse, Button } from 'react-bootstrap';
-var ReactTooltip = require('react-tooltip');
-var { console, object, Filters } = require('./../../util');
-var globals = require('./../../globals');
+import ReactTooltip from 'react-tooltip';
+import { console, object, Filters } from './../../util';
 import { PartialList } from './PartialList';
 import { FilesInSetTable } from './FilesInSetTable';
 import { getTitleStringFromContext } from './../item';

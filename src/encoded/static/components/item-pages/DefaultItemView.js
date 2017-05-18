@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-var globals = require('./../globals');
+import { panel_views, itemClass } from './../globals';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } from './components';
 import { console, object, DateUtility, Filters } from './../util';
@@ -122,7 +122,7 @@ export default class DefaultItemView extends ItemBaseView {
     render() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
-        var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
+        var itemClass = itemClass(this.props.context, 'view-detail item-page-container');
 
         return (
             <div className={itemClass}>
@@ -154,4 +154,4 @@ export default class DefaultItemView extends ItemBaseView {
 
 }
 
-globals.panel_views.register(DefaultItemView, 'Item');
+panel_views.register(DefaultItemView, 'Item');

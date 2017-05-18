@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-var globals = require('./../globals');
+import * as globals from './../globals';
 import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } from './components';
 
 
