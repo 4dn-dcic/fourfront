@@ -9,7 +9,8 @@ def biosource_1(award, lab):
         "award": award['@id'],
         "lab": lab['@id'],
         "biosource_type": "immortalized cell line",
-        "cell_line": "GM12878"
+        "cell_line": "GM12878",
+        "cell_line_termid": "EFO:0000001"
     }
 
 
@@ -28,6 +29,7 @@ def test_biosource_convert_cell_line_to_link_to_ontology_term(
                              current_version='1', target_version='2')
     assert value['schema_version'] == '2'
     assert value['cell_line'] == gm12878_oterm['uuid']
+    assert 'cell_line_termid' not in value
 
 
 def test_biosource_convert_cell_line_w_no_ontology_term(
@@ -38,3 +40,4 @@ def test_biosource_convert_cell_line_w_no_ontology_term(
                              current_version='1', target_version='2')
     assert value['schema_version'] == '2'
     assert 'cell_line' not in value
+    assert 'cell_line_termid' not in value
