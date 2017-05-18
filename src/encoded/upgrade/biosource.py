@@ -12,6 +12,8 @@ def biosource_1_2(value, system):
         terms = system['registry']['collections']['OntologyTerm']
         oterm = terms.get(value['cell_line'])
         del value['cell_line']
+        if 'cell_line_termid' in value:
+            del value['cell_line_termid']
         if oterm:
             # if we get something back see if it has a uuid - if not oh well
             try:
