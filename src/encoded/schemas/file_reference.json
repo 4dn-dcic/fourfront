@@ -1,6 +1,6 @@
 {
     "title": "Reference file",
-    "description": "Schema for submitting metadata for a FASTA file.",
+    "description": "Schema for submitting metadata for a reference file used in pipelines.",
     "id": "/profiles/file_reference.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
