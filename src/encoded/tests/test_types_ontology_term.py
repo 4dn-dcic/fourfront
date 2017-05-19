@@ -40,13 +40,13 @@ def test_store_ontology_term_by_term_id(testapp, oterm):
 
 
 def test_store_ontology_no_required_keys(testapp, oterm):
-    oterm.pop('preferred_name')
+    oterm.pop('term_name')
     oterm.pop('uuid')
     oterm.pop('term_id')
     testapp.post_json('/ontology_term', oterm, status=422)
 
 
-def test_linkto_ontology_term_by_preffered_name(testapp, lab, award, oterm):
+def test_linkto_ontology_term_by_term_name(testapp, lab, award, oterm):
     item = {
         "accession": "4DNSR000AAQ1",
         "biosource_type": "immortalized cell line",
