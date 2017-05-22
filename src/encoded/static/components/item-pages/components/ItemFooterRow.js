@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import ExternalReferenceLink from './ExternalReferenceLink';
+import { ExternalReferenceLink } from './ExternalReferenceLink';
 
 /**
  * Component for showing Aliases, External References, etc.
@@ -119,6 +119,8 @@ export class ItemFooterRow extends React.Component {
         var externalReferences  = this.externalReferences(schemas),
             aliases             = this.aliases(),
             alternateAccessions = this.alternateAccessions();
+
+        console.log(alternateAccessions);
 
         
         return (
