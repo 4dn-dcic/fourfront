@@ -504,8 +504,8 @@ export default class SubmissionView extends React.Component{
     }
 
     setKeyState = (key, value) => {
-        var newState = this.state;
-        if(key in newState){
+        var stateToSet = this.state;
+        if(key in stateToSet){
             // this means we're navigating to a new object if true
             if(key === 'currKey' && value !== this.state.currKey){
                 // don't allow navigation when we have an uploading file
@@ -523,22 +523,22 @@ export default class SubmissionView extends React.Component{
                 // get rid of any hanging errors
                 for(var i=0; i<this.state.errorCount; i++){
                     Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
-                    newState.errorCount = 0;
+                    stateToSet.errorCount = 0;
                 }
                 // reset some state
-                newState.processingFetch = false;
-                newState.uploadStatus = null;
+                stateToSet.processingFetch = false;
+                stateToSet.uploadStatus = null;
                 // see if newly-navigated obj is ready for validation
                 if(keyValid[value] == 0){
                     var validState = this.findValidationState(value);
                     if(validState == 1){
                         keyValid[value] = 1;
-                        newState['keyValid'] = keyValid;
+                        stateToSet['keyValid'] = keyValid;
                     }
                 }
             }
-            newState[key] = value;
-            this.setState(newState);
+            stateToSet[key] = value;
+            this.setState(stateToSet);
         }
     }
 
@@ -924,6 +924,7 @@ export default class SubmissionView extends React.Component{
                 roundTwoCopy.splice(rmIdx,1)
             }
         }
+        stateToSet.uploadStatus = null;
         stateToSet.keyValid = validationCopy;
         stateToSet.roundTwoKeys = roundTwoCopy;
         this.setState(stateToSet);
