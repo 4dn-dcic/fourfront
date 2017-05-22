@@ -5,7 +5,7 @@ var _ = require('underscore');
 var url = require('url');
 var querystring = require('querystring');
 var { console, DateUtility, Filters } = require('./../../util');
-var { FlexibleDescriptionBox } = require('./../../experiment-common');
+import FlexibleDescriptionBox from './FlexibleDescriptionBox';
 import { getItemType, getBaseItemType, getTitleForType, getSchemaForItemType } from './../item';
 
 
@@ -189,13 +189,13 @@ export class TopRow extends React.Component {
         //}
         return (
             <div className="row clearfix top-row">
-                <h5 className="col-sm-6 item-label-title">
+                <h5 className="col-sm-5 item-label-title">
                     { this.typeInfoLabel(this.props.typeInfo || null) }
                     { this.props.context.accession ?
                         <span className="accession inline-block" data-tip={accessionTooltip}>{ this.props.context.accession }</span>
                     : null }
                 </h5>
-                <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
+                <h5 className="col-sm-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
                     { this.viewJSONButton() }
                     { this.itemActions() }
                     { this.wrapChildren() }

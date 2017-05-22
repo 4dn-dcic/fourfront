@@ -4,7 +4,6 @@ var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
 var barAggrFxn = require('./../BarPlot/aggregation-functions');
-var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, object } = require('./../../util');
 import { CursorViewBounds } from './../ChartDetailCursor';
 import ReactTooltip from 'react-tooltip';
@@ -42,7 +41,7 @@ class Term extends React.Component {
     }
 
     onMouseEnter(e){
-        highlightTerm.bind(this, this.props.field, this.props.term, this.props.color);
+        vizUtil.highlightTerm(this.props.field, this.props.term, this.props.color);
         if (typeof this.props.onNodeMouseEnter === 'function'){
             this.props.onNodeMouseEnter(this.generateNode(), e);
         }
@@ -107,7 +106,7 @@ class Field extends React.Component {
      */
     render(){
         return (
-            <div className="field" data-field={this.props.field} onMouseLeave={unhighlightTerms.bind(this, this.props.field)}>
+            <div className="field" data-field={this.props.field} onMouseLeave={vizUtil.unhighlightTerms.bind(this, this.props.field)}>
                 { this.props.includeFieldTitle ? 
                     <h5 className="text-500 legend-field-title">{ this.props.title || this.props.name || this.props.field }</h5>
                 : null }

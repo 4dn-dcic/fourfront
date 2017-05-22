@@ -13,12 +13,12 @@ var Search = require('./search').Search;
  * @namespace
  * @type {Component}
  */
-var Collection = module.exports.Collection = React.createClass({
-    render: function () {
+export default class Collection extends React.Component {
+    render () {
         return (
             <div>
                 <Search {...this.props} />
             </div>
         );
     }
-});
+}

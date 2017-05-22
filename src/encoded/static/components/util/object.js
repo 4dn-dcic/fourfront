@@ -34,6 +34,18 @@ export function tipsFromSchema(schemas, content){
     return tips;
 }
 
+/**
+ * Convert tips, as obtained from tipsFromSchema, into a list containing objects with at least the following properties:
+ * 'key', 'title', 'description'
+ */
+export function listFromTips(tips){
+    return _.map(_.pairs(tips), function(p){
+        return _.extend(_.omit(p[1], 'key'), {
+            'key' : p[0],
+        });
+    });
+}
+
 
 
 /**

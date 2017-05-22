@@ -12,6 +12,21 @@ var FilesInSetTable = require('./FilesInSetTable');
 import { getTitleStringFromContext } from './../item';
 import JSONTree from 'react-json-tree';
 
+
+export class TooltipInfoIconContainer extends React.Component {
+    render(){
+        var { elementType, title, tooltip } = this.props;
+        return React.createElement(elementType || 'div', {
+            'className' : "tooltip-info-container"
+        }, (
+            <span>{ title }&nbsp;{ typeof tooltip === 'string' ?
+                <i data-tip={tooltip} className="icon icon-info-circle"/>
+            : null }</span>
+        ));
+    }
+}
+
+
 /**
  * Contains and toggles visibility/mounting of a Subview.
  * 
@@ -154,13 +169,7 @@ export class Detail extends React.Component {
             }
         }
 
-        return (
-            <div className="tooltip-info-container">
-                <span>{ title || key } { tooltip !== null ?
-                    <i data-tip={tooltip} className="icon icon-info-circle"/>
-                : null }</span>
-            </div>
-        );
+        return <TooltipInfoIconContainer title={title || key} tooltip={tooltip} />;
     }
 
     /**
@@ -356,7 +365,7 @@ export class Detail extends React.Component {
 }
 
 
-export default class ItemDetailList extends React.Component {
+export class ItemDetailList extends React.Component {
 
     static Detail = Detail
 

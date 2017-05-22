@@ -12,6 +12,7 @@
     "output_quality_metrics": [
         {
             "name": "fastqc",
+            "workflow_argument_name": "report_zip",
             "value": "131106bc-8535-4448-903e-854af460b000"
         }
     ],
@@ -35,6 +36,6 @@
             "value": "46e82a90-49e5-4c33-afab-9ec90d65faa1"
         }
     ],
-    "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
+    "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9"
  }
 ]
