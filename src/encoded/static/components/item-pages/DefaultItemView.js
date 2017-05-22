@@ -122,10 +122,10 @@ export default class DefaultItemView extends ItemBaseView {
     render() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
-        var itemClass = itemClass(this.props.context, 'view-detail item-page-container');
+        var itemClassName = itemClass(this.props.context, 'view-detail item-page-container');
 
         return (
-            <div className={itemClass}>
+            <div className={itemClassName}>
 
                 <ItemPageTitle context={context} schemas={schemas} />
                 <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
