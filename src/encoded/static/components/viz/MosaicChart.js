@@ -5,7 +5,6 @@ var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
 var { expFxn, Filters, console, object, isServerSide } = require('./../util');
-var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 var { CursorComponent, RotatedLabel } = require('./components');
 
 // Share one instance between all charts because D3 selector acts on common class/elem names.
@@ -525,7 +524,7 @@ var MosaicChart = React.createClass({
 
         vizUtil.requestAnimationFrame(()=>{
 
-            if (d.data.field && d.data.term) highlightTerm(d.data.field, d.data.term, vizUtil.colorForNode(d));
+            if (d.data.field && d.data.term) vizUtil.highlightTerm(d.data.field, d.data.term, vizUtil.colorForNode(d));
 
             // Fade all the segments.
             // Then highlight only those that are an ancestor of the current segment.
@@ -577,7 +576,7 @@ var MosaicChart = React.createClass({
                 d3.selectAll("svg.sunburst-svg-chart path, svg.sunburst-svg-chart > g").classed('hover', false);
                 //_this.vis.selectAll("path").classed('hover', false);
 
-                unhighlightTerms();
+                vizUtil.unhighlightTerms();
 
                 //_this.resetActiveExperimentsCount();
 
@@ -1029,7 +1028,7 @@ var MosaicChart = React.createClass({
                     className={className}
                     onMouseOver={node.depth > 0 ? _this.onPathMouseOver : null }
                     onMouseEnter={ node.depth === 0 ? _this.mouseleave : null }
-                    onMouseLeave={/*node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } :*/ null}
+                    onMouseLeave={/*node.depth > 0 ? function(e){ vizUtil.unhighlightTerms(e.target.__data__.data.field); } :*/ null}
                     onClick={/*clickable ? (e) => _this.props.handleClick(e.target.__data__) : */null}
                     key={node.data.id}
                     data-key={node.data.id}

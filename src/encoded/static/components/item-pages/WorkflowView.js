@@ -3,13 +3,59 @@
 var React = require('react');
 var globals = require('./../globals');
 var _ = require('underscore');
-var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane } = require('./components');
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
-var { console, object, DateUtility, Filters, isServerSide } = require('./../util');
-import { Graph, parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+var { console, object, DateUtility, Filters, isServerSide, navigate } = require('./../util');
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 var { DropdownButton, MenuItem } = require('react-bootstrap');
 
+
+/**
+ * Pass this to props.onNodeClick for Graph.
+ * 
+ * @export
+ * @param {Object} node - Node clicked on.
+ * @param {Object|null} selectedNode - Node currently selected, if any.
+ * @param {MouseEvent} evt - onClick MouseEvent.
+ */
+export function onItemPageNodeClick(node, selectedNode, evt){
+    if (node !== selectedNode){
+        navigate('#' + (node.id || node.name), { inPlace: true, skipRequest : true });
+    } else {
+        navigate('#', { inPlace: true, skipRequest : true });
+    }
+}
+
+export function commonGraphPropsFromProps(props){
+    return {
+        'href'        : props.href,
+        'onNodeClick' : onItemPageNodeClick,
+        'detailPane'  : <WorkflowDetailPane schemas={props.schemas} />,
+        'nodeTitle'   : function(node, canBeJSX = false){
+            if (
+                node.type === 'step' && node.meta.uuid &&
+                Array.isArray(node.meta.analysis_step_types) &&
+                node.meta.analysis_step_types.length > 0
+            ){
+                var purposes = node.meta.analysis_step_types.map(Filters.Term.capitalize).join(', ');
+                if (canBeJSX){
+                    return (
+                        <div className="pull-right">
+                            <div className="text-ellipsis-container above-node-title" style={{ maxWidth : Graph.defaultProps.columnWidth }}>
+                                { purposes }
+                            </div>
+                            <div className="text-ellipsis-container" style={{ width : Graph.defaultProps.columnWidth - 40 }}>
+                                { node.title || node.name }
+                            </div>
+                        </div>
+                    );
+                }
+            }
+            return node.title || node.name;
+        }
+    };
+}
 
 
 /**
@@ -62,7 +108,7 @@ export class WorkflowView extends React.Component {
         return (
             <div className={itemClass}>
 
-                <ItemPageTitle context={context} />
+                <ItemPageTitle context={context} schemas={schemas} />
                 <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
                     <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
                     <ItemHeader.MiddleRow />
@@ -199,26 +245,30 @@ class GraphSection extends React.Component {
         return true;
     }
 
+    static cwlDataExists(props){
+        return props.context && props.context.cwl_data && GraphSection.isCwlDataValid(props.context.cwl_data);
+    }
+
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.cwlDataExists = this.cwlDataExists.bind(this);
+        this.commonGraphProps = this.commonGraphProps.bind(this);
         this.cwlGraph = this.cwlGraph.bind(this);
         this.basicGraph = this.basicGraph.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
         this.dropDownMenu = this.dropDownMenu.bind(this);
         this.body = this.body.bind(this);
+        this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail'
         }
     }
 
-    cwlDataExists(props = this.props){
-        return props.context && props.context.cwl_data && GraphSection.isCwlDataValid(props.context.cwl_data);
+    commonGraphProps(){
+        return commonGraphPropsFromProps(this.props);
     }
 
     cwlGraph(){
-        if (!this.cwlDataExists()) return (
+        if (!GraphSection.cwlDataExists(this.props)) return (
             <div>
                 <h4 className="text-400"><em>No graphable data.</em></h4>
             </div>
@@ -228,10 +278,9 @@ class GraphSection extends React.Component {
         );
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
-                href={this.props.href}
-                schemas={this.props.schemas}
             />
         );
     }
@@ -241,13 +290,12 @@ class GraphSection extends React.Component {
         var graphData = parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
-                href={this.props.href}
-                schemas={this.props.schemas}
             />
         );
     }
@@ -257,10 +305,9 @@ class GraphSection extends React.Component {
         var graphData = parseAnalysisSteps(this.props.context.analysis_steps);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
-                href={this.props.href}
-                schemas={this.props.schemas}
             />
         );
     }
@@ -289,7 +336,7 @@ class GraphSection extends React.Component {
             </MenuItem>
         );
 
-        var cwl = this.cwlDataExists() ? (
+        var cwl = GraphSection.cwlDataExists(this.props) ? (
             <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>
                 Common Workflow Language (CWL)
             </MenuItem>

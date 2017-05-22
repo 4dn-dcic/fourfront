@@ -7,7 +7,7 @@ var querystring = require('querystring');
 var { Button } = require('react-bootstrap');
 var ReactTooltip = require('react-tooltip');
 var { console, DateUtility, object } = require('./../../util');
-var { FlexibleDescriptionBox } = require('./../../experiment-common');
+import FlexibleDescriptionBox from './FlexibleDescriptionBox';
 import PartialList from './PartialList';
 
 /*

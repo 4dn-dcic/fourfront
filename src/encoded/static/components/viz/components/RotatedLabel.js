@@ -1,7 +1,6 @@
 var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
-var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, layout } = require('./../../util');
 
 /**
