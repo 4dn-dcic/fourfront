@@ -1690,6 +1690,7 @@ var replaceInHierarchy = function myself(hierarchy, current, toReplace){
 var flattenHierarchy = function myself(hierarchy){
     var found_keys = [];
     Object.keys(hierarchy).forEach(function(key, index){
+        if(!isNaN(key)) key = parseInt(key)
         var sub_keys = myself(hierarchy[key]);
         found_keys = _.union(found_keys, sub_keys, [key]);
     });
