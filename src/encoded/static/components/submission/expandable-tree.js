@@ -20,7 +20,7 @@ export default class SubmissionTree extends React.Component{
     }
 
     render() {
-        var infoTip = 'This panel is for navigating between objects in the creation process. Colors correspond to the state of each object: <br>  <br> Orange: has incomplete children, cannot yet be validated <br> Blue: all children are complete, can be validated <br> Red: validation failed. Fix fields and try again <br> Light green: validation passed, ready for submission <br> Dark green: successfully submitted or pre-existing <br> White: available but unused child object type <br>  <br> Click on object titles to navigate around and edit individually.';
+        var infoTip = 'This panel is for navigating between objects in the creation process. Colors correspond to the state of each object: <br>  <br> Orange: has incomplete children, cannot yet be validated <br> Blue: all children are complete, can be validated <br> Red: validation failed. Fix fields and try again <br> Light green: validation passed, ready for submission <br> Dark green: successfully submitted or pre-existing <br> White: bookmarks organizing child object types <br>  <br> Click on object titles to navigate around and edit individually.';
         const{
             keyIdx,
             ...others
@@ -53,6 +53,9 @@ class SubmissionLeaf extends React.Component{
     }
 
     generateChild = (childKey) => {
+        if(!isNaN(childKey)){
+            childKey = parseInt(childKey);
+        }
         // replace key and hierarchy in props
         const{
             keyIdx,
@@ -70,7 +73,14 @@ class SubmissionLeaf extends React.Component{
         );
     }
 
-    generatePlaceholder = (unused) =>{
+    generatePlaceholder = (bookmark) =>{
+        var children = Object.keys(this.props.hierarchy[this.props.keyIdx]).map(function(childKey){
+            if(this.props.keyLinks[childKey] == bookmark){
+                return this.generateChild(childKey);
+            }else{
+                return null;
+            }
+        }.bind(this));
         var style = {
             'marginLeft': '-15px',
             'overflow': 'hidden',
@@ -84,12 +94,15 @@ class SubmissionLeaf extends React.Component{
             'padding':'4px 7px 0px 3px'
         };
         return(
-            <div key={unused} className="submission-nav-leaf">
+            <div key={bookmark} className="submission-nav-leaf">
                 <div className="clearfix" style={style}>
                     <Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" disabled/>
-                    <span style={{'padding':'1px 5px'}}>
-                        {unused}
+                    <span>
+                        {bookmark}
                     </span>
+                </div>
+                <div>
+                    {children}
                 </div>
             </div>
         );
@@ -97,7 +110,7 @@ class SubmissionLeaf extends React.Component{
 
     callBack = (e) => {
         e.preventDefault();
-        var intKey = parseInt(this.props.keyIdx);
+        var intKey = this.props.keyIdx;
         this.props.setKeyState('currKey', intKey);
         this.props.setKeyState('navigationIsOpen', false);
     }
@@ -107,10 +120,12 @@ class SubmissionLeaf extends React.Component{
         var keyValid = this.props.keyValid;
         var keyTypes = this.props.keyTypes;
         var keyComplete = this.props.keyComplete;
-        var children = Object.keys(this.props.hierarchy[key]).map((childKey) => this.generateChild(childKey));
         var placeholders;
-        if(this.props.keyUnused[key]){
-            placeholders = this.props.keyUnused[key].map((link) => this.generatePlaceholder(link))
+        if(!isNaN(key)){
+            placeholders = this.props.keyLinkBookmarks[key].map((link) => this.generatePlaceholder(link));
+        }else{
+            // must be a submitted object - plot directly
+            placeholders = Object.keys(this.props.hierarchy[this.props.keyIdx]).map((child) => this.generateChild(child));
         }
         var style = {
             'marginLeft': '-15px',
@@ -118,10 +133,7 @@ class SubmissionLeaf extends React.Component{
             'whiteSpace': 'nowrap',
             'textOverflow': 'ellipsis',
             'fontSize': '0.8em',
-            'borderLeft' : '1px solid #fff',
-            'borderRight' : '1px solid #fff',
-            'borderTop' : '1px solid #fff',
-            'borderBottom' : '1px solid #fff',
+            'border' : '1px solid #fff'
         };
         var buttonStyle = {
             'height': '15px',
@@ -133,7 +145,6 @@ class SubmissionLeaf extends React.Component{
             'verticalAlign': 'super'
         };
         var title;
-        var linkType;
         var leftButton;
         var titleText = this.props.keyDisplay[key] || key;
         // if key is not a number (i.e. path), the object is not a custom one.
@@ -170,12 +181,9 @@ class SubmissionLeaf extends React.Component{
             }else if(keyValid[key] == 3){
                 style.backgroundColor = '#b7e1bb'; // light green
             }
-            if(parseInt(key) === parseInt(this.props.currKey)){
+            if(key === this.props.currKey){
                 style.fontWeight = "bold";
-                style.borderTop = "1px solid #000";
-                style.borderBottom = "1px solid #000";
-                style.borderLeft = "1px solid #000";
-                style.borderRight = "1px solid #000";
+                style.border = "1px solid #000";
                 title = (<span style={{'padding':'1px 5px'}} >
                             {titleText}
                         </span>);
@@ -186,36 +194,16 @@ class SubmissionLeaf extends React.Component{
             }
         }
         var dummyButton = <Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" disabled></Button>;
-        if(parseInt(key) == 0){
+        if(key == 0){
             style.marginLeft = 0;
             leftButton = null;
             dummyButton = null;
-        }else if(children.length > 0 || (placeholders && placeholders.length > 0)){
-            // Button to expand children
+        }else if (placeholders.length > 0){
             leftButton = (<Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
                             <i style={iconStyle} className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                         </Button>);
         }else{
             leftButton = dummyButton;
-        }
-        var linkStyle;
-        if(this.props.keyLinks[key]){
-            linkStyle = JSON.parse(JSON.stringify(style));
-            linkStyle.color = '#fff';
-            style.borderBottom = "none";
-            linkStyle.borderTop = "none";
-            if(parseInt(key) === parseInt(this.props.currKey)){
-                linkStyle.fontWeight = "bold";
-                linkStyle.borderBottom = "1px solid #000";
-                linkType = (<span style={{'padding':'1px 5px'}} >
-                            {this.props.keyLinks[key]}
-                        </span>);
-            }else{
-                linkType = (<span style={{'padding':'1px 5px', 'cursor':'pointer'}} onClick={this.callBack}>
-                            {this.props.keyLinks[key]}
-                        </span>);
-            }
-
         }
         return(
             <div className="submission-nav-leaf">
@@ -223,18 +211,9 @@ class SubmissionLeaf extends React.Component{
                     {leftButton}
                     {title}
                 </div>
-                {linkType ?
-                    <div className="clearfix" style={linkStyle}>
-                        {dummyButton}
-                        {linkType}
-                    </div>
-                    :
-                    null
-                }
                 <Collapse in={this.state.open}>
                     <div style={{'paddingLeft':'15px'}}>
                         {placeholders}
-                        {children}
                     </div>
                 </Collapse>
             </div>

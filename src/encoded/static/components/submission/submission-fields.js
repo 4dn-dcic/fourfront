@@ -9,6 +9,7 @@ var makeTitle = require('../item-pages/item').title;
 var Alerts = require('../alerts');
 var getLargeMD5 = require('../util/file-utility').getLargeMD5;
 var ReactTooltip = require('react-tooltip');
+var ProgressBar = require('rc-progress').Line;
 
 /*
 This is a key/input pair for any one field. Made to be stateless; changes
@@ -36,26 +37,6 @@ export default class BuildField extends React.Component{
             'autoFocus': true,
             'placeholder': "No value"
         };
-        var otherProps = {
-            'id' : this.props.field,
-            'value' : this.props.value,
-            'field': this.props.field,
-            'collection': this.props.schema.linkTo,
-            'modifyNewContext': this.props.modifyNewContext,
-            'getFieldValue': this.props.getFieldValue,
-            'selectObj': this.props.selectObj,
-            'arrayIdx': this.props.arrayIdx,
-            'isArray': this.props.isArray,
-            'nestedField': this.props.nestedField,
-            'schema': this.props.schema,
-            'md5Progress': this.props.md5Progress,
-            'modifyFile': this.props.modifyFile,
-            'modifyMD5Progess': this.props.modifyMD5Progess,
-            'keyDisplay': this.props.keyDisplay,
-            'keyComplete': this.props.keyComplete,
-            'setKeyState': this.props.setKeyState,
-            'linkType': this.props.linkType
-        };
         switch(field_case){
             case 'text' : return (
                 <div className="input-wrapper" style={{'display':'inline'}}>
@@ -81,28 +62,28 @@ export default class BuildField extends React.Component{
             );
             case 'linked object' : return (
                 <div style={{'display':'inline-block'}}>
-                    <LinkedObj {...otherProps}/>
+                    <LinkedObj {...this.props}/>
                 </div>
             );
             case 'array' : return (
                 <div style={{'display':'inline'}}>
-                    <ArrayField {...otherProps}/>
+                    <ArrayField {...this.props}/>
                 </div>
 
             );
             case 'object' : return (
                 <div style={{'display':'inline'}}>
-                    <ObjectField {...otherProps}/>
+                    <ObjectField {...this.props}/>
                 </div>
             );
             case 'attachment' : return (
                 <div style={{'display':'inline'}}>
-                    <AttachmentInput {...otherProps}/>
+                    <AttachmentInput {...this.props}/>
                 </div>
             );
             case 'file upload' : return (
                 <div style={{'display':'inline'}}>
-                    <S3FileInput {...otherProps}/>
+                    <S3FileInput {...this.props}/>
                 </div>
             );
         }
@@ -256,6 +237,7 @@ class LinkedObj extends React.Component{
     }
 
     render(){
+        var objType = this.props.schema.linkTo;
         var style={'width':'160px', 'marginRight':'10px'};
         // object chosen or being created
         if(this.props.value){
@@ -314,13 +296,13 @@ class LinkedObj extends React.Component{
             <div>
                 <Button bsSize="xsmall" style={style} onClick={function(e){
                         e.preventDefault();
-                        this.props.selectObj(this.props.collection, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
+                        this.props.selectObj(objType, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
                     }.bind(this)}>
                     {'Select existing'}
                 </Button>
                 <Button bsSize="xsmall" style={style}onClick={function(e){
                         e.preventDefault();
-                        this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, this.props.collection);
+                        this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, objType);
                     }.bind(this)}>
                     {'Create new'}
                 </Button>
@@ -402,6 +384,10 @@ class ArrayField extends React.Component{
                     keyDisplay={this.props.keyDisplay}
                     keyComplete={this.props.keyComplete}
                     setKeyState= {this.props.setKeyState}
+                    updateUpload={this.props.updateUpload}
+                    upload={this.props.upload}
+                    uploadStatus={this.props.uploadStatus}
+                    md5Progress={this.props.md5Progress}
                 />
             </div>
         );
@@ -516,6 +502,10 @@ class ObjectField extends React.Component{
                 keyDisplay={this.props.keyDisplay}
                 keyComplete={this.props.keyComplete}
                 setKeyState= {this.props.setKeyState}
+                updateUpload={this.props.updateUpload}
+                upload={this.props.upload}
+                uploadStatus={this.props.uploadStatus}
+                md5Progress={this.props.md5Progress}
             />
         );
     }
@@ -586,7 +576,7 @@ class AttachmentInput extends React.Component{
             }
 
         }.bind(this);
-        this.props.modifyNewContext(this.props.nestedField, null, 'attachment', this.props.linkType, this.props.arrayIdx);
+        this.props.modifyNewContext(this.props.nestedField, attachment_props, 'attachment', this.props.linkType, this.props.arrayIdx);
     }
 
     render(){
@@ -605,7 +595,7 @@ class AttachmentInput extends React.Component{
             'fontWeight':'400'
         };
         return(
-            <div>
+            <div style={{'display': 'inherit'}}>
                 <input id={this.props.field} type='file' onChange={this.handleChange} style={{'display':'none'}} accept={this.acceptedTypes()}/>
                 <Button bsSize="xsmall" style={{'padding':'0px'}}>
                     <label htmlFor={this.props.field} style={labelStyle}>
@@ -624,6 +614,24 @@ class S3FileInput extends React.Component{
 
     constructor(props){
         super(props);
+        this.state = {
+            'percentDone': null,
+            'sizeUploaded': null
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if(this.props.upload === null && nextProps.upload !== null){
+            this.handleAsyncUpload(nextProps.upload);
+        }
+    }
+
+    modifyMD5Progess = (val) => {
+        this.props.setKeyState('md5Progress', val);
+    }
+
+    modifyFile = (val) => {
+        this.props.setKeyState('file', val);
     }
 
     handleChange = (e) => {
@@ -634,40 +642,70 @@ class S3FileInput extends React.Component{
             return;
         }else{
             var filename = file.name ? file.name : "unknown";
-            getLargeMD5(file, this.props.modifyMD5Progess).then((hash) => {
+            getLargeMD5(file, this.modifyMD5Progess).then((hash) => {
                 this.props.modifyNewContext('md5sum', hash, 'file upload', this.props.linkType, this.props.arrayIdx);
                 console.log('HASH SET TO:', hash, 'FOR FILE:', this.props.value);
-                this.props.modifyMD5Progess(null);
+                this.modifyMD5Progess(null);
             }).catch((error) => {
                 console.log('ERROR CALCULATING MD5!', error);
                 // TODO: should file upload fail on a md5 error?
-                this.props.modifyMD5Progess(null);
+                this.modifyMD5Progess(null);
             });
             this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.linkType, this.props.arrayIdx);
             // calling modifyFile changes the 'file' state of top level component
-            this.props.modifyFile(file);
+            this.modifyFile(file);
         }
     }
 
-    render(){
-        var edit_tip;
-        var previous_status = this.props.getFieldValue('status');
-        var filename_text = this.props.value ? this.props.value : "No file chosen";
-        var md5sum = this.props.getFieldValue('md5sum');
-        if(this.props.value && !md5sum && previous_status){
-            // edit tip to show that there is filename metadata but no actual file
-            // selected (i.e. no file held in state)
-            edit_tip = "Previous file: " + this.props.value;
-            // inform them if the upload failed previously
-            if(previous_status == 'upload failed'){
-                edit_tip += ' (upload FAILED)';
-            }
-            filename_text = "No file chosen";
+    // this.props.upload IS the upload manager
+    handleAsyncUpload = (upload_manager) => {
+        if(upload_manager === null){
+            return;
         }
+        upload_manager.on('httpUploadProgress',
+            function(evt) {
+                var percentage = Math.round((evt.loaded * 100) / evt.total);
+                this.modifyRunningUploads(percentage, evt.total);
+            }.bind(this))
+            .send(function(err, data) {
+                if(err){
+                    this.modifyRunningUploads(null, null);
+                    this.props.updateUpload(null, false, true);
+                    alert("File upload failed!");
+                }else{
+                    this.modifyRunningUploads(null, null);
+                    // this will finish roundTwo for the file
+                    this.props.updateUpload(null, true);
+                }
+            }.bind(this));
+    }
+
+    /*
+    Set state to reflect new upload percentage and size complete for the given upload
+    */
+    modifyRunningUploads = (percentage, size) => {
+        this.setState({
+            'percentDone': percentage,
+            'sizeUploaded': size
+        });
+    }
+
+    cancelUpload = (e) => {
+        e.preventDefault();
+        if(this.state.percentDone === null || this.props.upload === null){
+            return;
+        }
+        this.props.upload.abort();
+    }
+
+    render(){
+        var edit_tip = this.props.uploadStatus;
+        var filename_text = this.props.value ? this.props.value : "No file chosen";
+        var disableFile = this.props.md5Progress !== null || this.props.upload !== null;
         return(
             <div>
-                <input id={this.props.field} type='file' onChange={this.handleChange} disabled={this.props.md5Progress ? true : false} style={{'display':'none'}}/>
-                <Button disabled={this.props.md5Progress ? true : false} style={{'padding':'0px'}}>
+                <input id={this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
+                <Button disabled={disableFile} style={{'padding':'0px'}}>
                     <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
                         {filename_text}
                     </label>
@@ -677,16 +715,36 @@ class S3FileInput extends React.Component{
                         {edit_tip}
                     </span>
                     :
-                    null}
+                    null
+                }
                 {this.props.md5Progress ?
-                    <div style={{'paddingTop':'10px','paddingBottom':'6px'}}>
+                    <div style={{'paddingTop':'10px'}}>
                         <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}></i>
                         <span style={{'paddingLeft':'10px'}}>
                             {'Calculating md5... ' + this.props.md5Progress + '%'}
                         </span>
                     </div>
                     :
-                    null}
+                    null
+                }
+                {this.state.percentDone !== null ?
+                    <div className="row" style={{'paddingTop':'10px'}}>
+                        <div className="col-sm-3" style={{'float':'left'}}>
+                            <a href="" style={{'color':'#a94442','paddingLeft':'10px'}} onClick={this.cancelUpload} title="Cancel">
+                                {'Cancel upload'}
+                            </a>
+                        </div>
+                        <div className="col-sm-9" style={{'float':'right'}}>
+                            <div>
+                                <div style={{'float':'left'}}>{this.state.percentDone + "% complete"}</div>
+                                <div style={{'float':'right'}}>{"Total size: " + this.state.sizeUploaded}</div>
+                            </div>
+                            <ProgressBar percent={this.state.percentDone} strokeWidth="1" strokeColor="#388a92" />
+                        </div>
+                    </div>
+                    :
+                    null
+                }
             </div>
         );
 

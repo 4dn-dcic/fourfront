@@ -17,7 +17,6 @@ require('./static-pages/static-page-base');
 require('./static-pages/home');
 require('./static-pages/help');
 require('./static-pages/about');
-require('./uploads');
 require('./submissions');
 require('./facetlist');
 require('./item-pages/item');

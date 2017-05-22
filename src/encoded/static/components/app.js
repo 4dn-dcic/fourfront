@@ -159,7 +159,7 @@ var App = React.createClass({
             'session': session,
             'user_actions': user_actions,
             'schemas': this.props.context.schemas || null,
-            'uploads': {}
+            'uploads': false
         };
     },
 
@@ -223,15 +223,7 @@ var App = React.createClass({
             return portal.user_section;
         }
         if (category === 'user') {
-            var temp_actions;
-            // remove uploads from dropdown if there aren't any current uploads
-            if(this.state.user_actions){
-                temp_actions = this.state.user_actions.slice();
-                if(Object.keys(this.state.uploads).length === 0){
-                    temp_actions = temp_actions.filter(action => action.id !== 'uploads');
-                }
-            }
-            return temp_actions || [];
+            return this.state.user_actions;
         }
         if (category === 'global_sections') {
             return portal.global_sections;
@@ -333,16 +325,10 @@ var App = React.createClass({
         }
     },
 
-    /* Handle updating of info used on the /uploads page. Contains relevant
-    item context and AWS UploadManager*/
-    updateUploads: function(key, upload_info, del_key=false){
-        var new_uploads = _.extend({}, this.state.uploads);
-        if (del_key){
-            delete new_uploads[key];
-        }else{
-            new_uploads[key] = upload_info;
-        }
-        this.setState({'uploads': new_uploads});
+    registerUploads: function(bool){
+        this.setState({
+            'uploads': bool
+        });
     },
 
     authenticateUser : function(callback = null){
@@ -611,7 +597,7 @@ var App = React.createClass({
                 'href': href
             };
             if (event.state){
-                d.context = event.state;       
+                d.context = event.state;
             }
             store.dispatch({
                 type: d
@@ -932,7 +918,7 @@ var App = React.createClass({
     // catch user navigating away from page if there are current uploads running
     // there doesn't seem to be any way to remove the default alert...
     handleBeforeUnload: function(e){
-        if(Object.keys(this.state.uploads).length > 0){
+        if(this.state.uploads){
             return 'You have current uploads running. Please wait until they are finished to leave.';
         }
     },
@@ -1002,7 +988,7 @@ var App = React.createClass({
         var route = currRoute[currRoute.length-1];
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
-            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads' && route != 'submissions'){
+            if(route != 'help' && route != 'about' && route != 'home' && route != 'submissions'){
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
@@ -1011,9 +997,6 @@ var App = React.createClass({
             }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
             }
-        }else if(route == 'uploads' && !_.contains(this.state.user_actions.map(action => action.id), 'uploads')){
-            console.log(this.state.user_actions);
-            status = 'forbidden'; // attempting to view uploads but it's not in users actions
         }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
             console.log(this.state.user_actions);
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
@@ -1044,11 +1027,10 @@ var App = React.createClass({
                             context={context}
                             schemas={this.state.schemas}
                             expSetFilters={this.props.expSetFilters}
-                            uploads={this.state.uploads}
-                            updateUploads={this.updateUploads}
                             expIncompleteFacets={this.props.expIncompleteFacets}
                             session={this.state.session}
                             key={key}
+                            registerUploads={this.registerUploads}
                             navigate={this.navigate}
                             href={this.props.href}
                             edit={actionList[0] == 'edit'}
@@ -1076,8 +1058,6 @@ var App = React.createClass({
                         schemas={this.state.schemas}
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
-                        uploads={this.state.uploads}
-                        updateUploads={this.updateUploads}
                         session={this.state.session}
                         key={key}
                         navigate={this.navigate}

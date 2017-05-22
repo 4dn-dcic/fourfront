@@ -96,6 +96,7 @@
         "related_files": {
             "title": "Related Files",
             "description": "Files related to this one",
+            "ff_flag": "second round",
             "type": "array",
             "items": {
                 "title": "Related File",
