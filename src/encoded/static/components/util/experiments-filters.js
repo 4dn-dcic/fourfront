@@ -193,7 +193,7 @@ export function changeFilter(
  */
 export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, callback = null, originalFilters = null){
     if (!store)   store = require('./../../store');
-    if (!Alerts) Alerts = require('../alerts');
+    if (!Alerts) Alerts = require('../alerts').default;
     if (!useAjax) {
         store.dispatch({
             type : {'expSetFilters' : newExpSetFilters}

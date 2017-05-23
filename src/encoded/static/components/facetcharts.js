@@ -13,6 +13,7 @@ var { SVGFilters, FetchingView, Legend } = require('./viz/components');
 import { ChartDataController } from './viz/chart-data-controller';
 var BarPlot = require('./viz/BarPlot');
 
+
 /**
  * @callback showFunc
  * @param {string} path - Path of current page or view, derived from 'href' prop on FacetCharts component.
@@ -173,7 +174,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         var height = show === 'small' ? 300 : 450;
         if (this.state.mounted && layout.responsiveGridState() === 'xs') height = Math.min(height, 240);
 
-        FacetList.unhighlightTerms();
+        vizUtil.unhighlightTerms();
 
         if (!this.state.mounted){
             return ( // + 30 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)

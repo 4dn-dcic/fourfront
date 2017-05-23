@@ -366,5 +366,20 @@
                 }
             }
         }
+    },
+    "tags": {
+        "tags": {
+            "title": "Key Words",
+            "description": "Key Words that can tag an item - useful for filtering.",
+            "type": "array",
+            "uniqueItems": true,
+            "ff_clear": "clone",
+            "items": {
+                "title": "Key Word",
+                "description": "A tag for the item.",
+                "type":  "string",
+                "enum": ["Joint Analysis Project"]
+            }
+        }
     }
 }

@@ -3,7 +3,7 @@ var React = require('react');
 var store = require('../store');
 var { JWT } = require('./util');
 var { MenuItem } = require('react-bootstrap');
-var Alerts = require('./alerts');
+import Alerts from './alerts';
 
 // Component that contains auth0 functions
 var Login = React.createClass({

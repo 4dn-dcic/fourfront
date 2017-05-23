@@ -1,4 +1,5 @@
 'use strict';
+
 var React = require('react');
 var _ = require('underscore');
 var Panel = require('react-bootstrap').Panel;

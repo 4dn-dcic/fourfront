@@ -6,7 +6,7 @@ var { ajax, console, object, isServerSide } = require('./util');
 var {getS3UploadUrl, s3UploadFile} = require('./util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
 var makeTitle = require('./item-pages/item').title;
-var Alerts = require('./alerts');
+import Alerts from './alerts';
 var d3 = require('d3');
 var store = require('../store');
 var getLargeMD5 = require('./util/file-utility').getLargeMD5;

@@ -3,18 +3,19 @@
 var React = require('react');
 var globals = require('./../globals');
 var _ = require('underscore');
-var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+var { DropdownButton, MenuItem } = require('react-bootstrap');
+var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ItemFooterRow, WorkflowDetailPane } = require('./components');
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 var { console, object, DateUtility, Filters, isServerSide } = require('./../util');
-import { Graph, parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-var { DropdownButton, MenuItem } = require('react-bootstrap');
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { commonGraphPropsFromProps } from './WorkflowView';
 
 
 
 /**
  * @export
- * @class WorkflowView
+ * @class WorkflowRunView
  * @memberof module:item-pages
  * @extends module:item-pages/DefaultItemView.ItemBaseView
  */
@@ -103,14 +104,21 @@ class GraphSection extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
+        this.commonGraphProps = this.commonGraphProps.bind(this);
         this.basicGraph = this.basicGraph.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
         this.dropDownMenu = this.dropDownMenu.bind(this);
         this.body = this.body.bind(this);
+        this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail'
         }
+    }
+
+    commonGraphProps(){
+        return _.extend(commonGraphPropsFromProps(this.props), {
+            'isNodeDisabled' : GraphSection.isNodeDisabled
+        });
     }
 
     basicGraph(){
@@ -118,14 +126,12 @@ class GraphSection extends React.Component {
         var graphData = parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
-                schemas={this.props.schemas}
-                isNodeDisabled={GraphSection.isNodeDisabled}
-                href={this.props.href}
             />
         );
     }
@@ -135,11 +141,9 @@ class GraphSection extends React.Component {
         var graphData = parseAnalysisSteps(this.props.context.analysis_steps);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
-                schemas={this.props.schemas}
-                isNodeDisabled={GraphSection.isNodeDisabled}
-                href={this.props.href}
             />
         );
     }

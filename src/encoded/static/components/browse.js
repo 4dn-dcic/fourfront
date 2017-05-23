@@ -9,11 +9,11 @@ var globals = require('./globals');
 var browse = module.exports;
 var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } = require('react-bootstrap');
 var store = require('../store');
-var FacetList = require('./facetlist');
+import FacetList from './facetlist';
 import ExperimentsTable from './experiments-table';
 var { isServerSide, expFxn, Filters, navigate, object } = require('./util');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
-var { FlexibleDescriptionBox } = require('./experiment-common');
+var { FlexibleDescriptionBox } = require('./item-pages/components');
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
@@ -904,7 +904,7 @@ export class ResultTable extends React.Component {
                 targetFiles={this.props.targetFiles}
                 key={experiment_set['@id']}
                 rowNumber={resultCount++}
-                facets={facets || FacetList.adjustedFacets(this.props.context.facets)}
+                facets={facets || this.props.context.facets}
                 fileStats={this.props.fileStats}
             />;
         });
@@ -944,14 +944,12 @@ export class ResultTableContainer extends React.Component {
         expSetFilters   : React.PropTypes.object.isRequired,
         fileFormats     : React.PropTypes.array,
         fileStats       : React.PropTypes.object,
-        targetFiles     : React.PropTypes.instanceOf(Set),
-        useAjax         : React.PropTypes.bool
+        targetFiles     : React.PropTypes.instanceOf(Set)
     }
 
     static defaultProps = {
         'href'      : '/browse/',
-        'debug'     : false,
-        'useAjax'   : true
+        'debug'     : false
     }
 
     constructor(props){
@@ -1085,8 +1083,7 @@ export class ResultTableContainer extends React.Component {
     }
 
     render() {
-        var facets = FacetList.adjustedFacets(this.props.context.facets);
-        var ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
+        var facets = this.props.context.facets;
         return (
             <div className="row">
                 { facets.length > 0 ?
@@ -1101,11 +1098,10 @@ export class ResultTableContainer extends React.Component {
                                 clear_filters : this.props.context.clear_filters || null
                             }}
                             facets={facets}
-                            ignoredFilters={ignoredFilters}
                             className="with-header-bg"
                             href={this.props.href}
-                            useAjax={true}
                             schemas={this.props.schemas}
+                            session={this.props.session}
                         />
                     </div>
                     :
@@ -1142,85 +1138,23 @@ var FileButton = browse.FileButton = React.createClass({
     }
 });
 
-var ControlsAndResults = browse.ControlsAndResults = React.createClass({
 
-    // TODO: ADJUST THIS!!! SELECTED FILES ARE NO LONGER GUARANTEED TO BE IN DOM!!!!!
-    // They are now in ExperimentSetRows state. We need to grab state.selectedFiles from each.
-    // We may in future store selectedFiles completely in Redux store or localStorage to allow a 'shopping cart' -like experience.
+export class ControlsAndResults extends React.Component {
 
-    getInitialState: function(){
-        var initStats = {};
-        initStats['checked'] = new Set();
-        initStats['formats'] = {};
-        initStats['uuids'] = new Set();
-        var defaultFormats = new Set();
-        for(var i=0; i<this.props.fileFormats.length; i++){
-            defaultFormats.add(this.props.fileFormats[i]);
-        }
-        return{
-            fileStats: initStats,
-            filesToFind: defaultFormats
-        }
-    },
+    constructor(props){
+        super(props);
+        this.getSelectedFiles = this.getSelectedFiles.bind(this);
+        this.render = this.render.bind(this);
+    }
 
-    componentDidMount: function(){
-        var currStats = findFiles(this.props.fileFormats);
-        this.setState({
-            fileStats: currStats
-        });
-        // update after initiating
-        this.forceUpdate();
-    },
-
-    componentDidUpdate: function(nextProps, nextState){
-        if (nextProps.expSetFilters !== this.props.expSetFilters || nextProps.context !== this.props.context){
-            // reset file filters when changing set type
-            var currStats = findFiles(this.props.fileFormats);
-            if(this.state.fileStats.formats !== currStats.formats){
-                this.setState({
-                    fileStats: currStats
-                });
-            }
-        }
-    },
-
-    deselectFiles: function(e){
-        e.preventDefault();
-    },
-
-    /** 
-     * DEPRECATED (probably), get current selected files sets via this.getSelectedFiles(), keyed by experiment set @id. 
-     * Use _.flatten(_.values(this.getSelectedFiles())) to get single array of selected files, maybe also wrapped in a _.uniq() if files might be shared between expsets.
-     */
-    downloadFiles: function(e){
-        e.preventDefault();
-        var currStats = findFiles(this.props.fileFormats);
-        var checkedFiles = currStats['checked'] ? currStats['checked'] : new Set();
-        console.log('____DOWNLOAD THESE ' + checkedFiles.size + ' FILES____');
-        console.log(checkedFiles);
-    },
-
-    /** DEPRECATED */
-    selectFiles: function(format, selected){
-        var newSet = this.state.filesToFind;
-        if(newSet.has(format) && selected){
-            newSet.delete(format);
-        }else if(!selected){
-            newSet.add(format);
-        }
-        this.setState({
-            filesToFind: newSet
-        });
-    },
-
-    getSelectedFiles : function(){
+    getSelectedFiles(){
         if (!this.refs.resultTableContainer) return null;
         return this.refs.resultTableContainer.getSelectedFiles();
-    },
+    }
 
-    render: function(){
-        var fileStats = this.state.fileStats;
-        var targetFiles = this.state.filesToFind;
+    render(){
+        //var fileStats = this.state.fileStats;
+        //var targetFiles = this.state.filesToFind;
         //var selectorButtons = this.props.fileFormats.map(function (format, idx) {
         //    var count = fileStats.formats[format] ? fileStats.formats[format].size : 0;
         //    return(
@@ -1262,13 +1196,10 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                 <PageLimitSortController href={this.props.href} context={this.props.context}>
                     <ResultTableContainer
                         ref="resultTableContainer"
-                        targetFiles={targetFiles}
-                        fileStats={this.state.fileStats}
                         context={this.props.context}
                         expSetFilters={this.props.expSetFilters}
                         session={this.props.session}
                         href={this.props.href}
-                        useAjax={this.props.useAjax}
                         schemas={this.props.schemas}
                     />
                 </PageLimitSortController>
@@ -1277,7 +1208,78 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
 
         );
     }
-});
+
+}
+
+
+//var ControlsAndResults = browse.ControlsAndResults = React.createClass({
+
+    // TODO: ADJUST THIS!!! SELECTED FILES ARE NO LONGER GUARANTEED TO BE IN DOM!!!!!
+    // They are now in ExperimentSetRows state. We need to grab state.selectedFiles from each.
+    // We may in future store selectedFiles completely in Redux store or localStorage to allow a 'shopping cart' -like experience.
+
+    //getInitialState: function(){
+    //    var initStats = {};
+    //    initStats['checked'] = new Set();
+    //    initStats['formats'] = {};
+    //    initStats['uuids'] = new Set();
+    //    var defaultFormats = new Set();
+    //    for(var i=0; i<this.props.fileFormats.length; i++){
+    //        defaultFormats.add(this.props.fileFormats[i]);
+    //    }
+    //    return{
+    //        fileStats: initStats,
+    //        filesToFind: defaultFormats
+    //    }
+    //},
+
+    //componentDidMount: function(){
+    //    var currStats = findFiles(this.props.fileFormats);
+    //    this.setState({
+    //        fileStats: currStats
+    //    });
+    //    // update after initiating
+    //    this.forceUpdate();
+    //},
+
+    //componentDidUpdate: function(nextProps, nextState){
+    //    if (nextProps.expSetFilters !== this.props.expSetFilters || nextProps.context !== this.props.context){
+    //        // reset file filters when changing set type
+    //        var currStats = findFiles(this.props.fileFormats);
+    //        if(this.state.fileStats.formats !== currStats.formats){
+    //            this.setState({
+    //                fileStats: currStats
+    //            });
+    //        }
+    //    }
+    //},
+
+    /** 
+     * DEPRECATED (probably), get current selected files sets via this.getSelectedFiles(), keyed by experiment set @id. 
+     * Use _.flatten(_.values(this.getSelectedFiles())) to get single array of selected files, maybe also wrapped in a _.uniq() if files might be shared between expsets.
+     */
+    //downloadFiles: function(e){
+    //    e.preventDefault();
+    //    var currStats = findFiles(this.props.fileFormats);
+    //    var checkedFiles = currStats['checked'] ? currStats['checked'] : new Set();
+    //    console.log('____DOWNLOAD THESE ' + checkedFiles.size + ' FILES____');
+    //    console.log(checkedFiles);
+    //},
+
+    /** DEPRECATED */
+    //selectFiles: function(format, selected){
+    //    var newSet = this.state.filesToFind;
+    //    if(newSet.has(format) && selected){
+    //        newSet.delete(format);
+    //    }else if(!selected){
+    //        newSet.add(format);
+    //    }
+    //    this.setState({
+    //        filesToFind: newSet
+    //    });
+    //},
+
+//});
 
 export class Browse extends React.Component {
 
