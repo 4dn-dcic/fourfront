@@ -29,6 +29,18 @@ Key container component for Submission components.
 Holds object values for all downstream components and owns the methods
 for submitting data. Passes the appropriate data downwards to the individual
 object views.
+
+The general function of Submission view is a container that holds the state
+off all objects being created, as well as state required to change view between
+object, coordinate uploads, and the alias naming process.
+
+The functions modifyKeyContext and setSubmissionState are used to change object
+creation views and modify the each object's content. Other functions, like
+updateUpload and addExistingObj are used to interface with lower level
+components for specific state changes.
+
+This component also holds submission logic and a few functions for generating
+JSX to be rendered depending on state.
 */
 export default class SubmissionView extends React.Component{
 
@@ -77,7 +89,8 @@ export default class SubmissionView extends React.Component{
         * - roundTwoKeys (type: array) list of key idxs that need round two submission
         * - file (type: object) holds currently uploading file info (round two)
         * - upload (type: object) holds upload info to be passed to children
-        * - uploadStats (type: str) holds message relevant to file BuildField
+        * - uploadStatus (type: str) holds message relevant to file BuildField.
+            Reset to null when currKey changes.
         */
         this.state = {
             'keyContext': null,
@@ -110,22 +123,31 @@ export default class SubmissionView extends React.Component{
         }
     }
 
-    // run async request to get frame=object context to fill the forms
+    /*
+    Call initializePrincipal to get state set up, but only if schemas are
+    available.
+    */
     componentDidMount(){
         if(this.props.schemas && Object.keys(this.props.schemas).length > 0){
             this.initializePrincipal(this.props.context, this.props.schemas);
         }
     }
 
+    /*
+    If schemas in props change (this should not happen often), re-initialize.
+    The main functionality of this is to wait for schemas if they're not
+    available on componentDidMount.
+    */
     componentWillReceiveProps(nextProps){
         if(this.props.schemas !== nextProps.schemas){
             this.initializePrincipal(nextProps.context, nextProps.schemas);
         }
     }
 
-    // function that modifies new context and sets validation state whenever
-    // a modification occurs. Is passed down to child elements representing
-    // individual fields
+    /*
+    Function that modifies new context and sets validation state whenever
+    a modification occurs
+    */
     modifyKeyContext = (objKey, newContext) => {
         var contextCopy = this.state.keyContext;
         var validCopy = this.state.keyValid;
@@ -137,9 +159,12 @@ export default class SubmissionView extends React.Component{
         });
     }
 
-    // use searchHierarchy() to see if the children of the given key
-    // contain any un-submitted custom objects. If they do, return
-    // 1 (ready to validate). Otherwise return 0 (not ready to validate)
+    /*
+    Function to look at a specific object (reference by key) and
+    use searchHierarchy() to see if the children of the given key
+    contain any un-submitted custom objects. If they do, return
+    1 (ready to validate). Otherwise return 0 (not ready to validate)
+    */
     findValidationState = (keyIdx) => {
         var hierarchy = JSON.parse(JSON.stringify(this.state.keyHierarchy));
         var keyHierarchy = searchHierarchy(hierarchy, keyIdx);
@@ -155,7 +180,15 @@ export default class SubmissionView extends React.Component{
         return validationReturn;
     }
 
-    // we need the frame=object context for create, so fetch this
+    /*
+    Initialize state for the principal object (i.e. the primary object we
+    are creating/editing/cloning). It has the index of 0.
+    Editing/cloning, fetch the frame=object context and use it initialize
+    the values of the fields.
+    initObjs is used to hold the linked objects for edited/cloned objects.
+    These are later used with initCreateObj to put those objects' information
+    in state.
+    */
     initializePrincipal = (context, schemas) => {
         var initContext = {};
         var contextID = context['@id'] || null;
@@ -214,6 +247,14 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    /*
+    Takes in an object type, the newIdx to create it under, the newLink linkTo
+    fieldname for it, and a existing alias (only used with initializePrincipal
+    when editing/cloning when the reference object has an alias). If there
+    are multiple available schemas for the linkTo, set up the 'ambiguous lookup'
+    process, which uses a modal to prompt the user to select a type. If not
+    an ambiguous linkTo type, move directly to alias creation (initCreateAlias)
+    */
     initCreateObj = (type, newIdx, newLink, existingAlias=false) => {
         // check to see if we have an ambiguous linkTo type.
         // this means there could be multiple types of linked objects for a
@@ -233,6 +274,13 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    /*
+    Takes a type, newIdx, linkTo type (newLink), and an existingAlias (if
+    applicable, see initCreateObj). Clears the state of the ambiguous object
+    type information and initializes state for the alias creation process.
+    If the current object's schemas does not support aliases, finish out the
+    creation process with createObj using a boilerplate placeholer obj name.
+    */
     initCreateAlias = (type, newIdx, newLink, existingAlias) => {
         // don't prompt alias input if an alias already exists or not in schema
         if(!existingAlias && this.props.schemas){
@@ -253,6 +301,11 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    /*
+    Callback function used with the ambiguous input element. Called when a type
+    is selected from the enum ambiguousType list.
+    Move to initCreateAlias afterwards.
+    */
     submitAmbiguousType = (e) => {
         e.preventDefault();
         var type = this.state.ambiguousSelected;
@@ -272,6 +325,9 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    /*
+    Simple function to generate enum entries for ambiguous types
+    */
     buildAmbiguousEnumEntry = (val) => {
         return(
             <MenuItem key={val} title={val || ''} eventKey={val} onSelect={this.handleTypeSelection}>
@@ -280,18 +336,34 @@ export default class SubmissionView extends React.Component{
         );
     }
 
+    /*
+    Enum callback to change state in ambiguous type selection
+    */
     handleTypeSelection = (e) => {
         this.setState({
             'ambiguousSelected': e
         });
     }
 
+    /*
+    Callback function used to change state in response to user input in the
+    alias creation process
+    */
     handleAliasChange = (e) => {
         var inputElement = e.target;
         var currValue = inputElement.value;
         this.setState({'creatingAlias': currValue});
     }
 
+    /*
+    Callback function used when alias creation process is complete.
+    Evaluates the input alias (this.state.creatingAlias) and checks it using
+    a regex and makes sure it is not redundant with any aliases already used
+    in this object creation session or elsewhere on fourfront. If there is
+    an error in the alias given, display a helpful message (kept in
+    this.state.creatingAliasMessage). If alias is valid, finalize the object
+    create process with createObj.
+    */
     submitAlias = (e) => {
         e.preventDefault();
         var type = this.state.creatingType;
@@ -335,6 +407,12 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    /*
+    Function passed down in props to modify the display title used for custom
+    objects upon a change of the alias field in the main creation process.
+    If all aliases are manually removed, use a placeholder object name. Otherwise,
+    use the lasst alias in the aliases field (an array).
+    */
     modifyAlias = () => {
         var keyDisplay = this.state.keyDisplay;
         var keyTypes = this.state.keyTypes;
@@ -355,6 +433,18 @@ export default class SubmissionView extends React.Component{
         this.setState({'keyDisplay': keyDisplay});
     }
 
+    /*
+    Takes in the type, newIdx, linkTo type (newLink), and the alias for a new
+    custom object. Used to generate an entry in all relevant key-indexed states
+    in SubmissionView. These are: keyContext, keyValid, keyTypes, keyHierarchy,
+    keyDisplay, keyLinkBookmarks, and keyLinks. Also resets state related to
+    the ambiguous type selection and alias creation processes (these should be
+    complete at this point).
+
+    Iterates keyIter, which is used as the master placeholder for the index of
+    the next created object. Sets currKey to the idx of the newly created object
+    so the view changes to it.
+    */
     createObj = (type, newIdx, newLink, alias) => {
         var contextCopy = this.state.keyContext;
         var validCopy = this.state.keyValid;
@@ -420,7 +510,16 @@ export default class SubmissionView extends React.Component{
         });
     }
 
-    // key is @id for exisiting objs, state key idx for custom objs
+    /*
+    Takes in a key for an object to removed from the state. Effectively deletes
+    an object by removing its idx from keyContext and other key-indexed state.
+    Used for the both pre-existing, where key is their string path, and custom
+    objects that have index keys.
+    If deleting a pre-existing object, dont modify the key-indexed states for
+    it since other occurences of that object may be used in the creation
+    process and those should not be affected. Effectively, removing a pre-
+    existing object amounts to removing it from keyHierarchy.
+    */
     removeObj = (key) => {
         var contextCopy = this.state.keyContext;
         var validCopy = this.state.keyValid;
@@ -441,7 +540,6 @@ export default class SubmissionView extends React.Component{
         // get a list of all keys to remove
         var toDelete = flattenHierarchy(dummyHierarchy);
         toDelete.push(key); // add this key
-        console.log('DELETING:', toDelete);
         // trimming the hierarchy effectively removes objects from creation process
         var newHierarchy = trimHierarchy(hierarchy, key);
         // for housekeeping, remove the keys from keyLinkBookmarks, keyLinks, and keyComplete
@@ -478,11 +576,23 @@ export default class SubmissionView extends React.Component{
         });
     }
 
-    // required for edit and clone functionality
+    /*
+    Uses an object holding specific data needed to initializing pre-existing
+    objects in the principal object initializing process when cloning/editing.
+    Exclusively called from initializePrincipal. Calls addExistingObj
+    */
     initExistingObj = (objData) => {
         this.addExistingObj(objData.path, objData.display, objData.type, objData.newLink, true);
     }
 
+    /*
+    Takes in the @id path of an exisiting object, a display name for it, the
+    object type, the linkTo field type (newLink), and whether or not it's
+    being added during the initializePrincipal process (bool init). Sets up
+    state to contain the newly introduced pre-existing object and adds it into
+    keyHierarchy. The key for pre-existing objects are their @id path. Thus,
+    isNan() for the key of a pre-existing object will return true.
+    */
     addExistingObj = (path, display, type, newLink, init=false) => {
         // on init=true, all objects are children of the principal object (keyIdx = 0)
         var parentKeyIdx = init ? 0 : this.state.currKey;
@@ -504,7 +614,17 @@ export default class SubmissionView extends React.Component{
         });
     }
 
-    setKeyState = (key, value) => {
+    /*
+    Takes a key and value and sets the corresponding state in this component to
+    the value.
+
+    Primarily used as a callback to change currKey, in which case we
+    ensure that there are no current uploads of md5 calculations running. If
+    allowed to change keys, attempt to automatically validate the key we are
+    leaving if its validation state == 1 (has no incomplete children). Also
+    remove any hanging Alert error messages from validation.
+    */
+    setSubmissionState = (key, value) => {
         var stateToSet = this.state;
         if(key in stateToSet){
             // this means we're navigating to a new object if true
@@ -543,6 +663,14 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    /*
+    Function used to initialize uploads, complete them, and end them on failure.
+    Sets the upload status, upload (which holds the s3 upload manager), and
+    also communicates to app.js that there is an upload occuring. In app, state
+    is changed so users are prompted before navigating away from a running
+    upload. When upload is complete, call finishRoundTwo to finish the object
+    creation process for the file object with the upload.
+    */
     updateUpload = (uploadInfo, completed=false, failed=false) => {
         var stateToSet = {};
         if(completed){
@@ -565,6 +693,16 @@ export default class SubmissionView extends React.Component{
         this.setState(stateToSet);
     }
 
+    /*
+    Generate JSX for a validation button. Disabled unless validation state == 1
+    (when all children are complete and no errors/unsubmitted) or == 2
+    (submitted by validation errors). If the submission is processing, render
+    a spinner icon.
+
+    When roundTwo, validation becomes Skip, which allows you to skip roundTwo
+    submissions for an object. Disable when the is an initialized upload or the
+    md5 is calculating.
+    */
     generateValidationButton(){
         var validity = this.state.keyValid[this.state.currKey];
         var style={'width':'100px'};
@@ -630,7 +768,14 @@ export default class SubmissionView extends React.Component{
         }
     }
 
-    generatePostButton(){
+    /*
+    Generate JSX for the the button that allows users to submit their custom
+    objects. Only active when validation state == 3 (validation successful).
+
+    In roundTwo, there is no validation step, so only inactive when there is
+    an active upload of md5 calculation.
+    */
+    generateSubmitButton(){
         var validity = this.state.keyValid[this.state.currKey];
         var style={'width':'100px','marginLeft':'10px'};
         if(this.state.roundTwo){
@@ -686,14 +831,22 @@ export default class SubmissionView extends React.Component{
         this.submitObject(this.state.currKey);
     }
 
-    // must remove nulls, which are used to represent an empty value in the
-    // creation process
+    /*
+    Takes the context held in keyContext for a given key idx and returns a
+    copy that has been passed through removeNulls to delete any key-value pair
+    with a null value.
+    */
     removeNullsFromContext = (inKey) => {
         var finalizedContext = JSON.parse(JSON.stringify(this.state.keyContext[inKey]));
         var noNulls = removeNulls(finalizedContext);
         return noNulls;
     }
 
+    /*
+    Adds the accession and uuid from the already submitted context (stored in
+    keyContext under the path of the submitted object) to the context used to
+    patch the same object in roundTwo.
+    */
     addSubmittedContext = (newContext) => {
         var path = this.state.keyComplete[this.state.currKey];
         if(path){
@@ -706,6 +859,24 @@ export default class SubmissionView extends React.Component{
         return newContext;
     }
 
+    /*
+    Master object submission function. Takes a key index and uses ajax to
+    POST/PATCH/PUT the json to the object collection (a new object) or to the
+    specific object path (a pre-existing/roundTwo object). If test=true,
+    the POST is made to the check_only=True endpoint for validation without
+    actual submission.
+
+    Upon successful submission, reponse data for the newly instantiated object
+    is stored in state (with key equal to the new object's path). On the
+    principal object submission if there are object that require roundTwo
+    submission, this function initializes the roundTwo process by setting
+    this.state.roundTwo to true and the currKey to the first index in the process.
+    If there are no roundTwo objects, completes submission process.
+
+    Handles roundTwo submission slightly differently. Uses PATCH and kicks off
+    uploads using updateUpload if there is a file given. Completes submission
+    process once all roundTwo objects have been skipped or submitted.
+    */
     submitObject = (inKey, test=false, suppressWarnings=false) => {
         // function to test a POST of the data or actually POST it.
         // validates if test=true, POSTs if test=false.
@@ -907,8 +1078,12 @@ export default class SubmissionView extends React.Component{
         });
     }
 
-    // Set validation status to 4 for currKey and splice it out of
-    // roundTwoKeys
+    /*
+    Finish the roundTwo process for the current key. Removes the currKey from
+    this.state.roundTwoKeys and modifies state to finish out for that object.
+    If there are no keys left in roundTwoKeys, navigate to the path of the
+    principal object we created.
+    */
     finishRoundTwo = () => {
         var stateToSet = {};
         var currKey = this.state.currKey;
@@ -934,6 +1109,11 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    /*
+    Render the navigable SubmissionTree and IndividualObjectView for the
+    current key. Also render modals for ambiguous type selection or alias
+    creation if necessary.
+    */
     render(){
         console.log('TOP LEVEL STATE:', this.state);
         //hard coded for now
@@ -1023,7 +1203,7 @@ export default class SubmissionView extends React.Component{
                 <div className="clearfix row">
                     <div className={navCol}>
                         <SubmissionTree
-                            setKeyState={this.setKeyState}
+                            setSubmissionState={this.setSubmissionState}
                             hierarchy={this.state.keyHierarchy}
                             keyValid={this.state.keyValid}
                             keyTypes={this.state.keyTypes}
@@ -1046,7 +1226,7 @@ export default class SubmissionView extends React.Component{
                             </h3>
                             <div className="pull-right">
                                 {this.generateValidationButton()}
-                                {this.generatePostButton()}
+                                {this.generateSubmitButton()}
                             </div>
                         </div>
                         <IndividualObjectView
@@ -1063,7 +1243,7 @@ export default class SubmissionView extends React.Component{
                             md5Progress={this.state.md5Progress}
                             keyContext={this.state.keyContext}
                             keyDisplay={this.state.keyDisplay}
-                            setKeyState={this.setKeyState}
+                            setSubmissionState={this.setSubmissionState}
                             modifyAlias={this.modifyAlias}
                             keyComplete={this.state.keyComplete}
                             md5Progress={this.state.md5Progress}
@@ -1083,7 +1263,9 @@ export default class SubmissionView extends React.Component{
 Main view for editing a specific object. This includes all non-same level
 linkTo object relationships and non-file upload fields.
 Essentially, this takes data held by the container component and passes it down
-to the correct BuildFields
+to the correct BuildFields. Also interfaces with SubmissionView to change
+the context for this specific object and create custom and/or pre-existing
+objects. Render changes slightly for RoundTwo.
 */
 class IndividualObjectView extends React.Component{
 
@@ -1114,6 +1296,10 @@ class IndividualObjectView extends React.Component{
         }
     }
 
+    /*
+    Fade the JSX rendered by this and scroll to top when this.props.currKey
+    changes.
+    */
     componentWillReceiveProps(nextProps){
         // scroll to top if worked-on object changes
         if(this.props.currKey !== nextProps.currKey){
@@ -1124,10 +1310,21 @@ class IndividualObjectView extends React.Component{
         }
     }
 
-    // Takes a field and value and modifies the keyContext held in parent.
-    // if objDelete is true, check to see if the value could be an object
-    // getting removed. If field == 'aliases', change keyDisplay to reflect
-    // the new alias name.
+    /*
+    Takes a field and value and modifies the keyContext held in parent.
+    Also uses the fieldType, which is unique among BuildField children,
+    to direct any special functionality (such as running initCreateObj for
+    new linked objects). Also takes the linkTo field of the new context,
+    arrayIdxs used, and object type if applicable. If field == 'aliases',
+    change keyDisplay to reflect the new alias name.
+
+    The format of field is nested to allow for subobjects. For example, for the
+    Related experiments flag, the actual linkTo experiment is stored using the
+    following field: experiment_relation.experiment. ArrayIdx is an array of
+    array indeces used to reference the specific value of the field. For example,
+    if a value is submitted for the 3rd array element inside the 2nd array element
+    of a larger field, arrayIdx would be [1,2].
+    */
     modifyNewContext = (field, value, fieldType, newLink, arrayIdx=null, type=null) => {
         if(fieldType === 'new linked object'){
             value = this.props.keyIter + 1;
@@ -1180,6 +1377,11 @@ class IndividualObjectView extends React.Component{
         }
     }
 
+    /*
+    Use ajax to get the display_title for an existing object. Use that to kicks
+    of the addExistingObj process; if a title can't be found, use the object
+    path as a fallback.
+    */
     fetchObjTitle = (value, type, newLink) => {
         ajax.promise(value).then(data => {
             if (data['display_title']){
@@ -1190,13 +1392,20 @@ class IndividualObjectView extends React.Component{
         });
     }
 
+    /*
+    If a value is null that was previously non-null, remove the linked object
+    from the current context and change state in SubmissionView accordingly.
+    */
     checkObjectRemoval = (value, prevValue) => {
          if(value === null){
             this.props.removeObj(prevValue);
         }
     }
 
-    // passed as the navigation function to search
+    /*
+    Navigation function passed to Search so that faceting can be done in-place
+    through ajax. If no results are returned from the search, abort.
+    */
     inPlaceNavigate = (destination) => {
         if(this.state.selectQuery){
             var dest = destination;
@@ -1219,13 +1428,17 @@ class IndividualObjectView extends React.Component{
                         'selectLink': null,
                         'selectArrayIdx': null
                     });
-                    this.props.setKeyState('fullScreen', false);
+                    this.props.setSubmissionState('fullScreen', false);
                 }
             });
         }
     }
 
-    // use when selecting a new object
+    /*
+    Initializes the first search (with just type=<type>) and sets state
+    accordingly. Set the fullScreen state in SubmissionView to alter its render
+    and hide the object navigation tree.
+    */
     selectObj = (collection, field, newLink, array=null) => {
         ajax.promise('/' + collection + '/?format=json').then(data => {
             if (data && data['@graph']){
@@ -1240,14 +1453,17 @@ class IndividualObjectView extends React.Component{
                         'selectLink': newLink,
                         'selectArrayIdx': array
                     });
-                    this.props.setKeyState('fullScreen', true);
+                    this.props.setSubmissionState('fullScreen', true);
                 }
             }
         });
     }
 
-    // callback passed to Search when selecting existing object
-    // when value is null, function is delete
+    /*
+    Callback passed to Search to select a pre-existing object. Cleans up
+    object selection state, modifies context, and initializes the fetchObjTitle
+    process.
+    */
     selectComplete = (value) => {
         var isRepeat = false;
         var current = this.props.currContext[this.state.selectField];
@@ -1268,10 +1484,14 @@ class IndividualObjectView extends React.Component{
             'selectLink': null,
             'selectArrayIdx': null
         });
-        this.props.setKeyState('fullScreen', false);
+        this.props.setSubmissionState('fullScreen', false);
     }
 
-    // collect props necessary to build create a BuildField child
+    /*
+    Given a field, use the schema to generate the sufficient information to
+    make a BuildField component for that field. Different fields are returned
+    for roundOne and roundTwo.
+    */
     initiateField = (field) => {
         var currSchema = this.props.schemas[this.props.currType];
         var fieldSchema = object.getNestedProperty(currSchema, ['properties', field], true);
@@ -1352,7 +1572,7 @@ class IndividualObjectView extends React.Component{
                 create={this.props.create}
                 keyDisplay={this.props.keyDisplay}
                 keyComplete={this.props.keyComplete}
-                setKeyState={this.props.setKeyState}
+                setSubmissionState={this.props.setSubmissionState}
                 updateUpload={this.props.updateUpload}
                 upload={this.props.upload}
                 uploadStatus={this.props.uploadStatus}
@@ -1360,6 +1580,14 @@ class IndividualObjectView extends React.Component{
         );
     }
 
+    /*
+    Render the fieldPanels which contain the BuildFields for regular field and
+    linked object fields, respectively.
+
+    On round two, combine all types of BuildFields and also render a
+    RoundTwoDetailPanel, which shows the attributes for the already submitted
+    object.
+    */
     render(){
         var fields = this.props.currContext ? Object.keys(this.props.currContext) : [];
         var buildFields = [];
@@ -1422,6 +1650,10 @@ class IndividualObjectView extends React.Component{
     }
 }
 
+/*
+Simple class that holds open/close logic and renders the BuildFields passed
+to it.
+*/
 class FieldPanel extends React.Component{
     constructor(props){
         super(props);
@@ -1466,6 +1698,10 @@ class FieldPanel extends React.Component{
     }
 }
 
+/*
+Simple object that opens/closes and renders a Detail panel using the context
+and schemas passed to it.
+*/
 class RoundTwoDetailPanel extends React.Component{
     constructor(props){
         super(props);
@@ -1688,6 +1924,7 @@ var searchHierarchy = function myself(hierarchy, keyIdx){
     return found_hierarchy;
 }
 
+// finds the key of direct parent for a given key in a hierarchy
 var findParentFromHierarchy = function myself(hierarchy, keyIdx){
     if(isNaN(keyIdx) || !hierarchy) return null;
     var found_parent = null;
@@ -1702,6 +1939,7 @@ var findParentFromHierarchy = function myself(hierarchy, keyIdx){
     return found_parent;
 }
 
+// replace a key with a different key in the hierarchy
 var replaceInHierarchy = function myself(hierarchy, current, toReplace){
     Object.keys(hierarchy).forEach(function(key, index){
         if(key == current){

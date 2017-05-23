@@ -39,6 +39,11 @@ export default class SubmissionTree extends React.Component{
     }
 }
 
+/*
+Generate an entry in SubmissionTree that corresponds to an object. When clicked
+on, either change the currKey to that object's key if a custom object, or
+open that object's page in a new tab if a pre-existing or submitted object.
+*/
 class SubmissionLeaf extends React.Component{
     constructor(props){
         super(props);
@@ -73,6 +78,11 @@ class SubmissionLeaf extends React.Component{
         );
     }
 
+    /*
+    Generate placeholders in the SubmissionTree for every linkTo name and
+    create a SubmissionLeaf for each child object under its corresponding
+    placholder.
+    */
     generatePlaceholder = (bookmark) =>{
         var children = Object.keys(this.props.hierarchy[this.props.keyIdx]).map(function(childKey){
             if(this.props.keyLinks[childKey] == bookmark){
@@ -108,11 +118,13 @@ class SubmissionLeaf extends React.Component{
         );
     }
 
+    /*
+    Change the currKey of submissionView
+    */
     callBack = (e) => {
         e.preventDefault();
         var intKey = this.props.keyIdx;
-        this.props.setKeyState('currKey', intKey);
-        this.props.setKeyState('navigationIsOpen', false);
+        this.props.setSubmissionState('currKey', intKey);
     }
 
     render() {
@@ -160,6 +172,7 @@ class SubmissionLeaf extends React.Component{
             }else{
                 popDestination = keyComplete[key];
             }
+            // open a new tab on click
             title = (<span style={{'padding':'1px 5px','cursor': 'pointer'}} onClick={function(e){
                             e.preventDefault();
                             var win = window.open(popDestination, '_blank');

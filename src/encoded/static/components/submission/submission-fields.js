@@ -12,10 +12,11 @@ var ReactTooltip = require('react-tooltip');
 var ProgressBar = require('rc-progress').Line;
 
 /*
-This is a key/input pair for any one field. Made to be stateless; changes
- to the newContext state of Action propogate downwards. Also includes a
- description and some validation message based on the schema
- */
+Individual component for each type of field. Contains the appropriate input
+if it is a simple number/text/enum, or generates a child component for
+attachment, linked object, array, object, and file fields. Contains delete
+logic for the field as well (deleting is done by setting value to null).
+*/
 export default class BuildField extends React.Component{
 
     constructor(props){
@@ -282,7 +283,7 @@ class LinkedObj extends React.Component{
                         <div>
                             <a href="" onClick={function(e){
                                     e.preventDefault();
-                                    this.props.setKeyState('currKey', intKey);
+                                    this.props.setSubmissionState('currKey', intKey);
                                 }.bind(this)}>
                                 {thisDisplay}
                             </a>
@@ -312,10 +313,9 @@ class LinkedObj extends React.Component{
 }
 
 
-/* Display fields that are arrays. To do this, use a table of array elements
-made with buildField, but pass in a different function to build new context,
-which essentially aggregates the context of the elements are propogates them
-upwards using this.props.modifyNewContext*/
+/* Display fields that are arrays. To do this, make a BuildField for each
+object in the value and use a custom render method. initiateArrayField is
+unique to ArrayField, since it needs to update the arrayIdx*/
 
 class ArrayField extends React.Component{
 
@@ -383,7 +383,7 @@ class ArrayField extends React.Component{
                     isArray={true}
                     keyDisplay={this.props.keyDisplay}
                     keyComplete={this.props.keyComplete}
-                    setKeyState= {this.props.setKeyState}
+                    setSubmissionState= {this.props.setSubmissionState}
                     updateUpload={this.props.updateUpload}
                     upload={this.props.upload}
                     uploadStatus={this.props.uploadStatus}
@@ -414,7 +414,10 @@ class ArrayField extends React.Component{
     }
 }
 
-/* Builds a field that represents an inline object. Based off of FieldPanel*/
+/*
+Builds a field that represents a sub-object. Essentially serves to hold
+and coordinate BuildFields that correspond to the fields within the subfield.
+*/
 class ObjectField extends React.Component{
 
     constructor(props){
@@ -501,7 +504,7 @@ class ObjectField extends React.Component{
                 arrayIdx={this.props.arrayIdx}
                 keyDisplay={this.props.keyDisplay}
                 keyComplete={this.props.keyComplete}
-                setKeyState= {this.props.setKeyState}
+                setSubmissionState= {this.props.setSubmissionState}
                 updateUpload={this.props.updateUpload}
                 upload={this.props.upload}
                 uploadStatus={this.props.uploadStatus}
@@ -528,9 +531,11 @@ class ObjectField extends React.Component{
     }
 }
 
-/* For version 1. A simple local file upload that gets the name, type,
+/*
+For version 1. A simple local file upload that gets the name, type,
 size, and b64 encoded stream in the form of a data url. Upon successful
-upload, adds this information to NewContext*/
+upload, adds this information to NewContext
+*/
 class AttachmentInput extends React.Component{
 
     constructor(props){
@@ -607,8 +612,10 @@ class AttachmentInput extends React.Component{
     }
 }
 
-/* Input for an s3 file upload. Context value set is local value of the filename.
-Also updates this.state.file for the overall component.
+/*
+Input for an s3 file upload. Context value set is local value of the filename.
+Also updates this.state.file for the overall component. Runs file uploads
+async using the upload_manager passed down in props.
 */
 class S3FileInput extends React.Component{
 
@@ -627,13 +634,17 @@ class S3FileInput extends React.Component{
     }
 
     modifyMD5Progess = (val) => {
-        this.props.setKeyState('md5Progress', val);
+        this.props.setSubmissionState('md5Progress', val);
     }
 
     modifyFile = (val) => {
-        this.props.setKeyState('file', val);
+        this.props.setSubmissionState('file', val);
     }
 
+    /*
+    Handle file selection. Calculate the md5 automatically and pass it up
+    to SubmissionView.
+    */
     handleChange = (e) => {
         var req_type = null;
         var file = e.target.files[0];
@@ -657,7 +668,10 @@ class S3FileInput extends React.Component{
         }
     }
 
-    // this.props.upload IS the upload manager
+    /*
+    Handle the async file upload which is coordinated by the file_manager held
+    in this.props.upload. Call this.props.updateUpload on failure or completetion.
+    */
     handleAsyncUpload = (upload_manager) => {
         if(upload_manager === null){
             return;
