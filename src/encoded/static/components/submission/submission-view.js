@@ -6,12 +6,13 @@ var { ajax, console, object, isServerSide, layout } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
 var makeTitle = require('../item-pages/item').title;
-var Alerts = require('../alerts');
 var Search = require('../search').Search;
 var getLargeMD5 = require('../util/file-utility').getLargeMD5;
 var ReactTooltip = require('react-tooltip');
 import SubmissionTree from './expandable-tree';
 import BuildField from './submission-fields';
+import Alerts from '../alerts';
+var { Detail } = require('../item-pages/components');
 
 // global variable holding hard-coded object optiosn for ambiguous linkTos
 var linkToLookup = {
@@ -913,10 +914,6 @@ export default class SubmissionView extends React.Component{
         var currKey = this.state.currKey;
         var validationCopy = this.state.keyValid;
         var roundTwoCopy = this.state.roundTwoKeys.slice();
-        // find key of parent object, starting from top of hierarchy
-        var parentKey = findParentFromHierarchy(this.state.keyHierarchy, currKey);
-        // navigate to parent obj if it was found. Else, go to top level
-        stateToSet.currKey = parentKey !== null ? parentKey : 0;
         validationCopy[currKey] = 4;
         if(_.contains(roundTwoCopy, currKey)){
             var rmIdx = roundTwoCopy.indexOf(currKey);
@@ -924,6 +921,8 @@ export default class SubmissionView extends React.Component{
                 roundTwoCopy.splice(rmIdx,1)
             }
         }
+        // navigate to next key in roundTwoKeys
+        if(roundTwoCopy.length > 0) stateToSet.currKey = roundTwoCopy.slice(0,1);
         stateToSet.uploadStatus = null;
         stateToSet.keyValid = validationCopy;
         stateToSet.roundTwoKeys = roundTwoCopy;
@@ -950,7 +949,6 @@ export default class SubmissionView extends React.Component{
         }
         var aliasModal = !ambiguousModal && this.state.creatingIdx !== null && this.state.creatingType !== null;
         var currType = this.state.keyTypes[currKey];
-        var currSchema = this.props.schemas[currType];
         var currContext = this.state.keyContext[currKey];
         var navCol = this.state.fullScreen ? 'submission-hidden-nav' : 'col-sm-2';
         var bodyCol = this.state.fullScreen ? 'col-sm-12' : 'col-sm-10';
@@ -1051,17 +1049,19 @@ export default class SubmissionView extends React.Component{
                                 {this.generatePostButton()}
                             </div>
                         </div>
-                        <RoundOneObject
+                        <IndividualObjectView
                             {...others}
                             currKey={currKey}
                             keyIter={this.state.keyIter}
-                            schema={currSchema}
+                            schemas={this.props.schemas}
+                            currType={currType}
                             currContext={currContext}
                             modifyKeyContext={this.modifyKeyContext}
                             initCreateObj={this.initCreateObj}
                             removeObj={this.removeObj}
                             addExistingObj={this.addExistingObj}
                             md5Progress={this.state.md5Progress}
+                            keyContext={this.state.keyContext}
                             keyDisplay={this.state.keyDisplay}
                             setKeyState={this.setKeyState}
                             modifyAlias={this.modifyAlias}
@@ -1080,12 +1080,12 @@ export default class SubmissionView extends React.Component{
 }
 
 /*
-Round one view for editing an object. This includes all non-same level
+Main view for editing a specific object. This includes all non-same level
 linkTo object relationships and non-file upload fields.
 Essentially, this takes data held by the container component and passes it down
 to the correct BuildFields
 */
-class RoundOneObject extends React.Component{
+class IndividualObjectView extends React.Component{
 
     constructor(props){
         super(props);
@@ -1273,7 +1273,8 @@ class RoundOneObject extends React.Component{
 
     // collect props necessary to build create a BuildField child
     initiateField = (field) => {
-        var fieldSchema = object.getNestedProperty(this.props.schema, ['properties', field], true);
+        var currSchema = this.props.schemas[this.props.currType];
+        var fieldSchema = object.getNestedProperty(currSchema, ['properties', field], true);
         if(!fieldSchema) return null;
         var secondRoundField = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
         if(this.props.roundTwo && !secondRoundField){
@@ -1325,7 +1326,7 @@ class RoundOneObject extends React.Component{
             }
         }
         // set a required flag if this field is required
-        var required = _.contains(this.props.schema.required, field);
+        var required = _.contains(currSchema.required, field);
 
         return(
             <BuildField
@@ -1364,12 +1365,15 @@ class RoundOneObject extends React.Component{
         var buildFields = [];
         var linkedObjs = [];
         var open = false;
+        var detailContext;
         if(this.props.roundTwo){
+            open = true;
             for(var i=0; i<fields.length; i++){
                 var built = this.initiateField(fields[i]);
                 buildFields.push(built);
-                open = true;
             }
+            var path = this.props.keyComplete[this.props.currKey];
+            detailContext = this.props.keyContext[path];
         }else{ // only use buildFields for round two
             for (var i=0; i<fields.length; i++){
                 var built = this.initiateField(fields[i]);
@@ -1403,8 +1407,14 @@ class RoundOneObject extends React.Component{
                 </Fade>
                 <Fade in={!selecting || this.state.fadeState} transitionAppear={true}>
     				<div>
-                        <RoundOnePanel title='Fields' fields={buildFields} currKey={this.props.currKey} open={open}/>
-                        <RoundOnePanel title='Linked objects' fields={linkedObjs} currKey={this.props.currKey} open={open}/>
+                        <FieldPanel title='Fields' fields={buildFields} currKey={this.props.currKey} open={open}/>
+                        <FieldPanel title='Linked objects' fields={linkedObjs} currKey={this.props.currKey} open={open}/>
+                        {
+                            this.props.roundTwo ?
+                            <RoundTwoDetailPanel schemas={this.props.schemas} context={detailContext} open={true} />
+                            :
+                            null
+                        }
                     </div>
                 </Fade>
             </div>
@@ -1412,7 +1422,7 @@ class RoundOneObject extends React.Component{
     }
 }
 
-class RoundOnePanel extends React.Component{
+class FieldPanel extends React.Component{
     constructor(props){
         super(props);
         this.state = {
@@ -1456,34 +1466,38 @@ class RoundOnePanel extends React.Component{
     }
 }
 
-class RoundTwoObject extends React.Component{
-    contextTypes: {
-        fetch: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
-        navigate: React.PropTypes.func
-    }
-
+class RoundTwoDetailPanel extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            'file': null,
-            'md5Progress': null
+            'open': this.props.open || false
         }
     }
 
-    modifyFile = (file) =>{
-        // function that updates state to contain a file upload
-        // not used for all object types
-        this.setState({'file':file});
-    }
-
-    modifyMD5Progess = (progress) => {
-        // set this.state.md5Progress to passed in progress value (should be int)
-        this.setState({'md5Progress':progress});
+    handleToggle = (e) => {
+        e.preventDefault();
+        this.setState({'open': !this.state.open});
     }
 
     render(){
-        return null;
+        return(
+            <div>
+                <h4 className="clearfix page-subtitle submission-field-header">
+                    <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
+                        <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
+                    </Button>
+                    <span>
+                        {'Object attributes'}
+                    </span>
+                </h4>
+                <Collapse in={this.state.open}>
+                    <div className="item-page-detail">
+                        <Detail context={this.props.context} schemas={this.props.schemas} open={false} popLink={true}/>
+                    </div>
+                </Collapse>
+            </div>
+
+        );
     }
 }
 
@@ -1543,24 +1557,7 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
                     if(!_.contains(objList, listTerm)) objList.push(listTerm);
                     // add pre-existing linkTo objects
                     if(initObjs !== null && built[fields[i]] !== null){
-                        if(built[fields[i]] instanceof Array){
-                            for(var j=0; j < built[fields[i]].length; j++){
-                                var initData = {};
-                                initData.path = built[fields[i]][j];
-                                initData.display = built[fields[i]][j];
-                                initData.newLink = listTerm;
-                                initData.type = linked;
-                                initObjs.push(initData);
-                            }
-                        }else{ // must be a non-array linkTo
-                            var initData = {};
-                            initData.path = built[fields[i]];
-                            initData.display = built[fields[i]];
-                            initData.newLink = listTerm;
-                            initData.type = linked;
-                            initObjs.push(initData);
-                        }
-
+                        delvePreExistingObjects(initObjs, built[fields[i]], fieldSchema, listTerm, linked);
                     }
                 }
                 objList.sort();
@@ -1568,6 +1565,38 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
         }
     }
     return built;
+}
+
+// takes an initObjs array that it will fill with data for each existing
+// object in an edit/clone situation. json is json content for the field,
+// schema is the individual fields schema.
+// Recursively handles objects and arrays
+var delvePreExistingObjects = function myself(initObjs, json, schema, listTerm, linked){
+    var populateInitObjs = function(initObjs, data, listTerm, linked){
+        var initData = {};
+        initData.path = data;
+        initData.display = data;
+        initData.newLink = listTerm;
+        initData.type = linked;
+        initObjs.push(initData);
+    }
+    if(json instanceof Array){
+        for(var j=0; j < json.length; j++){
+            delvePreExistingObjects(initObjs, json[j], schema, listTerm, linked);
+        }
+    }else if(json instanceof Object){
+        Object.keys(json).forEach(function(key, idx){
+            // check if the field is a linked obj
+            if(schema[key] && _.contains(schema[key],'linkTo')){
+                populateInitObjs(initObjs, json[key], listTerm, linked);
+            }else{
+                // try to find any linked objs deeper in
+                delvePreExistingObjects(initObjs, json[key], schema[key], listTerm, linked);
+            }
+        });
+    }else{ // must be a non-array linkTo
+        populateInitObjs(initObjs, json, listTerm, linked);
+    }
 }
 
 // sort a list of BuildFields first by required status, then by title
@@ -1598,7 +1627,7 @@ function sortPropFields(fields){
     return retFields;
 }
 
-// Function to recursively find whether a json object contains a linkTo field
+// Function to recursively find whether a json object contains a linkTo fields
 // anywhere in its nested structure. Returns object type if found, null otherwise.
 var delveObject = function myself(json){
     var found_obj = null;
