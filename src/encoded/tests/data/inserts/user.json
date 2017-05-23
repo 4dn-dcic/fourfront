@@ -28,7 +28,7 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Schroeder",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267227777",
-        "viewing_groups": ["4DN", "1U01CA200059-01"]
+        "viewing_groups": ["4DN"]
     },
     {
         "email": "johnsonjp@gmail.com",
@@ -138,7 +138,6 @@
         "last_name": "Guy",
         "status": "current",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab117227e3d",
-        "viewing_groups": ["1U01CA200059-01"],
         "lab": "811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"
     }
 ]

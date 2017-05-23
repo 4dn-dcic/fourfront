@@ -1,4 +1,4 @@
-from snovault import COLLECTIONS 
+from snovault import COLLECTIONS
 
 
 def groupfinder(login, request):
@@ -51,7 +51,12 @@ def groupfinder(login, request):
     principals = ['userid.%s' % user.uuid]
     lab = user_properties.get('lab')
     if lab:
+        #import pdb; pdb.set_trace()
         principals.append('lab.%s' % lab)
+        lab_properties = collections.by_item_type['lab'][lab].properties
+        awards = lab_properties.get('awards')
+        if awards:
+            principals.extend('award.%s' % award for award in awards)
     submits_for = user_properties.get('submits_for', [])
     principals.extend('lab.%s' % lab_uuid for lab_uuid in submits_for)
     principals.extend('submits_for.%s' % lab_uuid for lab_uuid in submits_for)
@@ -61,4 +66,5 @@ def groupfinder(login, request):
     principals.extend('group.%s' % group for group in groups)
     viewing_groups = user_properties.get('viewing_groups', [])
     principals.extend('viewing_group.%s' % group for group in viewing_groups)
+    # import pdb; pdb.set_trace()
     return principals

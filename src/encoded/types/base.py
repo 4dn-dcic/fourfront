@@ -70,6 +70,7 @@ ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
 
 ALLOW_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.lab_member', 'view'),
+    (Allow, 'role.award_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
@@ -259,7 +260,6 @@ class Item(snovault.Item):
 
     def __ac_local_roles__(self):
         """this creates roles based on properties of the object being acccessed"""
-        # import pdb; pdb.set_trace()
         roles = {}
         properties = self.upgrade_properties().copy()
         if 'lab' in properties:
@@ -273,10 +273,8 @@ class Item(snovault.Item):
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
                 roles[viewing_group_members] = 'role.viewing_group_member'
-            awardname = find_root(self).get(properties['award']).properties['name']
-            if awardname is not None:
-                award_group_members = 'viewing_group.%s' % awardname
-                roles[award_group_members] = 'role.viewing_group_member'
+                award_group_members = 'award.%s' % properties['award']
+                roles[award_group_members] = 'role.award_member'
         return roles
 
     def unique_keys(self, properties):
