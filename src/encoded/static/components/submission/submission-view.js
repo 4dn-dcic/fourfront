@@ -1097,7 +1097,7 @@ export default class SubmissionView extends React.Component{
             }
         }
         // navigate to next key in roundTwoKeys
-        if(roundTwoCopy.length > 0) stateToSet.currKey = roundTwoCopy.slice(0,1);
+        if(roundTwoCopy.length > 0) stateToSet.currKey = roundTwoCopy[0];
         stateToSet.uploadStatus = null;
         stateToSet.keyValid = validationCopy;
         stateToSet.roundTwoKeys = roundTwoCopy;
