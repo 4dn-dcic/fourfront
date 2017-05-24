@@ -1,26 +1,27 @@
 'use strict';
-var React = require('react');
-var ReactDOM = require('react-dom');
-var jsonScriptEscape = require('../libs/jsonScriptEscape');
-var globals = require('./globals');
-var ErrorPage = require('./error');
-import Navigation from './navigation';
-var Action = require('./action');
-var Footer = require('./footer');
-var url = require('url');
-var _ = require('underscore');
-var store = require('../store');
-var browse = require('./browse');
-var origin = require('../libs/origin');
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import ReactDOM from 'react-dom';
+import url from 'url';
+import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
-var { Filters, ajax, JWT, console, isServerSide, navigate, analytics } = require('./util');
-import Alerts from './alerts';
 var jwt = require('jsonwebtoken');
-var { FacetCharts } = require('./facetcharts');
+import jsonScriptEscape from '../libs/jsonScriptEscape';
+import * as globals from './globals';
+import ErrorPage from './static-pages/ErrorPage';
+import Navigation from './navigation';
+import * as Action from './action';
+import Footer from './footer';
+import * as store from '../store';
+import * as origin from '../libs/origin';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics } from './util';
+import Alerts from './alerts';
+import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
-var makeTitle = require('./item-pages/item').title;
-var ReactTooltip = require('react-tooltip');
+import { getTitleStringFromContext } from './item-pages/item';
 
 /**
  * The top-level component for this application.
@@ -33,14 +34,14 @@ var ReactTooltip = require('react-tooltip');
  *
  * @memberof module:app
  */
-var dispatch_dict = {};
+let dispatch_dict = {};
 
 /**
  * Top bar navigation & link schema definition.
  *
  * @memberof module:app
  */
-var portal = {
+const portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
         {
@@ -79,17 +80,27 @@ var portal = {
 
 
 // See https://github.com/facebook/react/issues/2323
-var Title = React.createClass({
-    render: function() {
-        return <title {...this.props}>{this.props.children}</title>;
-    },
-    componentDidMount: function() {
+class Title extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    componentDidMount() {
         var node = document.querySelector('title');
         if (node && !node.getAttribute('data-reactid')) {
             node.setAttribute('data-reactid', this._rootNodeID);
         }
     }
-});
+
+    render() {
+        return <title {...this.props}>{this.props.children}</title>;
+    }
+
+}
+
 
 /**
  * Creates a promise which completes after a delay, performing no network request.
@@ -105,34 +116,129 @@ class Timeout {
 /**
  * @alias module:app
  */
-var App = React.createClass({
-    SLOW_REQUEST_TIME: 750,
-    historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
-    /**
-     *  Session-related props 'sessionMayBeSet' is meant to provided by server-side only, then scraped and re-provided
-     *  by client-side render in browser.js via @see App.getRendersPropValues(documentElement, [propNamesToGet]) to match server-side render.
-     *  Similarly as to how is done for the redux store.
-     */
-    propTypes: {
-        "sessionMayBeSet" : React.PropTypes.any,    // Whether Auth0 session exists or not.
-    },
 
-    getDefaultProps : function(){
-        return {
-            'sessionMayBeSet' : null
+export default class App extends React.Component {
+
+    static SLOW_REQUEST_TIME = 750
+
+    static contentTypeIsJSON(content) {
+        var isJson = true;
+        try{
+            var json = JSON.parse(JSON.stringify(content));
+        }catch(err){
+            isJson = false;
         }
-    },
+        return isJson;
+    }
 
-    getInitialState: function() {
-        console.log('APP FILTERS', Filters.hrefToFilters(this.props.href));
+    static scrollTo() {
+        var hash = window.location.hash;
+        if (hash && document.getElementById(hash.slice(1))) {
+            window.location.replace(hash);
+        } else {
+            window.scrollTo(0, 0);
+        }
+    }
+
+    static getRenderedPropValues(document, filter = null){
+        var returnObj = {};
+        var script_props;
+        if (typeof filter === 'string') script_props = document.querySelectorAll('script[data-prop-name="' + filter + '"]');
+        else script_props = document.querySelectorAll('script[data-prop-name]');
+        for (var i = 0; i < script_props.length; i++) {
+            var elem = script_props[i];
+            var prop_name = elem.getAttribute('data-prop-name');
+            if (filter && Array.isArray(filter)){
+                if (filter.indexOf(prop_name) === -1) continue;
+            }
+            var elem_value = elem.text;
+            var elem_type = elem.getAttribute('type') || '';
+            if (elem_type == 'application/json' || elem_type.slice(-5) == '+json') {
+                elem_value = JSON.parse(elem_value);
+            }
+            //if (elem.getAttribute('data-prop-name') === 'user_details' && !filter){
+                // pass; don't include as is not a redux prop
+            //} else {
+                returnObj[prop_name] = elem_value;
+            //}
+        }
+        return returnObj;
+    }
+
+    static getRenderedProps(document, filters = null) {
+        return _.extend(App.getRenderedPropValues(document, filters), {
+            'href' : document.querySelector('link[rel="canonical"]').getAttribute('href') // Ensure the initial render is exactly the same
+        });
+    }
+
+    static propTypes = {
+        "sessionMayBeSet" : PropTypes.any,    // Whether Auth0 session exists or not.
+    }
+
+    static defaultProps = {
+        'sessionMayBeSet' : null
+    }
+
+    static childContextTypes = {
+        dropdownComponent: React.PropTypes.string,
+        listActionsFor: React.PropTypes.func,
+        currentResource: React.PropTypes.func,
+        location_href: React.PropTypes.string,
+        onDropdownChange: React.PropTypes.func,
+        portal: React.PropTypes.object,
+        hidePublicAudits: React.PropTypes.bool,
+        fetch: React.PropTypes.func,
+        session: React.PropTypes.bool,
+        navigate: React.PropTypes.func,
+        contentTypeIsJSON: React.PropTypes.func,
+        updateUserInfo: React.PropTypes.func,
+        schemas: React.PropTypes.object
+    }
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.fetch = this.fetch.bind(this);
+        this.getChildContext = this.getChildContext.bind(this);
+        this.listActionsFor = this.listActionsFor.bind(this);
+        this.currentResource = this.currentResource.bind(this);
+        this.currentAction = this.currentAction.bind(this);
+        this.loadSchemas = this.loadSchemas.bind(this);
+        this.getStatsComponent = this.getStatsComponent.bind(this);
+        this.updateStats = this.updateStats.bind(this);
+
+        // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
+        this.handleDropdownChange = this.handleDropdownChange.bind(this);
+        this.handleAutocompleteChosenChange = this.handleAutocompleteChosenChange.bind(this);
+        this.handleAutocompleteFocusChange = this.handleAutocompleteFocusChange.bind(this);
+        this.handleAutocompleteHiddenChange = this.handleAutocompleteHiddenChange.bind(this);
+        this.handleLayoutClick = this.handleLayoutClick.bind(this);
+        this.handleKey = this.handleKey.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handlePopState = this.handlePopState.bind(this);
+
+        this.updateUploads = this.updateUploads.bind(this);
+        this.authenticateUser = this.authenticateUser.bind(this);
+        this.updateUserInfo = this.updateUserInfo.bind(this);
+        this.confirmNavigation = this.confirmNavigation.bind(this);
+        this.navigate = this.navigate.bind(this);
+        this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
+        this.render = this.render.bind(this);
+
+        console.log('APP FILTERS', Filters.hrefToFilters(props.href));
+
+        this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
+
         // Todo: Migrate session & user_actions to redux store?
         var session = false;
         var user_actions = [];
 
-        if (this.props.sessionMayBeSet !== null){ // Only provided from server
-            if (this.props.sessionMayBeSet === false) session = false;
-            if (this.props.sessionMayBeSet === true) session = true;
+        if (props.sessionMayBeSet !== null){ // Only provided from server
+            if (props.sessionMayBeSet === false) session = false;
+            if (props.sessionMayBeSet === true) session = true;
             else session = false; // Else is null
         } else {
             session = !!(JWT.get('cookie')); // Same cookie sent to server-side to authenticate, so it must match.
@@ -152,7 +258,7 @@ var App = React.createClass({
 
         console.log("App Initial State: ", session, user_actions);
 
-        return {
+        this.state = {
             'errors': [],
             'dropdownComponent': undefined,
             'content': undefined,
@@ -161,223 +267,10 @@ var App = React.createClass({
             'schemas': this.props.context.schemas || null,
             'uploads': {}
         };
-    },
-
-    // Dropdown context using React context mechanism.
-    childContextTypes: {
-        dropdownComponent: React.PropTypes.string,
-        listActionsFor: React.PropTypes.func,
-        currentResource: React.PropTypes.func,
-        location_href: React.PropTypes.string,
-        onDropdownChange: React.PropTypes.func,
-        portal: React.PropTypes.object,
-        hidePublicAudits: React.PropTypes.bool,
-        fetch: React.PropTypes.func,
-        session: React.PropTypes.bool,
-        navigate: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
-        updateUserInfo: React.PropTypes.func,
-        schemas: React.PropTypes.object
-    },
-
-    // Retrieve current React context
-    getChildContext: function() {
-        return {
-            dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
-            listActionsFor: this.listActionsFor,
-            currentResource: this.currentResource,
-            location_href: this.props.href,
-            onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
-            portal: portal,
-            hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
-            fetch: this.fetch,
-            session: this.state.session,
-            navigate: this.navigate,
-            contentTypeIsJSON: this.contentTypeIsJSON,
-            updateUserInfo: this.updateUserInfo,
-            schemas : this.state.schemas
-        };
-    },
-
-    listActionsFor: function(category) {
-        if (category === 'context') {
-            var context = this.currentResource();
-            var name = this.currentAction();
-            var context_actions = [];
-            Array.prototype.push.apply(context_actions, context.actions || []);
-
-            if (!name && context.default_page) {
-                context = context.default_page;
-                var actions = context.actions || [];
-                for (var i = 0; i < actions.length; i++) {
-                    var action = actions[i];
-                    if (action.href[0] == '#') {
-                        action.href = context['@id'] + action.href;
-                    }
-                    context_actions.push(action);
-                }
-            }
-            return context_actions;
-        }
-        if (category === 'user_section') {
-            return portal.user_section;
-        }
-        if (category === 'user') {
-            var temp_actions;
-            // remove uploads from dropdown if there aren't any current uploads
-            if(this.state.user_actions){
-                temp_actions = this.state.user_actions.slice();
-                if(Object.keys(this.state.uploads).length === 0){
-                    temp_actions = temp_actions.filter(action => action.id !== 'uploads');
-                }
-            }
-            return temp_actions || [];
-        }
-        if (category === 'global_sections') {
-            return portal.global_sections;
-        }
-    },
-
-    currentResource: function() {
-        return this.props.context;
-    },
-
-    currentAction: function() {
-        var href_url = url.parse(this.props.href);
-        var hash = href_url.hash || '';
-        var name;
-        if (hash.slice(0, 2) === '#!') {
-            name = hash.slice(2);
-        }
-        return name;
-    },
-
-    loadSchemas : function(callback, forceFetch = false){
-        if (this.state.schemas !== null && !forceFetch){
-            // We've already loaded these successfully (hopefully)
-            if (typeof callback === 'function') callback(this.state.schemas);
-            return this.state.schemas;
-        }
-        ajax.promise('/profiles/?format=json').then(data => {
-            if (this.contentTypeIsJSON(data)){
-                this.setState({
-                    schemas: data
-                }, () => {
-                    // Let Filters have access to schemas for own functions.
-                    Filters.getSchemas = () => this.state.schemas;
-                    // Rebuild tooltips because they likely use descriptions from schemas
-                    ReactTooltip.rebuild();
-                    if (typeof callback === 'function') callback(data);
-                });
-            }
-        });
-    },
-
-    getStatsComponent : function(){
-        if (!this.refs || !this.refs.navigation) return null;
-        if (!this.refs.navigation.refs) return null;
-        if (!this.refs.navigation.refs.stats) return null;
-        return this.refs.navigation.refs.stats;
-    },
-
-    updateStats : function(currentCounts, totalCounts = null, callback = null){
-        var statsComponent = this.getStatsComponent();
-        if (statsComponent){
-            if (totalCounts === null){
-                return statsComponent.updateCurrentCounts(currentCounts, callback);
-            } else {
-                return statsComponent.updateCurrentAndTotalCounts(currentCounts, totalCounts, callback);
-            }
-        }
-        return null;
-    },
-
-    // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
-    handleDropdownChange: function(componentID) {
-        // Use React _rootNodeID to uniquely identify a dropdown menu;
-        // It's passed in as componentID
-        this.setState({dropdownComponent: componentID});
-    },
-
-    handleAutocompleteChosenChange: function(chosen) {
-        this.setState({autocompleteTermChosen: chosen});
-    },
-
-    handleAutocompleteFocusChange: function(focused) {
-        this.setState({autocompleteFocused: focused});
-    },
-
-    handleAutocompleteHiddenChange: function(hidden) {
-        this.setState({autocompleteHidden: hidden});
-    },
-
-    // Handle a click outside a dropdown menu by clearing currently dropped down menu
-    handleLayoutClick: function(e) {
-        if (this.state.dropdownComponent !== undefined) {
-            this.setState({dropdownComponent: undefined});
-        }
-    },
-
-    // If ESC pressed while drop-down menu open, close the menu
-    handleKey: function(e) {
-        if (e.which === 27) {
-            if (this.state.dropdownComponent !== undefined) {
-                e.preventDefault();
-                this.handleDropdownChange(undefined);
-            } else if (!this.state.autocompleteHidden) {
-                e.preventDefault();
-                this.handleAutocompleteHiddenChange(true);
-            }
-        } else if (e.which === 13 && this.state.autocompleteFocused && !this.state.autocompleteTermChosen) {
-            e.preventDefault();
-        }
-    },
-
-    /* Handle updating of info used on the /uploads page. Contains relevant
-    item context and AWS UploadManager*/
-    updateUploads: function(key, upload_info, del_key=false){
-        var new_uploads = _.extend({}, this.state.uploads);
-        if (del_key){
-            delete new_uploads[key];
-        }else{
-            new_uploads[key] = upload_info;
-        }
-        this.setState({'uploads': new_uploads});
-    },
-
-    authenticateUser : function(callback = null){
-        // check existing user_info in local storage and authenticate
-        var idToken = JWT.get();
-        if(idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
-            this.fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer '+idToken
-                },
-                body: JSON.stringify({id_token: idToken})
-            })
-            .then(response => {
-                if (response.code || response.status || response.id_token !== idToken) throw response;
-                return response;
-            })
-            .then(response => {
-                JWT.saveUserInfo(response);
-                this.updateUserInfo(callback);
-            }, error => {
-                // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove())
-                // and unset state.session & state.user_actions (via this.updateUserInfo())
-                JWT.remove();
-                this.updateUserInfo(callback);
-            });
-            return idToken;
-        }
-        return null;
-    },
+    }
 
     // Once the app component is mounted, bind keydowns to handleKey function
-    componentDidMount: function() {
+    componentDidMount() {
         globals.bindEvent(window, 'keydown', this.handleKey);
 
         this.authenticateUser();
@@ -421,9 +314,9 @@ var App = React.createClass({
             this.props.context,
             this.props.expSetFilters
         );
-    },
+    }
 
-    componentDidUpdate: function (prevProps, prevState) {
+    componentDidUpdate(prevProps, prevState) {
         var key;
         if (this.props) {
 
@@ -458,10 +351,10 @@ var App = React.createClass({
                 }
             }
         }
-    },
+    }
 
     // functions previously in persona, mixins.js
-    fetch: function (url, options) {
+    fetch(url, options) {
         options = _.extend({credentials: 'same-origin'}, options);
         var http_method = options.method || 'GET';
         var headers = options.headers = _.extend({}, options.headers);
@@ -477,42 +370,139 @@ var App = React.createClass({
             request.xhr_end = 1 * new Date();
         });
         return request;
-    },
+    }
 
-    updateUserInfo: function(callback = null){
-        // get user actions (a function of log in) from local storage
-        var userActions = [];
-        var session = false;
-        var userInfo = JWT.getUserInfo();
-        if (userInfo){
-            userActions = userInfo.user_actions;
-            var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.
-            if (currentToken) session = true;
-            else if (this.state.session === true) {
-                Alerts.queue(Alerts.LoggedOut);
+    // Retrieve current React context
+    getChildContext() {
+        return {
+            dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
+            listActionsFor: this.listActionsFor,
+            currentResource: this.currentResource,
+            location_href: this.props.href,
+            onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
+            portal: portal,
+            hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
+            fetch: this.fetch,
+            session: this.state.session,
+            navigate: this.navigate,
+            contentTypeIsJSON: App.contentTypeIsJSON,
+            updateUserInfo: this.updateUserInfo,
+            schemas : this.state.schemas
+        };
+    }
+
+    listActionsFor(category) {
+        if (category === 'context') {
+            var context = this.currentResource();
+            var name = this.currentAction();
+            var context_actions = [];
+            Array.prototype.push.apply(context_actions, context.actions || []);
+
+            if (!name && context.default_page) {
+                context = context.default_page;
+                var actions = context.actions || [];
+                for (var i = 0; i < actions.length; i++) {
+                    var action = actions[i];
+                    if (action.href[0] == '#') {
+                        action.href = context['@id'] + action.href;
+                    }
+                    context_actions.push(action);
+                }
+            }
+            return context_actions;
+        }
+        if (category === 'user_section') {
+            return portal.user_section;
+        }
+        if (category === 'user') {
+            var temp_actions;
+            // remove uploads from dropdown if there aren't any current uploads
+            if(this.state.user_actions){
+                temp_actions = this.state.user_actions.slice();
+                if(Object.keys(this.state.uploads).length === 0){
+                    temp_actions = temp_actions.filter(action => action.id !== 'uploads');
+                }
+            }
+            return temp_actions || [];
+        }
+        if (category === 'global_sections') {
+            return portal.global_sections;
+        }
+    }
+
+    currentResource() { return this.props.context; }
+
+    currentAction() {
+        var href_url = url.parse(this.props.href);
+        var hash = href_url.hash || '';
+        var name;
+        if (hash.slice(0, 2) === '#!') {
+            name = hash.slice(2);
+        }
+        return name;
+    }
+
+    loadSchemas(callback, forceFetch = false){
+        if (this.state.schemas !== null && !forceFetch){
+            // We've already loaded these successfully (hopefully)
+            if (typeof callback === 'function') callback(this.state.schemas);
+            return this.state.schemas;
+        }
+        ajax.promise('/profiles/?format=json').then(data => {
+            if (App.contentTypeIsJSON(data)){
+                this.setState({
+                    schemas: data
+                }, () => {
+                    // Let Filters have access to schemas for own functions.
+                    Filters.getSchemas = () => this.state.schemas;
+                    // Rebuild tooltips because they likely use descriptions from schemas
+                    ReactTooltip.rebuild();
+                    if (typeof callback === 'function') callback(data);
+                });
+            }
+        });
+    }
+
+    getStatsComponent(){
+        if (!this.refs || !this.refs.navigation) return null;
+        if (!this.refs.navigation.refs) return null;
+        if (!this.refs.navigation.refs.stats) return null;
+        return this.refs.navigation.refs.stats;
+    }
+
+    updateStats(currentCounts, totalCounts = null, callback = null){
+        var statsComponent = this.getStatsComponent();
+        if (statsComponent){
+            if (totalCounts === null){
+                return statsComponent.updateCurrentCounts(currentCounts, callback);
+            } else {
+                return statsComponent.updateCurrentAndTotalCounts(currentCounts, totalCounts, callback);
             }
         }
+        return null;
+    }
 
-        var stateChange = {};
-        if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
-        if (session != this.state.session) stateChange.session = session;
+    // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
+    handleDropdownChange(componentID) {
+        // Use React _rootNodeID to uniquely identify a dropdown menu;
+        // It's passed in as componentID
+        this.setState({dropdownComponent: componentID});
+    }
 
-        if (Object.keys(stateChange).length > 0){
-            this.setState(stateChange, typeof callback === 'function' ? callback.bind(this, session, userInfo) : null);
-        } else {
-            if (typeof callback === 'function') callback(session, userInfo);
+    handleAutocompleteChosenChange(chosen) { this.setState({autocompleteTermChosen: chosen}); }
+
+    handleAutocompleteFocusChange(focused) { this.setState({autocompleteFocused: focused}); }
+
+    handleAutocompleteHiddenChange(hidden) { this.setState({autocompleteHidden: hidden}); }
+
+    // Handle a click outside a dropdown menu by clearing currently dropped down menu
+    handleLayoutClick(e) {
+        if (this.state.dropdownComponent !== undefined) {
+            this.setState({dropdownComponent: undefined});
         }
-    },
+    }
 
-    // functions previously in navigate, mixins.js
-    onHashChange: function (event) {
-        // IE8/9
-        store.dispatch({
-            type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
-        });
-    },
-
-    handleClick: function(event) {
+    handleClick(event) {
         // https://github.com/facebook/react/issues/1691
         if (event.isDefaultPrevented()) return;
 
@@ -566,10 +556,10 @@ var App = React.createClass({
             }
             if (target && target.blur) target.blur();
         }
-    },
+    }
 
     // Submitted forms are treated the same as links
-    handleSubmit: function(event) {
+    handleSubmit(event) {
         var target = event.target;
 
         // Skip POST forms
@@ -600,9 +590,9 @@ var App = React.createClass({
             event.preventDefault();
             this.navigate(href, options);
         }
-    },
+    }
 
-    handlePopState: function (event) {
+    handlePopState(event) {
         if (this.DISABLE_POPSTATE) return;
         var href = window.location.href;
         if (!this.confirmNavigation(href)) {
@@ -646,10 +636,100 @@ var App = React.createClass({
         }
         // Always async update in case of server side changes.
         this.navigate(href, {'replace': true});
-    },
+    }
+
+    // If ESC pressed while drop-down menu open, close the menu
+    handleKey(e) {
+        if (e.which === 27) {
+            if (this.state.dropdownComponent !== undefined) {
+                e.preventDefault();
+                this.handleDropdownChange(undefined);
+            } else if (!this.state.autocompleteHidden) {
+                e.preventDefault();
+                this.handleAutocompleteHiddenChange(true);
+            }
+        } else if (e.which === 13 && this.state.autocompleteFocused && !this.state.autocompleteTermChosen) {
+            e.preventDefault();
+        }
+    }
+
+    /**
+     * Handle updating of info used on the /uploads page.
+     * Contains relevant item context and AWS UploadManager.
+     */
+    updateUploads(key, upload_info, del_key=false){
+        var new_uploads = _.extend({}, this.state.uploads);
+        if (del_key){
+            delete new_uploads[key];
+        } else {
+            new_uploads[key] = upload_info;
+        }
+        this.setState({'uploads': new_uploads});
+    }
+
+    authenticateUser(callback = null){
+        // check existing user_info in local storage and authenticate
+        var idToken = JWT.get();
+        if(idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
+            
+            ajax.promise('/login', 'POST', {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '+idToken
+            }, JSON.stringify({id_token: idToken}))
+            .then(response => {
+                if (response.code || response.status || response.id_token !== idToken) throw response;
+                return response;
+            })
+            .then(response => {
+                JWT.saveUserInfo(response);
+                this.updateUserInfo(callback);
+            }, error => {
+                // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove())
+                // and unset state.session & state.user_actions (via this.updateUserInfo())
+                JWT.remove();
+                this.updateUserInfo(callback);
+            });
+            return idToken;
+        }
+        return null;
+    }
+
+    updateUserInfo(callback = null){
+        // get user actions (a function of log in) from local storage
+        var userActions = [];
+        var session = false;
+        var userInfo = JWT.getUserInfo();
+        if (userInfo){
+            userActions = userInfo.user_actions;
+            var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.
+            if (currentToken) session = true;
+            else if (this.state.session === true) {
+                Alerts.queue(Alerts.LoggedOut);
+            }
+        }
+
+        var stateChange = {};
+        if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
+        if (session != this.state.session) stateChange.session = session;
+
+        if (Object.keys(stateChange).length > 0){
+            this.setState(stateChange, typeof callback === 'function' ? callback.bind(this, session, userInfo) : null);
+        } else {
+            if (typeof callback === 'function') callback(session, userInfo);
+        }
+    }
+
+    // functions previously in navigate, mixins.js
+    onHashChange (event) {
+        // IE8/9
+        store.dispatch({
+            type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
+        });
+    }
 
     // only navigate if href changes
-    confirmNavigation: function(href, options) {
+    confirmNavigation(href, options) {
         if(options && options.inPlace && options.inPlace==true){
             return true;
         }
@@ -669,9 +749,9 @@ var App = React.createClass({
         }
 
         return true;
-    },
+    }
 
-    navigate: function (href, options = {}, callback = null, fallbackCallback = null, includeReduxDispatch = {}) {
+    navigate(href, options = {}, callback = null, fallbackCallback = null, includeReduxDispatch = {}) {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
 
@@ -739,7 +819,7 @@ var App = React.createClass({
             );
 
             this.requestCurrent = true; // Remember we have an outstanding GET request
-            var timeout = new Timeout(this.SLOW_REQUEST_TIME);
+            var timeout = new Timeout(App.SLOW_REQUEST_TIME);
 
             Promise.race([request, timeout.promise]).then(v => {
                 if (v instanceof Timeout) {
@@ -813,7 +893,7 @@ var App = React.createClass({
             .then(response => {
                 this.requestCurrent = false;
                 // navigate normally to URL of unexpected non-JSON response so back button works.
-                if (!this.contentTypeIsJSON(response)) {
+                if (!App.contentTypeIsJSON(response)) {
                     if (options.replace) {
                         window.location.replace(href + fragment);
                     } else {
@@ -840,7 +920,7 @@ var App = React.createClass({
             });
 
             if (!options.replace && !options.dontScrollToTop) {
-                promise = promise.then(this.scrollTo);
+                promise = promise.then(App.scrollTo);
             }
 
             promise.catch((err)=>{
@@ -880,9 +960,9 @@ var App = React.createClass({
             return null; // Was handled by setupRequest (returns false)
         }
 
-    },
+    }
 
-    receiveContextResponse: function (data, extendDispatchDict = {}) {
+    receiveContextResponse (data, extendDispatchDict = {}) {
         // title currently ignored by browsers
         try {
             window.history.replaceState(data, '', window.location.href);
@@ -908,36 +988,17 @@ var App = React.createClass({
         });
         dispatch_dict={};
         return data;
-    },
-
-    contentTypeIsJSON: function(content) {
-        var isJson = true;
-        try{
-            var json = JSON.parse(JSON.stringify(content));
-        }catch(err){
-            isJson = false;
-        }
-        return isJson;
-    },
-
-    scrollTo: function() {
-        var hash = window.location.hash;
-        if (hash && document.getElementById(hash.slice(1))) {
-            window.location.replace(hash);
-        } else {
-            window.scrollTo(0, 0);
-        }
-    },
+    }
 
     // catch user navigating away from page if there are current uploads running
     // there doesn't seem to be any way to remove the default alert...
-    handleBeforeUnload: function(e){
+    handleBeforeUnload(e){
         if(Object.keys(this.state.uploads).length > 0){
             return 'You have current uploads running. Please wait until they are finished to leave.';
         }
-    },
+    }
 
-    render: function() {
+    render() {
         console.log('render app');
         var context = this.props.context;
         var content;
@@ -1055,7 +1116,7 @@ var App = React.createClass({
                             create={actionList[0] == 'create'}
                         />
                     );
-                    title = makeTitle({'context': context});
+                    title = getTitleStringFromContext(context);
                     if (title && title != 'Home') {
                         title = title + ' – ' + portal.portal_title;
                     } else {
@@ -1187,39 +1248,6 @@ var App = React.createClass({
                 </body>
             </html>
         );
-    },
-
-    statics: {
-        getRenderedPropValues : function(document, filter = null){
-            var returnObj = {};
-            var script_props;
-            if (typeof filter === 'string') script_props = document.querySelectorAll('script[data-prop-name="' + filter + '"]');
-            else script_props = document.querySelectorAll('script[data-prop-name]');
-            for (var i = 0; i < script_props.length; i++) {
-                var elem = script_props[i];
-                var prop_name = elem.getAttribute('data-prop-name');
-                if (filter && Array.isArray(filter)){
-                    if (filter.indexOf(prop_name) === -1) continue;
-                }
-                var elem_value = elem.text;
-                var elem_type = elem.getAttribute('type') || '';
-                if (elem_type == 'application/json' || elem_type.slice(-5) == '+json') {
-                    elem_value = JSON.parse(elem_value);
-                }
-                //if (elem.getAttribute('data-prop-name') === 'user_details' && !filter){
-                    // pass; don't include as is not a redux prop
-                //} else {
-                    returnObj[prop_name] = elem_value;
-                //}
-            }
-            return returnObj;
-        },
-        getRenderedProps: function (document, filters = null) {
-            return _.extend(App.getRenderedPropValues(document, filters), {
-                'href' : document.querySelector('link[rel="canonical"]').getAttribute('href') // Ensure the initial render is exactly the same
-            });
-        }
     }
-});
 
-module.exports = App;
+}
