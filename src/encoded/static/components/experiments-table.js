@@ -1,11 +1,11 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var { Checkbox, Collapse } = require('react-bootstrap');
-var _ = require('underscore');
-var FacetList = require('./facetlist'); // Only used for statics.
-var { expFxn, Filters, console, isServerSide, analytics } = require('./util');
+import { Checkbox, Collapse } from 'react-bootstrap';
+import _ from 'underscore';
+import FacetList from './facetlist'; // Only used for statics.
+import { expFxn, Filters, console, isServerSide, analytics } from './util';
 
 
 

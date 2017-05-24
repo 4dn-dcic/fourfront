@@ -6,14 +6,13 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'querystring';
 import _ from 'underscore';
-var globals = require('./globals');
-var browse = module.exports;
+import * as globals from './globals';
 import { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
-var store = require('../store');
+import * as store from '../store';
 import FacetList from './facetlist';
 import ExperimentsTable from './experiments-table';
 import { isServerSide, expFxn, Filters, navigate, object } from './util';
-var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
+import { AuditIndicators, AuditDetail, AuditMixin } from './audit';
 import { FlexibleDescriptionBox } from './item-pages/components';
 
 var expSetColumnLookup={
@@ -1116,28 +1115,28 @@ export class ResultTableContainer extends React.Component {
 }
 
 
-var FileButton = browse.FileButton = React.createClass({
+// var FileButton = React.createClass({
 
-    getInitialState: function(){
-        return{
-            selected: true
-        };
-    },
+//     getInitialState: function(){
+//         return{
+//             selected: true
+//         };
+//     },
 
-    handleToggle: function(){
-        this.setState({
-            selected: !this.state.selected
-        });
-        this.props.fxn(this.props.format, this.state.selected);
-    },
+//     handleToggle: function(){
+//         this.setState({
+//             selected: !this.state.selected
+//         });
+//         this.props.fxn(this.props.format, this.state.selected);
+//     },
 
-    render: function(){
-        var selected = this.state.selected ? "success" : "default";
-        return(
-            <Button className="expset-selector-button" bsStyle={selected} bsSize="xsmall" onClick={this.handleToggle}>{this.props.format} ({this.props.count})</Button>
-        );
-    }
-});
+//     render: function(){
+//         var selected = this.state.selected ? "success" : "default";
+//         return(
+//             <Button className="expset-selector-button" bsStyle={selected} bsSize="xsmall" onClick={this.handleToggle}>{this.props.format} ({this.props.count})</Button>
+//         );
+//     }
+// });
 
 
 export class ControlsAndResults extends React.Component {
@@ -1213,7 +1212,7 @@ export class ControlsAndResults extends React.Component {
 }
 
 
-//var ControlsAndResults = browse.ControlsAndResults = React.createClass({
+//var ControlsAndResults = React.createClass({
 
     // TODO: ADJUST THIS!!! SELECTED FILES ARE NO LONGER GUARANTEED TO BE IN DOM!!!!!
     // They are now in ExperimentSetRows state. We need to grab state.selectedFiles from each.

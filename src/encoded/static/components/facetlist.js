@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
-var store = require('../store');
+import * as store from '../store';
 import { ajax, console, object, isServerSide, Filters, layout, analytics } from './util';
 import * as vizUtil from './viz/utilities';
 import ReactTooltip from 'react-tooltip';
@@ -737,4 +737,3 @@ export default class FacetList extends React.Component {
     }
 
 }
-

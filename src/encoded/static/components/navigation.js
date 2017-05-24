@@ -1,14 +1,16 @@
 'use strict';
-var React = require('react');
-var url = require('url');
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import url from 'url';
 var Login = require('./login');
-var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bootstrap');
-var _ = require('underscore');
-var store = require('../store');
-var { JWT, console, layout, isServerSide } = require('./util');
+import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
+import _ from 'underscore';
+import * as store from '../store';
+import { JWT, console, layout, isServerSide } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
-var TestWarning = require('./testwarning');
-var productionHost = require('./globals').productionHost;
+import TestWarning from './testwarning';
+import { productionHost } from './globals';
 
 
 
@@ -232,7 +234,7 @@ export default class Navigation extends React.Component {
     }
 
     render() {
-        var portal = this.context.portal;
+        //var portal = this.context.portal;
 
         var navClass = "navbar-container";
         if (this.state.testWarning) navClass += ' test-warning-visible';
@@ -246,7 +248,7 @@ export default class Navigation extends React.Component {
         return (
             <div className={navClass}>
                 <div id="top-nav" className="navbar-fixed-top">
-                    <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} />
+                    <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} href={this.props.href} />
                     <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
                         this.setState({ mobileDropdownOpen : open });
                     }} expanded={this.state.mobileDropdownOpen}>
@@ -281,13 +283,13 @@ export default class Navigation extends React.Component {
 };
 
 Navigation.propTypes = {
-    href : React.PropTypes.string,
+    href : PropTypes.string,
     session : React.PropTypes.bool
 };
 
 Navigation.contextTypes = {
-    portal: React.PropTypes.object,
-    listActionsFor : React.PropTypes.func
+    portal: PropTypes.object,
+    listActionsFor : PropTypes.func
 };
 
 
@@ -372,11 +374,11 @@ class UserActions extends React.Component {
 };
 
 UserActions.propTypes = {
-    session: React.PropTypes.bool
+    session: PropTypes.bool
 }
 
 UserActions.contextTypes = {
-    listActionsFor: React.PropTypes.func
+    listActionsFor: PropTypes.func
 }
 
 
@@ -430,6 +432,6 @@ export class Breadcrumbs extends React.Component {
 };
 
 Breadcrumbs.propTypes = {
-    root: React.PropTypes.string, // Root URI for searches
-    crumbs: React.PropTypes.arrayOf(React.PropTypes.object).isRequired // Object with breadcrumb contents
+    root: PropTypes.string, // Root URI for searches
+    crumbs: PropTypes.arrayOf(PropTypes.object).isRequired // Object with breadcrumb contents
 };
