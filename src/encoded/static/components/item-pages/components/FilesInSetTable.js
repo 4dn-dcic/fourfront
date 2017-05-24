@@ -150,13 +150,13 @@ export class FileItemRow extends React.Component {
                 </div>
 
                 <div className="col-xs-1 col-md-1 lab">
-                    <FilesInSetTable.LabIcon
+                    <LabIcon
                         lab={file && file.lab}
                     />
                 </div>
 
                 <div className="col-xs-11 col-md-3 col-lg-2 submitter">
-                    <FilesInSetTable.SubmitterLink 
+                    <SubmitterLink 
                         user={file && file.submitted_by}
                     />
                 </div>
@@ -340,7 +340,7 @@ export class FilesInSetTable extends React.Component {
         return (
             <div className="files-in-set-table">
                 { this.header() }
-                { this.props.files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} key={file.link_id || i} />) }
+                { this.props.files.map((file, i)=> <FileItemRow file={file} key={file.link_id || i} />) }
             </div>
         );
     }
