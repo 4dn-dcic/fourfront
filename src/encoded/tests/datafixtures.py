@@ -135,6 +135,7 @@ def tissue_biosample(testapp, lung_biosource, lab, award):
 @pytest.fixture
 def protocol(testapp, lab, award):
     item = {'description': 'A Protocol',
+            'protocol_type': 'Experimental protocol',
             'award': award['@id'],
             'lab': lab['@id']
             }
