@@ -156,6 +156,12 @@ class Protocol(Item, ItemWithAttachment):
     schema = load_schema('encoded:schemas/protocol.json')
     embedded = []
 
+    def display_title(self):
+        if self.properties.get('attachment'):
+            attach = self.properties['attachment']
+            if attach.get('download'):
+                return attach['download']
+
 
 @collection(
     name='sysinfos',
