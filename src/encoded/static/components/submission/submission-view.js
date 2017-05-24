@@ -242,25 +242,30 @@ export default class SubmissionView extends React.Component{
                 if(initObjs.length > 0){
                     initObjs.forEach((initObj, idx) => this.initExistingObj(initObj));
                 }
-                this.initCreateObj(principalTypes[0], 0, 'Primary Object', existingAlias);
+                // if we are cloning and there is not an existing alias
+                // never prompt alias creation on edit
+                // do not initiate ambiguous type lookup on edit or create
+                if(!this.props.edit && !existingAlias){
+                    this.initCreateObj(principalTypes[0], 0, 'Primary Object', true);
+                }
             });
         }
     }
 
     /*
     Takes in an object type, the newIdx to create it under, the newLink linkTo
-    fieldname for it, and a existing alias (only used with initializePrincipal
-    when editing/cloning when the reference object has an alias). If there
-    are multiple available schemas for the linkTo, set up the 'ambiguous lookup'
-    process, which uses a modal to prompt the user to select a type. If not
-    an ambiguous linkTo type, move directly to alias creation (initCreateAlias)
+    fieldname for it. If there are multiple available schemas for the linkTo,
+    set up the 'ambiguous lookup' process, which uses a modal to prompt the user
+    to select a type. If not an ambiguous linkTo type, move directly to alias
+    creation (initCreateAlias). If init (bool) is true, skip ambiguous type
+    lookup even if applicable and move right to alias selection.
     */
-    initCreateObj = (type, newIdx, newLink, existingAlias=false) => {
+    initCreateObj = (type, newIdx, newLink, init=false) => {
         // check to see if we have an ambiguous linkTo type.
         // this means there could be multiple types of linked objects for a
         // given type. let the user choose one.
         if(this.props.schemas){
-            if(type in linkToLookup){
+            if(type in linkToLookup && !init){
                 // ambiguous linkTo type found
                 this.setState({
                     'ambiguousIdx': newIdx,
@@ -269,35 +274,31 @@ export default class SubmissionView extends React.Component{
                     'creatingLink': newLink
                 });
             }else{
-                this.initCreateAlias(type, newIdx, newLink, existingAlias);
+                this.initCreateAlias(type, newIdx, newLink);
             }
         }
     }
 
     /*
-    Takes a type, newIdx, linkTo type (newLink), and an existingAlias (if
-    applicable, see initCreateObj). Clears the state of the ambiguous object
+    Takes a type, newIdx, linkTo type (newLink). Clears the state of the ambiguous object
     type information and initializes state for the alias creation process.
     If the current object's schemas does not support aliases, finish out the
     creation process with createObj using a boilerplate placeholer obj name.
     */
-    initCreateAlias = (type, newIdx, newLink, existingAlias) => {
-        // don't prompt alias input if an alias already exists or not in schema
-        if(!existingAlias && this.props.schemas){
-            var schema = this.props.schemas[type] || null;
-            if(schema && schema.properties.aliases){
-                this.setState({
-                    'ambiguousIdx': null,
-                    'ambiguousType': null,
-                    'ambiguousSelected': null,
-                    'creatingIdx': newIdx,
-                    'creatingType': type,
-                    'creatingLink': newLink
-                });
-            }else{ // schema doesn't support aliases
-                var fallbackAlias = 'My ' + type + ' ' + newIdx;
-                this.createObj(type, newIdx, newLink, fallbackAlias);
-            }
+    initCreateAlias = (type, newIdx, newLink) => {
+        var schema = this.props.schemas[type] || null;
+        if(schema && schema.properties.aliases){
+            this.setState({
+                'ambiguousIdx': null,
+                'ambiguousType': null,
+                'ambiguousSelected': null,
+                'creatingIdx': newIdx,
+                'creatingType': type,
+                'creatingLink': newLink
+            });
+        }else{ // schema doesn't support aliases
+            var fallbackAlias = 'My ' + type + ' ' + newIdx;
+            this.createObj(type, newIdx, newLink, fallbackAlias);
         }
     }
 
@@ -314,7 +315,7 @@ export default class SubmissionView extends React.Component{
         var newLink = this.state.creatingLink;
         // safety check to ensure schema exists for selected type
         if(schema && type){
-            this.initCreateAlias(type, newIdx, newLink, false);
+            this.initCreateAlias(type, newIdx, newLink);
         }else{
             // abort
             this.setState({
@@ -636,27 +637,30 @@ export default class SubmissionView extends React.Component{
                     return;
                 }
                 var keyValid = this.state.keyValid;
-                // if current key is ready for validation, first try that
-                // but suppress warning messages
-                if(keyValid[this.state.currKey] == 1){
-                    this.submitObject(this.state.currKey, true, true);
-                }
                 // get rid of any hanging errors
                 for(var i=0; i<this.state.errorCount; i++){
                     Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
                     stateToSet.errorCount = 0;
                 }
+                // skip validation stuff if in roundTwo
+                if(!this.state.roundTwo){
+                    // if current key is ready for validation, first try that
+                    // but suppress warning messages
+                    if(keyValid[this.state.currKey] == 1){
+                        this.submitObject(this.state.currKey, true, true);
+                    }
+                    // see if newly-navigated obj is ready for validation
+                    if(keyValid[value] == 0){
+                        var validState = this.findValidationState(value);
+                        if(validState == 1){
+                            keyValid[value] = 1;
+                            stateToSet['keyValid'] = keyValid;
+                        }
+                    }
+                }
                 // reset some state
                 stateToSet.processingFetch = false;
                 stateToSet.uploadStatus = null;
-                // see if newly-navigated obj is ready for validation
-                if(keyValid[value] == 0){
-                    var validState = this.findValidationState(value);
-                    if(validState == 1){
-                        keyValid[value] = 1;
-                        stateToSet['keyValid'] = keyValid;
-                    }
-                }
             }
             stateToSet[key] = value;
             this.setState(stateToSet);
@@ -666,8 +670,9 @@ export default class SubmissionView extends React.Component{
     /*
     Function used to initialize uploads, complete them, and end them on failure.
     Sets the upload status, upload (which holds the s3 upload manager), and
-    also communicates to app.js that there is an upload occuring. In app, state
-    is changed so users are prompted before navigating away from a running
+    also communicates to app.js that there is an upload occuring.
+    When upload is initialized, calculate the md5sum of the file before uploading.
+    In app, state is changed so users are prompted before navigating away from a running
     upload. When upload is complete, call finishRoundTwo to finish the object
     creation process for the file object with the upload.
     */
@@ -676,21 +681,60 @@ export default class SubmissionView extends React.Component{
         if(completed){
             stateToSet.uploadStatus = 'Upload complete';
             stateToSet.upload = null;
+            stateToSet.file = null;
             this.props.registerUploads(false);
             this.finishRoundTwo();
+            this.setState(stateToSet);
         }else if(failed){
-            var contextCopy = this.state.keyContext;
-            contextCopy[this.state.currKey].status = 'upload failed';
-            stateToSet.uploadStatus = 'Upload failed';
-            stateToSet.upload = null;
-            stateToSet.keyContext = contextCopy;
-            this.props.registerUploads(false);
-        }else{
-            stateToSet.uploadStatus = null;
-            stateToSet.upload = uploadInfo;
-            this.props.registerUploads(true);
+            var destination = this.state.keyComplete[this.state.currKey];
+            var payload = JSON.stringify({'status':'upload failed'});
+            // set status to upload failed for the file
+            ajax.promise(destination, 'PATCH', {}, payload).then(data => {
+                // doesn't really matter what response is
+                stateToSet.uploadStatus = 'Upload failed';
+                stateToSet.upload = null;
+                this.props.registerUploads(false);
+                this.setState(stateToSet);
+            });
+        }else{ // must be the initial run
+            // Calculate the md5sum for the file held in state and save it to the md5
+            // field of the current key's context (this can only be a file due to the
+            // submission process). Resets file and md5Progess in state after running.
+            var file = this.state.file;
+            // md5 calculation should ONLY occur when current type is file
+            if(file === null) return;
+            getLargeMD5(file, this.modifyMD5Progess).then((hash) => {
+                // perform async patch to set md5sum field of the file
+                var destination = this.state.keyComplete[this.state.currKey];
+                var payload = JSON.stringify({'md5sum': hash});
+                ajax.promise(destination, 'PATCH', {}, payload).then(data => {
+                    if(data.status && data.status == 'success'){
+                        console.log('HASH SET TO:', hash, 'FOR', destination);
+                        stateToSet.upload = uploadInfo;
+                        stateToSet.md5Progress = null;
+                        stateToSet.uploadStatus = null;
+                        this.props.registerUploads(true);
+                        this.setState(stateToSet);
+                    }else if(data.status && data.title && data.status == 'error' && data.title == 'Conflict'){
+                        // md5 key conflict
+                        stateToSet.uploadStatus = 'MD5 conflicts with another file';
+                        stateToSet.md5Progress = null;
+                        this.setState(stateToSet);
+                    }else{
+                        // error setting md5
+                        stateToSet.uploadStatus = 'MD5 calculation error';
+                        stateToSet.md5Progress = null;
+                        this.setState(stateToSet);
+                    }
+                });
+
+            }).catch((error) => {
+                stateToSet.uploadStatus = 'MD5 calculation error';
+                stateToSet.file = null;
+                stateToSet.md5Progress = null;
+                this.setState(stateToSet);
+            });
         }
-        this.setState(stateToSet);
     }
 
     /*
@@ -721,7 +765,7 @@ export default class SubmissionView extends React.Component{
             }else{
                 return(
                     <Button bsStyle="warning" bsSize="xsmall" style={style} disabled>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                        {'Skip'}
                     </Button>
                 );
             }
@@ -860,6 +904,13 @@ export default class SubmissionView extends React.Component{
     }
 
     /*
+    Set md5Progress in state to val. Passed as callback to getLargeMD5
+    */
+    modifyMD5Progess = (val) => {
+        this.setState({'md5Progress': val});
+    }
+
+    /*
     Master object submission function. Takes a key index and uses ajax to
     POST/PATCH/PUT the json to the object collection (a new object) or to the
     specific object path (a pre-existing/roundTwo object). If test=true,
@@ -939,8 +990,7 @@ export default class SubmissionView extends React.Component{
                 // change actionMethod and destination based on edit/round two
                 if(!test){
                     if(this.state.roundTwo){
-                        // use PATCH because the entirety of the obj is not supplied
-                        actionMethod = 'PATCH';
+                        actionMethod = 'PUT';
                         destination = this.state.keyComplete[inKey];
                         // add uuid and accession from submitted context
                         finalizedContext = this.addSubmittedContext(finalizedContext);
@@ -1002,9 +1052,13 @@ export default class SubmissionView extends React.Component{
                                 // that is not added from /types/file.py get_upload
                                 var creds = responseData['upload_credentials'];
                                 var upload_manager = s3UploadFile(this.state.file, creds);
-                                this.updateUpload(upload_manager);
-                                stateToSet.file = null; // remove file
+                                // this will set off a chain of aync events.
+                                // first, md5 will be calculated and then the
+                                // file will be uploaded to s3. If all of this
+                                // is succesful, call finishRoundTwo.
+                                stateToSet.uploadStatus = null;
                                 this.setState(stateToSet);
+                                this.updateUpload(upload_manager);
                             }else{
                                 // state cleanup for this key
                                 this.finishRoundTwo();
@@ -1038,9 +1092,9 @@ export default class SubmissionView extends React.Component{
                             stateToSet.keyComplete = keyComplete;
                             stateToSet.keyDisplay = displayCopy;
                             stateToSet.keyContext = contextCopy;
-                            // update context with response data and check if submitted object needs a round two
                             var needsRoundTwo = [];
-                            contextCopy[inKey] = buildContext(responseData, currSchema, [], this.props.edit, this.props.create, needsRoundTwo);
+                            // update context with response data and check if submitted object needs a round two
+                            contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false, needsRoundTwo);
                             // update roundTwoKeys if necessary
                             if(needsRoundTwo.length > 0){
                                 if(!_.contains(roundTwoCopy, inKey)){
@@ -1497,10 +1551,25 @@ class IndividualObjectView extends React.Component{
         var fieldSchema = object.getNestedProperty(currSchema, ['properties', field], true);
         if(!fieldSchema) return null;
         var secondRoundField = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
+        var fieldTitle = fieldSchema.title || field;
         if(this.props.roundTwo && !secondRoundField){
             return null;
         }else if(!this.props.roundTwo && secondRoundField){
-            return null;
+            // return a placeholder informing user that this field is for roundTwo
+            return(
+                <div key={fieldTitle} className="row facet" required={false} title={fieldTitle} style={{'overflow':'visible'}}>
+                    <div className="col-sm-12 col-md-3">
+                        <h5 className="facet-title submission-field-title">
+                            {fieldTitle}
+                        </h5>
+                    </div>
+                    <div className="col-sm-12 col-md-9">
+                        <div style={{'color':'#8b8b8b'}}>
+                            {'This field is available after finishing initial submission.'}
+                        </div>
+                    </div>
+                </div>
+            );
         }
         var fieldTip = fieldSchema.description ? fieldSchema.description : null;
         if(fieldSchema.comment){
@@ -1508,7 +1577,6 @@ class IndividualObjectView extends React.Component{
         }
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
         var fieldValue = this.props.currContext[field] || null;
-        var fieldTitle = fieldSchema.title || field;
         var enumValues = [];
         var isLinked = false;
         // transform some types...
@@ -1534,9 +1602,14 @@ class IndividualObjectView extends React.Component{
             fieldType = 'attachment';
         }else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
             // only render file upload input if status is 'uploading' or 'upload_failed'
-            // when editing a File principal object
-            if(this.props.edit && this.props.currKey === 0 && this.props.currContext.status){
-                if(this.props.currContext.status == 'uploading' || this.props.currContext.status == 'upload failed'){
+            // when editing a File principal object.
+            // there may be a bug where status automatically gets reset to uploading
+            // when edit is PUT, despite the file not changing. That's a wrangler issue
+            var path = this.props.keyComplete[this.props.currKey]
+            var completeContext = this.props.keyContext[path];
+            var statusCheck = completeContext.status && (completeContext.status == 'uploading' || completeContext.status == 'upload failed');
+            if(this.props.edit){
+                if(statusCheck){
                     fieldType = 'file upload';
                 }else{
                     return null;
@@ -1547,7 +1620,6 @@ class IndividualObjectView extends React.Component{
         }
         // set a required flag if this field is required
         var required = _.contains(currSchema.required, field);
-
         return(
             <BuildField
                 value={fieldValue}

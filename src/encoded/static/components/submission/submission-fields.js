@@ -167,7 +167,7 @@ export default class BuildField extends React.Component{
                             <Fade in={showDelete}>
                                 <div className="pull-right">
                                     <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                        {'Delete item'}
+                                        {'Remove item'}
                                     </Button>
                                 </div>
                             </Fade>
@@ -202,7 +202,7 @@ export default class BuildField extends React.Component{
                         <Fade in={showDelete}>
                             <div className="pull-right">
                                 <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                    {'Delete'}
+                                    {'Remove'}
                                 </Button>
                             </div>
                         </Fade>
@@ -623,7 +623,9 @@ class S3FileInput extends React.Component{
         super(props);
         this.state = {
             'percentDone': null,
-            'sizeUploaded': null
+            'sizeUploaded': null,
+            'newFile': false,
+            'status': null
         };
     }
 
@@ -631,19 +633,29 @@ class S3FileInput extends React.Component{
         if(this.props.upload === null && nextProps.upload !== null){
             this.handleAsyncUpload(nextProps.upload);
         }
-    }
-
-    modifyMD5Progess = (val) => {
-        this.props.setSubmissionState('md5Progress', val);
+        if(this.props.uploadStatus !== nextProps.uploadStatus){
+            this.setState({'status': nextProps.uploadStatus});
+        }
     }
 
     modifyFile = (val) => {
         this.props.setSubmissionState('file', val);
+        if(val !== null){
+            this.setState({
+                'newFile': true,
+                'status': null
+            });
+        }else{
+            this.setState({
+                'newFile': false,
+                'status': null
+            });
+        }
     }
 
     /*
-    Handle file selection. Calculate the md5 automatically and pass it up
-    to SubmissionView.
+    Handle file selection. Store the file in SubmissionView state and change
+    the filename context using modifyNewContext
     */
     handleChange = (e) => {
         var req_type = null;
@@ -653,15 +665,6 @@ class S3FileInput extends React.Component{
             return;
         }else{
             var filename = file.name ? file.name : "unknown";
-            getLargeMD5(file, this.modifyMD5Progess).then((hash) => {
-                this.props.modifyNewContext('md5sum', hash, 'file upload', this.props.linkType, this.props.arrayIdx);
-                console.log('HASH SET TO:', hash, 'FOR FILE:', this.props.value);
-                this.modifyMD5Progess(null);
-            }).catch((error) => {
-                console.log('ERROR CALCULATING MD5!', error);
-                // TODO: should file upload fail on a md5 error?
-                this.modifyMD5Progess(null);
-            });
             this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.linkType, this.props.arrayIdx);
             // calling modifyFile changes the 'file' state of top level component
             this.modifyFile(file);
@@ -712,22 +715,48 @@ class S3FileInput extends React.Component{
         this.props.upload.abort();
     }
 
+    deleteField = (e) => {
+        e.preventDefault();
+        this.props.modifyNewContext(this.props.nestedField, null, 'file upload', this.props.linkType, this.props.arrayIdx);
+        this.modifyFile(null);
+    }
+
     render(){
-        var edit_tip = this.props.uploadStatus;
-        var filename_text = this.props.value ? this.props.value : "No file chosen";
+        var statusTip = this.state.status;
+        var showDelete = false;
+        var filename_text = "No file chosen";
+        if(this.props.value){
+            if(this.state.newFile){
+                if(this.props.md5Progress === null && this.props.upload === null){
+                    showDelete = true;
+                }
+                filename_text = this.props.value;
+            }else{
+                statusTip = 'Previous file: ' + this.props.value;
+            }
+        }
         var disableFile = this.props.md5Progress !== null || this.props.upload !== null;
         return(
             <div>
-                <input id={this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
-                <Button disabled={disableFile} style={{'padding':'0px'}}>
-                    <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
-                        {filename_text}
-                    </label>
-                </Button>
-                {edit_tip ?
-                    <span style={{'color':'#a94442','paddingBottom':'6px', 'paddingLeft':'10px'}}>
-                        {edit_tip}
-                    </span>
+                <div>
+                    <input id={this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
+                    <Button disabled={disableFile} style={{'padding':'0px'}}>
+                        <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
+                            {filename_text}
+                        </label>
+                    </Button>
+                    <Fade in={showDelete}>
+                        <div className="pull-right">
+                            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
+                                {'Remove'}
+                            </Button>
+                        </div>
+                    </Fade>
+                </div>
+                {statusTip ?
+                    <div style={{'color':'#a94442', 'paddingTop':'10px'}}>
+                        {statusTip}
+                    </div>
                     :
                     null
                 }
@@ -735,7 +764,7 @@ class S3FileInput extends React.Component{
                     <div style={{'paddingTop':'10px'}}>
                         <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}></i>
                         <span style={{'paddingLeft':'10px'}}>
-                            {'Calculating md5... ' + this.props.md5Progress + '%'}
+                            {'Calculating MD5... ' + this.props.md5Progress + '%'}
                         </span>
                     </div>
                     :
@@ -761,7 +790,6 @@ class S3FileInput extends React.Component{
                 }
             </div>
         );
-
     }
 }
 
