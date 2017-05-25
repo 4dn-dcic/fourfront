@@ -234,8 +234,6 @@ export default class Navigation extends React.Component {
     }
 
     render() {
-        //var portal = this.context.portal;
-
         var navClass = "navbar-container";
         if (this.state.testWarning) navClass += ' test-warning-visible';
         if (this.state.navInitialized) navClass += ' nav-initialized';
@@ -266,17 +264,18 @@ export default class Navigation extends React.Component {
                         <Navbar.Collapse>
                             <Nav>
                             { 
-                                this.context.listActionsFor('global_sections').map((a)=> 
+                                this.props.listActionsFor('global_sections').map((a)=> 
                                     Navigation.buildDropdownMenu.call(this, a, this.state.mounted)
                                 ) 
                             }
                             </Nav>
                             <UserActions
-                                mounted={this.state.mounted}
-                                closeMobileMenu={this.closeMobileMenu}
-                                session={this.props.session}
-                                href={this.props.href}
-                                updateUserInfo={this.props.updateUserInfo}
+                                mounted={this.state.mounted} // boolean
+                                closeMobileMenu={this.closeMobileMenu} // function
+                                session={this.props.session} // boolean
+                                href={this.props.href} // string
+                                updateUserInfo={this.props.updateUserInfo} // function
+                                listActionsFor={this.props.listActionsFor} // function
                             />
                             {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>
@@ -291,11 +290,6 @@ export default class Navigation extends React.Component {
 Navigation.propTypes = {
     href : PropTypes.string,
     session : React.PropTypes.bool
-};
-
-Navigation.contextTypes = {
-    portal: PropTypes.object,
-    listActionsFor : PropTypes.func
 };
 
 
@@ -344,7 +338,7 @@ class UserActions extends React.Component {
         );
 
         var actions = [];
-        this.context.listActionsFor('user_section').forEach((action) => {
+        this.props.listActionsFor('user_section').forEach((action) => {
             if (action.id === "login"){
                 actions.push(
                     <Login
@@ -361,13 +355,13 @@ class UserActions extends React.Component {
                     actions.push(Navigation.buildMenuItem.call(this, action, this.props.mounted));
                 } else {
                     // Account Actions
-                    actions = actions.concat(this.context.listActionsFor('user').map((action, idx) => {
+                    actions = actions.concat(this.props.listActionsFor('user').map((action, idx) => {
                         return Navigation.buildMenuItem.call(this, action, this.props.mounted, {"data-no-cache" : true});
                     }));
                 }
             } else if (action.id === "contextactions") {
                 // Context Actions
-                actions = actions.concat(this.context.listActionsFor('context').map((action) => {
+                actions = actions.concat(this.props.listActionsFor('context').map((action) => {
                     return Navigation.buildMenuItem.call(
                         this,
                         _.extend(_.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> }),
@@ -388,13 +382,10 @@ class UserActions extends React.Component {
 }
 
 UserActions.propTypes = {
-    session: PropTypes.bool
+    session         : PropTypes.bool.isRequired,
+    listActionsFor  : PropTypes.func.isRequired,
+    href            : PropTypes.string.isRequired
 };
-
-UserActions.contextTypes = {
-    listActionsFor: PropTypes.func
-};
-
 
 
 // Display breadcrumbs with contents given in 'crumbs' object.

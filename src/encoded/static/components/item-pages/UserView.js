@@ -283,7 +283,8 @@ export function gravatar(email, size=null, className=null, defaultImg='retro'){
             title="Obtained via Gravatar"
         />
     );
-};
+}
+
 
 
 /**
@@ -313,6 +314,7 @@ export default class UserView extends React.Component {
             'job_title' : PropTypes.string
         }),
         'href' : PropTypes.string.isRequired,
+        'listActionsFor' : PropTypes.func.isRequired,
         'schemas' : PropTypes.shape({
             'User' : PropTypes.shape({
                 'required' : PropTypes.array,
@@ -329,12 +331,8 @@ export default class UserView extends React.Component {
         })
     }
 
-    static contextTypes = {
-        listActionsFor : PropTypes.func
-    }
-
     mayEdit(){
-        return this.context.listActionsFor('context').filter(function(action){
+        return this.props.listActionsFor('context').filter(function(action){
             return action.name && action.name === 'edit';
         }).length > 0 ? true : false;
     }
@@ -707,8 +705,8 @@ class BasicForm extends React.Component {
  */
 export class ImpersonateUserForm extends React.Component {
 
-    static contextTypes = {
-        updateUserInfo: PropTypes.func
+    static propTypes = {
+        updateUserInfo: PropTypes.func.isRequired
     }
 
     /**
@@ -728,7 +726,7 @@ export class ImpersonateUserForm extends React.Component {
             //    localStorage.setItem("user_info", JSON.stringify(payload));
             //}
             JWT.saveUserInfo(payload);
-            this.context.updateUserInfo();
+            this.props.updateUserInfo();
             navigate('/');
         }.bind(this);
         var fallbackFxn = function() {

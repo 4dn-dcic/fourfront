@@ -172,15 +172,12 @@ export default class App extends React.Component {
 
     static childContextTypes = {
         dropdownComponent: React.PropTypes.string,
-        listActionsFor: React.PropTypes.func,
         currentResource: React.PropTypes.func,
         location_href: React.PropTypes.string,
         onDropdownChange: React.PropTypes.func,
-        portal: React.PropTypes.object,
         hidePublicAudits: React.PropTypes.bool,
         session: React.PropTypes.bool,
         navigate: React.PropTypes.func,
-        updateUserInfo: React.PropTypes.func,
         schemas: React.PropTypes.object
     }
 
@@ -344,15 +341,12 @@ export default class App extends React.Component {
     getChildContext() {
         return {
             dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
-            listActionsFor: this.listActionsFor,
             currentResource: this.currentResource,
             location_href: this.props.href,
             onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
-            portal: portal,
             hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
             session: this.state.session,
             navigate: this.navigate,
-            updateUserInfo: this.updateUserInfo,
             schemas : this.state.schemas
         };
     }
@@ -1102,6 +1096,8 @@ export default class App extends React.Component {
                         schemas={this.state.schemas}
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
+                        updateUserInfo={this.updateUserInfo}
+                        listActionsFor={this.listActionsFor}
                         uploads={this.state.uploads}
                         updateUploads={this.updateUploads}
                         session={this.state.session}
@@ -1176,6 +1172,8 @@ export default class App extends React.Component {
                                     session={this.state.session}
                                     updateUserInfo={this.updateUserInfo}
                                     expSetFilters={this.props.expSetFilters}
+                                    portal={portal}
+                                    listActionsFor={this.listActionsFor}
                                     ref="navigation"
                                     schemas={this.state.schemas}
                                 />
