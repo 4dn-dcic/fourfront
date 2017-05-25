@@ -8,7 +8,7 @@ var _ = require('underscore');
 var globals = require('./globals');
 var search = module.exports;
 var ReactTooltip = require('react-tooltip');
-var { ajax, console, object, isServerSide, Filters, layout, DateUtility } = require('./util');
+var { ajax, console, object, isServerSide, Filters, layout, DateUtility, navigate } = require('./util');
 var { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} = require('react-bootstrap');
 var { Detail } = require('./item-pages/components');
 
@@ -549,16 +549,12 @@ var ResultTable = search.ResultTable = React.createClass({
 });
 
 var Search = search.Search = React.createClass({
-    contextTypes: {
-        location_href: React.PropTypes.string,
-        navigate: React.PropTypes.func
-    },
 
     render: function() {
         var context = this.props.context;
         var results = context['@graph'];
         var notification = context['notification'];
-        var searchBase = url.parse(this.context.location_href).search || '';
+        var searchBase = url.parse(this.props.href).search || '';
         var facetdisplay = context.facets && context.facets.some(function(facet) {
             return facet.total > 0;
         });
@@ -566,7 +562,7 @@ var Search = search.Search = React.createClass({
             <div>
                 {facetdisplay ?
                     <div className="browse-page-container">
-                        <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.props.navigate || this.context.navigate} />
+                        <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.props.navigate || navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
             </div>

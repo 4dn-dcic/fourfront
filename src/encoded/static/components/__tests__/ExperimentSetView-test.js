@@ -8,24 +8,56 @@ jest.dontMock('underscore');
 
 
 describe('Testing experiments-table.js', function() {
-    var React, ExperimentsTable, expFuncs, testExperimentsTable, TestUtils, FetchContext, context, schemas, _, ExperimentSetView;
+    var sinon, server, React, TestUtils;
+    var expFuncs, context, schemas, _, ExperimentSetView, testView;
 
-    beforeEach(function() {
+    beforeAll(function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
+
+        sinon = require('sinon');
+        server = sinon.fakeServer.create();
+        
+        server.respondWith(
+            "GET",
+            '/profiles/',
+            [
+                200, 
+                { "Content-Type" : "application/json" },
+                '<html></html>' // Don't actually need content JSON here for test.
+            ]
+        );
+
+        server.respondWith(
+            "GET",
+            '/profiles/?format=json',
+            [
+                200, 
+                { "Content-Type" : "application/json" },
+                '<html></html>' // Don't actually need content JSON here for test.
+            ]
+        );
 
         ExperimentSetView = require('../item-pages/ExperimentSetView').default;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
 
-        
-
         testView = TestUtils.renderIntoDocument(<ExperimentSetView context={context} schemas={schemas} />);
 
+
+        //jest.runAllTimers();
     });
-    /*
+
+    afterAll(function(){
+        server.restore();
+    });
+
+    beforeEach(function() {
+        return;
+    });
+    
     it('Same first test from ExperimentsTable test to ensure we have table.', function() {
         var checkIfHaveHeaders = ['Experiment', 'Biosample', 'File'].sort(); // Sort b/c indices matter
         
@@ -50,7 +82,7 @@ describe('Testing experiments-table.js', function() {
             )
         ).toEqual(checkIfHaveHeaders);
     });
-*/
+
 /*
     it('Header columns have width styles which fit available width', function() {
         var headers = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');

@@ -2,7 +2,7 @@
 var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
-var { ajax, console, object, isServerSide } = require('./util');
+var { ajax, console, object, isServerSide, navigate } = require('./util');
 var {getS3UploadUrl, s3UploadFile} = require('./util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
 var makeTitle = require('./item-pages/item').title;
@@ -18,11 +18,6 @@ var getLargeMD5 = require('./util/file-utility').getLargeMD5;
 // This component initiates and hold the new context and coordinated
 // submission/validation
 var Action = module.exports = React.createClass({
-    contextTypes: {
-        fetch: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
-        navigate: React.PropTypes.func
-    },
 
     getInitialState: function() {
         var contType = this.props.context['@type'] || [];
@@ -55,7 +50,7 @@ var Action = module.exports = React.createClass({
             this.setState({'newContext': {}});
             return;
         }
-        this.context.fetch(contextID + '?frame=object', {
+        ajax.fetch(contextID + '?frame=object', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -251,7 +246,7 @@ var Action = module.exports = React.createClass({
         console.log('contextToPOST:', finalizedContext);
         this.setState({'processingFetch': true});
         ajax.promise('/me?frame=embedded').then(data => {
-            if (this.context.contentTypeIsJSON(data)){
+            if (object.isValidJSON(data)){
                 if(!data.submits_for || data.submits_for.length == 0){
                     console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
                     stateToSet.validated = 2;
@@ -263,7 +258,7 @@ var Action = module.exports = React.createClass({
                 lab = submits_for['@id'] ? submits_for['@id'] : submits_for.link_id.replace(/~/g, "/");
             }
             ajax.promise(lab).then(lab_data => {
-                if (this.context.contentTypeIsJSON(lab_data)){
+                if (object.isValidJSON(lab_data)){
                     if(!lab_data.awards || lab_data.awards.length == 0){
                         console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
                         stateToSet.validated = 2;
@@ -304,7 +299,7 @@ var Action = module.exports = React.createClass({
                         finalizedContext.accession = this.state.newContext.accession;
                     }
                 }
-                this.context.fetch(destination, {
+                ajax.fetch(destination, {
                     method: actionMethod,
                     headers: {
                         'Accept': 'application/json',
@@ -342,11 +337,11 @@ var Action = module.exports = React.createClass({
                         // Passes upload_manager to uploads.js through app.js
                         this.props.updateUploads(destination, upload_info);
                         alert('Success! Navigating to the uploads page.');
-                        this.context.navigate('/uploads');
+                        navigate('/uploads');
                     }else{
                         console.log('ACTION SUCCESSFUL!');
                         alert('Success! Navigating to the object page.');
-                        this.context.navigate(destination);
+                        navigate(destination);
                     }
                 }, error => {
                     stateToSet.validated = 0;
@@ -656,9 +651,6 @@ allow the user to pick one from a displayed table. This component holds the
 state of whether it is currently open and the fetched data.
 */
 var LinkedObj = React.createClass({
-    contextTypes: {
-        contentTypeIsJSON: React.PropTypes.func
-    },
 
     getInitialState: function(){
         return{
@@ -674,7 +666,7 @@ var LinkedObj = React.createClass({
         var state = {};
         if(this.props.collection){
             ajax.promise('/' + this.props.collection + '/?format=json').then(data => {
-                if (this.context.contentTypeIsJSON(data) && data['@graph']){
+                if (object.isValidJSON(data) && data['@graph']){
                     state['data'] = data['@graph'];
                     // get a nicer collection name
                     state['collection'] = data['@id'].split('/')[1];

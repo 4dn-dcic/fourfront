@@ -271,7 +271,13 @@ export default class Navigation extends React.Component {
                                 ) 
                             }
                             </Nav>
-                            <UserActions mounted={this.state.mounted} closeMobileMenu={this.closeMobileMenu} session={this.props.session} />
+                            <UserActions
+                                mounted={this.state.mounted}
+                                closeMobileMenu={this.closeMobileMenu}
+                                session={this.props.session}
+                                href={this.props.href}
+                                updateUserInfo={this.props.updateUserInfo}
+                            />
                             {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>
                     </Navbar>
@@ -280,7 +286,7 @@ export default class Navigation extends React.Component {
             </div>
         );
     }
-};
+}
 
 Navigation.propTypes = {
     href : PropTypes.string,
@@ -310,7 +316,7 @@ class Search extends React.Component{
             </form>
         );
     }
-};
+}
 
 
 class UserActions extends React.Component {
@@ -340,7 +346,15 @@ class UserActions extends React.Component {
         var actions = [];
         this.context.listActionsFor('user_section').forEach((action) => {
             if (action.id === "login"){
-                actions.push(<Login key={action.id} navCloseMobileMenu={this.props.closeMobileMenu} />);
+                actions.push(
+                    <Login
+                        key={action.id}
+                        navCloseMobileMenu={this.props.closeMobileMenu}
+                        session={this.props.session}
+                        href={this.props.href}
+                        updateUserInfo={this.props.updateUserInfo}
+                    />
+                );
             } else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session) {
@@ -371,15 +385,15 @@ class UserActions extends React.Component {
             </Nav>
         );
     }
-};
+}
 
 UserActions.propTypes = {
     session: PropTypes.bool
-}
+};
 
 UserActions.contextTypes = {
     listActionsFor: PropTypes.func
-}
+};
 
 
 

@@ -1,17 +1,18 @@
 'use strict';
-var React = require('react');
-var store = require('../store');
-var { JWT } = require('./util');
-var { MenuItem } = require('react-bootstrap');
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import * as store from '../store';
+import { JWT, ajax, navigate } from './util';
+import { MenuItem } from 'react-bootstrap';
 import Alerts from './alerts';
 
 // Component that contains auth0 functions
 var Login = React.createClass({
-    contextTypes: {
-    	fetch: React.PropTypes.func,
-    	session: React.PropTypes.bool,
-        navigate: React.PropTypes.func,
-        updateUserInfo: React.PropTypes.func
+
+    propTypes : {
+        updateUserInfo : PropTypes.func.isRequired,
+        session : PropTypes.bool.isRequired
     },
 
     componentWillMount: function () {
@@ -50,18 +51,18 @@ var Login = React.createClass({
     logout: function (eventKey, e) {
         JWT.remove();
         console.log('Logging out');
-        if (!this.context.session) return;
+        if (!this.props.session) return;
         if (typeof this.props.navCloseMobileMenu === 'function') this.props.navCloseMobileMenu();
 
-        this.context.fetch('/logout?redirect=false')
+        ajax.fetch('/logout?redirect=false')
         .then(data => {
             if(typeof document !== 'undefined'){
 
                 // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
                 document.dispatchEvent(new MouseEvent('click'));
 
-                this.context.updateUserInfo();
-                this.context.navigate('', {'inPlace':true});
+                this.props.updateUserInfo();
+                navigate('', {'inPlace':true});
             }
         });
     },
@@ -72,7 +73,7 @@ var Login = React.createClass({
 
         JWT.save(idToken); // We just got token from Auth0 so probably isn't outdated.
 
-        this.context.fetch('/login', {
+        ajax.fetch('/login', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer '+idToken },
             body: JSON.stringify({id_token: idToken})
@@ -83,9 +84,9 @@ var Login = React.createClass({
         })
         .then(response => {
             JWT.saveUserInfoLocalStorage(response);
-            this.context.updateUserInfo();
+            this.props.updateUserInfo();
             Alerts.deQueue(Alerts.LoggedOut);
-            this.context.navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
+            navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
         }, error => {
             console.log("got an error: ", error.description);
             console.log(error);
@@ -99,7 +100,7 @@ var Login = React.createClass({
 
     render: function () {
         if (this.props.invisible) return null;
-        if (this.context.session){
+        if (this.props.session){
             return (
                 <MenuItem id="logoutbtn" onSelect={this.logout} className="global-entry">
                     Log Out
@@ -112,7 +113,7 @@ var Login = React.createClass({
             </MenuItem>
         );
         /* For old nav
-        return (this.context.session ?
+        return (this.props.session ?
             <a href="#" className="global-entry" onClick={this.logout}>Log out</a>
             :
             <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>

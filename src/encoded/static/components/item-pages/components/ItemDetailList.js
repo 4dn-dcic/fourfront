@@ -404,7 +404,7 @@ export class ItemDetailList extends React.Component {
         this.state = {
             'collapsed' : true,
             'showingJSON' : false
-        }
+        };
     }
 
     seeMoreButton(){

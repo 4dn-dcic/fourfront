@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var store = require('../store');
-var { ajax, console, object, isServerSide } = require('./util');
+var { ajax, console, object, isServerSide, navigate } = require('./util');
 
 /**
  * FieldSet allows to group EditableFields together.
@@ -62,6 +62,7 @@ var FieldSet = module.exports.FieldSet = React.createClass({
                 if (!child.props.context || _.isEmpty(child.props.context)) newProps.context = this.props.context;
                 if (!child.props.parent) newProps.parent = this.props.parent || this;
                 if (!child.props.endpoint && this.props.endpoint) newProps.endpoint = this.props.endpoint;
+                if (!child.props.href && this.props.href) newProps.href = this.props.href;
                 if (!child.props.objectType && this.props.objectType) newProps.objectType = this.props.objectType;
                 if (!child.props.schemas && this.props.schemas) newProps.schemas = this.props.schemas;
                 if (
@@ -73,7 +74,7 @@ var FieldSet = module.exports.FieldSet = React.createClass({
                 if (this.props.absoluteBox) newProps.absoluteBox = this.props.absoluteBox;
 
                 child = React.cloneElement(child, newProps);
-            };
+            }
             return child;
         });
     },
@@ -180,11 +181,6 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
     },
 
-    contextTypes: {
-        navigate: React.PropTypes.func,
-        schemas : React.PropTypes.object    // @see app.js > App.loadSchemas
-    },
-
     propTypes : {
         label : React.PropTypes.string,
         labelID : React.PropTypes.string,   // Property in context to be edited. Allows dot notation for nested values.
@@ -201,7 +197,7 @@ var EditableField = module.exports.EditableField = React.createClass({
         pattern : React.PropTypes.any,      // Optional pattern to use in lieu of one derived from schema or default field pattern.
                                             // If set to false, will skip (default or schema-based) validation.
         required : React.PropTypes.bool,    // Optionally set if field is required, overriding setting derived from schema (if any). Defaults to false.
-        schemas : React.PropTypes.object,   // Schemas to use for validation. If not provided, attempts to get from this.context
+        schemas : React.PropTypes.object.isRequired,
         debug : React.PropTypes.bool        // Verbose lifecycle log messages.
     },
 
@@ -307,11 +303,10 @@ var EditableField = module.exports.EditableField = React.createClass({
             newState.savedValue = newState.value = newVal || null;
             newState.valueExistsOnObj = typeof newVal !== 'undefined';
         }
-        // Update state.validationPattern && state.isRequired if this.context.schemas becomes available
+        // Update state.validationPattern && state.isRequired if this.props.schemas becomes available
         // (loaded via ajax by app.js) or from props if is provided.
         if (
             newProps.schemas !== this.props.schemas ||
-            newContext.schemas !== this.context.schemas ||
             newProps.pattern !== this.props.pattern ||
             newProps.required !== this.props.required
         ){
@@ -425,7 +420,7 @@ var EditableField = module.exports.EditableField = React.createClass({
                 } else {
                     // Couldn't insert into current context, refetch from server :s.
                     console.warn("Couldn't update current context, fetching from server.");
-                    this.context.navigate('', {'inPlace':true});
+                    navigate('', {'inPlace':true});
                     // ToDo : ...navigate(inPlace)...
                 }
 
@@ -577,7 +572,7 @@ var EditableField = module.exports.EditableField = React.createClass({
     },
 
     /** Return the schema for the provided props.labelID and (props.objectType or props.context['@type'][0]) */
-    fieldSchema : function(schemas = this.props.schemas || this.context.schemas){
+    fieldSchema : function(schemas = this.props.schemas){
         // We do not handle nested, linked or embedded properties for now.
         if (!this.props.labelID || this.props.labelID.indexOf('.') > -1) return null;
         if (schemas === null) return null;
@@ -595,12 +590,12 @@ var EditableField = module.exports.EditableField = React.createClass({
 
     /**
      * Get a validation pattern to check input against for text(-like) fields.
-     * Try to get from this.context.schemas based on object type (User, ExperimentHIC, etc.) and props.labelID.
+     * Try to get from this.props.schemas based on object type (User, ExperimentHIC, etc.) and props.labelID.
      * Defaults to generic per-fieldType validation pattern if available and pattern not set schemas, or null if not applicable.
      *
      * @return {*} Pattern to input validate against.
      */
-    validationPattern : function(schemas = this.props.schemas || this.context.schemas){
+    validationPattern : function(schemas = this.props.schemas){
 
         function getPatternFromSchema(){
             // We do not handle nested, linked or embedded properties for now.
@@ -623,7 +618,7 @@ var EditableField = module.exports.EditableField = React.createClass({
     },
 
     /** Check if field is required based on schemas. */
-    isRequired : function(schemas = this.context.schemas){
+    isRequired : function(schemas = this.props.schemas){
         if (!schemas) return false;
         var objectType = this.objectType();
         if (!objectType) return false;

@@ -11,11 +11,6 @@ coordinates individual subscriptions.
 */
 var Submissions = module.exports = React.createClass({
 
-    contextTypes: {
-        fetch: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
-    },
-
     getInitialState: function(){
         return({
             'subscriptions': null,
@@ -29,7 +24,7 @@ var Submissions = module.exports = React.createClass({
     },
 
     getUserInfo: function(){
-        this.context.fetch('/me?frame=embedded', {
+        ajax.fetch('/me?frame=embedded', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -37,7 +32,7 @@ var Submissions = module.exports = React.createClass({
             }
         })
         .then(response => {
-            if (!this.context.contentTypeIsJSON(response) || !response.subscriptions) throw response;
+            if (!object.isValidJSON(response) || !response.subscriptions) throw response;
             return response;
         })
         .then(response => {
@@ -83,11 +78,6 @@ it into a paginated table. Also allows filtering on item type
 */
 var SubscriptionEntry = React.createClass({
 
-    contextTypes: {
-        fetch: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
-    },
-
     getInitialState: function(){
         var is_open = false;
         // user submissions default to open
@@ -132,7 +122,7 @@ var SubscriptionEntry = React.createClass({
         if(no_type_in_url){
             fetch_url = fetch_url + '&type=' + type;
         }
-        this.context.fetch(fetch_url, {
+        ajax.fetch(fetch_url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -140,7 +130,7 @@ var SubscriptionEntry = React.createClass({
             }
         })
         .then(response => {
-            if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['facets']) throw response;
+            if (!object.isValidJSON(response) || !response['@graph'] || !response['facets']) throw response;
             var types;
             // no specified item type, so set the types state
             // only want to run this once, with type=Item

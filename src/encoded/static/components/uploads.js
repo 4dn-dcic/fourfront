@@ -12,10 +12,6 @@ upload info.
 */
 var Uploads = module.exports = React.createClass({
 
-    contextTypes: {
-        fetch: React.PropTypes.func
-    },
-
     getInitialState: function(){
         var initial_uploads = {};
         var upload_keys = Object.keys(this.props.uploads);
@@ -59,7 +55,7 @@ var Uploads = module.exports = React.createClass({
                     if(this.props.uploads[upload_key]['context']['accession']){
                         put_body['accession'] = this.props.uploads[upload_key]['context']['accession'];
                     }
-                    this.context.fetch(upload_key, {
+                    ajax.fetch(upload_key, {
                         method: 'PATCH',
                         headers: {
                             'Accept': 'application/json',

@@ -312,6 +312,7 @@ export default class UserView extends React.Component {
             'timezone' : PropTypes.string,
             'job_title' : PropTypes.string
         }),
+        'href' : PropTypes.string.isRequired,
         'schemas' : PropTypes.shape({
             'User' : PropTypes.shape({
                 'required' : PropTypes.array,
@@ -382,6 +383,7 @@ export default class UserView extends React.Component {
                                                     objectType="User"
                                                     schemas={this.props.schemas}
                                                     disabled={!mayEdit}
+                                                    href={this.props.href}
                                                 >
                                                     <EditableField
                                                         labelID="first_name"
@@ -399,12 +401,12 @@ export default class UserView extends React.Component {
                                         </div>
                                     </div>
                                 </div>
-                                <ProfileContactFields user={user} parent={this} mayEdit={mayEdit} />
+                                <ProfileContactFields user={user} parent={this} mayEdit={mayEdit} href={this.props.href} />
                             </div>
 
                         </div>
                         <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-5">
-                            <ProfileWorkFields user={user} parent={this} />
+                            <ProfileWorkFields user={user} parent={this} href={this.props.href} />
                         </div>
 
                     </div>
@@ -457,6 +459,7 @@ class ProfileContactFields extends React.Component {
                 disabled={!this.props.mayEdit}
                 objectType="User"
                 schemas={this.props.schemas}
+                href={this.props.href}
             >
 
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>

@@ -12,53 +12,39 @@ jest.dontMock('underscore');
 
 
 describe('Testing item.js', function() {
-    var React, Action, testCreate, testEdit, TestUtils, FetchContext, context, context_obj, schemas, biosource_search, _, Wrapper, ajax;
+    var sinon, server;
+    var React, Action, testCreate, testEdit, TestUtils, FetchContext, context, schemas, biosource_search, _, Wrapper, ajax;
 
-    beforeEach(function() {
+    beforeAll(function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         Action = require('../action');
         context = require('../testdata/biosample/uberon-2371-object');
-        context_obj = require('../testdata/biosample/uberon-2371-object');
         schemas = require('../testdata/schemas');
         biosource_search = require('../testdata/search/biosource_all');
         ajax = require('../util/ajax');
+
         // return /search/?type=Biosource&format=json for ajax.promise calls
         ajax.promise = jest.fn(() => Promise.resolve(biosource_search));
-        Wrapper = React.createClass({
-            childContextTypes: {
-                fetch: React.PropTypes.func,
-                contentTypeIsJSON: React.PropTypes.func
-            },
-            getChildContext: function() {
-                return {
-                    fetch: function() { return Promise.resolve(context_obj);},
-                    contentTypeIsJSON: function(data) {
-                        // return true for search results
-                        if(data['@graph']){
-                            return true;
-                        }else{
-                            return false;
-                        }
-                    }
-                };
-            },
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
-            }
-        });
+        sinon = require('sinon');
+        server = sinon.fakeServer.create();
+        
+        server.respondWith(
+            "GET",
+            '/biosamples/ENCBS989WPD',
+            [
+                200, 
+                { "Content-Type" : "application/json" },
+                JSON.stringify(context)
+            ]
+        );
+
         testCreate = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <Action schemas={schemas} context={context} edit={false}/>
-            </Wrapper>
+            <Action schemas={schemas} context={context} edit={false}/>
         );
         testEdit = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <Action schemas={schemas} context={context} edit={true}/>
-            </Wrapper>
+            <Action schemas={schemas} context={context} edit={true}/>
         );
     });
 

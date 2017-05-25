@@ -1303,7 +1303,7 @@ export class Browse extends React.Component {
             return <div className="error-page"><h4>{context.notification}</h4></div>
         }
         var results = context['@graph'];
-        var searchBase = url.parse(this.props.href || this.context.location_href).search || '';
+        var searchBase = url.parse(this.props.href).search || '';
 
         // browse is only for experiment sets
         //console.log(this.props.href, this.context.location_href, searchBase);

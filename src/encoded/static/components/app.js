@@ -16,7 +16,7 @@ import * as Action from './action';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
@@ -122,16 +122,6 @@ export default class App extends React.Component {
 
     static SLOW_REQUEST_TIME = 750
 
-    static contentTypeIsJSON(content) {
-        var isJson = true;
-        try{
-            var json = JSON.parse(JSON.stringify(content));
-        }catch(err){
-            isJson = false;
-        }
-        return isJson;
-    }
-
     static scrollTo() {
         var hash = window.location.hash;
         if (hash && document.getElementById(hash.slice(1))) {
@@ -160,7 +150,7 @@ export default class App extends React.Component {
             //if (elem.getAttribute('data-prop-name') === 'user_details' && !filter){
                 // pass; don't include as is not a redux prop
             //} else {
-                returnObj[prop_name] = elem_value;
+            returnObj[prop_name] = elem_value;
             //}
         }
         return returnObj;
@@ -188,10 +178,8 @@ export default class App extends React.Component {
         onDropdownChange: React.PropTypes.func,
         portal: React.PropTypes.object,
         hidePublicAudits: React.PropTypes.bool,
-        fetch: React.PropTypes.func,
         session: React.PropTypes.bool,
         navigate: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
         updateUserInfo: React.PropTypes.func,
         schemas: React.PropTypes.object
     }
@@ -200,7 +188,6 @@ export default class App extends React.Component {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.fetch = this.fetch.bind(this);
         this.getChildContext = this.getChildContext.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentResource = this.currentResource.bind(this);
@@ -353,25 +340,6 @@ export default class App extends React.Component {
         }
     }
 
-    // functions previously in persona, mixins.js
-    fetch(url, options) {
-        options = _.extend({credentials: 'same-origin'}, options);
-        var http_method = options.method || 'GET';
-        var headers = options.headers = _.extend({}, options.headers);
-        // Strip url fragment.
-        var url_hash = url.indexOf('#');
-        if (url_hash > -1) {
-            url = url.slice(0, url_hash);
-        }
-        var data = options.body ? options.body : null;
-        var request = ajax.promise(url, http_method, headers, data, options.cache === false ? false : true);
-        request.xhr_begin = 1 * new Date();
-        request.then(response => {
-            request.xhr_end = 1 * new Date();
-        });
-        return request;
-    }
-
     // Retrieve current React context
     getChildContext() {
         return {
@@ -382,10 +350,8 @@ export default class App extends React.Component {
             onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
             portal: portal,
             hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
-            fetch: this.fetch,
             session: this.state.session,
             navigate: this.navigate,
-            contentTypeIsJSON: App.contentTypeIsJSON,
             updateUserInfo: this.updateUserInfo,
             schemas : this.state.schemas
         };
@@ -448,8 +414,8 @@ export default class App extends React.Component {
             if (typeof callback === 'function') callback(this.state.schemas);
             return this.state.schemas;
         }
-        ajax.promise('/profiles/?format=json').then(data => {
-            if (App.contentTypeIsJSON(data)){
+        ajax.promise('/profiles/').then(data => {
+            if (object.isValidJSON(data)){
                 this.setState({
                     schemas: data
                 }, () => {
@@ -613,7 +579,6 @@ export default class App extends React.Component {
             return;
         }
         var request = this.props.contextRequest;
-        var href = window.location.href;
         if (event.state) {
             // Abort inflight xhr before dispatching
             if (request && this.requestCurrent) {
@@ -810,7 +775,7 @@ export default class App extends React.Component {
                 return null;
             }
 
-            var request = this.fetch(
+            var request = ajax.fetch(
                 href,
                 {
                     'headers': {}, // Filled in by ajax.promise
@@ -893,7 +858,7 @@ export default class App extends React.Component {
             .then(response => {
                 this.requestCurrent = false;
                 // navigate normally to URL of unexpected non-JSON response so back button works.
-                if (!App.contentTypeIsJSON(response)) {
+                if (!object.isValidJSON(response)) {
                     if (options.replace) {
                         window.location.replace(href + fragment);
                     } else {
@@ -1209,6 +1174,7 @@ export default class App extends React.Component {
                                 <Navigation
                                     href={this.props.href}
                                     session={this.state.session}
+                                    updateUserInfo={this.updateUserInfo}
                                     expSetFilters={this.props.expSetFilters}
                                     ref="navigation"
                                     schemas={this.state.schemas}
