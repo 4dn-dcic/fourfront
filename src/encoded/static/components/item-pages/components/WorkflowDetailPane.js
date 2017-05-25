@@ -314,7 +314,7 @@ class AnalysisStepDetailBody extends React.Component {
             <div className="col-sm-6 col-md-8 box">
                 <span className="text-600">Purpose{ purposeList.length > 1 ? 's' : '' }</span>
                 { React.createElement(elementType, { 'className' : 'text-400' }, purposeList.map(function(p, i){
-                    return <span className="text-capitalize">{ p }{ i !== purposeList.length - 1 ? ', ' : '' }</span>;
+                    return <span className="text-capitalize" key={p}>{ p }{ i !== purposeList.length - 1 ? ', ' : '' }</span>;
                 })) }
             </div>
         );
