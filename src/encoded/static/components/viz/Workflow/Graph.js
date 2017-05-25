@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-var d3 = require('d3');
+import * as d3 from 'd3';
 import { Fade } from 'react-bootstrap';
 import { console, isServerSide } from './../../util';
 

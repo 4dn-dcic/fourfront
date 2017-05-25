@@ -1,9 +1,9 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var url = require('url');
-var _ = require('underscore');
+import url from 'url';
+import _ from 'underscore';
 import { console, isServerSide } from './../../util';
 
 
