@@ -1,9 +1,9 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
-var d3 = require('d3');
+import _ from 'underscore';
+import * as d3 from 'd3';
 import { console } from './../../util';
 
 import Node from './Node';

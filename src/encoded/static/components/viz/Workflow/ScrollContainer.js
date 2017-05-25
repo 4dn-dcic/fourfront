@@ -1,8 +1,8 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
+import _ from 'underscore';
 
 
 export default class ScrollContainer extends React.Component {
