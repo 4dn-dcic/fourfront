@@ -79,9 +79,9 @@ export default class CursorComponent extends React.Component {
 
     static defaultProps = {
         'cursorOffset'      : {
-                                x: 0,
-                                y: 0
-                            },
+            x: 0,
+            y: 0
+        },
         'scale'             : 3,
         'visibilityMargin'  : null,
         'style'             : null,

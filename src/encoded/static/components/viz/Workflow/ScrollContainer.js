@@ -15,7 +15,7 @@ export default class ScrollContainer extends React.Component {
                 <div className="scroll-container" style={{ width : Math.max(this.props.contentWidth, fullWidth), height: fullHeight }}>
                 {
                     React.Children.map(this.props.children, (child)=>{
-                        return React.cloneElement(child, _.omit(this.props, 'children'))
+                        return React.cloneElement(child, _.omit(this.props, 'children'));
                     })
                 }
                 </div>

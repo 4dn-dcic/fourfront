@@ -55,21 +55,21 @@ export default class Graph extends React.Component {
             'inputOf'           : PropTypes.object,  // Unused currently
             'description'       : PropTypes.string,
             'meta'              : PropTypes.oneOfType([
-                                    PropTypes.object,
-                                    PropTypes.shape({
-                                        'target' : PropTypes.arrayOf(PropTypes.shape({
-                                            'name' : PropTypes.string.isRequired,
-                                            'type' : PropTypes.string.isRequired,
-                                            'step' : PropTypes.string
-                                        }))
-                                    })
-                                ])
-                            })).isRequired,
+                PropTypes.object,
+                PropTypes.shape({
+                    'target' : PropTypes.arrayOf(PropTypes.shape({
+                        'name' : PropTypes.string.isRequired,
+                        'type' : PropTypes.string.isRequired,
+                        'step' : PropTypes.string
+                    }))
+                })
+            ])
+        })).isRequired,
         'edges'             : PropTypes.arrayOf(PropTypes.shape({
             'source'            : PropTypes.object.isRequired,
             'target'            : PropTypes.object.isRequired,
             'capacity'          : PropTypes.string
-                            })).isRequired
+        })).isRequired
     }
 
     static defaultProps = {

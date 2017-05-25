@@ -309,7 +309,7 @@ export default class Legend extends React.Component {
     }
 
     render(){
-        return <LegendExpandContainer {...this.props} />
+        return <LegendExpandContainer {...this.props} />;
     }
 
 }
@@ -329,7 +329,7 @@ class LegendExpandContainer extends React.Component {
         if (this.props.expandable){
             this.state = {
                 'expanded' : props.defaultExpanded
-            }
+            };
         }
     }
 

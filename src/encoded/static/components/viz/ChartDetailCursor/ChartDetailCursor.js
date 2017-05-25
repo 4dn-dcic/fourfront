@@ -246,7 +246,7 @@ const initialDetailCursorState = {
     'bodyComponent' : Body,
     'actions' : null,
     'xCoordOverride' : null
-}
+};
 
 
 export default class ChartDetailCursor extends React.Component {

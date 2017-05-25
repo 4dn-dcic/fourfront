@@ -200,7 +200,7 @@ class Bar extends React.Component {
                 //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
                 return pastNode;
             })
-        )
+        );
 
         var className = "chart-bar";
         if (!this.props.canBeHighlighted) className += ' no-highlight';

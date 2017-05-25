@@ -62,7 +62,7 @@ export default class NodesLayer extends React.Component {
                                 key : node.id || node.name || i
                             });
                             if (p.nodeElement) return React.cloneElement(p.nodeElement, nodeProps);
-                            else return <Node {...nodeProps} />
+                            else return <Node {...nodeProps} />;
                         })
                     }
                 </div>

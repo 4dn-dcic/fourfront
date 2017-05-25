@@ -59,10 +59,11 @@ export default class StateContainer extends React.Component {
     componentWillReceiveProps(nextProps){
 
         var newState = {};
+        var foundNode;
 
         if (nextProps.checkHrefForSelectedNode){
             // Update selectedNode from location hash.
-            var foundNode = findNodeFromHref(this.href(nextProps.href, nextProps.checkWindowLocationHref), nextProps.nodes);
+            foundNode = findNodeFromHref(this.href(nextProps.href, nextProps.checkWindowLocationHref), nextProps.nodes);
             if (foundNode){
                 newState.selectedNode = foundNode;
             } else {
@@ -75,7 +76,7 @@ export default class StateContainer extends React.Component {
         if (typeof newState.selectedNode === 'undefined' && this.state.selectedNode){
             var find = { 'name' : this.state.selectedNode.name };
             if (this.state.selectedNode.id) find.id = this.state.selectedNode.id;
-            var foundNode = _.findWhere(this.props.nodes, find);
+            foundNode = _.findWhere(this.props.nodes, find);
             if (foundNode){
                 newState.selectedNode = foundNode;
             } else {
@@ -114,7 +115,7 @@ export default class StateContainer extends React.Component {
                 React.Children.map(this.props.children, (child)=>{
                     return React.cloneElement(child, _.extend(
                         _.omit(this.props, 'children'), { onNodeClick : this.handleNodeClick }, this.state
-                    ))
+                    ));
                 })
             }
             </div>
