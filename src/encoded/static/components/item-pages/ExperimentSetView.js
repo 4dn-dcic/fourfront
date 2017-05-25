@@ -33,7 +33,7 @@ export default class ExperimentSetView extends React.Component {
     static propTypes = {
         schemas : PropTypes.object,
         context : PropTypes.object,
-        expSetFilters : PropTypes.object,     // Set via app.js <ContentView...>
+        expSetFilters : PropTypes.object.isRequired,     // Set via app.js <ContentView...>
         expIncompleteFacets : PropTypes.array,
         facets : PropTypes.array
     }
@@ -133,7 +133,7 @@ export default class ExperimentSetView extends React.Component {
         var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
 
-        console.log('render ExperimentSet view');
+        if (this.props.debug) console.log('render ExperimentSet view');
 
         return (
             <div className={itemClass}>
@@ -205,7 +205,7 @@ class ExperimentSetHeader extends React.Component {
     }
 
     render() {
-        console.log('render ExperimentSetHeader');
+        if (this.props.debug) console.log('render ExperimentSetHeader');
         return (
             <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href} schemas={this.props.schemas}>
                 <ItemHeader.TopRow />

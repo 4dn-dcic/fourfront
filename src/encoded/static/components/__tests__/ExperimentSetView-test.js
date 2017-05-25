@@ -35,7 +35,7 @@ describe('Testing ExperimentSetView', function() {
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
 
-        testView = TestUtils.renderIntoDocument(<ExperimentSetView context={context} schemas={schemas} />);
+        testView = TestUtils.renderIntoDocument(<ExperimentSetView context={context} schemas={schemas} expSetFilters={{}} />);
 
 
         //jest.runAllTimers();
@@ -75,28 +75,12 @@ describe('Testing ExperimentSetView', function() {
     });
 
     it('Has tab bar with tabs.', function() {
-        var checkIfHaveHeaders = ['Experiment', 'Biosample', 'File'].sort(); // Sort b/c indices matter
-        
-        // Check if built-in header definitions match headers to be checked in rendered table.
-        expect(
-            _.intersection(
-                _.map(
-                    ExperimentsTable.builtInHeaders(context.experimentset_type),
-                    function(h){ return h.visibleTitle || h.title; }
-                ).sort(),
-                checkIfHaveHeaders
-            )
-        ).toEqual(checkIfHaveHeaders);
 
-        // Then ensure they're rendered.
-        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testView, 'expset-headers');
-        var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');
-        expect(
-            _.intersection(
-                _.pluck(headers, 'innerHTML').sort(),
-                checkIfHaveHeaders
-            )
-        ).toEqual(checkIfHaveHeaders);
+        var tabBar = TestUtils.scryRenderedDOMComponentsWithClass(testView, 'rc-tabs-bar');
+        var tabButtons = TestUtils.scryRenderedDOMComponentsWithClass(testView, 'rc-tabs-tab');
+        expect(tabBar.length).toBeGreaterThan(0);
+        expect(tabButtons.length).toBeGreaterThan(1);
+
     });
 
 /*

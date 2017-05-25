@@ -120,9 +120,6 @@ export class ItemFooterRow extends React.Component {
             aliases             = this.aliases(),
             alternateAccessions = this.alternateAccessions();
 
-        console.log(alternateAccessions);
-
-        
         return (
             <div className="row">
 

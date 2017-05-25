@@ -29,7 +29,8 @@ export default class Item extends React.Component {
         schemas : PropTypes.any.isRequired,
         listActionsFor : PropTypes.func.isRequired,
         href : PropTypes.string.isRequired,
-        session : PropTypes.bool.isRequired
+        session : PropTypes.bool.isRequired,
+        expSetFilters : PropTypes.object.isRequired
     }
 
     constructor(props){
