@@ -92,7 +92,7 @@ class TableEntry extends React.Component {
                 setTimeout(()=>{
                     if (link === 'top' || link === 'bottom') link = '';
                     this.props.navigate('#' + link, { 'replace' : true, 'skipRequest' : true });
-                }, link === 'top' || origScrollTop <= 40  ? 800 : 0);
+                }, link === 'top' || (document && document.body && document.body.scrollTop <= 40) ? 800 : 0);
             }
         });
 

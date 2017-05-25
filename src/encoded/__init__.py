@@ -223,7 +223,7 @@ def app_version(config):
 
         config.registry.settings['snovault.app_version'] = version
 
-
+'''
 def add_schemas_to_html_responses(config):
 
     from pyramid.events import BeforeRender
@@ -242,8 +242,6 @@ def add_schemas_to_html_responses(config):
         request = event.get('request')
         if request is not None:
             
-            # 'null_renderer' means this is a subrequest. Ignore it.
-            # If request is not for an HTML page, ignore also.
             if event.get('renderer_name') != 'null_renderer' and ('application/html' in request.accept or 'text/html' in request.accept):
                 #print('\n\n\n\n')
                 #print(event.keys())
@@ -251,14 +249,10 @@ def add_schemas_to_html_responses(config):
                 #print(should_transform(request, request.response))
                 #print(request.response.content_type)
 
-                # If we're not returning an @type, @id, etc. then we're on some niche non-portal view.
-                # For example, an ES indexing request or something. So we check for these common values to ensure we add only on page frame requests.
-                # If for some reason it doesn't get added (niche static page, for example), front-end will fallback to fetching this via AJAX.
                 if event.rendering_val.get('@type') is not None and event.rendering_val.get('@id') is not None and event.rendering_val.get('schemas') is None:
                     schemasDict = {
                         k:v for k,v in schemas(None, request).items() if k not in exclude_schema_keys
                     }
-                    # Trim schemas a little to decrease size.
                     for schema in schemasDict.values():
                         if schema.get('@type') is not None:
                             del schema['@type']
@@ -280,7 +274,7 @@ def add_schemas_to_html_responses(config):
                     event.rendering_val['schemas'] = schemasDict
 
     config.add_subscriber(add_schemas, BeforeRender)
-
+'''
 
 
 def main(global_config, **local_config):
@@ -313,7 +307,7 @@ def main(global_config, **local_config):
     config.commit()  # commit so search can override listing
 
     # Render an HTML page to browsers and a JSON document for API clients
-    config.include(add_schemas_to_html_responses)
+    #config.include(add_schemas_to_html_responses)
     config.include('.renderers')
     config.include('.authentication')
     config.include('.server_defaults')
@@ -366,3 +360,4 @@ def main(global_config, **local_config):
         load_workbook(app, workbook_filename, docsdir, test=load_test_only)
 
     return app
+    
