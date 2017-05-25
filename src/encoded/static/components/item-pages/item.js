@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Panel } from 'react-bootstrap';
 import url from 'url';
 import * as globals from './../globals';
@@ -23,6 +24,13 @@ import AuditTabView from './components/AuditTabView';
  * @extends {React.Component}
  */
 export default class Item extends React.Component {
+
+    static propTypes = {
+        schemas : PropTypes.any.isRequired,
+        listActionsFor : PropTypes.func.isRequired,
+        href : PropTypes.string.isRequired,
+        session : PropTypes.bool.isRequired
+    }
 
     constructor(props){
         super(props);

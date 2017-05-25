@@ -272,8 +272,7 @@ var FacetList = search.FacetList = React.createClass({
     },
 
     render: function() {
-        var {context, term} = this.props;
-        var loggedIn = this.context.session;
+        var { context, term, session } = this.props;
 
         // Get all facets, and "normal" facets, meaning non-audit facets
         var facets = this.props.facets;
@@ -328,7 +327,7 @@ var FacetList = search.FacetList = React.createClass({
                         </div>
                     </div>
                     {facets.map(facet => {
-                        if ((hideTypes && facet.field == 'type') || (!loggedIn && facet.field.substring(0, 6) === 'audit.')) {
+                        if ((hideTypes && facet.field == 'type') || (!session && facet.field.substring(0, 6) === 'audit.')) {
                             return <span key={facet.field} />;
                         } else {
                             return <Facet {...this.props} key={facet.field} facet={facet} filters={filters}

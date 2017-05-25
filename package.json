@@ -19,11 +19,19 @@
     "setupFiles": [
       "../../../jest/environment.js"
     ],
+    "timers" : "fake",
     "unmockedModulePathPatterns": [
       "node_modules/react",
       "node_modules/underscore",
       "libs/react-patches",
       "jsdom"
+    ],
+    "coveragePathIgnorePatterns" : [
+      "/node_modules/",
+      "/jest/",
+      "/src/encoded/static/store.js",
+      "/src/encoded/static/components/util/layout.js",
+      "/src/encoded/static/components/audit.js"
     ],
     "collectCoverage": true
   },
@@ -40,7 +48,7 @@
     "coveralls": "^2.11.12",
     "gulp": "^3.9.1",
     "gulp-util": "^3.0.7",
-    "jest-cli": "^12.0.1",
+    "jest-cli": "^20.0.4",
     "jsdom": "^8.4.0",
     "json-loader": "^0.5.4",
     "sinon": "^1.17.6",

@@ -1020,6 +1020,8 @@ export default class App extends React.Component {
         // check error status
         var status;
         var route = currRoute[currRoute.length-1];
+
+
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
             if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads' && route != 'submissions'){
@@ -1038,6 +1040,23 @@ export default class App extends React.Component {
             console.log(this.state.user_actions);
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
+
+        // Object of common props passed to all content_views.
+
+        let commonContentViewProps = {
+            context : context,
+            schemas : this.state.schemas,
+            session : this.state.session,
+            href : this.props.href,
+            navigate : this.navigate,
+            expSetFilters : this.props.expSetFilters,
+            key : key,
+            uploads : this.state.uploads,
+            updateUploads : this.updateUploads,
+            listActionsFor : this.listActionsFor,
+            updateUserInfo : this.updateUserInfo
+        };
+
         // first case is fallback
         if (canonical === "about:blank"){
             title = portal.portal_title;
@@ -1061,16 +1080,7 @@ export default class App extends React.Component {
                 if (ContentView){
                     content = (
                         <Action
-                            context={context}
-                            schemas={this.state.schemas}
-                            expSetFilters={this.props.expSetFilters}
-                            uploads={this.state.uploads}
-                            updateUploads={this.updateUploads}
-                            expIncompleteFacets={this.props.expIncompleteFacets}
-                            session={this.state.session}
-                            key={key}
-                            navigate={this.navigate}
-                            href={this.props.href}
+                            {...commonContentViewProps}
                             edit={actionList[0] == 'edit'}
                             create={actionList[0] == 'create'}
                         />
@@ -1091,20 +1101,7 @@ export default class App extends React.Component {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
                 content = (
-                    <ContentView
-                        context={context}
-                        schemas={this.state.schemas}
-                        expSetFilters={this.props.expSetFilters}
-                        expIncompleteFacets={this.props.expIncompleteFacets}
-                        updateUserInfo={this.updateUserInfo}
-                        listActionsFor={this.listActionsFor}
-                        uploads={this.state.uploads}
-                        updateUploads={this.updateUploads}
-                        session={this.state.session}
-                        key={key}
-                        navigate={this.navigate}
-                        href={this.props.href}
-                    />
+                    <ContentView {...commonContentViewProps} />
                 );
                 title = context.display_title || context.title || context.name || context.accession || context['@id'];
                 if (title && title != 'Home') {
@@ -1114,7 +1111,7 @@ export default class App extends React.Component {
                 }
             } else {
                 // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null}/>;
+                content = <ErrorPage status={null} />;
                 title = 'Error';
             }
         }

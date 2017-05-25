@@ -7,9 +7,9 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 
-describe('Testing experiments-table.js', function() {
+describe('Testing ExperimentSetView', function() {
     var sinon, server, React, TestUtils;
-    var expFuncs, context, schemas, _, ExperimentSetView, testView;
+    var expFuncs, context, schemas, _, ExperimentSetView, testView, ExperimentsTable;
 
     beforeAll(function() {
         React = require('react');
@@ -40,6 +40,7 @@ describe('Testing experiments-table.js', function() {
         );
 
         ExperimentSetView = require('../item-pages/ExperimentSetView').default;
+        ExperimentsTable = require('../experiments-table').default;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
@@ -58,7 +59,7 @@ describe('Testing experiments-table.js', function() {
         return;
     });
     
-    it('Same first test from ExperimentsTable test to ensure we have table.', function() {
+    it('Same first test from ExperimentsTable; test to ensure we have table.', function() {
         var checkIfHaveHeaders = ['Experiment', 'Biosample', 'File'].sort(); // Sort b/c indices matter
         
         // Check if built-in header definitions match headers to be checked in rendered table.
@@ -73,7 +74,7 @@ describe('Testing experiments-table.js', function() {
         ).toEqual(checkIfHaveHeaders);
 
         // Then ensure they're rendered.
-        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testExperimentsTable, 'expset-headers');
+        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testView, 'expset-headers');
         var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');
         expect(
             _.intersection(
