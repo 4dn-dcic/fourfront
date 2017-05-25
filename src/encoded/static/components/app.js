@@ -406,6 +406,8 @@ export default class App extends React.Component {
         if (this.state.schemas !== null && !forceFetch){
             // We've already loaded these successfully (hopefully)
             if (typeof callback === 'function') callback(this.state.schemas);
+            console.info('Schemas available already.');
+            Filters.getSchemas = () => this.state.schemas;
             return this.state.schemas;
         }
         ajax.promise('/profiles/').then(data => {
@@ -418,6 +420,7 @@ export default class App extends React.Component {
                     // Rebuild tooltips because they likely use descriptions from schemas
                     ReactTooltip.rebuild();
                     if (typeof callback === 'function') callback(data);
+                    console.info('Loaded schemas');
                 });
             }
         });

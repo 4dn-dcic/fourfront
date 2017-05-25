@@ -29,16 +29,6 @@ describe('Testing ExperimentSetView', function() {
             ]
         );
 
-        server.respondWith(
-            "GET",
-            '/profiles/?format=json',
-            [
-                200, 
-                { "Content-Type" : "application/json" },
-                '<html></html>' // Don't actually need content JSON here for test.
-            ]
-        );
-
         ExperimentSetView = require('../item-pages/ExperimentSetView').default;
         ExperimentsTable = require('../experiments-table').default;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
@@ -60,6 +50,31 @@ describe('Testing ExperimentSetView', function() {
     });
     
     it('Same first test from ExperimentsTable; test to ensure we have table.', function() {
+        var checkIfHaveHeaders = ['Experiment', 'Biosample', 'File'].sort(); // Sort b/c indices matter
+        
+        // Check if built-in header definitions match headers to be checked in rendered table.
+        expect(
+            _.intersection(
+                _.map(
+                    ExperimentsTable.builtInHeaders(context.experimentset_type),
+                    function(h){ return h.visibleTitle || h.title; }
+                ).sort(),
+                checkIfHaveHeaders
+            )
+        ).toEqual(checkIfHaveHeaders);
+
+        // Then ensure they're rendered.
+        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testView, 'expset-headers');
+        var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');
+        expect(
+            _.intersection(
+                _.pluck(headers, 'innerHTML').sort(),
+                checkIfHaveHeaders
+            )
+        ).toEqual(checkIfHaveHeaders);
+    });
+
+    it('Has tab bar with tabs.', function() {
         var checkIfHaveHeaders = ['Experiment', 'Biosample', 'File'].sort(); // Sort b/c indices matter
         
         // Check if built-in header definitions match headers to be checked in rendered table.
