@@ -12,7 +12,7 @@ import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import Navigation from './navigation';
-import * as Action from './action';
+import Action from './action';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
@@ -601,7 +601,7 @@ export default class App extends React.Component {
                 'href': href
             };
             if (event.state){
-                d.context = event.state;       
+                d.context = event.state;
             }
             store.dispatch({
                 type: d
@@ -671,7 +671,7 @@ export default class App extends React.Component {
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
         if(idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
-            
+
             ajax.promise('/login', 'POST', {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
