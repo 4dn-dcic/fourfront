@@ -2,6 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'underscore';
 import { ItemDetailList, TooltipInfoIconContainer } from './ItemDetailList';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
@@ -186,7 +187,6 @@ class FileDetailBody extends React.Component {
 
         var title = file.href ? <span>Download</span> : 'File Name';
         var disabled = !this.canDownload();
-        var content = file.filename || file.href;
         var content = file.href ?
             <FileDownloadButton title={title} href={file.href} disabled={disabled} filename={file.filename} />
             :

@@ -21,7 +21,7 @@ export class FlexibleCharacterCountBox extends React.Component {
         this.onClick = _.debounce(this.onClick.bind(this), 300, true);
         this.state = {
             'expanded' : props.defaultExpanded || false
-        }
+        };
     }
 
     onClick(){
@@ -81,10 +81,10 @@ class FlexibleCharacterCountString extends React.Component {
 
     render(){
         var expanded = this.isExpanded(this.props);
-        if (expanded) return props.string;
+        if (expanded) return this.props.string;
         else {
-            if (typeof props.expandCharacters === 'number' && typeof props.string === 'string'){
-                return props.string.slice(0, props.expandCharacters);
+            if (typeof this.props.expandCharacters === 'number' && typeof this.props.string === 'string'){
+                return this.props.string.slice(0, this.props.expandCharacters);
             } else {
                 throw new Error('props.string must be a string and props.expandCharacters must be a number.');
             }
@@ -235,14 +235,14 @@ export class FlexibleDescriptionBox extends React.Component {
     toggleDescriptionExpand(){
         this.setState({
             descriptionWhiteSpace : 'normal',
-  		    descriptionExpanded: !this.state.descriptionExpanded
+            descriptionExpanded: !this.state.descriptionExpanded
         }, ()=>{
             if (!this.state.descriptionExpanded) {
                 // Delay whiteSpace style since can't transition it w/ CSS3
                 setTimeout(()=>{
                     this.setState({
                         descriptionWhiteSpace : 'nowrap'
-                    })
+                    });
                 }, 350);
             }
         });

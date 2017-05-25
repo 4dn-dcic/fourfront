@@ -32,15 +32,18 @@ export const defaultProps = {
             }
         }
     }
-}    
+};
+
 
 export function getDefaultProps(){
     return _.clone(defaultProps);
 }
 
+
 export function sortedSections(){
     if (!this.props.context || !this.props.context.content) return null;
 }
+
 
 export function renderSections(renderMethod, context){
     if (!context || !context.content) return null;
@@ -60,42 +63,32 @@ export function renderSections(renderMethod, context){
         .value();
 }
 
+
 export function parseSectionsContent(context = this.props.context){
 
-    return _.extend(
-        {},
-        context,
-        {
-            'content' : _(context.content).chain()
-                .pairs()
-                .map(function(sectionPair){
-                    var s = sectionPair[1];
-                    if (s.filetype === 'md'){
-                        var content = compiler(s.content, {
-                            'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
-                                .map(function(type){
-                                    return [type, {
-                                        component : Entry.Heading,
-                                        props : { 'type' : type }
-                                    }];
-                                })
-                                .object()
-                                .value()
-                            }
-                        );
-                        s =  _.extend(
-                            {}, s, {
-                                'content' : content
-                            }
-                        );
-                    }
-                    return [sectionPair[0], s];
-                })
-                .object()
-                .value()
-        }
-    );
+    return _.extend({}, context, {
+        'content' : _(context.content).chain().pairs().map(function(sectionPair){ // [key, value] pairs
+            var s = sectionPair[1];
+            if (s.filetype === 'md'){
+                var content = compiler(s.content, {
+                    'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
+                        .map(function(type){
+                            return [type, {
+                                component : Entry.Heading,
+                                props : { 'type' : type }
+                            }];
+                        })
+                        .object()
+                        .value()
+                });
+                s =  _.extend({}, s, { 'content' : content });
+            }
+            return [sectionPair[0], s];
+        }).object().value()
+    });
 }
+
+
 
 /**
  * Converts links to other files into links to sections from a React element and its children.
@@ -156,6 +149,8 @@ export function correctRelativeLinks(elem, context, depth = 0){
     }
 }
 
+
+
 export const render = {
 
     base : function(){
@@ -197,7 +192,9 @@ export const render = {
             </Wrapper>
         );
     },
-}
+};
+
+
 
 export class Wrapper extends React.Component {
 
@@ -205,7 +202,7 @@ export class Wrapper extends React.Component {
         'contentColSize' : 12,
         'tableOfContents' : false,
         'tocListStyles' : ['decimal', 'lower-alpha', 'lower-roman']
-    }
+    };
 
     contentColSize(){
         return Math.min(
@@ -332,7 +329,7 @@ export const Entry = {
         );
     }
 
-}
+};
 
 class EntryExample extends React.Component {
 

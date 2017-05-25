@@ -2,6 +2,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'querystring';
@@ -370,7 +371,7 @@ function findFiles(fileFormats) {
     return fileStats;
 }
 
-var Term = React.createClass({
+export const Term = createReactClass({
 
     componentWillMount: function(){
         var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', this.props.facet['field'], this.props.term['key']);
@@ -402,10 +403,8 @@ var Term = React.createClass({
     }
 });
 
-export var Term;
-
 //Dropdown facet for experimentset_type
-var DropdownFacet = React.createClass({
+export const DropdownFacet = createReactClass({
     getDefaultProps: function() {
         return {width: 'inherit'};
     },
@@ -443,14 +442,12 @@ var DropdownFacet = React.createClass({
     }
 });
 
-export var DropdownFacet;
-
 
 export class PageLimitSortController extends React.Component {
 
     static propTypes = {
-        href            : React.PropTypes.string.isRequired,
-        context         : React.PropTypes.object.isRequired,
+        href            : PropTypes.string.isRequired,
+        context         : PropTypes.object.isRequired,
     }
 
     /**
@@ -472,7 +469,7 @@ export class PageLimitSortController extends React.Component {
         return {
             'page' : (from / limit) + 1,
             'limit' : limit
-        }
+        };
     }
 
     static getSortColumnAndReverseFromURL(href){
@@ -491,7 +488,7 @@ export class PageLimitSortController extends React.Component {
         return {
             'sortColumn' : sortParam,
             'sortReverse' : reverse
-        }
+        };
     }
 
     constructor(props){
@@ -552,17 +549,13 @@ export class PageLimitSortController extends React.Component {
         var newHref = url.format(urlParts);
 
         this.setState({ 'changingPage' : true }, ()=>{
-            navigate(
-                newHref,
-                { 'replace' : true },
-                ()=>{
-                    this.setState({ 
-                        'sortColumn' : key,
-                        'sortReverse' : reverse,
-                        'changingPage' : false,
-                        'page' : 1
-                    }
-                );
+            navigate(newHref, { 'replace' : true }, ()=>{
+                this.setState({ 
+                    'sortColumn' : key,
+                    'sortReverse' : reverse,
+                    'changingPage' : false,
+                    'page' : 1
+                });
             });
         });
 
@@ -732,7 +725,7 @@ export class LimitAndPageControls extends React.Component {
 
                 </ButtonToolbar>
             </div>
-        )
+        );
     }
 
 }
@@ -939,12 +932,12 @@ export class ResultTableContainer extends React.Component {
 
     static propTypes = {
         // Props' type validation based on contents of this.props during render.
-        href            : React.PropTypes.string.isRequired,
-        context         : React.PropTypes.object.isRequired,
-        expSetFilters   : React.PropTypes.object.isRequired,
-        fileFormats     : React.PropTypes.array,
-        fileStats       : React.PropTypes.object,
-        targetFiles     : React.PropTypes.instanceOf(Set)
+        href            : PropTypes.string.isRequired,
+        context         : PropTypes.object.isRequired,
+        expSetFilters   : PropTypes.object.isRequired,
+        fileFormats     : PropTypes.array,
+        fileStats       : PropTypes.object,
+        targetFiles     : PropTypes.instanceOf(Set)
     }
 
     static defaultProps = {

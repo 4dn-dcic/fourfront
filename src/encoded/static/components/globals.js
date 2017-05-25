@@ -44,7 +44,7 @@ export function itemClass(context, htmlClass) {
         htmlClass += ' type-' + type;
     });
     return statusClass(context.status, htmlClass);
-};
+}
 
 export function statusClass(status, htmlClass) {
     htmlClass = htmlClass || '';
@@ -52,7 +52,7 @@ export function statusClass(status, htmlClass) {
         htmlClass += ' status-' + status.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g,'');
     }
     return htmlClass;
-};
+}
 
 export function validationStatusClass (status, htmlClass) {
     htmlClass = htmlClass || '';
@@ -60,7 +60,7 @@ export function validationStatusClass (status, htmlClass) {
         htmlClass += ' validation-status-' + status.toLowerCase().replace(/ /g, '-');
     }
     return htmlClass;
-};
+}
 
 export function truncateString (str, len) {
     if (str.length > len) {
@@ -70,13 +70,13 @@ export function truncateString (str, len) {
         str = (!isOneWord ? str.substr(0, str.lastIndexOf(' ')) : str) + '…'; // Back up to word boundary
     }
     return str;
-};
+}
 
 // Given an array of objects with @id properties, this returns the same array but with any
 // duplicate @id objects removed.
 export function uniqueObjectsArray(objects){ 
     return _.uniq(objects, false, function(o){ return o['@id']; } );
-};
+}
 
 export function bindEvent(el, eventName, eventHandler) {
     if (el.addEventListener) {
@@ -86,7 +86,7 @@ export function bindEvent(el, eventName, eventHandler) {
         // IE8 specific
         el.attachEvent('on' + eventName, eventHandler);
     }
-};
+}
 
 export function unbindEvent(el, eventName, eventHandler) {
     if (el.removeEventListener) {
@@ -96,7 +96,7 @@ export function unbindEvent(el, eventName, eventHandler) {
         // IE8 specific
         el.detachEvent('on' + eventName, eventHandler);
     }
-};
+}
 
 // Make the first character of the given string uppercase. Can be less fiddly than CSS text-transform.
 // http://stackoverflow.com/questions/1026069/capitalize-the-first-letter-of-string-in-javascript#answer-1026087
@@ -137,7 +137,7 @@ export function encodeVersion(context) {
         }
     }
     return encodevers;
-};
+}
 
 export const dbxref_prefix_map = {
     "UniProtKB": "http://www.uniprot.org/uniprot/",

@@ -1,2 +1,5 @@
 **/testdata
-**/lib
+src/encoded/static/components/lib
+src/encoded/static/components/util/patched-console.js
+src/encoded/static/components/util/analytics.js
+src/encoded/static/components/__tests__
