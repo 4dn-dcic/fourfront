@@ -28,6 +28,8 @@
             "enum": [
                 "bwaIndex",
                 "chromsizes",
+                "reference_fasta",
+                "juicer_format_restriction_site_file",
                 "other"
             ]
         }
@@ -35,6 +37,8 @@
     "file_format_file_extension": {
         "bwaIndex": ".bwaIndex.tgz",
         "chromsizes": ".chrom.sizes",
+        "reference_fasta": ".fasta.gz",
+        "juicer_format_restriction_site_file": ".txt",
         "other": ""
     }
 }
