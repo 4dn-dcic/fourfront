@@ -1,11 +1,11 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
-var Panel = require('react-bootstrap').Panel;
-var { ajax, console, DateUtility, object, isServerSide } = require('./../util');
-var globals = require('./../globals');
+import _ from 'underscore';
+import { Panel } from 'react-bootstrap';
+import { ajax, console, DateUtility, object, isServerSide } from './../util';
+import * as globals from './../globals';
 import ExperimentsTable from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView } from './components';
 import FacetList from './../facetlist';

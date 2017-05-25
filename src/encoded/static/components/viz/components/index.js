@@ -11,8 +11,8 @@
 
 
 module.exports.ActiveFiltersBar = require('./ActiveFiltersBar').default;
-module.exports.SVGFilters = require('./SVGFilters');
-module.exports.FetchingView = require('./FetchingView');
+export * from './SVGFilters';
+export * from './FetchingView';
 module.exports.Legend = require('./Legend').default;
 
 /**

@@ -1,22 +1,22 @@
 'use strict';
+
 var Registry = require('../libs/registry');
-var _ = require('underscore');
+import _ from 'underscore';
 
 // Item pages
-module.exports.content_views = new Registry();
+export const content_views = new Registry();
 
 // Panel detail views
-module.exports.panel_views = new Registry();
+export const panel_views = new Registry();
 
 // Listing detail views
-module.exports.listing_views = new Registry();
+export const listing_views = new Registry();
 
 // Cell name listing titles
-module.exports.listing_titles = new Registry();
-
+export const listing_titles = new Registry();
 
 // Graph detail view
-module.exports.graph_detail = new Registry();
+export const graph_detail = new Registry();
 
 // Document panel components
 // +---------------------------------------+
@@ -30,40 +30,39 @@ module.exports.graph_detail = new Registry();
 // +---------------------------------------+
 // | detail                                |
 // +---------------------------------------+
-var document_views = {};
+export const document_views = {};
 document_views.header = new Registry();
 document_views.caption = new Registry();
 document_views.preview = new Registry();
 document_views.file = new Registry();
 document_views.detail = new Registry();
-module.exports.document_views = document_views;
 
 
-var itemClass = module.exports.itemClass = function (context, htmlClass) {
+export function itemClass(context, htmlClass) {
     htmlClass = htmlClass || '';
     (context['@type'] || []).forEach(function (type) {
         htmlClass += ' type-' + type;
     });
     return statusClass(context.status, htmlClass);
-};
+}
 
-var statusClass = module.exports.statusClass = function (status, htmlClass) {
+export function statusClass(status, htmlClass) {
     htmlClass = htmlClass || '';
     if (typeof status == 'string') {
         htmlClass += ' status-' + status.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g,'');
     }
     return htmlClass;
-};
+}
 
-var validationStatusClass = module.exports.validationStatusClass = function (status, htmlClass) {
+export function validationStatusClass (status, htmlClass) {
     htmlClass = htmlClass || '';
     if (typeof status == 'string') {
         htmlClass += ' validation-status-' + status.toLowerCase().replace(/ /g, '-');
     }
     return htmlClass;
-};
+}
 
-module.exports.truncateString = function (str, len) {
+export function truncateString (str, len) {
     if (str.length > len) {
         str = str.replace(/(^\s)|(\s$)/gi, ''); // Trim leading/trailing white space
         var isOneWord = str.match(/\s/gi) === null; // Detect single-word string
@@ -71,13 +70,15 @@ module.exports.truncateString = function (str, len) {
         str = (!isOneWord ? str.substr(0, str.lastIndexOf(' ')) : str) + '…'; // Back up to word boundary
     }
     return str;
-};
+}
 
 // Given an array of objects with @id properties, this returns the same array but with any
 // duplicate @id objects removed.
-module.exports.uniqueObjectsArray = objects => _(objects).uniq(object =>  object['@id']);
+export function uniqueObjectsArray(objects){ 
+    return _.uniq(objects, false, function(o){ return o['@id']; } );
+}
 
-module.exports.bindEvent = function (el, eventName, eventHandler) {
+export function bindEvent(el, eventName, eventHandler) {
     if (el.addEventListener) {
         // Modern browsers
         el.addEventListener(eventName, eventHandler, false);
@@ -85,9 +86,9 @@ module.exports.bindEvent = function (el, eventName, eventHandler) {
         // IE8 specific
         el.attachEvent('on' + eventName, eventHandler);
     }
-};
+}
 
-module.exports.unbindEvent = function (el, eventName, eventHandler) {
+export function unbindEvent(el, eventName, eventHandler) {
     if (el.removeEventListener) {
         // Modern browsers
         el.removeEventListener(eventName, eventHandler, false);
@@ -95,7 +96,7 @@ module.exports.unbindEvent = function (el, eventName, eventHandler) {
         // IE8 specific
         el.detachEvent('on' + eventName, eventHandler);
     }
-};
+}
 
 // Make the first character of the given string uppercase. Can be less fiddly than CSS text-transform.
 // http://stackoverflow.com/questions/1026069/capitalize-the-first-letter-of-string-in-javascript#answer-1026087
@@ -104,7 +105,7 @@ String.prototype.uppercaseFirstChar = function(string) {
 };
 
 // Order that antibody statuses should be displayed
-module.exports.statusOrder = [
+export const statusOrder = [
     'eligible for new data',
     'not eligible for new data',
     'pending dcc review',
@@ -113,7 +114,7 @@ module.exports.statusOrder = [
     'not reviewed'
 ];
 
-module.exports.productionHost = {
+export const productionHost = {
     //'www.data.4dnucleome.org'                   :1, 
     //'data.4dnucleome.org'                       :1,
     'www.testportal.4dnucleome.org'             :1, 
@@ -121,13 +122,13 @@ module.exports.productionHost = {
     'fourfront-webdev.us-east-1.elasticbeanstalk.com':1,
 };
 
-var encodeVersionMap = module.exports.encodeVersionMap = {
+export const encodeVersionMap = {
     "ENCODE2": "2",
     "ENCODE3": "3"
 };
 
 // Determine the given object's ENCODE version
-module.exports.encodeVersion = function(context) {
+export function encodeVersion(context) {
     var encodevers = "";
     if (context.award && context.award.rfa) {
         encodevers = encodeVersionMap[context.award.rfa.substring(0,7)];
@@ -136,9 +137,9 @@ module.exports.encodeVersion = function(context) {
         }
     }
     return encodevers;
-};
+}
 
-module.exports.dbxref_prefix_map = {
+export const dbxref_prefix_map = {
     "UniProtKB": "http://www.uniprot.org/uniprot/",
     "HGNC": "http://www.genecards.org/cgi-bin/carddisp.pl?gene=",
     // ENSEMBL link only works for human

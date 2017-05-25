@@ -1,14 +1,14 @@
 'use strict';
 
-var React = require('react');
-var globals = require('./../globals');
-var _ = require('underscore');
-var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane } = require('./components');
+import React from 'react';
+import { itemClass, panel_views } from './../globals';
+import _ from 'underscore';
+import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
-var { console, object, DateUtility, Filters, isServerSide, navigate } = require('./../util');
+import { console, object, DateUtility, Filters, isServerSide, navigate } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-var { DropdownButton, MenuItem } = require('react-bootstrap');
+import { DropdownButton, MenuItem } from 'react-bootstrap';
 
 
 /**
@@ -103,10 +103,10 @@ export class WorkflowView extends React.Component {
     render() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
-        var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
+        var ic = itemClass(this.props.context, 'view-detail item-page-container');
 
         return (
-            <div className={itemClass}>
+            <div className={ic}>
 
                 <ItemPageTitle context={context} schemas={schemas} />
                 <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
@@ -382,4 +382,4 @@ class GraphSection extends React.Component {
 }
 
 
-globals.panel_views.register(WorkflowView, 'Workflow');
+panel_views.register(WorkflowView, 'Workflow');

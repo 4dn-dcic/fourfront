@@ -1,8 +1,8 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
+import _ from 'underscore';
 
 
 export default class ScrollContainer extends React.Component {
@@ -15,7 +15,7 @@ export default class ScrollContainer extends React.Component {
                 <div className="scroll-container" style={{ width : Math.max(this.props.contentWidth, fullWidth), height: fullHeight }}>
                 {
                     React.Children.map(this.props.children, (child)=>{
-                        return React.cloneElement(child, _.omit(this.props, 'children'))
+                        return React.cloneElement(child, _.omit(this.props, 'children'));
                     })
                 }
                 </div>

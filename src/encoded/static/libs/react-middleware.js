@@ -1,6 +1,7 @@
 'use strict';
-var React = require('react');
-var ReactDOMServer = require('react-dom/server');
+
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 var doctype = '<!DOCTYPE html>\n';
 var transformResponse = require('subprocess-middleware').transformResponse;
 var fs = require('fs');

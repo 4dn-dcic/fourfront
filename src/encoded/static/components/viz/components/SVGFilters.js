@@ -1,22 +1,20 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 
-module.exports = React.createClass({
+export class SVGFilters extends React.Component {
 
-    getDefaultProps : function(){
-        return {
-            'enabled' : true,
-            'wrapInOwnSVG' : true,
-            'includeFilters' : ['svg-filter-highlight', 'svg-filter-brightness']
-        };
-    },
+    static defaultProps = {
+        'enabled' : true,
+        'wrapInOwnSVG' : true,
+        'includeFilters' : ['svg-filter-highlight', 'svg-filter-brightness']
+    }
 
-    shouldComponentUpdate : function(){
+    shouldComponentUpdate(){
         return false; // We never need to update this. Let's improve performance a little bit instead of re-rendering.
-    },
+    }
 
-    renderFilters : function(){
+    renderFilters(){
         var filterComponents = [];
         this.props.includeFilters.forEach(function(filterID){
             if (filterID === 'svg-filter-highlight'){
@@ -51,12 +49,13 @@ module.exports = React.createClass({
             }
         });
         return <defs>{ filterComponents }</defs>;
-    },
+    }
 
-    render : function(){
+    render(){
         if (!this.props.enabled) return null;
         if (this.props.wrapInOwnSVG){
             return <svg id="svg-filters" height={0} width={0}>{ this.renderFilters() }</svg>;
         } else return this.renderFilters();
     }
-});
+
+}

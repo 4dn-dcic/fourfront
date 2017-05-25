@@ -10,25 +10,22 @@ var Collapse = require('react-bootstrap').Collapse;
 
 /**
  * A single Announcement block/view.
- * 
- * @namespace
- * @type {Component}
- * @memberof module:static-pages/components.Announcements
- * @private
  */
-var Announcement = React.createClass({
-    getInitialState: function() {
-        return {
-            active: true
-        };
-    },
+class Announcement extends React.Component {
 
-    handleToggle: function(e) {
+    constructor(props){
+        super(props);
+        this.handleToggle = this.handleToggle.bind(this);
+        this.render = this.render.bind(this);
+        this.state = { active : true };
+    }
+
+    handleToggle(e) {
         e.preventDefault();
         this.setState({active: !this.state.active});
-    },
+    }
 
-    render: function() {
+    render() {
         var title = this.props.content.title || "";
         var author = this.props.content.author || "";
         var date = this.props.content.date || "";
@@ -70,12 +67,18 @@ var Announcement = React.createClass({
             </div>
         );
     }
-});
 
+}
 
-
-var Announcements = module.exports = React.createClass({
-    render : function(){
+/**
+ * Component which shows currents announcements.
+ * Announcements are (temporarily) currently stored in src/encoded/static/data/announcements_data.js.
+ * 
+ * @prop {string} className - Outer <div> element's className
+ * @prop {string} id - Outer <div> element's id attribute.
+ */
+export class Announcements extends React.Component {
+    render(){
         return (
             <div className={this.props.className} id={this.props.id}>{
                 announcements_data.map(function(announce){
@@ -86,4 +89,4 @@ var Announcements = module.exports = React.createClass({
             }</div>
         );
     }
-});
+}

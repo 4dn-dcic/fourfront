@@ -1,13 +1,12 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var d3 = require('d3');
-var vizUtil = require('./../utilities');
-var { expFxn, Filters, console, object, isServerSide } = require('./../../util');
-var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
-var CursorComponent = require('./CursorComponent');
-var { Button } = require('react-bootstrap');
+import React from 'react';
+import _ from 'underscore';
+import * as d3 from 'd3';
+import * as vizUtil from './../utilities';
+import { expFxn, Filters, console, object, isServerSide } from './../../util';
+import CursorComponent from './CursorComponent';
+import { Button } from 'react-bootstrap';
 
 /**
  * @ignore
@@ -247,7 +246,7 @@ const initialDetailCursorState = {
     'bodyComponent' : Body,
     'actions' : null,
     'xCoordOverride' : null
-}
+};
 
 
 export default class ChartDetailCursor extends React.Component {

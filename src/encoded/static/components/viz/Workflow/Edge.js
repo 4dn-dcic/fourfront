@@ -1,9 +1,9 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
-var d3 = require('d3');
+import _ from 'underscore';
+import * as d3 from 'd3';
 import { console } from './../../util';
 
 import Node from './Node';
@@ -58,22 +58,23 @@ export default class Edge extends React.Component {
             y : edge.target.y
         };
 
+        var path;
         if (edgeStyle === 'straight'){
-            var path = d3.path();
+            path = d3.path();
             path.moveTo(startPt.x, startPt.y);
             path.lineTo(endPt.x, endPt.y);
             path.closePath();
             return path.toString();
         }
         if (edgeStyle === 'curve'){
-            var path = d3.path();
+            path = d3.path();
             path.moveTo(startPt.x, startPt.y);
             path.lineTo(
                 startPt.x + ((endPt.x - startPt.x) / 2) - radius,
                 startPt.y
             );
 
-            var arcYOffset = Math.min(Math.max(endPt.y - startPt.y, -radius), radius)
+            var arcYOffset = Math.min(Math.max(endPt.y - startPt.y, -radius), radius);
 
             path.arcTo(
                 startPt.x + ((endPt.x - startPt.x) / 2),

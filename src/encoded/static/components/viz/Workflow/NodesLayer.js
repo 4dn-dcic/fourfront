@@ -1,10 +1,10 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
+import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
 import { console, Filters } from './../../util';
-var ReactTooltip = require('react-tooltip');
 
 import Node from './Node';
 
@@ -62,7 +62,7 @@ export default class NodesLayer extends React.Component {
                                 key : node.id || node.name || i
                             });
                             if (p.nodeElement) return React.cloneElement(p.nodeElement, nodeProps);
-                            else return <Node {...nodeProps} />
+                            else return <Node {...nodeProps} />;
                         })
                     }
                 </div>
