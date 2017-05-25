@@ -1,17 +1,17 @@
 'use strict';
 // Entry point for browser, compiled into bundle[.chunkHash].js.
-require('./libs/react-patches');
-var React = require('react');
-var _ = require('underscore');
-var ReactDOM = require('react-dom');
+
+import React from 'react';
+import _ from 'underscore';
+import ReactDOM from 'react-dom';
 var ReactMount = require('react-dom/lib/ReactMount');
 ReactMount.allowFullPageRender = true;
 
 var App = require('./components');
 var domready = require('domready');
-var store = require('./store');
+import * as store from './store';
 var { Provider, connect } = require('react-redux');
-var { JWT, Filters } = require('./components/util');
+import { JWT, Filters } from './components/util';
 
 
 /** 

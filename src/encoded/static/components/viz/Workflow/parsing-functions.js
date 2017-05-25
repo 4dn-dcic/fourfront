@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('underscore');
+import _ from 'underscore';
 
 
 export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){

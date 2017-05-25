@@ -317,7 +317,7 @@ export function filtersToHref(expSetFilters, currentHref, page = null, limit = n
         if (parts.query && typeof parts.query.sort === 'string'){
             if (parts.query.sort.charAt(0) === '-'){
                 sortReverse = true;
-                sortColumn = part.query.sort.slice(1);
+                sortColumn = parts.query.sort.slice(1);
             } else {
                 sortColumn = parts.query.sort;
             }

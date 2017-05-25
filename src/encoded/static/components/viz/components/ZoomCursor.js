@@ -1,19 +1,19 @@
 'use strict';
 
 var React = require('react');
+import createReactClass from 'create-react-class';
 var ReactDOM = require('react-dom');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
 var { console, object, isServerSide, layout } = require('./../../util');
 
 /**
- * Currently Unused
- * ToDo: Refactor and make inherit from CursorComponent
+ * Informed by https://github.com/CarMax/react-cursor-zoom/blob/master/src/cursor-zoom.jsx, for use on existing components (SVGs).
  * 
+ * @deprecated
+ * @class ZoomCursor
  */
-
-/** Informed by https://github.com/CarMax/react-cursor-zoom/blob/master/src/cursor-zoom.jsx, for use on existing components (SVGs).  */
-var ZoomCursor = React.createClass({
+var ZoomCursor = createReactClass({
 
     getDefaultProps : function(){
         return {
@@ -160,7 +160,7 @@ var ZoomCursor = React.createClass({
     },
 
     statics : {
-        Magnifier : React.createClass({
+        Magnifier : createReactClass({
             
             getDefaultProps : function(){
                 return {

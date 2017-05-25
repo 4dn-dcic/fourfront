@@ -143,7 +143,7 @@ export default class Aggregator extends React.Component {
                     'field' : fieldUsedForLegend.field,
                     'term' : termName,
                     'count' : -fieldUsedForLegend.terms[termName][this.props.aggregateType || 'experiment_sets']
-                }
+                };
             }),
             'count'
         ).map(function(fauxNode){

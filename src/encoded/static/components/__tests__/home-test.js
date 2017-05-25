@@ -18,7 +18,7 @@ describe('Testing home.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        HomePage = require('../static-pages/home');
+        HomePage = require('../static-pages/home').default;
         statics = require('../../data/statics'); // Maybe keep version of statics.js and put into /testdata/
         Wrapper = React.createClass({
             childContextTypes: {

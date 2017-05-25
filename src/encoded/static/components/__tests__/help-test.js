@@ -21,7 +21,7 @@ describe('Testing help.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        HelpPage = require('../static-pages/help');
+        HelpPage = require('../static-pages/help').default;
         context = require('../testdata/static/helppage');
         Wrapper = React.createClass({
             render: function() {

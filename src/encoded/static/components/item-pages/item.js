@@ -1,12 +1,12 @@
 'use strict';
-var React = require('react');
-var globals = require('./../globals');
-var Panel = require('react-bootstrap').Panel;
-var Table = require('./../collection').Table;
-var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
-var { console, object, Filters } = require('./../util');
+
+import React from 'react';
+import { Panel } from 'react-bootstrap';
+import url from 'url';
+import * as globals from './../globals';
+import { AuditIndicators, AuditDetail, AuditMixin } from './../audit';
+import { console, object, Filters } from './../util';
 import AuditTabView from './components/AuditTabView';
-var url = require('url');
 
 
 /********************/

@@ -69,7 +69,7 @@ export default class UIControlsWrapper extends React.Component {
             'aggregateType' : 'experiment_sets',
             'showState' : this.filterObjExistsAndNoFiltersSelected(props.expSetFilters) ? 'all' : 'filtered',
             'openDropdown' : null
-        }
+        };
     }
 
     componentWillReceiveProps(nextProps){

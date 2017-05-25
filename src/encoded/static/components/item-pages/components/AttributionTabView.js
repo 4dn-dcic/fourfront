@@ -1,12 +1,13 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
+import React from 'react';
+import _ from 'underscore';
 import PropTypes from 'prop-types';
-var ReactTooltip = require('react-tooltip');
-import { FormattedInfoBlock, Publications } from './';
+import ReactTooltip from 'react-tooltip';
+import { FormattedInfoBlock } from './FormattedInfoBlock';
+import { Publications } from './Publications';
 
-export default class AttributionTabView extends React.Component {
+export class AttributionTabView extends React.Component {
 
     static getTabObject(context){
         return {
