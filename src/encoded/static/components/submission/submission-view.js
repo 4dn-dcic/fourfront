@@ -462,7 +462,6 @@ export default class SubmissionView extends React.Component{
         if(newIdx === 0){ // initial object creation
             keyIdx = 0;
             newHierarchy = hierarchy;
-            console.log('PRINCIPAL INIT HIER', newHierarchy);
         }else{
             keyIdx = this.state.keyIter + 1;
             if(newIdx !== keyIdx){
@@ -682,7 +681,7 @@ export default class SubmissionView extends React.Component{
             stateToSet.uploadStatus = 'Upload complete';
             stateToSet.upload = null;
             stateToSet.file = null;
-            this.props.registerUploads(false);
+            this.props.setIsSubmitting(false);
             this.finishRoundTwo();
             this.setState(stateToSet);
         }else if(failed){
@@ -693,7 +692,7 @@ export default class SubmissionView extends React.Component{
                 // doesn't really matter what response is
                 stateToSet.uploadStatus = 'Upload failed';
                 stateToSet.upload = null;
-                this.props.registerUploads(false);
+                this.props.setIsSubmitting(false);
                 this.setState(stateToSet);
             });
         }else{ // must be the initial run
@@ -713,7 +712,7 @@ export default class SubmissionView extends React.Component{
                         stateToSet.upload = uploadInfo;
                         stateToSet.md5Progress = null;
                         stateToSet.uploadStatus = null;
-                        this.props.registerUploads(true);
+                        this.props.setIsSubmitting(true);
                         this.setState(stateToSet);
                     }else if(data.status && data.title && data.status == 'error' && data.title == 'Conflict'){
                         // md5 key conflict

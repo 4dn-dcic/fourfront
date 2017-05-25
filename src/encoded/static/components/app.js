@@ -159,7 +159,7 @@ var App = React.createClass({
             'session': session,
             'user_actions': user_actions,
             'schemas': this.props.context.schemas || null,
-            'uploads': false
+            'isSubmitting': false
         };
     },
 
@@ -325,9 +325,9 @@ var App = React.createClass({
         }
     },
 
-    registerUploads: function(bool){
+    setSubmissionState: function(bool){
         this.setState({
-            'uploads': bool
+            'isSubmitting': bool
         });
     },
 
@@ -915,11 +915,11 @@ var App = React.createClass({
         }
     },
 
-    // catch user navigating away from page if there are current uploads running
+    // catch user navigating away from page if in submission process.
     // there doesn't seem to be any way to remove the default alert...
     handleBeforeUnload: function(e){
-        if(this.state.uploads){
-            return 'You have current uploads running. Please wait until they are finished to leave.';
+        if(this.state.isSubmitting){
+            return 'You have not finished the submission process and your work will be lost if you leave.';
         }
     },
 
@@ -1030,7 +1030,7 @@ var App = React.createClass({
                             expIncompleteFacets={this.props.expIncompleteFacets}
                             session={this.state.session}
                             key={key}
-                            registerUploads={this.registerUploads}
+                            setSubmissionState={this.setSubmissionState}
                             navigate={this.navigate}
                             href={this.props.href}
                             edit={actionList[0] == 'edit'}
