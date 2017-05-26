@@ -22,7 +22,7 @@ export class AttributionTabView extends React.Component {
                     <AttributionTabView context={context} />
                 </div>
             )
-        }
+        };
     }
 
     static isAllInfoInProps(props){
@@ -237,4 +237,4 @@ export class AttributionTabView extends React.Component {
         );
     }
 
-};
+}

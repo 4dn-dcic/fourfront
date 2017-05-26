@@ -32,11 +32,11 @@ export class Fallback extends React.Component {
             </div>
         );
     }
-};
+}
 
 Fallback.contextTypes = {
     location_href: React.PropTypes.string
-}
+};
 
 // Use this view as a fallback for anything we haven't registered
 content_views.fallback = function () {

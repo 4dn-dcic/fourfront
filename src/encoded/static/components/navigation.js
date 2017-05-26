@@ -120,7 +120,7 @@ export default class Navigation extends React.Component {
             mobileDropdownOpen : false,
             scrolledPastTop : false,
             navInitialized : false
-        }
+        };
     }
 
     componentDidMount(){
@@ -189,7 +189,7 @@ export default class Navigation extends React.Component {
             if (['xs','sm'].indexOf(layout.responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
             //navBarBrandImgContainer.style.width = navBarBrandImgContainer.offsetWidth + 'px'; // Enable to fix width of logo to its large size.
             navBarBrand.style.width = navBarBrand.offsetWidth + 'px';
-        };
+        }
 
         this.throttledResizeHandler = _.throttle(saveWidth, 300);
 
@@ -434,7 +434,7 @@ export class Breadcrumbs extends React.Component {
             </ol>
         );
     }
-};
+}
 
 Breadcrumbs.propTypes = {
     root: PropTypes.string, // Root URI for searches

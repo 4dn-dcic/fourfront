@@ -85,11 +85,11 @@ class SubmissionLeaf extends React.Component{
         var masterTypes = this.props.masterTypes;
         var children = Object.keys(this.props.hierarchy[key]).map((childKey) => this.generateChild(childKey));
         var style = {
-                        'marginLeft':'-20px',
-                        'overflow': 'hidden',
-                        'whiteSpace': 'nowrap',
-                        'textOverflow': 'ellipsis'
-                    };
+            'marginLeft'    :'-20px',
+            'overflow'      : 'hidden',
+            'whiteSpace'    : 'nowrap',
+            'textOverflow'  : 'ellipsis'
+        };
         var title;
         var titleText = this.props.masterDisplay[key] || key;
         // if key is not a number (i.e. path), the object is not a custom one

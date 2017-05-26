@@ -199,8 +199,8 @@ export class Detail extends React.Component {
                 <ol>
                     {   item.length === 0 ? <li><em>None</em></li>
                         :   item.map(function(it, i){
-                                return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
-                            })
+                            return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
+                        })
                     }
                 </ol>
             );
@@ -209,7 +209,7 @@ export class Detail extends React.Component {
 
             // if the following is true, we have an embedded object without significant other data
             if (item.display_title && typeof item.link_id === 'string' && _.keys(item).length < 4){
-                var format_id = item.link_id.replace(/~/g, "/")
+                var format_id = item.link_id.replace(/~/g, "/");
                 return (
                     <a href={format_id}>
                         { title }

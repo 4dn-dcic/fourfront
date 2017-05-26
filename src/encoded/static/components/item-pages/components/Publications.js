@@ -122,7 +122,7 @@ class ListBlock extends React.Component {
         );
     }
 
-};
+}
 
 
 /**
@@ -306,7 +306,7 @@ export class Publications extends React.Component {
         this.render = this.render.bind(this);
         this.state = {
             'abstractCollapsed' : true
-        }
+        };
     }
 
     /**
@@ -369,7 +369,7 @@ export class Publications extends React.Component {
             details.push({
                 'label' : 'Author' + (publication.authors.length > 1 ? 's' : ''),
                 'content' : publication.authors.join(', ')
-            })
+            });
         }
 
         if (typeof publication.abstract === 'string'){

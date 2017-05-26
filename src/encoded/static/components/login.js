@@ -27,26 +27,26 @@ var Login = React.createClass({
         // TODO: these should be read in from base and production.ini
         this.lock = new lock_('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
             'hms-dbmi.auth0.com', {
-            auth: {
-            	redirect: false,
-                responseType: 'token',
-                params: {scope: 'openid email'}
-            },
-            socialButtonStyle: 'big',
-            languageDictionary: {
-            	title: "Log in"
-            },
-            theme: {
-                logo: '/static/img/4dn_logo.svg'
-            },
-            allowedConnections: ['github', 'google-oauth2']
-        });
+                auth: {
+                    redirect: false,
+                    responseType: 'token',
+                    params: {scope: 'openid email'}
+                },
+                socialButtonStyle: 'big',
+                languageDictionary: {
+                    title: "Log in"
+                },
+                theme: {
+                    logo: '/static/img/4dn_logo.svg'
+                },
+                allowedConnections: ['github', 'google-oauth2']
+            });
         this.lock.on("authenticated", this.handleAuth0Login);
     },
 
-	showLock: function(eventKey, e) {
-		this.lock.show();
-	},
+    showLock: function(eventKey, e) {
+        this.lock.show();
+    },
 
     logout: function (eventKey, e) {
         JWT.remove();

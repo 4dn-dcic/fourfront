@@ -91,7 +91,7 @@ export default class Alerts extends React.Component {
             var dismissing = _.clone(this.state.dismissing);
             if (_.findIndex(dismissing, currentAlert) === -1) dismissing.push(currentAlert);
             this.setState({ 'dismissing' : dismissing });
-        };
+        }
 
         function finishDismiss(index){
             var currentAlert = this.props.alerts.slice(index, index + 1)[0];

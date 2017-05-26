@@ -94,7 +94,7 @@ export class ExperimentSetRow extends React.Component {
             open : false,
             reallyOpen : false,
             selectedFiles : this.props.selectAllFilesInitially ? new Set(this.allFileIDs(this.props)) : new Set()
-        }
+        };
     }
 
     componentWillReceiveProps(nextProps) {
@@ -224,7 +224,7 @@ export class ExperimentSetRow extends React.Component {
                     </div>
                 </div>
             );
-        };
+        }
 
         function experimentsTable(){
             /* Removed props.facets & props.expSetFilters as passing in props.passExperiments as experimentArray. */
@@ -344,7 +344,8 @@ function findFiles(fileFormats) {
     fileStats['checked'] = new Set();
     fileStats['formats'] = {};
     fileStats['uuids'] = new Set();
-    for(var i=0; i<checkboxes.length; i++){
+    var i;
+    for(i=0; i<checkboxes.length; i++){
         // ID in form checked (boolean), passed (boolean), format, uuid
         var splitID = checkboxes[i].id.split('~');
         // check to see if file has already been found
@@ -363,7 +364,7 @@ function findFiles(fileFormats) {
             }
         }
     }
-    for(var i=0; i<fileFormats.length; i++){
+    for(i=0; i<fileFormats.length; i++){
         if(!fileStats['formats'][fileFormats[i]]){
             fileStats['formats'][fileFormats[i]] = new Set();
         }
@@ -416,7 +417,7 @@ export const DropdownFacet = createReactClass({
     },
 
     handleToggle: function(){
-        this.setState({toggled: !this.state.toggled})
+        this.setState({toggled: !this.state.toggled});
     },
 
     render: function() {
@@ -598,7 +599,7 @@ export class PageLimitSortController extends React.Component {
                         'page' : page
                     }
                 );
-            });
+                });
         });
     }
 
@@ -635,7 +636,7 @@ export class PageLimitSortController extends React.Component {
                         'limit' : limit,
                     }
                 );
-            });
+                });
         });
     }
 
@@ -1300,7 +1301,7 @@ export class Browse extends React.Component {
 
         // no results found!
         if(context.total === 0 && context.notification){
-            return <div className="error-page"><h4>{context.notification}</h4></div>
+            return <div className="error-page"><h4>{context.notification}</h4></div>;
         }
         var results = context['@graph'];
         var searchBase = url.parse(this.props.href).search || '';

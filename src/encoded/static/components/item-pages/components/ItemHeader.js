@@ -111,11 +111,11 @@ export class TopRow extends React.Component {
                     target="_blank"
                     data-tip="Open raw JSON in new window"
                     onClick={(e)=>{
-                    if (window && window.open){
-                        e.preventDefault();
-                        window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');
-                    }
-                }}>
+                        if (window && window.open){
+                            e.preventDefault();
+                            window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');
+                        }
+                    }}>
                     View JSON
                 </a>
             </div>

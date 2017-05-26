@@ -263,7 +263,7 @@ export function buildGravatarURL(email, size=null, defaultImg='retro'){
     url += "?d=" + defaultImg;
     if (size) url += '&s=' + size;
     return url;
-};
+}
 
 
 /**

@@ -56,7 +56,7 @@ export default class Item extends React.Component {
             </div>
         );
     }
-};
+}
 
 //Item.contextTypes = {
 //    schemas: React.PropTypes.object
@@ -137,7 +137,7 @@ export function title(props) {
             null //: 'No title found'
         )
     );
-};
+}
 
 globals.listing_titles.register(title, 'Item');
 

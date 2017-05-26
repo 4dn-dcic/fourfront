@@ -464,7 +464,7 @@ var ResultTable = search.ResultTable = React.createClass({
                         'page' : page
                     }
                 );
-            });
+                });
         });
     }, 250),
 

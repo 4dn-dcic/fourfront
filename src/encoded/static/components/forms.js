@@ -349,7 +349,7 @@ var EditableField = module.exports.EditableField = React.createClass({
     isValid : function(checkServer = false){
         if (typeof this.state.valid === 'boolean' && this.state.valid === false){
             return false;
-        };
+        }
         if (checkServer && this.state.serverErrors && this.state.serverErrors.length > 0) {
             return false;
         }

@@ -260,7 +260,7 @@ class Facet extends React.Component {
                             'dimension1' : analytics.getStringifiedCurrentFilters(existingFilters)
                         });
                     }
-                )
+                );
             }
         );
     }
@@ -672,7 +672,7 @@ export default class FacetList extends React.Component {
                 defaultFacetOpen={ !this.state.mounted ? false : !!(layout.responsiveGridState() !== 'xs') }
                 mounted={this.state.mounted}
             />
-        )
+        );
     }
 
 
