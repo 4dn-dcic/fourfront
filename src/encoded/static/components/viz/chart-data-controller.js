@@ -664,7 +664,7 @@ export const ChartDataController = {
                 // Reload/navigation will also receive 403 and then trigger JWT unset, logged out alert, & refresh.
                 if (errResp && typeof errResp === 'object'){
                     if (typeof errResp.total === 'number' && errResp.total > 0){
-                        experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
+                        experiments = expFxn.listAllExperimentsFromExperimentSets(errResp['@graph']);
                     }
                     //if (errResp.code === 403 || errResp.total === 0){
                     //    console.warn('403 or 404 Error, refetching.');

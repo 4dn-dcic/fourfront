@@ -5,6 +5,7 @@
 
 /** @ignore */
 var _ = require('underscore');
+import { ajax } from './../util';
 
 /**
  * @module lib/store
@@ -85,8 +86,12 @@ class ItemStore {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         });
-        var request = this._fetch(url, options);
-        request.then(response => {
+        ajax.promise(
+            url,
+            options.method || 'GET',
+            options.headers || {},
+            options.body || null
+        ).then(response => {
             console.log(response);
             if (response.status && response.status != 'success') throw response;
             return response;

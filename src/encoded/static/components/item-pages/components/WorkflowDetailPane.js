@@ -1,9 +1,10 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'underscore';
 import { ItemDetailList, TooltipInfoIconContainer } from './ItemDetailList';
-import FlexibleDescriptionBox from './FlexibleDescriptionBox';
+import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
 import { console, object, layout } from './../../util';
 
@@ -186,7 +187,6 @@ class FileDetailBody extends React.Component {
 
         var title = file.href ? <span>Download</span> : 'File Name';
         var disabled = !this.canDownload();
-        var content = file.filename || file.href;
         var content = file.href ?
             <FileDownloadButton title={title} href={file.href} disabled={disabled} filename={file.filename} />
             :
@@ -314,7 +314,7 @@ class AnalysisStepDetailBody extends React.Component {
             <div className="col-sm-6 col-md-8 box">
                 <span className="text-600">Purpose{ purposeList.length > 1 ? 's' : '' }</span>
                 { React.createElement(elementType, { 'className' : 'text-400' }, purposeList.map(function(p, i){
-                    return <span className="text-capitalize">{ p }{ i !== purposeList.length - 1 ? ', ' : '' }</span>;
+                    return <span className="text-capitalize" key={p}>{ p }{ i !== purposeList.length - 1 ? ', ' : '' }</span>;
                 })) }
             </div>
         );
@@ -415,7 +415,7 @@ class AnalysisStepDetailBody extends React.Component {
 }
 
 
-export default class WorkflowDetailPane extends React.Component {
+export class WorkflowDetailPane extends React.Component {
 
     static propTypes = {
         'selectedNode' : PropTypes.oneOfType([ PropTypes.object, PropTypes.oneOf([null]) ])

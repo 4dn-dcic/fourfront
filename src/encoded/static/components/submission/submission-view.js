@@ -140,7 +140,9 @@ export default class SubmissionView extends React.Component{
     */
     componentWillReceiveProps(nextProps){
         if(this.props.schemas !== nextProps.schemas){
-            this.initializePrincipal(nextProps.context, nextProps.schemas);
+            if(this.state.currKey === null){
+                this.initializePrincipal(nextProps.context, nextProps.schemas);
+            }
         }
     }
 
@@ -250,6 +252,8 @@ export default class SubmissionView extends React.Component{
                 }
             });
         }
+        // set state in app to prevent accidental mid-submission navigation
+        this.props.setIsSubmitting(true);
     }
 
     /*
@@ -681,7 +685,6 @@ export default class SubmissionView extends React.Component{
             stateToSet.uploadStatus = 'Upload complete';
             stateToSet.upload = null;
             stateToSet.file = null;
-            this.props.setIsSubmitting(false);
             this.finishRoundTwo();
             this.setState(stateToSet);
         }else if(failed){
@@ -692,7 +695,6 @@ export default class SubmissionView extends React.Component{
                 // doesn't really matter what response is
                 stateToSet.uploadStatus = 'Upload failed';
                 stateToSet.upload = null;
-                this.props.setIsSubmitting(false);
                 this.setState(stateToSet);
             });
         }else{ // must be the initial run
@@ -712,7 +714,6 @@ export default class SubmissionView extends React.Component{
                         stateToSet.upload = uploadInfo;
                         stateToSet.md5Progress = null;
                         stateToSet.uploadStatus = null;
-                        this.props.setIsSubmitting(true);
                         this.setState(stateToSet);
                     }else if(data.status && data.title && data.status == 'error' && data.title == 'Conflict'){
                         // md5 key conflict
@@ -1107,7 +1108,7 @@ export default class SubmissionView extends React.Component{
                                 // see if we need to go into round two submission
                                 if(roundTwoCopy.length == 0){
                                     alert('Success! Navigating to your new object.');
-                                    this.props.navigate(destination);
+                                    this.props.navigate(destination, {'endSubmitting': true});
                                 }else{
                                     // break this out into another fxn?
                                     // roundTwo initiation
@@ -1158,7 +1159,7 @@ export default class SubmissionView extends React.Component{
         // we're done!
         if(roundTwoCopy.length == 0){
             alert('Success! Navigating to your new object.');
-            this.props.navigate(this.state.keyComplete[0]);
+            this.props.navigate(this.state.keyComplete[0], {'endSubmitting': true});
         }
     }
 
@@ -1889,20 +1890,23 @@ var delvePreExistingObjects = function myself(initObjs, json, schema, listTerm, 
     }
     if(json instanceof Array){
         for(var j=0; j < json.length; j++){
-            delvePreExistingObjects(initObjs, json[j], schema, listTerm, linked);
+            if(schema.items){
+                delvePreExistingObjects(initObjs, json[j], schema.items, listTerm, linked);
+            }
         }
     }else if(json instanceof Object){
-        Object.keys(json).forEach(function(key, idx){
-            // check if the field is a linked obj
-            if(schema[key] && _.contains(schema[key],'linkTo')){
-                populateInitObjs(initObjs, json[key], listTerm, linked);
-            }else{
-                // try to find any linked objs deeper in
-                delvePreExistingObjects(initObjs, json[key], schema[key], listTerm, linked);
-            }
-        });
-    }else{ // must be a non-array linkTo
-        populateInitObjs(initObjs, json, listTerm, linked);
+        if(schema.properties){
+            Object.keys(json).forEach(function(key, idx){
+                if(schema.properties[key]){
+                    delvePreExistingObjects(initObjs, json[key], schema.properties[key], listTerm, linked);
+                }
+            });
+        }
+    }else{
+        // non-array, non-object field. check schema to ensure there's a linkTo
+        if(_.contains(Object.keys(schema),'linkTo')){
+            populateInitObjs(initObjs, json, listTerm, linked);
+        }
     }
 }
 

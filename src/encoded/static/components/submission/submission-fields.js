@@ -167,7 +167,7 @@ export default class BuildField extends React.Component{
                             <Fade in={showDelete}>
                                 <div className="pull-right">
                                     <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                        {'Remove item'}
+                                        {'Remove'}
                                     </Button>
                                 </div>
                             </Fade>

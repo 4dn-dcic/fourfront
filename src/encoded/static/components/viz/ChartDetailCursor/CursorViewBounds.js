@@ -1,11 +1,10 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var vizUtil = require('./../utilities');
-var ChartDetailCursor = require('./ChartDetailCursor').default;
-var { console, isServerSide, Filters, layout, analytics } = require('./../../util');
-var { highlightTerm } = require('./../../facetlist');
+import React from 'react';
+import _ from 'underscore';
+import * as vizUtil from './../utilities';
+import ChartDetailCursor from './ChartDetailCursor';
+import { console, isServerSide, Filters, layout, analytics } from './../../util';
 
 /**
  * Use this Component to wrap a chart or other view which displays any sort of Experiment Set 'Node'(s).
@@ -52,6 +51,7 @@ export default class CursorViewBounds extends React.Component {
 
     static defaultProps = {
         'cursorContainerMargin' : 100,
+        'highlightTerm' : false,
         // Return an object with 'x', 'y'.
         'clickCoordsFxn' : function(node, containerPosition, boundsHeight, isOnRightSide){
 
@@ -213,7 +213,7 @@ export default class CursorViewBounds extends React.Component {
             this.setState(newOwnState, this.registerHoverEvent.bind(this, node));
         }
 
-        if (this.props.highlightTerm && typeof highlightTerm === 'function') highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
+        if (this.props.highlightTerm && typeof vizUtil.highlightTerm === 'function') vizUtil.highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
     }
 
     onNodeMouseLeave(node, evt){

@@ -39,4 +39,4 @@ require('./experiments-table');
 require('./browse');
 require('./testwarning');
 
-module.exports = require('./app');
+module.exports = require('./app').default;

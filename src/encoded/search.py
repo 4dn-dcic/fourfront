@@ -544,8 +544,12 @@ def set_facets(facets, used_filters, principals, doc_types):
 
         agg_name = field.replace('.', '-')
 
+        # default was size = 10, so only top 10 agg results were returned.
+        # set size to 100.
+        # https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
         aggregation = {
             'terms': {
+                'size': 100,
                 'field': query_field,
             }
         }
@@ -561,8 +565,6 @@ def set_facets(facets, used_filters, principals, doc_types):
 
         # Adding facets based on filters
         for q_field, q_terms in used_filters.items():
-            if q_field not in facetFields:
-                continue
 
             if q_field == field:
                 continue
@@ -583,7 +585,6 @@ def set_facets(facets, used_filters, principals, doc_types):
             },
             'filter': termFilter,
         }
-
     # to achieve OR behavior within facets, search among GLOBAL results,
     # not just returned ones. to do this, wrap aggs in ['all_items']
     # and add "global": {} to top level aggs query

@@ -1,19 +1,20 @@
 'use strict';
-var React = require('react');
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
-var ReactDOM = require('react-dom');
-var url = require('url');
-var querystring = require('querystring');
-var _ = require('underscore');
-var globals = require('./globals');
-var browse = module.exports;
-var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } = require('react-bootstrap');
-var store = require('../store');
+import url from 'url';
+import queryString from 'querystring';
+import _ from 'underscore';
+import * as globals from './globals';
+import { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
+import * as store from '../store';
 import FacetList from './facetlist';
 import ExperimentsTable from './experiments-table';
-var { isServerSide, expFxn, Filters, navigate, object } = require('./util');
-var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
-var { FlexibleDescriptionBox } = require('./item-pages/components');
+import { isServerSide, expFxn, Filters, navigate, object } from './util';
+import { AuditIndicators, AuditDetail, AuditMixin } from './audit';
+import { FlexibleDescriptionBox } from './item-pages/components';
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
@@ -370,7 +371,7 @@ function findFiles(fileFormats) {
     return fileStats;
 }
 
-var Term = React.createClass({
+export const Term = createReactClass({
 
     componentWillMount: function(){
         var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', this.props.facet['field'], this.props.term['key']);
@@ -402,10 +403,8 @@ var Term = React.createClass({
     }
 });
 
-export var Term;
-
 //Dropdown facet for experimentset_type
-var DropdownFacet = React.createClass({
+export const DropdownFacet = createReactClass({
     getDefaultProps: function() {
         return {width: 'inherit'};
     },
@@ -443,14 +442,12 @@ var DropdownFacet = React.createClass({
     }
 });
 
-export var DropdownFacet;
-
 
 export class PageLimitSortController extends React.Component {
 
     static propTypes = {
-        href            : React.PropTypes.string.isRequired,
-        context         : React.PropTypes.object.isRequired,
+        href            : PropTypes.string.isRequired,
+        context         : PropTypes.object.isRequired,
     }
 
     /**
@@ -472,7 +469,7 @@ export class PageLimitSortController extends React.Component {
         return {
             'page' : (from / limit) + 1,
             'limit' : limit
-        }
+        };
     }
 
     static getSortColumnAndReverseFromURL(href){
@@ -491,7 +488,7 @@ export class PageLimitSortController extends React.Component {
         return {
             'sortColumn' : sortParam,
             'sortReverse' : reverse
-        }
+        };
     }
 
     constructor(props){
@@ -548,21 +545,17 @@ export class PageLimitSortController extends React.Component {
         } else {
             urlParts.query.sort = null;
         }
-        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        urlParts.search = '?' + queryString.stringify(urlParts.query);
         var newHref = url.format(urlParts);
 
         this.setState({ 'changingPage' : true }, ()=>{
-            navigate(
-                newHref,
-                { 'replace' : true },
-                ()=>{
-                    this.setState({ 
-                        'sortColumn' : key,
-                        'sortReverse' : reverse,
-                        'changingPage' : false,
-                        'page' : 1
-                    }
-                );
+            navigate(newHref, { 'replace' : true }, ()=>{
+                this.setState({ 
+                    'sortColumn' : key,
+                    'sortReverse' : reverse,
+                    'changingPage' : false,
+                    'page' : 1
+                });
             });
         });
 
@@ -594,7 +587,7 @@ export class PageLimitSortController extends React.Component {
         } else {
             urlParts.query.from = (Filters.getLimit() * (page - 1)) + '';
         }
-        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        urlParts.search = '?' + queryString.stringify(urlParts.query);
         this.setState({ 'changingPage' : true }, ()=>{
             navigate(
                 url.format(urlParts),
@@ -629,7 +622,7 @@ export class PageLimitSortController extends React.Component {
 
         urlParts.query.limit = limit + '';
         urlParts.query.from = parseInt(Math.max(Math.floor(previousFrom / limit), 0) * limit);
-        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        urlParts.search = '?' + queryString.stringify(urlParts.query);
         var newHref = url.format(urlParts);
 
         this.setState({ 'changingPage' : true }, ()=>{
@@ -732,7 +725,7 @@ export class LimitAndPageControls extends React.Component {
 
                 </ButtonToolbar>
             </div>
-        )
+        );
     }
 
 }
@@ -939,12 +932,12 @@ export class ResultTableContainer extends React.Component {
 
     static propTypes = {
         // Props' type validation based on contents of this.props during render.
-        href            : React.PropTypes.string.isRequired,
-        context         : React.PropTypes.object.isRequired,
-        expSetFilters   : React.PropTypes.object.isRequired,
-        fileFormats     : React.PropTypes.array,
-        fileStats       : React.PropTypes.object,
-        targetFiles     : React.PropTypes.instanceOf(Set)
+        href            : PropTypes.string.isRequired,
+        context         : PropTypes.object.isRequired,
+        expSetFilters   : PropTypes.object.isRequired,
+        fileFormats     : PropTypes.array,
+        fileStats       : PropTypes.object,
+        targetFiles     : PropTypes.instanceOf(Set)
     }
 
     static defaultProps = {
@@ -1115,28 +1108,28 @@ export class ResultTableContainer extends React.Component {
 }
 
 
-var FileButton = browse.FileButton = React.createClass({
+// var FileButton = React.createClass({
 
-    getInitialState: function(){
-        return{
-            selected: true
-        };
-    },
+//     getInitialState: function(){
+//         return{
+//             selected: true
+//         };
+//     },
 
-    handleToggle: function(){
-        this.setState({
-            selected: !this.state.selected
-        });
-        this.props.fxn(this.props.format, this.state.selected);
-    },
+//     handleToggle: function(){
+//         this.setState({
+//             selected: !this.state.selected
+//         });
+//         this.props.fxn(this.props.format, this.state.selected);
+//     },
 
-    render: function(){
-        var selected = this.state.selected ? "success" : "default";
-        return(
-            <Button className="expset-selector-button" bsStyle={selected} bsSize="xsmall" onClick={this.handleToggle}>{this.props.format} ({this.props.count})</Button>
-        );
-    }
-});
+//     render: function(){
+//         var selected = this.state.selected ? "success" : "default";
+//         return(
+//             <Button className="expset-selector-button" bsStyle={selected} bsSize="xsmall" onClick={this.handleToggle}>{this.props.format} ({this.props.count})</Button>
+//         );
+//     }
+// });
 
 
 export class ControlsAndResults extends React.Component {
@@ -1212,7 +1205,7 @@ export class ControlsAndResults extends React.Component {
 }
 
 
-//var ControlsAndResults = browse.ControlsAndResults = React.createClass({
+//var ControlsAndResults = React.createClass({
 
     // TODO: ADJUST THIS!!! SELECTED FILES ARE NO LONGER GUARANTEED TO BE IN DOM!!!!!
     // They are now in ExperimentSetRows state. We need to grab state.selectedFiles from each.

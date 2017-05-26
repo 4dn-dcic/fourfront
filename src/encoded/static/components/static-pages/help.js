@@ -1,63 +1,67 @@
 // Render a simple static help page
 
-var React = require('react');
-var _ = require('underscore');
-var StaticPageBase = require('./static-page-base');
-var Button = require('react-bootstrap').Button;
-var globals = require('../globals');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import { content_views } from '../globals';
+import * as StaticPageBase from './static-page-base';
+import { Button } from 'react-bootstrap';
 
-var HelpPage = module.exports = React.createClass({
+class Entry extends React.Component {
 
-    statics : {
+    static defaultProps = {
+        'section'   : null,
+        'content'   : null,
+        'entryType' : 'help',
+        'className' : 'text-justified'
+    }
 
-        Entry : React.createClass({
+    constructor(props){
+        super(props);
+        this.renderEntryContent = StaticPageBase.Entry.renderEntryContent.bind(this);
+        this.render = StaticPageBase.Entry.render.bind(this);
+    }
 
-            getDefaultProps : function(){
-                return {
-                    'section'   : null,
-                    'content'   : null,
-                    'entryType' : 'help',
-                    'className' : 'text-justified'
-                };
-            },
+    replacePlaceholder(placeholderString){
+        if (placeholderString === '<SlideCarousel/>'){
+            return (<SlideCarousel />);
+        }
+        return placeholderString;
+    }
+}
 
-            replacePlaceholder : function(placeholderString){
-                if (placeholderString === '<SlideCarousel/>'){
-                    return (<SlideCarousel />);
-                }
-                return placeholderString;
-            },
+export default class HelpPage extends React.Component {
 
-            renderEntryContent : StaticPageBase.Entry.renderEntryContent,
-            render : StaticPageBase.Entry.render
-        })
-
-    },
-
-    propTypes : {
-        context : React.PropTypes.shape({
-            "title" : React.PropTypes.string,
-            "content" : React.PropTypes.shape({
-                "gettingStarted" : React.PropTypes.object,
-                "metadataStructure1" : React.PropTypes.object,
-                "metadataStructure2" : React.PropTypes.object,
-                "restAPI" : React.PropTypes.object
+    static propTypes = {
+        'context' : PropTypes.shape({
+            "title" : PropTypes.string,
+            "content" : PropTypes.shape({
+                "gettingStarted" : PropTypes.object,
+                "metadataStructure1" : PropTypes.object,
+                "metadataStructure2" : PropTypes.object,
+                "restAPI" : PropTypes.object
             }).isRequired
         }).isRequired
-    },
+    }
 
-    entryRenderFxn : function(key, content, context){
-        return (<HelpPage.Entry key={key} section={key} content={content} context={context} />);
-    },
+    static defaultProps = StaticPageBase.getDefaultProps()
 
-    getDefaultProps : StaticPageBase.getDefaultProps,
-    parseSectionsContent : StaticPageBase.parseSectionsContent,
-    renderSections  : StaticPageBase.renderSections,
-    render          : StaticPageBase.render.base
+    constructor(props){
+        super(props);
+        this.entryRenderFxn = this.entryRenderFxn.bind(this);
+        this.parseSectionsContent = StaticPageBase.parseSectionsContent.bind(this);
+        this.renderSections = StaticPageBase.renderSections.bind(this);
+        this.render = StaticPageBase.render.base.bind(this);
+    }
 
-});
+    entryRenderFxn(key, content, context){
+        return (<Entry key={key} section={key} content={content} context={context} />);
+    }
 
-globals.content_views.register(HelpPage, 'HelpPage');
+}
+
+
+content_views.register(HelpPage, 'HelpPage');
 
 var SlideCarousel = React.createClass({
     getInitialState() {

@@ -1,11 +1,10 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var globals = require('./../globals');
-var { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+import React from 'react';
+import _ from 'underscore';
+import * as globals from './../globals';
+import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } from './components';
 
-// TODO: Rename to FileSetCalibrationView?
 
 /**
  * Page view for a FileSetCalibration Item.
@@ -13,9 +12,10 @@ var { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetT
  * 
  * @module {Component} item-pages/file-set-calibration-view
  */
-var FileSetCalibrationView = module.exports = React.createClass({
 
-    render : function(){
+export default class FileSetCalibrationView extends React.Component {
+
+    render(){
         var context = this.props.context || null;
         var schemas = this.props.schemas || null;
 
@@ -62,6 +62,6 @@ var FileSetCalibrationView = module.exports = React.createClass({
         );
     }
 
-});
+}
 
 globals.panel_views.register(FileSetCalibrationView, 'FileSetCalibration');

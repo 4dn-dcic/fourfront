@@ -1,15 +1,12 @@
 'use strict';
 
-var _ = require('underscore');
+import _ from 'underscore';
 
 
 /**
  * Convert a link_id, if one exists on param 'object', to an '@id' link.
  * If an '@id' exists already, gets that.
  * 
- * @memberof module:item-pages/components.FilesInSetTable
- * @static
- * @public
  * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
  * @returns {string|null} The Item's '@id'.
  */

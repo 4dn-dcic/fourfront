@@ -1,11 +1,11 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var { Checkbox, Collapse } = require('react-bootstrap');
-var _ = require('underscore');
-var FacetList = require('./facetlist'); // Only used for statics.
-var { expFxn, Filters, console, isServerSide, analytics } = require('./util');
+import { Checkbox, Collapse } from 'react-bootstrap';
+import _ from 'underscore';
+import FacetList from './facetlist'; // Only used for statics.
+import { expFxn, Filters, console, isServerSide, analytics } from './util';
 
 
 
@@ -556,9 +556,9 @@ export default class ExperimentsTable extends React.Component {
         useSet = false  // Return as array instead of set.
     ){
         if (!Array.isArray(allExperiments)){
-                // no experiments
-                if (useSet) return new Set();
-                return [];
+            // no experiments
+            if (useSet) return new Set();
+            return [];
         }
         // TODO: If filters === null then filters = store.getState().expSetFilters ?
         if (Array.isArray(allExperiments[0].experiments_in_set)){
@@ -591,17 +591,18 @@ export default class ExperimentsTable extends React.Component {
         if (!experimentArray) return null;
         var experimentsCount = 0;
         var fileSet = new Set();
+        var j;
         for (var i = 0; i < experimentArray.length; i++){
             if (experimentArray[i].files && experimentArray[i].files.length > 0){
                 experimentsCount++; // Exclude empty experiments
-                for (var j = 0; j < experimentArray[i].files.length; j++){
+                for (j = 0; j < experimentArray[i].files.length; j++){
                     if (!fileSet.has(experimentArray[i].files[j]['@id'])){
                         fileSet.add(experimentArray[i].files[j]['@id']);
                     }
                 }
             } else if (experimentArray[i].filesets && experimentArray[i].filesets.length > 0){
                 experimentsCount++;
-                for (var j = 0; j < experimentArray[i].filesets.length; j++){
+                for (j = 0; j < experimentArray[i].filesets.length; j++){
                     for (var k = 0; k < experimentArray[i].filesets[j].files_in_set.length; k++){
                         if (!fileSet.has(experimentArray[i].filesets[j].files_in_set[k]['@id'])){
                             fileSet.add(experimentArray[i].filesets[j].files_in_set[k]['@id']);
@@ -615,52 +616,6 @@ export default class ExperimentsTable extends React.Component {
         return {
             'experiments' : experimentsCount,
             'files' : fileSet.size
-        };
-    }
-
-    static visibleExperimentsCount(experimentArray){
-        if (!Array.isArray(experimentArray)) return null;
-        var fileKeys = Object.keys(fileDetailContainer.fileDetail);
-        var experiments = new Set();
-        var fileSet = new Set(fileKeys);
-
-        for (var i = 0; i < fileKeys.length; i++){
-            if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
-                experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
-            }
-            if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
-                if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
-                    fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
-                }
-            }
-        }
-        return {
-            'experiments' : experiments.size,
-            'files' : fileSet.size,
-            'emptyExperiments' : fileDetailContainer.emptyExps.length
-        };
-    }
-
-    static visibleExperimentsCountDeprecated(fileDetailContainer){
-        if (!fileDetailContainer) return null;
-        var fileKeys = Object.keys(fileDetailContainer.fileDetail);
-        var experiments = new Set();
-        var fileSet = new Set(fileKeys);
-
-        for (var i = 0; i < fileKeys.length; i++){
-            if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
-                experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
-            }
-            if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
-                if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
-                    fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
-                }
-            }
-        }
-        return {
-            'experiments' : experiments.size,
-            'files' : fileSet.size,
-            'emptyExperiments' : fileDetailContainer.emptyExps.length
         };
     }
 
@@ -754,12 +709,12 @@ export default class ExperimentsTable extends React.Component {
         }
 
         var availableWidth = this.props.width || this.refs.header.offsetWidth || 960, // 960 = fallback for tests
-            totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v }, 0);
+            totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
 
         if (totalOrigColsWidth > availableWidth){
             this.setState({ columnWidths : null });
             return; // No room to scale up widths.
-        };
+        }
 
         var scale = (availableWidth / totalOrigColsWidth) || 1;
         var newColWidths = origColumnWidths.map(function(c){

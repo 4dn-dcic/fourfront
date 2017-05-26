@@ -1,6 +1,8 @@
 'use strict';
 
 var React = require('react');
+import createReactClass from 'create-react-class';
+import PropTypes from 'prop-types';
 var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
@@ -17,7 +19,7 @@ var mouseleaveTimeout = null;
  * We re-render chart (via shouldComponentUpdate(), reset()) only when data has changed, or needs to be redrawn due to dimension change.
  */
 
-var MosaicChart = React.createClass({
+var MosaicChart = createReactClass({
 
     statics : {
         /**

@@ -13,10 +13,10 @@ var ReactTooltip = require('react-tooltip');
 
 function defaultStyle(data, maxValue = 10) {
     var val = (data && data.value) || data;
-	return {
-		backgroundColor: 'rgba(65, 65, 138, '+ val/maxValue + ')',
-		border: val >= 1 ? 'none' : '1px dotted #eee'
-	}
+    return {
+        backgroundColor: 'rgba(65, 65, 138, '+ val/maxValue + ')',
+        border: val >= 1 ? 'none' : '1px dotted #eee'
+    };
 }
 
 
@@ -224,7 +224,7 @@ export class MatrixContainer extends React.Component {
         vizUtil.requestAnimationFrame(()=>{
             this.postUpdateFxns.forEach(function(fxn){
                 fxn();
-            })
+            });
         });
     }
 
@@ -313,7 +313,7 @@ export default class MatrixView extends React.Component {
         return _.reduce(grid, function(mOuter, row){
             return Math.max(
                 _.reduce(row, function(mInner, cell){
-                    if (typeof cell[valueKey] !== 'number') return m;
+                    if (typeof cell[valueKey] !== 'number') return mInner;
                     return Math.max(mInner, cell[valueKey]);
                 }, 0),
                 mOuter
@@ -321,18 +321,18 @@ export default class MatrixView extends React.Component {
         }, 0);
     }
 
-	constructor(props){
-		super(props);
-		this.render = this.render.bind(this);
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.getContainerWidth = this.getContainerWidth.bind(this);
         this.handleResize = _.debounce(this.handleResize.bind(this), 300);
         this.state = {
-    		mounted : false,
+            mounted : false,
             containerWidth : null
-		}
-	}
+        };
+    }
 
     getContainerWidth(){
         if (this.props.width) return this.props.width;
@@ -357,8 +357,8 @@ export default class MatrixView extends React.Component {
                 window.addEventListener('resize', this.handleResize);
             }
         }
-		this.setState(newState);
-	}
+        this.setState(newState);
+    }
 
     componentWillUnmount(){
         if (!isServerSide() && !this.props.width){
@@ -367,7 +367,7 @@ export default class MatrixView extends React.Component {
     }
 
     render(grid, xAxisLabels, yAxisLabels, xAxisTitle, yAxisTitle, title, defaultStyle = defaultStyle) {
-		return (
+        return (
             <div ref="matrixWrapper">
                 <MatrixContainer
                     grid={grid}
@@ -382,7 +382,7 @@ export default class MatrixView extends React.Component {
                     maxValue={MatrixView.findGreatestValueInGrid(grid)}
                 />
             </div>
-		);
-	}
+        );
+    }
 
 }

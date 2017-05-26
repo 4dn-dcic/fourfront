@@ -1,13 +1,13 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
-var d3 = require('d3');
+import _ from 'underscore';
+import * as d3 from 'd3';
 var store = require('./../../../store');
-var vizUtil = require('./../utilities');
+import * as vizUtil from './../utilities';
 import ChartDetailCursor, { CursorViewBounds } from './../ChartDetailCursor';
-var { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } = require('./../../util');
+import { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } from './../../util';
 
 // Used for transitioning
 var cachedBars = {},
@@ -200,7 +200,7 @@ class Bar extends React.Component {
                 //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
                 return pastNode;
             })
-        )
+        );
 
         var className = "chart-bar";
         if (!this.props.canBeHighlighted) className += ' no-highlight';
@@ -475,7 +475,7 @@ export class PopoverViewContainer extends React.Component {
                 actions={this.cursorDetailActions.call(this)}
                 cursorContainerMargin={this.props.cursorContainerMargin}
                 eventCategory="BarPlot" // For Analytics events
-                highlightTerm
+                highlightTerm={false}
                 clickCoordsFxn={(node, containerPosition, boundsHeight)=>{
                     var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
                     var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;

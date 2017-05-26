@@ -1,12 +1,16 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-
+import React from 'react';
+import _ from 'underscore';
 import Tabs, { TabPane, TabContent } from './../../lib/rc-tabs';
 import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
 
-export default class TabView extends React.Component {
+
+/**
+ * @prop {Object[]} contents - List of objects for tabs containing 'tab', 'content', and maybe 'key'.
+ */
+
+export class TabbedView extends React.Component {
 
     static defaultProps = {
         'contents' : [
