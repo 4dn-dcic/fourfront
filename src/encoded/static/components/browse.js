@@ -13,7 +13,6 @@ import * as store from '../store';
 import FacetList from './facetlist';
 import ExperimentsTable from './experiments-table';
 import { isServerSide, expFxn, Filters, navigate, object } from './util';
-import { AuditIndicators, AuditDetail, AuditMixin } from './audit';
 import { FlexibleDescriptionBox } from './item-pages/components';
 
 var expSetColumnLookup={

@@ -75,6 +75,7 @@ class ResultTableEntry extends React.Component{
 
 // Uses Detail from item-pages/components to provide item summary panel
 class ResultDetail extends React.Component{
+
     static propTypes = {
         result: PropTypes.object.isRequired,
         schemas: PropTypes.object.isRequired,
@@ -123,9 +124,9 @@ function countSelectedTerms(terms, field, filters) {
     return count;
 }
 
-var Term = search.Term = React.createClass({
+class Term extends React.Component {
 
-    getHref : function(selected = termSelected(this.props.term['key'], this.props.facet['field'], this.props.filters)){
+    getHref(selected = termSelected(this.props.term['key'], this.props.facet['field'], this.props.filters)){
         var href;
         if (selected && !this.props.canDeselect) {
             href = null;
@@ -135,9 +136,9 @@ var Term = search.Term = React.createClass({
             href = this.props.searchBase + this.props.facet['field'] + '=' + encodeURIComponent(this.props.term['key']).replace(/%20/g, '+');
         }
         return href;
-    },
+    }
 
-    render: function () {
+    render () {
         var filters = this.props.filters;
         var term = this.props.term['key'];
         var count = this.props.term['doc_count'];
@@ -160,16 +161,16 @@ var Term = search.Term = React.createClass({
             </li>
         );
     }
-});
+}
 
-var TypeTerm = search.TypeTerm = React.createClass({
-    render: function () {
+class TypeTerm extends React.Component {
+    render() {
         var term = this.props.term['key'];
         var filters = this.props.filters;
         var total = this.props.total;
         return <Term {...this.props} title={term} filters={filters} total={total} />;
     }
-});
+}
 
 class InfoIcon extends React.Component{
     render() {
@@ -181,27 +182,26 @@ class InfoIcon extends React.Component{
 }
 
 
-var Facet = search.Facet = React.createClass({
+class Facet extends React.Component {
 
-    statics : {
+    static defaultProps = {
+        width : 'inherit'
+    }
 
-    },
-
-    getDefaultProps: function() {
-        return {width: 'inherit'};
-    },
-
-    getInitialState: function () {
-        return {
-            facetOpen: false
+    constructor(props){
+        super(props);
+        this.onClick = this.onClick.bind(this);
+        this.render = this.render.bind(this);
+        this.state = {
+            'facetOpen' : false
         };
-    },
+    }
 
-    handleClick: function () {
+    onClick() {
         this.setState({facetOpen: !this.state.facetOpen});
-    },
+    }
 
-    render: function() {
+    render() {
         var facet = this.props.facet;
         var filters = this.props.filters;
         var title = facet['title'];
@@ -259,19 +259,20 @@ var Facet = search.Facet = React.createClass({
             </div>
         );
     }
-});
+}
 
 
-var FacetList = search.FacetList = React.createClass({
-    contextTypes: {
-        session: React.PropTypes.bool,
-    },
+class FacetList extends React.Component {
 
-    getDefaultProps: function() {
-        return {orientation: 'vertical'};
-    },
+    static contextTypes = {
+        session: PropTypes.bool
+    }
 
-    render: function() {
+    static defaultProps = {
+        orientation: 'vertical'
+    }
+
+    render() {
         var { context, term, session } = this.props;
 
         // Get all facets, and "normal" facets, meaning non-audit facets
@@ -338,14 +339,16 @@ var FacetList = search.FacetList = React.createClass({
             </div>
         );
     }
-});
+
+}
+
 
 // the old Search tabular-style result display
 class TabularTableResults extends React.Component{
 
     static propTypes = {
-        results: React.PropTypes.array.isRequired,
-        schemas: React.PropTypes.object,
+        results: PropTypes.array.isRequired,
+        schemas: PropTypes.object,
     }
 
     constructor(props){
@@ -393,34 +396,39 @@ class TabularTableResults extends React.Component{
     }
 }
 
-var ResultTable = search.ResultTable = React.createClass({
+class ResultTable extends React.Component {
 
-    getDefaultProps: function() {
-        return {
-            restrictions: {},
-            searchBase: ''
-        };
-    },
+    static defaultProps = {
+        restrictions : {},
+        searchBase : ''
+    }
 
-    getInitialState: function(){
+    constructor(props){
+        super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.getSearchType = this.getSearchType.bind(this);
+        this.changePage = _.throttle(this.changePage.bind(this), 250);
+        this.onFilter = this.onFilter.bind(this);
+        this.render = this.render.bind(this);
+
         var urlParts = url.parse(this.props.searchBase, true);
         var urlFrom = parseInt(urlParts.query.from || 0);
         var urlLimit = parseInt(urlParts.query.limit || 25);
         var page = 1 + Math.ceil(urlFrom/urlLimit);
-        return({
+        this.state = {
             'page': page,
             'changing_page': false
-        });
-    },
+        };
+    }
 
-    componentWillReceiveProps: function(nextProps){
+    componentWillReceiveProps(nextProps){
         // go back to first page if items change
         if(this.props.context.total !== nextProps.context.total){
             this.changePage(1, nextProps.searchBase);
         }
-    },
+    }
 
-    getSearchType: function(facets){
+    getSearchType(facets){
         var specificSearchType;
         // Check to see if we are searching among multiple data types
         // If only one type, use that as the search title
@@ -436,9 +444,9 @@ var ResultTable = search.ResultTable = React.createClass({
             }
             return specificSearchType;
         }
-    },
+    }
 
-    changePage : _.throttle(function(page, urlBase=this.props.searchBase){
+    changePage(page, urlBase=this.props.searchBase){
 
         if (typeof this.props.onChange !== 'function') throw new Error("Search doesn't have props.onChange");
         if (typeof urlBase !== 'string') throw new Error("Search doesn't have props.searchBase");
@@ -455,20 +463,23 @@ var ResultTable = search.ResultTable = React.createClass({
         urlParts.query.from = newFrom + '';
         urlParts.search = '?' + querystring.stringify(urlParts.query);
         this.setState({ 'changingPage' : true }, ()=>{
-            this.props.navigate(
-                url.format(urlParts),
-                { 'replace' : true },
-                ()=>{
-                    this.setState({
-                        'changingPage' : false,
-                        'page' : page
-                    }
-                );
+            this.props.navigate(url.format(urlParts), { 'replace' : true }, ()=>{
+                this.setState({
+                    'changingPage' : false,
+                    'page' : page
                 });
+            });
         });
-    }, 250),
+    }
 
-    render: function() {
+    onFilter(e) {
+        var search = e.currentTarget.getAttribute('href');
+        this.props.onChange(search);
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    render() {
         const batchHubLimit = 100;
         var context = this.props.context;
         var results = context['@graph'];
@@ -537,19 +548,12 @@ var ResultTable = search.ResultTable = React.createClass({
                 </div>
             </div>
         );
-    },
-
-    onFilter: function(e) {
-        var search = e.currentTarget.getAttribute('href');
-        this.props.onChange(search);
-        e.stopPropagation();
-        e.preventDefault();
     }
-});
 
-var Search = search.Search = React.createClass({
+}
 
-    render: function() {
+class Search extends React.Component {
+    render() {
         var context = this.props.context;
         var results = context['@graph'];
         var notification = context['notification'];
@@ -567,6 +571,6 @@ var Search = search.Search = React.createClass({
             </div>
         );
     }
-});
+}
 
 globals.content_views.register(Search, 'Search');

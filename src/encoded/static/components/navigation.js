@@ -3,9 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-var Login = require('./login');
 import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 import _ from 'underscore';
+import Login from './login';
 import * as store from '../store';
 import { JWT, console, layout, isServerSide } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
@@ -289,7 +289,7 @@ export default class Navigation extends React.Component {
 
 Navigation.propTypes = {
     href : PropTypes.string,
-    session : React.PropTypes.bool
+    session : PropTypes.bool
 };
 
 

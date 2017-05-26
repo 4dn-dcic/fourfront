@@ -7,15 +7,17 @@ import { JWT, ajax, navigate } from './util';
 import { MenuItem } from 'react-bootstrap';
 import Alerts from './alerts';
 
-// Component that contains auth0 functions
-var Login = React.createClass({
+/** Component that contains auth0 functions */
+export default class Login extends React.Component {
+    
+    static propTypes = {
+        updateUserInfo      : PropTypes.func.isRequired,
+        session             : PropTypes.bool.isRequired,
+        navCloseMobileMenu  : PropTypes.func.isRequired,
+        href                : PropTypes.string.isRequired
+    }
 
-    propTypes : {
-        updateUserInfo : PropTypes.func.isRequired,
-        session : PropTypes.bool.isRequired
-    },
-
-    componentWillMount: function () {
+    componentWillMount () {
         const isClient = typeof window !== 'undefined';
         var lock_;
         if (isClient) {
@@ -42,13 +44,13 @@ var Login = React.createClass({
                 allowedConnections: ['github', 'google-oauth2']
             });
         this.lock.on("authenticated", this.handleAuth0Login);
-    },
+    }
 
-    showLock: function(eventKey, e) {
+    showLock(eventKey, e) {
         this.lock.show();
-    },
+    }
 
-    logout: function (eventKey, e) {
+    logout(eventKey, e) {
         JWT.remove();
         console.log('Logging out');
         if (!this.props.session) return;
@@ -65,9 +67,9 @@ var Login = React.createClass({
                 navigate('', {'inPlace':true});
             }
         });
-    },
+    }
 
-    handleAuth0Login: function(authResult, retrying){
+    handleAuth0Login(authResult, retrying){
         var idToken = authResult.idToken; //JWT
         if (!idToken) return;
 
@@ -95,10 +97,9 @@ var Login = React.createClass({
             });
             this.lock.hide.bind(this.lock);
         });
+    }
 
-    },
-
-    render: function () {
+    render() {
         if (this.props.invisible) return null;
         if (this.props.session){
             return (
@@ -119,6 +120,7 @@ var Login = React.createClass({
             <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>
         );
         */
-    },
-});
-module.exports = Login;
+    }
+
+}
+

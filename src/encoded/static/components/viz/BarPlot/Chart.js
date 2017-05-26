@@ -1,13 +1,13 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var d3 = require('d3');
-var store = require('./../../../store');
-var vizUtil = require('./../utilities');
-var { RotatedLabel } = require('./../components');
-var { console, object, isServerSide, expFxn, Filters, layout, navigate } = require('./../../util');
-var aggregationFxn = require('./aggregation-functions');
+import React from 'react';
+import _ from 'underscore';
+import * as d3 from 'd3';
+import * as store from './../../../store';
+import * as vizUtil from './../utilities';
+import { RotatedLabel } from './../components';
+import { console, object, isServerSide, expFxn, Filters, layout, navigate } from './../../util';
+import { firstPopulatedFieldIndex, genChartData } from './aggregation-functions';
 import { PopoverViewContainer } from './ViewContainer';
 
 
@@ -45,7 +45,7 @@ var Chart = module.exports = React.createClass({
             var topIndex = 0;
 
             if (useOnlyPopulatedFields) {
-                topIndex = aggregationFxn.firstPopulatedFieldIndex(fields);
+                topIndex = firstPopulatedFieldIndex(fields);
             }
             
             var numberOfTerms = _.keys(fields[topIndex].terms).length;
@@ -446,7 +446,7 @@ var Chart = module.exports = React.createClass({
         if (!styleOpts) styleOpts = this.styleOptions();
 
         var allExperimentsBarData = Chart.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
-            aggregationFxn.genChartData( // Get counts by term per field.
+            genChartData( // Get counts by term per field.
                 this.props.experiments,
                 this.props.fields,
                 this.props.aggregateType,
@@ -482,7 +482,7 @@ var Chart = module.exports = React.createClass({
     },
 
     genChartData : function(){
-        return aggregationFxn.genChartData( // Get counts by term per field.
+        return genChartData( // Get counts by term per field.
             (
                 this.props.showType === 'all' ?
                 this.props.experiments : this.props.filteredExperiments || this.props.experiments
