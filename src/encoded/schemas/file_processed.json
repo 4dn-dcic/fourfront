@@ -32,6 +32,7 @@
                 "pairs_px2",
                 "cool",
                 "hic",
+                "mcool",
                 "other"
             ]
         },
@@ -47,6 +48,7 @@
         "pairs": ".pairs.txt.gz",
         "pairs_px2": ".pairs.txt.gz.px2",
         "cool": ".cool",
+        "mcoo": ".mcool",
         "hic": ".hic",
         "other": ""
     }
