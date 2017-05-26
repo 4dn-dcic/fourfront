@@ -11,7 +11,7 @@ jest.dontMock('underscore');
 
 
 describe('Testing search.js', function() {
-    var React, Search, testSearch, TestUtils, FetchContext, context, schemas, _;
+    var React, Search, testSearch, TestUtils, context, schemas, _;
 
     beforeEach(function() {
         React = require('react');
