@@ -110,9 +110,9 @@ export const CSVParsingUtilities = {
     xAxisLabelsFrom2DArray : function(data, options){
         return _.zip.apply(_.zip, options.xaxisRows.map(function(xRow){ 
             return data[xRow - 1].filter(function(colLabel, colIdx){
-	            if (colIdx < options.startCell[0] - 1) return false;
+                if (colIdx < options.startCell[0] - 1) return false;
                 if (colIdx > options.endCell[0] - 1) return false;
-            	return true;
+                return true;
             });
         })).map(function(setOfXLabels){
             return setOfXLabels.map(function(xLabelPart){
@@ -124,12 +124,12 @@ export const CSVParsingUtilities = {
     yAxisLabelsFrom2DArray : function(data, options){
         return _.zip.apply(_.zip, options.yaxisCols.map(function(yCol){ 
             return _.pluck(data, yCol - 1).filter(function(rowLabel, rowIdx){
-	            if (rowIdx < options.startCell[1] - 1) return false;
+                if (rowIdx < options.startCell[1] - 1) return false;
                 if (rowIdx > options.endCell[1] - 1) return false;
                 if (options.skipRows.indexOf(rowIdx + 1) > -1){
                     return false;
                 }
-            	return true;
+                return true;
             });
         })).map(function(setOfYLabels){
             return setOfYLabels.map(function(yLabelPart){

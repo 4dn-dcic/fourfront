@@ -85,7 +85,6 @@ class ListBlock extends React.Component {
             return <ul>{ pubsToElements(publications) }</ul>;
         } else {
             // Only show first 3, then a 'more' button.
-
             return (
                 <PartialList
                     persistent={pubsToElements(publications.slice(0, this.props.persistentCount))}
@@ -95,7 +94,6 @@ class ListBlock extends React.Component {
                 />
             );
         }
-        return null;
     }
 
     render(){

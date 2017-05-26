@@ -136,7 +136,7 @@ export class WorkflowView extends React.Component {
 }
 
 class GraphSection extends React.Component {
-
+/*
     static parseCWLToAnalysisSteps(cwlJSON){
 
         var stepInputNamesEncountered = {};
@@ -233,7 +233,7 @@ class GraphSection extends React.Component {
 
         });
     }
-
+*/
     static isCwlDataValid(cwlJSON){
         if (!Array.isArray(cwlJSON.steps)) return false;
         if (cwlJSON.steps.length === 0) return false;
