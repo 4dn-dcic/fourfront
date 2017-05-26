@@ -276,17 +276,34 @@ export default class App extends React.Component {
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
         this.loadSchemas();
 
+        // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
+        // Here we grab full-length href from window and update props.href (via Redux), if it is different.
         var query_href;
-        if(document.querySelector('link[rel="canonical"]')){
+        // Technically these two statements should be exact same. Props.href is put into <link...> (see render() ). w.e.
+        if (document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
-        }else{
+        } else {
             query_href = this.props.href;
         }
+        // Grab window.location.href w/ query_href as fallback. Remove hash if need to.
+        query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
         if (this.props.href !== query_href){
             store.dispatch({
                 type: {'href':query_href}
             });
         }
+
+        // If the window href has a hash, which SHOULD NOT remain (!== globals.maybeRemoveHash()), strip it on mount to match app's props.href.
+        var parts = url.parse(query_href);
+        if (
+            typeof window.location.hash === 'string' &&
+            window.location.hash.length > 0 && 
+            (!parts.hash || parts.hash === '')
+        ){
+            window.location.hash = '';
+        }
+
+
         if (this.historyEnabled) {
             var data = this.props.context;
             try {
@@ -586,8 +603,13 @@ export default class App extends React.Component {
     handlePopState(event) {
         if (this.DISABLE_POPSTATE) return;
         var href = window.location.href;
-        // pass in endSubmitting to handle back button from submissions page
-        if (!this.confirmNavigation(href, {'endSubmitting': true})) {
+
+        if (!this.confirmPopState(href)){
+            window.history.pushState(window.state, '', this.props.href);
+            return;
+        }
+
+        if (!this.confirmNavigation(href)) {
             //window.history.pushState(window.state, '', this.props.href);
             var d = {
                 'href': href
@@ -605,7 +627,6 @@ export default class App extends React.Component {
             return;
         }
         var request = this.props.contextRequest;
-        var href = window.location.href;
         if (event.state) {
             // Abort inflight xhr before dispatching
             if (request && this.requestCurrent) {
@@ -706,18 +727,24 @@ export default class App extends React.Component {
         });
     }
 
-    // only navigate if href changes
+    /** Rules to prevent browser from changing to 'href' via back/forward buttons. */
+    confirmPopState(href){
+        if (this.stayOnSubmissionsPage()) return false;
+    }
+
+    /** Only navigate if href changes */
     confirmNavigation(href, options) {
 
         // check if user is currently on submission page
         // if so, warn them about leaving
-        if(this.stayOnSubmissionsPage(options)){
+        if (this.stayOnSubmissionsPage()){
             return false;
         }
 
         if(options && options.inPlace && options.inPlace==true){
             return true;
         }
+
         if(href===this.props.href){
             return false;
         }
@@ -725,11 +752,7 @@ export default class App extends React.Component {
         var partsNew = url.parse(href),
             partsOld = url.parse(this.props.href);
 
-        if (
-            partsNew.path === partsOld.path && (
-                partsNew.path.slice(0,14) === '/workflow-runs' ||
-                partsNew.path.slice(0,11) === '/workflows/'
-        )){
+        if (partsNew.path === partsOld.path && globals.isHashPartOfHref(null, partsNew)){
             return false;
         }
 
@@ -738,15 +761,12 @@ export default class App extends React.Component {
 
     // check this.state.isSubmitting to prompt user if navigating away
     // from the submissions page
-    stayOnSubmissionsPage(options={}) {
+    stayOnSubmissionsPage() {
         // can override state in options
         // override with replace, which occurs on back button navigation
-        if(options.endSubmitting && options.endSubmitting === true){
-            this.setIsSubmitting(false);
-            return false;
-        }else if(this.state.isSubmitting){
+        if(this.state.isSubmitting){
             var msg = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
-            if(confirm(msg) == true){
+            if(confirm(msg)){
                 // we are no longer submitting
                 this.setIsSubmitting(false);
                 return false;
@@ -754,7 +774,7 @@ export default class App extends React.Component {
                 // stay
                 return true;
             }
-        }else{
+        } else {
             return false;
         }
     }
