@@ -736,6 +736,9 @@
     "lab": "4dn-dcic-lab"
 },
 {
+    "accession": "4DNWFSOZLJBM",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab"
     "workflow_diagram": "",
     "description": "Hi-C processing partA based on Juicer",
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.5.cwl",
