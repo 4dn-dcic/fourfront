@@ -100,9 +100,12 @@
                             "pairs",
                             "pairs_px2",
                             "cool",
+                            "mcool",
                             "hic",
                             "bwaIndex",
                             "chromsizes",
+                            "reference_fasta",
+                            "juicer_format_restriction_site_file",
                             "other"
                         ]
                     },
