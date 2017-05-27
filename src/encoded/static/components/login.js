@@ -17,6 +17,15 @@ export default class Login extends React.Component {
         href                : PropTypes.string.isRequired
     }
 
+    constructor(props){
+        super(props);
+        this.componentWillMount = this.componentWillMount.bind(this);
+        this.showLock           = this.showLock.bind(this);
+        this.logout             = this.logout.bind(this);
+        this.handleAuth0Login   = this.handleAuth0Login.bind(this);
+        this.render             = this.render.bind(this);
+    }
+
     componentWillMount () {
         const isClient = typeof window !== 'undefined';
         var lock_;
@@ -101,25 +110,16 @@ export default class Login extends React.Component {
 
     render() {
         if (this.props.invisible) return null;
-        if (this.props.session){
-            return (
-                <MenuItem id="logoutbtn" onSelect={this.logout} className="global-entry">
-                    Log Out
-                </MenuItem>
-            );
-        }
-        return (
+        if (this.props.session) return (
+            <MenuItem id="logoutbtn" onSelect={this.logout} className="global-entry">
+                Log Out
+            </MenuItem>
+        );
+        else return (
             <MenuItem id="loginbtn" onSelect={this.showLock} className="global-entry">
                 Log In
             </MenuItem>
         );
-        /* For old nav
-        return (this.props.session ?
-            <a href="#" className="global-entry" onClick={this.logout}>Log out</a>
-            :
-            <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>
-        );
-        */
     }
 
 }
