@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import url from 'url';
 import { content_views } from './../globals';
 import { console, object, Filters } from './../util';
@@ -35,7 +36,7 @@ export class Fallback extends React.Component {
 }
 
 Fallback.contextTypes = {
-    location_href: React.PropTypes.string
+    location_href: PropTypes.string
 };
 
 // Use this view as a fallback for anything we haven't registered

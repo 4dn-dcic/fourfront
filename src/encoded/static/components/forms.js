@@ -1,9 +1,11 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var store = require('../store');
-var { ajax, console, object, isServerSide, navigate } = require('./util');
+import React from 'react';
+import createReactClass from 'create-react-class';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import * as store from './../store';
+import { ajax, console, object, isServerSide, navigate } from './util';
 
 /**
  * FieldSet allows to group EditableFields together.
@@ -15,19 +17,19 @@ var { ajax, console, object, isServerSide, navigate } = require('./util');
  * @see EditableField
  */
 
-var FieldSet = module.exports.FieldSet = React.createClass({
+var FieldSet = module.exports.FieldSet = createReactClass({
 
     propTypes : {
-        children : React.PropTypes.node,    // Inner fieldset content, should have at least 1 EditableField, probably more.
-        context : React.PropTypes.object,   // JSON graph/output from server representing page data. Passed to child EditableFields.
-        endpoint : React.PropTypes.string,  // Override context['@id'] (if doesn't exist, dif endpoint, etc.)
-        inputSize : React.PropTypes.oneOf(['sm', 'md', 'lg']),
-        style : React.PropTypes.oneOf(['row', 'minimal', 'inline']),
-        parent : React.PropTypes.any,       // Pass a parent React component, i.e. supply 'this' from a parent's render method,
+        children : PropTypes.node,    // Inner fieldset content, should have at least 1 EditableField, probably more.
+        context : PropTypes.object,   // JSON graph/output from server representing page data. Passed to child EditableFields.
+        endpoint : PropTypes.string,  // Override context['@id'] (if doesn't exist, dif endpoint, etc.)
+        inputSize : PropTypes.oneOf(['sm', 'md', 'lg']),
+        style : PropTypes.oneOf(['row', 'minimal', 'inline']),
+        parent : PropTypes.any,       // Pass a parent React component, i.e. supply 'this' from a parent's render method,
                                             // to have it act as host of state.currentlyEditing. Use when there are other EditableFields
                                             // available on view/page which act on same props.context but not all within this FieldSet.
-        className : React.PropTypes.string, // Additional className to prepend.
-        schemas : React.PropTypes.object    // Schemas to use for validation. If not provided, EditableField attempts to get from context
+        className : PropTypes.string, // Additional className to prepend.
+        schemas : PropTypes.object    // Schemas to use for validation. If not provided, EditableField attempts to get from context
     },
 
     getDefaultProps : function(){
@@ -182,23 +184,23 @@ var EditableField = module.exports.EditableField = React.createClass({
     },
 
     propTypes : {
-        label : React.PropTypes.string,
-        labelID : React.PropTypes.string,   // Property in context to be edited. Allows dot notation for nested values.
-        parent : React.PropTypes.any,       // Holds 'currentlyEditing' state (== labelID of field being edited.)
-        fallbackText : React.PropTypes.string, // Fallback text to display when no value is set/available.
-        context : React.PropTypes.object,   // ToDo : validate context obj has property labelID.
-        endpoint : React.PropTypes.string,  // Endpoint to PATCH update to. Defaults to props.context['@id'] if not set.
-        fieldType : React.PropTypes.string, // Type of field, used for rendering of input element & validation.
-        style : React.PropTypes.string,     // Markup style, e.g. render row with label (default), minimal (just input field w/ buttons).
-        inputSize : React.PropTypes.oneOf(['sm', 'md', 'lg']), // Size of Bootstrap input field to use. Defaults to sm.
-        children : React.PropTypes.any,     // Rendered value of field, use custom formatting on a per-field basis. ToDo : create fallback.
-        placeholder : React.PropTypes.string,
-        objectType: React.PropTypes.string, // Class name of object being edited, e.g. User, Biosource, AccessKey, etc. for schema-based validation.
-        pattern : React.PropTypes.any,      // Optional pattern to use in lieu of one derived from schema or default field pattern.
+        label : PropTypes.string,
+        labelID : PropTypes.string,   // Property in context to be edited. Allows dot notation for nested values.
+        parent : PropTypes.any,       // Holds 'currentlyEditing' state (== labelID of field being edited.)
+        fallbackText : PropTypes.string, // Fallback text to display when no value is set/available.
+        context : PropTypes.object,   // ToDo : validate context obj has property labelID.
+        endpoint : PropTypes.string,  // Endpoint to PATCH update to. Defaults to props.context['@id'] if not set.
+        fieldType : PropTypes.string, // Type of field, used for rendering of input element & validation.
+        style : PropTypes.string,     // Markup style, e.g. render row with label (default), minimal (just input field w/ buttons).
+        inputSize : PropTypes.oneOf(['sm', 'md', 'lg']), // Size of Bootstrap input field to use. Defaults to sm.
+        children : PropTypes.any,     // Rendered value of field, use custom formatting on a per-field basis. ToDo : create fallback.
+        placeholder : PropTypes.string,
+        objectType: PropTypes.string, // Class name of object being edited, e.g. User, Biosource, AccessKey, etc. for schema-based validation.
+        pattern : PropTypes.any,      // Optional pattern to use in lieu of one derived from schema or default field pattern.
                                             // If set to false, will skip (default or schema-based) validation.
-        required : React.PropTypes.bool,    // Optionally set if field is required, overriding setting derived from schema (if any). Defaults to false.
-        schemas : React.PropTypes.object.isRequired,
-        debug : React.PropTypes.bool        // Verbose lifecycle log messages.
+        required : PropTypes.bool,    // Optionally set if field is required, overriding setting derived from schema (if any). Defaults to false.
+        schemas : PropTypes.object.isRequired,
+        debug : PropTypes.bool        // Verbose lifecycle log messages.
     },
 
     getDefaultProps : function(){

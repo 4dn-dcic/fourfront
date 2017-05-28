@@ -171,14 +171,14 @@ export default class App extends React.Component {
     }
 
     static childContextTypes = {
-        dropdownComponent: React.PropTypes.string,
-        currentResource: React.PropTypes.func,
-        location_href: React.PropTypes.string,
-        onDropdownChange: React.PropTypes.func,
-        hidePublicAudits: React.PropTypes.bool,
-        session: React.PropTypes.bool,
-        navigate: React.PropTypes.func,
-        schemas: React.PropTypes.object
+        dropdownComponent: PropTypes.string,
+        currentResource: PropTypes.func,
+        location_href: PropTypes.string,
+        onDropdownChange: PropTypes.func,
+        hidePublicAudits: PropTypes.bool,
+        session: PropTypes.bool,
+        navigate: PropTypes.func,
+        schemas: PropTypes.object
     }
 
     constructor(props){

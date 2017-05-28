@@ -22,7 +22,7 @@ import * as aggregationFxn from './aggregation-functions';
  * @prop {string} showType - Passed from UIControlsWrapper.
  * @prop {BarPlot.Chart} children - Must contain a BarPlotChart as the single child element.
  */
-export default class Aggregator extends React.Component {
+export class Aggregator extends React.Component {
     
     static defaultProps = {
         'debug' : false

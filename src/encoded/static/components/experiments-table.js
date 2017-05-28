@@ -1185,8 +1185,8 @@ class FilePairBlock extends React.Component {
 class FileEntryBlock extends React.Component {
 
     static propTypes = {
-        selectedFiles : React.PropTypes.instanceOf(Set),
-        handleFileUpdate : React.PropTypes.func
+        selectedFiles : PropTypes.instanceOf(Set),
+        handleFileUpdate : PropTypes.func
     }
 
     constructor(props){
