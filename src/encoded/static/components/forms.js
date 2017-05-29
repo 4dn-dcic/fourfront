@@ -178,7 +178,6 @@ export class FieldSet extends React.Component {
     }
 
     render(){
-        console.log(this.props);
         if (this.props.style === 'inline'){
             return <span className={this.fullClassName()}>{ this.adjustedChildren() }</span>;
         }
@@ -557,7 +556,6 @@ export class EditableField extends React.Component {
     }
 
     enterEditState(e){
-        console.log(this.props);
         e.preventDefault();
         if (this.props.parent.state && this.props.parent.state.currentlyEditing) return null;
         this.props.parent.setState({ currentlyEditing : this.props.labelID });

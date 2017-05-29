@@ -552,7 +552,7 @@ class ResultTable extends React.Component {
 
 }
 
-class Search extends React.Component {
+export class Search extends React.Component {
     render() {
         var context = this.props.context;
         var results = context['@graph'];
