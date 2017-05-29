@@ -121,7 +121,7 @@ var FieldSet = module.exports.FieldSet = createReactClass({
  *
  * @see EditableField.propTypes for more info of props to provide.
  */
-var EditableField = module.exports.EditableField = React.createClass({
+var EditableField = module.exports.EditableField = createReactClass({
 
     statics : {
         regex : {

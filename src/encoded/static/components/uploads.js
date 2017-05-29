@@ -1,5 +1,7 @@
 'use strict';
+
 var React = require('react');
+import createReactClass from 'create-react-class';
 var globals = require('./globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide } = require('./util');
@@ -10,7 +12,7 @@ Uploads component holds the s3 file upload managers generated in action.js.
 State works where key is object ID of file, values are important object context and
 upload info.
 */
-var Uploads = module.exports = React.createClass({
+var Uploads = module.exports = createReactClass({
 
     getInitialState: function(){
         var initial_uploads = {};

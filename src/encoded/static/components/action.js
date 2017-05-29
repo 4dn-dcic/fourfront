@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+import createReactClass from 'create-react-class';
 var globals = require('./globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide, navigate } = require('./util');
@@ -17,7 +18,7 @@ var getLargeMD5 = require('./util/file-utility').getLargeMD5;
 // of true to the edit prop.
 // This component initiates and hold the new context and coordinated
 // submission/validation
-var Action = module.exports = React.createClass({
+var Action = module.exports = createReactClass({
 
     getInitialState: function() {
         var contType = this.props.context['@type'] || [];
@@ -406,7 +407,7 @@ var Action = module.exports = React.createClass({
 });
 
 // Container for BuildField that passes them the appropriate information
-var FieldPanel = React.createClass({
+var FieldPanel = createReactClass({
     includeField : function(schema, field){
         if (!schema) return null;
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
@@ -495,7 +496,7 @@ This is a key/input pair for any one field. Made to be stateless; changes
  to the newContext state of Action propogate downwards. Also includes a
  description and some validation message based on the schema
  */
-var BuildField = React.createClass({
+var BuildField = createReactClass({
     // display a limited message including if the field is required and its type
     displayMessage: function(field_case){
         if(this.props.required){
@@ -650,7 +651,7 @@ Case for a linked object. Fetches the search results for that subobject to
 allow the user to pick one from a displayed table. This component holds the
 state of whether it is currently open and the fetched data.
 */
-var LinkedObj = React.createClass({
+var LinkedObj = createReactClass({
 
     getInitialState: function(){
         return{
@@ -790,7 +791,7 @@ made with buildField, but pass in a different function to build new context,
 which essentially aggregates the context of the elements are propogates them
 upwards using this.props.modifyNewContext*/
 
-var ArrayField = React.createClass({
+var ArrayField = createReactClass({
     getInitialState: function(){
         return{'open': false};
     },
@@ -919,7 +920,7 @@ var ArrayField = React.createClass({
 });
 
 /* Builds a field that represents an inline object. Based off of FieldPanel*/
-var ObjectField = React.createClass({
+var ObjectField = createReactClass({
 
     modifyObjectContent: function(field, value){
         var valueCopy;
@@ -1005,7 +1006,7 @@ var ObjectField = React.createClass({
 /* For version 1. A simple local file upload that gets the name, type,
 size, and b64 encoded stream in the form of a data url. Upon successful
 upload, adds this information to NewContext*/
-var AttachmentInput = React.createClass({
+var AttachmentInput = createReactClass({
 
     acceptedTypes: function(){
         var types = [
@@ -1072,7 +1073,7 @@ var AttachmentInput = React.createClass({
 /* Input for an s3 file upload. Context value set is local value of the filename.
 Also updates this.state.file for the overall component.
 */
-var S3FileInput = React.createClass({
+var S3FileInput = createReactClass({
     handleChange: function(e){
         var req_type = null;
         var file = e.target.files[0];
