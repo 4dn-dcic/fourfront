@@ -865,7 +865,6 @@
             "workflow_argument_name": "out_pairs_index"
         },
         {
-            "argument_type": "",
             "argument_mapping": [
                 {
                     "step_argument_name": "input_merged_nodups",
@@ -877,8 +876,7 @@
                     "workflow_step": "juicer",
                     "step_argument_type": "Output file or parameter"
                 }
-            ],
-            "workflow_argument_name": ""
+            ]
         }
     ]
 }
