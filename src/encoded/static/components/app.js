@@ -602,7 +602,7 @@ export default class App extends React.Component {
 
     handlePopState(event) {
         if (this.DISABLE_POPSTATE) return;
-        var href = window.location.href;
+        var href = window.location.href; // Href which browser just navigated to, but maybe not yet set to this.props.href
 
         if (!this.confirmPopState(href)){
             window.history.pushState(window.state, '', this.props.href);
@@ -729,7 +729,7 @@ export default class App extends React.Component {
 
     /** Rules to prevent browser from changing to 'href' via back/forward buttons. */
     confirmPopState(href){
-        if (this.stayOnSubmissionsPage()) return false;
+        if (this.stayOnSubmissionsPage(href)) return false;
         return true;
     }
 
@@ -738,7 +738,7 @@ export default class App extends React.Component {
 
         // check if user is currently on submission page
         // if so, warn them about leaving
-        if (this.stayOnSubmissionsPage()){
+        if (this.stayOnSubmissionsPage(href)){
             return false;
         }
 
@@ -762,10 +762,16 @@ export default class App extends React.Component {
 
     // check this.state.isSubmitting to prompt user if navigating away
     // from the submissions page
-    stayOnSubmissionsPage() {
+    stayOnSubmissionsPage(href) {
         // can override state in options
         // override with replace, which occurs on back button navigation
         if(this.state.isSubmitting){
+            if (typeof href === 'string'){
+                if (href.indexOf('#!edit') > -1 || href.indexOf('#!create') > -1){
+                    // Cancel out if we are "returning" to edit or create (submissions page) href.
+                    return false;
+                }
+            }
             var msg = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
             if(confirm(msg)){
                 // we are no longer submitting
