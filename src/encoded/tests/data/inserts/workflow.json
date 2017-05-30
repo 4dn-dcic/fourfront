@@ -842,7 +842,7 @@
         },
         {
             "argument_format": "pairs",
-            "argument_type": "Output file",
+            "argument_type": "Output processed file",
             "argument_mapping": [
                 {
                     "step_argument_name": "out_pairs",
@@ -854,7 +854,7 @@
         },
         {
             "argument_format": "pairs_px2",
-            "argument_type": "Output file",
+            "argument_type": "Output processed file",
             "argument_mapping": [
                 {
                     "step_argument_name": "out_pairs_px",
