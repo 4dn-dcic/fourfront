@@ -105,6 +105,7 @@ class Experiment(Item):
         "title": "Experiment Sets",
         "description": "Experiment Sets to which this experiment belongs.",
         "type": "array",
+        "exclude_from": ["submit4dn", "FFedit-create"],
         "items": {
             "title": "Experiment Set",
             "type": ["string", "object"],

@@ -30,6 +30,9 @@
         "experimentset_type": {
             "default" : "replicate"
         },
+        "experiments_in_set": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
         "replicate_exps": {
             "title": "Set of replicate experiments",
             "description": "Replicate experiments with biological and technical replication numbers.",

@@ -56,7 +56,7 @@
             "comment": "Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).",
             "default": [],
             "uniqueItems": true,
-            "ff_clear": "clone",
+            "ff_flag": "clear clone",
             "items": {
                 "uniqueKey": "alias",
                 "title": "Lab alias",
@@ -215,7 +215,7 @@
             "additionalProperties": false,
             "formInput": "file",
             "attachment": true,
-            "ff_clear": "clone",
+            "ff_flag": "clear clone",
             "properties": {
                 "download": {
                     "title": "File Name",
@@ -292,7 +292,7 @@
             "description": "Unique identifiers from external resources.",
             "type": "array",
             "default": [],
-            "ff_clear": "clone",
+            "ff_flag": "clear clone",
             "uniqueItems": true,
             "items": {
                 "title": "External identifier",

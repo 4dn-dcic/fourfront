@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { console, isServerSide } from './../../util';
+import { windowHref } from './../../globals';
 
 
 export function findNodeFromHref(href, nodes){
@@ -95,9 +96,8 @@ export default class StateContainer extends React.Component {
         fallbackHref = (this.props && this.props.href) || null,
         checkWindowLocationHref = (this.props && typeof this.props.checkWindowLocationHref === 'boolean') ? this.props.checkWindowLocationHref : true
     ){
-        var href = fallbackHref;
-        if (checkWindowLocationHref && !isServerSide() && window.location && window.location.href) href = window.location.href;
-        return href;
+        if (checkWindowLocationHref) return windowHref(fallbackHref);
+        return fallbackHref;
     }
 
     handleNodeClick(node, evt){
