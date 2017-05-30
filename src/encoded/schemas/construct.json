@@ -1,6 +1,6 @@
 {
     "title": "Construct",
-    "description": "Schema for submitting a construct.",
+    "description": "DNA construct used for modification or treatment",
     "id": "/profiles/construct.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -34,7 +34,7 @@
             "type": "string"
         },
         "construct_type": {
-            "title": "Construct type",
+            "title": "Construct Type",
             "description": "The categorization of the construct.",
             "type": "string",
             "enum" : [
@@ -72,7 +72,7 @@
               "linkTo": "Vendor"
           },
           "map": {
-              "title": "Construct Map",
+              "title": "Construct Map Document",
               "description": "Map of the construct - document",
               "type": "string",
               "linkTo": "Document"

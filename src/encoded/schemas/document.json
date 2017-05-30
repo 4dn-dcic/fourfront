@@ -1,6 +1,6 @@
 {
     "title": "Document",
-    "description": "Schema for submitting a document file.",
+    "description": "Additional files like pdf, doc, txt",
     "id": "/profiles/document.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

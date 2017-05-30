@@ -1,6 +1,6 @@
 {
     "title": "Enzyme",
-    "description": "Schema for submitting an enzyme used for digestion of DNA as part of the chromatin capture assay.",
+    "description": "DNA digestion enzymes like HindIII or DNaseI",
     "id": "/profiles/enzyme.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -44,7 +44,7 @@
             "type": "string"
         },
         "recognition_sequence": {
-            "title": "Cut Sequence",
+            "title": "Recognition Sequence",
             "description": "The bases of the enzyme recognition sequence.",
             "type": "string",
             "pattern": "^[ATGCYRWSKMDVHBN]+$"

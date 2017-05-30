@@ -1,6 +1,6 @@
 {
     "title": "Replicate Experiments",
-    "description": "An Experiment Set containing experiment replicates.",
+    "description": "Experiment Set for technical/biological replicates.",
     "id": "/profiles/experiment_set_replicate.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -28,10 +28,13 @@
             "accessionType": "ES"
         },
         "experimentset_type": {
-            "default" : "replicate"
+            "default" : "replicate",
+            "enum" : [
+              "replicate"
+            ]
         },
         "replicate_exps": {
-            "title": "Set of replicate experiments",
+            "title": "Set of Replicate Experiments",
             "description": "Replicate experiments with biological and technical replication numbers.",
             "type": "array",
             "default": [],
@@ -76,7 +79,7 @@
             "title": "Organism"
         },
         "experiments_in_set.biosample.biosource.biosource_type": {
-            "title": "Biosource type"
+            "title": "Biosource Type"
         },
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Biosource"
