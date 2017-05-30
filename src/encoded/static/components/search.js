@@ -1,21 +1,19 @@
 'use strict';
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var queryString = require('query-string');
-var url = require('url');
-var querystring = require('querystring');
-var _ = require('underscore');
-var globals = require('./globals');
-var search = module.exports;
-var ReactTooltip = require('react-tooltip');
-var { ajax, console, object, isServerSide, Filters, layout, DateUtility, navigate } = require('./util');
-var { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} = require('react-bootstrap');
-var { Detail } = require('./item-pages/components');
+import queryString from 'query-string';
+import url from 'url';
+import _ from 'underscore';
+import * as globals from './globals';
+import ReactTooltip from 'react-tooltip';
+import { ajax, console, object, isServerSide, Filters, layout, DateUtility, navigate } from './util';
+import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
+import { Detail } from './item-pages/components';
 
-var Listing = function (result, schemas) {
+var Listing = function (result, schemas, selectCallback) {
     var props;
     if (result['@id']) {
-        props = {'context': result,  'key': result['@id'], 'schemas': schemas};
+        props = {'context': result,  'key': result['@id'], 'schemas': schemas, 'selectCallback': selectCallback};
     }
     if(props){
         return(<ResultTableEntry {...props} />);
@@ -28,20 +26,33 @@ var Listing = function (result, schemas) {
 class ResultTableEntry extends React.Component{
     constructor(props){
         super(props);
-    }
-
-    state = {
-        'open': false
+        this.state = {
+            'open': false
+        };
     }
 
     handleToggle = (e) => {
+        e.preventDefault();
         this.setState({'open': !this.state.open});
+    }
+
+    handleSelect = (e) => {
+        e.preventDefault();
+        if(!this.props.selectCallback){
+            return;
+        }
+        var processed_link = this.props.context.link_id.replace(/~/g, "/");
+        this.props.selectCallback(processed_link);
     }
 
     render() {
         var result = this.props.context || null;
         var item_type = result['@type'][0];
         var processed_link = result.link_id.replace(/~/g, "/");
+        var detailPop = false;
+        if(this.props.selectCallback){
+            detailPop = true;
+        }
         return (
             <div className="result-table-result">
                 <div className="row">
@@ -49,7 +60,16 @@ class ResultTableEntry extends React.Component{
                         <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
                             <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                         </Button>
-                        <a href={processed_link}>{result.display_title}</a>
+                        {this.props.selectCallback ?
+                            <Button bsSize="xsmall" bsStyle="success" className="icon-container pull-left" onClick={this.handleSelect}>
+                                <i className={"icon icon-check"}></i>
+                            </Button>
+                            : null
+                        }
+                        {detailPop ?
+                            <a href={processed_link} target="_blank">{result.display_title}</a>
+                            : <a href={processed_link}>{result.display_title}</a>
+                        }
                     </div>
                     <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
                         {result.lab ? result.lab.display_title : ""}
@@ -65,7 +85,7 @@ class ResultTableEntry extends React.Component{
                 </div>
                 <Collapse in={this.state.open}>
                     <div>
-                        <ResultDetail result={result} schemas={this.props.schemas} />
+                        <ResultDetail result={result} schemas={this.props.schemas} popLink={detailPop}/>
                     </div>
                 </Collapse>
             </div>
@@ -79,6 +99,7 @@ class ResultDetail extends React.Component{
     static propTypes = {
         result: PropTypes.object.isRequired,
         schemas: PropTypes.object.isRequired,
+        popLink: PropTypes.bool.isRequired
     }
 
     constructor(props){
@@ -96,7 +117,7 @@ class ResultDetail extends React.Component{
                     : null}
                 <div className="item-page-detail">
                     <h4 className="text-300">Details</h4>
-                    <Detail context={result} schemas={this.props.schemas} open={false}/>
+                    <Detail context={result} schemas={this.props.schemas} open={false} popLink={this.props.popLink}/>
                 </div>
             </div>
         );
@@ -285,6 +306,8 @@ class FacetList extends React.Component {
         var hideTypes;
         if (this.props.mode == 'picker') {
             hideTypes = false;
+        }else if(this.props.submissionBase){
+            hideTypes = true; // don't show types facet if using submission page
         } else {
             hideTypes = filters.filter(filter => filter.field === 'type').length === 1 && normalFacets.length > 1;
         }
@@ -294,6 +317,7 @@ class FacetList extends React.Component {
 
         // See if we need the Clear Filters link or not. context.clear_filters
         var clearButton; // JSX for the clear button
+        var clearHref = this.props.submissionBase ? '/' : context.clear_filters;
         var searchQuery = context && context['@id'] && url.parse(context['@id']).search;
         if (searchQuery) {
             // Convert search query string to a query object for easy parsing
@@ -312,7 +336,6 @@ class FacetList extends React.Component {
         }
 
         return (
-
             <div>
                 <div className={"facets-container facets " + this.props.orientation}>
                     <div className="row facets-header">
@@ -322,7 +345,7 @@ class FacetList extends React.Component {
                             <h4 className="facets-title">Properties</h4>
                         </div>
                         <div className={"col-xs-6 clear-filters-control" + (clearButton ? '' : ' placeholder')}>
-                            <a href={context.clear_filters} className={"btn btn-xs rounded btn-outline-default"}>
+                            <a href={clearHref} onClick={clearHref ? this.props.onFilter : null} className={"btn btn-xs rounded btn-outline-default"}>
                                 <i className="icon icon-times"></i> Clear All
                             </a>
                         </div>
@@ -358,17 +381,22 @@ class TabularTableResults extends React.Component{
     render(){
         var results = this.props.results;
         var schemas = this.props.schemas || {};
+        // Buttons are included in title bar for correct spacing
         return(
             <div>
                 <div className="result-table-header-row-container">
                     <div className="row hidden-xs hidden-sm result-table-header-row">
                         <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
-                            {/*
-                            <Button style={{'visibility':'hidden', "marginRight":"3px"}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
+                            <Button style={{'visibility':'hidden','marginRight':'4px'}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
                                 <i className="icon icon-plus"></i>
                             </Button>
-                            */}
-                            <div className="text-left" style={{ paddingLeft : 44 }}>Title</div>
+                            {this.props.selectCallback ?
+                                <Button style={{'visibility':'hidden','marginRight':'4px'}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
+                                    <i className={"icon icon-check"}></i>
+                                </Button>
+                                : null
+                            }
+                            <div>Title</div>
                         </div>
                         <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
                             <div>Lab</div>
@@ -387,8 +415,12 @@ class TabularTableResults extends React.Component{
                 <div className="nav result-table row" id="result-table">
                     {results.length ?
                         results.map(function (result) {
-                            return Listing(result, schemas);
-                        })
+                            if(this.props.selectCallback){
+                                return Listing(result, schemas, this.props.selectCallback);
+                            }else{
+                                return Listing(result, schemas, null);
+                            }
+                        }.bind(this))
                     : null}
                 </div>
             </div>
@@ -450,7 +482,6 @@ class ResultTable extends React.Component {
 
         if (typeof this.props.onChange !== 'function') throw new Error("Search doesn't have props.onChange");
         if (typeof urlBase !== 'string') throw new Error("Search doesn't have props.searchBase");
-
         var urlParts = url.parse(urlBase, true);
         var urlLimit = parseInt(urlParts.query.limit || 25);
 
@@ -461,15 +492,25 @@ class ResultTable extends React.Component {
         }
         var newFrom = urlLimit * (page - 1);
         urlParts.query.from = newFrom + '';
-        urlParts.search = '?' + querystring.stringify(urlParts.query);
-        this.setState({ 'changingPage' : true }, ()=>{
-            this.props.navigate(url.format(urlParts), { 'replace' : true }, ()=>{
+        urlParts.search = '?' + queryString.stringify(urlParts.query);
+        if(this.props.submissionBase){
+            this.setState({ 'changingPage' : true }, ()=>{
+                this.props.onChange(url.format(urlParts));
                 this.setState({
                     'changingPage' : false,
                     'page' : page
                 });
             });
-        });
+        } else {
+            this.setState({ 'changingPage' : true }, ()=>{
+                this.props.onChange( url.format(urlParts), { 'replace' : true }, ()=>{
+                    this.setState({
+                        'changingPage' : false,
+                        'page' : page
+                    });
+                });
+            });
+        }
     }
 
     onFilter(e) {
@@ -511,7 +552,10 @@ class ResultTable extends React.Component {
         return (
             <div>
 
-                <h1 className="page-title">{thisType + ' Search'}</h1>
+                {this.props.submissionBase ?
+                    <h1 className="page-title">{thisType + ' Selection'}</h1>
+                    : <h1 className="page-title">{thisType + ' Search'}</h1>
+                }
                 <h4 className="page-subtitle">Filter & sort results</h4>
 
                 <div className="row">
@@ -543,7 +587,7 @@ class ResultTable extends React.Component {
                                 </ButtonToolbar>
                             </div>
                         </div>
-                        <TabularTableResults results={results} schemas={this.props.schemas}/>
+                        <TabularTableResults {...this.props} results={results} schemas={this.props.schemas}/>
                     </div>
                 </div>
             </div>
@@ -553,11 +597,24 @@ class ResultTable extends React.Component {
 }
 
 export class Search extends React.Component {
+
+    componentDidMount(){
+        ReactTooltip.rebuild();
+    }
+
     render() {
         var context = this.props.context;
         var results = context['@graph'];
         var notification = context['notification'];
-        var searchBase = url.parse(this.props.href).search || '';
+        var searchBase;
+        // submissionBase is supplied when using Search through frontend
+        // submission. this switch controls several things, including
+        // pagination, clear filter, and types filter.
+        if(this.props.submissionBase){
+            searchBase = this.props.submissionBase;
+        }else{
+            searchBase = url.parse(this.context.location_href).search || '';
+        }
         var facetdisplay = context.facets && context.facets.some(function(facet) {
             return facet.total > 0;
         });
@@ -565,7 +622,7 @@ export class Search extends React.Component {
             <div>
                 {facetdisplay ?
                     <div className="browse-page-container">
-                        <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.props.navigate || navigate} />
+                        <ResultTable {...this.props} searchBase={searchBase} onChange={this.props.navigate || navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
             </div>
