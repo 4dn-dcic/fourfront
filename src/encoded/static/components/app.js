@@ -239,6 +239,7 @@ export default class App extends React.Component {
         // Save navigate fxn and other req'd stuffs to GLOBAL navigate obj.
         // So that we may call it from anywhere if necessary without passing through props.
         navigate.setNavigateFunction(this.navigate);
+        navigate.registerCallbackFunction(Alerts.updateCurrentAlertsTitleMap.bind(this, null));
 
         console.log("App Initial State: ", session, user_actions);
 
@@ -346,7 +347,7 @@ export default class App extends React.Component {
             onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
             hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
             session: this.state.session,
-            navigate: this.navigate,
+            navigate: navigate,
             schemas : this.state.schemas
         };
     }
@@ -513,7 +514,7 @@ export default class App extends React.Component {
         // through the navigate method.
         if (this.historyEnabled) {
             event.preventDefault();
-            this.navigate(href, navOpts);
+            navigate(href, navOpts);
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
             }
@@ -551,7 +552,7 @@ export default class App extends React.Component {
 
         if (this.historyEnabled) {
             event.preventDefault();
-            this.navigate(href, options);
+            navigate(href, options);
         }
     }
 
@@ -597,7 +598,7 @@ export default class App extends React.Component {
 
         }
         // Always async update in case of server side changes.
-        this.navigate(href, {'replace': true});
+        navigate(href, {'replace': true});
     }
 
     // If ESC pressed while drop-down menu open, close the menu
@@ -1182,7 +1183,7 @@ export default class App extends React.Component {
                                         href={this.props.href}
                                         context={this.props.context}
                                         expSetFilters={this.props.expSetFilters}
-                                        navigate={this.navigate}
+                                        navigate={navigate}
                                         updateStats={this.updateStats}
                                         schemas={this.state.schemas}
                                         session={this.state.session}
