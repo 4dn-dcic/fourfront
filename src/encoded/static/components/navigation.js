@@ -93,7 +93,7 @@ export default class Navigation extends React.Component {
             );
         } else {
             return (
-                <NavItem 
+                <NavItem
                     key={action.id}
                     id={action.sid || action.id}
                     href={Navigation.getMenuItemURL(action, mounted)}
@@ -140,7 +140,7 @@ export default class Navigation extends React.Component {
             if (!this.state.navInitialized){
                 stateChange.navInitialized = true;
             }
-            
+
             var scrollVector = document.body.scrollTop - lastScrollTop;
             lastScrollTop = document.body.scrollTop;
 
@@ -265,10 +265,10 @@ export default class Navigation extends React.Component {
                         </Navbar.Header>
                         <Navbar.Collapse>
                             <Nav>
-                            { 
-                                this.context.listActionsFor('global_sections').map((a)=> 
+                            {
+                                this.context.listActionsFor('global_sections').map((a)=>
                                     Navigation.buildDropdownMenu.call(this, a, this.state.mounted)
-                                ) 
+                                )
                             }
                             </Nav>
                             <UserActions mounted={this.state.mounted} closeMobileMenu={this.closeMobileMenu} session={this.props.session} />
@@ -330,7 +330,7 @@ class UserActions extends React.Component {
                 acctTitle = userDetails.first_name;
             }
         }
-        
+
         acctTitle = (
             <span>
                 <i title={session ? "Signed In" : null} className={"account-icon icon icon-user" + (session ? "" : "-o")}></i> { acctTitle }
