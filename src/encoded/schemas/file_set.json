@@ -1,6 +1,6 @@
 {
     "title": "File Set",
-    "description": "Schema for submitting metadata for a file set.",
+    "description": "Grouping for files with similar features.",
     "id": "/profiles/file_set.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

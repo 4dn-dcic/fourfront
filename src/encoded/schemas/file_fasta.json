@@ -1,6 +1,6 @@
 {
     "title": "FASTA file",
-    "description": "Schema for submitting metadata for a FASTA file.",
+    "description": "List of DNA sequences in fasta format.",
     "id": "/profiles/file_fasta.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -23,7 +23,7 @@
             "default": "1"
         },
         "file_format": {
-            "title": "File format",
+            "title": "File Format",
             "type": "string",
             "enum": [
                 "fasta"
@@ -44,7 +44,7 @@
             "title": "General Classification",
             "type": "string",
             "default": "ancillary file",
-            "exclude_from": ["submit4dn", "FFedit-create"],            
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
                 "ancillary file"
               ]

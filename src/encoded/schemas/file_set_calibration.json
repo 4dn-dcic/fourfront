@@ -1,6 +1,6 @@
 {
     "title": "Calibration File Set",
-    "description": "Schema for submitting metadata for a calibration file set.",
+    "description": "File set dedicated to imaging calibration files.",
     "id": "/profiles/file_set_calibration.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
