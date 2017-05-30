@@ -730,6 +730,7 @@ export default class App extends React.Component {
     /** Rules to prevent browser from changing to 'href' via back/forward buttons. */
     confirmPopState(href){
         if (this.stayOnSubmissionsPage()) return false;
+        return true;
     }
 
     /** Only navigate if href changes */
