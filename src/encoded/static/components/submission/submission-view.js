@@ -1107,8 +1107,12 @@ export default class SubmissionView extends React.Component{
                             if(inKey == 0){
                                 // see if we need to go into round two submission
                                 if(roundTwoCopy.length == 0){
+                                    // we're done!
+                                    this.props.setIsSubmitting(false);
                                     alert('Success! Navigating to your new object.');
-                                    this.props.navigate(destination, {'endSubmitting': true});
+                                    setTimeout(()=>{
+                                        this.props.navigate(destination);
+                                    }, 500);
                                 }else{
                                     // break this out into another fxn?
                                     // roundTwo initiation
@@ -1156,10 +1160,13 @@ export default class SubmissionView extends React.Component{
         stateToSet.keyValid = validationCopy;
         stateToSet.roundTwoKeys = roundTwoCopy;
         this.setState(stateToSet);
-        // we're done!
         if(roundTwoCopy.length == 0){
+            // we're done!
+            this.props.setIsSubmitting(false);
             alert('Success! Navigating to your new object.');
-            this.props.navigate(this.state.keyComplete[0], {'endSubmitting': true});
+            setTimeout(()=>{
+                this.props.navigate(this.state.keyComplete[0]);
+            }, 500);
         }
     }
 
@@ -1254,6 +1261,7 @@ export default class SubmissionView extends React.Component{
                         </Button>
                     </Modal.Body>
                 </Modal>
+                <WarningBanner/>
                 <div className="clearfix row">
                     <div className={navCol}>
                         <SubmissionTree
@@ -1807,6 +1815,31 @@ class RoundTwoDetailPanel extends React.Component{
 
         );
     }
+}
+
+class WarningBanner extends React.Component {
+
+    constructor(props){
+        super(props);
+    }
+
+    render() {
+        var style = {
+            'fontWeight': 300,
+            'textAlign': 'center',
+            'marginBottom': '10px',
+            'paddingTop': '5px',
+            'paddingBottom': '5px',
+            'color': '#8b8b8b'
+        };
+        var textBody = 'Please note: do not navigate away from, refresh or close this page while submitting. Doing so will result in your work being lost. The submission process is under active development and features may change.'
+        return(
+            <h5 style={style}>
+                {textBody}
+            </h5>
+        );
+    }
+
 }
 
 /***** MISC. FUNCIONS *****/

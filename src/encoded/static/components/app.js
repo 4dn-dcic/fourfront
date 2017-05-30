@@ -297,7 +297,7 @@ export default class App extends React.Component {
         var parts = url.parse(query_href);
         if (
             typeof window.location.hash === 'string' &&
-            window.location.hash.length > 0 && 
+            window.location.hash.length > 0 &&
             (!parts.hash || parts.hash === '')
         ){
             window.location.hash = '';
