@@ -124,7 +124,7 @@ class SubItemView extends React.Component {
                         popLink={popLink}
                         alwaysCollapsibleKeys={[]}
                         excludedKeys={this.props.excludedKeys ||
-                            _.without(Detail.defaultProps,
+                            _.without(Detail.defaultProps.excludedKeys,
                             // Remove
                                 '@id', 'audit', 'lab', 'award', 'description'
                             ).concat([

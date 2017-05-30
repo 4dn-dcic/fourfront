@@ -1808,7 +1808,7 @@ class RoundTwoDetailPanel extends React.Component{
                 </h4>
                 <Collapse in={this.state.open}>
                     <div className="item-page-detail">
-                        <Detail context={this.props.context} schemas={this.props.schemas} open={false} popLink={true}/>
+                        <Detail excludedKeys={Detail.defaultProps.excludedKeys.concat('upload_credentials')} context={this.props.context} schemas={this.props.schemas} open={false} popLink={true}/>
                     </div>
                 </Collapse>
             </div>
