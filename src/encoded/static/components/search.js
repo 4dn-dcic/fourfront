@@ -613,7 +613,7 @@ export class Search extends React.Component {
         if(this.props.submissionBase){
             searchBase = this.props.submissionBase;
         }else{
-            searchBase = url.parse(this.context.location_href).search || '';
+            searchBase = url.parse(this.props.href).search || '';
         }
         var facetdisplay = context.facets && context.facets.some(function(facet) {
             return facet.total > 0;
