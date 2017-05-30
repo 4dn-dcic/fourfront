@@ -51,9 +51,9 @@ def groupfinder(login, request):
     principals = ['userid.%s' % user.uuid]
     lab = user_properties.get('lab')
     if lab:
-        #import pdb; pdb.set_trace()
         principals.append('lab.%s' % lab)
         lab_properties = collections.by_item_type['lab'][lab].properties
+        # for members sharing awards but in different labs
         awards = lab_properties.get('awards')
         if awards:
             principals.extend('award.%s' % award for award in awards)
@@ -66,5 +66,4 @@ def groupfinder(login, request):
     principals.extend('group.%s' % group for group in groups)
     viewing_groups = user_properties.get('viewing_groups', [])
     principals.extend('viewing_group.%s' % group for group in viewing_groups)
-    # import pdb; pdb.set_trace()
     return principals
