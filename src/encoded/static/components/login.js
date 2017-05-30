@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as store from '../store';
-import { JWT, ajax, navigate } from './util';
+import { JWT, ajax, navigate, isServerSide } from './util';
 import { MenuItem } from 'react-bootstrap';
 import Alerts from './alerts';
 
@@ -27,12 +27,11 @@ export default class Login extends React.Component {
     }
 
     componentWillMount () {
-        const isClient = typeof window !== 'undefined';
         var lock_;
-        if (isClient) {
-            lock_ = require('auth0-lock').default;
-        }else{
+        if (isServerSide()) {
             return;
+        } else {
+            lock_ = require('auth0-lock').default;
         }
         // Login / logout actions must be deferred until Auth0 is ready.
         // TODO: these should be read in from base and production.ini
