@@ -767,7 +767,7 @@ export default class App extends React.Component {
         // override with replace, which occurs on back button navigation
         if(this.state.isSubmitting){
             if (typeof href === 'string'){
-                if (href.indexOf('#!edit') > -1 || href.indexOf('#!create') > -1){
+                if (href.indexOf('#!edit') > -1 || href.indexOf('#!create') > -1 || href.indexOf('#!clone') > -1){
                     // Cancel out if we are "returning" to edit or create (submissions page) href.
                     return false;
                 }
