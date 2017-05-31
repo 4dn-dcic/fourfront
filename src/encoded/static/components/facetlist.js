@@ -6,7 +6,7 @@ import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
 import * as store from '../store';
-import { ajax, console, object, isServerSide, Filters, layout, analytics } from './util';
+import { ajax, console, object, isServerSide, Filters, layout, analytics, JWT } from './util';
 import * as vizUtil from './viz/utilities';
 import ReactTooltip from 'react-tooltip';
 
@@ -287,8 +287,13 @@ class Facet extends React.Component {
             });
         }
 
-        var schemaProperty = Filters.Field.getSchemaProperty(standardizedFieldKey, this.props.schemas, this.props.itemTypeForSchemas || 'ExperimentSet');
-        var description = schemaProperty && schemaProperty.description;
+        var schemaProperty, description;
+        try {
+            schemaProperty = Filters.Field.getSchemaProperty(standardizedFieldKey, this.props.schemas, this.props.itemTypeForSchemas || 'ExperimentSet');
+            description = schemaProperty && schemaProperty.description;
+        } catch(e){
+            console.warn("Could not find schema property (for description tooltip) for field " + standardizedFieldKey, e);
+        }
 
         if (this.isStatic()){
             // Only one term
@@ -488,7 +493,10 @@ export class ReduxExpSetFiltersInterface extends React.Component {
 
         if (!this.props.facets && !isServerSide() && !Array.isArray(cachedEmptyFacets)){
             this.loadFacets((facets) => {
-                cachedEmptyFacets = facets;
+
+                cachedEmptyFacets = facets.map((f)=>{
+                    return _.extend({}, f, { 'field' : Filters.standardizeFieldKey(f.field, this.props.experimentsOrSets, false) });
+                });
                 facets = ReduxExpSetFiltersInterface.fillFacetTermsAndCountFromExps(
                     cachedEmptyFacets,
                     this.props.experimentSets
@@ -510,7 +518,7 @@ export class ReduxExpSetFiltersInterface extends React.Component {
         var facetType = (this.props.itemTypes && Array.isArray(this.props.itemTypes) && this.props.itemTypes[0]) ||
             (this.props.experimentsOrSets === 'sets' ? 'ExperimentSet' : 'Experiment');
 
-        ajax.load('/facets?type=' + /*facetType*/ 'ExperimentSet', (resultFacets) => {
+        ajax.load('/facets?type=' + facetType, (resultFacets) => {
             if (this.props.debug) console.log('Loaded Facet List via AJAX.', resultFacets);
             if (typeof callback == 'function') callback(resultFacets);
         });
@@ -548,6 +556,7 @@ export class ReduxExpSetFiltersInterface extends React.Component {
         newChildProps.href = oldChildProps.href || this.props.href;
         newChildProps.schemas = oldChildProps.schemas || this.props.schemas;
         newChildProps.expSetFilters = oldChildProps.expSetFilters || this.props.expSetFilters;
+        newChildProps.session = oldChildProps.session || this.props.session;
         return React.cloneElement(this.props.children, newChildProps);
     }
 
@@ -620,10 +629,23 @@ export default class FacetList extends React.Component {
 
     static filterFacetsForBrowse(facet, props, state){
         if (facet.field.substring(0, 6) === 'audit.'){
-            return false; // Ignore audit facets temporarily, esp if logged out.
+            if (props.session && JWT.getUserDetails().groups.indexOf('admin') > -1){
+                return true;
+            }
+            return false; // Ignore audit facets temporarily, if not logged in as admin.
         }
         if (facet.field === 'experimentset_type') return false;
         if (facet.field === 'type') return false;
+        return true;
+    }
+
+    static filterFacetsForExpSetView(facet, props, state){
+        // Lets extend Browse version w/ more strictness (remove audits).
+        var browseFilterResult = FacetList.filterFacetsForBrowse.apply(this, arguments);
+        if (!browseFilterResult) return false;
+        if (facet.field.substring(0, 25) === 'experiments_in_set.audit.'){
+            return false; // Ignore audit facets temporarily, esp if logged out.
+        }
         return true;
     }
 
@@ -636,21 +658,26 @@ export default class FacetList extends React.Component {
 
 
     static defaultProps = {
-        'orientation'       : 'vertical',
+        'orientation'       : 'vertical', // Probably unnecessary.
         'facets'            : null,
         'experimentsOrSets' : 'sets',
         'title'             : "Properties",
-        'filterFacetsFxn'   : FacetList.filterFacetsForBrowse,
+        'filterFacetsFxn'   : FacetList.filterFacetsForBrowse, // Filters out 'Item Type', etc.
         'debug'             : false,
 
-        // These functions don't do anything except show parameters.
+        /**
+         * These 'default' functions don't do anything except show parameters passed.
+         * Callback must be called because it changes Term's 'loading' state back to false.
+         */
         'onFilter'          : function(field, term, callback){
+            // Set redux filter accordingly, or update search query/href.
             console.log('FacetList: props.onFilter(' + field + ', ' + term + ', callback)');
             if (typeof callback === 'function'){
                 setTimeout(callback, 1000);
             }
         },
         'onClearFilters'    : function(e, callback){
+            // Clear Redux filters, or go base search url.
             e.preventDefault();
             console.log('FacetList: props.onClearFilters(e, callback)');
             if (typeof callback === 'function'){
@@ -658,6 +685,7 @@ export default class FacetList extends React.Component {
             }
         },
         'isTermSelected'    : function (termKey, facetField, expsOrSets = 'sets'){
+            // Check against responseContext.filters, or expSetFilters in Redux store.
             return false;
         }
     }

@@ -556,6 +556,8 @@ export function standardizeFieldKey(field, expsOrSets = 'sets', reverse = false)
         if (reverse){
             return field.replace('experiments_in_set.', '');
         } else if (field.slice(0, 19) !== 'experiments_in_set.') {
+            if (field === 'type') return field;
+            //if (field.slice(0, 6) === 'audit.') return field;
             return 'experiments_in_set.' + field;
         }
     }

@@ -171,6 +171,7 @@ export default class ExperimentSetView extends React.Component {
                                 orientation="vertical"
                                 itemTypes={this.props.context['@type'] || ['ExperimentSetReplicate']}
                                 className="with-header-bg"
+                                filterFacetsFxn={FacetList.filterFacetsForExpSetView}
                             />
                         </ReduxExpSetFiltersInterface>
                         : <div>&nbsp;</div> }

@@ -248,7 +248,8 @@ export default class App extends React.Component {
             'session': session,
             'user_actions': user_actions,
             'schemas': this.props.context.schemas || null,
-            'isSubmitting': false
+            'isSubmitting': false,
+            'mounted' : false
         };
     }
 
@@ -314,6 +315,8 @@ export default class App extends React.Component {
             this.props.context,
             this.props.expSetFilters
         );
+
+        this.setState({ 'mounted' : true });
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -391,6 +394,7 @@ export default class App extends React.Component {
             return portal.user_section;
         }
         if (category === 'user') {
+            if (!this.state.mounted) return [];
             return this.state.user_actions;
         }
         if (category === 'global_sections') {
