@@ -777,7 +777,7 @@ export class ResultTable extends React.Component {
     static propTypes = {
         'context' : PropTypes.object.isRequired,
         'sortReverse' : PropTypes.bool.isRequired,
-        'sortColumn' : PropTypes.string.isRequired,
+        'sortColumn' : PropTypes.string,
         'sortBy' : PropTypes.func.isRequired,
         'expSetFilters' : PropTypes.object,
 

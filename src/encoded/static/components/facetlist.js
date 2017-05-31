@@ -61,32 +61,6 @@ class Term extends React.Component {
     }
 
 
-    static isSelectedExpItem (
-        termKey     = (this.state.term || this.props.term || {key:null}).key,
-        facetField  = (this.state.facet || this.props.facet || {field:null}).field,
-        expsOrSets  = this.props.experimentsOrSets || 'sets'
-    ){
-        var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
-        if (
-            this.props.expSetFilters[standardizedFieldKey] &&
-            this.props.expSetFilters[standardizedFieldKey].has(termKey)
-        ){
-            return true;
-        }
-        return false;
-    }
-
-    // If the given term is selected, return the href for the term
-    static isSelectedItem(term, field, filters) {
-        for (var filter in filters) {
-            if (filters[filter]['field'] === field && filters[filter]['term'] === term) {
-                return url.parse(filters[filter]['remove']).search;
-            }
-        }
-        return null;
-    }
-
-
     static propTypes = {
         'facet'             : PropTypes.shape({
             'field'             : PropTypes.string.isRequired
@@ -95,8 +69,8 @@ class Term extends React.Component {
             'key'               : PropTypes.string.isRequired,
             'doc_count'         : PropTypes.number
         }).isRequired,
-        'expSetFilters'     : PropTypes.object.isRequired,
-        'experimentsOrSets' : PropTypes.string
+        'experimentsOrSets' : PropTypes.string,
+        'isTermSelected'    : PropTypes.func.isRequired
     }
 
 
@@ -107,7 +81,6 @@ class Term extends React.Component {
 
     constructor(props){
         super(props);
-        this.isSelectedExpItem = Term.isSelectedExpItem.bind(this);
         this.experimentSetsCount = this.experimentSetsCount.bind(this);
         this.standardizeFieldKey = this.standardizeFieldKey.bind(this);
         this.handleClick = _.debounce(this.handleClick.bind(this), 500, true);
@@ -128,7 +101,9 @@ class Term extends React.Component {
 
     handleClick(e) {
         e.preventDefault();
-        var existingFilters = _.clone(this.props.expSetFilters);
+        var existingFilters;
+        if (this.props.expSetFilters) existingFilters = _.clone(this.props.expSetFilters);
+
         this.setState(
             { filtering : true },
             () => {
@@ -138,17 +113,18 @@ class Term extends React.Component {
                     () => this.setState({ filtering : false })
                 );
 
-                var isUnset = false;
-                if (
-                    existingFilters &&
-                    existingFilters[this.props.facet.field] &&
-                    existingFilters[this.props.facet.field].has(this.props.term.key)
-                ) isUnset = true;
-
-                analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
-                    'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.term.key,
-                    'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
-                });
+                if (this.props.expSetFilters){
+                    var isUnset = false;
+                    if (
+                        existingFilters &&
+                        existingFilters[this.props.facet.field] &&
+                        existingFilters[this.props.facet.field].has(this.props.term.key)
+                    ) isUnset = true;
+                    analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
+                        'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.term.key,
+                        'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
+                    });
+                }
             }
         );
     }
@@ -204,13 +180,12 @@ class Facet extends React.Component {
             'terms'                 : PropTypes.array.isRequired      // Possible terms
         }),
         'defaultFacetOpen'      : PropTypes.bool,
-        'experimentSets'        : PropTypes.array,
-        'expSetFilters'         : PropTypes.object.isRequired,
         'onFilter'              : PropTypes.func,           // Executed on term click
         'experimentsOrSets'     : PropTypes.string,         // Defaults to 'sets'
         'width'                 : PropTypes.any,
         'extraClassname'        : PropTypes.string,
-        'schemas'               : PropTypes.object
+        'schemas'               : PropTypes.object,
+        'isTermSelected'        : PropTypes.func.isRequired
     }
 
     static defaultProps = {
@@ -222,7 +197,6 @@ class Facet extends React.Component {
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.isStatic = this.isStatic.bind(this);
         this.isEmpty = this.isEmpty.bind(this);
-        this.isSelected = this.isStatic(props) ? Term.isSelectedExpItem.bind(this, props.facet.terms[0].key) : () => false;
         this.handleExpandToggleClick = this.handleExpandToggleClick.bind(this);
         this.handleStaticClick = this.handleStaticClick.bind(this);
         this.state = {
@@ -252,7 +226,7 @@ class Facet extends React.Component {
     handleStaticClick(e) {
         e.preventDefault();
         if (!this.isStatic()) return false;
-        var existingFilters = _.clone(this.props.expSetFilters);
+        if (this.props.expSetFilters) var existingFilters = _.clone(this.props.expSetFilters);
         this.setState(
             { filtering : true },
             () => {
@@ -261,16 +235,18 @@ class Facet extends React.Component {
                     this.props.facet.terms[0].key,
                     ()=> {
                         this.setState({ filtering : false });
-                        var isUnset = false;
-                        if (
-                            existingFilters &&
-                            existingFilters[this.props.facet.field] &&
-                            existingFilters[this.props.facet.field].has(this.props.facet.terms[0].key)
-                        ) isUnset = true;
-                        analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
-                            'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.facet.terms[0].key,
-                            'dimension1' : analytics.getStringifiedCurrentFilters(existingFilters)
-                        });
+                        if (this.props.expSetFilters){
+                            var isUnset = false;
+                            if (
+                                existingFilters &&
+                                existingFilters[this.props.facet.field] &&
+                                existingFilters[this.props.facet.field].has(this.props.facet.terms[0].key)
+                            ) isUnset = true;
+                            analytics.event('FacetList', (isUnset ? 'Unset' : 'Set') + ' Filter', {
+                                'eventLabel' : 'Field: ' + this.props.facet.field + ', Term: ' + this.props.facet.terms[0].key,
+                                'dimension1' : analytics.getStringifiedCurrentFilters(existingFilters)
+                            });
+                        }
                     }
                 );
             }
@@ -280,7 +256,6 @@ class Facet extends React.Component {
     render() {
         var facet = this.props.facet;
         var standardizedFieldKey = Filters.standardizeFieldKey(facet.field, this.props.experimentsOrSets);
-        var selected = this.isSelected();
         if (typeof facet.title !== 'string'){
             facet = _.extend({}, facet, {
                 'title' : Filters.Field.toName(facet.field, this.props.schemas || null)
@@ -297,6 +272,7 @@ class Facet extends React.Component {
 
         if (this.isStatic()){
             // Only one term
+            var selected = this.props.isTermSelected(facet.terms[0].key, standardizedFieldKey);
             return (
                 <div
                     className={
@@ -310,7 +286,7 @@ class Facet extends React.Component {
                 >
                     <div className="facet-static-row clearfix">
                         <h5 className="facet-title">
-                            <span className="inline-block" data-tip={description} data-place="right">{ facet.title || facet.field }</span>
+                            <span className="inline-block" data-tip={description} data-place="right">{ facet.title || Filters.Field.toName(facet.field, this.props.schemas || null) }</span>
                         </h5>
                         <div className={
                             "facet-item term" +
@@ -334,7 +310,7 @@ class Facet extends React.Component {
                                     (this.state.filtering ? 'icon-spin icon-circle-o-notch' :
                                         ( selected ? 'icon-times-circle' : 'icon-circle' )
                                     )
-                                }></i>{ facet.terms[0].key }
+                                }></i> { Filters.Term.toName(facet.field, facet.terms[0].key) }
                             </span>
                         </div>
                     </div>
@@ -369,7 +345,6 @@ class Facet extends React.Component {
                                 facet={this.props.facet}
                                 total={facet.total}
                                 href={this.props.href || this.context.location_href}
-                                expSetFilters={this.props.expSetFilters}
                                 onFilter={this.props.onFilter}
                                 isTermSelected={this.props.isTermSelected}
                             />
@@ -406,8 +381,6 @@ export class ReduxExpSetFiltersInterface extends React.Component {
     }
 
     /**
-     * @deprecated
-     * 
      * For client-side filtering of experiments only.
      * Fills facet objects with 'terms' and 'total' properties, as well as terms' counts.
      * Modifies incompleteFacets param in place to turn the array of object into "complete" facets.
@@ -461,7 +434,8 @@ export class ReduxExpSetFiltersInterface extends React.Component {
         'facets' : PropTypes.array,
         'experimentsOrSets' : PropTypes.oneOf([ 'sets', 'experiments' ]),
         'expSetFilters' : PropTypes.object,
-        'href' : PropTypes.string.isRequired
+        'href' : PropTypes.string.isRequired,
+        'experimentSets' : PropTypes.array // Required if no facets supplied.
     }
 
     static defaultProps = {
@@ -474,6 +448,7 @@ export class ReduxExpSetFiltersInterface extends React.Component {
         this.componentDidMount = this.componentDidMount.bind(this);
         this.loadFacets = this.loadFacets.bind(this);
         this.changeFilter = this.changeFilter.bind(this);
+        this.clearFilters = this.clearFilters.bind(this);
         this.render = this.render.bind(this);
     }
 
@@ -486,7 +461,7 @@ export class ReduxExpSetFiltersInterface extends React.Component {
     componentDidMount(){
 
         if (this.props.debug) console.log(
-            'Mounted FacetList on ' + (this.props.href || 'unknown page.'),
+            'Mounted FacetList/ReduxExpSetFiltersInterface on ' + (this.props.href || 'unknown page.'),
             '\nFacets Provided: ' + this.props.facets,
             'Facets Loaded: ' + Array.isArray(cachedEmptyFacets)
         );
@@ -608,8 +583,6 @@ export default class FacetList extends React.Component {
          */
         'schemas' : PropTypes.object,
         // { '<schemaKey : string > (active facet categories)' : Set (active filters within category) }
-        'expSetFilters' : PropTypes.object.isRequired,
-        'experimentSets' : PropTypes.array.isRequired, // JSON data of experiments, if not in context['@graph']
         'orientation' : PropTypes.string,   // 'vertical' or 'horizontal'
         'experimentsOrSets' : PropTypes.string,
         'title' : PropTypes.string,         // Title to put atop FacetList
@@ -708,7 +681,6 @@ export default class FacetList extends React.Component {
 
     componentWillReceiveProps(nextProps){
         if (
-            this.props.expSetFilters !== nextProps.expSetFilters ||
             !_.isEqual(nextProps.facets, this.props.facets)
         ){
 
@@ -738,8 +710,6 @@ export default class FacetList extends React.Component {
             .filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state))
             .map(facet =>
             <Facet
-                experimentSets={ this.props.experimentSets || this.props.context['@graph'] || null }
-                expSetFilters={this.props.expSetFilters}
                 onFilter={this.props.onFilter}
                 key={facet.field}
                 facet={facet}

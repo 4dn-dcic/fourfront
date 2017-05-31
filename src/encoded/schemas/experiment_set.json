@@ -70,7 +70,7 @@
     },
     "facets": {
         "experimentset_type": {
-            "title": "Experiment Set Type"
+            "title": "Set Type"
         },
         "experiments_in_set.experiment_type": {
             "title": "Experiment Type"

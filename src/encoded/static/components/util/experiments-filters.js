@@ -20,6 +20,7 @@ export const Term = {
             case 'experiments_in_set.biosample.biosource.individual.organism.name':
                 return Term.capitalize(term);
             case 'experiments_in_set.biosample.biosource.biosource_type':
+            case 'experimentset_type':
                 return Term.capitalizeSentence(term);
             default:
                 return term;
@@ -38,7 +39,8 @@ export const Field = {
         'accession' : 'Experiment Set',
         'experiments_in_set.digestion_enzyme.name' : 'Enzyme',
         'experiments_in_set.biosample.biosource_summary' : 'Biosource',
-        'experiments_in_set.lab.title' : 'Lab'
+        'experiments_in_set.lab.title' : 'Lab',
+        'experimentset_type' : 'Set Type'
     },
 
     toName : function(field, schemas, schemaOnly = false){
