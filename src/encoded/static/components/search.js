@@ -9,6 +9,7 @@ import ReactTooltip from 'react-tooltip';
 import { ajax, console, object, isServerSide, Filters, layout, DateUtility, navigate } from './util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { Detail } from './item-pages/components';
+import FacetList from './facetlist';
 
 var Listing = function (result, schemas, selectCallback) {
     var props;
@@ -125,7 +126,7 @@ class ResultDetail extends React.Component{
 }
 
 // If the given term is selected, return the href for the term
-function termSelected(term, field, filters) {
+export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
     for (var filter in filters) {
         if (filters[filter]['field'] == field && filters[filter]['term'] == term) {
             return url.parse(filters[filter]['remove']).search;
@@ -134,20 +135,30 @@ function termSelected(term, field, filters) {
     return null;
 }
 
+function buildSearchHref(unselectHref, field, term, searchBase){
+    var href;
+    if (unselectHref) {
+        href = unselectHref;
+    } else {
+        href = searchBase + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
+    }
+    return href;
+}
+
 // Determine whether any of the given terms are selected
 function countSelectedTerms(terms, field, filters) {
     var count = 0;
     for(var oneTerm in terms) {
-        if(termSelected(terms[oneTerm].key, field, filters)) {
+        if(getUnselectHrefIfSelectedFromResponseFilters(terms[oneTerm].key, field, filters)) {
             count++;
         }
     }
     return count;
 }
-
+/*
 class Term extends React.Component {
 
-    getHref(selected = termSelected(this.props.term['key'], this.props.facet['field'], this.props.filters)){
+    buildSearchHref(selected = getUnselectHrefIfSelectedFromResponseFilters(this.props.term['key'], this.props.facet['field'], this.props.filters)){
         var href;
         if (selected && !this.props.canDeselect) {
             href = null;
@@ -165,8 +176,8 @@ class Term extends React.Component {
         var count = this.props.term['doc_count'];
         var title = this.props.title || term;
         var field = this.props.facet['field'];
-        var selected = termSelected(term, field, filters);
-        var href = this.getHref(selected);
+        var selected = getUnselectHrefIfSelectedFromResponseFilters(term, field, filters);
+        var href = this.buildSearchHref(selected);
 
         return (
             <li className={"facet-list-element" + (selected ? " selected" : '')} id={selected ? "selected" : null} key={term}>
@@ -183,6 +194,7 @@ class Term extends React.Component {
         );
     }
 }
+*/
 
 class TypeTerm extends React.Component {
     render() {
@@ -202,7 +214,7 @@ class InfoIcon extends React.Component{
     }
 }
 
-
+/*
 class Facet extends React.Component {
 
     static defaultProps = {
@@ -281,8 +293,9 @@ class Facet extends React.Component {
         );
     }
 }
+*/
 
-
+/*
 class FacetList extends React.Component {
 
     static contextTypes = {
@@ -364,7 +377,7 @@ class FacetList extends React.Component {
     }
 
 }
-
+*/
 
 // the old Search tabular-style result display
 class TabularTableResults extends React.Component{
@@ -441,6 +454,7 @@ class ResultTable extends React.Component {
         this.getSearchType = this.getSearchType.bind(this);
         this.changePage = _.throttle(this.changePage.bind(this), 250);
         this.onFilter = this.onFilter.bind(this);
+        this.isTermSelected = this.isTermSelected.bind(this);
         this.render = this.render.bind(this);
 
         var urlParts = url.parse(this.props.searchBase, true);
@@ -480,7 +494,7 @@ class ResultTable extends React.Component {
 
     changePage(page, urlBase=this.props.searchBase){
 
-        if (typeof this.props.onChange !== 'function') throw new Error("Search doesn't have props.onChange");
+        if (typeof this.props.navigate !== 'function') throw new Error("Search doesn't have props.navigate");
         if (typeof urlBase !== 'string') throw new Error("Search doesn't have props.searchBase");
         var urlParts = url.parse(urlBase, true);
         var urlLimit = parseInt(urlParts.query.limit || 25);
@@ -495,15 +509,16 @@ class ResultTable extends React.Component {
         urlParts.search = '?' + queryString.stringify(urlParts.query);
         if(this.props.submissionBase){
             this.setState({ 'changingPage' : true }, ()=>{
-                this.props.onChange(url.format(urlParts));
-                this.setState({
-                    'changingPage' : false,
-                    'page' : page
+                this.props.navigate(url.format(urlParts), {}, ()=>{
+                    this.setState({
+                        'changingPage' : false,
+                        'page' : page
+                    });
                 });
             });
         } else {
             this.setState({ 'changingPage' : true }, ()=>{
-                this.props.onChange( url.format(urlParts), { 'replace' : true }, ()=>{
+                this.props.navigate( url.format(urlParts), { 'replace' : true }, ()=>{
                     this.setState({
                         'changingPage' : false,
                         'page' : page
@@ -513,11 +528,20 @@ class ResultTable extends React.Component {
         }
     }
 
-    onFilter(e) {
-        var search = e.currentTarget.getAttribute('href');
-        this.props.onChange(search);
-        e.stopPropagation();
-        e.preventDefault();
+    onFilter(field, term, callback) {
+        var searchBase = this.props.searchBase;
+
+        var targetSearchHref = buildSearchHref(
+            getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters),
+            field, term, searchBase ? searchBase + '&' : searchBase + '?'
+        );
+        
+        this.props.navigate(targetSearchHref, {});
+        setTimeout(callback, 100);
+    }
+
+    isTermSelected(term, facet){
+        return !!(getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
     }
 
     render() {
@@ -527,7 +551,6 @@ class ResultTable extends React.Component {
         var total = context['total'];
         var batch_hub_disabled = total > batchHubLimit;
         var filters = context['filters'];
-        var searchBase = this.props.searchBase;
         var show_link;
         var facets = context['facets'].map(function(facet) {
             if (this.props.restrictions[facet.field] !== undefined) {
@@ -548,6 +571,12 @@ class ResultTable extends React.Component {
         var urlParts = url.parse(this.props.searchBase, true);
         var urlLimit = parseInt(urlParts.query.limit || 25);
         var num_pages = Math.ceil(this.props.context.total/urlLimit);
+        var itemTypeForSchemas = null;
+        if (typeof urlParts.query.type === 'string') { // Can also be array
+            if (urlParts.query.type !== 'Item') {
+                itemTypeForSchemas = urlParts.query.type;
+            }
+        }
 
         return (
             <div>
@@ -560,8 +589,17 @@ class ResultTable extends React.Component {
 
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList {...this.props} facets={facets} filters={filters} thisType={thisType}
-                                    searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} />
+                        <FacetList
+                            {...this.props}
+                            facets={facets}
+                            filters={filters}
+                            thisType={thisType}
+                            expSetFilters={this.props.expSetFilters}
+                            onFilter={this.onFilter}
+                            filterFacetsFxn={FacetList.filterFacetsForSearch}
+                            isTermSelected={this.isTermSelected}
+                            itemTypeForSchemas={itemTypeForSchemas}
+                        />
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9 expset-result-table-fix">
                         <div className="row above-chart-row">
@@ -613,7 +651,7 @@ export class Search extends React.Component {
         if(this.props.submissionBase){
             searchBase = this.props.submissionBase;
         }else{
-            searchBase = url.parse(this.context.location_href).search || '';
+            searchBase = url.parse(this.props.href).search || '';
         }
         var facetdisplay = context.facets && context.facets.some(function(facet) {
             return facet.total > 0;
@@ -622,7 +660,7 @@ export class Search extends React.Component {
             <div>
                 {facetdisplay ?
                     <div className="browse-page-container">
-                        <ResultTable {...this.props} searchBase={searchBase} onChange={this.props.navigate || navigate} />
+                        <ResultTable {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
             </div>

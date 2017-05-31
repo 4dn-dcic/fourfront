@@ -89,7 +89,7 @@ export const Field = {
             var property = propertiesObj[fieldParts[fieldPartIndex]];
             if (fieldPartIndex >= fieldParts.length - 1) return property;
             var nextSchemaProperties = null;
-
+            //console.log(propertiesObj, fieldParts, fieldPartIndex);
             if (property.type === 'array' && property.items && property.items.linkTo){
                 nextSchemaProperties = getNextSchemaProperties(property.items.linkTo);
             } else if (property.linkTo) {

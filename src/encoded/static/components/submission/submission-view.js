@@ -1468,12 +1468,12 @@ class IndividualObjectView extends React.Component{
     Navigation function passed to Search so that faceting can be done in-place
     through ajax. If no results are returned from the search, abort.
     */
-    inPlaceNavigate = (destination) => {
+    inPlaceNavigate = (destination, options, callback) => {
         if(this.state.selectQuery){
             var dest = destination;
             // to clear filters
             if(destination == '/'){
-                dest = '?type=' + this.state.selectType
+                dest = '?type=' + this.state.selectType;
             }
             ajax.promise('/search/' + dest).then(data => {
                 if (data && data['@graph']){
@@ -1491,6 +1491,10 @@ class IndividualObjectView extends React.Component{
                         'selectArrayIdx': null
                     });
                     this.props.setSubmissionState('fullScreen', false);
+                }
+            }).then(data => {
+                if (typeof callback === 'function'){
+                    callback(data);
                 }
             });
         }

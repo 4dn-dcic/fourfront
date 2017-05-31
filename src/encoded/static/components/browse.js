@@ -10,7 +10,7 @@ import _ from 'underscore';
 import * as globals from './globals';
 import { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import * as store from '../store';
-import FacetList from './facetlist';
+import FacetList, { ReduxExpSetFiltersInterface } from './facetlist';
 import ExperimentsTable from './experiments-table';
 import { isServerSide, expFxn, Filters, navigate, object } from './util';
 import { FlexibleDescriptionBox } from './item-pages/components';
@@ -955,6 +955,7 @@ export class ResultTableContainer extends React.Component {
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.setOverflowingRight = this.setOverflowingRight.bind(this);
         this.getSelectedFiles = this.getSelectedFiles.bind(this);
+        this.isTermSelected = this.isTermSelected.bind(this);
         this.renderTable = this.renderTable.bind(this);
         this.render = this.render.bind(this);
 
@@ -1026,7 +1027,16 @@ export class ResultTableContainer extends React.Component {
             .value();
     }
 
-
+    isTermSelected(termKey, facetField, expsOrSets = 'sets'){
+        var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
+        if (
+            this.props.expSetFilters[standardizedFieldKey] &&
+            this.props.expSetFilters[standardizedFieldKey].has(termKey)
+        ){
+            return true;
+        }
+        return false;
+    }
 
     renderTable(){
         if (this.props.debug) console.log('Rendering ResultTableContainer.');
@@ -1081,21 +1091,24 @@ export class ResultTableContainer extends React.Component {
             <div className="row">
                 { facets.length > 0 ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList
-                            urlPath={this.props.context['@id']}
-                            experimentSetListJSON={this.props.context['@graph']}
-                            orientation="vertical"
+                        <ReduxExpSetFiltersInterface
+                            experimentSets={this.props.context['@graph']}
                             expSetFilters={this.props.expSetFilters}
-                            browseFilters={{
-                                filters : this.props.context.filters || null,
-                                clear_filters : this.props.context.clear_filters || null
-                            }}
                             facets={facets}
-                            className="with-header-bg"
                             href={this.props.href}
                             schemas={this.props.schemas}
                             session={this.props.session}
-                        />
+                        >
+                            <FacetList
+                                orientation="vertical"
+                                browseFilters={{
+                                    filters : this.props.context.filters || null,
+                                    clear_filters : this.props.context.clear_filters || null
+                                }}
+                                className="with-header-bg"
+                                isTermSelected={this.isTermSelected}
+                            />
+                        </ReduxExpSetFiltersInterface>
                     </div>
                     :
                     null
