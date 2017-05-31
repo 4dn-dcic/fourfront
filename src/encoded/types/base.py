@@ -35,8 +35,8 @@ def _award_viewing_group(award_uuid, root):
     award = root.get_by_uuid(award_uuid)
     return award.upgrade_properties().get('viewing_group')
 
-# Item acls
 
+# Item acls
 ONLY_ADMIN_VIEW = [
     (Allow, 'group.admin', ['view', 'edit']),
     (Allow, 'group.read-only-admin', ['view']),
@@ -70,6 +70,7 @@ ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
 
 ALLOW_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.lab_member', 'view'),
+    (Allow, 'role.award_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
@@ -133,7 +134,6 @@ class AbstractCollection(snovault.AbstractCollection):
             pass
         super(AbstractCollection, self).__init__(*args, **kw)
 
-
     def get(self, name, default=None):
         '''
         heres' and example of why this is the way it is:
@@ -193,7 +193,6 @@ def collection_add(context, request, render=None):
     return sno_collection_add(context, request, render)
 
 
-
 @view_config(context=snovault.Item, permission='edit', request_method='PUT',
              validators=[validate_item_content_put], decorator=if_match_tid)
 @view_config(context=snovault.Item, permission='edit', request_method='PATCH',
@@ -205,7 +204,7 @@ def item_edit(context, request, render=None):
         return {'status': "success",
                 '@type': ['result'],
                 }
-    return sno_item_edit(context,request, render)
+    return sno_item_edit(context, request, render)
 
 
 class Item(snovault.Item):
@@ -240,8 +239,7 @@ class Item(snovault.Item):
         # update self.embedded here
         self.update_embeds()
         # update registry embedded
-        self.registry.embedded = self.embedded;
-
+        self.registry.embedded = self.embedded
 
     @property
     def __name__(self):
@@ -275,6 +273,8 @@ class Item(snovault.Item):
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
                 roles[viewing_group_members] = 'role.viewing_group_member'
+                award_group_members = 'award.%s' % properties['award']
+                roles[award_group_members] = 'role.award_member'
         return roles
 
     def unique_keys(self, properties):
@@ -291,11 +291,8 @@ class Item(snovault.Item):
         "title": "External Reference URIs",
         "description": "External references to this item.",
         "type": "array",
-        "items": {"type": "object", "title": "External Reference", "properties": {
-                "uri": {"type": "string"},
-                "ref": {"type": "string"}
-            }
-        }
+        "items": {"type": "object", "title": "External Reference", "properties":
+                  {"uri": {"type": "string"}, "ref": {"type": "string"}}}
     })
     def external_references(self, request, dbxrefs=None):
         namespaces = request.registry.settings.get('snovault.jsonld.namespaces')
@@ -332,11 +329,11 @@ class Item(snovault.Item):
         """create a display_title field."""
         display_title = ""
         look_for = [
-                    "title",
-                    "name",
-                    "location_description",
-                    "accession",
-                    ]
+            "title",
+            "name",
+            "location_description",
+            "accession",
+        ]
         for field in look_for:
             # special case for user: concatenate first and last names
             display_title = self.properties.get(field, None)
@@ -380,7 +377,7 @@ class Item(snovault.Item):
 
     def rev_link_atids(self, request, rev_name):
         conn = request.registry[CONNECTION]
-        return [ request.resource_path(conn[uuid]) for uuid in
+        return [request.resource_path(conn[uuid]) for uuid in
                 paths_filtered_by_status(request, self.get_rev_links(rev_name))]
 
 

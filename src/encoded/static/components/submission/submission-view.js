@@ -479,7 +479,7 @@ export default class SubmissionView extends React.Component{
         }
         var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
         if(contextWithAlias.aliases){
-            contextWithAlias.aliases.push(alias)
+            contextWithAlias.aliases.push(alias);
         }else{
             contextWithAlias.aliases = [alias];
         }
@@ -556,7 +556,7 @@ export default class SubmissionView extends React.Component{
                 if(_.contains(roundTwoCopy, toDelete[i])){
                     var rmIdx = roundTwoCopy.indexOf(toDelete[i]);
                     if(rmIdx > -1){
-                        roundTwoCopy.splice(rmIdx,1)
+                        roundTwoCopy.splice(rmIdx,1);
                     }
                 }
                 delete typesCopy[toDelete[i]];
@@ -756,9 +756,9 @@ export default class SubmissionView extends React.Component{
             if(this.state.upload === null && this.state.md5Progress === null){
                 return(
                     <Button bsStyle="warning" bsSize="xsmall" style={style} onClick={function(e){
-                                    e.preventDefault();
-                                    this.finishRoundTwo();
-                                }.bind(this)}>
+                        e.preventDefault();
+                        this.finishRoundTwo();
+                    }.bind(this)}>
                         {'Skip'}
                     </Button>
                 );
@@ -1151,7 +1151,7 @@ export default class SubmissionView extends React.Component{
         if(_.contains(roundTwoCopy, currKey)){
             var rmIdx = roundTwoCopy.indexOf(currKey);
             if(rmIdx > -1){
-                roundTwoCopy.splice(rmIdx,1)
+                roundTwoCopy.splice(rmIdx,1);
             }
         }
         // navigate to next key in roundTwoKeys
@@ -1355,7 +1355,7 @@ class IndividualObjectView extends React.Component{
             'selectLink': null,
             'selectArrayIdx': null,
             'fadeState': false
-        }
+        };
     }
 
     /*
@@ -1422,7 +1422,7 @@ class IndividualObjectView extends React.Component{
                 pointer[arrayIdx[arrayIdxPointer]] = value;
             }
         }else{ // value we're trying to set is not inside an array at this point
-            var prevValue = pointer[splitField[splitField.length-1]];
+            prevValue = pointer[splitField[splitField.length-1]];
             pointer[splitField[splitField.length-1]] = value;
         }
         // actually change value
@@ -1459,7 +1459,7 @@ class IndividualObjectView extends React.Component{
     from the current context and change state in SubmissionView accordingly.
     */
     checkObjectRemoval = (value, prevValue) => {
-         if(value === null){
+        if(value === null){
             this.props.removeObj(prevValue);
         }
     }
@@ -1617,7 +1617,7 @@ class IndividualObjectView extends React.Component{
             // when editing a File principal object.
             // there may be a bug where status automatically gets reset to uploading
             // when edit is PUT, despite the file not changing. That's a wrangler issue
-            var path = this.props.keyComplete[this.props.currKey]
+            var path = this.props.keyComplete[this.props.currKey];
             var completeContext = this.props.keyContext[path];
             var statusCheck = completeContext.status && (completeContext.status == 'uploading' || completeContext.status == 'upload failed');
             if(this.props.edit){
@@ -1678,17 +1678,19 @@ class IndividualObjectView extends React.Component{
         var linkedObjs = [];
         var open = false;
         var detailContext;
+        var i;
+        var built;
         if(this.props.roundTwo){
             open = true;
-            for(var i=0; i<fields.length; i++){
-                var built = this.initiateField(fields[i]);
+            for(i=0; i<fields.length; i++){
+                built = this.initiateField(fields[i]);
                 buildFields.push(built);
             }
             var path = this.props.keyComplete[this.props.currKey];
             detailContext = this.props.keyContext[path];
         }else{ // only use buildFields for round two
-            for (var i=0; i<fields.length; i++){
-                var built = this.initiateField(fields[i]);
+            for (i=0; i<fields.length; i++){
+                built = this.initiateField(fields[i]);
                 if (built && built.props.isLinked){
                     linkedObjs.push(built);
                 }else if(built){
@@ -1706,7 +1708,7 @@ class IndividualObjectView extends React.Component{
         return(
             <div>
                 <Fade in={selecting} transitionAppear={true}>
-    				<div>
+                    <div>
                         {selecting ?
                             <Search {...this.props}
                                 context={this.state.selectData}
@@ -1718,7 +1720,7 @@ class IndividualObjectView extends React.Component{
                     </div>
                 </Fade>
                 <Fade in={!selecting || this.state.fadeState} transitionAppear={true}>
-    				<div>
+                    <div>
                         <FieldPanel title='Fields' fields={buildFields} currKey={this.props.currKey} open={open}/>
                         <FieldPanel title='Linked objects' fields={linkedObjs} currKey={this.props.currKey} open={open}/>
                         {
@@ -1743,7 +1745,7 @@ class FieldPanel extends React.Component{
         super(props);
         this.state = {
             'open': this.props.open || false
-        }
+        };
     }
 
     componentWillReceiveProps(nextProps){
@@ -1791,7 +1793,7 @@ class RoundTwoDetailPanel extends React.Component{
         super(props);
         this.state = {
             'open': this.props.open || false
-        }
+        };
     }
 
     handleToggle = (e) => {
@@ -1836,7 +1838,7 @@ class WarningBanner extends React.Component {
             'paddingBottom': '5px',
             'color': '#8b8b8b'
         };
-        var textBody = 'Please note: do not navigate away from, refresh or close this page while submitting. Doing so will result in your work being lost. The submission process is under active development and features may change.'
+        var textBody = 'Please note: do not navigate away from, refresh or close this page while submitting. Doing so will result in your work being lost. The submission process is under active development and features may change.';
         return(
             <h5 style={style}>
                 {textBody}
@@ -1924,7 +1926,7 @@ var delvePreExistingObjects = function myself(initObjs, json, schema, listTerm, 
         initData.newLink = listTerm;
         initData.type = linked;
         initObjs.push(initData);
-    }
+    };
     if(json instanceof Array){
         for(var j=0; j < json.length; j++){
             if(schema.items){
@@ -1945,7 +1947,7 @@ var delvePreExistingObjects = function myself(initObjs, json, schema, listTerm, 
             populateInitObjs(initObjs, json, listTerm, linked);
         }
     }
-}
+};
 
 // sort a list of BuildFields first by required status, then by title
 function sortPropFields(fields){
@@ -1990,7 +1992,7 @@ var delveObject = function myself(json){
         }
     });
     return found_obj;
-}
+};
 
 // Given the parent object key and a new object key, return a version
 // of this.state.keyHierarchy that includes the new parent-child relation.
@@ -2003,8 +2005,8 @@ var modifyHierarchy = function myself(hierarchy, keyIdx, parentKeyIdx){
             hierarchy[key] = myself(hierarchy[key], keyIdx, parentKeyIdx);
         }
     });
-    return hierarchy
-}
+    return hierarchy;
+};
 
 // remove given key from hierarchy. Recursive function.
 var trimHierarchy = function myself(hierarchy, keyIdx){
@@ -2016,7 +2018,7 @@ var trimHierarchy = function myself(hierarchy, keyIdx){
         });
     }
     return hierarchy;
-}
+};
 
 // returns the entire hierarchy below for the given keyIdx. keyIdx must be a
 // number (custom object). Recursive function.
@@ -2034,7 +2036,7 @@ var searchHierarchy = function myself(hierarchy, keyIdx){
         }
     });
     return found_hierarchy;
-}
+};
 
 // finds the key of direct parent for a given key in a hierarchy
 var findParentFromHierarchy = function myself(hierarchy, keyIdx){
@@ -2049,7 +2051,7 @@ var findParentFromHierarchy = function myself(hierarchy, keyIdx){
         }
     });
     return found_parent;
-}
+};
 
 // replace a key with a different key in the hierarchy
 var replaceInHierarchy = function myself(hierarchy, current, toReplace){
@@ -2062,19 +2064,19 @@ var replaceInHierarchy = function myself(hierarchy, current, toReplace){
             hierarchy[key] = myself(hierarchy[key], current, toReplace);
         }
     });
-    return hierarchy
-}
+    return hierarchy;
+};
 
 // return a list of all keys contained within a given hierarchy
 var flattenHierarchy = function myself(hierarchy){
     var found_keys = [];
     Object.keys(hierarchy).forEach(function(key, index){
-        if(!isNaN(key)) key = parseInt(key)
+        if(!isNaN(key)) key = parseInt(key);
         var sub_keys = myself(hierarchy[key]);
         found_keys = _.union(found_keys, sub_keys, [key]);
     });
-    return found_keys
-}
+    return found_keys;
+};
 
 
 // remove any field with a null value from given json context.
@@ -2094,4 +2096,4 @@ var removeNulls = function myself(context){
         }
     });
     return context;
-}
+};

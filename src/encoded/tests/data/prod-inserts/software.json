@@ -1,5 +1,40 @@
 [
     {
+        "name": "STAR",
+        "version": "2.5.1b",
+        "description": "STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
+        "software_type": ["aligner"],
+        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
+        "purpose": ["Hi-C"],
+        "source_url": "https://github.com/alexdobin/STAR/releases",
+        "references": ["52e85c70-fe2d-11e3-9191-0800200c9a66"],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a66"
+    },
+    {
+        "name": "DOCKER STAR",
+        "version": "1",
+        "description": "Docker container for star",
+        "software_type": ["docker container"],
+        "documentation_url": "https://docs.docker.com",
+        "docker_info": {
+            "docker_registry_url": "https://hub.docker.com/r/genomicpariscentre/star/",
+            "docker_image_name": "genomicpariscentre/star",
+            "docker_image_version": "2.5.1b"
+        },
+        "references": ["52e85c70-fe2d-11e3-9191-0800200c9a66"],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a67",
+        "software_relation": [
+            {
+                "relationship_type": "container for",
+                "software": "0afb6080-1c08-11e4-8c21-0800200c9a66"
+            }
+          ]
+    },
+    {
         "name": "TopHat",
         "version": "2.5",
         "software_type": ["other"],
@@ -32,5 +67,21 @@
         "name": "pairix",
         "software_type": ["file format converter", "indexer"],
         "version": "0.1.1"
+    },
+    {
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a13131",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "fastqc",
+        "software_type": ["quality metric generator"],
+        "version": "0.11.4"
+    },
+    {
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a23548",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "juicer",
+        "software_type": ["quality metric generator"],
+        "commit": "855e6291c6926371aeeab3d5f96b3895c0cdb171"
     }
 ]

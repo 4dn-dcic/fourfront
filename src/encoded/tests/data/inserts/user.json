@@ -19,7 +19,8 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Alver",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139",
-        "viewing_groups": ["4DN"]
+        "viewing_groups": ["4DN"],
+        "groups": ["read-only-admin"]
     },
     {
         "email": "andrew_schroeder@hms.harvard.edu",
@@ -28,7 +29,8 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Schroeder",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267227777",
-        "viewing_groups": ["4DN"]
+        "viewing_groups": ["4DN"],
+        "groups": ["read-only-admin"]
     },
     {
         "email": "johnsonjp@gmail.com",
@@ -55,7 +57,8 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Kirli",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267111888",
-        "viewing_groups": ["4DN"]
+        "viewing_groups": ["4DN"],
+        "groups": ["read-only-admin"]
     },
     {
         "email": "alexander_balashov@hms.harvard.edu",
@@ -137,6 +140,7 @@
         "first_name": "Some",
         "last_name": "Guy",
         "status": "current",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab117227e3d"
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab117227e3d",
+        "lab": "811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"
     }
 ]
