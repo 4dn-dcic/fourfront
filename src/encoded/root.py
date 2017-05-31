@@ -19,7 +19,6 @@ from pyramid.security import (
 
 def includeme(config):
     config.include(static_pages)
-    config.include(uploads_page)
     config.include(health_check)
     config.include(submissions_page)
     config.scan(__name__)
@@ -152,33 +151,6 @@ def static_pages(config):
         return responseDict
 
     config.add_view(static_page, route_name='static-page')
-
-
-def uploads_page(config):
-    """
-    Emulate a lite form of Alex's static page routing
-    """
-    config.add_route(
-        'uploads-page',
-        '/uploads'
-    )
-    def upload_page_view(request):
-        response = request.response
-        response.content_type = 'application/json; charset=utf-8'
-
-        responseDict = {
-            "title" : "Uploads",
-            "notification" : "success",
-            "@type" : [ "Uploads", "Portal" ],
-            "@context" : "/uploads",
-            "@id" : "/uploads",
-            "content" : None
-        }
-
-        return responseDict
-
-    config.add_view(upload_page_view, route_name='uploads-page')
-
 
 
 def health_check(config):

@@ -4,7 +4,7 @@
     "id": "/profiles/software.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["name", "version", "software_type", "award", "lab"],
+    "required": ["name", "software_type", "award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "alias", "title"],
     "mixinProperties": [
@@ -29,6 +29,11 @@
         "version": {
             "title": "Version",
             "description": "The software version number.",
+            "type": "string"
+        },
+        "commit": {
+            "title": "Commit",
+            "description": "The software commit hash.",
             "type": "string"
         },
         "title": {
@@ -131,6 +136,7 @@
         "software_relation": {
               "title": "Related Softwares",
               "description": "All related software",
+              "ff_flag": "second round",
               "type": "array",
               "items": {
                   "title": "Related Software",

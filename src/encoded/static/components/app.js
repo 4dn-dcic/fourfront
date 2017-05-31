@@ -1,5 +1,4 @@
 'use strict';
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
@@ -12,7 +11,7 @@ import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import Navigation from './navigation';
-import Action from './action';
+import SubmissionView from './submission/submission-view';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
@@ -203,8 +202,8 @@ export default class App extends React.Component {
         this.handleClick = this.handleClick.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handlePopState = this.handlePopState.bind(this);
-
-        this.updateUploads = this.updateUploads.bind(this);
+        this.setIsSubmitting = this.setIsSubmitting.bind(this);
+        this.stayOnSubmissionsPage = this.stayOnSubmissionsPage.bind(this);
         this.authenticateUser = this.authenticateUser.bind(this);
         this.updateUserInfo = this.updateUserInfo.bind(this);
         this.confirmNavigation = this.confirmNavigation.bind(this);
@@ -250,7 +249,7 @@ export default class App extends React.Component {
             'session': session,
             'user_actions': user_actions,
             'schemas': this.props.context.schemas || null,
-            'uploads': {}
+            'isSubmitting': false
         };
     }
 
@@ -262,17 +261,34 @@ export default class App extends React.Component {
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
         this.loadSchemas();
 
+        // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
+        // Here we grab full-length href from window and update props.href (via Redux), if it is different.
         var query_href;
-        if(document.querySelector('link[rel="canonical"]')){
+        // Technically these two statements should be exact same. Props.href is put into <link...> (see render() ). w.e.
+        if (document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
-        }else{
+        } else {
             query_href = this.props.href;
         }
+        // Grab window.location.href w/ query_href as fallback. Remove hash if need to.
+        query_href = globals.maybeRemoveHash(globals.windowHref(query_href));
         if (this.props.href !== query_href){
             store.dispatch({
                 type: {'href':query_href}
             });
         }
+
+        // If the window href has a hash, which SHOULD NOT remain (!== globals.maybeRemoveHash()), strip it on mount to match app's props.href.
+        var parts = url.parse(query_href);
+        if (
+            typeof window.location.hash === 'string' &&
+            window.location.hash.length > 0 &&
+            (!parts.hash || parts.hash === '')
+        ){
+            window.location.hash = '';
+        }
+
+
         if (this.historyEnabled) {
             var data = this.props.context;
             try {
@@ -376,15 +392,7 @@ export default class App extends React.Component {
             return portal.user_section;
         }
         if (category === 'user') {
-            var temp_actions;
-            // remove uploads from dropdown if there aren't any current uploads
-            if(this.state.user_actions){
-                temp_actions = this.state.user_actions.slice();
-                if(Object.keys(this.state.uploads).length === 0){
-                    temp_actions = temp_actions.filter(action => action.id !== 'uploads');
-                }
-            }
-            return temp_actions || [];
+            return this.state.user_actions;
         }
         if (category === 'global_sections') {
             return portal.global_sections;
@@ -558,7 +566,13 @@ export default class App extends React.Component {
 
     handlePopState(event) {
         if (this.DISABLE_POPSTATE) return;
-        var href = window.location.href;
+        var href = window.location.href; // Href which browser just navigated to, but maybe not yet set to this.props.href
+
+        if (!this.confirmPopState(href)){
+            window.history.pushState(window.state, '', this.props.href);
+            return;
+        }
+
         if (!this.confirmNavigation(href)) {
             //window.history.pushState(window.state, '', this.props.href);
             var d = {
@@ -614,20 +628,6 @@ export default class App extends React.Component {
         } else if (e.which === 13 && this.state.autocompleteFocused && !this.state.autocompleteTermChosen) {
             e.preventDefault();
         }
-    }
-
-    /**
-     * Handle updating of info used on the /uploads page.
-     * Contains relevant item context and AWS UploadManager.
-     */
-    updateUploads(key, upload_info, del_key=false){
-        var new_uploads = _.extend({}, this.state.uploads);
-        if (del_key){
-            delete new_uploads[key];
-        } else {
-            new_uploads[key] = upload_info;
-        }
-        this.setState({'uploads': new_uploads});
     }
 
     authenticateUser(callback = null){
@@ -691,11 +691,25 @@ export default class App extends React.Component {
         });
     }
 
-    // only navigate if href changes
+    /** Rules to prevent browser from changing to 'href' via back/forward buttons. */
+    confirmPopState(href){
+        if (this.stayOnSubmissionsPage(href)) return false;
+        return true;
+    }
+
+    /** Only navigate if href changes */
     confirmNavigation(href, options) {
+
+        // check if user is currently on submission page
+        // if so, warn them about leaving
+        if (this.stayOnSubmissionsPage(href)){
+            return false;
+        }
+
         if(options && options.inPlace && options.inPlace==true){
             return true;
         }
+
         if(href===this.props.href){
             return false;
         }
@@ -703,15 +717,41 @@ export default class App extends React.Component {
         var partsNew = url.parse(href),
             partsOld = url.parse(this.props.href);
 
-        if (
-            partsNew.path === partsOld.path && (
-                partsNew.path.slice(0,14) === '/workflow-runs' ||
-                partsNew.path.slice(0,11) === '/workflows/'
-        )){
+        if (partsNew.path === partsOld.path && globals.isHashPartOfHref(null, partsNew)){
             return false;
         }
 
         return true;
+    }
+
+    /** 
+     * Check this.state.isSubmitting to prompt user if navigating away
+     * from the submissions page.
+     * 
+     * @param {string} [href] - Href we are navigating to (in case of navigate, confirmNavigation) or have just navigated to (in case of popState event).
+     */
+    stayOnSubmissionsPage(href = null) {
+        // can override state in options
+        // override with replace, which occurs on back button navigation
+        if(this.state.isSubmitting){
+            if (typeof href === 'string'){
+                if (href.indexOf('#!edit') > -1 || href.indexOf('#!create') > -1 || href.indexOf('#!clone') > -1){
+                    // Cancel out if we are "returning" to edit or create (submissions page) href.
+                    return false;
+                }
+            }
+            var msg = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
+            if(confirm(msg)){
+                // we are no longer submitting
+                this.setIsSubmitting(false);
+                return false;
+            }else{
+                // stay
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
     navigate(href, options = {}, callback = null, fallbackCallback = null, includeReduxDispatch = {}) {
@@ -953,11 +993,17 @@ export default class App extends React.Component {
         return data;
     }
 
-    // catch user navigating away from page if there are current uploads running
-    // there doesn't seem to be any way to remove the default alert...
+    // set isSubmitting in state. works with handleBeforeUnload
+    setIsSubmitting(bool){
+        this.setState({'isSubmitting': bool});
+    }
+
+    // catch user navigating away from page if in submission process.
     handleBeforeUnload(e){
-        if(Object.keys(this.state.uploads).length > 0){
-            return 'You have current uploads running. Please wait until they are finished to leave.';
+        if(this.state.isSubmitting){
+            var dialogText = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
+            e.returnValue = dialogText;
+            return dialogText;
         }
     }
 
@@ -1028,7 +1074,7 @@ export default class App extends React.Component {
 
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
-            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads' && route != 'submissions'){
+            if(route != 'help' && route != 'about' && route != 'home' && route != 'submissions'){
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
@@ -1037,9 +1083,6 @@ export default class App extends React.Component {
             }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
             }
-        }else if(route == 'uploads' && !_.contains(this.state.user_actions.map(action => action.id), 'uploads')){
-            console.log(this.state.user_actions);
-            status = 'forbidden'; // attempting to view uploads but it's not in users actions
         }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
             console.log(this.state.user_actions);
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
@@ -1083,10 +1126,9 @@ export default class App extends React.Component {
                 ContentView = globals.content_views.lookup(context, current_action);
                 if (ContentView){
                     content = (
-                        <Action
+                        <SubmissionView
                             {...commonContentViewProps}
-                            edit={actionList[0] == 'edit'}
-                            create={actionList[0] == 'create'}
+                            setIsSubmitting={this.setIsSubmitting}
                         />
                     );
                     title = getTitleStringFromContext(context);

@@ -1292,10 +1292,11 @@ $small-label-accession-font-size : 0.75rem;
 				color: #fff;
 				height: 46px;
 				line-height: 26px;
+                text-align: center;
 			}
-			&:not(:first-child) > div {
-				text-align: center;
-			}
+			// &:not(:first-child) > div {
+			// 	text-align: center;
+			// }
 		}
 	}
 }
