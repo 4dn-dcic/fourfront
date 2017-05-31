@@ -1,5 +1,7 @@
 'use strict';
 
+import createReactClass from 'create-react-class';
+
 /** Test ExperimentsTable for Replicate Experiment Set */
 
 jest.autoMockOff();
@@ -22,7 +24,7 @@ describe('Testing experiments-table.js', function() {
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
 
-        ExperimentsTableWrapper = React.createClass({
+        ExperimentsTableWrapper = createReactClass({
 
             getInitialState : function(){
                 return {

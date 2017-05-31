@@ -10,7 +10,13 @@ var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('
 var { Toggle } = require('./../../inputs');
 import { boundActions } from './ViewContainer';
 
-export default class UIControlsWrapper extends React.Component {
+/**
+ * Component which wraps BarPlot.Chart and provides some UI buttons and stuff.
+ * Passes props to BarPlot.Chart.
+ * 
+ * @type {Component}
+ */
+export class UIControlsWrapper extends React.Component {
 
     static defaultProps = {
         'titleMap' : {

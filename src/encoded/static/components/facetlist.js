@@ -260,7 +260,7 @@ class Facet extends React.Component {
                             'dimension1' : analytics.getStringifiedCurrentFilters(existingFilters)
                         });
                     }
-                )
+                );
             }
         );
     }
@@ -614,10 +614,10 @@ export default class FacetList extends React.Component {
         var facetType = (this.props.itemTypes && Array.isArray(this.props.itemTypes) && this.props.itemTypes[0]) ||
             (this.props.experimentsOrSets == 'sets' ? 'ExperimentSet' : 'Experiment');
 
-        ajax.load('/facets?type=' + facetType + '&format=json', function(resultFacets){
+        ajax.load('/facets?type=' + facetType, (resultFacets) => {
             if (this.props.debug) console.log('Loaded Facet List via AJAX.', resultFacets);
             if (typeof callback == 'function') callback(resultFacets);
-        }.bind(this));
+        });
     }
 
 
@@ -672,7 +672,7 @@ export default class FacetList extends React.Component {
                 defaultFacetOpen={ !this.state.mounted ? false : !!(layout.responsiveGridState() !== 'xs') }
                 mounted={this.state.mounted}
             />
-        )
+        );
     }
 
 

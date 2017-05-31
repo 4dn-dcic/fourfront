@@ -7,7 +7,7 @@ var { console, isServerSide, Filters, analytics } = require('./../../util');
 
 
 
-export default class ActiveFiltersBar extends React.Component {
+export class ActiveFiltersBar extends React.Component {
 
     static defaultProps = {
         'parentId' : 'main',

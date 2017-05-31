@@ -1,16 +1,14 @@
 'use strict';
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var queryString = require('query-string');
-var url = require('url');
-var querystring = require('querystring');
-var _ = require('underscore');
-var globals = require('./globals');
-var search = module.exports;
-var { ajax, console, object, isServerSide, Filters, layout, DateUtility } = require('./util');
-var { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} = require('react-bootstrap');
-var { Detail } = require('./item-pages/components');
-var ReactTooltip = require('react-tooltip');
+import queryString from 'query-string';
+import url from 'url';
+import _ from 'underscore';
+import * as globals from './globals';
+import ReactTooltip from 'react-tooltip';
+import { ajax, console, object, isServerSide, Filters, layout, DateUtility, navigate } from './util';
+import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
+import { Detail } from './item-pages/components';
 
 var Listing = function (result, schemas, selectCallback) {
     var props;
@@ -30,7 +28,7 @@ class ResultTableEntry extends React.Component{
         super(props);
         this.state = {
             'open': false
-        }
+        };
     }
 
     handleToggle = (e) => {
@@ -97,6 +95,7 @@ class ResultTableEntry extends React.Component{
 
 // Uses Detail from item-pages/components to provide item summary panel
 class ResultDetail extends React.Component{
+
     static propTypes = {
         result: PropTypes.object.isRequired,
         schemas: PropTypes.object.isRequired,
@@ -146,9 +145,9 @@ function countSelectedTerms(terms, field, filters) {
     return count;
 }
 
-var Term = search.Term = React.createClass({
+class Term extends React.Component {
 
-    getHref : function(selected = termSelected(this.props.term['key'], this.props.facet['field'], this.props.filters)){
+    getHref(selected = termSelected(this.props.term['key'], this.props.facet['field'], this.props.filters)){
         var href;
         if (selected && !this.props.canDeselect) {
             href = null;
@@ -158,9 +157,9 @@ var Term = search.Term = React.createClass({
             href = this.props.searchBase + this.props.facet['field'] + '=' + encodeURIComponent(this.props.term['key']).replace(/%20/g, '+');
         }
         return href;
-    },
+    }
 
-    render: function () {
+    render () {
         var filters = this.props.filters;
         var term = this.props.term['key'];
         var count = this.props.term['doc_count'];
@@ -183,16 +182,16 @@ var Term = search.Term = React.createClass({
             </li>
         );
     }
-});
+}
 
-var TypeTerm = search.TypeTerm = React.createClass({
-    render: function () {
+class TypeTerm extends React.Component {
+    render() {
         var term = this.props.term['key'];
         var filters = this.props.filters;
         var total = this.props.total;
         return <Term {...this.props} title={term} filters={filters} total={total} />;
     }
-});
+}
 
 class InfoIcon extends React.Component{
     render() {
@@ -204,27 +203,26 @@ class InfoIcon extends React.Component{
 }
 
 
-var Facet = search.Facet = React.createClass({
+class Facet extends React.Component {
 
-    statics : {
+    static defaultProps = {
+        width : 'inherit'
+    }
 
-    },
-
-    getDefaultProps: function() {
-        return {width: 'inherit'};
-    },
-
-    getInitialState: function () {
-        return {
-            facetOpen: false
+    constructor(props){
+        super(props);
+        this.onClick = this.onClick.bind(this);
+        this.render = this.render.bind(this);
+        this.state = {
+            'facetOpen' : false
         };
-    },
+    }
 
-    handleClick: function () {
+    onClick() {
         this.setState({facetOpen: !this.state.facetOpen});
-    },
+    }
 
-    render: function() {
+    render() {
         var facet = this.props.facet;
         var filters = this.props.filters;
         var title = facet['title'];
@@ -282,21 +280,21 @@ var Facet = search.Facet = React.createClass({
             </div>
         );
     }
-});
+}
 
 
-var FacetList = search.FacetList = React.createClass({
-    contextTypes: {
-        session: React.PropTypes.bool,
-    },
+class FacetList extends React.Component {
 
-    getDefaultProps: function() {
-        return {orientation: 'vertical'};
-    },
+    static contextTypes = {
+        session: PropTypes.bool
+    }
 
-    render: function() {
-        var {context, term} = this.props;
-        var loggedIn = this.context.session;
+    static defaultProps = {
+        orientation: 'vertical'
+    }
+
+    render() {
+        var { context, term, session } = this.props;
 
         // Get all facets, and "normal" facets, meaning non-audit facets
         var facets = this.props.facets;
@@ -353,7 +351,7 @@ var FacetList = search.FacetList = React.createClass({
                         </div>
                     </div>
                     {facets.map(facet => {
-                        if ((hideTypes && facet.field == 'type') || (!loggedIn && facet.field.substring(0, 6) === 'audit.')) {
+                        if ((hideTypes && facet.field == 'type') || (!session && facet.field.substring(0, 6) === 'audit.')) {
                             return <span key={facet.field} />;
                         } else {
                             return <Facet {...this.props} key={facet.field} facet={facet} filters={filters}
@@ -364,14 +362,16 @@ var FacetList = search.FacetList = React.createClass({
             </div>
         );
     }
-});
+
+}
+
 
 // the old Search tabular-style result display
 class TabularTableResults extends React.Component{
 
     static propTypes = {
-        results: React.PropTypes.array.isRequired,
-        schemas: React.PropTypes.object,
+        results: PropTypes.array.isRequired,
+        schemas: PropTypes.object,
     }
 
     constructor(props){
@@ -428,34 +428,39 @@ class TabularTableResults extends React.Component{
     }
 }
 
-var ResultTable = search.ResultTable = React.createClass({
+class ResultTable extends React.Component {
 
-    getDefaultProps: function() {
-        return {
-            restrictions: {},
-            searchBase: ''
-        };
-    },
+    static defaultProps = {
+        restrictions : {},
+        searchBase : ''
+    }
 
-    getInitialState: function(){
+    constructor(props){
+        super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.getSearchType = this.getSearchType.bind(this);
+        this.changePage = _.throttle(this.changePage.bind(this), 250);
+        this.onFilter = this.onFilter.bind(this);
+        this.render = this.render.bind(this);
+
         var urlParts = url.parse(this.props.searchBase, true);
         var urlFrom = parseInt(urlParts.query.from || 0);
         var urlLimit = parseInt(urlParts.query.limit || 25);
         var page = 1 + Math.ceil(urlFrom/urlLimit);
-        return({
+        this.state = {
             'page': page,
             'changing_page': false
-        });
-    },
+        };
+    }
 
-    componentWillReceiveProps: function(nextProps){
+    componentWillReceiveProps(nextProps){
         // go back to first page if items change
         if(this.props.context.total !== nextProps.context.total){
             this.changePage(1, nextProps.searchBase);
         }
-    },
+    }
 
-    getSearchType: function(facets){
+    getSearchType(facets){
         var specificSearchType;
         // Check to see if we are searching among multiple data types
         // If only one type, use that as the search title
@@ -471,9 +476,9 @@ var ResultTable = search.ResultTable = React.createClass({
             }
             return specificSearchType;
         }
-    },
+    }
 
-    changePage : _.throttle(function(page, urlBase=this.props.searchBase){
+    changePage(page, urlBase=this.props.searchBase){
 
         if (typeof this.props.onChange !== 'function') throw new Error("Search doesn't have props.onChange");
         if (typeof urlBase !== 'string') throw new Error("Search doesn't have props.searchBase");
@@ -487,7 +492,7 @@ var ResultTable = search.ResultTable = React.createClass({
         }
         var newFrom = urlLimit * (page - 1);
         urlParts.query.from = newFrom + '';
-        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        urlParts.search = '?' + queryString.stringify(urlParts.query);
         if(this.props.submissionBase){
             this.setState({ 'changingPage' : true }, ()=>{
                 this.props.onChange(url.format(urlParts));
@@ -496,23 +501,26 @@ var ResultTable = search.ResultTable = React.createClass({
                     'page' : page
                 });
             });
-        }else{
+        } else {
             this.setState({ 'changingPage' : true }, ()=>{
-                this.props.onChange(
-                    url.format(urlParts),
-                    { 'replace' : true },
-                    ()=>{
-                        this.setState({
-                            'changingPage' : false,
-                            'page' : page
-                        }
-                    );
+                this.props.onChange( url.format(urlParts), { 'replace' : true }, ()=>{
+                    this.setState({
+                        'changingPage' : false,
+                        'page' : page
+                    });
                 });
             });
         }
-    }, 250),
+    }
 
-    render: function() {
+    onFilter(e) {
+        var search = e.currentTarget.getAttribute('href');
+        this.props.onChange(search);
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    render() {
         const batchHubLimit = 100;
         var context = this.props.context;
         var results = context['@graph'];
@@ -584,27 +592,17 @@ var ResultTable = search.ResultTable = React.createClass({
                 </div>
             </div>
         );
-    },
-
-    onFilter: function(e) {
-        var search = e.currentTarget.getAttribute('href');
-        this.props.onChange(search);
-        e.stopPropagation();
-        e.preventDefault();
     }
-});
 
-var Search = search.Search = React.createClass({
-    contextTypes: {
-        location_href: React.PropTypes.string,
-        navigate: React.PropTypes.func
-    },
+}
 
-    componentDidMount: function(){
+export class Search extends React.Component {
+
+    componentDidMount(){
         ReactTooltip.rebuild();
-    },
+    }
 
-    render: function() {
+    render() {
         var context = this.props.context;
         var results = context['@graph'];
         var notification = context['notification'];
@@ -615,7 +613,7 @@ var Search = search.Search = React.createClass({
         if(this.props.submissionBase){
             searchBase = this.props.submissionBase;
         }else{
-            searchBase = url.parse(this.context.location_href).search || '';
+            searchBase = url.parse(this.props.href).search || '';
         }
         var facetdisplay = context.facets && context.facets.some(function(facet) {
             return facet.total > 0;
@@ -624,12 +622,12 @@ var Search = search.Search = React.createClass({
             <div>
                 {facetdisplay ?
                     <div className="browse-page-container">
-                        <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.props.navigate || this.context.navigate} />
+                        <ResultTable {...this.props} searchBase={searchBase} onChange={this.props.navigate || navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
             </div>
         );
     }
-});
+}
 
 globals.content_views.register(Search, 'Search');

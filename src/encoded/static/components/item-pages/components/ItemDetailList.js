@@ -205,9 +205,10 @@ export class Detail extends React.Component {
             return (
                 <ol>
                     {   item.length === 0 ? <li><em>None</em></li>
-                        :   item.map(function(it, i){
-                                return <li key={i}>{ Detail.formValue(schemas, it, popLink, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
-                            })
+                        :
+                        item.map(function(it, i){
+                            return <li key={i}>{ Detail.formValue(schemas, it, popLink, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
+                        })
                     }
                 </ol>
             );
@@ -223,7 +224,7 @@ export class Detail extends React.Component {
                             {title}
                         </a>
                     );
-                }else{
+                } else {
                     return (
                         <a href={format_id}>
                             { title }
@@ -348,7 +349,7 @@ export class Detail extends React.Component {
     render(){
         var context = this.props.context;
         var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
-        var tips = object.tipsFromSchema(this.props.schemas, context);
+        var tips = this.props.schemas ? object.tipsFromSchema(this.props.schemas, context) : {};
         if (typeof this.props.keyTitleDescriptionMap === 'object' && this.props.keyTitleDescriptionMap){
             _.extend(tips, this.props.keyTitleDescriptionMap);
         }
@@ -438,7 +439,7 @@ export class ItemDetailList extends React.Component {
         this.state = {
             'collapsed' : true,
             'showingJSON' : false
-        }
+        };
     }
 
     seeMoreButton(){
@@ -487,6 +488,8 @@ export class ItemDetailList extends React.Component {
                             schemas={this.props.schemas}
                             open={!collapsed}
                             keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                            excludedKeys={this.props.excludedKeys || Detail.defaultProps.excludedKeys}
+                            stickyKeys={this.props.stickyKeys || Detail.defaultProps.stickyKeys}
                         />
                         <div className="row">
                             <div className="col-xs-6">{ this.seeMoreButton() }</div>

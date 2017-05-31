@@ -173,17 +173,17 @@ class SubmissionLeaf extends React.Component{
                 popDestination = keyComplete[key];
             }
             // open a new tab on click
-            title = (<span style={{'padding':'1px 5px','cursor': 'pointer'}} onClick={function(e){
-                            e.preventDefault();
-                            var win = window.open(popDestination, '_blank');
-                            if(win){
-                                win.focus();
-                            }else{
-                                alert('Object page popup blocked!');
-                            }
-                        }.bind(this)}>
-                        {titleText}
-                    </span>);
+            title = (
+                <span style={{'padding':'1px 5px','cursor': 'pointer'}} onClick={function(e){
+                    e.preventDefault();
+                    var win = window.open(popDestination, '_blank');
+                    if(win){
+                        win.focus();
+                    }else{
+                        alert('Object page popup blocked!');
+                    }
+                }.bind(this)}>{ titleText }</span>
+            );
         }else{
             if(keyValid[key] == 0){
                 style.backgroundColor = '#fcd19c'; // orange

@@ -1,11 +1,10 @@
 'use strict';
 
-/** @ignore */
-var React = require('react');
-var _ = require('underscore');
-var vizUtil = require('./../utilities');
-var { console, object, expFxn } = require('./../../util');
-var aggregationFxn = require('./aggregation-functions');
+import React from 'react';
+import _ from 'underscore';
+import * as vizUtil from './../utilities';
+import { console, object, expFxn } from './../../util';
+import * as aggregationFxn from './aggregation-functions';
 
 /**
  * This is an optional component which may be placed between BarPlot.Chart and UIControlsWrapper.
@@ -23,7 +22,7 @@ var aggregationFxn = require('./aggregation-functions');
  * @prop {string} showType - Passed from UIControlsWrapper.
  * @prop {BarPlot.Chart} children - Must contain a BarPlotChart as the single child element.
  */
-export default class Aggregator extends React.Component {
+export class Aggregator extends React.Component {
     
     static defaultProps = {
         'debug' : false

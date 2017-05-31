@@ -265,14 +265,14 @@ class LinkedObj extends React.Component{
                     return(
                         <div>
                             <a href="" onClick={function(e){
-                                            e.preventDefault();
-                                            var win = window.open(this.props.keyComplete[intKey], '_blank');
-                                            if(win){
-                                                win.focus();
-                                            }else{
-                                                alert('Object page popup blocked!');
-                                            }
-                                        }.bind(this)}>
+                                e.preventDefault();
+                                var win = window.open(this.props.keyComplete[intKey], '_blank');
+                                if(win){
+                                    win.focus();
+                                }else{
+                                    alert('Object page popup blocked!');
+                                }
+                            }.bind(this)}>
                                 <span>{thisDisplay}</span>
                                 <i style={{'paddingLeft':'4px'}} className={"icon icon-external-link"}></i>
                             </a>
@@ -282,9 +282,9 @@ class LinkedObj extends React.Component{
                     return(
                         <div>
                             <a href="" onClick={function(e){
-                                    e.preventDefault();
-                                    this.props.setSubmissionState('currKey', intKey);
-                                }.bind(this)}>
+                                e.preventDefault();
+                                this.props.setSubmissionState('currKey', intKey);
+                            }.bind(this)}>
                                 {thisDisplay}
                             </a>
                         </div>
@@ -296,15 +296,15 @@ class LinkedObj extends React.Component{
         return(
             <div>
                 <Button bsSize="xsmall" style={style} onClick={function(e){
-                        e.preventDefault();
-                        this.props.selectObj(objType, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
-                    }.bind(this)}>
+                    e.preventDefault();
+                    this.props.selectObj(objType, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
+                }.bind(this)}>
                     {'Select existing'}
                 </Button>
                 <Button bsSize="xsmall" style={style}onClick={function(e){
-                        e.preventDefault();
-                        this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, objType);
-                    }.bind(this)}>
+                    e.preventDefault();
+                    this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, objType);
+                }.bind(this)}>
                     {'Create new'}
                 </Button>
             </div>

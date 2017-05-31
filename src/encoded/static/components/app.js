@@ -15,7 +15,7 @@ import SubmissionView from './submission/submission-view';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
@@ -121,16 +121,6 @@ export default class App extends React.Component {
 
     static SLOW_REQUEST_TIME = 750
 
-    static contentTypeIsJSON(content) {
-        var isJson = true;
-        try{
-            var json = JSON.parse(JSON.stringify(content));
-        }catch(err){
-            isJson = false;
-        }
-        return isJson;
-    }
-
     static scrollTo() {
         var hash = window.location.hash;
         if (hash && document.getElementById(hash.slice(1))) {
@@ -159,7 +149,7 @@ export default class App extends React.Component {
             //if (elem.getAttribute('data-prop-name') === 'user_details' && !filter){
                 // pass; don't include as is not a redux prop
             //} else {
-                returnObj[prop_name] = elem_value;
+            returnObj[prop_name] = elem_value;
             //}
         }
         return returnObj;
@@ -180,26 +170,20 @@ export default class App extends React.Component {
     }
 
     static childContextTypes = {
-        dropdownComponent: React.PropTypes.string,
-        listActionsFor: React.PropTypes.func,
-        currentResource: React.PropTypes.func,
-        location_href: React.PropTypes.string,
-        onDropdownChange: React.PropTypes.func,
-        portal: React.PropTypes.object,
-        hidePublicAudits: React.PropTypes.bool,
-        fetch: React.PropTypes.func,
-        session: React.PropTypes.bool,
-        navigate: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
-        updateUserInfo: React.PropTypes.func,
-        schemas: React.PropTypes.object
+        dropdownComponent: PropTypes.string,
+        currentResource: PropTypes.func,
+        location_href: PropTypes.string,
+        onDropdownChange: PropTypes.func,
+        hidePublicAudits: PropTypes.bool,
+        session: PropTypes.bool,
+        navigate: PropTypes.func,
+        schemas: PropTypes.object
     }
 
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.fetch = this.fetch.bind(this);
         this.getChildContext = this.getChildContext.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentResource = this.currentResource.bind(this);
@@ -369,40 +353,16 @@ export default class App extends React.Component {
         }
     }
 
-    // functions previously in persona, mixins.js
-    fetch(url, options) {
-        options = _.extend({credentials: 'same-origin'}, options);
-        var http_method = options.method || 'GET';
-        var headers = options.headers = _.extend({}, options.headers);
-        // Strip url fragment.
-        var url_hash = url.indexOf('#');
-        if (url_hash > -1) {
-            url = url.slice(0, url_hash);
-        }
-        var data = options.body ? options.body : null;
-        var request = ajax.promise(url, http_method, headers, data, options.cache === false ? false : true);
-        request.xhr_begin = 1 * new Date();
-        request.then(response => {
-            request.xhr_end = 1 * new Date();
-        });
-        return request;
-    }
-
     // Retrieve current React context
     getChildContext() {
         return {
             dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
-            listActionsFor: this.listActionsFor,
             currentResource: this.currentResource,
             location_href: this.props.href,
             onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
-            portal: portal,
             hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
-            fetch: this.fetch,
             session: this.state.session,
             navigate: this.navigate,
-            contentTypeIsJSON: App.contentTypeIsJSON,
-            updateUserInfo: this.updateUserInfo,
             schemas : this.state.schemas
         };
     }
@@ -454,10 +414,12 @@ export default class App extends React.Component {
         if (this.state.schemas !== null && !forceFetch){
             // We've already loaded these successfully (hopefully)
             if (typeof callback === 'function') callback(this.state.schemas);
+            console.info('Schemas available already.');
+            Filters.getSchemas = () => this.state.schemas;
             return this.state.schemas;
         }
-        ajax.promise('/profiles/?format=json').then(data => {
-            if (App.contentTypeIsJSON(data)){
+        ajax.promise('/profiles/').then(data => {
+            if (object.isValidJSON(data)){
                 this.setState({
                     schemas: data
                 }, () => {
@@ -466,6 +428,7 @@ export default class App extends React.Component {
                     // Rebuild tooltips because they likely use descriptions from schemas
                     ReactTooltip.rebuild();
                     if (typeof callback === 'function') callback(data);
+                    console.info('Loaded schemas');
                 });
             }
         });
@@ -849,7 +812,7 @@ export default class App extends React.Component {
                 return null;
             }
 
-            var request = this.fetch(
+            var request = ajax.fetch(
                 href,
                 {
                     'headers': {}, // Filled in by ajax.promise
@@ -932,7 +895,7 @@ export default class App extends React.Component {
             .then(response => {
                 this.requestCurrent = false;
                 // navigate normally to URL of unexpected non-JSON response so back button works.
-                if (!App.contentTypeIsJSON(response)) {
+                if (!object.isValidJSON(response)) {
                     if (options.replace) {
                         window.location.replace(href + fragment);
                     } else {
@@ -1037,7 +1000,7 @@ export default class App extends React.Component {
     // catch user navigating away from page if in submission process.
     handleBeforeUnload(e){
         if(this.state.isSubmitting){
-            var dialogText = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?'
+            var dialogText = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
             e.returnValue = dialogText;
             return dialogText;
         }
@@ -1106,6 +1069,8 @@ export default class App extends React.Component {
         // check error status
         var status;
         var route = currRoute[currRoute.length-1];
+
+
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
             if(route != 'help' && route != 'about' && route != 'home' && route != 'submissions'){
@@ -1121,6 +1086,23 @@ export default class App extends React.Component {
             console.log(this.state.user_actions);
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
+
+        // Object of common props passed to all content_views.
+
+        let commonContentViewProps = {
+            context : context,
+            schemas : this.state.schemas,
+            session : this.state.session,
+            href : this.props.href,
+            navigate : this.navigate,
+            expSetFilters : this.props.expSetFilters,
+            key : key,
+            uploads : this.state.uploads,
+            updateUploads : this.updateUploads,
+            listActionsFor : this.listActionsFor,
+            updateUserInfo : this.updateUserInfo
+        };
+
         // first case is fallback
         if (canonical === "about:blank"){
             title = portal.portal_title;
@@ -1144,17 +1126,8 @@ export default class App extends React.Component {
                 if (ContentView){
                     content = (
                         <SubmissionView
-                            context={context}
-                            schemas={this.state.schemas}
-                            expSetFilters={this.props.expSetFilters}
-                            expIncompleteFacets={this.props.expIncompleteFacets}
-                            session={this.state.session}
-                            key={key}
+                            {...commonContentViewProps}
                             setIsSubmitting={this.setIsSubmitting}
-                            navigate={this.navigate}
-                            href={this.props.href}
-                            edit={actionList[0] == 'edit'}
-                            create={actionList[0] == 'create'}
                         />
                     );
                     title = getTitleStringFromContext(context);
@@ -1173,16 +1146,7 @@ export default class App extends React.Component {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
                 content = (
-                    <ContentView
-                        context={context}
-                        schemas={this.state.schemas}
-                        expSetFilters={this.props.expSetFilters}
-                        expIncompleteFacets={this.props.expIncompleteFacets}
-                        session={this.state.session}
-                        key={key}
-                        navigate={this.navigate}
-                        href={this.props.href}
-                    />
+                    <ContentView {...commonContentViewProps} />
                 );
                 title = context.display_title || context.title || context.name || context.accession || context['@id'];
                 if (title && title != 'Home') {
@@ -1192,7 +1156,7 @@ export default class App extends React.Component {
                 }
             } else {
                 // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null}/>;
+                content = <ErrorPage status={null} />;
                 title = 'Error';
             }
         }
@@ -1248,7 +1212,10 @@ export default class App extends React.Component {
                                 <Navigation
                                     href={this.props.href}
                                     session={this.state.session}
+                                    updateUserInfo={this.updateUserInfo}
                                     expSetFilters={this.props.expSetFilters}
+                                    portal={portal}
+                                    listActionsFor={this.listActionsFor}
                                     ref="navigation"
                                     schemas={this.state.schemas}
                                 />

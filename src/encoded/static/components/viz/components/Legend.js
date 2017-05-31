@@ -208,7 +208,7 @@ class LegendViewContainer extends React.Component {
  * @prop {number} width - How wide should the legend container element (<div>) be.
  * @prop {string|Element|Component} title - Optional title to display at top of fields.
  */
-export default class Legend extends React.Component {
+export class Legend extends React.Component {
 
     static Term = Term
     static Field = Field
