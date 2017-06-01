@@ -29,7 +29,7 @@ describe('Testing search.js', function() {
     it('has the correct number of facets and experiment accessions listed', function() {
         var facets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'facet');
         var results = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'result-table-result');
-        expect(facets.length).toEqual(8);
+        expect(facets.length).toBeGreaterThan(7);
         expect(results.length).toEqual(5);
     });
 
@@ -46,6 +46,6 @@ describe('Testing search.js', function() {
         var results = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'result-table-result');
         var selectedFacets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'selected');
         expect(results.length).toEqual(2);
-        expect(selectedFacets.length).toEqual(1);
+        expect(selectedFacets.length).toEqual(2);
     });
 });
