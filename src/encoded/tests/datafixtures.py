@@ -60,6 +60,7 @@ def award(testapp):
         'name': 'encode3-award',
         'description': 'ENCODE test award',
         'viewing_group': '4DN',
+        'project': '4DN'
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 

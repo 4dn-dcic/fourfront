@@ -3,6 +3,16 @@ pytestmark = pytest.mark.working
 
 
 @pytest.fixture
+def external_award(testapp):
+    item = {
+        'name': 'some-award',
+        'description': 'test award',
+        'project': 'External'
+    }
+    return testapp.post_json('/award', item).json['@graph'][0]
+
+
+@pytest.fixture
 def biosample_cell_culture_data(lab, award):
     return {
         'lab': lab['@id'],
@@ -129,6 +139,18 @@ def one_experiment_replicate_set(testapp, rep_set_data, experiments):
          'bio_rep_no': 1,
          'tec_rep_no': 1}
     ]
+    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+
+
+@pytest.fixture
+def external_exp_set(testapp, rep_set_data, experiments, external_award):
+    rep_set_data['description'] = 'External Experiment Set no pub'
+    rep_set_data['replicate_exps'] = [
+        {'replicate_exp': experiments[0]['@id'],
+         'bio_rep_no': 1,
+         'tec_rep_no': 1}
+    ]
+    rep_set_data['award'] = external_award['@id']
     return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
@@ -269,3 +291,11 @@ def test_audit_replicate_set_inconsistency_checks(testapp, invalid_replicate_set
             assert any('Biosample field' in error['detail'] for error in errors)
         else:
             assert any('Cell Culture Detail field' in error['detail'] for error in errors)
+
+
+def test_audit_external_experiment_set_no_pub_warns(testapp, external_exp_set):
+    res = testapp.get(external_exp_set['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    print(errors)
+    assert any(error['category'] == 'missing mandatory metadata' for error in errors)
+    assert False
