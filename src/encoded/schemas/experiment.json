@@ -153,6 +153,9 @@
         }
     },
     "facets": {
+        "experiment_type" : {
+            "title" : "Experiment Type"
+        },
         "award.project": {
             "title": "Project"
         },

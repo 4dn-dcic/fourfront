@@ -22,6 +22,9 @@
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "experiment.json#/properties"}
     ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"}
+    ],
     "dependencies": {
       "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
       "crosslinking_time": ["crosslinking_method", "crosslinking_temperature"],
@@ -110,32 +113,6 @@
             "description": "The optional biotin removal step was performed",
             "type": "string",
             "enum": ["Yes", "No"]
-        }
-    },
-    "facets": {
-        "award.project": {
-            "title": "Project"
-        },
-        "biosample.biosource.individual.organism.name": {
-            "title": "Organism"
-        },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource type"
-        },
-        "biosample.biosource_summary": {
-            "title": "Biosource"
-        },
-        "digestion_enzyme.name": {
-            "title": "Enzyme"
-        },
-        "biosample.modifications_summary": {
-            "title": "Modifications"
-        },
-        "biosample.treatments_summary": {
-            "title": "Treatments"
-        },
-        "lab.title": {
-            "title": "Lab"
         }
     }
 }

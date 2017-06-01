@@ -8,6 +8,7 @@ import _ from 'underscore';
 import * as store from '../store';
 import { ajax, console, object, isServerSide, Filters, layout, analytics, JWT } from './util';
 import * as vizUtil from './viz/utilities';
+import { PartialList } from './item-pages/components';
 import ReactTooltip from 'react-tooltip';
 
 /**
@@ -163,6 +164,129 @@ class InfoIcon extends React.Component{
     }
 }
 
+class FacetTermsList extends React.Component {
+
+    static defaultProps = {
+        'persistentCount' : 10
+    }
+
+    constructor(props){
+        super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.handleOpenToggleClick = this.handleOpenToggleClick.bind(this);
+        this.handleExpandListToggleClick = this.handleExpandListToggleClick.bind(this);
+        this.renderIndividualTerm = this.renderIndividualTerm.bind(this);
+        this.renderTerms = this.renderTerms.bind(this);
+        this.state = {
+            'facetOpen' : typeof props.defaultFacetOpen === 'boolean' ? props.defaultFacetOpen : true,
+            'expanded' : false
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        // We might want to change defaultFacetOpen right after mount, so let us re-do getInitialState.
+        if (
+            (nextProps.mounted && !this.props.mounted) &&
+            (typeof nextProps.defaultFacetOpen === 'boolean' && nextProps.defaultFacetOpen !== this.props.defaultFacetOpen)
+        ){
+            this.setState({ facetOpen : nextProps.defaultFacetOpen });
+        }
+    }
+
+    handleOpenToggleClick(e) {
+        e.preventDefault();
+        this.setState({'facetOpen': !this.state.facetOpen});
+    }
+
+    handleExpandListToggleClick(e){
+        e.preventDefault();
+        this.setState({'expanded' : !this.state.expanded });
+    }
+
+    renderIndividualTerm(term){
+        var facet = this.props.facet;
+        return (
+            <Term
+                {...this.props}
+                key={term.key}
+                term={term}
+                facet={this.props.facet}
+                total={facet.total}
+                href={this.props.href}
+                onFilter={this.props.onFilter}
+                isTermSelected={this.props.isTermSelected}
+            />
+        );
+    }
+
+    renderTerms(){
+        var facet = this.props.facet;
+        var terms = facet.terms;
+        if (terms.length > this.props.persistentCount){
+            var persistentTerms = terms.slice(0, this.props.persistentCount + 1);
+            var collapsibleTerms = terms.slice(this.props.persistentCount - 1);
+
+            var remainingTermsCount = !this.state.expanded ? _.reduce(collapsibleTerms, function(m, term){
+                return m + (term.doc_count || 0);
+            }, 0) : null;
+
+            var expandButtonTitle = (
+                this.state.expanded ? 
+                    <span>
+                        <i className="icon icon-fw icon-minus"/> Collapse
+                    </span>
+                    :
+                    <span>
+                        <i className="icon icon-fw icon-plus"/> View {terms.length - this.props.persistentCount} More
+                        <span className="pull-right">{ remainingTermsCount }</span>
+                    </span>
+            );
+
+            return (
+                <div className="facet-list nav">
+                    <PartialList
+                        persistent={persistentTerms.map(this.renderIndividualTerm)}
+                        collapsible={collapsibleTerms.map(this.renderIndividualTerm)}
+                        open={this.state.expanded}
+                    />
+                    <div className="view-more-button" onClick={this.handleExpandListToggleClick}>
+                        { expandButtonTitle }
+                    </div>
+                </div>
+            );
+        } else {
+            return (
+                <div className="facet-list nav">
+                    { facet.terms.map(this.renderIndividualTerm) }
+                </div>
+            );
+        }
+    }
+
+    render(){
+        var { facet, standardizedFieldKey, tooltip } = this.props;
+        // List of terms
+        return (
+            <div
+                className={"facet row" + (this.state.facetOpen ? ' open' : ' closed')}
+                hidden={false/*this.isEmpty()*/}
+                data-field={standardizedFieldKey}
+            >
+                <h5 className="facet-title" onClick={this.handleOpenToggleClick}>
+                    <span className="right">
+                        <i className={
+                            "icon icon-fw " +
+                            (this.state.facetOpen ? "icon-angle-down" : "icon-angle-right")
+                        }></i>
+                    </span>
+                    <span className="inline-block" data-tip={tooltip} data-place="right">{ facet.title || facet.field }</span>
+                </h5>
+                { this.state.facetOpen ? this.renderTerms() : null }
+            </div>
+        );
+    }
+}
+
 /**
  * Used to render individual facet fields and their available terms in FacetList.
  *
@@ -194,34 +318,17 @@ class Facet extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.isStatic = this.isStatic.bind(this);
         this.isEmpty = this.isEmpty.bind(this);
-        this.handleExpandToggleClick = this.handleExpandToggleClick.bind(this);
         this.handleStaticClick = this.handleStaticClick.bind(this);
         this.state = {
             'facetOpen' : typeof props.defaultFacetOpen === 'boolean' ? props.defaultFacetOpen : true
         };
     }
-
-
-    componentWillReceiveProps(nextProps){
-        // We might want to change defaultFacetOpen right after mount, so let us re-do getInitialState.
-        if (
-            (nextProps.mounted && !this.props.mounted) &&
-            (typeof nextProps.defaultFacetOpen === 'boolean' && nextProps.defaultFacetOpen !== this.props.defaultFacetOpen)
-        ){
-            this.setState({ facetOpen : nextProps.defaultFacetOpen });
-        }
-    }
+    
 
     isStatic(props = this.props){ return !!(props.facet.terms.length === 1); }
     isEmpty(props = this.props) { return !!(props.facet.terms.length === 0); }
-
-    handleExpandToggleClick(e) {
-        e.preventDefault();
-        this.setState({facetOpen: !this.state.facetOpen});
-    }
 
     handleStaticClick(e) {
         e.preventDefault();
@@ -316,46 +423,17 @@ class Facet extends React.Component {
                     </div>
                 </div>
             );
+        } else {
+            return (
+                <FacetTermsList
+                    {...this.props}
+                    standardizedFieldKey={standardizedFieldKey}
+                    tooltip={description}
+                />
+            );
         }
 
-        // List of terms
-        return (
-            <div
-                className={"facet row" + (this.state.facetOpen ? ' open' : ' closed')}
-                hidden={false/*this.isEmpty()*/}
-                data-field={standardizedFieldKey}
-            >
-                <h5 className="facet-title" onClick={this.handleExpandToggleClick}>
-                    <span className="right">
-                        <i className={
-                            "icon icon-fw " +
-                            (this.state.facetOpen ? "icon-angle-down" : "icon-angle-right")
-                        }></i>
-                    </span>
-                    <span className="inline-block" data-tip={description} data-place="right">{ facet.title || facet.field }</span>
-                </h5>
-                { this.state.facetOpen ?
-                <div className="facet-list nav">
-                    <div>
-                        { facet.terms.map((term)=>
-                            <Term
-                                {...this.props}
-                                key={term.key}
-                                term={term}
-                                facet={this.props.facet}
-                                total={facet.total}
-                                href={this.props.href || this.context.location_href}
-                                onFilter={this.props.onFilter}
-                                isTermSelected={this.props.isTermSelected}
-                            />
-                        )}
-                    </div>
-                </div>
-                :
-                null
-                }
-            </div>
-        );
+        
 
     }
 

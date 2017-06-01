@@ -298,6 +298,22 @@
 
         }
 
+        .view-more-button {
+            cursor: pointer;
+            font-size: 0.85rem;
+            border: 1px solid #777;
+            padding: 0 5px;
+            line-height: 24px;
+            margin-top: -5px;
+            &:hover {
+                border-color: #000;
+            }
+
+            i.icon {
+                font-size: 0.8rem;
+            }
+        }
+
         
     }
 

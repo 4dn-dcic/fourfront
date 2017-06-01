@@ -174,6 +174,31 @@ export function isDisplayTitleAccession(context, displayTitle = null){
     return false;
 }
 
+
+export function getAbstractTypeForType(type){
+    switch(type){
+        case 'ExperimentHiC':
+        case 'ExperimentMic':
+        case 'ExperimentRepliseq':
+        case 'ExperimentCaptureC':
+        case 'Experiment':
+            return 'Experiment';
+        case 'ExperimentSet':
+        case 'ExperimentSetReplicate':
+            return 'ExperimentSet';
+        case 'File':
+        case 'FileProcessed':
+        case 'FileFasta':
+        case 'FileFastq':
+        case 'FileReference':
+        case 'FileCalibration':
+            return 'File';
+        default:
+            return null;
+    }
+}
+
+
 /**
  * Returns the leaf type from the Item's '@type' array.
  *

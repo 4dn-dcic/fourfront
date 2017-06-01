@@ -10,6 +10,7 @@ import { ajax, console, object, isServerSide, Filters, layout, DateUtility, navi
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { Detail } from './item-pages/components';
 import FacetList from './facetlist';
+import { getAbstractTypeForType } from './item-pages/item';
 
 var Listing = function (result, schemas, selectCallback) {
     var props;
@@ -537,8 +538,21 @@ class ResultTable extends React.Component {
             field, term, searchBase ? searchBase + '&' : searchBase + '?'
         );
 
-        if (field === 'type' && !(unselectHrefIfSelected)){ // If selecting new type, unselect type=Item
-            targetSearchHref = targetSearchHref.replace(/(&)?(type=Item)/,'');
+        // Ensure only 1 type filter is selected at once. Unselect any other type= filters if setting new one.
+        if (field === 'type'){
+            if (!(unselectHrefIfSelected)){
+                var parts = url.parse(targetSearchHref, true);
+                if (Array.isArray(parts.query.type)){
+                    var types = parts.query.type;
+                    if (types.length > 1){
+                        var queryParts = _.clone(parts.query);
+                        delete queryParts[""]; // Safety
+                        queryParts.type = encodeURIComponent(term).replace(/%20/g, '+'); // Only 1 Item type selected at once.
+                        var searchString = queryString.stringify(queryParts);
+                        targetSearchHref = (parts.pathname || '') + (searchString ? '?' + searchString : '');
+                    }
+                }
+            }
         }
         
         this.props.navigate(targetSearchHref, {});
@@ -557,12 +571,42 @@ class ResultTable extends React.Component {
         var batch_hub_disabled = total > batchHubLimit;
         var filters = context['filters'];
         var show_link;
+
+        // Preprocess
         var facets = context['facets'].map(function(facet) {
+
             if (this.props.restrictions[facet.field] !== undefined) {
                 facet = _.clone(facet);
                 facet.restrictions = this.props.restrictions[facet.field];
                 facet.terms = facet.terms.filter(term => _.contains(facet.restrictions, term.key));
             }
+
+            if (facet.field === 'type'){ // For search page, filter out Item types which are subtypes of an abstract type. Unless are on an abstract type.
+                facet = _.clone(facet);
+                var queryParts = url.parse((this.props.searchBase || ''), true).query;
+                if (typeof queryParts.type === 'string') queryParts.type = [queryParts.type];
+                queryParts.type = _.without(queryParts.type, 'Item');
+
+                var isParentTypeSet = queryParts.type.filter(function(t){
+                    var pt = getAbstractTypeForType(t);
+                    if (pt && pt === t){
+                        return true;
+                    }
+                    return false;
+                }).length > 0;
+
+                if (!isParentTypeSet){
+                    facet.terms = facet.terms.filter(function(itemType){
+                        var parentType = getAbstractTypeForType(itemType.key);
+                        if (parentType && itemType.key !== parentType){
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+            }
+
             return facet;
         }.bind(this));
 
