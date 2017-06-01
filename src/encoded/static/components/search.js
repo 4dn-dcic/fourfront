@@ -589,7 +589,7 @@ class ResultTable extends React.Component {
 
                 var isParentTypeSet = queryParts.type.filter(function(t){
                     var pt = getAbstractTypeForType(t);
-                    if (pt && pt === t){
+                    if (pt){
                         return true;
                     }
                     return false;
