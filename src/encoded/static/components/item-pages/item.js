@@ -199,7 +199,6 @@ export const itemTypeHierarchy = {
 
 
 export function getAbstractTypeForType(type){
-    var parentType = null;
     var possibleParentTypes = _.keys(itemTypeHierarchy);
     var i;
     var foundIndex;
