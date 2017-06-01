@@ -530,11 +530,16 @@ class ResultTable extends React.Component {
 
     onFilter(field, term, callback) {
         var searchBase = this.props.searchBase;
+        var unselectHrefIfSelected = getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters);
 
         var targetSearchHref = buildSearchHref(
-            getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters),
+            unselectHrefIfSelected,
             field, term, searchBase ? searchBase + '&' : searchBase + '?'
         );
+
+        if (field === 'type' && !(unselectHrefIfSelected)){ // If selecting new type, unselect type=Item
+            targetSearchHref = targetSearchHref.replace(/(&)?(type=Item)/,'');
+        }
         
         this.props.navigate(targetSearchHref, {});
         setTimeout(callback, 100);

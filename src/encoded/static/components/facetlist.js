@@ -133,7 +133,7 @@ class Term extends React.Component {
         //var selected = this.isSelectedExpItem();
         var selected = this.props.isTermSelected(this.props.term.key, (this.state.facet || this.props.facet || {field:null}).field, this.props.expsOrSets || 'sets');
         return (
-            <li className={"facet-list-element" + (selected ? " selected" : '')} key={this.props.term.key}>
+            <li className={"facet-list-element" + (selected ? " selected" : '')} key={this.props.term.key} data-key={this.props.term.key}>
                 <a className="term" data-selected={selected} href="#" onClick={this.handleClick} data-term={this.props.term.key}>
                     <span className="pull-left facet-selector">
                         { this.state.filtering ?

@@ -173,7 +173,7 @@
         .facet-title,
         .facet-item {
             display: inline-block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             width: 50%;
         }
 
@@ -296,6 +296,14 @@
                 margin-right: 30px;
             }
 
+        }
+
+        
+    }
+
+    &[data-field="type"] .facet-list {
+        li[data-key="Item"]{
+            display: none;
         }
     }
 
