@@ -11,7 +11,7 @@ import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react
 import { Detail } from './item-pages/components';
 import FacetList from './facetlist';
 import { getAbstractTypeForType } from './item-pages/item';
-import { PageLimitSortController, LimitAndPageControls } from './browse';
+import { PageLimitSortController, LimitAndPageControls } from './browse/components';
 
 
 var Listing = function (result, schemas, selectCallback) {
@@ -348,7 +348,7 @@ class ResultTableContainer extends React.Component {
         });
 
         return (
-            <PageLimitSortController href={this.props.href} context={this.props.context} navigate={this.props.navigate}>
+            <PageLimitSortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
                 <ResultTable
                     {...this.props}
                     isTermSelected={this.isTermSelected}

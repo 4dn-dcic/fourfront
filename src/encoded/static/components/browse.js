@@ -14,6 +14,7 @@ import FacetList, { ReduxExpSetFiltersInterface } from './facetlist';
 import ExperimentsTable from './experiments-table';
 import { isServerSide, expFxn, Filters, navigate, object } from './util';
 import { FlexibleDescriptionBox } from './item-pages/components';
+import { PageLimitSortController, LimitAndPageControls } from './browse/components';
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
@@ -371,39 +372,8 @@ function findFiles(fileFormats) {
     return fileStats;
 }
 
-export const Term = createReactClass({
-
-    componentWillMount: function(){
-        var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', this.props.facet['field'], this.props.term['key']);
-        if(this.props.typeTitle === this.props.term['key'] && fullHref !== this.props.searchBase){
-            if(typeof document !== 'undefined'){
-                navigate(fullHref);
-            }
-        }
-    },
-
-    render: function () {
-        var term = this.props.term['key'];
-        var count = this.props.term['doc_count'];
-        var title = this.props.title || term;
-        var field = this.props.facet['field'];
-        var selected = term === this.props.typeTitle ? true : false;
-        var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', field, term);
-        var href = fullHref;
-        return (
-            <div className="facet-entry-container" id={selected ? "selected" : null} key={term}>
-                <MenuItem className="facet-entry" id={selected ? "selected" : null} href={href} onClick={href ? this.props.onFilter : null}>
-                    <span className="facet-item">
-                        {title}
-                    </span>
-                    <span className="pull-right facet-count">{count}</span>
-                </MenuItem>
-            </div>
-        );
-    }
-});
-
 //Dropdown facet for experimentset_type
+/*
 export const DropdownFacet = createReactClass({
     getDefaultProps: function() {
         return {width: 'inherit'};
@@ -441,293 +411,9 @@ export const DropdownFacet = createReactClass({
         );
     }
 });
-
-export class PageLimitSortController extends React.Component {
-
-    static propTypes = {
-        'href'            : PropTypes.string.isRequired,
-        'context'         : PropTypes.object.isRequired,
-        'navigate'        : PropTypes.func
-    }
-
-    static defaultProps = {
-        'navigate' : function(href, options, callback){
-            console.info('Called PageLimitSortController.props.navigate with:', href,options, callback);
-            if (typeof navigate === 'function') return navigate.apply(navigate, arguments);
-        }
-    }
-
-    /**
-     * Grab limit & page (via '(from / limit) + 1 ) from URL, if available.
-     * 
-     * @static
-     * @param {string} href - Current page href, with query.
-     * @returns {Object} { 'page' : int, 'limit' : int }
-     * 
-     * @memberof PageLimitSortController
-     */
-    static getPageAndLimitFromURL(href){
-        var urlParts = url.parse(href, true);
-        var limit = parseInt(urlParts.query.limit || Filters.getLimit() || 25);
-        var from  = parseInt(urlParts.query.from  || 0);
-        if (isNaN(limit)) limit = 25;
-        if (isNaN(from)) from = 0;
-        
-        return {
-            'page' : (from / limit) + 1,
-            'limit' : limit
-        };
-    }
-
-    static getSortColumnAndReverseFromURL(href){
-        var urlParts = url.parse(href, true);
-        var sortParam = urlParts.query.sort;
-        var reverse = false;
-        if (typeof sortParam !== 'string') return {
-            sortColumn : null,
-            sortReverse : reverse
-        };
-        if (sortParam.charAt(0) === '-'){
-            reverse = true;
-            sortParam = sortParam.slice(1);
-        }
-        
-        return {
-            'sortColumn' : sortParam,
-            'sortReverse' : reverse
-        };
-    }
-
-    constructor(props){
-        super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.sortBy = this.sortBy.bind(this);
-        this.changePage = _.throttle(this.changePage.bind(this), 250);
-        this.changeLimit = _.throttle(this.changeLimit.bind(this), 250);
-
-        // State
-
-        // Have Filters use our state.limit, until another component overrides.
-        Filters.getLimit = function(){
-            return (this && this.state && this.state.limit) || 25;
-        }.bind(this);
-
-        this.state = _.extend(
-            { changingPage : false },
-            PageLimitSortController.getSortColumnAndReverseFromURL(props.href),
-            PageLimitSortController.getPageAndLimitFromURL(props.href)
-        );
-    }
-
-    componentWillReceiveProps(newProps){
-        var newState = {};
-
-        // Update page re: href.
-        if (this.props.href !== newProps.href){
-            var pageAndLimit = PageLimitSortController.getPageAndLimitFromURL(newProps.href);
-            if (pageAndLimit.page !== this.state.page) newState.page = pageAndLimit.page;
-            if (pageAndLimit.limit !== this.state.limit) newState.limit = pageAndLimit.limit;
-
-            var { sortColumn, sortReverse } = PageLimitSortController.getSortColumnAndReverseFromURL(newProps.href);
-            if (sortColumn !== this.state.sortColumn) newState.sortColumn = sortColumn;
-            if (sortReverse !== this.state.sortReverse) newState.sortReverse = sortReverse;
-        }
-
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
-    }
-
-    sortBy(key, reverse) {
-
-        if (typeof this.props.navigate !== 'function') throw new Error("No navigate function.");
-        if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
-
-        var urlParts = url.parse(this.props.href, true);
-        //var previousLimit = parseInt(urlParts.query.limit || this.state.limit || 25);
-        //urlParts.query.limit = previousLimit + '';
-        urlParts.query.from = '0';
-        if (key){
-            urlParts.query.sort = (reverse ? '-' : '' ) + key;
-        } else {
-            urlParts.query.sort = null;
-        }
-        urlParts.search = '?' + queryString.stringify(urlParts.query);
-        var newHref = url.format(urlParts);
-
-        this.setState({ 'changingPage' : true }, ()=>{
-            this.props.navigate(newHref, { 'replace' : true }, ()=>{
-                this.setState({ 
-                    'sortColumn' : key,
-                    'sortReverse' : reverse,
-                    'changingPage' : false,
-                    'page' : 1
-                });
-            });
-        });
-
-    }
-
-    changePage(page = null){
-        
-        if (typeof this.props.navigate !== 'function') throw new Error("No navigate function");
-        if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
-
-        page = Math.min( // Correct page, so don't go past # available or under 1.
-            Math.max(page, 1),
-            Math.ceil(this.props.context.total / this.state.limit)
-        );
-
-        var urlParts = url.parse(this.props.href, true);
-        var previousFrom = parseInt(urlParts.query.from || 0);
-
-        if ( // Check page from URL and state to see if same and if so, cancel navigation.
-            page === this.state.page && 
-            page === Math.ceil(previousFrom / this.state.limit) + 1
-        ){
-            console.warn("Already on page " + page);
-            return;
-        }
-
-        if (typeof urlParts.query.limit === 'number'){
-            urlParts.query.from = (urlParts.query.limit * (page - 1)) + '';
-        } else {
-            urlParts.query.from = (Filters.getLimit() * (page - 1)) + '';
-        }
-        urlParts.search = '?' + queryString.stringify(urlParts.query);
-        this.setState({ 'changingPage' : true }, ()=>{
-            this.props.navigate(url.format(urlParts), { 'replace' : true }, ()=>{
-                this.setState({ 
-                    'changingPage' : false,
-                    'page' : page
-                });
-            });
-        });
-    }
-
-    changeLimit(limit = 25){
-        
-        if (typeof this.props.navigate !== 'function') throw new Error("No navigate function.");
-        if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
-
-        var urlParts = url.parse(this.props.href, true);
-        var previousLimit = parseInt(urlParts.query.limit || 25);
-        var previousFrom = parseInt(urlParts.query.from || 0);
-        var previousPage = parseInt(Math.ceil(urlParts.query.from / previousLimit)) + 1;
-
-        if ( // Check page from URL and state to see if same and if so, cancel navigation.
-            limit === this.state.limit &&
-            limit === previousLimit
-        ){
-            console.warn("Already have limit " + limit);
-            return;
-        }
-
-        urlParts.query.limit = limit + '';
-        urlParts.query.from = parseInt(Math.max(Math.floor(previousFrom / limit), 0) * limit);
-        urlParts.search = '?' + queryString.stringify(urlParts.query);
-        var newHref = url.format(urlParts);
-
-        this.setState({ 'changingPage' : true }, ()=>{
-            this.props.navigate(newHref, { 'replace' : true }, ()=>{
-                this.setState({ 
-                    'changingPage' : false,
-                    'limit' : limit,
-                });
-            });
-        });
-    }
-
-    render(){
-        return(
-            <div>
-                { 
-                    React.Children.map(this.props.children, (c)=>{
-                        return React.cloneElement(c, _.extend({
-                            'maxPage' : Math.ceil(this.props.context.total / this.state.limit),
-                            'sortBy' : this.sortBy,
-                            'changePage' : this.changePage,
-                            'changeLimit' : this.changeLimit
-                        }, this.state));
-                    })
-                }
-            </div>
-        );
-    }
+*/
 
 
-}
-
-export class LimitAndPageControls extends React.Component {
-
-    static propTypes = {
-        'limit'         : PropTypes.number.isRequired,
-        'page'          : PropTypes.number.isRequired,
-        'maxPage'       : PropTypes.number.isRequired,
-        'changingPage'  : PropTypes.bool,
-        'changeLimit'   : PropTypes.func.isRequired,
-        'changePage'    : PropTypes.func.isRequired
-    }
-
-    static defaultProps = {
-        'changingPage' : false
-    }
-
-    constructor(props){
-        super(props);
-        this.handleLimitSelect = this.handleLimitSelect.bind(this);
-        this.render = this.render.bind(this);
-    }
-
-
-    handleLimitSelect(eventKey, evt){
-        evt.target.blur();
-        return this.props.changeLimit(eventKey);
-    }
-
-    render(){
-        var { page, limit, maxPage, changingPage, changePage, changeLimit } = this.props;
-        return (
-            <div>
-                <ButtonToolbar className="pull-right">
-                            
-                    <DropdownButton title={
-                        <span className="text-small">
-                            <i className="icon icon-list icon-fw" style={{ fontSize: '0.825rem' }}></i> Show {limit}
-                        </span>
-                    } id="bg-nested-dropdown">
-                        <MenuItem eventKey={10} onSelect={this.handleLimitSelect}>Show 10</MenuItem>
-                        <MenuItem eventKey={25} onSelect={this.handleLimitSelect}>Show 25</MenuItem>
-                        <MenuItem eventKey={50} onSelect={this.handleLimitSelect}>Show 50</MenuItem>
-                        <MenuItem eventKey={100} onSelect={this.handleLimitSelect}>Show 100</MenuItem>
-                        <MenuItem eventKey={250} onSelect={this.handleLimitSelect}>Show 250</MenuItem>
-                    </DropdownButton>
-                    
-                    <ButtonGroup>
-                        
-                        <Button disabled={changingPage || page === 1} onClick={changingPage === true ? null : (e)=>{
-                            changePage(page - 1);
-                        }}><i className="icon icon-angle-left icon-fw"></i></Button>
-                    
-                        <Button disabled style={{ minWidth : 120 }}>
-                            { changingPage === true ? 
-                                <i className="icon icon-spin icon-circle-o-notch" style={{ opacity : 0.5 }}></i>
-                                : 'Page ' + page + ' of ' + maxPage
-                            }
-                        </Button>
-                    
-                        <Button disabled={changingPage || page === maxPage} onClick={changingPage === true ? null : (e)=>{
-                            changePage(page + 1);
-                        }}><i className="icon icon-angle-right icon-fw"></i></Button>
-                        
-                    </ButtonGroup>
-
-                </ButtonToolbar>
-            </div>
-        );
-    }
-
-}
 
 class ColumnSorter extends React.Component {
 
@@ -1043,7 +729,6 @@ export class ResultTableContainer extends React.Component {
         //console.log('RENDER TABLE EXP LISTINGS', formattedExperimentSetListings);
 
         this.experimentSetRows = {}; // ExperimentSetRow instances stored here, keyed by @id, to get selectFiles from (?).
-
         return (
             <div className={
                 "expset-result-table-fix col-sm-7 col-md-8 col-lg-9" +
@@ -1198,7 +883,7 @@ export class ControlsAndResults extends React.Component {
                     </div>
                 </div>*/}
 
-                <PageLimitSortController href={this.props.href} context={this.props.context}>
+                <PageLimitSortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
                     <ResultTableContainer
                         ref="resultTableContainer"
                         context={this.props.context}
