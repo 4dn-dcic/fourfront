@@ -442,12 +442,19 @@ export const DropdownFacet = createReactClass({
     }
 });
 
-
 export class PageLimitSortController extends React.Component {
 
     static propTypes = {
-        href            : PropTypes.string.isRequired,
-        context         : PropTypes.object.isRequired,
+        'href'            : PropTypes.string.isRequired,
+        'context'         : PropTypes.object.isRequired,
+        'navigate'        : PropTypes.func
+    }
+
+    static defaultProps = {
+        'navigate' : function(href, options, callback){
+            console.info('Called PageLimitSortController.props.navigate with:', href,options, callback);
+            if (typeof navigate === 'function') return navigate.apply(navigate, arguments);
+        }
     }
 
     /**
@@ -533,7 +540,7 @@ export class PageLimitSortController extends React.Component {
 
     sortBy(key, reverse) {
 
-        if (typeof navigate !== 'function') throw new Error("No navigate function.");
+        if (typeof this.props.navigate !== 'function') throw new Error("No navigate function.");
         if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
 
         var urlParts = url.parse(this.props.href, true);
@@ -549,7 +556,7 @@ export class PageLimitSortController extends React.Component {
         var newHref = url.format(urlParts);
 
         this.setState({ 'changingPage' : true }, ()=>{
-            navigate(newHref, { 'replace' : true }, ()=>{
+            this.props.navigate(newHref, { 'replace' : true }, ()=>{
                 this.setState({ 
                     'sortColumn' : key,
                     'sortReverse' : reverse,
@@ -563,7 +570,7 @@ export class PageLimitSortController extends React.Component {
 
     changePage(page = null){
         
-        if (typeof navigate !== 'function') throw new Error("No navigate function");
+        if (typeof this.props.navigate !== 'function') throw new Error("No navigate function");
         if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
 
         page = Math.min( // Correct page, so don't go past # available or under 1.
@@ -589,22 +596,18 @@ export class PageLimitSortController extends React.Component {
         }
         urlParts.search = '?' + queryString.stringify(urlParts.query);
         this.setState({ 'changingPage' : true }, ()=>{
-            navigate(
-                url.format(urlParts),
-                { 'replace' : true },
-                ()=>{
-                    this.setState({ 
-                        'changingPage' : false,
-                        'page' : page
-                    }
-                );
+            this.props.navigate(url.format(urlParts), { 'replace' : true }, ()=>{
+                this.setState({ 
+                    'changingPage' : false,
+                    'page' : page
                 });
+            });
         });
     }
 
     changeLimit(limit = 25){
         
-        if (typeof navigate !== 'function') throw new Error("No navigate function.");
+        if (typeof this.props.navigate !== 'function') throw new Error("No navigate function.");
         if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
 
         var urlParts = url.parse(this.props.href, true);
@@ -626,16 +629,12 @@ export class PageLimitSortController extends React.Component {
         var newHref = url.format(urlParts);
 
         this.setState({ 'changingPage' : true }, ()=>{
-            navigate(
-                newHref,
-                { 'replace' : true },
-                ()=>{
-                    this.setState({ 
-                        'changingPage' : false,
-                        'limit' : limit,
-                    }
-                );
+            this.props.navigate(newHref, { 'replace' : true }, ()=>{
+                this.setState({ 
+                    'changingPage' : false,
+                    'limit' : limit,
                 });
+            });
         });
     }
 

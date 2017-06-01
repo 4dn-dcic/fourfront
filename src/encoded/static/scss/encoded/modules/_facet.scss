@@ -301,10 +301,11 @@
         .view-more-button {
             cursor: pointer;
             font-size: 0.85rem;
-            border: 1px solid #777;
-            padding: 0 5px;
+            border: 1px solid #888;
+            padding: 0 6px;
             line-height: 24px;
             margin-top: -5px;
+            border-radius: 2px;
             &:hover {
                 border-color: #000;
             }

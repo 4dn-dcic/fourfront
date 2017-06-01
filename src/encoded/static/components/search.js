@@ -11,6 +11,8 @@ import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react
 import { Detail } from './item-pages/components';
 import FacetList from './facetlist';
 import { getAbstractTypeForType } from './item-pages/item';
+import { PageLimitSortController, LimitAndPageControls } from './browse';
+
 
 var Listing = function (result, schemas, selectCallback) {
     var props;
@@ -156,46 +158,7 @@ function countSelectedTerms(terms, field, filters) {
     }
     return count;
 }
-/*
-class Term extends React.Component {
 
-    buildSearchHref(selected = getUnselectHrefIfSelectedFromResponseFilters(this.props.term['key'], this.props.facet['field'], this.props.filters)){
-        var href;
-        if (selected && !this.props.canDeselect) {
-            href = null;
-        } else if (selected) {
-            href = selected;
-        } else {
-            href = this.props.searchBase + this.props.facet['field'] + '=' + encodeURIComponent(this.props.term['key']).replace(/%20/g, '+');
-        }
-        return href;
-    }
-
-    render () {
-        var filters = this.props.filters;
-        var term = this.props.term['key'];
-        var count = this.props.term['doc_count'];
-        var title = this.props.title || term;
-        var field = this.props.facet['field'];
-        var selected = getUnselectHrefIfSelectedFromResponseFilters(term, field, filters);
-        var href = this.buildSearchHref(selected);
-
-        return (
-            <li className={"facet-list-element" + (selected ? " selected" : '')} id={selected ? "selected" : null} key={term}>
-                <a className="term" data-selected={selected} href={href} onClick={href ? this.props.onFilter : null}>
-                    <span className="pull-left facet-selector">
-                        {selected ? <i className="icon icon-times-circle icon-fw"></i> : '' }
-                    </span>
-                    <span className="facet-item">
-                        {title}
-                    </span>
-                    <span className="facet-count">{count}</span>
-                </a>
-            </li>
-        );
-    }
-}
-*/
 
 class TypeTerm extends React.Component {
     render() {
@@ -215,170 +178,6 @@ class InfoIcon extends React.Component{
     }
 }
 
-/*
-class Facet extends React.Component {
-
-    static defaultProps = {
-        width : 'inherit'
-    }
-
-    constructor(props){
-        super(props);
-        this.onClick = this.onClick.bind(this);
-        this.render = this.render.bind(this);
-        this.state = {
-            'facetOpen' : false
-        };
-    }
-
-    onClick() {
-        this.setState({facetOpen: !this.state.facetOpen});
-    }
-
-    render() {
-        var facet = this.props.facet;
-        var filters = this.props.filters;
-        var title = facet['title'];
-        var field = facet['field'];
-        var total = facet['total'];
-        var termID = title.replace(/\s+/g, '');
-        var terms = facet['terms'].filter(function (term) {
-            if (term.key) {
-                for(var filter in filters) {
-                    if(filters[filter].term === term.key) {
-                        return true;
-                    }
-                }
-                return term.doc_count > 0;
-            } else {
-                return false;
-            }
-        });
-        var moreTerms = terms.slice(5);
-        var TermComponent = field === 'type' ? TypeTerm : Term;
-        var selectedTermCount = countSelectedTerms(moreTerms, field, filters);
-        var moreTermSelected = selectedTermCount > 0;
-        var canDeselect = (!facet.restrictions || selectedTermCount >= 2);
-        var moreSecClass = 'collapse' + ((moreTermSelected || this.state.facetOpen) ? ' in' : '');
-        var seeMoreClass = 'btn btn-link' + ((moreTermSelected || this.state.facetOpen) ? '' : ' collapsed');
-        var schemaProperty = Filters.Field.getSchemaProperty(field, this.props.schemas, this.props.thisType, true);
-        var description = schemaProperty && schemaProperty.description;
-        return (
-            <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}}>
-                <h5 className="facet-title">
-                    <span className="inline-block">{ title || field }</span>
-                    <InfoIcon children={description}/>
-                </h5>
-                <ul className="facet-list nav">
-                    <div>
-                        {terms.slice(0, 5).map(function (term) {
-                            return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total} canDeselect={canDeselect} />;
-                        }.bind(this))}
-                    </div>
-                    {terms.length > 5 ?
-                        <div id={termID} className={moreSecClass}>
-                            {moreTerms.map(function (term) {
-                                return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total} canDeselect={canDeselect} />;
-                            }.bind(this))}
-                        </div>
-                    : null}
-                    {(terms.length > 5 && !moreTermSelected) ?
-                        <label className="pull-left">
-                                <small>
-                                    <button type="button" className={seeMoreClass} data-toggle="collapse" data-target={'#'+termID} onClick={this.handleClick} />
-                                </small>
-                        </label>
-                    : null}
-                </ul>
-            </div>
-        );
-    }
-}
-*/
-
-/*
-class FacetList extends React.Component {
-
-    static contextTypes = {
-        session: PropTypes.bool
-    }
-
-    static defaultProps = {
-        orientation: 'vertical'
-    }
-
-    render() {
-        var { context, term, session } = this.props;
-
-        // Get all facets, and "normal" facets, meaning non-audit facets
-        var facets = this.props.facets;
-        var normalFacets = facets.filter(facet => facet.field.substring(0, 6) !== 'audit.');
-
-        var filters = this.props.filters;
-        var width = 'inherit';
-        if (!facets.length && this.props.mode != 'picker') return <div />;
-        var hideTypes;
-        if (this.props.mode == 'picker') {
-            hideTypes = false;
-        }else if(this.props.submissionBase){
-            hideTypes = true; // don't show types facet if using submission page
-        } else {
-            hideTypes = filters.filter(filter => filter.field === 'type').length === 1 && normalFacets.length > 1;
-        }
-        if (this.props.orientation == 'horizontal') {
-            width = (100 / facets.length) + '%';
-        }
-
-        // See if we need the Clear Filters link or not. context.clear_filters
-        var clearButton; // JSX for the clear button
-        var clearHref = this.props.submissionBase ? '/' : context.clear_filters;
-        var searchQuery = context && context['@id'] && url.parse(context['@id']).search;
-        if (searchQuery) {
-            // Convert search query string to a query object for easy parsing
-            var terms = queryString.parse(searchQuery);
-
-            // See if there are terms in the query string aside from searchTerm, from, and limit
-            // We have Clear Filters button if so
-            var nonPersistentTerms = _(Object.keys(terms)).any(term => !_.contains(['searchTerm', 'from', 'limit'], term));
-            clearButton = nonPersistentTerms && terms['searchTerm'];
-
-            // If no Clear Filters button yet, do the same check with type instead of searchTerm
-            if (!clearButton) {
-                nonPersistentTerms = _(Object.keys(terms)).any(term => !_.contains(['type', 'from', 'limit'], term));
-                clearButton = nonPersistentTerms && terms['type'];
-            }
-        }
-
-        return (
-            <div>
-                <div className={"facets-container facets " + this.props.orientation}>
-                    <div className="row facets-header">
-                        <div className="col-xs-6 facets-title-column">
-                            <i className="icon icon-fw icon-filter"></i>
-                            &nbsp;
-                            <h4 className="facets-title">Properties</h4>
-                        </div>
-                        <div className={"col-xs-6 clear-filters-control" + (clearButton ? '' : ' placeholder')}>
-                            <a href={clearHref} onClick={clearHref ? this.props.onFilter : null} className={"btn btn-xs rounded btn-outline-default"}>
-                                <i className="icon icon-times"></i> Clear All
-                            </a>
-                        </div>
-                    </div>
-                    {facets.map(facet => {
-                        if ((hideTypes && facet.field == 'type') || (!session && facet.field.substring(0, 6) === 'audit.')) {
-                            return <span key={facet.field} />;
-                        } else {
-                            return <Facet {...this.props} key={facet.field} facet={facet} filters={filters}
-                                            width={width} />;
-                        }
-                    })}
-                </div>
-            </div>
-        );
-    }
-
-}
-*/
 
 // the old Search tabular-style result display
 class TabularTableResults extends React.Component{
@@ -442,7 +241,25 @@ class TabularTableResults extends React.Component{
     }
 }
 
-class ResultTable extends React.Component {
+export function getSearchType(facets){
+    var specificSearchType;
+    // Check to see if we are searching among multiple data types
+    // If only one type, use that as the search title
+    for (var i = 0; i < facets.length; i++){
+        if (facets[i]['field'] && facets[i]['field'] == 'type'){
+            if (facets[i]['terms'][0]['doc_count'] === facets[i]['total']
+                && facets[i]['total'] > 0 && facets[i]['terms'][0]['key'] !== 'Item'){
+                // it's a single data type, so grab it
+                specificSearchType = facets[i]['terms'][0]['key'];
+            }else{
+                specificSearchType = 'Multiple type';
+            }
+        }
+        return specificSearchType;
+    }
+}
+
+class ResultTableContainer extends React.Component {
 
     static defaultProps = {
         restrictions : {},
@@ -451,82 +268,9 @@ class ResultTable extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.getSearchType = this.getSearchType.bind(this);
-        this.changePage = _.throttle(this.changePage.bind(this), 250);
         this.onFilter = this.onFilter.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
         this.render = this.render.bind(this);
-
-        var urlParts = url.parse(this.props.searchBase, true);
-        var urlFrom = parseInt(urlParts.query.from || 0);
-        var urlLimit = parseInt(urlParts.query.limit || 25);
-        var page = 1 + Math.ceil(urlFrom/urlLimit);
-        this.state = {
-            'page': page,
-            'changing_page': false
-        };
-    }
-
-    componentWillReceiveProps(nextProps){
-        // go back to first page if items change
-        if(this.props.context.total !== nextProps.context.total){
-            this.changePage(1, nextProps.searchBase);
-        }
-    }
-
-    getSearchType(facets){
-        var specificSearchType;
-        // Check to see if we are searching among multiple data types
-        // If only one type, use that as the search title
-        for (var i = 0; i < facets.length; i++){
-            if (facets[i]['field'] && facets[i]['field'] == 'type'){
-                if (facets[i]['terms'][0]['doc_count'] === facets[i]['total']
-                    && facets[i]['total'] > 0 && facets[i]['terms'][0]['key'] !== 'Item'){
-                    // it's a single data type, so grab it
-                    specificSearchType = facets[i]['terms'][0]['key'];
-                }else{
-                    specificSearchType = 'Multiple type';
-                }
-            }
-            return specificSearchType;
-        }
-    }
-
-    changePage(page, urlBase=this.props.searchBase){
-
-        if (typeof this.props.navigate !== 'function') throw new Error("Search doesn't have props.navigate");
-        if (typeof urlBase !== 'string') throw new Error("Search doesn't have props.searchBase");
-        var urlParts = url.parse(urlBase, true);
-        var urlLimit = parseInt(urlParts.query.limit || 25);
-
-        // Check page from URL and state to see if same and if so, cancel navigation.
-        if (page === this.state.page){
-            console.warn("Already on page " + page);
-            return;
-        }
-        var newFrom = urlLimit * (page - 1);
-        urlParts.query.from = newFrom + '';
-        urlParts.search = '?' + queryString.stringify(urlParts.query);
-        if(this.props.submissionBase){
-            this.setState({ 'changingPage' : true }, ()=>{
-                this.props.navigate(url.format(urlParts), {}, ()=>{
-                    this.setState({
-                        'changingPage' : false,
-                        'page' : page
-                    });
-                });
-            });
-        } else {
-            this.setState({ 'changingPage' : true }, ()=>{
-                this.props.navigate( url.format(urlParts), { 'replace' : true }, ()=>{
-                    this.setState({
-                        'changingPage' : false,
-                        'page' : page
-                    });
-                });
-            });
-        }
     }
 
     onFilter(field, term, callback) {
@@ -563,17 +307,10 @@ class ResultTable extends React.Component {
         return !!(getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
     }
 
-    render() {
-        const batchHubLimit = 100;
-        var context = this.props.context;
-        var results = context['@graph'];
-        var total = context['total'];
-        var batch_hub_disabled = total > batchHubLimit;
-        var filters = context['filters'];
-        var show_link;
+    render(){
 
-        // Preprocess
-        var facets = context['facets'].map(function(facet) {
+        // Preprocess Facets for Search
+        var facets = this.props.context.facets.map((facet)=>{
 
             if (this.props.restrictions[facet.field] !== undefined) {
                 facet = _.clone(facet);
@@ -608,7 +345,44 @@ class ResultTable extends React.Component {
             }
 
             return facet;
-        }.bind(this));
+        });
+
+        return (
+            <PageLimitSortController href={this.props.href} context={this.props.context} navigate={this.props.navigate}>
+                <ResultTable
+                    {...this.props}
+                    isTermSelected={this.isTermSelected}
+                    onFilter={this.onFilter}
+                    facets={facets}
+                />
+            </PageLimitSortController>
+        );
+    }
+
+}
+
+class ResultTable extends React.Component {
+
+    static defaultProps = {
+        restrictions : {},
+        searchBase : ''
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+    
+    render() {
+        const batchHubLimit = 100;
+        var context = this.props.context;
+        var results = context['@graph'];
+        var total = context['total'];
+        var batch_hub_disabled = total > batchHubLimit;
+        var filters = context['filters'];
+        var show_link;
+
+        var facets = this.props.facets;
 
         // get type of this object for getSchemaProperty (if type="Item", no tooltips)
         var thisType = 'Item';
@@ -645,9 +419,9 @@ class ResultTable extends React.Component {
                             filters={filters}
                             thisType={thisType}
                             expSetFilters={this.props.expSetFilters}
-                            onFilter={this.onFilter}
+                            onFilter={this.props.onFilter}
                             filterFacetsFxn={FacetList.filterFacetsForSearch}
-                            isTermSelected={this.isTermSelected}
+                            isTermSelected={this.props.isTermSelected}
                             itemTypeForSchemas={itemTypeForSchemas}
                         />
                     </div> : ''}
@@ -657,6 +431,15 @@ class ResultTable extends React.Component {
                                 <h5 className='browse-title'>{results.length} of {total} results</h5>
                             </div>
                             <div className="col-sm-7 col-xs-12">
+                                <LimitAndPageControls
+                                    limit={this.props.limit}
+                                    page={this.props.page}
+                                    maxPage={this.props.maxPage}
+                                    changingPage={this.props.changingPage}
+                                    changePage={this.props.changePage}
+                                    changeLimit={this.props.changeLimit}
+                                />
+                                {/*
                                 <ButtonToolbar className="pull-right">
                                     <ButtonGroup>
                                         <Button disabled={this.state.changing_page || this.state.page === 1} onClick={this.state.changing_page === true ? null : (e)=>{
@@ -673,6 +456,7 @@ class ResultTable extends React.Component {
                                         }}><i className="icon icon-angle-right icon-fw"></i></Button>
                                     </ButtonGroup>
                                 </ButtonToolbar>
+                                */}
                             </div>
                         </div>
                         <TabularTableResults {...this.props} results={results} schemas={this.props.schemas}/>
@@ -710,7 +494,7 @@ export class Search extends React.Component {
             <div>
                 {facetdisplay ?
                     <div className="browse-page-container">
-                        <ResultTable {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
+                        <ResultTableContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
             </div>
