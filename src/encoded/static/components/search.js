@@ -596,6 +596,7 @@ class ResultTable extends React.Component {
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList
                             {...this.props}
+                            className="with-header-bg"
                             facets={facets}
                             filters={filters}
                             thisType={thisType}

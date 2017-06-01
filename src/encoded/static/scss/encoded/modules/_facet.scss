@@ -301,6 +301,7 @@
         
     }
 
+    // Hide 'Data Type' : 'Item'
     &[data-field="type"] .facet-list {
         li[data-key="Item"]{
             display: none;

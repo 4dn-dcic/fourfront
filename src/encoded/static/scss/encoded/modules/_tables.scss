@@ -1225,7 +1225,7 @@ $small-label-accession-font-size : 0.75rem;
     overflow: hidden;
 
     .result-table-result {
-        padding-top: 12px;
+        /* padding-top: 12px; */
         border-bottom: 1px solid #E8E8E8;
         @include font-size(0.9);
 
@@ -1238,16 +1238,20 @@ $small-label-accession-font-size : 0.75rem;
 		.result-table-entry-div {
 			text-align: center;
 			line-height: 1.5em;
-			height: 2em;
+			padding-top: 15px;
+			height: 48px;
 			overflow: hidden;
 			white-space: nowrap;
 			text-overflow: ellipsis;
-			margin-bottom: 5px;
+			margin-bottom: 0;
 
 			.icon-container.btn {
 				margin: 0;
 				width: 40px;
+				height: 40px;
+				margin-top: -11px;
 				margin-right: 4px;
+				margin-left: 2px;
 				border: none;
 			}
 		}
