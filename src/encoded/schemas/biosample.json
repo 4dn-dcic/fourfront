@@ -1,6 +1,6 @@
 {
     "title": "Biosample",
-    "description": "Biological material used in the experiment with culture details.",
+    "description": "Biological material used in the experiment with information on modifications, treatments and preparation.",
     "id": "/profiles/biosample.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
