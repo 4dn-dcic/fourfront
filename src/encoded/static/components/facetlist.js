@@ -224,7 +224,7 @@ class FacetTermsList extends React.Component {
         var terms = facet.terms;
         if (terms.length > this.props.persistentCount){
             var persistentTerms = terms.slice(0, this.props.persistentCount + 1);
-            var collapsibleTerms = terms.slice(this.props.persistentCount - 1);
+            var collapsibleTerms = terms.slice(this.props.persistentCount + 1);
 
             var remainingTermsCount = !this.state.expanded ? _.reduce(collapsibleTerms, function(m, term){
                 return m + (term.doc_count || 0);

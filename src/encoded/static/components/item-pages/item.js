@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Panel } from 'react-bootstrap';
+import _ from 'underscore';
 import url from 'url';
 import * as globals from './../globals';
 import { AuditIndicators, AuditDetail, AuditMixin } from './../audit';
@@ -175,27 +176,40 @@ export function isDisplayTitleAccession(context, displayTitle = null){
 }
 
 
+export const itemTypeHierarchy = {
+    'Experiment': [
+        'Experiment', 'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq'
+    ],
+    'ExperimentSet': [
+        'ExperimentSet', 'ExperimentSetReplicate'
+    ],
+    'File': [
+        'File', 'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference'
+    ],
+    'FileSet': [
+        'FileSet', 'FileSetCalibration'
+    ],
+    'Individual': [
+        'Individual', 'IndividualHuman', 'IndividualMouse'
+    ],
+    'Treatment': [
+        'Treatment', 'TreatmentChemical', 'TreatmentRnai'
+    ]
+};
+
+
 export function getAbstractTypeForType(type){
-    switch(type){
-        case 'ExperimentHiC':
-        case 'ExperimentMic':
-        case 'ExperimentRepliseq':
-        case 'ExperimentCaptureC':
-        case 'Experiment':
-            return 'Experiment';
-        case 'ExperimentSet':
-        case 'ExperimentSetReplicate':
-            return 'ExperimentSet';
-        case 'File':
-        case 'FileProcessed':
-        case 'FileFasta':
-        case 'FileFastq':
-        case 'FileReference':
-        case 'FileCalibration':
-            return 'File';
-        default:
-            return null;
+    var parentType = null;
+    var possibleParentTypes = _.keys(itemTypeHierarchy);
+    var i;
+    var foundIndex;
+    for (i = 0; i < possibleParentTypes.length; i++){
+        foundIndex = itemTypeHierarchy[possibleParentTypes[i]].indexOf(type);
+        if ( foundIndex > -1 ){
+            return possibleParentTypes[i];
+        }
     }
+    return null;
 }
 
 
