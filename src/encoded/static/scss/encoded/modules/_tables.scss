@@ -1216,6 +1216,26 @@ $small-label-accession-font-size : 0.75rem;
 /**********************/
 
 
+.search-results-container {
+	position: relative;
+	.inner-container {
+		overflow-x: auto;
+		.scrollable-container {
+			position: relative;
+			overflow: hidden;
+			width: auto;
+
+			.search-result-row {
+				> .columns {
+					> .search-result-column-block {
+						float: left;
+					}
+				}
+			}
+		}
+	}
+}
+
 .result-table {
     position: relative;
     z-index: 10;

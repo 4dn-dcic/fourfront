@@ -10,7 +10,7 @@ import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtil
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { Detail } from './item-pages/components';
 import FacetList from './facetlist';
-import { PageLimitSortController, LimitAndPageControls } from './browse/components';
+import { PageLimitSortController, LimitAndPageControls, SearchResultTable } from './browse/components';
 
 
 var Listing = function (result, schemas, selectCallback) {
@@ -391,21 +391,20 @@ class ResultTable extends React.Component {
             thisType = filteredBits[0].slice(5);
         }
         var urlParts = url.parse(this.props.searchBase, true);
-        var urlLimit = parseInt(urlParts.query.limit || 25);
-        var num_pages = Math.ceil(this.props.context.total/urlLimit);
         var itemTypeForSchemas = null;
         if (typeof urlParts.query.type === 'string') { // Can also be array
             if (urlParts.query.type !== 'Item') {
                 itemTypeForSchemas = urlParts.query.type;
             }
         }
+        var thisTypeTitle = Schemas.getTitleForType(thisType);
 
         return (
             <div>
 
                 {this.props.submissionBase ?
-                    <h1 className="page-title">{thisType + ' Selection'}</h1>
-                    : <h1 className="page-title">{thisType + ' Search'}</h1>
+                    <h1 className="page-title">{thisTypeTitle + ' Selection'}</h1>
+                    : <h1 className="page-title">{thisTypeTitle + ' Search'}</h1>
                 }
                 <h4 className="page-subtitle">Filter & sort results</h4>
 
@@ -438,27 +437,10 @@ class ResultTable extends React.Component {
                                     changePage={this.props.changePage}
                                     changeLimit={this.props.changeLimit}
                                 />
-                                {/*
-                                <ButtonToolbar className="pull-right">
-                                    <ButtonGroup>
-                                        <Button disabled={this.state.changing_page || this.state.page === 1} onClick={this.state.changing_page === true ? null : (e)=>{
-                                            this.changePage(this.state.page - 1);
-                                        }}><i className="icon icon-angle-left icon-fw"></i></Button>
-                                        <Button disabled style={{'minWidth': 120 }}>
-                                            { this.state.changing_page === true ?
-                                                <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': 0.5 }}></i>
-                                                : 'Page ' + this.state.page + ' of ' + num_pages
-                                            }
-                                        </Button>
-                                        <Button disabled={this.state.changing_page || this.state.page === num_pages} onClick={this.state.changing_page === true ? null : (e)=>{
-                                            this.changePage(this.state.page + 1);
-                                        }}><i className="icon icon-angle-right icon-fw"></i></Button>
-                                    </ButtonGroup>
-                                </ButtonToolbar>
-                                */}
                             </div>
                         </div>
-                        <TabularTableResults {...this.props} results={results} schemas={this.props.schemas}/>
+                        <SearchResultTable results={results} columns={context.columns || {}} />
+                        {/*<TabularTableResults {...this.props} results={results} schemas={this.props.schemas}/>*/}
                     </div>
                 </div>
             </div>
