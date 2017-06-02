@@ -246,13 +246,10 @@ def audit_external_experiment_sets_have_pub(value, system):
     '''
     an experiment set from an external group should have an associated pub
     '''
-    import pdb; pdb.set_trace()
     award = value.get('award', None)
     if award is not None and award.get('project') == 'External':
         if not value['publications_of_set']:
             # we don't have a publications_of_set
-            print("TRIGGER AUDIT")
-            detail.append('External ExperimentSet {}'.format(value['@id']) +
-                          ' is missing attribution to a publication')
+            detail = 'External ExperimentSet {} is missing attribution to a publication'.format(value['@id'])
             yield AuditFailure('missing mandatory metadata', detail, level='WARNING')
     return
