@@ -191,7 +191,8 @@ export class Detail extends React.Component {
     * @param {Object} schemas - Object containing schemas for server's JSONized object output.
     * @param {Object|Array|string} item - Item(s) to render recursively.
     */
-    static formValue(schemas, item, popLink = false, keyPrefix = '', atType = 'ExperimentSet', keyTitleDescriptionMap, depth = 0) {
+    static formValue(item, popLink = false, keyPrefix = '', atType = 'ExperimentSet', keyTitleDescriptionMap, depth = 0) {
+        var schemas = Schemas.get();
         if (item === null){
             return <span>No Value</span>;
         } else if (Array.isArray(item)) {
@@ -207,7 +208,7 @@ export class Detail extends React.Component {
                     {   item.length === 0 ? <li><em>None</em></li>
                         :
                         item.map(function(it, i){
-                            return <li key={i}>{ Detail.formValue(schemas, it, popLink, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
+                            return <li key={i}>{ Detail.formValue(it, popLink, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
                         })
                     }
                 </ol>
@@ -305,7 +306,6 @@ export class Detail extends React.Component {
     static SubItemView = SubItemView
 
     static propTypes = {
-        'schemas' : PropTypes.object.isRequired,
         'context' : PropTypes.object.isRequired,
         'keyTitleDescriptionMap' : PropTypes.object
     }
@@ -349,7 +349,8 @@ export class Detail extends React.Component {
     render(){
         var context = this.props.context;
         var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
-        var tips = this.props.schemas ? object.tipsFromSchema(this.props.schemas, context) : {};
+        var schemas = this.props.schemas || Schemas.get();
+        var tips = schemas ? object.tipsFromSchema(schemas, context) : {};
         if (typeof this.props.keyTitleDescriptionMap === 'object' && this.props.keyTitleDescriptionMap){
             _.extend(tips, this.props.keyTitleDescriptionMap);
         }
@@ -374,7 +375,6 @@ export class Detail extends React.Component {
                 persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
                         { Detail.formValue(
-                            this.props.schemas,
                             context[key],
                             popLink,
                             key,
@@ -386,7 +386,6 @@ export class Detail extends React.Component {
                 collapsible={ collapsibleKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
                         { Detail.formValue(
-                            this.props.schemas,
                             context[key],
                             popLink,
                             key,
@@ -414,7 +413,7 @@ export class ItemDetailList extends React.Component {
 
     static Detail = Detail
 
-    static getTabObject(context, schemas){
+    static getTabObject(context){
         return {
             tab : <span><i className="icon icon-list-ul icon-fw"/> Details</span>,
             key : 'details',
@@ -424,7 +423,7 @@ export class ItemDetailList extends React.Component {
                         <span>Details</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <ItemDetailList context={context} schemas={schemas} />
+                    <ItemDetailList context={context} />
                 </div>
             )
         };

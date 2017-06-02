@@ -1215,6 +1215,19 @@ $small-label-accession-font-size : 0.75rem;
 /**** Search Table ****/
 /**********************/
 
+// Common definitions
+@mixin search-result-column-block {
+	float: left;
+	> .inner {
+		height : 46px;
+		padding: 15px 8px;
+		line-height: 16px;
+		text-align: center;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
 
 .search-results-container {
 	position: relative;
@@ -1225,12 +1238,60 @@ $small-label-accession-font-size : 0.75rem;
 			overflow: hidden;
 			width: auto;
 
-			.search-result-row {
+			.search-headers-row {
+				background-color: #22656d;
 				> .columns {
-					> .search-result-column-block {
-						float: left;
+					> .search-headers-column-block {
+						@include search-result-column-block;
+						> .inner {
+							color: #fff;
+							font-weight: 500;
+							
+						}
 					}
 				}
+			}
+
+			.search-result-row {
+				border-bottom: 1px solid #ddd;
+				> .columns {
+					> .search-result-column-block {
+						@include search-result-column-block;
+						> .inner {
+							height: 46px;
+						}
+						&[data-field="display_title"]{
+							.toggle-detail-button-container {
+								float: left;
+								margin-top: -10px;
+								margin-left: -7px;
+								margin-right: 10px;
+								> button {
+									padding-left: 0;
+									padding-right: 0;
+									height: 36px;
+									width: 36px;
+									border: 1px solid transparent;
+									background: transparent;
+									border-radius: 3px;
+									outline: none;
+									&:hover {
+										background-color: rgba(0,0,0,0.15);
+									}
+								}
+							}
+						}
+					}
+				}
+
+				.result-table-detail {
+					border-top: 1px solid #eee;
+					padding-top: 10px;
+					margin-left: 44px;
+					@include font-size(0.8);
+				}
+				
+
 			}
 		}
 	}
@@ -1294,12 +1355,6 @@ $small-label-accession-font-size : 0.75rem;
         position: relative;
         z-index: 2;
     }
-}
-
-.result-table-detail {
-    margin-top: 10px;
-    margin-left: 44px;
-    @include font-size(0.8);
 }
 
 /** Search Table Headings **/

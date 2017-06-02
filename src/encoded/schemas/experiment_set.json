@@ -102,10 +102,7 @@
     },
     "columns": {
         "experimentset_type": {
-            "title": "Experiment set type"
-        },
-        "experiments_in_set": {
-            "title": "Experiments"
+            "title": "Set Type"
         }
     }
 

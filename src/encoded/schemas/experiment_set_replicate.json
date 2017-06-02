@@ -98,14 +98,11 @@
         }
     },
     "columns": {
-        "accession": {
-            "title": "Accession"
-        },
         "experimentset_type": {
-            "title": "Experiment set type"
+            "title": "Set Type"
         },
-        "experiments_in_set": {
-            "title": "Experiments"
+        "experiments_in_set.biosample.biosource_summary": {
+            "title": "Biosource Summary"
         }
     }
 }
