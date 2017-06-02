@@ -6,6 +6,7 @@ import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
 import * as store from '../store';
+import { Collapse, Fade } from 'react-bootstrap';
 import { ajax, console, object, isServerSide, Filters, layout, analytics, JWT } from './util';
 import * as vizUtil from './viz/utilities';
 import { PartialList } from './item-pages/components';
@@ -173,12 +174,14 @@ class FacetTermsList extends React.Component {
     constructor(props){
         super(props);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.handleOpenToggleClick = this.handleOpenToggleClick.bind(this);
         this.handleExpandListToggleClick = this.handleExpandListToggleClick.bind(this);
         this.renderIndividualTerm = this.renderIndividualTerm.bind(this);
         this.renderTerms = this.renderTerms.bind(this);
         this.state = {
             'facetOpen' : typeof props.defaultFacetOpen === 'boolean' ? props.defaultFacetOpen : true,
+            'facetClosing' : false,
             'expanded' : false
         };
     }
@@ -193,9 +196,24 @@ class FacetTermsList extends React.Component {
         }
     }
 
+    componentDidUpdate(pastProps, pastState){
+        if (pastState.facetOpen !== this.state.facetOpen){
+            ReactTooltip.rebuild();
+        }
+    }
+
     handleOpenToggleClick(e) {
         e.preventDefault();
-        this.setState({'facetOpen': !this.state.facetOpen});
+        var willBeOpen = !this.state.facetOpen;
+        if (!willBeOpen){
+            this.setState({'facetClosing': true}, ()=>{
+                setTimeout(()=>{
+                    this.setState({ 'facetOpen' : false, 'facetClosing' : false });
+                }, 300);
+            });
+        } else {
+            this.setState({'facetOpen': true});
+        }
     }
 
     handleExpandListToggleClick(e){
@@ -265,6 +283,16 @@ class FacetTermsList extends React.Component {
 
     render(){
         var { facet, standardizedFieldKey, tooltip } = this.props;
+
+        var indicator = (
+                <Fade in={this.state.facetClosing || !this.state.facetOpen} transitionAppear>
+                    <span className="pull-right closed-terms-count" data-tip={facet.terms.length + " options"}>
+                        { _.range(0, Math.min(Math.ceil(facet.terms.length / 3), 8)).map((c)=>
+                            <i className="icon icon-ellipsis-v" style={{ opacity : ((c + 1) / 5) * (0.67) + 0.33 }} key={c}/>
+                        )}
+                    </span>
+                </Fade>
+            );
         // List of terms
         return (
             <div
@@ -273,15 +301,18 @@ class FacetTermsList extends React.Component {
                 data-field={standardizedFieldKey}
             >
                 <h5 className="facet-title" onClick={this.handleOpenToggleClick}>
-                    <span className="right">
+                    <span className="expand-toggle">
                         <i className={
                             "icon icon-fw " +
-                            (this.state.facetOpen ? "icon-angle-down" : "icon-angle-right")
+                            (this.state.facetOpen && !this.state.facetClosing ? "icon-minus" : "icon-plus")
                         }></i>
                     </span>
                     <span className="inline-block" data-tip={tooltip} data-place="right">{ facet.title || facet.field }</span>
+                    { indicator }
                 </h5>
-                { this.state.facetOpen ? this.renderTerms() : null }
+                { this.state.facetOpen || this.state.facetClosing ? 
+                    <Collapse in={this.state.facetOpen && !this.state.facetClosing} transitionAppear children={this.renderTerms()}/>
+                : null }
             </div>
         );
     }
@@ -309,7 +340,8 @@ class Facet extends React.Component {
         'width'                 : PropTypes.any,
         'extraClassname'        : PropTypes.string,
         'schemas'               : PropTypes.object,
-        'isTermSelected'        : PropTypes.func.isRequired
+        'isTermSelected'        : PropTypes.func.isRequired,
+        'facetOrder'            : PropTypes.number
     }
 
     static defaultProps = {
@@ -327,7 +359,12 @@ class Facet extends React.Component {
     }
     
 
-    isStatic(props = this.props){ return !!(props.facet.terms.length === 1); }
+    isStatic(props = this.props){ 
+        return (
+            props.facet.terms.length === 1 &&
+            props.facet.total <= _.reduce(props.facet.terms, function(m, t){ return m + (t.doc_count || 0); }, 0)
+        ); 
+    }
     isEmpty(props = this.props) { return !!(props.facet.terms.length === 0); }
 
     handleStaticClick(e) {
@@ -783,10 +820,22 @@ export default class FacetList extends React.Component {
     }
 
 
-    renderFacets(facets){
-        return facets
-            .filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state))
-            .map(facet =>
+    renderFacets(facets, maxTermsToShow = 12){
+
+        facets = facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state));
+
+        var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
+            if (m[2]) return m;
+            m[0] = index;
+            m[1] += Math.min( // Take into account 'view more' button
+                facet.terms.length,
+                this.props.persistentCount || FacetTermsList.defaultProps.persistentCount
+            );
+            if (m[1] > maxTermsToShow) m[2] = true;
+            return m;
+        }, [0, 0, false])[0]; // [facetIndex, termCount, done]...facetIndex
+
+        return facets.map((facet, i) =>
             <Facet
                 onFilter={this.props.onFilter}
                 key={facet.field}
@@ -795,7 +844,10 @@ export default class FacetList extends React.Component {
                 experimentsOrSets={this.props.experimentsOrSets}
                 href={this.props.href}
                 schemas={this.props.schemas}
-                defaultFacetOpen={ !this.state.mounted ? false : !!(layout.responsiveGridState() !== 'xs') }
+                defaultFacetOpen={
+                    !this.state.mounted ? false :
+                    !!(layout.responsiveGridState() !== 'xs') && i < (facetIndexWherePastXTerms || 1)
+                }
                 mounted={this.state.mounted}
                 isTermSelected={this.props.isTermSelected}
                 itemTypeForSchemas={this.props.itemTypeForSchemas}

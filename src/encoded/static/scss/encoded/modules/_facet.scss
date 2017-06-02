@@ -6,7 +6,7 @@
     padding-bottom: 2px;
     padding-left: ($grid-gutter-width / 2);
     padding-right: ($grid-gutter-width / 2);
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    border: 1px solid #e8e8e8;
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     //border-radius: 3px;
 
@@ -153,15 +153,37 @@
 
     &:not(.static) {
         h5.facet-title {
-            margin : -2px 0 9px;
+            margin : -1px 0 0;
             padding: 0 0 8px;
             border-bottom: 1px solid #f8f8f8;
             cursor: pointer;
+            > span.expand-toggle > i.icon {
+                font-size: 0.75rem;
+                margin-right: 7px;
+            }
+
+            .closed-terms-count {
+                position: relative;
+                top: 1px;
+                font-weight: 300;
+                color: #888;
+                font-size: 0.75rem;
+                line-height : 1.25rem;
+                margin-right: 5px;
+                > i {
+                    margin-right: 2px;
+                    margin-right: 1.5px;
+                }
+            }
         }
-        &.closed h5.facet-title {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
+        &.closed {
+            padding-bottom: 0px;
+            transition: padding-bottom .1s;
+            h5.facet-title {
+                margin-bottom: 0;
+                //padding-bottom: 0;
+                border-bottom: none;
+            }
         }
     }
 
@@ -240,6 +262,7 @@
 
     .facet-list {
         margin: 0;
+        padding-top: 8px;
 
         li {
             margin-bottom: 1px;
