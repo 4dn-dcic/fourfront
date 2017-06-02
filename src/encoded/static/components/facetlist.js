@@ -7,7 +7,7 @@ import queryString from 'query-string';
 import _ from 'underscore';
 import * as store from '../store';
 import { Collapse, Fade } from 'react-bootstrap';
-import { ajax, console, object, isServerSide, Filters, layout, analytics, JWT } from './util';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, analytics, JWT } from './util';
 import * as vizUtil from './viz/utilities';
 import { PartialList } from './item-pages/components';
 import ReactTooltip from 'react-tooltip';
@@ -145,7 +145,7 @@ class Term extends React.Component {
                                 : '' }
                     </span>
                     <span className="facet-item">
-                        { this.props.title || this.props.term.key }
+                        { this.props.title || Schemas.Term.toName(this.props.facet.field, this.props.term.key) }
                     </span>
                     <span className="facet-count">{this.experimentSetsCount()}</span>
                 </a>
@@ -285,7 +285,7 @@ class FacetTermsList extends React.Component {
         var { facet, standardizedFieldKey, tooltip } = this.props;
 
         var indicator = (
-                <Fade in={this.state.facetClosing || !this.state.facetOpen} transitionAppear>
+                <Fade in={this.state.facetClosing || !this.state.facetOpen}>
                     <span className="pull-right closed-terms-count" data-tip={facet.terms.length + " options"}>
                         { _.range(0, Math.min(Math.ceil(facet.terms.length / 3), 8)).map((c)=>
                             <i className="icon icon-ellipsis-v" style={{ opacity : ((c + 1) / 5) * (0.67) + 0.33 }} key={c}/>
@@ -402,13 +402,13 @@ class Facet extends React.Component {
         var standardizedFieldKey = Filters.standardizeFieldKey(facet.field, this.props.experimentsOrSets);
         if (typeof facet.title !== 'string'){
             facet = _.extend({}, facet, {
-                'title' : Filters.Field.toName(facet.field, this.props.schemas || null)
+                'title' : Schemas.Field.toName(facet.field, this.props.schemas || null)
             });
         }
 
         var schemaProperty, description;
         try {
-            schemaProperty = Filters.Field.getSchemaProperty(standardizedFieldKey, this.props.schemas, this.props.itemTypeForSchemas || 'ExperimentSet');
+            schemaProperty = Schemas.Field.getSchemaProperty(standardizedFieldKey, this.props.schemas, this.props.itemTypeForSchemas || 'ExperimentSet');
             description = schemaProperty && schemaProperty.description;
         } catch(e){
             console.warn("Could not find schema property (for description tooltip) for field " + standardizedFieldKey, e);
@@ -430,7 +430,7 @@ class Facet extends React.Component {
                 >
                     <div className="facet-static-row clearfix">
                         <h5 className="facet-title">
-                            <span className="inline-block" data-tip={description} data-place="right">{ facet.title || Filters.Field.toName(facet.field, this.props.schemas || null) }</span>
+                            <span className="inline-block" data-tip={description} data-place="right">{ facet.title || Schemas.Field.toName(facet.field, this.props.schemas || null) }</span>
                         </h5>
                         <div className={
                             "facet-item term" +
@@ -454,7 +454,7 @@ class Facet extends React.Component {
                                     (this.state.filtering ? 'icon-spin icon-circle-o-notch' :
                                         ( selected ? 'icon-times-circle' : 'icon-circle' )
                                     )
-                                }></i> { Filters.Term.toName(facet.field, facet.terms[0].key) }
+                                }></i> { Schemas.Term.toName(facet.field, facet.terms[0].key) }
                             </span>
                         </div>
                     </div>
@@ -844,10 +844,13 @@ export default class FacetList extends React.Component {
                 experimentsOrSets={this.props.experimentsOrSets}
                 href={this.props.href}
                 schemas={this.props.schemas}
-                defaultFacetOpen={
-                    !this.state.mounted ? false :
-                    !!(layout.responsiveGridState() !== 'xs') && i < (facetIndexWherePastXTerms || 1)
-                }
+                defaultFacetOpen={ !this.state.mounted ? false : !!(
+                    facet.terms.filter((t)=> this.props.isTermSelected(t.key, facet.field)).length ||
+                    (
+                        layout.responsiveGridState() !== 'xs' &&
+                        i < (facetIndexWherePastXTerms || 1)
+                    )
+                )}
                 mounted={this.state.mounted}
                 isTermSelected={this.props.isTermSelected}
                 itemTypeForSchemas={this.props.itemTypeForSchemas}

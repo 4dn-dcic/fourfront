@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Collapse, Button } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
-import { console, object, Filters } from './../../util';
+import { console, object, Schemas } from './../../util';
 import { PartialList } from './PartialList';
 import { FilesInSetTable } from './FilesInSetTable';
 import { getTitleStringFromContext } from './../item';
@@ -284,7 +284,7 @@ export class Detail extends React.Component {
                 }
             } else if (item.slice(0,4) === 'http') {
                 // Is a URL. Check if we should render it as a link/uri.
-                var schemaProperty = Filters.Field.getSchemaProperty(keyPrefix, schemas, atType);
+                var schemaProperty = Schemas.Field.getSchemaProperty(keyPrefix, schemas, atType);
                 if (
                     schemaProperty &&
                     typeof schemaProperty.format === 'string' &&

@@ -15,7 +15,7 @@ import SubmissionView from './submission/submission-view';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
@@ -241,6 +241,8 @@ export default class App extends React.Component {
 
         console.log("App Initial State: ", session, user_actions);
 
+        if (this.props.context.schemas) Schemas.set(this.props.context.schemas);
+
         this.state = {
             'errors': [],
             'dropdownComponent': undefined,
@@ -319,6 +321,12 @@ export default class App extends React.Component {
         this.setState({ 'mounted' : true });
     }
 
+    componentWillUpdate(nextProps, nextState){
+        if (nextState.schemas !== this.state.schemas){
+            Schemas.set(nextState.schemas);
+        }
+    }
+
     componentDidUpdate(prevProps, prevState) {
         var key;
         if (this.props) {
@@ -340,6 +348,7 @@ export default class App extends React.Component {
                 }
             }
         }
+
         if (this.state) {
             if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
                 setTimeout(function(){
@@ -348,6 +357,7 @@ export default class App extends React.Component {
                     ChartDataController.sync();
                 }, 100);
             }
+
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
                     console.log('changed state: %s', key);
@@ -419,7 +429,6 @@ export default class App extends React.Component {
             // We've already loaded these successfully (hopefully)
             if (typeof callback === 'function') callback(this.state.schemas);
             console.info('Schemas available already.');
-            Filters.getSchemas = () => this.state.schemas;
             return this.state.schemas;
         }
         ajax.promise('/profiles/').then(data => {
@@ -427,8 +436,6 @@ export default class App extends React.Component {
                 this.setState({
                     schemas: data
                 }, () => {
-                    // Let Filters have access to schemas for own functions.
-                    Filters.getSchemas = () => this.state.schemas;
                     // Rebuild tooltips because they likely use descriptions from schemas
                     ReactTooltip.rebuild();
                     if (typeof callback === 'function') callback(data);

@@ -2,10 +2,10 @@
 var React = require('react');
 var globals = require('../globals');
 var _ = require('underscore');
-var { ajax, console, object, isServerSide, layout } = require('../util');
+var { ajax, console, object, isServerSide, layout, Schemas } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
-import { getTitleStringFromContext, itemTypeHierarchy } from '../item-pages/item';
+import { getTitleStringFromContext } from '../item-pages/item';
 var Search = require('../search').Search;
 var getLargeMD5 = require('../util/file-utility').getLargeMD5;
 var ReactTooltip = require('react-tooltip');
@@ -259,7 +259,7 @@ export default class SubmissionView extends React.Component{
         // this means there could be multiple types of linked objects for a
         // given type. let the user choose one.
         if(this.props.schemas){
-            if(type in itemTypeHierarchy && !init){
+            if(type in Schemas.itemTypeHierarchy && !init){
                 // ambiguous linkTo type found
                 this.setState({
                     'ambiguousIdx': newIdx,
@@ -1207,7 +1207,7 @@ export default class SubmissionView extends React.Component{
                         <div className="input-wrapper" style={{'marginBottom':'15px'}}>
                             <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={this.state.ambiguousSelected || "No value"}>
                                 {this.state.ambiguousType !== null ?
-                                    itemTypeHierarchy[this.state.ambiguousType].map((val) => this.buildAmbiguousEnumEntry(val))
+                                    Schemas.itemTypeHierarchy[this.state.ambiguousType].map((val) => this.buildAmbiguousEnumEntry(val))
                                     :
                                     null
                                 }

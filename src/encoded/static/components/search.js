@@ -6,11 +6,10 @@ import url from 'url';
 import _ from 'underscore';
 import * as globals from './globals';
 import ReactTooltip from 'react-tooltip';
-import { ajax, console, object, isServerSide, Filters, layout, DateUtility, navigate } from './util';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { Detail } from './item-pages/components';
 import FacetList from './facetlist';
-import { getAbstractTypeForType } from './item-pages/item';
 import { PageLimitSortController, LimitAndPageControls } from './browse/components';
 
 
@@ -325,7 +324,7 @@ class ResultTableContainer extends React.Component {
                 queryParts.type = _.without(queryParts.type, 'Item');
 
                 var isParentTypeSet = queryParts.type.filter(function(t){
-                    var pt = getAbstractTypeForType(t);
+                    var pt = Schemas.getAbstractTypeForType(t);
                     if (pt){
                         return true;
                     }
@@ -334,7 +333,7 @@ class ResultTableContainer extends React.Component {
 
                 if (!isParentTypeSet){
                     facet.terms = facet.terms.filter(function(itemType){
-                        var parentType = getAbstractTypeForType(itemType.key);
+                        var parentType = Schemas.getAbstractTypeForType(itemType.key);
                         if (parentType && itemType.key !== parentType){
                             return false;
                         }

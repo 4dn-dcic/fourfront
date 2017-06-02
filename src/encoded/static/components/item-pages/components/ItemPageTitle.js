@@ -2,9 +2,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Filters, console } from './../../util';
+import { Filters, console, Schemas } from './../../util';
 import _ from 'underscore';
-import { title, isDisplayTitleAccession, getItemTypeTitle } from './../item';
+import { title, isDisplayTitleAccession } from './../item';
 
 /**
  * Renders page title appropriately for a provided props.context.
@@ -49,7 +49,7 @@ export class ItemPageTitle extends React.Component {
 
         var itemTypeTitle;
         if (this.props.showType){
-            itemTypeTitle = getItemTypeTitle(this.props.context, this.props.schemas);
+            itemTypeTitle = Schemas.getItemTypeTitle(this.props.context, this.props.schemas);
         }
 
         var subtitle;
