@@ -209,7 +209,7 @@ class FacetTermsList extends React.Component {
             this.setState({'facetClosing': true}, ()=>{
                 setTimeout(()=>{
                     this.setState({ 'facetOpen' : false, 'facetClosing' : false });
-                }, 300);
+                }, 350);
             });
         } else {
             this.setState({'facetOpen': true});
@@ -296,7 +296,7 @@ class FacetTermsList extends React.Component {
         // List of terms
         return (
             <div
-                className={"facet row" + (this.state.facetOpen ? ' open' : ' closed')}
+                className={"facet row" + (this.state.facetOpen ? ' open' : ' closed') + (this.state.facetClosing ? ' closing' : '')}
                 hidden={false/*this.isEmpty()*/}
                 data-field={standardizedFieldKey}
             >

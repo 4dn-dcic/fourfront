@@ -152,6 +152,8 @@
     }
 
     &:not(.static) {
+        transition: padding-bottom .35s ease;
+        transform: translate3d(0,0,0);
         h5.facet-title {
             margin : -1px 0 0;
             padding: 0 0 8px;
@@ -176,9 +178,10 @@
                 }
             }
         }
-        &.closed {
+        &.closed, &.closing {
             padding-bottom: 0px;
-            transition: padding-bottom .1s;
+        }
+        &.closed {
             h5.facet-title {
                 margin-bottom: 0;
                 //padding-bottom: 0;
