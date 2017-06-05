@@ -763,7 +763,7 @@ tr.expset-addinfo-row {
 }
 
 .above-chart-row {
-	height: 38px;
+	min-height: 38px;
 	@media screen and (min-width: $screen-sm-min){
 		.expset-result-table-fix & {
 			margin-top: -38px;
@@ -1244,12 +1244,17 @@ $small-label-accession-font-size : 0.75rem;
 			position: relative;
 			overflow: hidden;
 			width: auto;
+			padding-bottom: 20px;
 
 			.search-headers-row {
 				background-color: #22656d;
 				> .columns {
+					display: -webkit-box;
+					display: flex;
+
 					> .search-headers-column-block {
 						@include search-result-column-block;
+						flex-shrink: 0;
 						position: relative;
 						> .inner {
 							color: #fff;
@@ -1262,14 +1267,32 @@ $small-label-accession-font-size : 0.75rem;
 						> .width-adjuster {
 							position: absolute;
 							color: #fff;
-							padding-left: 10px;
-							padding-right: 10px;
+							padding-left: 15px;
+							padding-right: 15px;
 							box-sizing: content-box;
 							left: 0;
 							top : 0;
-							margin-left: -11px;
+							margin-left: -17px;
 							z-index: 10;
 							cursor: col-resize;
+							width: 33px;
+							height: 100%;
+							
+							&:after{
+								content: ' ';
+								border-left: 1px dotted #fff;
+								border-right: 1px dotted #fff;
+								width: 3px;
+								left: 15px;
+
+								top: 5.5px;
+								bottom: 5.5px;
+								position: absolute;
+								opacity: 0.85;
+							}
+							&:hover:after {
+								opacity: 1;
+							}
 						}
 					}
 				}
@@ -1278,6 +1301,7 @@ $small-label-accession-font-size : 0.75rem;
 			.search-result-row {
 				border-bottom: 1px solid #ddd;
 				> .columns {
+					display: flex;
 					> .search-result-column-block {
 						@include search-result-column-block;
 						> .inner {

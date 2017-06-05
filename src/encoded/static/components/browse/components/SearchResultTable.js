@@ -15,7 +15,10 @@ export const defaultSearchResultTableColumnWidthMap = {'lg' : 200, 'md' : 180, '
 
 export function defaultColumnBlockRenderFxn(result, columnDefinition, props){
     var value = object.getNestedProperty(result, columnDefinition.field);
-    if (!value) value = <em>N/A</em>;
+    if (!value) value = null;
+    if (Array.isArray(value)){
+        value = _.uniq(value).join(', ');
+    }
     return value;
 }
 
@@ -78,6 +81,7 @@ export const constantSearchResultColumns = [
         'field' : 'lab',
         'render' : function(result, columnDefinition, props){
             var labItem = defaultColumnBlockRenderFxn(result, columnDefinition, props);
+            if (!labItem) return null;
             var labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
 
             if (!result.submitted_by || !result.submitted_by.display_title){
@@ -86,7 +90,7 @@ export const constantSearchResultColumns = [
             return (
                 <span>
                     <i
-                        className="icon icon-fw icon-user user-icon"
+                        className="icon icon-fw icon-user-o user-icon"
                         data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title}
                         data-html
                     />
@@ -144,7 +148,7 @@ class ResultRowColumnBlock extends React.Component {
                         value = value.display_title;
                     }
                 }
-            }
+            } else if (!value) { value = <span className="text-300">-</span>; }
         }
         return (
             <div className="search-result-column-block" style={{ width : blockWidth }} data-field={columnDefinition.field}>
@@ -275,6 +279,7 @@ class HeadersRow extends React.Component {
 
     constructor(props){
         super(props);
+        this.throttledSetHeaderWidths = _.debounce(_.throttle(this.setHeaderWidths.bind(this), 1000), 350);
         this.setHeaderWidths = this.setHeaderWidths.bind(this);
         this.onAdjusterDrag = this.onAdjusterDrag.bind(this);
         this.render = this.render.bind(this);
@@ -285,13 +290,7 @@ class HeadersRow extends React.Component {
 
     setHeaderWidths(idx, evt, r){
         if (typeof this.props.setHeaderWidths !== 'function') throw new Error('props.setHeaderWidths not a function');
-        console.log(idx, r, evt);
-        var widths = this.state.widths.slice(0);
-        this.props.setHeaderWidths(widths);
-        //this.setState({ widths : DimensioningContainer.resetHeaderColumnWidths(widths.length) });
-        //var widths = this.props.headerColumnWidths.slice(0);
-        //widths[idx] = r.x;
-        //this.props.setHeaderWidths(widths);
+        this.props.setHeaderWidths(this.state.widths.slice(0));
     }
 
     getWidthFor(idx){
@@ -305,13 +304,12 @@ class HeadersRow extends React.Component {
     onAdjusterDrag(idx, evt, r){
         var widths = this.state.widths.slice(0);
         widths[idx] = Math.max( idx > 0 ? 30 : 120, r.x );
-        this.setState({ 'widths' : widths });
-        //console.log(r);
+        this.setState({ 'widths' : widths }, this.throttledSetHeaderWidths);
     }
 
     render(){
         return (
-            <div className="search-headers-row">
+            <div className="search-headers-row hidden-xs">
                 <div className="columns clearfix">
                 {
                     this.props.columnDefinitions.map((colDef, i)=>{
@@ -327,7 +325,7 @@ class HeadersRow extends React.Component {
                                     { colDef.title }
                                 </div>
                                 <Draggable position={{x:w,y:0}} axis="x" onDrag={this.onAdjusterDrag.bind(this, i)} onStop={this.setHeaderWidths.bind(this, i)}>
-                                    <div className="width-adjuster">|</div>
+                                    <div className="width-adjuster"/>
                                 </Draggable>
                             </div>
                         );
@@ -353,7 +351,7 @@ class DimensioningContainer extends React.Component {
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
-        this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 100);
+        this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
         this.render = this.render.bind(this);
         this.state = {
             'mounted' : false,
@@ -373,17 +371,21 @@ class DimensioningContainer extends React.Component {
     render(){
         var columnDefinitions = columnsToColumnDefinitions(this.props.columns);
         var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, this.state.mounted, this.state.widths);
+        var responsiveGridSize = !isServerSide() && this.state.mounted && layout.responsiveGridState();
+
         return (
             <div className="search-results-container">
                 {/*<Fade in={this.state.mounted}>*/}
                 <div className="inner-container">
-                    <div className="scrollable-container" style={{ minWidth : fullRowWidth }}>
+                    <div className="scrollable-container" style={{ minWidth : fullRowWidth + 25 }}>
+                        { !responsiveGridSize || responsiveGridSize !== 'xs' ? 
                         <HeadersRow
                             columnDefinitions={columnDefinitions}
                             mounted={this.state.mounted}
                             headerColumnWidths={this.state.widths}
                             setHeaderWidths={this.setHeaderWidths}
                         />
+                        : null }
                         { this.props.results.map((r, rowNumber)=>
                             <ResultRow
                                 result={r}
