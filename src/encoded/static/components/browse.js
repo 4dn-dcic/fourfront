@@ -14,7 +14,7 @@ import FacetList, { ReduxExpSetFiltersInterface } from './facetlist';
 import ExperimentsTable from './experiments-table';
 import { isServerSide, expFxn, Filters, navigate, object } from './util';
 import { FlexibleDescriptionBox } from './item-pages/components';
-import { PageLimitSortController, LimitAndPageControls } from './browse/components';
+import { PageLimitSortController, LimitAndPageControls, ColumnSorterIcon } from './browse/components';
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
@@ -414,43 +414,13 @@ export const DropdownFacet = createReactClass({
 */
 
 
-
 class ColumnSorter extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.sortClickFxn = this.sortClickFxn.bind(this);
-    }
-
-    defaultProps = {
-        descend : false
-    }
-
-    sortClickFxn(e){
-        e.preventDefault();
-        var reverse = this.props.sortColumn === this.props.val && !this.props.descend;
-        this.props.sortByFxn(this.props.val, reverse);
-    }
-
-    iconStyle(style = 'descend'){
-        if (style === 'descend')        return <i className="icon icon-sort-desc" style={{ transform: 'translateY(-1px)' }}/>;
-        else if (style === 'ascend')    return <i className="icon icon-sort-asc" style={{ transform: 'translateY(2px)' }}/>;
-    }
-
-    icon(){
-        var val = this.props.val;
-        if (typeof val !== 'string' || val.length === 0) {
-            return null;
-        }
-        var style = !this.props.descend && this.props.sortColumn === val ? 'ascend' : 'descend';
-        var linkClass = this.props.sortColumn === val ? 'expset-column-sort-used' : 'expset-column-sort';
-        return <a href="#" className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</a>;
-    }
-
     render(){
+        var { title, value, sortColumn, descend, sortByFxn } = this.props;
         return(
             <span>
-                <span>{this.props.title || this.props.val}</span>&nbsp;&nbsp;{ this.icon() }
+                <span>{ title || value}</span>&nbsp;&nbsp;<ColumnSorterIcon value={value} currentSortColumn={sortColumn} descend={descend} sortByFxn={sortByFxn} />
             </span>
         );
     }
@@ -497,7 +467,7 @@ export class ResultTable extends React.Component {
                     sortColumn={this.props.sortColumn}
                     sortByFxn={this.props.sortBy}
                     title={pair[0]}
-                    val={pair[1]}
+                    value={pair[1]}
                 />
             </th>
         );
@@ -1027,7 +997,6 @@ export class Browse extends React.Component {
                     key="controlsAndResults"
                     fileFormats={fileFormats}
                     href={this.props.href}
-                    useAjax={true}
                     schemas={this.props.schemas}
                 />
 

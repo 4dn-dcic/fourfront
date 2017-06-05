@@ -75,3 +75,46 @@ export class LimitAndPageControls extends React.Component {
     }
 
 }
+
+export class ColumnSorterIcon extends React.Component {
+
+    static propTypes = {
+        'currentSortColumn' : PropTypes.string,
+        'descend' : PropTypes.bool,
+        'value' : PropTypes.string.isRequired,
+        'sortByFxn' : PropTypes.func.isRequired
+    }
+
+    static defaultProps = {
+        'descend' : false
+    }
+
+    constructor(props){
+        super(props);
+        this.sortClickFxn = this.sortClickFxn.bind(this);
+    }
+
+    sortClickFxn(e){
+        e.preventDefault();
+        var reverse = this.props.currentSortColumn === this.props.value && !this.props.descend;
+        this.props.sortByFxn(this.props.value, reverse);
+    }
+    
+    iconStyle(style = 'descend'){
+        if (style === 'descend')        return <i className="icon icon-sort-desc" style={{ transform: 'translateY(-1px)' }}/>;
+        else if (style === 'ascend')    return <i className="icon icon-sort-asc" style={{ transform: 'translateY(2px)' }}/>;
+    }
+
+    render(){
+        var value = this.props.value;
+        if (typeof value !== 'string' || value.length === 0) {
+            return null;
+        }
+        var style = !this.props.descend && this.props.currentSortColumn === value ? 'ascend' : 'descend';
+        var linkClass = (
+            (this.props.currentSortColumn === value ? 'active ' : '') +
+            'column-sort-icon'
+        );
+        return <a href="#" className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</a>;
+    }
+}

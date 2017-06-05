@@ -1,5 +1,5 @@
 'use strict';
 
-export { LimitAndPageControls } from './LimitAndPageControls';
+export { LimitAndPageControls, ColumnSorterIcon } from './LimitAndPageControls';
 export { PageLimitSortController } from './PageLimitSortController';
 export { SearchResultTable } from './SearchResultTable';

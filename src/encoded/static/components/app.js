@@ -1066,11 +1066,11 @@ export default class App extends React.Component {
                 }
             }else if(value.charAt(0) !== "!" && value.length > 0){
                 // test for edit handle
-                if (value == '#!edit'){
+                if (value === '#!edit'){
                     actionList.push('edit');
-                }else if (value == '#!create'){
+                }else if (value === '#!create'){
                     actionList.push('create');
-                }else if (value == '#!clone'){
+                }else if (value === '#!clone'){
                     actionList.push('clone');
                 }else{
                     lowerList.push(value.toLowerCase());
@@ -1081,6 +1081,8 @@ export default class App extends React.Component {
         // check error status
         var status;
         var route = currRoute[currRoute.length-1];
+
+        console.log('ALABAMAE',actionList);
 
 
         if(context.code && context.code == 404){
@@ -1123,7 +1125,7 @@ export default class App extends React.Component {
         }else if(status){
             content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
             title = 'Error';
-        }else if(actionList.length == 1){
+        }else if(actionList.length === 1){
             // check if the desired action is allowed per user (in the context)
 
             var contextActionNames = this.listActionsFor('context').map(function(act){
@@ -1140,6 +1142,7 @@ export default class App extends React.Component {
                         <SubmissionView
                             {...commonContentViewProps}
                             setIsSubmitting={this.setIsSubmitting}
+                            edit={actionList[0] === 'edit'}
                         />
                     );
                     title = getTitleStringFromContext(context);

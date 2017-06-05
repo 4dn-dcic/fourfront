@@ -44,14 +44,14 @@ class ResultTableEntry extends React.Component{
         if(!this.props.selectCallback){
             return;
         }
-        var processed_link = this.props.context.link_id.replace(/~/g, "/");
+        var processed_link = object.atIdFromObject(this.props.context);
         this.props.selectCallback(processed_link);
     }
 
     render() {
         var result = this.props.context || null;
         var item_type = result['@type'][0];
-        var processed_link = result.link_id.replace(/~/g, "/");
+        var processed_link = object.atIdFromObject(result);
         var detailPop = false;
         if(this.props.selectCallback){
             detailPop = true;
@@ -329,6 +329,34 @@ class ResultTableHandlersContainer extends React.Component {
 
 }
 
+class ResultDetailPane extends React.Component {
+
+    componentDidMount(){
+        ReactTooltip.rebuild();
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (this.props.open && !pastProps.open) ReactTooltip.rebuild();
+    }
+
+    render (){
+        var { result, popLink } = this.props;
+        return (
+            <div>
+                {result.description ?
+                        <div className="data-row flexible-description-box result-table-result-heading">
+                            {result.description}
+                        </div>
+                        : null}
+                    { <div className="item-page-detail">
+                        <h4 className="text-300">Details</h4>
+                        <Detail context={result} open={false} popLink={popLink}/>
+                    </div> }
+            </div>
+        );
+    }
+}
+
 class ControlsAndResults extends React.Component {
 
     static defaultProps = {
@@ -366,7 +394,40 @@ class ControlsAndResults extends React.Component {
                 itemTypeForSchemas = urlParts.query.type;
             }
         }
+
         var thisTypeTitle = Schemas.getTitleForType(thisType);
+        var abstractType = Schemas.getAbstractTypeForType(thisType);
+        var hiddenColumns = null;
+        if (abstractType && abstractType !== thisType) {
+            hiddenColumns = ['@type'];
+        }
+
+        // Render out button for "Select" if we have a props.selectCallback
+        var constantColumnDefinitions = SearchResultTable.defaultProps.constantColumnDefinitions.slice(0);
+        if (typeof this.props.selectCallback === 'function'){
+            var titleBlockColDefIndex = _.findIndex(constantColumnDefinitions, { 'field' : 'display_title' }); // Or just use columnDefinitions[0] ?
+            if (typeof this.props.selectCallback === 'function' && typeof titleBlockColDefIndex === 'number' && titleBlockColDefIndex > -1){
+                var newColDef = _.clone(constantColumnDefinitions[titleBlockColDefIndex]);
+                var origRenderFxn = newColDef.render;
+                newColDef.minColumnWidth = 120;
+                newColDef.render = (result, columnDefinition, props, width) => {
+                    var currentTitleBlock = origRenderFxn(result, columnDefinition, props, width);
+                    var newChildren = currentTitleBlock.props.children.slice(0);
+                    newChildren.unshift(
+                        <div className="select-button-container" onClick={(e)=>{
+                            e.preventDefault();
+                            this.props.selectCallback(object.atIdFromObject(result));
+                        }}>
+                            <button className="select-button" onClick={props.toggleDetailOpen}>
+                                <i className="icon icon-fw icon-check"/>
+                            </button>
+                        </div>
+                    );
+                    return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
+                };
+                constantColumnDefinitions[titleBlockColDefIndex] = newColDef;
+            }
+        }
 
         return (
             <div>
@@ -408,7 +469,16 @@ class ControlsAndResults extends React.Component {
                                 />
                             </div>
                         </div>
-                        <SearchResultTable results={results} columns={context.columns || {}} />
+                        <SearchResultTable
+                            results={results}
+                            columns={context.columns || {}}
+                            detailPane={<ResultDetailPane popLink={this.props.selectCallback ? true : false} />}
+                            sortBy={this.props.sortBy}
+                            sortColumn={this.props.sortColumn}
+                            sortReverse={this.props.sortReverse}
+                            hiddenColumns={hiddenColumns}
+                            constantColumnDefinitions={constantColumnDefinitions}
+                        />
                     </div>
                 </div>
             </div>
