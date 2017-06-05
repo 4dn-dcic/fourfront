@@ -28,7 +28,7 @@ describe('Testing search.js', function() {
 
     it('has the correct number of facets and experiment accessions listed', function() {
         var facets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'facet');
-        var results = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'result-table-result');
+        var results = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row');
         expect(facets.length).toBeGreaterThan(7);
         expect(results.length).toEqual(5);
     });
@@ -43,7 +43,7 @@ describe('Testing search.js', function() {
         testSearch = TestUtils.renderIntoDocument(
             <Search context={context} href='/search/?type=ExperimentHiC&digestion_enzyme.name=HindIII' />
         );
-        var results = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'result-table-result');
+        var results = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row');
         var selectedFacets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'selected');
         expect(results.length).toEqual(2);
         expect(selectedFacets.length).toEqual(2);
