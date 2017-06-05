@@ -430,7 +430,7 @@ class Facet extends React.Component {
                 >
                     <div className="facet-static-row clearfix">
                         <h5 className="facet-title">
-                            <span className="inline-block" data-tip={description} data-place="right">{ facet.title || Schemas.Field.toName(facet.field, this.props.schemas || null) }</span>
+                            <span className="inline-block" data-tip={description} data-place="right">&nbsp;{ facet.title || Schemas.Field.toName(facet.field, this.props.schemas || null) }</span>
                         </h5>
                         <div className={
                             "facet-item term" +

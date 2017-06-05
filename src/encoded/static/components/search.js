@@ -96,37 +96,6 @@ class ResultTableEntry extends React.Component{
     }
 }
 
-// Uses Detail from item-pages/components to provide item summary panel
-class ResultDetail extends React.Component{
-
-    static propTypes = {
-        result: PropTypes.object.isRequired,
-        schemas: PropTypes.object.isRequired,
-        popLink: PropTypes.bool.isRequired
-    }
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        var result = this.props.result;
-        return(
-            <div className="result-table-detail">
-                {result.description ?
-                    <div className="data-row flexible-description-box result-table-result-heading">
-                        {result.description}
-                    </div>
-                    : null}
-                <div className="item-page-detail">
-                    <h4 className="text-300">Details</h4>
-                    <Detail context={result} schemas={this.props.schemas} open={false} popLink={this.props.popLink}/>
-                </div>
-            </div>
-        );
-    }
-}
-
 // If the given term is selected, return the href for the term
 export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
     for (var filter in filters) {
@@ -258,7 +227,7 @@ export function getSearchType(facets){
     }
 }
 
-class ResultTableContainer extends React.Component {
+class ResultTableHandlersContainer extends React.Component {
 
     static defaultProps = {
         restrictions : {},
@@ -348,7 +317,7 @@ class ResultTableContainer extends React.Component {
 
         return (
             <PageLimitSortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
-                <ResultTable
+                <ControlsAndResults
                     {...this.props}
                     isTermSelected={this.isTermSelected}
                     onFilter={this.onFilter}
@@ -360,7 +329,7 @@ class ResultTableContainer extends React.Component {
 
 }
 
-class ResultTable extends React.Component {
+class ControlsAndResults extends React.Component {
 
     static defaultProps = {
         restrictions : {},
@@ -440,7 +409,6 @@ class ResultTable extends React.Component {
                             </div>
                         </div>
                         <SearchResultTable results={results} columns={context.columns || {}} />
-                        {/*<TabularTableResults {...this.props} results={results} schemas={this.props.schemas}/>*/}
                     </div>
                 </div>
             </div>
@@ -475,7 +443,7 @@ export class Search extends React.Component {
             <div>
                 {facetdisplay ?
                     <div className="browse-page-container">
-                        <ResultTableContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
+                        <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
             </div>

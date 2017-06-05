@@ -1227,6 +1227,13 @@ $small-label-accession-font-size : 0.75rem;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
+	&[data-field="display_title"],
+	&[data-field="@type"],
+	&[data-field="lab"] {
+		> .inner {
+			text-align: left;
+		}
+	}
 }
 
 .search-results-container {
@@ -1243,10 +1250,26 @@ $small-label-accession-font-size : 0.75rem;
 				> .columns {
 					> .search-headers-column-block {
 						@include search-result-column-block;
+						position: relative;
 						> .inner {
 							color: #fff;
 							font-weight: 500;
 							
+						}
+						&[data-field="display_title"]{
+							padding-left: 40px;
+						}
+						> .width-adjuster {
+							position: absolute;
+							color: #fff;
+							padding-left: 10px;
+							padding-right: 10px;
+							box-sizing: content-box;
+							left: 0;
+							top : 0;
+							margin-left: -11px;
+							z-index: 10;
+							cursor: col-resize;
 						}
 					}
 				}
@@ -1279,6 +1302,11 @@ $small-label-accession-font-size : 0.75rem;
 										background-color: rgba(0,0,0,0.15);
 									}
 								}
+							}
+						}
+						&[data-field="lab"]{
+							i.user-icon {
+								margin-right: 5px;
 							}
 						}
 					}
