@@ -301,7 +301,7 @@ def test_audit_external_experiment_set_no_pub_warns(testapp, external_exp_set):
 
 
 def test_audit_external_experiment_set_w_pub_no_warn(testapp, external_exp_set, publication):
-    patch_res = testapp.patch_json(publication['@id'], {'exp_sets_prod_in_pub': [external_exp_set['@id']]}, status=200)
+    testapp.patch_json(publication['@id'], {'exp_sets_prod_in_pub': [external_exp_set['@id']]}, status=200)
     res = testapp.get(external_exp_set['@id'] + '/@@audit-self')
     errors = res.json['audit']
     assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
