@@ -44,7 +44,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     principals = effective_principals(request)
 
     es = request.registry[ELASTIC_SEARCH]
-    es_index = request.registry.settings['snovault.elasticsearch.index']
     search_audit = request.has_permission('search_audit')
 
     from_, size = get_pagination(request)
@@ -53,6 +52,14 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     prepared_terms = prepare_search_term(request)
 
     doc_types = set_doc_types(request, types, search_type)
+
+    # set ES index based on doc_type (one type per index)
+    # if doc_type is item, search all indexes by setting es_index to None
+    # If multiple, search all specified
+    if 'Item' in doc_types:
+        es_index = '_all'
+    else:
+        es_index = find_index_by_doc_types(request, doc_types, ['Item'])
 
     # set up clear_filters path
     result['clear_filters'] = clear_filters_setup(request, doc_types, forced_type)
@@ -86,7 +93,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     query['aggs'] = set_facets(facets, used_filters, principals, doc_types)
     ### Execute the query
     if size == 'all':
-        es_results = get_all_results(request, query)
+        es_results = get_all_results(request, query, es_index)
     elif size:
         es_results = es.search(body=query, index=es_index, from_=from_, size=size)
     else:
@@ -189,13 +196,13 @@ def get_pagination(request):
     return from_, size
 
 
-def get_all_results(request, origQuery):
+def get_all_results(request, origQuery, es_index):
     es = request.registry[ELASTIC_SEARCH]
-    es_index = request.registry.settings['snovault.elasticsearch.index']
     from_ = 0
     sizeIncrement = 1000 # Decrease this to like 5 or 10 to test.
 
     es_result = es.search(body=origQuery, index=es_index, from_=from_, size=sizeIncrement) # get our aggregations from here
+
     total = es_result['hits'].get('total',0)
     extraRequestsNeeded = int(math.ceil(total / sizeIncrement)) - 1 # Decrease by 1 (first es_result already happened)
 
@@ -668,6 +675,46 @@ def format_results(request, hits):
                 frame_result['audit'] = hit['_source']['audit']
             yield frame_result
         return
+
+
+def find_index_by_doc_types(request, doc_types, ignore):
+    """
+    Find the correct index(es) to be search given a list of doc_types.
+    The types in doc_types are the collection names, formatted like
+    'Experiment HiC' and index names are the jsonld_types, formatted like
+    'experiment_hi_c'.
+    Ignore any collection names provided in the ignore param, an array.
+    Formats output indexes as a string usable by elasticsearch
+    """
+    indexes = []
+    for doc_type in doc_types:
+        if doc_type in ignore:
+            continue
+        else:
+            result = get_jsonld_types_from_collection_type(request, doc_type)
+            indexes.extend(result)
+    # remove any duplicates
+    indexes = list(set(indexes))
+    index_string = ','.join(indexes)
+    return index_string
+
+
+def get_jsonld_types_from_collection_type(request, doc_type):
+    types_found = []
+    try:
+        registry_type = request.registry['types'][doc_type]
+    except KeyError:
+        return [] # no types found
+    # add the item_type of this collection if applicable
+    if hasattr(registry_type, 'item_type'):
+        types_found.append(registry_type.item_type)
+    # see if we're dealing with an abstract type
+    elif hasattr(registry_type, 'subtypes'):
+        subtypes = registry_type.subtypes
+        for subtype in subtypes:
+            types_found.extend(get_jsonld_types_from_collection_type(request, subtype))
+    return types_found
+
 
 ### stupid things to remove; had to add because of other fxns importing
 
