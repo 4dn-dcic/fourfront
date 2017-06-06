@@ -11,6 +11,8 @@ var getLargeMD5 = require('../util/file-utility').getLargeMD5;
 var ReactTooltip = require('react-tooltip');
 var ProgressBar = require('rc-progress').Line;
 
+
+
 /*
 Individual component for each type of field. Contains the appropriate input
 if it is a simple number/text/enum, or generates a child component for
@@ -21,10 +23,21 @@ export default class BuildField extends React.Component{
 
     constructor(props){
         super(props);
+        this.state = {
+            'dropdownOpen' : false
+        };
     }
 
     componentDidMount(){
         ReactTooltip.rebuild();
+    }
+
+    handleDropdownButtonToggle = (isOpen, evt) => {
+        if (isOpen) {
+            this.setState({ 'dropdownOpen' : true });
+        } else {
+            this.setState({ 'dropdownOpen' : false });
+        }
     }
 
     displayField = (field_case) => {
@@ -56,7 +69,7 @@ export default class BuildField extends React.Component{
             );
             case 'enum' : return (
                 <span className="input-wrapper" style={{'display':'inline'}}>
-                    <DropdownButton bsSize="xsmall" id="dropdown-size-extra-small" title={this.props.value || "No value"}>
+                    <DropdownButton bsSize="xsmall" id="dropdown-size-extra-small" title={this.props.value || "No value"} onToggle={this.handleDropdownButtonToggle}>
                         {this.props.enumValues.map((val) => this.buildEnumEntry(val))}
                     </DropdownButton>
                 </span>
@@ -137,7 +150,7 @@ export default class BuildField extends React.Component{
         this.props.modifyNewContext(this.props.nestedField, valueCopy, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
     }
 
-    render(){
+    render = () => {
         // TODO: come up with a schema based solution for code below?
         // hardcoded fields you can't delete
         var cannot_delete = ['filename'];
@@ -148,6 +161,9 @@ export default class BuildField extends React.Component{
         if(!_.contains(cannot_delete, this.props.field) && this.props.value !== null && this.props.fieldType !== 'array'){
             showDelete = true;
         }
+
+        var rowClassName = "row facet" + (this.state.dropdownOpen ? ' active-submission-row' : '');
+
         // array items don't need fieldnames/tooltips
         if(this.props.isArray){
             // if we've got an object that's inside inside an array, only allow
@@ -160,7 +176,7 @@ export default class BuildField extends React.Component{
                 }
             }
             return(
-                <div className="row facet" style={{'overflow':'visible'}}>
+                <div className={rowClassName} style={{'overflow':'visible'}}>
                     <div className="col-sm-12">
                         <div>
                             {this.displayField(this.props.fieldType)}
@@ -178,7 +194,7 @@ export default class BuildField extends React.Component{
         }
         return(
 
-            <div className="row facet" style={{'overflow':'visible'}}>
+            <div className={rowClassName} style={{'overflow':'visible'}}>
                 <div className="col-sm-12 col-md-3">
                     <h5 className="facet-title submission-field-title">
                         <span style={{'marginRight': '6px'}} className="inline-block">{this.props.title}</span>
