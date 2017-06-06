@@ -118,6 +118,10 @@
         // .row not for inner columns, used for margin offset
         padding-left : 10px;
         padding-right : 10px;
+        &.active-submission-row {
+            position: relative;
+            z-index: 5;
+        }
     }
 
     &:not(:last-child) {
