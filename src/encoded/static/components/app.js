@@ -1082,9 +1082,6 @@ export default class App extends React.Component {
         var status;
         var route = currRoute[currRoute.length-1];
 
-        console.log('ALABAMAE',actionList);
-
-
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
             if(route != 'help' && route != 'about' && route != 'home' && route != 'submissions'){
@@ -1097,7 +1094,6 @@ export default class App extends React.Component {
                 status = 'forbidden';
             }
         }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
-            console.log(this.state.user_actions);
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
@@ -1143,6 +1139,7 @@ export default class App extends React.Component {
                             {...commonContentViewProps}
                             setIsSubmitting={this.setIsSubmitting}
                             edit={actionList[0] === 'edit'}
+                            create={actionList[0] === 'create'}
                         />
                     );
                     title = getTitleStringFromContext(context);
