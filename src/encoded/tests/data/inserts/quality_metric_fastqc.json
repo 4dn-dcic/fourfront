@@ -7,7 +7,7 @@
         "Sequences flagged as poor quality": 0,
         "Per base sequence quality": "PASS",
         "Sequence Duplication Levels": "PASS",
-        "Sequence length": 101,
+        "Sequence length": "101",
         "Per base sequence content": "WARN",
         "Per sequence GC content": "WARN",
         "Total Sequences": 557747,
