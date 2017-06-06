@@ -1082,9 +1082,6 @@ export default class App extends React.Component {
         var status;
         var route = currRoute[currRoute.length-1];
 
-        console.log('ALABAMAE',actionList);
-
-
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
             if(route != 'help' && route != 'about' && route != 'home' && route != 'submissions'){
@@ -1142,6 +1139,7 @@ export default class App extends React.Component {
                         <SubmissionView
                             {...commonContentViewProps}
                             setIsSubmitting={this.setIsSubmitting}
+                            create={actionList[0] === 'create'}
                             edit={actionList[0] === 'edit'}
                         />
                     );

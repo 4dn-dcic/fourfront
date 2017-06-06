@@ -473,11 +473,14 @@ class ControlsAndResults extends React.Component {
                             results={results}
                             columns={context.columns || {}}
                             detailPane={<ResultDetailPane popLink={this.props.selectCallback ? true : false} />}
+                            hiddenColumns={hiddenColumns}
+                            constantColumnDefinitions={constantColumnDefinitions}
+                            href={this.props.href}
+
                             sortBy={this.props.sortBy}
                             sortColumn={this.props.sortColumn}
                             sortReverse={this.props.sortReverse}
-                            hiddenColumns={hiddenColumns}
-                            constantColumnDefinitions={constantColumnDefinitions}
+
                         />
                     </div>
                 </div>

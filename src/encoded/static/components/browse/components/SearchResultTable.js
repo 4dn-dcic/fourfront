@@ -5,13 +5,15 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import Draggable from 'react-draggable';
+import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
-import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility } from './../../util';
+import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { ColumnSorterIcon } from './LimitAndPageControls';
 import ReactTooltip from 'react-tooltip';
+import Infinite from 'react-infinite';
 
 
 /**
@@ -400,6 +402,110 @@ class HeadersRow extends React.Component {
     }
 }
 
+class LoadMoreAsYouScroll extends React.Component {
+
+    static propTypes = {
+        'href' : PropTypes.string.isRequired,
+        'limit' : PropTypes.number,
+        'rowHeight' : PropTypes.number.isRequired
+    }
+
+    static defaultProps = {
+        'limit' : 25,
+        'rowHeight' : 47
+    }
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.isMounted = this.isMounted.bind(this);
+        this.getInitialFrom = this.getInitialFrom.bind(this);
+        this.rebuiltHref = this.rebuiltHref.bind(this);
+        this.handleLoad = this.handleLoad.bind(this);
+        var state = {
+            'items' : props.children,
+            'isLoading' : false,
+            'canLoad' : true
+        };
+        if (typeof props.mounted === 'undefined'){
+            state.mounted = false;
+        }
+        this.state = state;
+    }
+
+    componentDidMount(){
+        if (typeof this.state.mounted === 'boolean') this.setState({ 'mounted' : true });
+    }
+
+
+    
+    isMounted(){
+        if (typeof this.props.mounted === 'boolean') return this.props.mounted;
+        return this.state.mounted;
+    }
+
+    getInitialFrom(){
+        if (typeof this.props.page === 'number' && typeof this.props.limit === 'number'){
+            return (this.props.page - 1) * this.props.limit;
+        } else if (typeof this.props.href === 'string'){
+            var parts = url.parse(this.props.href, true);
+            if (parts.query.limit && !isNaN(parts.query.from)) return parseInt(parts.query.from);
+        }
+        return 0;
+    }
+
+    rebuiltHref(){
+        var parts = url.parse(this.props.href, true);
+        var q = parts.query;
+        var initialFrom = this.getInitialFrom();
+        q.from = initialFrom + this.props.results.length;
+        parts.search = '?' + queryString.stringify(q);
+        return url.format(parts);
+    }
+
+    handleLoad(e,p,t){
+        console.log('LOSSSSDDD', this.props.href, this.rebuiltHref());
+        var nextHref = this.rebuiltHref();
+        this.setState({ 'isLoading' : true }, ()=>{
+            ajax.load(nextHref, (r)=>{
+                if (r && r['@graph'] && r['@graph'].length > 0){
+                    this.props.setResults(this.props.results.concat(r['@graph']), ()=>{
+                        this.setState({ 'isLoading' : false });
+                    });
+                } else {
+                    this.setState({
+                        'isLoading' : false,
+                        'canLoad' : false
+                    });
+                }
+            });
+        });
+    }
+
+    render(){
+        console.log('ISMTD', this.isMounted());
+        if (!this.isMounted()) return <div>{ this.props.children }</div>;
+        var loader = (
+            <div className="search-result-row loading text-center">
+                <i className="icon icon-circle-o-notch icon-spin" />&nbsp; Loading...
+            </div>
+        );
+        return (
+            <Infinite
+                elementHeight={this.props.rowHeight}
+                useWindowAsScrollContainer
+                onInfiniteLoad={this.handleLoad}
+                isInfiniteLoading={this.state.isLoading}
+                loadingSpinnerDelegate={loader}
+                infiniteLoadBeginEdgeOffset={this.state.canLoad ? 200 : undefined}
+                preloadAdditionalHeight={Infinite.containerHeightScaleFactor(2)}
+            >
+                { this.props.children }
+            </Infinite>
+        );
+    }
+}
+
 class DimensioningContainer extends React.Component {
 
     static resetHeaderColumnWidths(length){
@@ -412,12 +518,14 @@ class DimensioningContainer extends React.Component {
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.onScroll = _.debounce(_.throttle(this.onScroll.bind(this), 250), 50);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
+        this.setResults = this.setResults.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'mounted' : false,
             'widths' : DimensioningContainer.resetHeaderColumnWidths(
                 props.columnDefinitions.length
-            )
+            ),
+            'results' : props.results
         };
     }
 
@@ -445,8 +553,33 @@ class DimensioningContainer extends React.Component {
         this.setState({ 'widths' : widths });
     }
 
+    setResults(results, cb){
+        this.setState({ 'results' : results }, cb);
+    }
+
+    renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft){
+        var { columnDefinitions, results, detailPane } = this.props;
+        return this.state.results.map((r, rowNumber)=>
+            <ResultRow
+                result={r}
+                rowNumber={rowNumber}
+                data-key={r['@id'] || r.link_id || rowNumber}
+                key={r['@id'] || r.link_id || rowNumber}
+                columnDefinitions={columnDefinitions}
+                rowWidth={fullRowWidth}
+                mounted={this.state.mounted}
+                headerColumnWidths={this.state.widths}
+                schemas={Schemas.get()}
+                detailPane={detailPane}
+
+                tableContainerWidth={tableContainerWidth}
+                tableContainerScrollLeft={tableContainerScrollLeft}
+            />
+        );
+    }
+
     render(){
-        var { columnDefinitions, results, sortBy, sortColumn, sortReverse, detailPane } = this.props;
+        var { columnDefinitions, results, sortBy, sortColumn, sortReverse, detailPane, href, limit } = this.props;
         var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, this.state.mounted, this.state.widths);
         var responsiveGridSize = !isServerSide() && this.state.mounted && layout.responsiveGridState();
 
@@ -470,22 +603,9 @@ class DimensioningContainer extends React.Component {
                             sortReverse={sortReverse}
                         />
                         : null }
-                        { results.map((r, rowNumber)=>
-                            <ResultRow
-                                result={r}
-                                rowNumber={rowNumber}
-                                key={r['@id'] || r.link_id || rowNumber}
-                                columnDefinitions={columnDefinitions}
-                                rowWidth={fullRowWidth}
-                                mounted={this.state.mounted}
-                                headerColumnWidths={this.state.widths}
-                                schemas={Schemas.get()}
-                                detailPane={detailPane}
-
-                                tableContainerWidth={tableContainerWidth}
-                                tableContainerScrollLeft={tableContainerScrollLeft}
-                            />
-                        )}
+                        <LoadMoreAsYouScroll results={this.state.results} mounted={this.state.mounted} href={href} limit={limit} setResults={this.setResults} ref="loadAsScroll">
+                            { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft) }
+                        </LoadMoreAsYouScroll>
                     </div>
                 </div>
             </div>
@@ -514,6 +634,8 @@ export class SearchResultTable extends React.Component {
 
     static propTypes = {
         'results' : PropTypes.arrayOf(ResultRow.propTypes.result).isRequired,
+        'href'  : PropTypes.string.isRequired,
+        'limit' : PropTypes.number,
         'columns' : PropTypes.object,
         'constantColumnDefinitions' : ResultRow.propTypes.columnDefinitions,
         'defaultWidthMap' : PropTypes.shape({ 'lg' : PropTypes.number.isRequired, 'md' : PropTypes.number.isRequired, 'sm' : PropTypes.number.isRequired }).isRequired,
@@ -595,7 +717,13 @@ export class SearchResultTable extends React.Component {
                     );
                 }
             }
-        ]
+        ],
+        'limit' : 25
+    }
+
+    getLoadedResults(){
+        if (!this.refs || !this.refs.container || !this.refs.container.state || !Array.isArray(this.refs.container.state.results)) return null;
+        return this.refs.container.state.results;
     }
 
     render(){
@@ -609,7 +737,7 @@ export class SearchResultTable extends React.Component {
         }
         return (
             <layout.WindowResizeUpdateTrigger>
-                <DimensioningContainer {...this.props} columnDefinitions={columnDefinitions}/>
+                <DimensioningContainer {...this.props} columnDefinitions={columnDefinitions} ref="container"/>
             </layout.WindowResizeUpdateTrigger>
         );
     }

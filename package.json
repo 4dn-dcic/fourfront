@@ -88,6 +88,7 @@
     "react-cookie": "^0.4.8",
     "react-dom": "^15.3.2",
     "react-draggable": "^2.2.6",
+    "react-infinite": "^0.11.0",
     "react-json-tree": "^0.10.7",
     "react-matrix-viz": "^0.2.2",
     "react-redux": "^4.4.5",
