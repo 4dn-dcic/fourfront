@@ -454,6 +454,7 @@ class ControlsAndResults extends React.Component {
                         />
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9 expset-result-table-fix">
+                        {/*
                         <div className="row above-chart-row clearfix">
                             <div className="col-sm-5 col-xs-12">
                                 <h5 className='browse-title'>{results.length} of {total} results</h5>
@@ -469,6 +470,7 @@ class ControlsAndResults extends React.Component {
                                 />
                             </div>
                         </div>
+                        */}
                         <SearchResultTable
                             results={results}
                             columns={context.columns || {}}

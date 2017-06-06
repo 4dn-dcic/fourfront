@@ -436,8 +436,6 @@ class LoadMoreAsYouScroll extends React.Component {
     componentDidMount(){
         if (typeof this.state.mounted === 'boolean') this.setState({ 'mounted' : true });
     }
-
-
     
     isMounted(){
         if (typeof this.props.mounted === 'boolean') return this.props.mounted;
@@ -469,9 +467,8 @@ class LoadMoreAsYouScroll extends React.Component {
         this.setState({ 'isLoading' : true }, ()=>{
             ajax.load(nextHref, (r)=>{
                 if (r && r['@graph'] && r['@graph'].length > 0){
-                    this.props.setResults(this.props.results.concat(r['@graph']), ()=>{
-                        this.setState({ 'isLoading' : false });
-                    });
+                    this.props.setResults(this.props.results.concat(r['@graph']));
+                    this.setState({ 'isLoading' : false });
                 } else {
                     this.setState({
                         'isLoading' : false,
@@ -483,10 +480,12 @@ class LoadMoreAsYouScroll extends React.Component {
     }
 
     render(){
-        console.log('ISMTD', this.isMounted());
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
         var loader = (
-            <div className="search-result-row loading text-center">
+            <div className="search-result-row loading text-center" style={{
+                'maxWidth' : this.props.tableContainerWidth,
+                'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
+            }}>
                 <i className="icon icon-circle-o-notch icon-spin" />&nbsp; Loading...
             </div>
         );
@@ -603,8 +602,33 @@ class DimensioningContainer extends React.Component {
                             sortReverse={sortReverse}
                         />
                         : null }
-                        <LoadMoreAsYouScroll results={this.state.results} mounted={this.state.mounted} href={href} limit={limit} setResults={this.setResults} ref="loadAsScroll">
-                            { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft) }
+                        <LoadMoreAsYouScroll
+                            results={this.state.results}
+                            mounted={this.state.mounted}
+                            href={href}
+                            limit={limit}
+                            setResults={this.setResults}
+                            tableContainerWidth={tableContainerWidth}
+                            tableContainerScrollLeft={tableContainerScrollLeft}
+                        >{ 
+                            this.state.results.map((r, rowNumber)=>
+                                <ResultRow
+                                    result={r}
+                                    rowNumber={rowNumber}
+                                    data-key={r['@id'] || r.link_id || rowNumber}
+                                    key={r['@id'] || r.link_id || rowNumber}
+                                    columnDefinitions={columnDefinitions}
+                                    rowWidth={fullRowWidth}
+                                    mounted={this.state.mounted}
+                                    headerColumnWidths={this.state.widths}
+                                    schemas={Schemas.get()}
+                                    detailPane={detailPane}
+
+                                    tableContainerWidth={tableContainerWidth}
+                                    tableContainerScrollLeft={tableContainerScrollLeft}
+                                />
+                            )
+                        }
                         </LoadMoreAsYouScroll>
                     </div>
                 </div>
