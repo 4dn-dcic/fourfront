@@ -3,6 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import { ExternalReferenceLink } from './ExternalReferenceLink';
+import { console } from './../../util';
 
 /**
  * Component for showing Aliases, External References, etc.

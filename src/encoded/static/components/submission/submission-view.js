@@ -2,10 +2,10 @@
 var React = require('react');
 var globals = require('../globals');
 var _ = require('underscore');
-var { ajax, console, object, isServerSide, layout } = require('../util');
+var { ajax, console, object, isServerSide, layout, Schemas } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
-var makeTitle = require('../item-pages/item').title;
+import { getTitleStringFromContext } from '../item-pages/item';
 var Search = require('../search').Search;
 var getLargeMD5 = require('../util/file-utility').getLargeMD5;
 var ReactTooltip = require('react-tooltip');
@@ -13,16 +13,6 @@ import SubmissionTree from './expandable-tree';
 import BuildField from './submission-fields';
 import Alerts from '../alerts';
 var { Detail } = require('../item-pages/components');
-
-// global variable holding hard-coded object optiosn for ambiguous linkTos
-var linkToLookup = {
-    'Experiment': ['ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq'],
-    'ExperimentSet': ['ExperimentSet', 'ExperimentSetReplicate'],
-    'File': ['FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference'],
-    'FileSet': ['FileSet', 'FileSetCalibration'],
-    'Individual': ['IndividualHuman', 'IndividualMouse'],
-    'Treatment': ['TreatmentChemical', 'TreatmentRnai']
-};
 
 /*
 Key container component for Submission components.
@@ -269,7 +259,7 @@ export default class SubmissionView extends React.Component{
         // this means there could be multiple types of linked objects for a
         // given type. let the user choose one.
         if(this.props.schemas){
-            if(type in linkToLookup && !init){
+            if(type in Schemas.itemTypeHierarchy && !init){
                 // ambiguous linkTo type found
                 this.setState({
                     'ambiguousIdx': newIdx,
@@ -1217,7 +1207,7 @@ export default class SubmissionView extends React.Component{
                         <div className="input-wrapper" style={{'marginBottom':'15px'}}>
                             <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={this.state.ambiguousSelected || "No value"}>
                                 {this.state.ambiguousType !== null ?
-                                    linkToLookup[this.state.ambiguousType].map((val) => this.buildAmbiguousEnumEntry(val))
+                                    Schemas.itemTypeHierarchy[this.state.ambiguousType].map((val) => this.buildAmbiguousEnumEntry(val))
                                     :
                                     null
                                 }
@@ -1468,7 +1458,7 @@ class IndividualObjectView extends React.Component{
     Navigation function passed to Search so that faceting can be done in-place
     through ajax. If no results are returned from the search, abort.
     */
-    inPlaceNavigate = (destination) => {
+    inPlaceNavigate = (destination, options, callback) => {
         if(this.state.selectQuery){
             var dest = destination;
             // to clear filters
@@ -1491,6 +1481,10 @@ class IndividualObjectView extends React.Component{
                         'selectArrayIdx': null
                     });
                     this.props.setSubmissionState('fullScreen', false);
+                }
+            }).then(data => {
+                if (typeof callback === 'function'){
+                    callback(data);
                 }
             });
         }

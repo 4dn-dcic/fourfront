@@ -68,10 +68,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
                                principals,
                                doc_types)
 
-    # TODO: decide if the schemas are useful
-    # commented out as not returning them currently
-    # schemas = [types[doc_type].schema for doc_type in doc_types]
-
     ### Set sort order
     set_sort_order(request, prepared_terms, types, doc_types, query, result)
     # TODO: implement BOOST here?
@@ -116,6 +112,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         result['notification'] = 'No results found'
         result['@graph'] = []
         return result if not return_generator else []
+
+    columns = list_visible_columns_for_schemas(request, schemas)
+    if columns:
+        result['columns'] = columns
 
     result['notification'] = 'Success'
 
@@ -677,7 +677,14 @@ def iter_search_results(context, request):
 
 # DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols
 def list_visible_columns_for_schemas(request, schemas):
-    return []
+    columns = OrderedDict()
+    for schema in schemas:
+        if 'columns' in schema:
+            columns.update(OrderedDict(
+                (name, obj.get('title'))
+                for name,obj in schema['columns'].items() #if name in schema['properties']
+            ))
+    return columns
 
 # DUMMY FUNCTION. TODO: update ./region_search.py
 def search_result_actions(request, doc_types, es_results, position=None):

@@ -8,7 +8,7 @@
 
 
 export { FormattedInfoBlock } from './FormattedInfoBlock';
-export { ItemPageTitle, getBaseItemType, getTitleStringFromContext, getBaseItemTypeTitle, isDisplayTitleAccession } from './ItemPageTitle';
+export { ItemPageTitle } from './ItemPageTitle';
 
 import * as ih from './ItemHeader';
 export const ItemHeader = ih;
