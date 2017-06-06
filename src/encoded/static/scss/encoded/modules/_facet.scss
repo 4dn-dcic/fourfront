@@ -6,7 +6,7 @@
     padding-bottom: 2px;
     padding-left: ($grid-gutter-width / 2);
     padding-right: ($grid-gutter-width / 2);
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    border: 1px solid #e8e8e8;
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     //border-radius: 3px;
 
@@ -118,6 +118,10 @@
         // .row not for inner columns, used for margin offset
         padding-left : 10px;
         padding-right : 10px;
+        &.active-submission-row {
+            position: relative;
+            z-index: 5;
+        }
     }
 
     &:not(:last-child) {
@@ -152,16 +156,51 @@
     }
 
     &:not(.static) {
+        transition: padding-bottom .35s ease, background-color .35s ease;
+        transform: translate3d(0,0,0);
+        background-color: transparent;
         h5.facet-title {
-            margin : -2px 0 9px;
+            margin : -1px 0 0;
             padding: 0 0 8px;
             border-bottom: 1px solid #f8f8f8;
             cursor: pointer;
+            > span.expand-toggle > i.icon {
+                font-size: 0.7rem;
+                margin-right: 7px;
+            }
+
+            .closed-terms-count {
+                position: relative;
+                transition: top .35s ease-out, opacity .35s ease;
+                top: 1px;
+                font-weight: 300;
+                color: #707070;
+                font-size: 0.75rem;
+                line-height : 1.25rem;
+                margin-right: 5px;
+                > i {
+                    margin-right: 2px;
+                    margin-right: 1.5px;
+                }
+            }
         }
-        &.closed h5.facet-title {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
+        &.open:not(.closing) {
+            h5.facet-title .closed-terms-count {
+                top : 9px;
+            }
+        }
+        &.closed, &.closing {
+            padding-bottom: 0px;
+            background-color: #fcfcfc;
+            border-bottom-color: #f0f0f0;
+            h5.facet-title {
+                font-weight: 400;
+            }
+        }
+        &.closed {
+            h5.facet-title {
+                border-bottom: none;
+            }
         }
     }
 
@@ -173,7 +212,7 @@
         .facet-title,
         .facet-item {
             display: inline-block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             width: 50%;
         }
 
@@ -240,6 +279,7 @@
 
     .facet-list {
         margin: 0;
+        padding-top: 8px;
 
         li {
             margin-bottom: 1px;
@@ -296,6 +336,32 @@
                 margin-right: 30px;
             }
 
+        }
+
+        .view-more-button {
+            cursor: pointer;
+            font-size: 0.85rem;
+            border: 1px solid #888;
+            padding: 0 6px;
+            line-height: 24px;
+            margin-top: -5px;
+            border-radius: 2px;
+            &:hover {
+                border-color: #000;
+            }
+
+            i.icon {
+                font-size: 0.8rem;
+            }
+        }
+
+        
+    }
+
+    // Hide 'Data Type' : 'Item'
+    &[data-field="type"] .facet-list {
+        li[data-key="Item"]{
+            display: none;
         }
     }
 

@@ -2,8 +2,6 @@
 
 import _ from 'underscore';
 
-//var f = module.exports = {
-
 /** 
  * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
  * @returns {Object[]} - List of experiments without files.
@@ -324,5 +322,3 @@ export function groupExperimentsByBiosample(experiments){
         .map(function(expSet){ return expSet[1]; }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
         .value();
 }
-
-//};

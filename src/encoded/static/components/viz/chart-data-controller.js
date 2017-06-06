@@ -4,7 +4,7 @@
 var React = require('react');
 import PropTypes from 'prop-types';
 var _ = require('underscore');
-var { expFxn, Filters, ajax, console, layout, isServerSide, navigate } = require('./../util');
+var { expFxn, Filters, Schemas, ajax, console, layout, isServerSide, navigate } = require('./../util');
 var vizUtil = require('./utilities');
 
 
@@ -65,7 +65,7 @@ var state = {
         //    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
         //    title : "Primary Organism",
         //    name : function(val, id, exps, filteredExps){
-        //        return Filters.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
+        //        return Schemas.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
         //    }
         //},
         //{ title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
@@ -104,7 +104,7 @@ var state = {
             title : "Primary Organism",
             /** @ignore */
             name : function(val, id, exps, filteredExps){
-                return Filters.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
+                return Schemas.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
             }
         },
         { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },

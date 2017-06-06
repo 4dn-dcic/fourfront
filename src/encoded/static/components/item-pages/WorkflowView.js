@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
-import { console, object, DateUtility, Filters, isServerSide, navigate } from './../util';
+import { console, object, DateUtility, Schemas, isServerSide, navigate } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 
@@ -38,7 +38,7 @@ export function commonGraphPropsFromProps(props){
                 Array.isArray(node.meta.analysis_step_types) &&
                 node.meta.analysis_step_types.length > 0
             ){
-                var purposes = node.meta.analysis_step_types.map(Filters.Term.capitalize).join(', ');
+                var purposes = node.meta.analysis_step_types.map(Schemas.Term.capitalize).join(', ');
                 if (canBeJSX){
                     return (
                         <div className="pull-right">
