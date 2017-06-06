@@ -9,6 +9,13 @@ def test_reference_file_by_md5(testapp, file):
     assert res.json['@id'] == file['@id']
 
 
+def test_file_content_md5sum_unique(testapp, file, fastq_json):
+    testapp.patch_json('/{uuid}'.format(**file), {'content_md5sum': '1234'}, status=200)
+    fastq_json['content_md5sum'] = '1234'
+    res2 = testapp.post_json('/file_fastq', fastq_json, status=409)
+    assert res2.json.get('detail').startswith("Keys conflict")
+
+
 def test_replaced_file_not_uniqued(testapp, file):
     testapp.patch_json('/{uuid}'.format(**file), {'status': 'replaced'}, status=200)
     testapp.get('/md5:{md5sum}'.format(**file), status=404)
