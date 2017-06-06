@@ -1094,7 +1094,6 @@ export default class App extends React.Component {
                 status = 'forbidden';
             }
         }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
-            console.log(this.state.user_actions);
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
@@ -1141,6 +1140,7 @@ export default class App extends React.Component {
                             setIsSubmitting={this.setIsSubmitting}
                             create={actionList[0] === 'create'}
                             edit={actionList[0] === 'edit'}
+                            create={actionList[0] === 'create'}
                         />
                     );
                     title = getTitleStringFromContext(context);
