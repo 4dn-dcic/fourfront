@@ -119,8 +119,8 @@ export const statusOrder = [
 export const productionHost = {
     //'www.data.4dnucleome.org'                   :1, 
     //'data.4dnucleome.org'                       :1,
-    'www.testportal.4dnucleome.org'             :1, 
-    'testportal.4dnucleome.org'                 :1,
+    //'www.testportal.4dnucleome.org'             :1, 
+    //'testportal.4dnucleome.org'                 :1,
     'fourfront-webdev.us-east-1.elasticbeanstalk.com':1,
 };
 
