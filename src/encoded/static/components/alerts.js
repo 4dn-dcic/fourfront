@@ -7,7 +7,6 @@ var store = require('../store');
 
 
 const defaultNavigateDisappearThreshold = 1;
-let countNavigations = 0;
 
 let alertNavigatationCountMap = {};
 
@@ -71,7 +70,6 @@ export default class Alerts extends React.Component {
                 Alerts.deQueue(a, currentAlerts);
             }
         });
-        console.log(alertNavigatationCountMap);
     }
 
     // Common alert definitions
