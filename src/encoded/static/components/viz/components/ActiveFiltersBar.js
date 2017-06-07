@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
-var { console, isServerSide, Filters, analytics } = require('./../../util');
+var { console, isServerSide, Filters, Schemas, analytics } = require('./../../util');
 
 
 
@@ -58,7 +58,7 @@ export class ActiveFiltersBar extends React.Component {
                                 color={node.color || null}
                             />);
                         }) }
-                        <div className="field-label">{ Filters.Field.toName(nodeSet[0].data.field, _this.props.schemas) || 'N/A' }</div>
+                        <div className="field-label">{ Schemas.Field.toName(nodeSet[0].data.field, _this.props.schemas) || 'N/A' }</div>
                     </div>
                 );
                 

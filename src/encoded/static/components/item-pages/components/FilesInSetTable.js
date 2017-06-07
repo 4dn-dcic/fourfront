@@ -191,7 +191,7 @@ class Small extends React.Component {
 
     render(){
         return (
-            <div className="files-in-set-table">
+            <div className="files-in-set-table smaller-version">
                 { 
                     this.props.files.map(function(file, i){
                         var atId = object.atIdFromObject(file);

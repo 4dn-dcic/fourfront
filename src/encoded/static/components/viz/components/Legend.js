@@ -4,7 +4,7 @@ var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
 var barAggrFxn = require('./../BarPlot/aggregation-functions');
-var { console, isServerSide, Filters, object } = require('./../../util');
+var { console, isServerSide, Schemas, object } = require('./../../util');
 import { CursorViewBounds } from './../ChartDetailCursor';
 import ReactTooltip from 'react-tooltip';
 
@@ -78,7 +78,7 @@ class Term extends React.Component {
                         data-term={this.props.term}
                         style={{ backgroundColor : color }}
                     />
-                    { this.props.name || Filters.Term.toName(this.props.field, this.props.term) }
+                    { this.props.name || Schemas.Term.toName(this.props.field, this.props.term) }
                 </span>
             </div>
         );
@@ -231,7 +231,7 @@ export class Legend extends React.Component {
         var terms = _.pairs(field.terms).map(function(p){ // p[0] = term, p[1] = term counts
             return {
                 'field' : field.field,
-                'name' : Filters.Term.toName(field.field, p[0]),
+                'name' : Schemas.Term.toName(field.field, p[0]),
                 'term' : p[0],
                 'color' : vizUtil.colorForNode({
                     'term' : p[0],
@@ -287,7 +287,7 @@ export class Legend extends React.Component {
         return fields.map(function(field){
             if (!field.title && !field.name) {
                 return _.extend({} , field, {
-                    'name' : Filters.Field.toName(field.field, schemas || null)
+                    'name' : Schemas.Field.toName(field.field, schemas || null)
                 });
             }
             return field;

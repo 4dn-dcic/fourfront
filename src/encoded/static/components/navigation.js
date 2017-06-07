@@ -338,6 +338,7 @@ class UserActions extends React.Component {
         );
 
         var actions = [];
+        console.log(this.props.listActionsFor('user_section'), this.props.listActionsFor('user'));
         this.props.listActionsFor('user_section').forEach((action) => {
             if (action.id === "login"){
                 actions.push(

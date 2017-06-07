@@ -5,7 +5,7 @@ var _ = require('underscore');
 var url = require('url');
 var vizUtil = require('./../utilities');
 var { RotatedLabel, Legend } = require('./../components');
-var { console, object, isServerSide, expFxn, Filters, layout } = require('./../../util');
+var { console, object, isServerSide, expFxn, Filters, Schemas, layout } = require('./../../util');
 var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
 var { Toggle } = require('./../../inputs');
 import { boundActions } from './ViewContainer';
@@ -273,7 +273,7 @@ export class UIControlsWrapper extends React.Component {
                         //}
                         var field = this.getFieldAtIndex(1);
                         if (!field) return "None";
-                        return field.title || Filters.Field.toName(field.field);
+                        return field.title || Schemas.Field.toName(field.field);
                     })()}
                     onToggle={this.handleDropDownToggle.bind(this, 'subdivisionField')}
                     children={this.renderDropDownMenuItems(
@@ -284,7 +284,7 @@ export class UIControlsWrapper extends React.Component {
                             var isDisabled = this.state.fields[0] && this.state.fields[0].field === field.field;
                             return [
                                 field.field,                                        // Field
-                                field.title || Filters.Field.toName(field.field),   // Title
+                                field.title || Schemas.Field.toName(field.field),   // Title
                                 field.description || null,                          // Description
                                 //isDisabled,                                         // Disabled
                                 //isDisabled ? "Field already selected for X-Axis" : null
@@ -379,7 +379,7 @@ export class UIControlsWrapper extends React.Component {
                                             //    return <em className="dropdown-open-title">X-Axis Field</em>;
                                             //}
                                             var field = this.getFieldAtIndex(0);
-                                            return <span>{(field.title || Filters.Field.toName(field.field))}</span>;
+                                            return <span>{(field.title || Schemas.Field.toName(field.field))}</span>;
                                         })()}
                                         onToggle={this.handleDropDownToggle.bind(this, 'xAxisField')}
                                         children={this.renderDropDownMenuItems(
@@ -387,7 +387,7 @@ export class UIControlsWrapper extends React.Component {
                                                 var isDisabled = this.state.fields[1] && this.state.fields[1].field === field.field;
                                                 return [
                                                     field.field,
-                                                    field.title || Filters.Field.toName(field.field),
+                                                    field.title || Schemas.Field.toName(field.field),
                                                     field.description || null,
                                                     //isDisabled,
                                                     //isDisabled ? 'Field is already selected for "Group By"' : null
