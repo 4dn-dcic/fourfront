@@ -374,7 +374,7 @@ def get_filtered_query(prepared_terms, result_fields, principals, doc_types):
         "query": {
             "bool" : bool_query
         },
-        'filter': {
+        'filters': {
             'and': {
                 'filters': [
                     {
@@ -448,7 +448,7 @@ def set_filters(request, query, result):
     Sets filters in the query. Use only for types. Specific fields are contained
     within the query_string.
     """
-    query_filters = query['filter']['and']['filters']
+    query_filters = query['filters']['and']['filters']
     used_filters = {}
     for field, term in request.params.items():
         if field in ['limit', 'y.limit', 'x.limit', 'mode', 'annotation',
@@ -590,7 +590,7 @@ def set_facets(facets, used_filters, principals, doc_types):
             'aggs': {
                 agg_name : aggregation
             },
-            'filter': termFilter,
+            'filters': termFilter,
         }
     # to achieve OR behavior within facets, search among GLOBAL results,
     # not just returned ones. to do this, wrap aggs in ['all_items']

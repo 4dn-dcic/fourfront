@@ -116,7 +116,7 @@ def index_peaks(uuid, request):
     if 'status' not in context or context['status'] != 'released':
         return
 
-    # Index human data for now       
+    # Index human data for now
     if 'assembly' not in context or 'hg19' not in context['assembly']:
         return
 
@@ -124,9 +124,9 @@ def index_peaks(uuid, request):
     if assay_term_name is None or isinstance(assay_term_name, collections.Hashable) is False:
         return
 
-    
+
     flag = False
-    
+
     for k, v in _INDEXED_DATA.get(assay_term_name, {}).items():
         if k in context and context[k] in v:
             if 'file_format' in context and context['file_format'] == 'bed':
@@ -167,7 +167,7 @@ def index_peaks(uuid, request):
                 log.warn('positions are not integers, will not index file')
 
 
-        
+
     for key in file_data:
         doc = {
             'uuid': context['uuid'],
@@ -179,12 +179,13 @@ def index_peaks(uuid, request):
                                    body=get_mapping(context['assembly']))
         es.index(index=key, doc_type=context['assembly'], body=doc,
                  id=context['uuid'])
-    
+
 
 
 @view_config(route_name='index_file', request_method='POST', permission="index")
 def index_file(request):
-    INDEX = request.registry.settings['snovault.elasticsearch.index']
+    # ES 5 change: search all indexes instead of 'snovault'
+    INDEX = '_all'
     request.datastore = 'database'
     dry_run = request.json.get('dry_run', False)
     recovery = request.json.get('recovery', False)
