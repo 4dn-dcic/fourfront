@@ -193,10 +193,24 @@ class ResultDetail extends React.Component{
     }
 
     componentWillReceiveProps(nextProps){
-        if (nextProps.open !== this.props.open && !nextProps.open){
-            this.setState({ 'closing' : true }, ()=> {
-                setTimeout( () => this.setState({ 'closing' : false }), 400 );
-            });
+        if (nextProps.open !== this.props.open){
+            if (!nextProps.open){
+                this.setState({ 'closing' : true }, ()=> {
+                    setTimeout( () => this.setState({ 'closing' : false }), 400 );
+                });
+            }
+        }
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (pastProps.open !== this.props.open){
+            if (this.props.open && typeof this.props.setDetailHeight === 'function'){
+                setTimeout(()=>{
+                    var detailHeight = parseInt(this.refs.detail.style.height);
+                    if (isNaN(detailHeight)) detailHeight = 0;
+                    this.props.setDetailHeight(detailHeight);
+                }, 0);
+            }
         }
     }
 
@@ -205,7 +219,7 @@ class ResultDetail extends React.Component{
         return (
             <Collapse in={open}>
                 { open || this.state.closing ?
-                <div className="result-table-detail" style={{
+                <div className="result-table-detail" ref="detail" style={{
                     'width' : tableContainerWidth,
                     'transform' : vizUtil.style.translate3d(tableContainerScrollLeft)
                 }}>
@@ -268,15 +282,13 @@ class ResultRow extends React.Component {
         super(props);
         this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.toggleDetailOpen = _.throttle(this.toggleDetailOpen.bind(this), 250);
+        this.isOpen = this.isOpen.bind(this);
         this.render = this.render.bind(this);
-        this.state = {
-            detailOpen : false
-        };
     }
 
     shouldComponentUpdate(nextProps, nextState){
         if (
-            nextState.detailOpen !== this.state.detailOpen ||
+            this.isOpen(nextProps) !== this.isOpen(this.props) ||
             !_.isEqual(nextProps.result, this.props.result) ||
             nextProps.rowNumber !== this.props.rowNumber ||
             nextProps.headerColumnWidths !== this.props.headerColumnWidths ||
@@ -293,13 +305,19 @@ class ResultRow extends React.Component {
     }
 
     toggleDetailOpen(){
-        this.setState({ 'detailOpen' : !this.state.detailOpen });
+        this.props.toggleDetailPaneOpen(this.props['data-key']);
+    }
+
+    isOpen(props = this.props){
+        return props.openDetailPanes[props['data-key']] || false;
     }
 
     render(){
-        var { result, rowNumber, mounted, headerColumnWidths, detailPane, columnDefinitions, schemas, tableContainerWidth, tableContainerScrollLeft } = this.props;
+        var { result, rowNumber, mounted, headerColumnWidths, detailPane, columnDefinitions, schemas,
+              tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href } = this.props;
+        var detailOpen = this.isOpen();
         return (
-            <div className={"search-result-row " + (this.state.detailOpen ? 'open' : 'closed')} data-row-number={rowNumber}>
+            <div className={"search-result-row " + (detailOpen ? 'open' : 'closed')} data-row-number={rowNumber}>
                 <div className="columns clearfix">
                 { columnDefinitions.map((colDef, i) =>
                     <ResultRowColumnBlock
@@ -309,21 +327,23 @@ class ResultRow extends React.Component {
                         columnDefinition={colDef}
                         result={result}
                         toggleDetailOpen={this.toggleDetailOpen}
-                        detailOpen={this.state.detailOpen}
+                        detailOpen={detailOpen}
                         mounted={mounted}
                         headerColumnWidths={headerColumnWidths}
                         schemas={schemas}
+                        href={href}
                     />
                 ) }
                 </div>
                 <ResultDetail
                     result={result}
-                    open={this.state.detailOpen}
+                    open={!!(detailOpen)}
                     detailPane={detailPane}
                     rowNumber={rowNumber}
                     tableContainerWidth={tableContainerWidth}
                     tableContainerScrollLeft={tableContainerScrollLeft}
                     toggleDetailOpen={this.toggleDetailOpen}
+                    setDetailHeight={setDetailHeight.bind(setDetailHeight, this.props['data-key'])}
                 />
             </div>
         );
@@ -478,7 +498,6 @@ class LoadMoreAsYouScroll extends React.Component {
     }
 
     handleLoad(e,p,t){
-        console.log('LOSSSSDDD', this.props.href, this.rebuiltHref());
         var nextHref = this.rebuiltHref();
         this.setState({ 'isLoading' : true }, ()=>{
             ajax.load(nextHref, (r)=>{
@@ -499,22 +518,27 @@ class LoadMoreAsYouScroll extends React.Component {
 
     render(){
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
-        var loader = (
-            <div className="search-result-row loading text-center" style={{
-                'maxWidth' : this.props.tableContainerWidth,
-                'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
-            }}>
-                <i className="icon icon-circle-o-notch icon-spin" />&nbsp; Loading...
-            </div>
-        );
-
         return (
             <Infinite
-                elementHeight={this.props.rowHeight}
+                elementHeight={
+                    this.props.children.map((c) => {
+                        if (typeof this.props.openDetailPanes[c.props['data-key']] === 'number'){
+                            return this.props.openDetailPanes[c.props['data-key']];
+                        } 
+                        return this.props.rowHeight;
+                    })
+                }
                 useWindowAsScrollContainer
                 onInfiniteLoad={this.handleLoad}
                 isInfiniteLoading={this.state.isLoading}
-                loadingSpinnerDelegate={loader}
+                loadingSpinnerDelegate={(
+                    <div className="search-result-row loading text-center" style={{
+                        'maxWidth' : this.props.tableContainerWidth,
+                        'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
+                    }}>
+                        <i className="icon icon-circle-o-notch icon-spin" />&nbsp; Loading...
+                    </div>
+                )}
                 infiniteLoadBeginEdgeOffset={this.state.canLoad ? 200 : undefined}
                 preloadAdditionalHeight={Infinite.containerHeightScaleFactor(2)}
             >
@@ -557,16 +581,19 @@ class DimensioningContainer extends React.Component {
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.throttledUpdate = _.throttle(this.forceUpdate.bind(this), 50, { leading : false });
+        this.toggleDetailPaneOpen = this.toggleDetailPaneOpen.bind(this);
+        this.setDetailHeight = this.setDetailHeight.bind(this);
         this.onScroll = this.onScroll.bind(this);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
         this.setResults = this.setResults.bind(this);
         this.render = this.render.bind(this);
         this.state = {
-            'mounted' : false,
-            'widths' : DimensioningContainer.resetHeaderColumnWidths(
-                props.columnDefinitions.length
-            ),
-            'results' : props.results
+            'mounted'   : false,
+            'widths'    : DimensioningContainer.resetHeaderColumnWidths(
+                            props.columnDefinitions.length
+                        ),
+            'results'   : props.results,
+            'openDetailPanes' : {} // { row key : detail pane height } used for determining if detailPane is open + height for Infinite listview.
         };
     }
 
@@ -583,7 +610,7 @@ class DimensioningContainer extends React.Component {
 
     componentWillReceiveProps(nextProps){
         if (nextProps.href !== this.props.href){ // <-- the important check, covers different filters, sort, etc.
-            this.setState({ 'results' : nextProps.results }, ()=>{
+            this.setState({ 'results' : nextProps.results, 'openDetailPanes' : {} }, ()=>{
                 vizUtil.requestAnimationFrame(()=>{
                     this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(this.props.columnDefinitions) });
                 });
@@ -599,6 +626,23 @@ class DimensioningContainer extends React.Component {
         if (!isServerSide()){
             this.refs.innerContainer.removeEventListener('scroll', this.onScroll);
         }
+    }
+
+    toggleDetailPaneOpen(rowKey, cb = null){
+        var openDetailPanes = _.clone(this.state.openDetailPanes);
+        if (openDetailPanes[rowKey]){
+            delete openDetailPanes[rowKey];
+        } else {
+            openDetailPanes[rowKey] = true;
+        }
+        this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
+    }
+
+    setDetailHeight(rowKey, height, cb){
+        var openDetailPanes = _.clone(this.state.openDetailPanes);
+        if (typeof openDetailPanes[rowKey] === 'undefined') return false;
+        openDetailPanes[rowKey] = height;
+        this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
     }
 
     onScroll(e){
@@ -623,7 +667,7 @@ class DimensioningContainer extends React.Component {
     }
 
     renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, props = this.props){
-        var { columnDefinitions, results, detailPane } = props;
+        var { columnDefinitions, results, detailPane, href } = props;
         return this.state.results.map((r, rowNumber)=>
             <ResultRow
                 result={r}
@@ -636,9 +680,14 @@ class DimensioningContainer extends React.Component {
                 headerColumnWidths={this.state.widths}
                 schemas={Schemas.get()}
                 detailPane={detailPane}
+                toggleDetailPaneOpen={this.toggleDetailPaneOpen}
+                openDetailPanes={this.state.openDetailPanes}
+                setDetailHeight={this.setDetailHeight}
 
                 tableContainerWidth={tableContainerWidth}
                 tableContainerScrollLeft={tableContainerScrollLeft}
+
+                href={href}
             />
         );
     }
@@ -688,6 +737,7 @@ class DimensioningContainer extends React.Component {
                             tableContainerWidth={tableContainerWidth}
                             tableContainerScrollLeft={tableContainerScrollLeft}
                             ref="loadMoreAsYouScroll"
+                            openDetailPanes={this.state.openDetailPanes}
                         >
                         { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft) }
                         </LoadMoreAsYouScroll>
@@ -774,7 +824,7 @@ export class SearchResultTable extends React.Component {
                 'field' : '@type',
                 'render' : function(result, columnDefinition, props, width){
                     if (!Array.isArray(result['@type'])) return null;
-                    return Schemas.getItemTypeTitle(result);
+                    return Schemas.getBaseItemTypeTitle(result);
                 }
             },
             {
