@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 export default class Footer extends React.Component {
 
     static propTypes = {
-        version: React.PropTypes.string // App version number
+        version: PropTypes.string // App version number
     }
 
     render() {

@@ -543,3 +543,70 @@ p, input {
 	width: 400px;
 	border: 2px solid #999999;
 }
+
+// SUBMISSION STUFF
+
+.submission-field-header{
+	background-color: #e7e7e7;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	span {
+		margin-left: 12px;
+	}
+	margin-bottom: 0px !important;
+}
+
+.submission-nav-tree{
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	background-color: #fff;
+	> h4{
+		text-align: center;
+		font-weight: 300;
+		margin-top: 0px;
+	}
+}
+
+.submission-nav-leaf{
+	width: 100%;
+	> div > button{
+		border: none;
+		border-radius: 0px;
+		width: 20px;
+		height: 19px;
+		opacity: 1 !important;
+	}
+}
+
+.submission-pop-icon{
+	background-color: #fff;
+	padding: 1px 5px;
+	a:hover, a:active {
+		text-decoration: none !important;
+		color: #000000;
+	}
+	a{
+		padding: 3px 5px 0px 5px;
+	}
+}
+
+.submission-field-title{
+	border: none !important;
+	padding-bottom: 0px !important;
+	margin-bottom: 0px !important;
+	padding-top: 5px !important;
+}
+
+.submission-working-title{
+	display: inline;
+	font-weight: 300;
+	> .working-subtitle{
+		font-weight: 200;
+		color: #8b8b8b;
+		padding-right: 10px;
+	}
+}
+
+.submission-hidden-nav{
+	display: none;
+}

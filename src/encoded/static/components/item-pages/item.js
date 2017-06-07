@@ -1,11 +1,13 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Panel } from 'react-bootstrap';
+import _ from 'underscore';
 import url from 'url';
 import * as globals from './../globals';
 import { AuditIndicators, AuditDetail, AuditMixin } from './../audit';
-import { console, object, Filters } from './../util';
+import { console, object, Filters, Schemas } from './../util';
 import AuditTabView from './components/AuditTabView';
 
 
@@ -23,6 +25,14 @@ import AuditTabView from './components/AuditTabView';
  * @extends {React.Component}
  */
 export default class Item extends React.Component {
+
+    static propTypes = {
+        schemas : PropTypes.any.isRequired,
+        listActionsFor : PropTypes.func.isRequired,
+        href : PropTypes.string.isRequired,
+        session : PropTypes.bool.isRequired,
+        expSetFilters : PropTypes.object.isRequired
+    }
 
     constructor(props){
         super(props);
@@ -47,7 +57,7 @@ export default class Item extends React.Component {
             </div>
         );
     }
-};
+}
 
 //Item.contextTypes = {
 //    schemas: React.PropTypes.object
@@ -128,7 +138,7 @@ export function title(props) {
             null //: 'No title found'
         )
     );
-};
+}
 
 globals.listing_titles.register(title, 'Item');
 
@@ -163,110 +173,4 @@ export function isDisplayTitleAccession(context, displayTitle = null){
     if (!displayTitle) displayTitle = getTitleStringFromContext(context);
     if (context.accession && context.accession === displayTitle) return true;
     return false;
-}
-
-/**
- * Returns the leaf type from the Item's '@type' array.
- *
- * @export
- * @throws {Error} Throws error if no types array ('@type') or it is empty.
- * @param {Object} context - JSON representation of current Item.
- * @returns {string} Most specific type's name.
- */
-export function getItemType(context){
-    if (!Array.isArray(context['@type']) || context['@type'].length < 1){
-        return null;
-        //throw new Error("No @type on Item object (context).");
-    }
-    return context['@type'][0];
-}
-
-/**
- * Returns base Item type from Item's '@type' array. This is the type right before 'Item'.
- * 
- * @export
- * @param {Object} context - JSON representation of current Item.
- * @param {string[]} context['@type] - List of types for the Item. 
- * @returns 
- */
-export function getBaseItemType(context){
-    var types = context['@type'];
-    if (!Array.isArray(types) || types.length === 0) return null;
-    var i = 0;
-    while (i < types.length){
-        if (types[i + 1] === 'Item'){
-            return types[i]; // Last type before 'Item'.
-        }
-        i++;
-    }
-    return types[i-1]; // Fallback.
-}
-
-
-/**
- * Returns schema for the specific type of Item we're on.
- *
- * @export
- * @param {string} itemType - The type for which to get schema.
- * @param {Object} [schemas] - Mapping of schemas, by type.
- * @returns {Object} Schema for itemType.
- */
-export function getSchemaForItemType(itemType, schemas = null){
-    if (typeof itemType !== 'string') return null;
-    if (!schemas){
-        schemas = (Filters.getSchemas && Filters.getSchemas()) || null;
-    }
-    if (!schemas) return null;
-    return schemas[itemType] || null;
-}
-
-/**
- * Lookup the title for an Item type, given the entire schemas object.
- * 
- * @export
- * @param {string} atType - Item type.
- * @param {Object} [schemas=null] - Entire schemas object, e.g. as stored in App state.
- * @returns {string} Human-readable title.
- */
-export function getTitleForType(atType, schemas = null){
-    if (!atType) return null;
-
-    // Grab schemas from Filters if we don't have them but they've been cached into there from App.
-    schemas = schemas || (Filters.getSchemas && Filters.getSchemas());
-
-    if (schemas && schemas[atType] && schemas[atType].title){
-        return schemas[atType].title;
-    }
-
-    // Correct baseType to title if not in schemas.
-    switch (atType){
-        case 'ExperimentSet':
-            return 'Experiment Set';
-        default:
-            return atType;
-    }
-}
-
-/**
- * Get title for leaf Item type from Item's context + schemas.
- * 
- * @export
- * @param {Object} context - JSON representation of Item.
- * @param {Object} [schemas=null] - Schemas object passed down from App.
- * @returns {string} Human-readable Item detailed type title.
- */
-export function getItemTypeTitle(context, schemas = null){
-    return getTitleForType(getItemType(context), schemas);
-}
-
-/**
- * Get title for base Item type from Item's context + schemas.
- * 
- * @export
- * @param {Object} context - JSON representation of Item.
- * @param {Object} [schemas=null] - Schemas object passed down from App.
- * @returns {string} Human-readable Item base type title.
- */
-export function getBaseItemTypeTitle(context, schemas = null){
-    return getTitleForType(getBaseItemType(context), schemas);
 }

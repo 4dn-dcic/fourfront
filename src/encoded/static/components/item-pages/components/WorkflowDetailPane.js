@@ -472,7 +472,7 @@ export class WorkflowDetailPane extends React.Component {
                         </h3>
                     </div>
                 </div>
-            )
+            );
         }
         if (node.type === 'step' && node.meta && node.meta.uuid){
             return (

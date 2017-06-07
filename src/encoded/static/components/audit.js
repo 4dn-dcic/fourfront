@@ -1,8 +1,9 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var Panel = require('react-bootstrap').Panel;
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import { Panel } from 'react-bootstrap';
 
 var editTargetMap = {
     'experiments': 'Experiment',
@@ -22,73 +23,66 @@ var editTargetMap = {
     'replicates': 'Replicate'
 };
 
-var AuditMixin = module.exports.AuditMixin = {
+/**
+ * Bind these to "this"" from a constructor wherever want to use these.
+ */
+export const auditMixinFxn = {
+
     childContextTypes: {
-        auditDetailOpen: React.PropTypes.bool, // Audit details open
-        auditStateToggle: React.PropTypes.func // Function to set current audit detail type
+        auditDetailOpen: PropTypes.bool, // Audit details open
+        auditStateToggle: PropTypes.func // Function to set current audit detail type
     },
 
-    // Retrieve current React context
-    getChildContext: function() {
-        return {
-            auditDetailOpen: this.state.auditDetailOpen,
-            auditStateToggle: this.auditStateToggle
-        };
+    initialState : {
+        auditDetailOpen : false
     },
 
-    getInitialState: function() {
-        return {auditDetailOpen: false};
-    },
-
-    // React to click in audit indicator. Set state to clicked indicator's error level
-    auditStateToggle: function(e) {
+    onToggleAudit : function(e){
         e.preventDefault();
         this.setState({auditDetailOpen: !this.state.auditDetailOpen});
     }
+
 };
 
-
-var AuditIndicators = module.exports.AuditIndicators = React.createClass({
-
-    statics : {
-        Header : React.createClass({
-            render : function(){
-                var children = this.props.children || <AuditIndicators context={this.props.context} />;
-                if (children && children.type && children.type.displayName === 'AuditIndicators'){
-                    if (!children.type.prototype.isVisible.call(children)) {
-                        return null; // Invisible
-                    }
-                }
-                return (
-                    <header className="row">
-                        <div className="col-sm-12">
-                            <div className="status-line">
-                                { children }
-                            </div>
-                        </div>
-                    </header>
-                );
+class Header extends React.Component {
+    render(){
+        var children = this.props.children || <AuditIndicators context={this.props.context} />;
+        if (children && children.type && children.type.displayName === 'AuditIndicators'){
+            if (!children.type.prototype.isVisible.call(children)) {
+                return null; // Invisible
             }
-        }),
+        }
+        return (
+            <header className="row">
+                <div className="col-sm-12">
+                    <div className="status-line">
+                        { children }
+                    </div>
+                </div>
+            </header>
+        );
+    }
+}
 
-        sortAuditLevels : function(audits){
-            if (!audits) return null;
-            return _(Object.keys(audits)).sortBy(function(level) {
-                return -audits[level][0].level;
-            });
-        },
-    },
-    
-    contextTypes: {
-        auditDetailOpen: React.PropTypes.bool,
-        auditStateToggle: React.PropTypes.func,
-        session: React.PropTypes.bool,
-        hidePublicAudits: React.PropTypes.bool
-    },
+export class AuditIndicators extends React.Component {
 
-    
+    static Header = Header
 
-    isVisible : function(sortedAuditLevels = null){
+    static sortAuditLevels(audits){
+        if (!audits) return null;
+        return _(_.keys(audits)).sortBy(function(level) {
+            return -audits[level][0].level;
+        });
+    }
+
+    static contextTypes = {
+        auditDetailOpen: PropTypes.bool,
+        auditStateToggle: PropTypes.func,
+        session: PropTypes.bool,
+        hidePublicAudits: PropTypes.bool
+    }
+
+    isVisible(sortedAuditLevels = null){
         if (!this.props.audits) return false;
         if (!sortedAuditLevels) sortedAuditLevels = AuditIndicators.sortAuditLevels(this.props.audits);
         if (!sortedAuditLevels) return false;
@@ -98,9 +92,9 @@ var AuditIndicators = module.exports.AuditIndicators = React.createClass({
             _.keys(this.props.audits).length > 0 &&
             (this.context.session || !(sortedAuditLevels.length === 1 && sortedAuditLevels[0] === 'DCC_ACTION'))
         );
-    },
+    }
 
-    render: function() {
+    render() {
         var auditCounts = {};
         var audits = this.props.audits;
         var loggedIn = this.context.session;
@@ -133,16 +127,17 @@ var AuditIndicators = module.exports.AuditIndicators = React.createClass({
             </button>
         );
     }
-});
+}
 
 
-var AuditDetail = module.exports.AuditDetail = React.createClass({
-    contextTypes: {
-        auditDetailOpen: React.PropTypes.bool,
-        session: React.PropTypes.bool
-    },
+export class AuditDetail extends React.Component {
 
-    render: function() {
+    static contextTypes = {
+        auditDetailOpen: PropTypes.bool,
+        session: PropTypes.bool
+    }
+
+    render() {
         var context = this.props.context;
         var auditLevels = context.audit;
 
@@ -175,31 +170,36 @@ var AuditDetail = module.exports.AuditDetail = React.createClass({
         }
         return null;
     }
-});
 
+}
 
-var AuditGroup = module.exports.AuditGroup = React.createClass({
-    propTypes: {
-        group: React.PropTypes.array.isRequired, // Array of audits in one name/category
-        groupName: React.PropTypes.string.isRequired, // Name of the group
-        auditLevelName: React.PropTypes.string.isRequired, // Audit level
-        context: React.PropTypes.object.isRequired // Audit records
-    },
+export class AuditGroup extends React.Component {
 
-    contextTypes: {
-        session: React.PropTypes.bool
-    },
+    static propTypes = {
+        group           : PropTypes.array.isRequired,   // Array of audits in one name/category
+        groupName       : PropTypes.string.isRequired,  // Name of the group
+        auditLevelName  : PropTypes.string.isRequired,  // Audit level
+        context         : PropTypes.object.isRequired,  // Audit records
+        session         : PropTypes.bool.isRequired
+    }
 
-    getInitialState: function() {
-        return {detailOpen: false};
-    },
+    static contextTypes = {
+        session: PropTypes.bool
+    }
 
-    detailSwitch: function() {
+    constructor(props){
+        super(props);
+        this.onToggleDetail = this.onToggleDetail.bind(this);
+        this.render = this.render.bind(this);
+        this.state = { detailOpen : false };
+    }
+
+    onToggleDetail() {
         // Click on the detail disclosure triangle
         this.setState({detailOpen: !this.state.detailOpen});
-    },
+    }
 
-    render: function() {
+    render() {
         var {group, groupName, context} = this.props;
         var auditLevelName = this.props.auditLevelName.toLowerCase();
         var detailOpen = this.state.detailOpen;
@@ -215,7 +215,7 @@ var AuditGroup = module.exports.AuditGroup = React.createClass({
             <div className={alertClass}>
                 {loggedIn ?
                     <div className={'icon audit-detail-trigger-' + auditLevelName}>
-                        <a href="#" className={'audit-detail-trigger-icon' + (detailOpen ? '' : ' collapsed')} data-trigger data-toggle="collapse" onClick={this.detailSwitch}>
+                        <a href="#" className={'audit-detail-trigger-icon' + (detailOpen ? '' : ' collapsed')} data-trigger data-toggle="collapse" onClick={this.onToggleDetail}>
                             <span className="sr-only">More</span>
                         </a>
                     </div>
@@ -249,7 +249,8 @@ var AuditGroup = module.exports.AuditGroup = React.createClass({
             </div>
         );
     }
-});
+
+}
 
 
 // Display details with embedded links.
@@ -257,8 +258,8 @@ var AuditGroup = module.exports.AuditGroup = React.createClass({
 // props.except: Path of object being reported on.
 // props.forcedEditLink: T if display path of reported object anyway.
 
-var DetailEmbeddedLink = React.createClass({
-    render: function() {
+class DetailEmbeddedLink extends React.Component {
+    render() {
         var detail = this.props.detail;
 
         // Get an array of all paths in the detail string, if any.
@@ -288,4 +289,4 @@ var DetailEmbeddedLink = React.createClass({
             return <span>{detail}</span>;
         }
     }
-});
+}

@@ -136,6 +136,7 @@
         "software_relation": {
               "title": "Related Softwares",
               "description": "All related software",
+              "ff_flag": "second round",
               "type": "array",
               "items": {
                   "title": "Related Software",

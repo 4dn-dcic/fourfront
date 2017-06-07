@@ -89,6 +89,18 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
 
 
 
+export function isValidJSON(content) {
+    var isJson = true;
+    try{
+        var json = JSON.parse(JSON.stringify(content));
+    } catch(err) {
+        isJson = false;
+    }
+    return isJson;
+}
+
+
+
 /**
  * Used for object.randomId().
  * @private

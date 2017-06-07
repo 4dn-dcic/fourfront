@@ -30,6 +30,9 @@
         "experimentset_type": {
             "default" : "replicate"
         },
+        "experiments_in_set": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
         "replicate_exps": {
             "title": "Set of replicate experiments",
             "description": "Replicate experiments with biological and technical replication numbers.",
@@ -64,7 +67,7 @@
     },
     "facets": {
         "experimentset_type": {
-            "title": "Experiment set type"
+            "title": "Set Type"
         },
         "experiments_in_set.award.project": {
             "title": "Project"
@@ -76,7 +79,7 @@
             "title": "Organism"
         },
         "experiments_in_set.biosample.biosource.biosource_type": {
-            "title": "Biosource type"
+            "title": "Biosource Type"
         },
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Biosource"
@@ -92,6 +95,14 @@
         },
         "experiments_in_set.lab.title": {
             "title": "Lab"
+        }
+    },
+    "columns": {
+        "experimentset_type": {
+            "title": "Set Type"
+        },
+        "experiments_in_set.biosample.biosource_summary": {
+            "title": "Biosource Summary"
         }
     }
 }

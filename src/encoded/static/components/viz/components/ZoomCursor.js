@@ -8,6 +8,7 @@ var vizUtil = require('./../utilities');
 var { console, object, isServerSide, layout } = require('./../../util');
 
 /**
+ * Deprecated. Magnifies an SVG component into a viewport which appears over mouse cursor.
  * Informed by https://github.com/CarMax/react-cursor-zoom/blob/master/src/cursor-zoom.jsx, for use on existing components (SVGs).
  * 
  * @deprecated
@@ -246,4 +247,4 @@ var ZoomCursor = createReactClass({
 
 });
 
-module.exports = ZoomCursor;
+module.exports.ZoomCursor = ZoomCursor;

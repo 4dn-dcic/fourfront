@@ -7,6 +7,13 @@ import * as vizUtil from './../utilities';
 import { console, object, expFxn } from './../../util';
 
 
+/**
+ * Various aggregation functions which are used by BarPlot.Chart and/or BarPlot.Aggregator to convert & aggregate list of experiments
+ * into a chart-friendly structure.
+ * 
+ * @file
+ */
+
 // *************************************
 // **** AGGREGATION FUNCTIONS BELOW ****
 // *************************************

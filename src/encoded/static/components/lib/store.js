@@ -22,7 +22,7 @@ class ItemStore {
 
     /** @ignore */
     constructor(items, view, stateKey) {
-        this._fetch = view.context ? view.context.fetch : undefined;
+        this._fetch = ajax.fetch;
         this._items = items;
         this._listeners = [{view: view, stateKey: stateKey}];
     }

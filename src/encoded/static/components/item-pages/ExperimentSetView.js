@@ -8,7 +8,7 @@ import { ajax, console, DateUtility, object, isServerSide } from './../util';
 import * as globals from './../globals';
 import ExperimentsTable from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView } from './components';
-import FacetList from './../facetlist';
+import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 
 /**
  * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
@@ -33,7 +33,7 @@ export default class ExperimentSetView extends React.Component {
     static propTypes = {
         schemas : PropTypes.object,
         context : PropTypes.object,
-        expSetFilters : PropTypes.object,     // Set via app.js <ContentView...>
+        expSetFilters : PropTypes.object.isRequired,     // Set via app.js <ContentView...>
         expIncompleteFacets : PropTypes.array,
         facets : PropTypes.array
     }
@@ -133,7 +133,7 @@ export default class ExperimentSetView extends React.Component {
         var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
 
-        console.log('render ExperimentSet view');
+        if (this.props.debug) console.log('render ExperimentSet view');
 
         return (
             <div className={itemClass}>
@@ -158,19 +158,22 @@ export default class ExperimentSetView extends React.Component {
 
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ?
-                        <FacetList
-                            urlPath={this.props.context['@id']}
-                            experimentSetListJSON={this.props.context.experiments_in_set}
-                            orientation="vertical"
+                        <ReduxExpSetFiltersInterface
+                            experimentSets={this.props.context.experiments_in_set}
                             expSetFilters={this.props.expSetFilters}
-                            itemTypes={this.props.context['@type'] || ['ExperimentSetReplicate']}
-                            facets={null}
                             experimentsOrSets="experiments"
-                            expIncompleteFacets={ this.props.expIncompleteFacets }
-                            className="with-header-bg"
-                            useAjax={false}
+                            facets={null}
+                            href={this.props.href}
                             schemas={this.props.schemas}
-                        />
+                            session={this.props.session}
+                        >
+                            <FacetList
+                                orientation="vertical"
+                                itemTypes={this.props.context['@type'] || ['ExperimentSetReplicate']}
+                                className="with-header-bg"
+                                filterFacetsFxn={FacetList.filterFacetsForExpSetView}
+                            />
+                        </ReduxExpSetFiltersInterface>
                         : <div>&nbsp;</div> }
                     </div>
 
@@ -205,7 +208,7 @@ class ExperimentSetHeader extends React.Component {
     }
 
     render() {
-        console.log('render ExperimentSetHeader');
+        if (this.props.debug) console.log('render ExperimentSetHeader');
         return (
             <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href} schemas={this.props.schemas}>
                 <ItemHeader.TopRow />

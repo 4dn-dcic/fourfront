@@ -1,12 +1,22 @@
 'use strict';
-const React = require('react');
-const ReactDOM = require('react-dom');
-const offset = require('../libs/offset');
 
-module.exports = React.createClass({
-    render() {
-        return React.Children.only(this.props.children);
-    },
+import React from 'react';
+import ReactDOM from 'react-dom';
+import * as offset from '../libs/offset';
+
+
+/**
+ * Keeping this file around because it'll be a good base for sticky headers.
+ */
+export default class StickyHeader extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUnmount = this.componentDidMount.bind(this);
+        this.stickyHeader = this.stickyHeader.bind(this);
+        this.render = this.render.bind(this);
+    }
 
     componentDidMount() {
         // Avoid shimming as ie8 does not support css transform
@@ -14,13 +24,13 @@ module.exports = React.createClass({
         this.stickyHeader();
         window.addEventListener('scroll', this.stickyHeader);
         window.addEventListener('resize', this.stickyHeader);
-    },
+    }
 
     componentWillUnmount() {
         if (window.getComputedStyle === undefined) return;
         window.removeEventListener('scroll', this.stickyHeader);
         window.removeEventListener('resize', this.stickyHeader);
-    },
+    }
 
     stickyHeader() {
         // http://stackoverflow.com/a/6625189/199100
@@ -42,5 +52,10 @@ module.exports = React.createClass({
         }
         const transform = 'translate(0px,' + y + 'px)';
         header.style.transform = transform;
-    },
-});
+    }
+
+    render() {
+        return React.Children.only(this.props.children);
+    }
+
+}

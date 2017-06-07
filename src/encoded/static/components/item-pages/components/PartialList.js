@@ -57,7 +57,7 @@ Row.defaultProps = {
     'colMd' : 4,
     'colLg' : 4,
     'className' : ''
-}
+};
 
 
 /**
