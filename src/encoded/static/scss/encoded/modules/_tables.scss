@@ -1255,6 +1255,8 @@ $small-label-accession-font-size : 0.75rem;
 	position: relative;
 	.inner-container {
 		overflow-x: auto;
+		box-shadow: inset 10px 0 10px -10px transparent, inset -10px 0 10px -10px transparent;
+		transition: box-shadow .35s ease;
 		.scrollable-container {
 			position: relative;
 			overflow: hidden;
@@ -1275,11 +1277,17 @@ $small-label-accession-font-size : 0.75rem;
 						> .inner {
 							color: #fff;
 							font-weight: 500;
+							padding-right: 32px;
 
 							.column-sort-icon {
 								color: rgba(255,255,255,0.5);
 								text-decoration: none !important;
 								margin-left: 10px;
+								margin-right: 5px;
+								display: inline-block;
+								/* float: right; */
+								position: absolute;
+								right: 9px;
 								&:hover, &:active, &:focus {
 									color: #fff;
 								}
@@ -1328,13 +1336,16 @@ $small-label-accession-font-size : 0.75rem;
 			}
 
 			.search-result-row {
-				border-bottom: 1px solid #ddd;
+				border-bottom: 1px solid rgba(0,0,0,0.125);
 				> .columns {
 					display: flex;
 					> .search-result-column-block {
 						@include search-result-column-block;
 						> .inner {
 							height: 46px;
+						}
+						&:not(:last-child) > .inner {
+							border-right: 1px dotted rgba(0,0,0,0.075);
 						}
 						&[data-field="display_title"]{
 							.toggle-detail-button-container {
@@ -1365,13 +1376,26 @@ $small-label-accession-font-size : 0.75rem;
 				&.loading { // Spinner/loader
 					height : 47px;
 					line-height: 46px;
+					transition: transform .2s linear;
+				}
+
+				&.fin { // "End of list" block
+					text-align: center;
+					height: 47px;
+					line-height: 47px;
+					font-style: italic;
+					transition: transform .2s linear;
+					border-bottom: none;
+					> span {
+						font-family: serif;
+					}
 				}
 
 				.result-table-detail {
-					border-top: 1px solid #eee;
+					border-top: 1px solid rgba(0,0,0,0.075);
 					padding-top: 10px;
 					padding-left: 47px;
-					transition: height .35s ease, transform .3s ease-out;
+					transition: height .35s ease, transform .2s linear;
 					@include font-size(0.8);
 					> .close-button-container {
 						position: absolute;
@@ -1385,7 +1409,7 @@ $small-label-accession-font-size : 0.75rem;
 						cursor: pointer;
 						border-radius: 3px;
 						&:hover {
-							background-color: #eee;
+							background-color: rgba(0,0,0,0.075);
 						}
 					}
 				}
@@ -1393,6 +1417,16 @@ $small-label-accession-font-size : 0.75rem;
 
 			}
 		}
+	}
+
+	&.shadow-right .inner-container {
+		box-shadow: inset 10px 0 10px -10px transparent, inset -10px 0 10px -10px rgba(0,0,0,0.33);
+	}
+	&.shadow-left .inner-container {
+		box-shadow: inset 10px 0 10px -10px rgba(0,0,0,0.33), inset -10px 0 10px -10px transparent;
+	}
+	&.shadow-left.shadow-right .inner-container {
+		box-shadow: inset 10px 0 10px -10px rgba(0,0,0,0.33), inset -10px 0 10px -10px rgba(0,0,0,0.33);
 	}
 }
 

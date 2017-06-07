@@ -111,7 +111,12 @@ function buildSearchHref(unselectHref, field, term, searchBase){
     if (unselectHref) {
         href = unselectHref;
     } else {
-        href = searchBase + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
+        var parts = url.parse(searchBase, true);
+        var query = _.clone(parts.query);
+        query[field] = encodeURIComponent(term).replace(/%20/g, '+');
+        query = queryString.stringify(query);
+        parts.search = query && query.length > 0 ? ('?' + query) : '';
+        href = url.format(parts);
     }
     return href;
 }
@@ -242,12 +247,11 @@ class ResultTableHandlersContainer extends React.Component {
     }
 
     onFilter(field, term, callback) {
-        var searchBase = this.props.searchBase;
         var unselectHrefIfSelected = getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters);
 
         var targetSearchHref = buildSearchHref(
             unselectHrefIfSelected,
-            field, term, searchBase ? searchBase + '&' : searchBase + '?'
+            field, term, this.props.searchBase,
         );
 
         // Ensure only 1 type filter is selected at once. Unselect any other type= filters if setting new one.
@@ -261,7 +265,8 @@ class ResultTableHandlersContainer extends React.Component {
                         delete queryParts[""]; // Safety
                         queryParts.type = encodeURIComponent(term).replace(/%20/g, '+'); // Only 1 Item type selected at once.
                         var searchString = queryString.stringify(queryParts);
-                        targetSearchHref = (parts.pathname || '') + (searchString ? '?' + searchString : '');
+                        parts.search = searchString && searchString.length > 0 ? ('?' + searchString) : '';
+                        targetSearchHref = url.format(parts);
                     }
                 }
             }
