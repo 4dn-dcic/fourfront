@@ -5,6 +5,10 @@ from snovault import (
 from collections import defaultdict
 
 
+@audit_checker(
+    'Experiment',
+    frame=['files', 'files.files']
+)
 def audit_experiments_have_raw_files(value, system):
     '''
     experiments should have associated raw files whose status is one of
@@ -27,15 +31,6 @@ def audit_experiments_have_raw_files(value, system):
         level = 'WARNING'
         if value['status'] == 'released':
             level = 'ERROR'
-        detail = 'Experiment {}'.format(value['@id']) + \
-                ' - Raw files are absent!'
+        detail = 'Experiment {}'.format(value['@id']) + ' - Raw files are absent!'
         yield AuditFailure('missing data', detail, level=level)
     return
-
-
-etypes = ['experiment_hi_c', 'experiment_capture_c', 'experiment_repliseq', 'experiment_mic']
-frame = ['files', 'files.files']
-from snovault.auditor import Auditor
-auditor = Auditor()
-for ty in etypes:
-    auditor.add_audit_checker(audit_experiments_have_raw_files, ty, frame)
