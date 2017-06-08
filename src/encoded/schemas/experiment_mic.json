@@ -1,6 +1,6 @@
 {
     "title": "Microscopy Experiments",
-    "description": "Experimental metadata fields for microsopy experiments.",
+    "description": "Target/Label/Channel information for microscopy experiments.",
     "id": "/profiles/experiment_mic.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -73,7 +73,7 @@
             "title": "Organism"
         },
         "biosample.biosource.biosource_type": {
-            "title": "Biosource type"
+            "title": "Biosource Type"
         },
         "biosample.biosource_summary": {
             "title": "Biosource"

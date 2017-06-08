@@ -27,7 +27,7 @@
             "default": "1"
         },
         "mouse_life_stage": {
-            "title": "Mouse Life stage",
+            "title": "Mouse Life Stage",
             "type": "string",
             "enum": [
               "pup",
@@ -46,7 +46,7 @@
           "description": "Can be an object of straing with dbxref for strain"
         },
         "mouse_vendor":{
-          "title": "Vendor for the mouse individual",
+          "title": "Vendor for the Mouse Individual",
           "type": "string",
           "linkTo": "Vendor"
         },
