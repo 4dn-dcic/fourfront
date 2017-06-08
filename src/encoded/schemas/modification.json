@@ -1,6 +1,6 @@
 {
     "title": "Modification",
-    "description": "Schema for submitting a stable genomic modification.",
+    "description": "Stable Genetic Modifications.",
     "id": "/profiles/modification.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

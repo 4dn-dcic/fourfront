@@ -50,7 +50,7 @@
     },
     "aliases": {
         "aliases": {
-            "title": "Lab Aliases",
+            "title": "Aliases",
             "description": "Lab specific identifiers to reference an object.",
             "type": "array",
             "comment": "Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).",
@@ -141,7 +141,7 @@
     },
     "references": {
         "references": {
-            "title": "References",
+            "title": "Reference publications",
             "description": "The publications that provide more information about the object.",
             "type": "array",
             "default": [],

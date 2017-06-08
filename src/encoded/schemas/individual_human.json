@@ -31,7 +31,7 @@
             "type": "string"
         },
         "health_status": {
-            "title": "Individual health status",
+            "title": "Individual Health Status",
             "type": "string"
         },
         "life_stage": {
