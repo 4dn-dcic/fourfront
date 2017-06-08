@@ -20,7 +20,6 @@ def biosample_cell_culture_data(lab, award):
         'culture_start_date': '2016-01-01',
         'culture_harvest_date': '2016-01-15',
         'culture_duration': 15,
-        'culture_duration_units': 'days',
         'passage_number': 1
     }
 
