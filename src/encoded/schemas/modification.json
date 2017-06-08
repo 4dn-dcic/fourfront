@@ -27,13 +27,27 @@
             "type": "string"
         },
         "modification_type": {
-            "title": "Genomic Modification Type",
-            "description": "The type of genomic modification.",
+            "title": "Genomic modification method",
+            "description": "The method used to make the genomic modification.",
             "type": "string",
             "enum" : [
               "Crispr",
               "Stable Transfection",
               "Other"
+            ]
+        },
+        "genomic_change": {
+            "title": "The type of modification",
+            "description": "How the target of the modification is changed - i.e. deletion, insertion.",
+            "type": "string",
+            "enum": [
+               "deletion",
+               "insertion",
+               "inversion",
+               "duplication",
+               "replacement",
+               "point mutation",
+               "complex change"
             ]
         },
         "constructs": {
