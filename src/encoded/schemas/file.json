@@ -69,7 +69,8 @@
             "comment": "This is only relavant for gzipped files.",
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"],
-            "format": "hex"
+            "format": "hex",
+			"uniqueKey": "file:content_md5sum"
         },
         "file_size": {
             "title": "File Size",
