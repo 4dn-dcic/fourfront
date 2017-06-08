@@ -53,6 +53,15 @@ def test_audit_experiments_have_raw_files_w_2rawfiles(testapp, fastq, file_data,
 
 
 def test_audit_experiments_have_raw_files_no_files(testapp, expt_data):
+    etypes = ['experiment_hi_c', 'experiment_capture_c', 'experiment_repliseq', 'experiment_mic']
+    frame = ['files', 'files.files']
+    from snovault.auditor import Auditor
+    auditor = Auditor()
+    from encoded.audit.experiment import audit_experiments_have_raw_files
+    for ty in etypes:
+        auditor.add_audit_checker(audit_experiments_have_raw_files, ty, frame)
+
+    import pdb; pdb.set_trace()
     expt = testapp.post_json('/experiment_hi_c', expt_data).json['@graph'][0]
     res = testapp.get(expt['@id'] + '/@@audit-self')
     errors = res.json['audit']
