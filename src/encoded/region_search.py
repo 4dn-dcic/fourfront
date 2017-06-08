@@ -6,7 +6,7 @@ from .search import (
     format_results,
     set_filters,
     set_facets,
-    get_filtered_query,
+    build_query_and_filters,
     format_facets,
     hgConnect,
     search_result_actions,
@@ -217,7 +217,7 @@ def region_search(context, request):
     es = request.registry[ELASTIC_SEARCH]
     snp_es = request.registry['snp_search']
     region = request.params.get('region', '*')
-    
+
 
     # handling limit
     size = request.params.get('limit', 25)
