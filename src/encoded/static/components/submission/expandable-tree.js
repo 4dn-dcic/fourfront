@@ -49,7 +49,7 @@ class SubmissionLeaf extends React.Component{
         super(props);
         this.state = {
             'open': this.props.open || true
-        }
+        };
     }
 
     handleToggle = (e) => {

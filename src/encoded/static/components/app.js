@@ -15,7 +15,7 @@ import SubmissionView from './submission/submission-view';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
@@ -183,6 +183,7 @@ export default class App extends React.Component {
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUpdate = this.componentWillUpdate.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.getChildContext = this.getChildContext.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
@@ -241,6 +242,8 @@ export default class App extends React.Component {
 
         console.log("App Initial State: ", session, user_actions);
 
+        if (this.props.context.schemas) Schemas.set(this.props.context.schemas);
+
         this.state = {
             'errors': [],
             'dropdownComponent': undefined,
@@ -248,7 +251,8 @@ export default class App extends React.Component {
             'session': session,
             'user_actions': user_actions,
             'schemas': this.props.context.schemas || null,
-            'isSubmitting': false
+            'isSubmitting': false,
+            'mounted' : false
         };
     }
 
@@ -314,6 +318,14 @@ export default class App extends React.Component {
             this.props.context,
             this.props.expSetFilters
         );
+
+        this.setState({ 'mounted' : true });
+    }
+
+    componentWillUpdate(nextProps, nextState){
+        if (nextState.schemas !== this.state.schemas){
+            Schemas.set(nextState.schemas);
+        }
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -337,6 +349,7 @@ export default class App extends React.Component {
                 }
             }
         }
+
         if (this.state) {
             if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
                 setTimeout(function(){
@@ -345,6 +358,7 @@ export default class App extends React.Component {
                     ChartDataController.sync();
                 }, 100);
             }
+
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
                     console.log('changed state: %s', key);
@@ -391,6 +405,7 @@ export default class App extends React.Component {
             return portal.user_section;
         }
         if (category === 'user') {
+            if (!this.state.mounted) return [];
             return this.state.user_actions;
         }
         if (category === 'global_sections') {
@@ -415,7 +430,6 @@ export default class App extends React.Component {
             // We've already loaded these successfully (hopefully)
             if (typeof callback === 'function') callback(this.state.schemas);
             console.info('Schemas available already.');
-            Filters.getSchemas = () => this.state.schemas;
             return this.state.schemas;
         }
         ajax.promise('/profiles/').then(data => {
@@ -423,8 +437,6 @@ export default class App extends React.Component {
                 this.setState({
                     schemas: data
                 }, () => {
-                    // Let Filters have access to schemas for own functions.
-                    Filters.getSchemas = () => this.state.schemas;
                     // Rebuild tooltips because they likely use descriptions from schemas
                     ReactTooltip.rebuild();
                     if (typeof callback === 'function') callback(data);
@@ -1054,11 +1066,11 @@ export default class App extends React.Component {
                 }
             }else if(value.charAt(0) !== "!" && value.length > 0){
                 // test for edit handle
-                if (value == '#!edit'){
+                if (value === '#!edit'){
                     actionList.push('edit');
-                }else if (value == '#!create'){
+                }else if (value === '#!create'){
                     actionList.push('create');
-                }else if (value == '#!clone'){
+                }else if (value === '#!clone'){
                     actionList.push('clone');
                 }else{
                     lowerList.push(value.toLowerCase());
@@ -1069,7 +1081,6 @@ export default class App extends React.Component {
         // check error status
         var status;
         var route = currRoute[currRoute.length-1];
-
 
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
@@ -1083,7 +1094,6 @@ export default class App extends React.Component {
                 status = 'forbidden';
             }
         }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
-            console.log(this.state.user_actions);
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
@@ -1111,7 +1121,7 @@ export default class App extends React.Component {
         }else if(status){
             content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
             title = 'Error';
-        }else if(actionList.length == 1){
+        }else if(actionList.length === 1){
             // check if the desired action is allowed per user (in the context)
 
             var contextActionNames = this.listActionsFor('context').map(function(act){
@@ -1128,6 +1138,8 @@ export default class App extends React.Component {
                         <SubmissionView
                             {...commonContentViewProps}
                             setIsSubmitting={this.setIsSubmitting}
+                            edit={actionList[0] === 'edit'}
+                            create={actionList[0] === 'create'}
                         />
                     );
                     title = getTitleStringFromContext(context);

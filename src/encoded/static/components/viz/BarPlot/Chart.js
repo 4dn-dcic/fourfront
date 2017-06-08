@@ -7,7 +7,7 @@ import * as d3 from 'd3';
 import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { RotatedLabel } from './../components';
-import { console, object, isServerSide, expFxn, Filters, layout, navigate } from './../../util';
+import { console, object, isServerSide, expFxn, Schemas, layout, navigate } from './../../util';
 import { firstPopulatedFieldIndex, genChartData } from './aggregation-functions';
 import { PopoverViewContainer } from './ViewContainer';
 
@@ -71,7 +71,7 @@ export function genChartBarDims(
                 var maxYForBar = parent ? parent.count : largestExpCountForATerm;
                 var barHeight = maxYForBar === 0 ? 0 : (termCount / maxYForBar) * outerDims.height;
                 var barNode = {
-                    'name' : Filters.Term.toName(fieldObj.field, termKey),
+                    'name' : Schemas.Term.toName(fieldObj.field, termKey),
                     'term' : termKey,
                     'count' : termCount,
                     'field' : fieldObj.field,

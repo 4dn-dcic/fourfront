@@ -19,14 +19,14 @@
     "setupFiles": [
       "../../../jest/environment.js"
     ],
-    "timers" : "fake",
+    "timers": "fake",
     "unmockedModulePathPatterns": [
       "node_modules/react",
       "node_modules/underscore",
       "libs/react-patches",
       "jsdom"
     ],
-    "coveragePathIgnorePatterns" : [
+    "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/jest/",
       "/src/encoded/static/store.js",
@@ -87,6 +87,7 @@
     "react-bootstrap": "0.31.0",
     "react-cookie": "^0.4.8",
     "react-dom": "^15.3.2",
+    "react-draggable": "^2.2.6",
     "react-json-tree": "^0.10.7",
     "react-matrix-viz": "^0.2.2",
     "react-redux": "^4.4.5",

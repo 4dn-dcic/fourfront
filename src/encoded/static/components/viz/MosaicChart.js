@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide } = require('./../util');
+var { expFxn, Filters, console, Schemas, object, isServerSide } = require('./../util');
 var { CursorComponent, RotatedLabel } = require('./components');
 
 // Share one instance between all charts because D3 selector acts on common class/elem names.
@@ -186,7 +186,7 @@ var MosaicChart = createReactClass({
 
                         if      (typeof field.title === 'string')   node.title = field.title;
                         else if (typeof field.title === 'function') node.title = field.title.apply(field.title, callbackArgs);
-                        else if (typeof field.title === 'undefined')node.title = Filters.Field.toName(field.field);
+                        else if (typeof field.title === 'undefined')node.title = Schemas.Field.toName(field.field);
                         
                         if      (typeof field.fallbackSize === 'number')   node.fallbackSize = field.fallbackSize;
                         else if (typeof field.fallbackSize === 'function') node.fallbackSize = field.fallbackSize.apply(field.fallbackSize, callbackArgs);
@@ -1178,7 +1178,7 @@ var MosaicChart = createReactClass({
             // Exclude first item (root node)
             var labels = paths.slice(1).map((pathGroup, i) => {
                 return {
-                    name : Filters.Field.toName(pathGroup.key, this.props.schemas),
+                    name : Schemas.Field.toName(pathGroup.key, this.props.schemas),
                     field : pathGroup.key,
                     x : i * barWidth
                 };

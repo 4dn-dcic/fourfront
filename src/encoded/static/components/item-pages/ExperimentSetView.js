@@ -8,7 +8,7 @@ import { ajax, console, DateUtility, object, isServerSide } from './../util';
 import * as globals from './../globals';
 import ExperimentsTable from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView } from './components';
-import FacetList from './../facetlist';
+import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 
 /**
  * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
@@ -158,19 +158,22 @@ export default class ExperimentSetView extends React.Component {
 
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ?
-                        <FacetList
-                            urlPath={this.props.context['@id']}
-                            experimentSetListJSON={this.props.context.experiments_in_set}
-                            orientation="vertical"
+                        <ReduxExpSetFiltersInterface
+                            experimentSets={this.props.context.experiments_in_set}
                             expSetFilters={this.props.expSetFilters}
-                            itemTypes={this.props.context['@type'] || ['ExperimentSetReplicate']}
-                            facets={null}
                             experimentsOrSets="experiments"
-                            expIncompleteFacets={ this.props.expIncompleteFacets }
-                            className="with-header-bg"
-                            useAjax={false}
+                            facets={null}
+                            href={this.props.href}
                             schemas={this.props.schemas}
-                        />
+                            session={this.props.session}
+                        >
+                            <FacetList
+                                orientation="vertical"
+                                itemTypes={this.props.context['@type'] || ['ExperimentSetReplicate']}
+                                className="with-header-bg"
+                                filterFacetsFxn={FacetList.filterFacetsForExpSetView}
+                            />
+                        </ReduxExpSetFiltersInterface>
                         : <div>&nbsp;</div> }
                     </div>
 

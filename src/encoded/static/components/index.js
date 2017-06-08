@@ -13,6 +13,7 @@ require('./app');
 require('./collection');
 require('./footer');
 require('./globals');
+require('./browse/components');
 require('./static-pages/static-page-base');
 require('./static-pages/home');
 require('./static-pages/help');
