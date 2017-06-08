@@ -149,6 +149,7 @@ class File(Item):
     rev = {
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+        'experiments': ('Experiment', 'files')
     }
 
     @calculated_property(schema={
@@ -177,6 +178,18 @@ class File(Item):
     def workflow_run_outputs(self, request):
         return self.rev_link_atids(request, "workflow_run_outputs")
 
+    @calculated_property(schema={
+        "title": "Experiments",
+        "description": "Experiments that this file is associated with",
+        "type": "array",
+        "items": {
+            "title": "Experiments",
+            "type": ["string", "object"],
+            "linkTo": "Experiment"
+        }
+    })
+    def experiments(self, request):
+        return self.rev_link_atids(request, "experiments")
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -188,7 +201,7 @@ class File(Item):
         new_creds = old_creds
 
         # don't get new creds
-        if properties.get('status',None) in ('uploading', 'to be uploaded by workflow', 'upload failed'):
+        if properties.get('status', None) in ('uploading', 'to be uploaded by workflow', 'upload failed'):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
 
@@ -198,7 +211,7 @@ class File(Item):
                     # delete the old sumabeach
                     conn = boto.connect_s3()
                     bname = old_creds['bucket']
-                    bucket = boto.s3.bucket.Bucket(conn,bname)
+                    bucket = boto.s3.bucket.Bucket(conn, bname)
                     bucket.delete_key(old_creds['key'])
                 except Exception as e:
                     print(e)
@@ -292,16 +305,6 @@ class File(Item):
         external = self.propsheets.get('external', None)
         if external is not None:
             return external['upload_credentials']
-
-    @calculated_property(schema={
-        "title": "File type",
-        "type": "string"
-    })
-    def file_type(self, file_format, file_format_type=None):
-        if file_format_type is None:
-            return file_format
-        else:
-            return file_format + ' ' + file_format_type
 
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
