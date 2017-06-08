@@ -136,6 +136,11 @@
             "description": "If a culture is synchronized the cell cycle stage from which the biosample used in an experiment is prepared",
             "type": "string"
         },
+        "cell_line_lot_number": {
+            "title": "Cell Line Lot",
+            "description": "For 4DN Tier2 or unclassified cell lines - a lot number or other information to uniquely identify the source/lot of the cells",
+            "type":  "string"
+        },
         "follows_sop": {
             "title": "Follows SOP",
             "description": "Flag to indicate if all the 4DN SOPs for the specified cell line was followed - Yes or No",
