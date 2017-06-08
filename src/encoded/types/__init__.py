@@ -1,6 +1,13 @@
 """init.py lists all the collections that do not have a dedicated types file."""
 
 from snovault.attachment import ItemWithAttachment
+
+from pyramid.security import (
+    Allow,
+    Deny,
+    Everyone,
+)
+
 from snovault import (
     # calculated_property,
     collection,
@@ -48,6 +55,32 @@ class Award(Item):
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
     embedded = ['pi']
+
+    # define some customs acls; awards can only be created/edited by admin
+    ONLY_ADMIN_VIEW = [
+        (Allow, 'group.admin', ['view', 'edit']),
+        (Allow, 'group.read-only-admin', ['view']),
+        (Allow, 'remoteuser.INDEXER', ['view']),
+        (Allow, 'remoteuser.EMBED', ['view']),
+        (Deny, Everyone, ['view', 'edit'])
+    ]
+
+    SUBMITTER_CREATE = []
+
+    ALLOW_EVERYONE_VIEW = [
+        (Allow, Everyone, 'view'),
+    ]
+
+    ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT = [
+        (Allow, Everyone, 'view'),
+    ] + ONLY_ADMIN_VIEW
+
+    STATUS_ACL = {
+        'current': ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT,
+        'deleted': ONLY_ADMIN_VIEW,
+        'revoked': ALLOW_EVERYONE_VIEW,
+        'inactive': ALLOW_EVERYONE_VIEW,
+    }
 
 
 @collection(

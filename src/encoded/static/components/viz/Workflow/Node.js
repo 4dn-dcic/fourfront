@@ -22,7 +22,7 @@ export default class Node extends React.Component {
     }
 
     static propTypes = {
-        'title' : React.PropTypes.func.isRequired
+        'title' : PropTypes.func.isRequired
     }
 
     constructor(props){

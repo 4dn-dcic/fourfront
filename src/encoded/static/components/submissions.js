@@ -122,6 +122,7 @@ class SubscriptionEntry extends React.Component{
         if(no_type_in_url){
             fetch_url = fetch_url + '&type=' + type;
         }
+
         ajax.promise(fetch_url).then(response => {
             if (!response['@graph'] || !response['facets']){
                 this.setState({

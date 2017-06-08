@@ -61,6 +61,7 @@
         "experiment_relation": {
             "title": "Experiment Relations",
             "description": "All related experiments",
+            "ff_flag": "second round",
             "type": "array",
             "items": {
                 "title": "Experiment relation",
@@ -152,6 +153,9 @@
         }
     },
     "facets": {
+        "experiment_type" : {
+            "title" : "Experiment Type"
+        },
         "award.project": {
             "title": "Project"
         },
@@ -172,6 +176,29 @@
         },
         "lab.title": {
             "title": "Lab"
+        }
+    },
+    "columns": {
+        "award.project": {
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "biosample.modifications_summary_short": {
+            "title": "Modifications"
+        },
+        "biosample.treatments_summary": {
+            "title": "Treatments"
         }
     }
 }

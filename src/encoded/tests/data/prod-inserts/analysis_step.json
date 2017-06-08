@@ -55,7 +55,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "analysis_step_types": ["QC calculation"],
-        "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a13131",
         "input_file_info": [{"input_file_type": "reads", "input_file_format": "fastq"} ],
         "output_file_info": [{"output_file_type": "QC report", "output_file_format": "zip"}],
         "uuid": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3"
@@ -89,5 +89,35 @@
         "version": "8",
         "analysis_step_types": ["alignment"],
         "software_used": "02d636b9-d82d-4da9-950c-2ca994a13209"
+    },
+    {
+        "uuid": "e4068c7a-49e5-4c33-afab-9ec90d65faf3",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "merge_pairs",
+        "name": "merge_pairs",
+        "version": "13",
+        "analysis_step_types": ["file merging"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547"
+    },
+    {
+        "uuid": "98a6e081-49e5-4c33-afab-9ec90d65faf3",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "juicer",
+        "name": "juicer",
+        "version": "6",
+        "analysis_step_types": ["alignment","filtering"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23548"
+    },
+    {
+        "uuid": "b1fe75f9-49e5-4c33-afab-9ec90d65faf3",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "juicer2pairs",
+        "name": "juicer2pairs",
+        "version": "1",
+        "analysis_step_types": ["file format conversion"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547"
     }
 ]

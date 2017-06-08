@@ -112,7 +112,7 @@ class GraphSection extends React.Component {
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail'
-        }
+        };
     }
 
     commonGraphProps(){

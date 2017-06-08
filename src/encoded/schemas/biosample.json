@@ -62,7 +62,7 @@
             "title": "Cell Culture Information",
             "description": "Link to biosample_cell_culture object that carries all cell culture related parameters",
             "type": "string",
-            "ff_clear": "clone",
+            "ff_flag": "clear clone",
             "linkTo": "BiosampleCellCulture"
         },
         "modifications": {
@@ -95,6 +95,7 @@
             "title": "Biosample Relations",
             "description": "Related biosamples",
             "type": "array",
+            "ff_flag": "second round",
             "items": {
                 "title": "Biosample relation",
                 "type": "object",

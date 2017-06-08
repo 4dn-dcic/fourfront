@@ -22,10 +22,10 @@ import { BannerEntry, Announcements } from './components';
 export default class HomePage extends React.Component {
 
     static propTypes = {
-        "context" : React.PropTypes.shape({
-            "content" : React.PropTypes.shape({
-                "description" : React.PropTypes.string,
-                "links" : React.PropTypes.string
+        "context" : PropTypes.shape({
+            "content" : PropTypes.shape({
+                "description" : PropTypes.string,
+                "links" : PropTypes.string
             }).isRequired
         }).isRequired
     }

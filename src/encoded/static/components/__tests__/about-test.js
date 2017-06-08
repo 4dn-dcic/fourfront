@@ -37,7 +37,7 @@ describe('Testing about.js', function() {
         
         server.respondWith(
             "GET",
-            '/profiles/?format=json',
+            '/profiles/',
             [
                 200, 
                 { "Content-Type" : "application/json" },

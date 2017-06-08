@@ -263,7 +263,7 @@ export function buildGravatarURL(email, size=null, defaultImg='retro'){
     url += "?d=" + defaultImg;
     if (size) url += '&s=' + size;
     return url;
-};
+}
 
 
 /**
@@ -283,7 +283,8 @@ export function gravatar(email, size=null, className=null, defaultImg='retro'){
             title="Obtained via Gravatar"
         />
     );
-};
+}
+
 
 
 /**
@@ -312,6 +313,8 @@ export default class UserView extends React.Component {
             'timezone' : PropTypes.string,
             'job_title' : PropTypes.string
         }),
+        'href' : PropTypes.string.isRequired,
+        'listActionsFor' : PropTypes.func.isRequired,
         'schemas' : PropTypes.shape({
             'User' : PropTypes.shape({
                 'required' : PropTypes.array,
@@ -328,12 +331,8 @@ export default class UserView extends React.Component {
         })
     }
 
-    static contextTypes = {
-        listActionsFor : PropTypes.func
-    }
-
     mayEdit(){
-        return this.context.listActionsFor('context').filter(function(action){
+        return this.props.listActionsFor('context').filter(function(action){
             return action.name && action.name === 'edit';
         }).length > 0 ? true : false;
     }
@@ -382,6 +381,7 @@ export default class UserView extends React.Component {
                                                     objectType="User"
                                                     schemas={this.props.schemas}
                                                     disabled={!mayEdit}
+                                                    href={this.props.href}
                                                 >
                                                     <EditableField
                                                         labelID="first_name"
@@ -399,12 +399,12 @@ export default class UserView extends React.Component {
                                         </div>
                                     </div>
                                 </div>
-                                <ProfileContactFields user={user} parent={this} mayEdit={mayEdit} />
+                                <ProfileContactFields user={user} parent={this} mayEdit={mayEdit} href={this.props.href} />
                             </div>
 
                         </div>
                         <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-5">
-                            <ProfileWorkFields user={user} parent={this} />
+                            <ProfileWorkFields user={user} parent={this} href={this.props.href} />
                         </div>
 
                     </div>
@@ -457,6 +457,7 @@ class ProfileContactFields extends React.Component {
                 disabled={!this.props.mayEdit}
                 objectType="User"
                 schemas={this.props.schemas}
+                href={this.props.href}
             >
 
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
@@ -704,8 +705,8 @@ class BasicForm extends React.Component {
  */
 export class ImpersonateUserForm extends React.Component {
 
-    static contextTypes = {
-        updateUserInfo: PropTypes.func
+    static propTypes = {
+        updateUserInfo: PropTypes.func.isRequired
     }
 
     /**
@@ -725,7 +726,7 @@ export class ImpersonateUserForm extends React.Component {
             //    localStorage.setItem("user_info", JSON.stringify(payload));
             //}
             JWT.saveUserInfo(payload);
-            this.context.updateUserInfo();
+            this.props.updateUserInfo();
             navigate('/');
         }.bind(this);
         var fallbackFxn = function() {

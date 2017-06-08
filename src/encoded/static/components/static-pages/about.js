@@ -1,17 +1,18 @@
 // Render a simple static about page
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { content_views } from '../globals';
 import { Wrapper } from './static-page-base';
 
 export default class AboutPage extends React.Component {
 
     static PropTypes = {
-        'context' : React.PropTypes.shape({
-            "content" : React.PropTypes.shape({
-                "dcic" : React.PropTypes.string,
-                "acknowledgements" : React.PropTypes.string,
-                "funding" : React.PropTypes.string
+        'context' : PropTypes.shape({
+            "content" : PropTypes.shape({
+                "dcic" : PropTypes.string,
+                "acknowledgements" : PropTypes.string,
+                "funding" : PropTypes.string
             }).isRequired
         }).isRequired
     }

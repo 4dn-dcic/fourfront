@@ -23,6 +23,9 @@
         { "$ref": "experiment.json#/properties" },
         { "$ref": "experiment_hi_c.json#/properties" }
     ],
+    "mixinColumns": [
+        { "$ref": "experiment.json#/columns"}
+    ],
     "dependencies": {
       "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
       "crosslinking_time": ["crosslinking_method", "crosslinking_temperature"],
@@ -95,5 +98,11 @@
         "lab.title": {
             "title": "Lab"
         }
+    },
+    "columns": {
+        "experiment_summary":{
+            "title": "Experiment summary"
+        }
     }
+
 }

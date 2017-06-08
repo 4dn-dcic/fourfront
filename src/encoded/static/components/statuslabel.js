@@ -1,16 +1,17 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
 
-var StatusLabel = module.exports.StatusLabel = React.createClass({
-    render: function() {
+import React from 'react';
+import { statusClass } from './globals';
+
+export class StatusLabel extends React.Component {
+    render() {
         var status = this.props.status;
         var title = this.props.title;
         if (typeof status === 'string') {
             // Display simple string and optional title in badge
             return (
                 <ul className="status-list">
-                    <li className={globals.statusClass(status, 'label')}>
+                    <li className={statusClass(status, 'label')}>
                         {title ? <span className="status-list-title">{title + ': '}</span> : null}
                         {this.props.buttonLabel ? this.props.buttonLabel : status}
                     </li>
@@ -22,7 +23,7 @@ var StatusLabel = module.exports.StatusLabel = React.createClass({
                 <ul className="status-list">
                     {status.map(function (status) {
                         return(
-                            <li key={status.title} className={globals.statusClass(status.status, 'label')}>
+                            <li key={status.title} className={statusClass(status.status, 'label')}>
                                 {status.title ? <span className="status-list-title">{status.title + ': '}</span> : null}
                                 {status.status}
                             </li>
@@ -34,4 +35,4 @@ var StatusLabel = module.exports.StatusLabel = React.createClass({
             return null;
         }
     }
-});
+}

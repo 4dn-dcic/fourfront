@@ -4,9 +4,8 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'querystring';
-import { console, DateUtility, Filters } from './../../util';
+import { console, DateUtility, Filters, Schemas } from './../../util';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
-import { getItemType, getBaseItemType, getTitleForType, getSchemaForItemType } from './../item';
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -111,11 +110,11 @@ export class TopRow extends React.Component {
                     target="_blank"
                     data-tip="Open raw JSON in new window"
                     onClick={(e)=>{
-                    if (window && window.open){
-                        e.preventDefault();
-                        window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');
-                    }
-                }}>
+                        if (window && window.open){
+                            e.preventDefault();
+                            window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');
+                        }
+                    }}>
                     View JSON
                 </a>
             </div>
@@ -146,11 +145,11 @@ export class TopRow extends React.Component {
      * @instance
      */
     baseItemTypeInfo(){
-        var baseItemType = getBaseItemType(this.props.context);
-        var itemType = getItemType(this.props.context);
+        var baseItemType = Schemas.getBaseItemType(this.props.context);
+        var itemType = Schemas.getItemType(this.props.context);
         if (itemType === baseItemType) return null;
 
-        return getSchemaForItemType(
+        return Schemas.getSchemaForItemType(
             baseItemType,
             this.props.schemas || null
         );
@@ -196,7 +195,7 @@ export class TopRow extends React.Component {
      * @returns {Element} Div element with .row Bootstrap class and items in top-right section.
      */
     render(){
-        var typeInfo = getSchemaForItemType(getItemType(this.props.context), this.props.schemas || null);
+        var typeInfo = Schemas.getSchemaForItemType(Schemas.getItemType(this.props.context), this.props.schemas || null);
         var accessionTooltip = "Accession";
         if (typeInfo && typeInfo.properties.accession && typeInfo.properties.accession.description){
             accessionTooltip += ': ' + typeInfo.properties.accession.description;
@@ -326,7 +325,7 @@ export class Wrapper extends React.Component {
                 return React.cloneElement(child, {
                     context : this.props.context,
                     href : this.props.href,
-                    schemas : this.props.schemas || (Filters.getSchemas && Filters.getSchemas()) || null
+                    schemas : this.props.schemas || (Schemas.get && Schemas.get()) || null
                 }, child.props.children);
             }
         });

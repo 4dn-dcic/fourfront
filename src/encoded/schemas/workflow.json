@@ -89,6 +89,12 @@
                             "NA"
                         ]
                     },
+					"argument_cardinality":{
+						"title": "Workflow argument cardinality",
+						"description": "number of items in the argument or N for dynamic number",
+						"type": "string",
+					    "default": "1"
+					},
                     "argument_format":{
                         "title": "Workflow argument format",
                         "description": "format of the argument",
@@ -100,9 +106,12 @@
                             "pairs",
                             "pairs_px2",
                             "cool",
+                            "mcool",
                             "hic",
                             "bwaIndex",
                             "chromsizes",
+                            "reference_fasta",
+                            "juicer_format_restriction_site_file",
                             "other"
                         ]
                     },

@@ -63,14 +63,25 @@ export default class HelpPage extends React.Component {
 
 content_views.register(HelpPage, 'HelpPage');
 
-var SlideCarousel = React.createClass({
-    getInitialState() {
-        return {
+class SlideCarousel extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.handleForward = this.handleForward.bind(this);
+        this.handleBackward = this.handleBackward.bind(this);
+        this.render = this.render.bind(this);
+        this.state = {
             index: 0,
-            slideTitles: ["Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png", "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png", "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png", "Slide13.png", "Slide14.png", "Slide15.png", "Slide16.png"]
+            slideTitles: [
+                "Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png",
+                "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png",
+                "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png",
+                "Slide13.png", "Slide14.png", "Slide15.png", "Slide16.png"
+            ]
         };
-    },
-    handleForward() {
+    }
+
+    handleForward(){
         var nextIdx;
         if (this.state.index + 1 < this.state.slideTitles.length) {
             nextIdx = this.state.index + 1;
@@ -80,8 +91,9 @@ var SlideCarousel = React.createClass({
         this.setState({
             index: nextIdx
         });
-    },
-    handleBackward() {
+    }
+
+    handleBackward(){
         var nextIdx;
         if (this.state.index - 1 >= 0) {
             nextIdx = this.state.index - 1;
@@ -91,8 +103,9 @@ var SlideCarousel = React.createClass({
         this.setState({
             index: nextIdx
         });
-    },
-    render: function() {
+    }
+
+    render() {
         var slideName = "/static/img/Metadata_structure_slides/" + this.state.slideTitles[this.state.index];
         var slide = <img width={720} height={540} alt="720x540" src={slideName}></img>;
         return(
@@ -105,4 +118,5 @@ var SlideCarousel = React.createClass({
             </div>
         );
     }
-});
+
+}

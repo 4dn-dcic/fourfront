@@ -1,21 +1,22 @@
 'use strict';
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var queryString = require('query-string');
-var url = require('url');
-var querystring = require('querystring');
-var _ = require('underscore');
-var globals = require('./globals');
-var search = module.exports;
-var ReactTooltip = require('react-tooltip');
-var { ajax, console, object, isServerSide, Filters, layout, DateUtility } = require('./util');
-var { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} = require('react-bootstrap');
-var { Detail } = require('./item-pages/components');
+import queryString from 'query-string';
+import url from 'url';
+import _ from 'underscore';
+import * as globals from './globals';
+import ReactTooltip from 'react-tooltip';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './util';
+import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
+import { Detail } from './item-pages/components';
+import FacetList from './facetlist';
+import { PageLimitSortController, LimitAndPageControls, SearchResultTable } from './browse/components';
 
-var Listing = function (result, schemas) {
+
+var Listing = function (result, schemas, selectCallback) {
     var props;
     if (result['@id']) {
-        props = {'context': result,  'key': result['@id'], 'schemas': schemas};
+        props = {'context': result,  'key': result['@id'], 'schemas': schemas, 'selectCallback': selectCallback};
     }
     if(props){
         return(<ResultTableEntry {...props} />);
@@ -28,20 +29,33 @@ var Listing = function (result, schemas) {
 class ResultTableEntry extends React.Component{
     constructor(props){
         super(props);
-    }
-
-    state = {
-        'open': false
+        this.state = {
+            'open': false
+        };
     }
 
     handleToggle = (e) => {
+        e.preventDefault();
         this.setState({'open': !this.state.open});
+    }
+
+    handleSelect = (e) => {
+        e.preventDefault();
+        if(!this.props.selectCallback){
+            return;
+        }
+        var processed_link = object.atIdFromObject(this.props.context);
+        this.props.selectCallback(processed_link);
     }
 
     render() {
         var result = this.props.context || null;
         var item_type = result['@type'][0];
-        var processed_link = result.link_id.replace(/~/g, "/");
+        var processed_link = object.atIdFromObject(result);
+        var detailPop = false;
+        if(this.props.selectCallback){
+            detailPop = true;
+        }
         return (
             <div className="result-table-result">
                 <div className="row">
@@ -49,7 +63,16 @@ class ResultTableEntry extends React.Component{
                         <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
                             <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                         </Button>
-                        <a href={processed_link}>{result.display_title}</a>
+                        {this.props.selectCallback ?
+                            <Button bsSize="xsmall" bsStyle="success" className="icon-container pull-left" onClick={this.handleSelect}>
+                                <i className={"icon icon-check"}></i>
+                            </Button>
+                            : null
+                        }
+                        {detailPop ?
+                            <a href={processed_link} target="_blank">{result.display_title}</a>
+                            : <a href={processed_link}>{result.display_title}</a>
+                        }
                     </div>
                     <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
                         {result.lab ? result.lab.display_title : ""}
@@ -65,7 +88,7 @@ class ResultTableEntry extends React.Component{
                 </div>
                 <Collapse in={this.state.open}>
                     <div>
-                        <ResultDetail result={result} schemas={this.props.schemas} />
+                        <ResultDetail result={result} schemas={this.props.schemas} popLink={detailPop}/>
                     </div>
                 </Collapse>
             </div>
@@ -73,37 +96,8 @@ class ResultTableEntry extends React.Component{
     }
 }
 
-// Uses Detail from item-pages/components to provide item summary panel
-class ResultDetail extends React.Component{
-    static propTypes = {
-        result: PropTypes.object.isRequired,
-        schemas: PropTypes.object.isRequired,
-    }
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        var result = this.props.result;
-        return(
-            <div className="result-table-detail">
-                {result.description ?
-                    <div className="data-row flexible-description-box result-table-result-heading">
-                        {result.description}
-                    </div>
-                    : null}
-                <div className="item-page-detail">
-                    <h4 className="text-300">Details</h4>
-                    <Detail context={result} schemas={this.props.schemas} open={false}/>
-                </div>
-            </div>
-        );
-    }
-}
-
 // If the given term is selected, return the href for the term
-function termSelected(term, field, filters) {
+export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
     for (var filter in filters) {
         if (filters[filter]['field'] == field && filters[filter]['term'] == term) {
             return url.parse(filters[filter]['remove']).search;
@@ -112,64 +106,36 @@ function termSelected(term, field, filters) {
     return null;
 }
 
+function buildSearchHref(unselectHref, field, term, searchBase){
+    var href;
+    if (unselectHref) {
+        href = unselectHref;
+    } else {
+        href = searchBase + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
+    }
+    return href;
+}
+
 // Determine whether any of the given terms are selected
 function countSelectedTerms(terms, field, filters) {
     var count = 0;
     for(var oneTerm in terms) {
-        if(termSelected(terms[oneTerm].key, field, filters)) {
+        if(getUnselectHrefIfSelectedFromResponseFilters(terms[oneTerm].key, field, filters)) {
             count++;
         }
     }
     return count;
 }
 
-var Term = search.Term = React.createClass({
 
-    getHref : function(selected = termSelected(this.props.term['key'], this.props.facet['field'], this.props.filters)){
-        var href;
-        if (selected && !this.props.canDeselect) {
-            href = null;
-        } else if (selected) {
-            href = selected;
-        } else {
-            href = this.props.searchBase + this.props.facet['field'] + '=' + encodeURIComponent(this.props.term['key']).replace(/%20/g, '+');
-        }
-        return href;
-    },
-
-    render: function () {
-        var filters = this.props.filters;
-        var term = this.props.term['key'];
-        var count = this.props.term['doc_count'];
-        var title = this.props.title || term;
-        var field = this.props.facet['field'];
-        var selected = termSelected(term, field, filters);
-        var href = this.getHref(selected);
-
-        return (
-            <li className={"facet-list-element" + (selected ? " selected" : '')} id={selected ? "selected" : null} key={term}>
-                <a className="term" data-selected={selected} href={href} onClick={href ? this.props.onFilter : null}>
-                    <span className="pull-left facet-selector">
-                        {selected ? <i className="icon icon-times-circle icon-fw"></i> : '' }
-                    </span>
-                    <span className="facet-item">
-                        {title}
-                    </span>
-                    <span className="facet-count">{count}</span>
-                </a>
-            </li>
-        );
-    }
-});
-
-var TypeTerm = search.TypeTerm = React.createClass({
-    render: function () {
+class TypeTerm extends React.Component {
+    render() {
         var term = this.props.term['key'];
         var filters = this.props.filters;
         var total = this.props.total;
         return <Term {...this.props} title={term} filters={filters} total={total} />;
     }
-});
+}
 
 class InfoIcon extends React.Component{
     render() {
@@ -181,172 +147,12 @@ class InfoIcon extends React.Component{
 }
 
 
-var Facet = search.Facet = React.createClass({
-
-    statics : {
-
-    },
-
-    getDefaultProps: function() {
-        return {width: 'inherit'};
-    },
-
-    getInitialState: function () {
-        return {
-            facetOpen: false
-        };
-    },
-
-    handleClick: function () {
-        this.setState({facetOpen: !this.state.facetOpen});
-    },
-
-    render: function() {
-        var facet = this.props.facet;
-        var filters = this.props.filters;
-        var title = facet['title'];
-        var field = facet['field'];
-        var total = facet['total'];
-        var termID = title.replace(/\s+/g, '');
-        var terms = facet['terms'].filter(function (term) {
-            if (term.key) {
-                for(var filter in filters) {
-                    if(filters[filter].term === term.key) {
-                        return true;
-                    }
-                }
-                return term.doc_count > 0;
-            } else {
-                return false;
-            }
-        });
-        var moreTerms = terms.slice(5);
-        var TermComponent = field === 'type' ? TypeTerm : Term;
-        var selectedTermCount = countSelectedTerms(moreTerms, field, filters);
-        var moreTermSelected = selectedTermCount > 0;
-        var canDeselect = (!facet.restrictions || selectedTermCount >= 2);
-        var moreSecClass = 'collapse' + ((moreTermSelected || this.state.facetOpen) ? ' in' : '');
-        var seeMoreClass = 'btn btn-link' + ((moreTermSelected || this.state.facetOpen) ? '' : ' collapsed');
-        var schemaProperty = Filters.Field.getSchemaProperty(field, this.props.schemas, this.props.thisType, true);
-        var description = schemaProperty && schemaProperty.description;
-        return (
-            <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}}>
-                <h5 className="facet-title">
-                    <span className="inline-block">{ title || field }</span>
-                    <InfoIcon children={description}/>
-                </h5>
-                <ul className="facet-list nav">
-                    <div>
-                        {terms.slice(0, 5).map(function (term) {
-                            return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total} canDeselect={canDeselect} />;
-                        }.bind(this))}
-                    </div>
-                    {terms.length > 5 ?
-                        <div id={termID} className={moreSecClass}>
-                            {moreTerms.map(function (term) {
-                                return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total} canDeselect={canDeselect} />;
-                            }.bind(this))}
-                        </div>
-                    : null}
-                    {(terms.length > 5 && !moreTermSelected) ?
-                        <label className="pull-left">
-                                <small>
-                                    <button type="button" className={seeMoreClass} data-toggle="collapse" data-target={'#'+termID} onClick={this.handleClick} />
-                                </small>
-                        </label>
-                    : null}
-                </ul>
-            </div>
-        );
-    }
-});
-
-
-var FacetList = search.FacetList = React.createClass({
-    contextTypes: {
-        session: React.PropTypes.bool,
-    },
-
-    getDefaultProps: function() {
-        return {orientation: 'vertical'};
-    },
-
-    render: function() {
-        var {context, term} = this.props;
-        var loggedIn = this.context.session;
-
-        // Get all facets, and "normal" facets, meaning non-audit facets
-        var facets = this.props.facets;
-        var normalFacets = facets.filter(facet => facet.field.substring(0, 6) !== 'audit.');
-
-        var filters = this.props.filters;
-        var width = 'inherit';
-        if (!facets.length && this.props.mode != 'picker') return <div />;
-        var hideTypes;
-        if (this.props.mode == 'picker') {
-            hideTypes = false;
-        } else {
-            hideTypes = filters.filter(filter => filter.field === 'type').length === 1 && normalFacets.length > 1;
-        }
-        if (this.props.orientation == 'horizontal') {
-            width = (100 / facets.length) + '%';
-        }
-
-        // See if we need the Clear Filters link or not. context.clear_filters
-        var clearButton; // JSX for the clear button
-        var searchQuery = context && context['@id'] && url.parse(context['@id']).search;
-        if (searchQuery) {
-            // Convert search query string to a query object for easy parsing
-            var terms = queryString.parse(searchQuery);
-
-            // See if there are terms in the query string aside from searchTerm, from, and limit
-            // We have Clear Filters button if so
-            var nonPersistentTerms = _(Object.keys(terms)).any(term => !_.contains(['searchTerm', 'from', 'limit'], term));
-            clearButton = nonPersistentTerms && terms['searchTerm'];
-
-            // If no Clear Filters button yet, do the same check with type instead of searchTerm
-            if (!clearButton) {
-                nonPersistentTerms = _(Object.keys(terms)).any(term => !_.contains(['type', 'from', 'limit'], term));
-                clearButton = nonPersistentTerms && terms['type'];
-            }
-        }
-
-        return (
-
-            <div>
-                <div className={"facets-container facets " + this.props.orientation}>
-                    <div className="row facets-header">
-                        <div className="col-xs-6 facets-title-column">
-                            <i className="icon icon-fw icon-filter"></i>
-                            &nbsp;
-                            <h4 className="facets-title">Properties</h4>
-                        </div>
-                        <div className={"col-xs-6 clear-filters-control" + (clearButton ? '' : ' placeholder')}>
-                            <a href={context.clear_filters} className={"btn btn-xs rounded btn-outline-default"}>
-                                <i className="icon icon-times"></i> Clear All
-                            </a>
-                        </div>
-                    </div>
-                    {facets.map(facet => {
-                        if ((hideTypes && facet.field == 'type') || (!loggedIn && facet.field.substring(0, 6) === 'audit.')) {
-                            return <span key={facet.field} />;
-                        } else {
-                            return <Facet {...this.props} key={facet.field} facet={facet} filters={filters}
-                                            width={width} />;
-                        }
-                    })}
-                </div>
-            </div>
-        );
-    }
-});
-
 // the old Search tabular-style result display
 class TabularTableResults extends React.Component{
 
     static propTypes = {
-        results: React.PropTypes.array.isRequired,
-        schemas: React.PropTypes.object,
+        results: PropTypes.array.isRequired,
+        schemas: PropTypes.object,
     }
 
     constructor(props){
@@ -356,17 +162,22 @@ class TabularTableResults extends React.Component{
     render(){
         var results = this.props.results;
         var schemas = this.props.schemas || {};
+        // Buttons are included in title bar for correct spacing
         return(
             <div>
                 <div className="result-table-header-row-container">
                     <div className="row hidden-xs hidden-sm result-table-header-row">
                         <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
-                            {/*
-                            <Button style={{'visibility':'hidden', "marginRight":"3px"}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
+                            <Button style={{'visibility':'hidden','marginRight':'4px'}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
                                 <i className="icon icon-plus"></i>
                             </Button>
-                            */}
-                            <div className="text-left" style={{ paddingLeft : 44 }}>Title</div>
+                            {this.props.selectCallback ?
+                                <Button style={{'visibility':'hidden','marginRight':'4px'}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
+                                    <i className={"icon icon-check"}></i>
+                                </Button>
+                                : null
+                            }
+                            <div>Title</div>
                         </div>
                         <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
                             <div>Lab</div>
@@ -385,8 +196,12 @@ class TabularTableResults extends React.Component{
                 <div className="nav result-table row" id="result-table">
                     {results.length ?
                         results.map(function (result) {
-                            return Listing(result, schemas);
-                        })
+                            if(this.props.selectCallback){
+                                return Listing(result, schemas, this.props.selectCallback);
+                            }else{
+                                return Listing(result, schemas, null);
+                            }
+                        }.bind(this))
                     : null}
                 </div>
             </div>
@@ -394,98 +209,176 @@ class TabularTableResults extends React.Component{
     }
 }
 
-var ResultTable = search.ResultTable = React.createClass({
-
-    getDefaultProps: function() {
-        return {
-            restrictions: {},
-            searchBase: ''
-        };
-    },
-
-    getInitialState: function(){
-        var urlParts = url.parse(this.props.searchBase, true);
-        var urlFrom = parseInt(urlParts.query.from || 0);
-        var urlLimit = parseInt(urlParts.query.limit || 25);
-        var page = 1 + Math.ceil(urlFrom/urlLimit);
-        return({
-            'page': page,
-            'changing_page': false
-        });
-    },
-
-    componentWillReceiveProps: function(nextProps){
-        // go back to first page if items change
-        if(this.props.context.total !== nextProps.context.total){
-            this.changePage(1, nextProps.searchBase);
+export function getSearchType(facets){
+    var specificSearchType;
+    // Check to see if we are searching among multiple data types
+    // If only one type, use that as the search title
+    for (var i = 0; i < facets.length; i++){
+        if (facets[i]['field'] && facets[i]['field'] == 'type'){
+            if (facets[i]['terms'][0]['doc_count'] === facets[i]['total']
+                && facets[i]['total'] > 0 && facets[i]['terms'][0]['key'] !== 'Item'){
+                // it's a single data type, so grab it
+                specificSearchType = facets[i]['terms'][0]['key'];
+            }else{
+                specificSearchType = 'Multiple type';
+            }
         }
-    },
+        return specificSearchType;
+    }
+}
 
-    getSearchType: function(facets){
-        var specificSearchType;
-        // Check to see if we are searching among multiple data types
-        // If only one type, use that as the search title
-        for (var i = 0; i < facets.length; i++){
-            if (facets[i]['field'] && facets[i]['field'] == 'type'){
-                if (facets[i]['terms'][0]['doc_count'] === facets[i]['total']
-                    && facets[i]['total'] > 0 && facets[i]['terms'][0]['key'] !== 'Item'){
-                    // it's a single data type, so grab it
-                    specificSearchType = facets[i]['terms'][0]['key'];
-                }else{
-                    specificSearchType = 'Multiple type';
+class ResultTableHandlersContainer extends React.Component {
+
+    static defaultProps = {
+        restrictions : {},
+        searchBase : ''
+    }
+
+    constructor(props){
+        super(props);
+        this.onFilter = this.onFilter.bind(this);
+        this.isTermSelected = this.isTermSelected.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    onFilter(field, term, callback) {
+        var searchBase = this.props.searchBase;
+        var unselectHrefIfSelected = getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters);
+
+        var targetSearchHref = buildSearchHref(
+            unselectHrefIfSelected,
+            field, term, searchBase ? searchBase + '&' : searchBase + '?'
+        );
+
+        // Ensure only 1 type filter is selected at once. Unselect any other type= filters if setting new one.
+        if (field === 'type'){
+            if (!(unselectHrefIfSelected)){
+                var parts = url.parse(targetSearchHref, true);
+                if (Array.isArray(parts.query.type)){
+                    var types = parts.query.type;
+                    if (types.length > 1){
+                        var queryParts = _.clone(parts.query);
+                        delete queryParts[""]; // Safety
+                        queryParts.type = encodeURIComponent(term).replace(/%20/g, '+'); // Only 1 Item type selected at once.
+                        var searchString = queryString.stringify(queryParts);
+                        targetSearchHref = (parts.pathname || '') + (searchString ? '?' + searchString : '');
+                    }
                 }
             }
-            return specificSearchType;
         }
-    },
+        
+        this.props.navigate(targetSearchHref, {});
+        setTimeout(callback, 100);
+    }
 
-    changePage : _.throttle(function(page, urlBase=this.props.searchBase){
+    isTermSelected(term, facet){
+        return !!(getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
+    }
 
-        if (typeof this.props.onChange !== 'function') throw new Error("Search doesn't have props.onChange");
-        if (typeof urlBase !== 'string') throw new Error("Search doesn't have props.searchBase");
+    render(){
 
-        var urlParts = url.parse(urlBase, true);
-        var urlLimit = parseInt(urlParts.query.limit || 25);
+        // Preprocess Facets for Search
+        var facets = this.props.context.facets.map((facet)=>{
 
-        // Check page from URL and state to see if same and if so, cancel navigation.
-        if (page === this.state.page){
-            console.warn("Already on page " + page);
-            return;
-        }
-        var newFrom = urlLimit * (page - 1);
-        urlParts.query.from = newFrom + '';
-        urlParts.search = '?' + querystring.stringify(urlParts.query);
-        this.setState({ 'changingPage' : true }, ()=>{
-            this.props.navigate(
-                url.format(urlParts),
-                { 'replace' : true },
-                ()=>{
-                    this.setState({
-                        'changingPage' : false,
-                        'page' : page
+            if (this.props.restrictions[facet.field] !== undefined) {
+                facet = _.clone(facet);
+                facet.restrictions = this.props.restrictions[facet.field];
+                facet.terms = facet.terms.filter(term => _.contains(facet.restrictions, term.key));
+            }
+
+            if (facet.field === 'type'){ // For search page, filter out Item types which are subtypes of an abstract type. Unless are on an abstract type.
+                facet = _.clone(facet);
+                var queryParts = url.parse((this.props.searchBase || ''), true).query;
+                if (typeof queryParts.type === 'string') queryParts.type = [queryParts.type];
+                queryParts.type = _.without(queryParts.type, 'Item');
+
+                var isParentTypeSet = queryParts.type.filter(function(t){
+                    var pt = Schemas.getAbstractTypeForType(t);
+                    if (pt){
+                        return true;
                     }
-                );
-            });
-        });
-    }, 250),
+                    return false;
+                }).length > 0;
 
-    render: function() {
+                if (!isParentTypeSet){
+                    facet.terms = facet.terms.filter(function(itemType){
+                        var parentType = Schemas.getAbstractTypeForType(itemType.key);
+                        if (parentType && itemType.key !== parentType){
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+            }
+
+            return facet;
+        });
+
+        return (
+            <PageLimitSortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
+                <ControlsAndResults
+                    {...this.props}
+                    isTermSelected={this.isTermSelected}
+                    onFilter={this.onFilter}
+                    facets={facets}
+                />
+            </PageLimitSortController>
+        );
+    }
+
+}
+
+class ResultDetailPane extends React.Component {
+
+    componentDidMount(){
+        ReactTooltip.rebuild();
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (this.props.open && !pastProps.open) ReactTooltip.rebuild();
+    }
+
+    render (){
+        var { result, popLink } = this.props;
+        return (
+            <div>
+                {result.description ?
+                        <div className="data-row flexible-description-box result-table-result-heading">
+                            {result.description}
+                        </div>
+                        : null}
+                    { <div className="item-page-detail">
+                        <h4 className="text-300">Details</h4>
+                        <Detail context={result} open={false} popLink={popLink}/>
+                    </div> }
+            </div>
+        );
+    }
+}
+
+class ControlsAndResults extends React.Component {
+
+    static defaultProps = {
+        restrictions : {},
+        searchBase : ''
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
+    
+    render() {
         const batchHubLimit = 100;
         var context = this.props.context;
         var results = context['@graph'];
         var total = context['total'];
         var batch_hub_disabled = total > batchHubLimit;
         var filters = context['filters'];
-        var searchBase = this.props.searchBase;
         var show_link;
-        var facets = context['facets'].map(function(facet) {
-            if (this.props.restrictions[facet.field] !== undefined) {
-                facet = _.clone(facet);
-                facet.restrictions = this.props.restrictions[facet.field];
-                facet.terms = facet.terms.filter(term => _.contains(facet.restrictions, term.key));
-            }
-            return facet;
-        }.bind(this));
+
+        var facets = this.props.facets;
 
         // get type of this object for getSchemaProperty (if type="Item", no tooltips)
         var thisType = 'Item';
@@ -495,70 +388,124 @@ var ResultTable = search.ResultTable = React.createClass({
             thisType = filteredBits[0].slice(5);
         }
         var urlParts = url.parse(this.props.searchBase, true);
-        var urlLimit = parseInt(urlParts.query.limit || 25);
-        var num_pages = Math.ceil(this.props.context.total/urlLimit);
+        var itemTypeForSchemas = null;
+        if (typeof urlParts.query.type === 'string') { // Can also be array
+            if (urlParts.query.type !== 'Item') {
+                itemTypeForSchemas = urlParts.query.type;
+            }
+        }
+
+        var thisTypeTitle = Schemas.getTitleForType(thisType);
+        var abstractType = Schemas.getAbstractTypeForType(thisType);
+        var hiddenColumns = null;
+        if (abstractType && abstractType !== thisType) {
+            hiddenColumns = ['@type'];
+        }
+
+        // Render out button for "Select" if we have a props.selectCallback
+        var constantColumnDefinitions = SearchResultTable.defaultProps.constantColumnDefinitions.slice(0);
+        if (typeof this.props.selectCallback === 'function'){
+            var titleBlockColDefIndex = _.findIndex(constantColumnDefinitions, { 'field' : 'display_title' }); // Or just use columnDefinitions[0] ?
+            if (typeof this.props.selectCallback === 'function' && typeof titleBlockColDefIndex === 'number' && titleBlockColDefIndex > -1){
+                var newColDef = _.clone(constantColumnDefinitions[titleBlockColDefIndex]);
+                var origRenderFxn = newColDef.render;
+                newColDef.minColumnWidth = 120;
+                newColDef.render = (result, columnDefinition, props, width) => {
+                    var currentTitleBlock = origRenderFxn(result, columnDefinition, props, width);
+                    var newChildren = currentTitleBlock.props.children.slice(0);
+                    newChildren.unshift(
+                        <div className="select-button-container" onClick={(e)=>{
+                            e.preventDefault();
+                            this.props.selectCallback(object.atIdFromObject(result));
+                        }}>
+                            <button className="select-button" onClick={props.toggleDetailOpen}>
+                                <i className="icon icon-fw icon-check"/>
+                            </button>
+                        </div>
+                    );
+                    return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
+                };
+                constantColumnDefinitions[titleBlockColDefIndex] = newColDef;
+            }
+        }
 
         return (
             <div>
 
-                <h1 className="page-title">{thisType + ' Search'}</h1>
+                {this.props.submissionBase ?
+                    <h1 className="page-title">{thisTypeTitle + ' Selection'}</h1>
+                    : <h1 className="page-title">{thisTypeTitle + ' Search'}</h1>
+                }
                 <h4 className="page-subtitle">Filter & sort results</h4>
 
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList {...this.props} facets={facets} filters={filters} thisType={thisType}
-                                    searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} />
+                        <FacetList
+                            {...this.props}
+                            className="with-header-bg"
+                            facets={facets}
+                            filters={filters}
+                            thisType={thisType}
+                            expSetFilters={this.props.expSetFilters}
+                            onFilter={this.props.onFilter}
+                            filterFacetsFxn={FacetList.filterFacetsForSearch}
+                            isTermSelected={this.props.isTermSelected}
+                            itemTypeForSchemas={itemTypeForSchemas}
+                        />
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9 expset-result-table-fix">
-                        <div className="row above-chart-row">
+                        <div className="row above-chart-row clearfix">
                             <div className="col-sm-5 col-xs-12">
                                 <h5 className='browse-title'>{results.length} of {total} results</h5>
                             </div>
                             <div className="col-sm-7 col-xs-12">
-                                <ButtonToolbar className="pull-right">
-                                    <ButtonGroup>
-                                        <Button disabled={this.state.changing_page || this.state.page === 1} onClick={this.state.changing_page === true ? null : (e)=>{
-                                            this.changePage(this.state.page - 1);
-                                        }}><i className="icon icon-angle-left icon-fw"></i></Button>
-                                        <Button disabled style={{'minWidth': 120 }}>
-                                            { this.state.changing_page === true ?
-                                                <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': 0.5 }}></i>
-                                                : 'Page ' + this.state.page + ' of ' + num_pages
-                                            }
-                                        </Button>
-                                        <Button disabled={this.state.changing_page || this.state.page === num_pages} onClick={this.state.changing_page === true ? null : (e)=>{
-                                            this.changePage(this.state.page + 1);
-                                        }}><i className="icon icon-angle-right icon-fw"></i></Button>
-                                    </ButtonGroup>
-                                </ButtonToolbar>
+                                <LimitAndPageControls
+                                    limit={this.props.limit}
+                                    page={this.props.page}
+                                    maxPage={this.props.maxPage}
+                                    changingPage={this.props.changingPage}
+                                    changePage={this.props.changePage}
+                                    changeLimit={this.props.changeLimit}
+                                />
                             </div>
                         </div>
-                        <TabularTableResults results={results} schemas={this.props.schemas}/>
+                        <SearchResultTable
+                            results={results}
+                            columns={context.columns || {}}
+                            detailPane={<ResultDetailPane popLink={this.props.selectCallback ? true : false} />}
+                            sortBy={this.props.sortBy}
+                            sortColumn={this.props.sortColumn}
+                            sortReverse={this.props.sortReverse}
+                            hiddenColumns={hiddenColumns}
+                            constantColumnDefinitions={constantColumnDefinitions}
+                        />
                     </div>
                 </div>
             </div>
         );
-    },
-
-    onFilter: function(e) {
-        var search = e.currentTarget.getAttribute('href');
-        this.props.onChange(search);
-        e.stopPropagation();
-        e.preventDefault();
     }
-});
 
-var Search = search.Search = React.createClass({
-    contextTypes: {
-        location_href: React.PropTypes.string,
-        navigate: React.PropTypes.func
-    },
+}
 
-    render: function() {
+export class Search extends React.Component {
+
+    componentDidMount(){
+        ReactTooltip.rebuild();
+    }
+
+    render() {
         var context = this.props.context;
         var results = context['@graph'];
         var notification = context['notification'];
-        var searchBase = url.parse(this.context.location_href).search || '';
+        var searchBase;
+        // submissionBase is supplied when using Search through frontend
+        // submission. this switch controls several things, including
+        // pagination, clear filter, and types filter.
+        if(this.props.submissionBase){
+            searchBase = this.props.submissionBase;
+        }else{
+            searchBase = url.parse(this.props.href).search || '';
+        }
         var facetdisplay = context.facets && context.facets.some(function(facet) {
             return facet.total > 0;
         });
@@ -566,12 +513,12 @@ var Search = search.Search = React.createClass({
             <div>
                 {facetdisplay ?
                     <div className="browse-page-container">
-                        <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.props.navigate || this.context.navigate} />
+                        <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
             </div>
         );
     }
-});
+}
 
 globals.content_views.register(Search, 'Search');

@@ -6,6 +6,7 @@ var ajax = require('./ajax');
 var Alerts = null; //require('./../alerts');
 var store = null;
 var object = require('./object');
+import * as Schemas from './Schemas';
 var navigate = require('./navigate').default;
 
 
@@ -13,97 +14,7 @@ export let getSchemas = null;
 export let getPage =  function(){ return 1;  };
 export let getLimit = function(){ return 25; };
 
-export const Term = {
 
-    toName : function(field, term){
-        switch (field) {
-            case 'experiments_in_set.biosample.biosource.individual.organism.name':
-                return Term.capitalize(term);
-            case 'experiments_in_set.biosample.biosource.biosource_type':
-                return Term.capitalizeSentence(term);
-            default:
-                return term;
-        }
-    },
-
-    capitalize : function(word)        { return word.charAt(0).toUpperCase() + word.slice(1);  },
-    capitalizeSentence : function(sen) { return sen.split(' ').map(Term.capitalize).join(' '); }
-
-};
-
-export const Field = {
-
-    nameMap : {
-        'experiments_in_set.biosample.biosource.individual.organism.name' : 'Organism',
-        'accession' : 'Experiment Set',
-        'experiments_in_set.digestion_enzyme.name' : 'Enzyme',
-        'experiments_in_set.biosample.biosource_summary' : 'Biosource',
-        'experiments_in_set.lab.title' : 'Lab'
-    },
-
-    toName : function(field, schemas, schemaOnly = false){
-        if (!schemaOnly && Field.nameMap[field]){
-            return Field.nameMap[field];
-        } else {
-            var schemaProperty = Field.getSchemaProperty(field, schemas);
-            if (schemaProperty && schemaProperty.title){
-                Field.nameMap[field] = schemaProperty.title; // Cache in nameMap for faster lookups.
-                return schemaProperty.title;
-            } else if (!schemaOnly) {
-                return field;
-            } else {
-                return null;
-            }
-        }
-    },
-
-    getSchemaProperty : function(field, schemas = null, startAt = 'ExperimentSet', skipExpFilters=false){
-        if (!schemas && !skipExpFilters) schemas = getSchemas && getSchemas();
-        var baseSchemaProperties = (schemas && schemas[startAt] && schemas[startAt].properties) || null;
-        if (!baseSchemaProperties) return null;
-        if (field.slice(0,5) === 'audit') return null;
-        var fieldParts = field.split('.');
-
-        function getNextSchemaProperties(linkToName){
-
-            function combineSchemaPropertiesFor(relatedLinkToNames){
-                return _.reduce(relatedLinkToNames, function(schemaProperties, schemaName){
-                    if (schemas[schemaName]){
-                        return _.extend(schemaProperties, schemas[schemaName].properties);
-                    }
-                    else return schemaProperties;
-                }, {});
-            }
-
-            if (linkToName === 'Experiment'){
-                return combineSchemaPropertiesFor(['Experiment', 'ExperimentRepliseq', 'ExperimentHiC', 'ExperimentCaptureC']);
-            } else if (linkToName === 'Individual'){
-                return combineSchemaPropertiesFor(['Individual', 'IndividualHuman', 'ExperimentHiC', 'IndividualMouse']);
-            } else {
-                return schemas[linkToName].properties;
-            }
-        }
-
-
-        function getProperty(propertiesObj, fieldPartIndex){
-            var property = propertiesObj[fieldParts[fieldPartIndex]];
-            if (fieldPartIndex >= fieldParts.length - 1) return property;
-            var nextSchemaProperties = null;
-
-            if (property.type === 'array' && property.items && property.items.linkTo){
-                nextSchemaProperties = getNextSchemaProperties(property.items.linkTo);
-            } else if (property.linkTo) {
-                nextSchemaProperties = getNextSchemaProperties(property.linkTo);
-            }
-
-            if (nextSchemaProperties) return getProperty(nextSchemaProperties, fieldPartIndex + 1);
-        }
-
-        return getProperty(baseSchemaProperties, 0);
-
-    }
-
-};
 
 /**
  * Get current expSetFilters from store. Utility method to use from other components if don't want to pass expSetFilters down as prop.
@@ -556,6 +467,8 @@ export function standardizeFieldKey(field, expsOrSets = 'sets', reverse = false)
         if (reverse){
             return field.replace('experiments_in_set.', '');
         } else if (field.slice(0, 19) !== 'experiments_in_set.') {
+            if (field === 'type') return field;
+            //if (field.slice(0, 6) === 'audit.') return field;
             return 'experiments_in_set.' + field;
         }
     }

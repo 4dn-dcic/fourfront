@@ -238,7 +238,13 @@ class Bar extends React.Component {
     }
 }
 
-
+/**
+ * React Component for wrapping the generated markup of BarPlot.Chart.
+ * Also contains Components Bar and BarSection as static children, for wrapping output bar and bar parts.
+ * 
+ * The top-level ViewContainer component contains state for interactivity of the generated chart mark-up.
+ * The child Bar and BarSection components are stateless and utilize the state passed down from ViewContainer.
+ */
 export class ViewContainer extends React.Component {
 
     static Bar = Bar

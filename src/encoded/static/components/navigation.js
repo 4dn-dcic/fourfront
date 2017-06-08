@@ -3,9 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-var Login = require('./login');
 import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 import _ from 'underscore';
+import Login from './login';
 import * as store from '../store';
 import { JWT, console, layout, isServerSide } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
@@ -93,7 +93,7 @@ export default class Navigation extends React.Component {
             );
         } else {
             return (
-                <NavItem 
+                <NavItem
                     key={action.id}
                     id={action.sid || action.id}
                     href={Navigation.getMenuItemURL(action, mounted)}
@@ -120,7 +120,7 @@ export default class Navigation extends React.Component {
             mobileDropdownOpen : false,
             scrolledPastTop : false,
             navInitialized : false
-        }
+        };
     }
 
     componentDidMount(){
@@ -140,7 +140,7 @@ export default class Navigation extends React.Component {
             if (!this.state.navInitialized){
                 stateChange.navInitialized = true;
             }
-            
+
             var scrollVector = document.body.scrollTop - lastScrollTop;
             lastScrollTop = document.body.scrollTop;
 
@@ -189,7 +189,7 @@ export default class Navigation extends React.Component {
             if (['xs','sm'].indexOf(layout.responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
             //navBarBrandImgContainer.style.width = navBarBrandImgContainer.offsetWidth + 'px'; // Enable to fix width of logo to its large size.
             navBarBrand.style.width = navBarBrand.offsetWidth + 'px';
-        };
+        }
 
         this.throttledResizeHandler = _.throttle(saveWidth, 300);
 
@@ -234,8 +234,6 @@ export default class Navigation extends React.Component {
     }
 
     render() {
-        //var portal = this.context.portal;
-
         var navClass = "navbar-container";
         if (this.state.testWarning) navClass += ' test-warning-visible';
         if (this.state.navInitialized) navClass += ' nav-initialized';
@@ -266,12 +264,19 @@ export default class Navigation extends React.Component {
                         <Navbar.Collapse>
                             <Nav>
                             { 
-                                this.context.listActionsFor('global_sections').map((a)=> 
+                                this.props.listActionsFor('global_sections').map((a)=> 
                                     Navigation.buildDropdownMenu.call(this, a, this.state.mounted)
-                                ) 
+                                )
                             }
                             </Nav>
-                            <UserActions mounted={this.state.mounted} closeMobileMenu={this.closeMobileMenu} session={this.props.session} />
+                            <UserActions
+                                mounted={this.state.mounted} // boolean
+                                closeMobileMenu={this.closeMobileMenu} // function
+                                session={this.props.session} // boolean
+                                href={this.props.href} // string
+                                updateUserInfo={this.props.updateUserInfo} // function
+                                listActionsFor={this.props.listActionsFor} // function
+                            />
                             {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>
                     </Navbar>
@@ -280,16 +285,11 @@ export default class Navigation extends React.Component {
             </div>
         );
     }
-};
+}
 
 Navigation.propTypes = {
     href : PropTypes.string,
-    session : React.PropTypes.bool
-};
-
-Navigation.contextTypes = {
-    portal: PropTypes.object,
-    listActionsFor : PropTypes.func
+    session : PropTypes.bool
 };
 
 
@@ -310,7 +310,7 @@ class Search extends React.Component{
             </form>
         );
     }
-};
+}
 
 
 class UserActions extends React.Component {
@@ -330,7 +330,7 @@ class UserActions extends React.Component {
                 acctTitle = userDetails.first_name;
             }
         }
-        
+
         acctTitle = (
             <span>
                 <i title={session ? "Signed In" : null} className={"account-icon icon icon-user" + (session ? "" : "-o")}></i> { acctTitle }
@@ -338,22 +338,30 @@ class UserActions extends React.Component {
         );
 
         var actions = [];
-        this.context.listActionsFor('user_section').forEach((action) => {
+        this.props.listActionsFor('user_section').forEach((action) => {
             if (action.id === "login"){
-                actions.push(<Login key={action.id} navCloseMobileMenu={this.props.closeMobileMenu} />);
+                actions.push(
+                    <Login
+                        key={action.id}
+                        navCloseMobileMenu={this.props.closeMobileMenu}
+                        session={this.props.session}
+                        href={this.props.href}
+                        updateUserInfo={this.props.updateUserInfo}
+                    />
+                );
             } else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session) {
                     actions.push(Navigation.buildMenuItem.call(this, action, this.props.mounted));
                 } else {
                     // Account Actions
-                    actions = actions.concat(this.context.listActionsFor('user').map((action, idx) => {
+                    actions = actions.concat(this.props.listActionsFor('user').map((action, idx) => {
                         return Navigation.buildMenuItem.call(this, action, this.props.mounted, {"data-no-cache" : true});
                     }));
                 }
             } else if (action.id === "contextactions") {
                 // Context Actions
-                actions = actions.concat(this.context.listActionsFor('context').map((action) => {
+                actions = actions.concat(this.props.listActionsFor('context').map((action) => {
                     return Navigation.buildMenuItem.call(
                         this,
                         _.extend(_.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> }),
@@ -371,16 +379,13 @@ class UserActions extends React.Component {
             </Nav>
         );
     }
-};
+}
 
 UserActions.propTypes = {
-    session: PropTypes.bool
-}
-
-UserActions.contextTypes = {
-    listActionsFor: PropTypes.func
-}
-
+    session         : PropTypes.bool.isRequired,
+    listActionsFor  : PropTypes.func.isRequired,
+    href            : PropTypes.string.isRequired
+};
 
 
 // Display breadcrumbs with contents given in 'crumbs' object.
@@ -429,7 +434,7 @@ export class Breadcrumbs extends React.Component {
             </ol>
         );
     }
-};
+}
 
 Breadcrumbs.propTypes = {
     root: PropTypes.string, // Root URI for searches

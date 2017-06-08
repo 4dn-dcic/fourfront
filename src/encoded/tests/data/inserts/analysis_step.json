@@ -99,5 +99,25 @@
         "version": "13",
         "analysis_step_types": ["file merging"],
         "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547"
+    },
+    {
+        "uuid": "98a6e081-49e5-4c33-afab-9ec90d65faf3",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "juicer",
+        "name": "juicer",
+        "version": "6",
+        "analysis_step_types": ["alignment","filtering"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23548"
+    },
+    {
+        "uuid": "b1fe75f9-49e5-4c33-afab-9ec90d65faf3",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "juicer2pairs",
+        "name": "juicer2pairs",
+        "version": "1",
+        "analysis_step_types": ["file format conversion"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547"
     }
 ]

@@ -1,5 +1,8 @@
 'use strict';
 
+import createReactClass from 'create-react-class';
+import PropTypes from 'prop-types';
+
 /* Written by Carl, used to test the homepage rendered by home.js
 Specifically, test the creation of Accouncements and Getting Started entries,
 making sure they collapse correctly, and test the fetchedParams used to build
@@ -20,9 +23,9 @@ describe('Testing home.js', function() {
         _ = require('underscore');
         HomePage = require('../static-pages/home').default;
         statics = require('../../data/statics'); // Maybe keep version of statics.js and put into /testdata/
-        Wrapper = React.createClass({
+        Wrapper = createReactClass({
             childContextTypes: {
-                fetch: React.PropTypes.func
+                fetch: PropTypes.func
             },
 
             // Retrieve current React context

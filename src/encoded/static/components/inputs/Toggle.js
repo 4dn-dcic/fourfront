@@ -1,9 +1,11 @@
 'use strict';
 
-var React = require('react');
-var { object, console } = require('./../util');
+import React from 'react';
+import createReactClass from 'create-react-class';
+import { object, console } from './../util';
 
-var Toggle = module.exports = React.createClass({
+
+var Toggle = module.exports = createReactClass({
 
     getDefaultProps : function(){
         return {

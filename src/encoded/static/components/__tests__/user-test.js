@@ -16,7 +16,7 @@ function mapStateToProps(store) {
 }
 
 describe('Testing user.js', function() {
-    var React, User, user, testItem, TestUtils, page, store, context, filters, _, Wrapper, sinon, getNestedProperty;
+    var React, User, user, testItem, TestUtils, page, store, context, filters, _, Wrapper, sinon, getNestedProperty, props;
     beforeAll(function() {
         React = require('react');
         var { Provider, connect } = require('react-redux');
@@ -33,34 +33,21 @@ describe('Testing user.js', function() {
             type: dispatch_vals
         });
 
-        Wrapper = React.createClass({
-            childContextTypes: {
-                location_href: React.PropTypes.string,
-                navigate: React.PropTypes.func,
-                listActionsFor : React.PropTypes.func
-            },
-            getChildContext: function() {
-                return {
-                    location_href: "http://localhost:8000/users/0abbd494-b852-433c-b360-93996f679dae/",
-                    navigate: function(){return;},
-                    listActionsFor: function(category){ 
-                        // 'Mocked' version
-                        if (category === 'context') {
-                            return [
-                                {
-                                    'name' : 'edit'
-                                }
-                            ];
+        props = {
+            'context' : context,
+            'href' : "http://localhost:8000/users/0abbd494-b852-433c-b360-93996f679dae/",
+            'navigate' : function(){ console.info("Mocked Navigate Function was called."); return; },
+            'listActionsFor' : function(category){ 
+                // 'Mocked' version
+                if (category === 'context') {
+                    return [
+                        {
+                            'name' : 'edit'
                         }
-                    }
-                };
-            },
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
+                    ];
+                }
             }
-        });
+        }
 
         // Mock this b/c certain data doesn't exist in test environment -- 
         // e.g. REST endpoints for test lab data which is to be AJAXed in.
@@ -68,9 +55,9 @@ describe('Testing user.js', function() {
 
         var UseUser = connect(mapStateToProps)(User);
         page = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <Provider store={store}><UseUser context={context} /></Provider>
-            </Wrapper>
+            <Provider store={store}>
+                <UseUser {...props}  />
+            </Provider>
         );
 
     });

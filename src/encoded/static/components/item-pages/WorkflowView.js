@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
-import { console, object, DateUtility, Filters, isServerSide, navigate } from './../util';
+import { console, object, DateUtility, Schemas, isServerSide, navigate } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 
@@ -38,7 +38,7 @@ export function commonGraphPropsFromProps(props){
                 Array.isArray(node.meta.analysis_step_types) &&
                 node.meta.analysis_step_types.length > 0
             ){
-                var purposes = node.meta.analysis_step_types.map(Filters.Term.capitalize).join(', ');
+                var purposes = node.meta.analysis_step_types.map(Schemas.Term.capitalize).join(', ');
                 if (canBeJSX){
                     return (
                         <div className="pull-right">
@@ -136,7 +136,7 @@ export class WorkflowView extends React.Component {
 }
 
 class GraphSection extends React.Component {
-
+/*
     static parseCWLToAnalysisSteps(cwlJSON){
 
         var stepInputNamesEncountered = {};
@@ -182,58 +182,58 @@ class GraphSection extends React.Component {
 
         return cwlJSON.steps.map(function(step, i){ // Each step will be a node.
 
-                return _.extend(
+            return _.extend(
                     step, 
-                    {
-                        'display_title' : step.id.replace('#',''),
-                        'uuid' : step.id,
-                        'inputs' : step.inputs.map(function(stepInput){
-                            return getFullStepInput(stepInput, step);
-                        }).filter(function(x){ return !!x; }),
-                        'outputs' : step.outputs.map(function(stepOutput){
-                            var outputID = stepOutput.id.replace(step.id + '.', '');
-                            var fullStepOutput = _.find(step.run.outputs, function(runOutput){
-                                if (outputID === runOutput.id.replace('#', '')) return true;
-                                return false;
-                            });
-                            if (fullStepOutput){
-                                stepOutput = _.extend({}, stepOutput, _.omit(fullStepOutput, 'id'));
-                            }
+                {
+                    'display_title' : step.id.replace('#',''),
+                    'uuid' : step.id,
+                    'inputs' : step.inputs.map(function(stepInput){
+                        return getFullStepInput(stepInput, step);
+                    }).filter(function(x){ return !!x; }),
+                    'outputs' : step.outputs.map(function(stepOutput){
+                        var outputID = stepOutput.id.replace(step.id + '.', '');
+                        var fullStepOutput = _.find(step.run.outputs, function(runOutput){
+                            if (outputID === runOutput.id.replace('#', '')) return true;
+                            return false;
+                        });
+                        if (fullStepOutput){
+                            stepOutput = _.extend({}, stepOutput, _.omit(fullStepOutput, 'id'));
+                        }
 
-                            var finalOutput = _.find(cwlJSON.outputs, function(cwlOutput){
-                                if (outputID === cwlOutput.id.replace('#', '')) return true;
-                                return false;
-                            });
+                        var finalOutput = _.find(cwlJSON.outputs, function(cwlOutput){
+                            if (outputID === cwlOutput.id.replace('#', '')) return true;
+                            return false;
+                        });
 
-                            if (finalOutput){
-                                stepOutput = _.extend(stepOutput, _.omit(finalOutput, 'id'));
-                            }
-                            if (!stepOutput.name) stepOutput.name = outputID;
-                            if (!stepOutput.target){
-                                if (stepOutput.source) {
-                                    stepOutput.target = stepOutput.source.map(function(s){
-                                        return {
-                                            'name' : s,
-                                            'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
-                                        };
-                                    });
-                                } else {
-                                    stepOutput.target = [{
-                                        'name' : stepOutput.id,
+                        if (finalOutput){
+                            stepOutput = _.extend(stepOutput, _.omit(finalOutput, 'id'));
+                        }
+                        if (!stepOutput.name) stepOutput.name = outputID;
+                        if (!stepOutput.target){
+                            if (stepOutput.source) {
+                                stepOutput.target = stepOutput.source.map(function(s){
+                                    return {
+                                        'name' : s,
                                         'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
-                                    }]
-                                }
+                                    };
+                                });
+                            } else {
+                                stepOutput.target = [{
+                                    'name' : stepOutput.id,
+                                    'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
+                                }];
                             }
-                            console.log(stepOutput);
-                            return stepOutput;
-                        })
-                    }
+                        }
+                        console.log(stepOutput);
+                        return stepOutput;
+                    })
+                }
                 );
 
 
         });
     }
-
+*/
     static isCwlDataValid(cwlJSON){
         if (!Array.isArray(cwlJSON.steps)) return false;
         if (cwlJSON.steps.length === 0) return false;
@@ -260,7 +260,7 @@ class GraphSection extends React.Component {
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail'
-        }
+        };
     }
 
     commonGraphProps(){

@@ -690,7 +690,7 @@ export default class ExperimentsTable extends React.Component {
                 !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
             )
         ){
-            this.setState({ columnWidths : ExperimentsTable.initialColumnWidths(null) })
+            this.setState({ columnWidths : ExperimentsTable.initialColumnWidths(null) });
             return null;
         }
         if (!this.cache.origColumnWidths){
@@ -722,7 +722,7 @@ export default class ExperimentsTable extends React.Component {
         });
 
         // Adjust first column by few px to fit perfectly.
-        var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v }, 0);
+        var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v; }, 0);
         var remainder = availableWidth - totalNewColsWidth;
         newColWidths[0] += Math.floor(remainder - 0.5);
 
@@ -781,13 +781,13 @@ export default class ExperimentsTable extends React.Component {
             'file-pair' : null,
             'file' : null,
             'file-detail' : null
-        }
+        };
 
         if (Array.isArray(this.state.columnWidths)){
             Object.keys(colWidthStyles).forEach((cn) => {
                 colWidthStyles[cn] = {
                     width : this.state.columnWidths[_.findIndex(this.columnHeaders(), { 'columnClass' : cn })]
-                }
+                };
             });
         }
 
@@ -951,7 +951,7 @@ export default class ExperimentsTable extends React.Component {
                         expsWithBiosample.length > 5 ?
                             'with ' + (
                                 _.all(expsWithBiosample.slice(3), function(exp){
-                                    return exp.file_pairs !== 'undefined'
+                                    return exp.file_pairs !== 'undefined';
                                 }) ? /* Do we have filepairs for all exps? */
                                     _.flatten(_.pluck(expsWithBiosample.slice(3), 'file_pairs'), true).length +
                                     ' File Pairs'
@@ -1185,8 +1185,8 @@ class FilePairBlock extends React.Component {
 class FileEntryBlock extends React.Component {
 
     static propTypes = {
-        selectedFiles : React.PropTypes.instanceOf(Set),
-        handleFileUpdate : React.PropTypes.func
+        selectedFiles : PropTypes.instanceOf(Set),
+        handleFileUpdate : PropTypes.func
     }
 
     constructor(props){
@@ -1362,92 +1362,4 @@ class FileEntryBlock extends React.Component {
             </div>
         );
     }
-}
-
-
-/**
- * Returns an object containing fileDetail and emptyExps.
- *
- * @param {Object[]} experimentArray - Array of experiments in set. Required.
- * @param {Set} [passedExperiments=null] - Set of experiments which match filter(s).
- * @return {Object} JS object containing two keys with arrays: 'fileDetail' of experiments with formatted details and 'emptyExps' with experiments with no files.
- */
-
-export function getFileDetailContainer(experimentArray, passedExperiments = null){
-
-    var fileDetail = {}; //use @id field as key
-    var emptyExps = [];
-
-    for (var i=0; i<experimentArray.length; i++){
-        if(typeof passedExperiments === 'undefined' || passedExperiments == null || passedExperiments.has(experimentArray[i])){
-            var tempFiles = [];
-            var biosample_accession = experimentArray[i].biosample ? experimentArray[i].biosample.accession : null;
-            var biosample_id = biosample_accession ? experimentArray[i].biosample['@id'] : null;
-
-            var experimentDetails = {
-                'accession':    experimentArray[i].accession,
-                'biosample':    biosample_accession,
-                'biosample_id': biosample_id,
-                'uuid':         experimentArray[i].uuid,
-                '@id' :         experimentArray[i]['@id']
-                // Still missing : 'data', 'related'
-            };
-
-            if(experimentArray[i].files){
-                tempFiles = experimentArray[i].files;
-            } else if (experimentArray[i].filesets) {
-                for (var j=0; j<experimentArray[i].filesets.length; j++) {
-                    if (experimentArray[i].filesets[j].files_in_set) {
-                        tempFiles = tempFiles.concat(experimentArray[i].filesets[j].files_in_set);
-                    }
-                }
-            // No files in experiment
-            } else {
-                emptyExps.push(experimentArray[i]['@id']);
-                experimentDetails.data = {};
-                fileDetail[experimentArray[i]['@id']] = experimentDetails;
-                continue;
-            }
-
-            // save appropriate experiment info
-            if(tempFiles.length > 0){
-                var relatedFiles = {};
-                var relatedData = [];
-                var k;
-                for(k=0;k<tempFiles.length;k++){
-
-                    // only use first file relation for now. Only support one relationship total
-                    if(tempFiles[k].related_files && tempFiles[k].related_files[0].file){
-                        // in form [related file @id, this file @id]
-                        relatedFiles[tempFiles[k].related_files[0].file] =  tempFiles[k]['@id'];
-                        fileDetail[tempFiles[k]['@id']] = _.extend({
-                            'data' : tempFiles[k],
-                            'related' : {
-                                'relationship_type':tempFiles[k].related_files[0].relationship_type,
-                                'file':tempFiles[k].related_files[0].file,
-                                'data':null
-                            }
-                        }, experimentDetails);
-                    } else {
-                        fileDetail[tempFiles[k]['@id']] = _.extend({
-                            'data' : tempFiles[k]
-                        }, experimentDetails);
-                    }
-                }
-                var usedRelations = [];
-                for(k=0;k<tempFiles.length;k++){
-                    if(_.contains(Object.keys(relatedFiles), tempFiles[k]['@id'])){
-                        if(_.contains(usedRelations, tempFiles[k]['@id'])){
-                            // skip already-added related files
-                            delete fileDetail[relatedFiles[tempFiles[k]['@id']]];
-                        }else{
-                            fileDetail[relatedFiles[tempFiles[k]['@id']]]['related']['data'] = tempFiles[k];
-                            usedRelations.push(relatedFiles[tempFiles[k]['@id']]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return { 'fileDetail' : fileDetail, 'emptyExps' : emptyExps };
 }
