@@ -63,6 +63,6 @@ class Modification(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, modification_type=None, target_of_mod=None):
+    def display_title(self, request, modification_type=None, genomic_change=None, target_of_mod=None):
         # biosample = '/biosample/'+ self.properties['biosample']
-        return self.modification_name_short(request, modification_type, target_of_mod)
+        return self.modification_name_short(request, modification_type, genomic_change, target_of_mod)
