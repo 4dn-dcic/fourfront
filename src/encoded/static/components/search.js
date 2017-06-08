@@ -403,20 +403,18 @@ class ControlsAndResults extends React.Component {
         var thisTypeTitle = Schemas.getTitleForType(thisType);
         var abstractType = Schemas.getAbstractTypeForType(thisType);
         var hiddenColumns = null;
-        if (abstractType && abstractType !== thisType) {
+        if ((abstractType && abstractType !== thisType) || (!abstractType && thisType !== 'Item')) {
             hiddenColumns = ['@type'];
         }
 
-        // Render out button for "Select" if we have a props.selectCallback
-        var constantColumnDefinitions = SearchResultTable.defaultProps.constantColumnDefinitions.slice(0);
+        var columnDefinitionOverrides = {};
+        
+        // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
         if (typeof this.props.selectCallback === 'function'){
-            var titleBlockColDefIndex = _.findIndex(constantColumnDefinitions, { 'field' : 'display_title' }); // Or just use columnDefinitions[0] ?
-            if (typeof this.props.selectCallback === 'function' && typeof titleBlockColDefIndex === 'number' && titleBlockColDefIndex > -1){
-                var newColDef = _.clone(constantColumnDefinitions[titleBlockColDefIndex]);
-                var origRenderFxn = newColDef.render;
-                newColDef.minColumnWidth = 120;
-                newColDef.render = (result, columnDefinition, props, width) => {
-                    var currentTitleBlock = origRenderFxn(result, columnDefinition, props, width);
+            columnDefinitionOverrides['display_title'] = {
+                'minColumnWidth' : 120,
+                'render' : (result, columnDefinition, props, width) => {
+                    var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(result, columnDefinition, props, width);
                     var newChildren = currentTitleBlock.props.children.slice(0);
                     newChildren.unshift(
                         <div className="select-button-container" onClick={(e)=>{
@@ -429,9 +427,21 @@ class ControlsAndResults extends React.Component {
                         </div>
                     );
                     return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
-                };
-                constantColumnDefinitions[titleBlockColDefIndex] = newColDef;
-            }
+                }
+            };
+        }
+        
+        // We're on an abstract type; show detailType in type column.
+        if (abstractType && abstractType === thisType){
+            columnDefinitionOverrides['@type'] = {
+                'noSort' : true,
+                'render' : (result, columnDefinition, props, width) => {
+                    if (!Array.isArray(result['@type'])) return null;
+                    var itemType = Schemas.getItemType(result);
+                    if (itemType === thisType) return null;
+                    return Schemas.getTitleForType(itemType);
+                }
+            };
         }
 
         return (
@@ -481,7 +491,7 @@ class ControlsAndResults extends React.Component {
                             columns={context.columns || {}}
                             detailPane={<ResultDetailPane popLink={this.props.selectCallback ? true : false} />}
                             hiddenColumns={hiddenColumns}
-                            constantColumnDefinitions={constantColumnDefinitions}
+                            columnDefinitionOverrideMap={columnDefinitionOverrides}
                             href={this.props.href}
 
                             sortBy={this.props.sortBy}

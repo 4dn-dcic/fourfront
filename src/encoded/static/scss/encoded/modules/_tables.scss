@@ -1224,7 +1224,7 @@ $small-label-accession-font-size : 0.75rem;
 	}
 	&[data-field="display_title"],
 	&[data-field="@type"],
-	&[data-field="lab"] {
+	&[data-field="lab.display_title"] {
 		> .inner {
 			text-align: left;
 		}
@@ -1245,6 +1245,10 @@ $small-label-accession-font-size : 0.75rem;
 		background: transparent;
 		border-radius: 3px;
 		outline: none;
+		> i.icon {
+			position: relative;
+			top: 2px;
+		}
 		&:hover {
 			background-color: #eee;
 		}
@@ -1257,11 +1261,11 @@ $small-label-accession-font-size : 0.75rem;
 		overflow-x: auto;
 		box-shadow: inset 10px 0 10px -10px transparent, inset -10px 0 10px -10px transparent;
 		transition: box-shadow .35s ease;
+		transform: translate3d(0,0,0);
 		.scrollable-container {
 			position: relative;
 			overflow: hidden;
 			width: auto;
-			padding-bottom: 20px;
 
 			.search-headers-row {
 				background-color: #22656d;
@@ -1293,6 +1297,7 @@ $small-label-accession-font-size : 0.75rem;
 								}
 								&.active {
 									color: #fff;
+									text-shadow: 0 0 0 #fff;
 								}
 							}
 
@@ -1306,14 +1311,14 @@ $small-label-accession-font-size : 0.75rem;
 						> .width-adjuster {
 							position: absolute;
 							color: #fff;
-							padding-left: 15px;
+							padding-left: 10px;
 							padding-right: 15px;
 							left: 0;
 							top : 0;
-							margin-left: -17px;
+							margin-left: -12px;
 							z-index: 10;
 							cursor: col-resize;
-							width: 33px;
+							width: 28px;
 							height: 100%;
 							
 							&:after{
@@ -1321,7 +1326,7 @@ $small-label-accession-font-size : 0.75rem;
 								border-left: 1px dotted rgba(255,255,255,0.6);
 								border-right: 1px dotted rgba(255,255,255,0.6);
 								width: 3px;
-								left: 15px;
+								left: 10px;
 
 								top: 9.5px;
 								bottom: 9.5px;
@@ -1343,9 +1348,16 @@ $small-label-accession-font-size : 0.75rem;
 						@include search-result-column-block;
 						> .inner {
 							height: 46px;
+							transition : height .35s ease-out, padding-top .35s ease-out;
 						}
-						&:not(:last-child) > .inner {
+						&:not(:last-child) {
 							border-right: 1px dotted rgba(0,0,0,0.075);
+						}
+						&.no-value {
+							> .inner {
+								
+								//background-color: #f9f9f9;
+							}
 						}
 						&[data-field="display_title"]{
 							.toggle-detail-button-container {
@@ -1365,9 +1377,23 @@ $small-label-accession-font-size : 0.75rem;
 								}
 							}
 						}
-						&[data-field="lab"]{
+						&[data-field="lab.display_title"]{
 							i.user-icon {
 								margin-right: 5px;
+							}
+						}
+					}
+				}
+
+				&.open {
+					> .columns {
+						background-color: rgba(255,255,255,0.75);
+						box-shadow: 0 1px 6px rgba(0,0,0,0.33);
+						> .search-result-column-block {
+							> .inner {
+								padding-top: 20px;
+								padding-bottom: 20px;
+								height : 56px;
 							}
 						}
 					}
@@ -1376,7 +1402,8 @@ $small-label-accession-font-size : 0.75rem;
 				&.loading { // Spinner/loader
 					height : 47px;
 					line-height: 46px;
-					transition: transform .2s linear;
+					transition: transform .5s ease;
+					border-bottom: none;
 				}
 
 				&.fin { // "End of list" block
@@ -1384,32 +1411,53 @@ $small-label-accession-font-size : 0.75rem;
 					height: 47px;
 					line-height: 47px;
 					font-style: italic;
-					transition: transform .2s linear;
 					border-bottom: none;
-					> span {
-						font-family: serif;
+					background-color: #fff;
+					> .inner {
+						transition: transform .5s ease;
+						> span {
+							font-family: serif;
+						}
+
 					}
 				}
 
-				.result-table-detail {
+				&.empty-block {
+					height: 20px;
+					border-bottom: none;
+					background-color: #fff;
+				}
+
+				.result-table-detail-container {
 					border-top: 1px solid rgba(0,0,0,0.075);
-					padding-top: 10px;
-					padding-left: 47px;
-					transition: height .35s ease, transform .2s linear;
-					@include font-size(0.8);
-					> .close-button-container {
-						position: absolute;
-						left: 0px;
-						top: 12px;
-						width: 36px;
-						margin-left: 1px;
-						height: 36px;
-						line-height: 36px;
-						font-size: 1rem;
-						cursor: pointer;
-						border-radius: 3px;
-						&:hover {
-							background-color: rgba(0,0,0,0.075);
+					position: relative;
+					background: rgba(255,255,255, 0.75);
+
+					&.closed {
+						display: none;
+					}
+					.result-table-detail {
+						padding-top: 10px;
+						padding-left: 47px;
+						position: relative;
+						transition: height .35s ease, transform .5s ease;
+						@include font-size(0.8);
+						padding-bottom: 10px;
+						.item-page-detail, .expandable-list { margin-bottom: 0; }
+						> .close-button-container {
+							position: absolute;
+							left: 8px;
+							top: 16px;
+							width: 28px;
+							margin-left: 1px;
+							height: 28px;
+							line-height: 28px;
+							font-size: 1rem;
+							cursor: pointer;
+							border-radius: 3px;
+							&:hover {
+								background-color: rgba(0,0,0,0.075);
+							}
 						}
 					}
 				}
