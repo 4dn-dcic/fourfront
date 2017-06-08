@@ -52,21 +52,6 @@
             "description":"Total number of culturing days since receiving original vial, including pyramid stocking and expansion since thawing the working stock, through to harvest date",
             "type":"number"
         },
-        "culture_duration_units":{
-            "title":"Culture duration units",
-            "comment": "DELETE OR DEPRECATE AS DAY IS SPECIFIED IN DURATION DESCRIPTION",
-            "description":"",
-            "type":"string",
-            "default": "days",
-            "enum": [
-                "minutes",
-                "hours",
-                "days",
-                "weeks",
-                "months",
-                "years"
-            ]
-        },
         "passage_number": {
             "title": "Passage Number",
             "description": "Number of passages since receiving original vial, including pyramid stocking and expansion since thawing the working stock, through to harvest date.",
