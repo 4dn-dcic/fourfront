@@ -236,3 +236,20 @@ def audit_replicate_sets_consistency_check(value, system):
                 yield AuditFailure('inconsistent replicate data', detail, level='ERROR')
 
             return
+
+
+@audit_checker(
+    'experiment_set',
+    frame=['award', 'award.project', 'publications_of_set']
+)
+def audit_external_experiment_sets_have_pub(value, system):
+    '''
+    an experiment set from an external group should have an associated pub
+    '''
+    award = value.get('award', None)
+    if award is not None and award.get('project') == 'External':
+        if not value['publications_of_set']:
+            # we don't have a publications_of_set
+            detail = 'External ExperimentSet {} is missing attribution to a publication'.format(value['@id'])
+            yield AuditFailure('missing mandatory metadata', detail, level='WARNING')
+    return

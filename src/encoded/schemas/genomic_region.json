@@ -1,6 +1,6 @@
 {
     "title": "Genomic Region",
-    "description": "Schema for describing a region of a genome.",
+    "description": "Genome Region from a reference genome assembly.",
     "id": "/profiles/genomic_region.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -21,7 +21,7 @@
             "default": "1"
         },
         "genome_assembly": {
-            "title": "Genome assembly",
+            "title": "Genome Assembly",
             "description": "The genome assembly from which the region was derived",
             "type": "string",
             "enum": [
