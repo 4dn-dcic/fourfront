@@ -60,6 +60,15 @@ def test_audit_experiments_have_raw_files_no_files(testapp, expt_data):
     assert any('Raw files are absent' in error['detail'] for error in errors)
 
 
+def test_audit_experiments_have_raw_files_no_files_cap_c(testapp, expt_data):
+    expt_data['experiment_type'] = 'capture Hi-C'
+    expt = testapp.post_json('/experiment_capture_c', expt_data).json['@graph'][0]
+    res = testapp.get(expt['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    assert any(error['category'] == 'missing data' for error in errors)
+    assert any('Raw files are absent' in error['detail'] for error in errors)
+
+
 def test_audit_experiments_have_raw_files_w_cooked_file(testapp, processed, expt_data):
     expt_data['files'] = [processed['@id']]
     expt = testapp.post_json('/experiment_hi_c', expt_data).json['@graph'][0]
