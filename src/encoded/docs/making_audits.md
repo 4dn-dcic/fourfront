@@ -11,7 +11,7 @@ Guide to where to edit Source Code
     * **schemas** - JSON schemas ([JSONSchema], [JSON-LD]) describing allowed types and values for all metadata objects
     * **tests** - Unit and integration tests
     * **types** -  business logic for dispatching URLs and producing the correct JSON
-    * **upgrade** - python instructions for upgrading old objects stored to the latest 
+    * **upgrade** - python instructions for upgrading old objects stored to the latest
     * **loadxl.py** - python script that defines the schema objects to load
 
 -----
@@ -22,10 +22,10 @@ Adding a new aduit
 1. To add a new audit, navigate to the *audit** directory. Determine what metadata is needed to implement the consistency and integrity check. This helps to determine which object has the appropriate metadata available and where to place the new audit. In the directory make a new python file or edit an exisiting python file named after the determined object.
 
 2. Make a new audit definition, using the metadata needed as a guide to fall into one these 2 categories:
-    
-    * *Contained in an object* - all metadata need for audit are properties of the object where embedded 
+
+    * *Contained in an object* - all metadata need for audit are properties of the object where embedded
 objects referred to by an identifier:
-  
+
         @audit_checker('{metadata_object}', frame='object')
         def audit_new_audit_name(value, system):
             '''
@@ -34,7 +34,7 @@ objects referred to by an identifier:
             pass
 
     * *Requires metadata in other objects* - metadata need for audit are properties of the object as well as properties within embedded objects:
-   
+
         @audit_checker('{metadata_object}', frame=['{linked_object_1}'])
         def audit_new_audit_name(value, system):
             '''
@@ -42,21 +42,37 @@ objects referred to by an identifier:
             '''
             pass
 
+        NOTE: the syntax of frame is a bit odd when you need metadata from other objects in that you need to use a repetitive dotted path notation.
+        Here is an 'extreme' example for an experiment_set_replicate audit that needs information about the experiments, files, biosample and cell_culture_details
+        associated with the Item:
+
+        @audit_checker(
+            'experiment_set_replicate',
+            frame=[
+                'replicate_exps',
+                'replicate_exps.replicate_exp',
+                'replicate_exps.replicate_exp.files.files',
+                'replicate_exps.replicate_exp.replicate_exp',
+                'replicate_exps.replicate_exp.biosample.biosample',
+                'replicate_exps.replicate_exp.biosample.cell_culture_details.cell_culture_details'
+            ]
+        )
+        def audit_replicate_sets_consistency_check(value, system):
 3. Write the logic for the metadata check and determine what the ```AuditFailure``` human readable name when displayed on faceted search and the details of the audit to be displayed. Also determine which of the following 4 categories this audit should fall into:
-    
+
     * *ERROR* - This is wrong no matter what.  Example: term mismatch
     * *NOT COMPLIANT* - This should not be released this way. Example: in progress ChIP experiment with no control
-    * *WARNING* - Informational warning.  Example: This library is paired end but the replicate is single end.  
-    * *DCC ACTION* - DCC needs to update metadata or code to fix. Example NTRs. 
-    
+    * *WARNING* - Informational warning.  Example: This library is paired end but the replicate is single end.
+    * *DCC ACTION* - DCC needs to update metadata or code to fix. Example NTRs.
+
     Example of ```library``` where RNA library should have a size_range specified :
-        
+
         RNAs = ['SO:0000356', 'SO:0000871']
-    
+
         if (value['nucleic_acid_term_id'] in RNAs) and ('size_range' not in value):
             detail = 'RNA library {} requires a value for size_range'.format(value['accession'])
             raise AuditFailure('missing size_range', detail, level='ERROR')
-        
+
 
 4. In the **tests** directory add audit test to an existing/new python file named ```test_audit_{metadata_object}.py```. This example shows the basic structure of setting up ```pytest.fixture``` and test that ```property_1``` is present if ```property_2``` is RNA:
 
@@ -75,4 +91,3 @@ objects referred to by an identifier:
                 for error_type in errors:
                     errors_list.extend(errors[error_type])
                 assert any(error['category'] == 'missing prperty 1' for error in errors_list)
-
