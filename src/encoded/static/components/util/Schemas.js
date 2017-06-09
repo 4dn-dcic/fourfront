@@ -59,8 +59,14 @@ export const Term = {
         return name;
     },
 
-    capitalize : function(word)        { return word.charAt(0).toUpperCase() + word.slice(1);  },
-    capitalizeSentence : function(sen) { return sen.split(' ').map(Term.capitalize).join(' '); }
+    capitalize : function(word)        {
+        if (typeof sen !== 'string') return word;
+        return word.charAt(0).toUpperCase() + word.slice(1);
+    },
+    capitalizeSentence : function(sen) {
+        if (typeof sen !== 'string') return sen;
+        return sen.split(' ').map(Term.capitalize).join(' ');
+    }
 
 };
 

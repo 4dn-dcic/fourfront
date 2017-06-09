@@ -7,14 +7,16 @@ import _ from 'underscore';
 import Draggable from 'react-draggable';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
+import ReactTooltip from 'react-tooltip';
+import Infinite from 'react-infinite';
+import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
 import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { ColumnSorterIcon } from './LimitAndPageControls';
-import ReactTooltip from 'react-tooltip';
-import Infinite from 'react-infinite';
 
+/** @flow */
 
 /**
  * Default value rendering function.
@@ -25,7 +27,7 @@ import Infinite from 'react-infinite';
  * @param {any} props - Props passed down from SearchResultTable/ResultRowColumnBlock instance
  * @returns {string|null} String value or null. Your function may return a React element, as well.
  */
-export function defaultColumnBlockRenderFxn(result, columnDefinition, props, width){
+export function defaultColumnBlockRenderFxn(result : Object, columnDefinition : Object, props : Object, width : number){
     var value = object.getNestedProperty(result, columnDefinition.field);
     if (!value) value = null;
     if (Array.isArray(value)){
@@ -51,7 +53,7 @@ function extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap)
 export const defaultColumnDefinitionMap = {
     'display_title' : {
         'title' : "Title",
-        'widthMap' : {'lg' : 275, 'md' : 200, 'sm' : 180},
+        'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
         'render' : function(result, columnDefinition, props, width){
             var title = getTitleStringFromContext(result);
@@ -83,6 +85,7 @@ export const defaultColumnDefinitionMap = {
     },
     'lab.display_title' : {
         'title' : "Lab",
+        'widthMap' : {'lg' : 220, 'md' : 200, 'sm' : 180},
         'render' : function(result, columnDefinition, props, width){
             var labItem = result.lab;
             if (!labItem) return null;
@@ -400,7 +403,6 @@ class ResultRow extends React.Component {
             nextProps.rowNumber !== this.props.rowNumber ||
             nextProps.headerColumnWidths !== this.props.headerColumnWidths ||
             nextProps.schemas !== this.props.schemas ||
-            nextProps.columnDefinitions !== this.props.columnDefinitions ||
             nextProps.columnDefinitions.length !== this.props.columnDefinitions.length ||
             nextProps.tableContainerScrollLeft !== this.props.tableContainerScrollLeft ||
             nextProps.tableContainerWidth !== this.props.tableContainerWidth
@@ -504,38 +506,48 @@ class HeadersRow extends React.Component {
 
     render(){
         return (
-            <div className="search-headers-row hidden-xs">
-                <div className="columns clearfix">
-                {
-                    this.props.columnDefinitions.map((colDef, i)=>{
-                        var w = this.getWidthFor(i);
-                        var sorterIcon;
-                        if (typeof this.props.sortBy === 'function' && w >= 50){
-                            var { sortColumn, sortBy, sortReverse } = this.props;
-                            sorterIcon = !colDef.noSort && (
-                                <ColumnSorterIcon sortByFxn={sortBy} currentSortColumn={sortColumn} descend={sortReverse} value={colDef.field} />
-                            );
+            <Sticky topOffset={-40} >{ ({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}) => {
+                return (
+                    <div className={"search-headers-row hidden-xs" + (isSticky ? ' stickied' : '')} style={
+                        isSticky ? _.extend({}, style, { 'top' : 40, 'left' : this.props.tableLeftOffset, 'width' : this.props.tableContainerWidth })
+                        : null}
+                    >
+                        <div className="columns clearfix" style={{ 
+                            'left'  : isSticky ? style.left - this.props.tableLeftOffset : null,
+                            'width' : style.width
+                        }}>
+                        {
+                            this.props.columnDefinitions.map((colDef, i)=>{
+                                var w = this.getWidthFor(i);
+                                var sorterIcon;
+                                if (typeof this.props.sortBy === 'function' && w >= 50){
+                                    var { sortColumn, sortBy, sortReverse } = this.props;
+                                    sorterIcon = !colDef.noSort && (
+                                        <ColumnSorterIcon sortByFxn={sortBy} currentSortColumn={sortColumn} descend={sortReverse} value={colDef.field} />
+                                    );
+                                }
+                                return (
+                                    <div
+                                        data-field={colDef.field}
+                                        key={colDef.field}
+                                        className="search-headers-column-block"
+                                        style={{ width : w }}
+                                    >
+                                        <div className="inner">
+                                            { colDef.title }
+                                            { sorterIcon }
+                                        </div>
+                                        <Draggable position={{x:w,y:0}} axis="x" onDrag={this.onAdjusterDrag.bind(this, i)} onStop={this.setHeaderWidths.bind(this, i)}>
+                                            <div className="width-adjuster"/>
+                                        </Draggable>
+                                    </div>
+                                );
+                            })
                         }
-                        return (
-                            <div
-                                data-field={colDef.field}
-                                key={colDef.field}
-                                className="search-headers-column-block"
-                                style={{ width : w }}
-                            >
-                                <div className="inner">
-                                    { colDef.title }
-                                    { sorterIcon }
-                                </div>
-                                <Draggable position={{x:w,y:0}} axis="x" onDrag={this.onAdjusterDrag.bind(this, i)} onStop={this.setHeaderWidths.bind(this, i)}>
-                                    <div className="width-adjuster"/>
-                                </Draggable>
-                            </div>
-                        );
-                    })
-                }
-                </div>
-            </div>
+                        </div>
+                    </div>
+                );
+            }}</Sticky>
         );
     }
 }
@@ -550,7 +562,7 @@ class LoadMoreAsYouScroll extends React.Component {
 
     static defaultProps = {
         'limit' : 25,
-        'rowHeight' : 47
+        'debouncePointerEvents' : 150
     }
 
     constructor(props){
@@ -560,6 +572,8 @@ class LoadMoreAsYouScroll extends React.Component {
         this.getInitialFrom = this.getInitialFrom.bind(this);
         this.rebuiltHref = this.rebuiltHref.bind(this);
         this.handleLoad = this.handleLoad.bind(this);
+        this.handleScrollExt = _.throttle(this.handleScrollExt.bind(this), 50, { trailing: false });
+        this.cancelNoEvents = this.cancelNoEvents.bind(this);
         var state = {
             'isLoading' : false,
             'canLoad' : true
@@ -572,6 +586,11 @@ class LoadMoreAsYouScroll extends React.Component {
 
     componentDidMount(){
         if (typeof this.state.mounted === 'boolean') this.setState({ 'mounted' : true });
+        window.addEventListener('scroll', this.handleScrollExt);
+    }
+
+    componentWillUnmount(){
+        window.removeEventListener('scroll', this.handleScrollExt);
     }
 
     componentWillReceiveProps(nextProps){
@@ -623,21 +642,42 @@ class LoadMoreAsYouScroll extends React.Component {
         });
     }
 
+    handleScrollExt(e){
+        console.log(e, e.currentTarget);
+        e.stopPropagation();
+        if (!this.innerContainerNoEvents && this.props.innerContainerElem){
+            this.props.innerContainerElem.style.pointerEvents = 'none';
+            this.innerContainerNoEvents = true;
+        }
+        if (this.timeout) clearTimeout(this.timeout);
+        this.timeout = setTimeout(this.cancelNoEvents, 250);
+    }
+
+    cancelNoEvents(){
+        //vizUtil.requestAnimationFrame(()=>{
+            if (this.innerContainerNoEvents){
+                this.props.innerContainerElem.style.pointerEvents = '';
+                this.innerContainerNoEvents = false;
+            }
+            this.timeout = null;
+        //});
+    }
+
     render(){
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
+        var elementHeight = _.keys(this.props.openDetailPanes).length === 0 ? this.props.rowHeight : this.props.children.map((c) => {
+            if (typeof this.props.openDetailPanes[c.props['data-key']] === 'number'){
+                return this.props.openDetailPanes[c.props['data-key']];
+            }
+            return this.props.rowHeight;
+        });
         return (
             <Infinite
-                elementHeight={
-                    this.props.children.map((c) => {
-                        if (typeof this.props.openDetailPanes[c.props['data-key']] === 'number'){
-                            return this.props.openDetailPanes[c.props['data-key']];
-                        } 
-                        return this.props.rowHeight;
-                    })
-                }
+                elementHeight={elementHeight}
                 useWindowAsScrollContainer
                 onInfiniteLoad={this.handleLoad}
                 isInfiniteLoading={this.state.isLoading}
+                timeScrollStateLastsForAfterUserScrolls={250}
                 loadingSpinnerDelegate={(
                     <div className="search-result-row loading text-center" style={{
                         'maxWidth' : this.props.tableContainerWidth,
@@ -646,12 +686,51 @@ class LoadMoreAsYouScroll extends React.Component {
                         <i className="icon icon-circle-o-notch icon-spin" />&nbsp; Loading...
                     </div>
                 )}
+                handleScroll={(elem)=>{
+                    /*
+                    //vizUtil.requestAnimationFrame(()=>{
+                        if (this.props.innerContainerElem){
+                            this.props.innerContainerElem.style.pointerEvents = 'none';
+                            this.innerContainerNoEvents = true;
+                        }
+                    //});
+                    setTimeout(this.cancelNoEvents, 10);
+                    */
+                    return false;
+                }}
                 infiniteLoadBeginEdgeOffset={this.state.canLoad ? 200 : undefined}
                 preloadAdditionalHeight={Infinite.containerHeightScaleFactor(2)}
+                preloadBatchSize={Infinite.containerHeightScaleFactor(2)}
             >
                 { this.props.children }
             </Infinite>
         );
+    }
+}
+
+class ShadowBorderLayer extends React.Component {
+
+    shouldComponentUpdate(nextProps){
+        if (this.shadowStateClass(nextProps) !== this.shadowStateClass(this.props)) return true;
+        return false;
+    }
+
+    shadowStateClass(props = this.props){
+        var { fullRowWidth, tableContainerScrollLeft, tableContainerWidth } = props;
+        var shadowBorderClassName = "";
+        if (fullRowWidth > tableContainerWidth){
+            if (tableContainerScrollLeft > 5){
+                shadowBorderClassName += ' shadow-left';
+            }
+            if (tableContainerScrollLeft + tableContainerWidth <= fullRowWidth - 5){
+                shadowBorderClassName += ' shadow-right';
+            }
+        }
+        return shadowBorderClassName;
+    }
+
+    render(){
+        return <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass()} />;
     }
 }
 
@@ -686,8 +765,7 @@ class DimensioningContainer extends React.Component {
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.throttledUpdate = _.debounce(this.forceUpdate.bind(this), 100);
+        this.throttledUpdate = _.debounce(this.forceUpdate.bind(this), 500);
         this.toggleDetailPaneOpen = this.toggleDetailPaneOpen.bind(this);
         this.setDetailHeight = this.setDetailHeight.bind(this);
         this.onScroll = this.onScroll.bind(this);
@@ -708,7 +786,6 @@ class DimensioningContainer extends React.Component {
         var state = { 'mounted' : true };
         if (!isServerSide()){
             if (this.refs.innerContainer){
-                this.refs.innerContainer.addEventListener('scroll', this.onScroll);
                 var fullRowWidth = ResultRow.fullRowWidth(this.props.columnDefinitions, this.state.mounted, []);
                 if (this.refs.innerContainer.offsetWidth < fullRowWidth){
                     state.widths = DimensioningContainer.findAndDecreaseColumnWidths(this.props.columnDefinitions);
@@ -735,12 +812,6 @@ class DimensioningContainer extends React.Component {
         if (pastState.results.length !== this.state.results.length) ReactTooltip.rebuild();
     }
 
-    componentWillUnmount(){
-        if (!isServerSide()){
-            this.refs.innerContainer.removeEventListener('scroll', this.onScroll);
-        }
-    }
-
     toggleDetailPaneOpen(rowKey, cb = null){
         var openDetailPanes = _.clone(this.state.openDetailPanes);
         if (openDetailPanes[rowKey]){
@@ -759,8 +830,23 @@ class DimensioningContainer extends React.Component {
     }
 
     onScroll(e){
+        if (document && document.querySelectorAll && this.refs && this.refs.innerContainer && this.refs.innerContainer.childNodes[0]){
+            var detailPanes = document.querySelectorAll('.result-table-detail.collapse.in');
+            if (detailPanes && detailPanes.length > 0){
+                var transformStyle = vizUtil.style.translate3d(this.refs.innerContainer.scrollLeft);
+                vizUtil.requestAnimationFrame(function(){
+                    detailPanes.forEach(function(d){
+                        d.style.transform = transformStyle;
+                    });
+                });
+            }
+        }
         this.throttledUpdate();
         return false;
+    }
+
+    getTableLeftOffset(){
+        return (this.refs && this.refs.innerContainer && layout.getElementOffset(this.refs.innerContainer).left) || null;
     }
 
     getTableDims(){
@@ -772,7 +858,8 @@ class DimensioningContainer extends React.Component {
         }
         return {
             'tableContainerWidth' : (this.refs && this.refs.innerContainer && this.refs.innerContainer.offsetWidth) || null,
-            'tableContainerScrollLeft' : (this.refs && this.refs.innerContainer && typeof this.refs.innerContainer.scrollLeft === 'number') ? this.refs.innerContainer.scrollLeft : null
+            'tableContainerScrollLeft' : (this.refs && this.refs.innerContainer && typeof this.refs.innerContainer.scrollLeft === 'number') ? this.refs.innerContainer.scrollLeft : null,
+            'tableLeftOffset' : this.getTableLeftOffset()
         };
     }
 
@@ -816,62 +903,63 @@ class DimensioningContainer extends React.Component {
         var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, this.state.mounted, this.state.widths);
         var responsiveGridSize = !isServerSide() && this.state.mounted && layout.responsiveGridState();
 
-        var { tableContainerWidth, tableContainerScrollLeft } = this.getTableDims();
-
-        var outerClassName = "search-results-container";
-        if (fullRowWidth > tableContainerWidth){
-            if (tableContainerScrollLeft > 5){
-                outerClassName += ' shadow-left';
-            }
-            if (tableContainerScrollLeft + tableContainerWidth <= fullRowWidth - 5){
-                outerClassName += ' shadow-right';
-            }
-        }
+        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset } = this.getTableDims();
 
         var canLoadMore = (this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state &&
             typeof this.refs.loadMoreAsYouScroll.state.canLoad === 'boolean') ? this.refs.loadMoreAsYouScroll.state.canLoad : null;
 
         return (
-            <div className={outerClassName}>
-                <div className="inner-container" ref="innerContainer">
-                    <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
-                        { !responsiveGridSize || responsiveGridSize !== 'xs' ? 
-                        <HeadersRow
-                            columnDefinitions={columnDefinitions}
-                            mounted={this.state.mounted}
-                            headerColumnWidths={this.state.widths}
-                            setHeaderWidths={this.setHeaderWidths}
-                            sortBy={sortBy}
-                            sortColumn={sortColumn}
-                            sortReverse={sortReverse}
-                            defaultMinColumnWidth={defaultMinColumnWidth}
-                        />
-                        : null }
-                        <LoadMoreAsYouScroll
-                            results={this.state.results}
-                            mounted={this.state.mounted}
-                            href={href}
-                            limit={limit}
-                            setResults={this.setResults}
-                            tableContainerWidth={tableContainerWidth}
-                            tableContainerScrollLeft={tableContainerScrollLeft}
-                            ref="loadMoreAsYouScroll"
-                            openDetailPanes={this.state.openDetailPanes}
-                        >
-                        { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft) }
-                        </LoadMoreAsYouScroll>
-                        { canLoadMore === false ?
-                            <div className="fin search-result-row">
-                                <div className="inner" style={{
-                                    'maxWidth' : tableContainerWidth,
-                                    'transform' : vizUtil.style.translate3d(tableContainerScrollLeft)
-                                }}>
-                                    - <span>fin</span> -
-                                </div>
+            <div className="search-results-outer-container">
+                <StickyContainer>
+                    <div className="search-results-container">
+                        <div className="inner-container" ref="innerContainer" onScroll={this.onScroll}>
+                            <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
+                                
+                                { !responsiveGridSize || responsiveGridSize !== 'xs' ? 
+                                
+                                    <HeadersRow
+                                        columnDefinitions={columnDefinitions}
+                                        mounted={this.state.mounted}
+                                        headerColumnWidths={this.state.widths}
+                                        setHeaderWidths={this.setHeaderWidths}
+                                        sortBy={sortBy}
+                                        sortColumn={sortColumn}
+                                        sortReverse={sortReverse}
+                                        defaultMinColumnWidth={defaultMinColumnWidth}
+                                        tableLeftOffset={tableLeftOffset}
+                                        tableContainerWidth={tableContainerWidth}
+                                        rowHeight={this.props.rowHeight}
+                                        results={this.state.results}
+                                    />
+                                
+                                : null }
+                                <LoadMoreAsYouScroll
+                                    results={this.state.results}
+                                    mounted={this.state.mounted}
+                                    href={href}
+                                    limit={limit}
+                                    setResults={this.setResults}
+                                    tableContainerWidth={tableContainerWidth}
+                                    tableContainerScrollLeft={tableContainerScrollLeft}
+                                    ref="loadMoreAsYouScroll"
+                                    openDetailPanes={this.state.openDetailPanes}
+                                    rowHeight={this.props.rowHeight}
+                                    innerContainerElem={this.refs && this.refs.innerContainer}
+                                >
+                                { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft) }
+                                </LoadMoreAsYouScroll>
                             </div>
-                        : <div className="search-result-row empty-block"/> }
+                        </div>
+                        <ShadowBorderLayer tableContainerScrollLeft={tableContainerScrollLeft} tableContainerWidth={tableContainerWidth} fullRowWidth={fullRowWidth} />
                     </div>
-                </div>
+                </StickyContainer>
+                { canLoadMore === false ?
+                    <div className="fin search-result-row">
+                        <div className="inner">
+                            - <span>fin</span> -
+                        </div>
+                    </div>
+                : <div className="search-result-row empty-block"/> }
             </div>
         );
     }
@@ -918,7 +1006,7 @@ export class SearchResultTable extends React.Component {
     static defaultProps = {
         'columns' : {},
         'detailPane' : <DefaultDetailPane/>,
-        'defaultWidthMap' : { 'lg' : 180, 'md' : 160, 'sm' : 120 },
+        'defaultWidthMap' : { 'lg' : 200, 'md' : 180, 'sm' : 120 },
         'defaultMinColumnWidth' : 55,
         'constantColumnDefinitions' : extendColumnDefinitions([
             { 'field' : 'display_title', },
@@ -929,6 +1017,7 @@ export class SearchResultTable extends React.Component {
         'columnDefinitionOverrideMap' : null,
         'hiddenColumns' : null,
         'limit' : 25,
+        'rowHeight' : 47
     }
 
     /**
@@ -952,9 +1041,9 @@ export class SearchResultTable extends React.Component {
         }
         if (columnDefinitionOverrideMap) columnDefinitions = extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap);
         return (
-            <layout.WindowResizeUpdateTrigger>
-                <DimensioningContainer {...this.props} columnDefinitions={columnDefinitions} ref="container"/>
-            </layout.WindowResizeUpdateTrigger>
+                <layout.WindowResizeUpdateTrigger>
+                    <DimensioningContainer {...this.props} columnDefinitions={columnDefinitions} ref="container"/>
+                </layout.WindowResizeUpdateTrigger>
         );
     }
 }

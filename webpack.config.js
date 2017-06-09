@@ -1,6 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var env = process.env.NODE_ENV;
+var FlowtypePlugin = require('flowtype-loader/plugin');
 
 var PATHS = {
     static: path.resolve(__dirname, 'src/encoded/static'),
@@ -36,6 +37,8 @@ if (env === 'production') {
     devTool = 'source-map';
 }
 
+plugins.push(new FlowtypePlugin());
+
 var preLoaders = [
     // Strip @jsx pragma in react-forms, which makes babel abort
     {
@@ -45,6 +48,11 @@ var preLoaders = [
             search: '@jsx',
             replace: 'jsx',
         }
+    },
+    {
+        test: /\.js$/,
+        loader: "flowtype",
+        exclude: /node_modules/
     }
 ];
 

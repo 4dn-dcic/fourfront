@@ -456,12 +456,9 @@ class ControlsAndResults extends React.Component {
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList
-                            {...this.props}
                             className="with-header-bg"
                             facets={facets}
                             filters={filters}
-                            thisType={thisType}
-                            expSetFilters={this.props.expSetFilters}
                             onFilter={this.props.onFilter}
                             filterFacetsFxn={FacetList.filterFacetsForSearch}
                             isTermSelected={this.props.isTermSelected}
@@ -509,6 +506,12 @@ class ControlsAndResults extends React.Component {
 
 export class Search extends React.Component {
 
+    fullWidthStyle(){
+        if (!this.refs || !this.refs.container) return null;
+        //var marginLeft = 
+
+    }
+
     componentDidMount(){
         ReactTooltip.rebuild();
     }
@@ -532,7 +535,7 @@ export class Search extends React.Component {
         return (
             <div>
                 {facetdisplay ?
-                    <div className="browse-page-container">
+                    <div className="browse-page-container" ref="container">
                         <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}
