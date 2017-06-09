@@ -8,7 +8,8 @@ import Draggable from 'react-draggable';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
-import Infinite from 'react-infinite';
+//import Infinite from 'react-infinite';
+import Infinite from './../../lib/react-infinite/src/react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
@@ -572,8 +573,7 @@ class LoadMoreAsYouScroll extends React.Component {
         this.getInitialFrom = this.getInitialFrom.bind(this);
         this.rebuiltHref = this.rebuiltHref.bind(this);
         this.handleLoad = this.handleLoad.bind(this);
-        this.handleScrollExt = _.throttle(this.handleScrollExt.bind(this), 50, { trailing: false });
-        this.cancelNoEvents = this.cancelNoEvents.bind(this);
+        this.handleScrollingStateChange = this.handleScrollingStateChange.bind(this);
         var state = {
             'isLoading' : false,
             'canLoad' : true
@@ -642,25 +642,14 @@ class LoadMoreAsYouScroll extends React.Component {
         });
     }
 
-    handleScrollExt(e){
-        console.log(e, e.currentTarget);
-        e.stopPropagation();
-        if (!this.innerContainerNoEvents && this.props.innerContainerElem){
-            this.props.innerContainerElem.style.pointerEvents = 'none';
-            this.innerContainerNoEvents = true;
-        }
-        if (this.timeout) clearTimeout(this.timeout);
-        this.timeout = setTimeout(this.cancelNoEvents, 250);
-    }
-
-    cancelNoEvents(){
-        //vizUtil.requestAnimationFrame(()=>{
-            if (this.innerContainerNoEvents){
+    handleScrollingStateChange(isScrolling){
+        vizUtil.requestAnimationFrame(()=>{
+            if (isScrolling){
+                this.props.innerContainerElem.style.pointerEvents = 'none';
+            } else {
                 this.props.innerContainerElem.style.pointerEvents = '';
-                this.innerContainerNoEvents = false;
             }
-            this.timeout = null;
-        //});
+        });
     }
 
     render(){
@@ -678,6 +667,7 @@ class LoadMoreAsYouScroll extends React.Component {
                 onInfiniteLoad={this.handleLoad}
                 isInfiniteLoading={this.state.isLoading}
                 timeScrollStateLastsForAfterUserScrolls={250}
+                onChangeScrollState={this.handleScrollingStateChange}
                 loadingSpinnerDelegate={(
                     <div className="search-result-row loading text-center" style={{
                         'maxWidth' : this.props.tableContainerWidth,
@@ -686,18 +676,7 @@ class LoadMoreAsYouScroll extends React.Component {
                         <i className="icon icon-circle-o-notch icon-spin" />&nbsp; Loading...
                     </div>
                 )}
-                handleScroll={(elem)=>{
-                    /*
-                    //vizUtil.requestAnimationFrame(()=>{
-                        if (this.props.innerContainerElem){
-                            this.props.innerContainerElem.style.pointerEvents = 'none';
-                            this.innerContainerNoEvents = true;
-                        }
-                    //});
-                    setTimeout(this.cancelNoEvents, 10);
-                    */
-                    return false;
-                }}
+                onChangeScrollState={this.handleScrollingStateChange}
                 infiniteLoadBeginEdgeOffset={this.state.canLoad ? 200 : undefined}
                 preloadAdditionalHeight={Infinite.containerHeightScaleFactor(2)}
                 preloadBatchSize={Infinite.containerHeightScaleFactor(2)}

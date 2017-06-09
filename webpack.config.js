@@ -59,7 +59,7 @@ var preLoaders = [
 var loaders = [
     // add babel to load .js files as ES6 and transpile JSX
     {
-        test: /\.js$/,
+        test: /\.(js|jsx)$/,
         include: [
             path.resolve(__dirname, 'src/encoded/static'),
         ],
@@ -70,6 +70,10 @@ var loaders = [
         loader: 'json',
     }
 ];
+
+var resolve = {
+    extensions : ["", ".webpack.js", ".web.js", ".js", ".json", '.jsx']
+};
 
 module.exports = [
     // for browser
@@ -93,6 +97,8 @@ module.exports = [
             preLoaders: preLoaders,
             loaders: loaders,
         },
+        resolve : resolve,
+        resolveLoader : resolve,
         devtool: devTool,
         plugins: plugins,
         debug: true
@@ -127,6 +133,8 @@ module.exports = [
             preLoaders: preLoaders,
             loaders: loaders,
         },
+        resolve : resolve,
+        resolveLoader : resolve,
         devtool: devTool, // No way to debug/log serverside JS currently, so may as well speed up builds for now.
         plugins: plugins,
         debug: false // See devtool comment.
