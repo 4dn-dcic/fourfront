@@ -1,6 +1,6 @@
 {
     "title": "Vendor",
-    "description": "Schema for submitting an originating lab or vendor.",
+    "description": "Lab or Company that is the Source for a Product/Sample.",
     "id": "/profiles/vendor.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

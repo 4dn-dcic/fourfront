@@ -1,6 +1,6 @@
 {
     "title": "Biosample",
-    "description": "Schema for submitting a biosample.",
+    "description": "Biological material used in the experiment with information on modifications, treatments and preparation.",
     "id": "/profiles/biosample.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -59,14 +59,14 @@
             }
         },
         "cell_culture_details": {
-            "title": "Cell culture related information",
+            "title": "Cell Culture Information",
             "description": "Link to biosample_cell_culture object that carries all cell culture related parameters",
             "type": "string",
             "ff_flag": "clear clone",
             "linkTo": "BiosampleCellCulture"
         },
         "modifications": {
-            "title": "Stable genomic modifications",
+            "title": "Stable Genomic Modifications",
             "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
             "comment": "See Modifications sheet or collection for existing items",
             "type": "array",
@@ -92,7 +92,7 @@
             }
         },
         "biosample_relation": {
-            "title": "Biosample relations",
+            "title": "Biosample Relations",
             "description": "Related biosamples",
             "type": "array",
             "ff_flag": "second round",
@@ -121,7 +121,7 @@
     },
     "facets": {
         "biosource.biosource_type": {
-            "title": "Biosource type"
+            "title": "Biosource Type"
         },
         "biosource_summary": {
             "title": "Biosource"

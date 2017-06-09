@@ -1,6 +1,6 @@
 {
     "title": "Imaging Path",
-    "description": "Schema for submitting a imaging path from taget to the label.",
+    "description": "Channel/Probe/Target/Dye information for imaging experiments.",
     "id": "/profiles/imaging_path.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -44,7 +44,7 @@
             ]
         },
         "target": {
-            "title": "Targets of labelling",
+            "title": "Targets of Labelling",
             "description": "Protein/RNA/DNA or cellular structure targeted for labeling",
             "type": "array",
             "items": {
@@ -54,12 +54,12 @@
             }
         },
         "labeled_probe": {
-            "title": "Probe with the label",
+            "title": "Probe with the Label",
             "description": "Antibodies/Primers/Chemicals that carry the label",
             "type": "string"
         },
         "type_labeled_probe": {
-            "title": "Type of labeled probe",
+            "title": "Type of Labeled Probe",
             "description": "General classification of the labeled probe",
             "type": "string",
             "enum": [
@@ -73,7 +73,7 @@
         },
         "labels": {
             "title": "Labels",
-            "description": "Fluorescent labels used for ",
+            "description": "Fluorescent labels used for imaging",
             "type": "array",
             "internal_comment": "Link to a label database through ontologies",
             "items": {
@@ -82,7 +82,7 @@
             }
         },
         "other_probes": {
-            "title": "mediators of target labeling",
+            "title": "Mediators of Target Labeling",
             "description": "Antibodies/Primers/Chemicals used for labeling the target",
             "type": "array",
             "items": {

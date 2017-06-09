@@ -1,5 +1,5 @@
 {
-    "title": "Protocol Cell Culture",
+    "title": "Cell culture details for biosample preparation",
     "description": "Cell culture specific parameters and protocols.",
     "id": "/profiles/biosample_cell_culture.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -29,7 +29,7 @@
         },
         "culture_start_date": {
             "title": "Culture start date",
-            "description": "The date the culture was started.",
+            "description": "The date the he cells were most recently thawed and cultured for the submitted experiment.",
             "comment": "Date can be submitted in as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD ((TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
@@ -39,7 +39,7 @@
         },
         "culture_harvest_date": {
             "title": "Culture harvest date",
-            "description": "The date the culture was harvested.",
+            "description": "The date the culture was harvested for biosample preparation.",
             "comment": "Date can be submitted in as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD ((TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
@@ -48,43 +48,54 @@
             ]
         },
         "culture_duration":{
-            "title":"Culture duration",
-            "description":"Time cells in culture since first thaw",
+            "title":"Total Days in Culture",
+            "description":"Total number of culturing days since receiving original vial, including pyramid stocking and expansion since thawing the working stock, through to harvest date",
             "type":"number"
-        },
-        "culture_duration_units":{
-            "title":"",
-            "description":"",
-            "type":"string",
-            "enum": [
-                "minutes",
-                "hours",
-                "days",
-                "weeks",
-                "months",
-                "years"
-            ]
-        },
-        "protocol_SOP_deviations": {
-            "title": "Additional Protocol describing Deviations from SOP",
-            "description": "Protocol with deviations from SOP",
-            "type": "string",
-            "linkTo": "Protocol"
-        },
-        "protocol_additional": {
-            "title": "Additional Protocol for Cell Culture",
-            "description": "Protocol for additonal treatments like synchronization",
-            "type": "string",
-            "linkTo": "Protocol"
         },
         "passage_number": {
             "title": "Passage Number",
-            "description": "Number of passages of the cell culture",
+            "description": "Number of passages since receiving original vial, including pyramid stocking and expansion since thawing the working stock, through to harvest date.",
             "type": "integer"
+        },
+        "doubling_number": {
+            "title": "Population Doubling Number",
+            "description": "The number of times the population has doubled since the time of thaw (culture start date) until harvest.",
+            "comment": "This may be reported in different ways - eg. 1) passage ratio and number of passages or 2) direct cell counts.",
+            "type": "string"
+        },
+        "doubling_time": {
+            "title": "Population Doubling Time",
+            "description": "The average time from thaw (culture start date) until harvest it takes for the population to double.",
+            "comment": "Researchers can record the number of times they split the cells and by what ratio as a simple approximation of doubling time. This is important for some cell lines eg. IMR90 (a mortal line) and HI and H9 human stem cells.",
+            "type": "string"
+        },
+        "protocol_SOP_deviations": {
+            "title": "Additional Protocol Describing Deviations from SOP",
+            "description": "Protocol with deviations from SOP",
+            "type": "string",
+            "linkTo": "Protocol",
+            "comment": "DELETE/DEPRECATE use array"
+        },
+        "protocol_addtional": {
+            "title": "Additional Protocol Describing Other culture manipulations",
+            "description": "Protocol with other protocol information",
+            "type": "string",
+            "linkTo": "Protocol",
+            "comment": "DELETE/DEPRECATE use array of protocols"
+        },
+        "protocols_additional": {
+            "title": "Additional Protocols used in Cell Culture",
+            "description": "Protocols describing deviations from 4DN SOPs, including additional culture manipulations eg. stem cell differentiation or cell cycle synchronization if they do not follow recommended 4DN SOPs",
+            "type": "array",
+            "items": {
+                "title": "Culture Protocol",
+                "type": "string",
+                "linkTo": "Protocol"
+            }
         },
         "differentiation_state": {
             "title": "Differentiation State",
-            "description": "Description of markers used to determine the differentiation state of embryonic stem cells.",
+            "description": "For cells that have undergone differentiation a description of the differention state and markers used to determine the state.",
             "type": "string"
         },
         "morphology_image": {
@@ -94,25 +105,30 @@
             "linkTo": "Image"
         },
         "karyotype_image": {
-            "title": "Karyotype",
+            "title": "Karyotype Image",
             "description": "Image of the karyotype of potentially genomically unstable lines",
             "comment":"If passage number is more then 10, please supply a karyotype image, or karyotype information from sequencing data.",
             "type": "string",
             "linkTo": "Image"
         },
         "karyotype": {
-            "title": "Karyotype",
+            "title": "Karyotype Description",
             "description": "Chromosome count and any noted rearrangements or copy number variation",
             "type": "string"
         },
         "synchronization_stage": {
-            "title": "Synchronization stage",
-            "description": "Cell cycle stage at which culture is synchronized",
+            "title": "Synchronization Stage",
+            "description": "If a culture is synchronized the cell cycle stage from which the biosample used in an experiment is prepared",
             "type": "string"
+        },
+        "cell_line_lot_number": {
+            "title": "Cell Line Lot",
+            "description": "For 4DN Tier2 or unclassified cell lines - a lot number or other information to uniquely identify the source/lot of the cells",
+            "type":  "string"
         },
         "follows_sop": {
             "title": "Follows SOP",
-            "description": "Flag to indicate if the 4DN SOP for the specified cell line was followed - Yes or No",
+            "description": "Flag to indicate if all the 4DN SOPs for the specified cell line was followed - Yes or No",
             "type": "string",
             "enum": ["Yes", "No"]
         }
