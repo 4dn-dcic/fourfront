@@ -1,9 +1,9 @@
 'use strict';
 
-var React = require('react');
-var { Alert, Fade } = require('react-bootstrap');
-var _ = require('underscore');
-var store = require('../store');
+import React from 'react';
+import { Alert, Fade } from 'react-bootstrap';
+import _ from 'underscore';
+import * as store from '../store';
 
 
 const defaultNavigateDisappearThreshold = 1;
