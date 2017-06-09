@@ -232,12 +232,11 @@ def test_name_for_file_is_accession(registry, fastq_json):
     assert my_file.__name__ == fastq_json['accession']
 
 
-def test_file_type(registry, fastq_json):
-    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = FileFastq.create(registry, uuid, fastq_json)
-    assert 'gz' == my_file.file_type('gz')
-    assert "fastq gz" == my_file.file_type('fastq', 'gz')
-
+# def test_file_type(registry, fastq_json):
+#    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
+#    my_file = FileFastq.create(registry, uuid, fastq_json)
+#    assert 'gz' == my_file.file_type('gz')
+#    assert "fastq gz" == my_file.file_type('fastq', 'gz')
 
 
 def test_post_upload_only_on_uploading(registry, fastq_json, request):
@@ -279,5 +278,3 @@ def test_workflowrun_input_rev_link(testapp, fastq_json, workflow_run_json):
 
     new_file = testapp.get(res['@id']).json
     assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
-
-
