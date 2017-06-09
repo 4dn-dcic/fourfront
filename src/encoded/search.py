@@ -98,7 +98,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     if size == 'all':
         es_results = get_all_results(search)
     elif size:
-        size_search = search[from_:size]
+        offset_size = from_ + size
+        size_search = search[from_:offset_size]
         es_results = size_search.execute().to_dict()
     else:
         # fallback size for elasticsearch is 10
@@ -211,8 +212,9 @@ def get_pagination(request):
 def get_all_results(search):
     from_ = 0
     sizeIncrement = 1000 # Decrease this to like 5 or 10 to test.
+    size = from_ + sizeIncrement
 
-    first_search = search[from_:sizeIncrement] # get aggregations from here
+    first_search = search[from_:size] # get aggregations from here
     es_result = first_search.execute().to_dict()
 
     total = es_result['hits'].get('total',0)
@@ -227,7 +229,8 @@ def get_all_results(search):
     while extraRequestsNeeded > 0:
         # print(str(extraRequestsNeeded) + " requests left to get all results.")
         from_ = from_ + sizeIncrement
-        subsequent_search = search[from_:sizeIncrement]
+        size = from_ + sizeIncrement
+        subsequent_search = search[from_:size]
         subsequent_es_result = subsequent_search.execute().to_dict()
         es_result['hits']['hits'] = es_result['hits']['hits'] + subsequent_es_result['hits'].get('hits', [])
         extraRequestsNeeded -= 1
@@ -540,7 +543,7 @@ def initialize_facets(types, doc_types, search_audit, principals):
 def set_facets(search, facets, used_filters, principals, doc_types):
     """
     Sets facets in the query using filters
-    ES5: simply sets aggs by calling
+    ES5: simply sets aggs by calling update_from_dict after adding them in
 
     :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
     :param used_filters: Dict of filters which are set for the ES query. Key is field type, e.g. 'experiments_in_set.award.project', and value is list of terms (strings).
