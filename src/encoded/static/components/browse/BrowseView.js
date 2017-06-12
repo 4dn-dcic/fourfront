@@ -1,5 +1,7 @@
 'use strict';
 
+/* @flow */
+
 import React from 'react';
 import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
@@ -148,6 +150,7 @@ export class ExperimentSetDetailPane extends React.Component {
 }
 
 
+
 const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'display_title', },
     { 'field' : 'experiments_in_set.experiment_type', },
@@ -155,6 +158,79 @@ const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'lab.display_title', },
     { 'field' : 'date_created',  }
 ], defaultColumnDefinitionMap);
+
+
+export class ExperimentSetCheckBox extends React.Component {
+
+    static isDisabled(files: Array){ return files.length === 0; }
+
+    static isAllFilesChecked(selectedFiles: Set, allFiles: Array){ return selectedFiles.size === allFiles.length && !ExperimentSetCheckBox.isDisabled(allFiles); }
+
+    static isIndeterminate(selectedFiles, allFiles){ return selectedFiles.size > 0 && selectedFiles.size < allFiles.length; }
+
+    render(){
+        var props = this.props;
+        return(
+            <input
+                checked={props.checked}
+                disabled={props.disabled}
+                onChange={props.onChange}
+                type="checkbox"
+                ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}}
+            />
+        );
+    }
+}
+
+/**
+ * IN PROGRESS -- TODO: Decide if we should store "selectedFiles" or "unselectedFiles" (re: 'All files in facet selection are selected by default')
+ * 
+ * @export
+ * @class SelectedFilesController
+ * @extends {React.Component}
+ */
+export class SelectedFilesController extends React.Component {
+
+    static defaultProps = {
+        'initiallySelectedFiles' : []
+    }
+
+    constructor(props){
+        super(props);
+        this.selectFile = this.selectFile.bind(this);
+        this.unselectFile = this.unselectFile.bind(this);
+        this.state = {
+            'selectedFiles' : new Set(props.initiallySelectedFiles)
+        };
+    }
+
+    selectFile(uuid: string){
+        if (this.state.selectedFiles.has(uuid)){
+            throw new Error("File already selected!");
+        }
+        var newSet = new Set(this.state.selectedFiles);
+        newSet.add(uuid);
+        this.setState({ 'selectedFiles' : newSet });
+    }
+
+    unselectFile(uuid: string){
+        if (!this.state.selectedFiles.has(uuid)){
+            throw new Error("File not in set!");
+        }
+        var newSet = new Set(this.state.selectedFiles);
+        newSet.remove(uuid);
+        this.setState({ 'selectedFiles' : newSet });
+    }
+
+    render(){
+        return React.cloneElement(this.props.children, {
+            'selectedFiles' : this.state.selectedFiles,
+            'selectFile' : this.selectFile,
+            'unselectFile' : this.unselectFile
+        });
+    }
+
+}
 
 
 /**
@@ -183,7 +259,8 @@ class ResultTableContainer extends React.Component {
             'experiments_in_set.biosample.biosource_summary' : {
                 'title' : "Biosource"
             }
-        }
+        },
+        'constantHiddenColumns' : ['experimentset_type']
     }
 
     constructor(props){
@@ -236,6 +313,29 @@ class ResultTableContainer extends React.Component {
         return false;
     }
 
+    /**
+     * IN PROGRESS --- TODO: See SelectedFilesController
+     */
+    colDefOverrides(){
+        return _.extend({}, this.props.columnDefinitionOverrides, {
+            'display_title' : _.extend({}, defaultColumnDefinitionMap.display_title, {
+                'render' : (expSet, columnDefinition, props, width) => {
+                    var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
+                    var newChildren = origTitleBlock.props.children.slice(0);
+                    newChildren.unshift(
+                        <ExperimentSetCheckBox
+                            checked={allFilesChecked}
+                            indeterminate={indeterminate}
+                            disabled={disabled}
+                            onChange={this.handleCheck}
+                        />
+                    );
+                    return React.cloneElement(origTitleBlock, { 'children' : newChildren });
+                }
+            })
+        });
+    }
+
     render() {
         var facets = this.props.context.facets;
         var results = this.props.context['@graph'];
@@ -272,7 +372,7 @@ class ResultTableContainer extends React.Component {
                         detailPane={ <ExperimentSetDetailPane expSetFilters={this.props.expSetFilters} /> }
                         stickyHeaderTopOffset={-78}
                         constantColumnDefinitions={browseTableConstantColumnDefinitions}
-                        hiddenColumns={['experimentset_type']}
+                        hiddenColumns={this.props.constantHiddenColumns}
                         columnDefinitionOverrideMap={this.props.columnDefinitionOverrides}
                         href={this.props.href}
 

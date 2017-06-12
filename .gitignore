@@ -14,6 +14,7 @@ coverage.xml
 /eggs/
 /.eggs/
 /extends/
+/jsconfig.json
 /node_modules/
 /documentation/
 /ontology.json

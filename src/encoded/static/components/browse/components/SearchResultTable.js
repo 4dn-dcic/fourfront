@@ -27,7 +27,7 @@ import { ColumnSorterIcon } from './LimitAndPageControls';
  * @param {any} props - Props passed down from SearchResultTable/ResultRowColumnBlock instance
  * @returns {string|null} String value or null. Your function may return a React element, as well.
  */
-export function defaultColumnBlockRenderFxn(result : Object, columnDefinition : Object, props : Object, width : number){
+export function defaultColumnBlockRenderFxn(result: Object, columnDefinition: Object, props: Object, width: number){
     var value = object.getNestedProperty(result, columnDefinition.field);
     if (!value) value = null;
     if (Array.isArray(value)){ // getNestedProperty may return a multidimensional array, # of dimennsions depending on how many child arrays were encountered in original result obj.
@@ -45,7 +45,7 @@ export function defaultColumnBlockRenderFxn(result : Object, columnDefinition : 
 }
 
 
-export function extendColumnDefinitions(columnDefinitions : Array<Object>, columnDefinitionOverrideMap : Object){
+export function extendColumnDefinitions(columnDefinitions: Array<Object>, columnDefinitionOverrideMap: Object){
     if (_.keys(columnDefinitionOverrideMap).length > 0){
         return columnDefinitions.map(function(colDef){
             if (columnDefinitionOverrideMap[colDef.field]){
@@ -61,7 +61,7 @@ export const defaultColumnDefinitionMap = {
         'title' : "Title",
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
-        'render' : function(result : Object, columnDefinition : Object, props : Object, width : number){
+        'render' : function(result: Object, columnDefinition: Object, props: Object, width: number){
             var title = getTitleStringFromContext(result);
             var link = object.atIdFromObject(result);
             var tooltip;
@@ -734,11 +734,6 @@ class DimensioningContainer extends React.Component {
         var elementsFound = document.querySelectorAll('div.search-result-column-block[data-field="' + columnField + '"] .value');
         if (elementsFound){
             elementsFound = [...elementsFound];
-        }
-
-        if (elementsFound && elementsFound.length > 0) {
-            var headerElement = document.querySelector('div.search-headers-column-block[data-field="' + columnField + '"] .column-title');
-            elementsFound.push(headerElement);
         }
 
         var maxColWidth = null;
