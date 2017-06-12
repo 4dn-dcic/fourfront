@@ -422,6 +422,7 @@ $open-expset-table-side-border-color : #e4e4e4;
 			.column-sort-icon {
 				color: rgba(255,255,255,0.5);
 				text-decoration: none !important;
+				cursor: pointer;
 				&:hover, &:active, &:focus {
 					color: #fff;
 				}
@@ -656,81 +657,69 @@ $open-expset-table-side-border-color : #e4e4e4;
 	white-space: nowrap;
 }
 
-tr.expset-addinfo-row {
 
-	> td {
-		border-bottom: none;
-	}
 
-	.experiment-set-info-wrapper {
+.experiment-set-info-wrapper {
 
-		margin-left: 38px;
-		border-bottom: 1px solid transparent;
-		box-shadow : 0 4px 4px -4px rgba(0,0,0,.25);
+	border-bottom: 1px solid transparent;
+	position: relative;
+	z-index: 1;
+	transition: border-bottom .3s ease-out;
+
+	border-bottom-color: #808080;
+
+	.expset-addinfo {
+		text-align: left;
+		//border-bottom: 1px solid #ccc;
 		position: relative;
-		z-index: 1;
-		transition: border-bottom .3s ease-out;
-		border-right: 1px solid transparent;
+		overflow: hidden;
 
-		tbody.open & {
-			//border-left: 1px solid $open-expset-table-side-border-color;
-			border-right-color: $open-expset-table-side-border-color;
-			border-bottom-color: #808080;
+		.addinfo-description-section,
+		.addinfo-properties-section {
+			padding-top: 15px;
+			padding-bottom: 18px;
+			position: static;
 		}
 
-		.expset-addinfo {
-			text-align: left;
-			//border-bottom: 1px solid #ccc;
-			position: relative;
-			overflow: hidden;
+		@media screen and (min-width: $screen-sm-min){
 
-			.addinfo-description-section,
-			.addinfo-properties-section {
-				padding-top: 15px;
-				padding-bottom: 18px;
-				position: static;
+			.addinfo-properties-section.col-sm-6 {
+			//border-left: 1px solid #eee;
+				padding-left : 18px;
 			}
 
-			@media screen and (min-width: $screen-sm-min){
-
-				.addinfo-properties-section.col-sm-6 {
-				//border-left: 1px solid #eee;
-					padding-left : 18px;
-				}
-
-				.row > .addinfo-description-section.col-sm-6:after {
-					content : "";
-					width: 1px;
-					height: 100%;
-					position: absolute;
-					left: 50%;
-					top: 0;
-					margin-left: -1px;
-					border-left: 1px solid #f4f4f4;
-				}
-
-				label.description-label {
-					font-weight: 500;
-					margin-bottom: 2px;
-					display: block;
-				}
+			.row > .addinfo-description-section.col-sm-6:after {
+				content : "";
+				width: 1px;
+				height: 100%;
+				position: absolute;
+				left: 50%;
+				top: 0;
+				margin-left: -1px;
+				border-left: 1px solid #f4f4f4;
 			}
 
-			.expset-addinfo-key {
+			label.description-label {
 				font-weight: 500;
-				padding-right: 10px;
-				width: 100px;
-				display: inline-block;
-			}
-
-			.expset-addinfo-val {
-				padding-right: 30px;
+				margin-bottom: 2px;
+				display: block;
 			}
 		}
 
+		.expset-addinfo-key {
+			font-weight: 500;
+			padding-right: 10px;
+			width: 100px;
+			display: inline-block;
+		}
+
+		.expset-addinfo-val {
+			padding-right: 30px;
+		}
 	}
 
 }
+
 
 .invis-cell{
 	background-color: #fff !important;
@@ -1247,7 +1236,7 @@ $small-label-accession-font-size : 0.75rem;
 		outline: none;
 		> i.icon {
 			position: relative;
-			top: 2px;
+			top: 1px;
 		}
 		&:hover {
 			background-color: #eee;
@@ -1265,6 +1254,12 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 		z-index: 10;
 		transform: translate3d(0,0,0) !important;
 		overflow-x: hidden;
+		&.stickied {
+			top : 40px;
+			.browse-page-container & {
+				top: 80px;
+			}
+		}
 		> .columns {
 			display: -webkit-box;
 			display: flex;
@@ -1276,6 +1271,13 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 				flex-shrink: 0;
 				position: relative;
 				transform: translate3d(0,0,0);
+
+				&.no-sort {
+					> .inner {
+						padding-right: 8px;
+					}
+				}
+
 				> .inner {
 					color: #fff;
 					font-weight: 500;
@@ -1289,6 +1291,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						display: inline-block;
 						/* float: right; */
 						position: absolute;
+						cursor: pointer;
 						right: 9px;
 						&:hover, &:active, &:focus {
 							color: #fff;
@@ -1452,12 +1455,16 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							display: none;
 						}
 						.result-table-detail {
-							padding-top: 10px;
 							padding-left: 47px;
 							//transition: height .35s ease, transform .1s ease;
 							@include font-size(0.8);
-							padding-bottom: 10px;
-							.item-page-detail, .expandable-list { margin-bottom: 0; }
+							.expandable-list { margin-bottom: 0; }
+							.item-page-detail {
+								margin-top: 0;
+								margin-bottom: 0;
+								padding-top: 10px;
+								padding-bottom: 10px;
+							}
 							> .close-button-container {
 								position: absolute;
 								left: 8px;
@@ -1499,6 +1506,8 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	}
 
 } // .search-results-outer-container
+
+
 
 .result-table {
     position: relative;

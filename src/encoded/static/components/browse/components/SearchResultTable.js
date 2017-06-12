@@ -1,5 +1,7 @@
 'use strict';
 
+/* @flow */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
@@ -8,7 +10,6 @@ import Draggable from 'react-draggable';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
-//import Infinite from 'react-infinite';
 import Infinite from './../../lib/react-infinite/src/react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
@@ -16,8 +17,6 @@ import { Detail } from './../../item-pages/components';
 import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { ColumnSorterIcon } from './LimitAndPageControls';
-
-/** @flow */
 
 /**
  * Default value rendering function.
@@ -31,8 +30,14 @@ import { ColumnSorterIcon } from './LimitAndPageControls';
 export function defaultColumnBlockRenderFxn(result : Object, columnDefinition : Object, props : Object, width : number){
     var value = object.getNestedProperty(result, columnDefinition.field);
     if (!value) value = null;
-    if (Array.isArray(value)){
-        value = _.uniq(value).map(function(v){ return Schemas.Term.toName(columnDefinition.field, v); }).join(', ');
+    if (Array.isArray(value)){ // getNestedProperty may return a multidimensional array, # of dimennsions depending on how many child arrays were encountered in original result obj.
+        value = _.uniq(value.map(function(v){
+            if (Array.isArray(v)){
+                v = _.uniq(v);
+                if (v.length === 1) v = v[0];
+            }
+            return Schemas.Term.toName(columnDefinition.field, v);
+        })).join(', ');
     } else {
         value = Schemas.Term.toName(columnDefinition.field, value);
     }
@@ -40,7 +45,7 @@ export function defaultColumnBlockRenderFxn(result : Object, columnDefinition : 
 }
 
 
-function extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap){
+export function extendColumnDefinitions(columnDefinitions : Array<Object>, columnDefinitionOverrideMap : Object){
     if (_.keys(columnDefinitionOverrideMap).length > 0){
         return columnDefinitions.map(function(colDef){
             if (columnDefinitionOverrideMap[colDef.field]){
@@ -56,7 +61,7 @@ export const defaultColumnDefinitionMap = {
         'title' : "Title",
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function(result : Object, columnDefinition : Object, props : Object, width : number){
             var title = getTitleStringFromContext(result);
             var link = object.atIdFromObject(result);
             var tooltip;
@@ -109,10 +114,23 @@ export const defaultColumnDefinitionMap = {
     },
     'date_created' : {
         'title' : 'Created',
-        'widthMap' : {'lg' : 150, 'md' : 120, 'sm' : 120},
+        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){
             return <DateUtility.LocalizedTime timestamp={defaultColumnBlockRenderFxn(result, columnDefinition, props, width)} formatType='date-sm' />;
         }
+    },
+    'experiments_in_set' : {
+        'title' : 'Exps',
+        'widthMap' : {'lg' : 60, 'md' : 60, 'sm' : 50},
+        'noSort' : true,
+        'render' : function(result, columnDefinition, props, width){
+            if (!Array.isArray(result.experiments_in_set)) return null;
+            return result.experiments_in_set.length;
+        }
+    },
+    'experiments_in_set.experiment_type' : {
+        'title' : 'Exp Type',
+        'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120}
     }
 };
 
@@ -132,11 +150,6 @@ export function searchResultTableColumnWidth(widthMap, mounted=true){
     if (responsiveGridSize === 'xs') return '100%'; // Mobile, stacking
     return widthMap[responsiveGridSize || 'lg'] || 250;
 }
-
-export const defaultItemColumns = { // In format as would be returned from back-end.
-    'display_title' : "Title",
-    'lab.display_title' : "Lab"
-};
 
 
 /**
@@ -180,32 +193,6 @@ export function compareResultsByID(listA, listB){
 
 class ResultRowColumnBlock extends React.Component {
 
-    /**
-     * Ensure we have a valid React element to render.
-     * If not, try to detect if Item object, and generate link.
-     * Else, let exception bubble up.
-     * 
-     * @static
-     * @param {any} value 
-     * 
-     * @memberof ResultRowColumnBlock
-     */
-    static sanitizeOutputValue(value){
-        if (typeof value !== 'string' && !React.isValidElement(value)){
-            if (value && typeof value === 'object'){
-                if (typeof value.display_title !== 'undefined'){
-                    if (typeof value.link_id !== 'undefined' || typeof value['@id'] !== 'undefined'){
-                        return <a href={object.atIdFromObject(value)}>{ value.display_title }</a>;
-                    } else {
-                        return value.display_title;
-                    }
-                }
-            } else if (!value) value = null;
-        }
-        if (value === "None") value = null;
-        return value;
-    }
-
     shouldComponentUpdate(nextProps, nextState){
         if (nextProps.headerColumnWidths[nextProps.columnNumber] !== this.props.headerColumnWidths[this.props.columnNumber]){
             return true;
@@ -231,7 +218,7 @@ class ResultRowColumnBlock extends React.Component {
             searchResultTableColumnWidth(columnDefinition.widthMap, mounted)
         );
 
-        var value = ResultRowColumnBlock.sanitizeOutputValue(
+        var value = SearchResultTable.sanitizeOutputValue(
             columnDefinition.render(result, columnDefinition, _.omit(this.props, 'columnDefinition', 'result'), blockWidth)
         );
 
@@ -272,13 +259,15 @@ class ResultDetailInner extends React.Component {
     shouldComponentUpdate(nextProps){
         if (nextProps.rowNumber !== this.props.rowNumber) return true;
         if (!_.isEqual(nextProps.result, this.props.result)) return true;
+        if (nextProps.tableContainerWidth !== this.props.tableContainerWidth) return true;
         return false;
     }
 
     render(){
         return React.cloneElement(this.props.detailPane, {
             'result'    : this.props.result,
-            'rowNumber' : this.props.rowNumber
+            'rowNumber' : this.props.rowNumber,
+            'containerWidth' : this.props.tableContainerWidth
         });
     }
 }
@@ -333,7 +322,10 @@ class ResultDetail extends React.Component{
                         'width' : this.props.tableContainerWidth,
                         'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
                     }}>
-                        <ResultDetailInner result={this.props.result} rowNumber={this.props.rowNumber} detailPane={this.props.detailPane}/>
+                        <ResultDetailInner
+                            result={this.props.result} rowNumber={this.props.rowNumber}
+                            detailPane={this.props.detailPane} tableContainerWidth={this.props.tableContainerWidth}
+                        />
                         { this.props.tableContainerScrollLeft && this.props.tableContainerScrollLeft > 10 ?
                             <div className="close-button-container text-center" onClick={this.props.toggleDetailOpen}>
                                 <i className="icon icon-angle-up"/>
@@ -361,6 +353,14 @@ class ResultRow extends React.Component {
             if (typeof w !== 'number') w = 0;
             return fw + w;
         }, 0);
+    }
+
+    static areWidthsEqual(arr1, arr2){
+        if (arr1.length !== arr2.length) return false;
+        for (var i = 0; i < arr1.length; i++){
+            if (arr1[i] !== arr2[i]) return false;
+        }
+        return true;
     }
 
     static propTypes = {
@@ -402,11 +402,11 @@ class ResultRow extends React.Component {
             this.isOpen(nextProps) !== this.isOpen(this.props) ||
             !_.isEqual(nextProps.result, this.props.result) ||
             nextProps.rowNumber !== this.props.rowNumber ||
-            nextProps.headerColumnWidths !== this.props.headerColumnWidths ||
             nextProps.schemas !== this.props.schemas ||
             nextProps.columnDefinitions.length !== this.props.columnDefinitions.length ||
-            nextProps.tableContainerScrollLeft !== this.props.tableContainerScrollLeft ||
-            nextProps.tableContainerWidth !== this.props.tableContainerWidth
+            !ResultRow.areWidthsEqual(nextProps.headerColumnWidths, this.props.headerColumnWidths)
+            //nextProps.tableContainerScrollLeft !== this.props.tableContainerScrollLeft ||
+            //nextProps.tableContainerWidth !== this.props.tableContainerWidth
         ) {
             return true;
         } else {
@@ -485,6 +485,18 @@ class HeadersRow extends React.Component {
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if (
+            this.props.mounted !== nextProps.mounted ||
+            this.state !== nextState ||
+            this.props.columnDefinitions !== nextProps.columnDefinitions ||
+            this.props.isSticky !== nextProps.isSticky ||
+            this.props.stickyStyle.width !== nextProps.stickyStyle.width ||
+            this.props.stickyStyle.left !== nextProps.stickyStyle.left
+        ) return true;
+        return false;
+    }
+
 
     setHeaderWidths(idx, evt, r){
         if (typeof this.props.setHeaderWidths !== 'function') throw new Error('props.setHeaderWidths not a function');
@@ -506,49 +518,44 @@ class HeadersRow extends React.Component {
     }
 
     render(){
+        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset } = this.props;
         return (
-            <Sticky topOffset={-40} >{ ({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}) => {
-                return (
-                    <div className={"search-headers-row hidden-xs" + (isSticky ? ' stickied' : '')} style={
-                        isSticky ? _.extend({}, style, { 'top' : 40, 'left' : this.props.tableLeftOffset, 'width' : this.props.tableContainerWidth })
-                        : null}
-                    >
-                        <div className="columns clearfix" style={{ 
-                            'left'  : isSticky ? style.left - this.props.tableLeftOffset : null,
-                            'width' : style.width
-                        }}>
-                        {
-                            this.props.columnDefinitions.map((colDef, i)=>{
-                                var w = this.getWidthFor(i);
-                                var sorterIcon;
-                                if (typeof this.props.sortBy === 'function' && w >= 50){
-                                    var { sortColumn, sortBy, sortReverse } = this.props;
-                                    sorterIcon = !colDef.noSort && (
-                                        <ColumnSorterIcon sortByFxn={sortBy} currentSortColumn={sortColumn} descend={sortReverse} value={colDef.field} />
-                                    );
-                                }
-                                return (
-                                    <div
-                                        data-field={colDef.field}
-                                        key={colDef.field}
-                                        className="search-headers-column-block"
-                                        style={{ width : w }}
-                                    >
-                                        <div className="inner">
-                                            { colDef.title }
-                                            { sorterIcon }
-                                        </div>
-                                        <Draggable position={{x:w,y:0}} axis="x" onDrag={this.onAdjusterDrag.bind(this, i)} onStop={this.setHeaderWidths.bind(this, i)}>
-                                            <div className="width-adjuster"/>
-                                        </Draggable>
-                                    </div>
-                                );
-                            })
+            <div className={"search-headers-row hidden-xs" + (isSticky ? ' stickied' : '')} style={
+                isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
+                : null}
+            >
+                <div className="columns clearfix" style={{ 
+                    'left'  : isSticky ? stickyStyle.left - tableLeftOffset : null,
+                    'width' : stickyStyle.width
+                }}>
+                {
+                    columnDefinitions.map((colDef, i)=>{
+                        var w = this.getWidthFor(i);
+                        var sorterIcon;
+                        if (!colDef.noSort && typeof this.props.sortBy === 'function' && w >= 50){
+                            var { sortColumn, sortBy, sortReverse } = this.props;
+                            sorterIcon = <ColumnSorterIcon sortByFxn={sortBy} currentSortColumn={sortColumn} descend={sortReverse} value={colDef.field} />;
                         }
-                        </div>
-                    </div>
-                );
-            }}</Sticky>
+                        return (
+                            <div
+                                data-field={colDef.field}
+                                key={colDef.field}
+                                className={"search-headers-column-block" + (colDef.noSort ? " no-sort" : '')}
+                                style={{ width : w }}
+                            >
+                                <div className="inner">
+                                    <span className="column-title">{ colDef.title }</span>
+                                    { sorterIcon }
+                                </div>
+                                <Draggable position={{x:w,y:0}} axis="x" onDrag={this.onAdjusterDrag.bind(this, i)} onStop={this.setHeaderWidths.bind(this, i)}>
+                                    <div className="width-adjuster"/>
+                                </Draggable>
+                            </div>
+                        );
+                    })
+                }
+                </div>
+            </div>
         );
     }
 }
@@ -578,6 +585,7 @@ class LoadMoreAsYouScroll extends React.Component {
             'isLoading' : false,
             'canLoad' : true
         };
+        this.lastIsScrolling = false;
         if (typeof props.mounted === 'undefined'){
             state.mounted = false;
         }
@@ -644,11 +652,13 @@ class LoadMoreAsYouScroll extends React.Component {
 
     handleScrollingStateChange(isScrolling){
         vizUtil.requestAnimationFrame(()=>{
-            if (isScrolling){
+            if (isScrolling && !this.lastIsScrolling){
                 this.props.innerContainerElem.style.pointerEvents = 'none';
-            } else {
+            } else if (this.lastIsScrolling) {
                 this.props.innerContainerElem.style.pointerEvents = '';
+                this.props.innerContainerElem.focus();
             }
+            this.lastIsScrolling = !!(isScrolling);
         });
     }
 
@@ -678,8 +688,8 @@ class LoadMoreAsYouScroll extends React.Component {
                 )}
                 onChangeScrollState={this.handleScrollingStateChange}
                 infiniteLoadBeginEdgeOffset={this.state.canLoad ? 200 : undefined}
-                preloadAdditionalHeight={Infinite.containerHeightScaleFactor(2)}
-                preloadBatchSize={Infinite.containerHeightScaleFactor(2)}
+                preloadAdditionalHeight={Infinite.containerHeightScaleFactor(1.5)}
+                preloadBatchSize={Infinite.containerHeightScaleFactor(1.5)}
             >
                 { this.props.children }
             </Infinite>
@@ -722,12 +732,32 @@ class DimensioningContainer extends React.Component {
     static findLargestBlockWidth(columnField){
         if (isServerSide() || !document.querySelectorAll) return null;
         var elementsFound = document.querySelectorAll('div.search-result-column-block[data-field="' + columnField + '"] .value');
-        if (elementsFound && elementsFound.length > 0){
-            return _.reduce(elementsFound, function(m, elem){
-                return Math.max(m, elem.offsetWidth);
-            }, 0);
+        if (elementsFound){
+            elementsFound = [...elementsFound];
         }
-        return null;
+
+        if (elementsFound && elementsFound.length > 0) {
+            var headerElement = document.querySelector('div.search-headers-column-block[data-field="' + columnField + '"] .column-title');
+            elementsFound.push(headerElement);
+        }
+
+        var maxColWidth = null;
+
+        if (elementsFound && elementsFound.length > 0){
+
+            var headerElement = document.querySelector('div.search-headers-column-block[data-field="' + columnField + '"] .column-title');
+
+            maxColWidth = Math.max(
+                _.reduce(elementsFound, function(m, elem){
+                    return Math.max(m, elem.offsetWidth);
+                }, 0),
+                (headerElement && (headerElement.offsetWidth + 12)) || 0
+            );
+
+        }
+
+
+        return maxColWidth;
     }
 
     static findAndDecreaseColumnWidths(columnDefinitions, padding = 30){
@@ -851,7 +881,7 @@ class DimensioningContainer extends React.Component {
         this.setState({ 'results' : results }, cb);
     }
 
-    renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, props = this.props){
+    renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, headerColumnWidthsFilled, props = this.props){
         var { columnDefinitions, results, detailPane, href } = props;
         return this.state.results.map((r, rowNumber)=>
             <ResultRow
@@ -862,7 +892,7 @@ class DimensioningContainer extends React.Component {
                 columnDefinitions={columnDefinitions}
                 rowWidth={fullRowWidth}
                 mounted={this.state.mounted || false}
-                headerColumnWidths={this.state.widths}
+                headerColumnWidths={headerColumnWidthsFilled}
                 schemas={Schemas.get()}
                 detailPane={detailPane}
                 toggleDetailPaneOpen={this.toggleDetailPaneOpen}
@@ -887,6 +917,11 @@ class DimensioningContainer extends React.Component {
         var canLoadMore = (this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state &&
             typeof this.refs.loadMoreAsYouScroll.state.canLoad === 'boolean') ? this.refs.loadMoreAsYouScroll.state.canLoad : null;
 
+        var headerColumnWidthsFilled = this.state.widths.map((w, i)=>{
+            if (typeof w === 'number' && w > 0) return w;
+            return searchResultTableColumnWidth(columnDefinitions[i].widthMap, this.state.mounted);
+        });
+
         return (
             <div className="search-results-outer-container">
                 <StickyContainer>
@@ -895,21 +930,27 @@ class DimensioningContainer extends React.Component {
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
                                 
                                 { !responsiveGridSize || responsiveGridSize !== 'xs' ? 
-                                
-                                    <HeadersRow
-                                        columnDefinitions={columnDefinitions}
-                                        mounted={this.state.mounted}
-                                        headerColumnWidths={this.state.widths}
-                                        setHeaderWidths={this.setHeaderWidths}
-                                        sortBy={sortBy}
-                                        sortColumn={sortColumn}
-                                        sortReverse={sortReverse}
-                                        defaultMinColumnWidth={defaultMinColumnWidth}
-                                        tableLeftOffset={tableLeftOffset}
-                                        tableContainerWidth={tableContainerWidth}
-                                        rowHeight={this.props.rowHeight}
-                                        results={this.state.results}
-                                    />
+                                    <Sticky topOffset={this.props.stickyHeaderTopOffset} >{
+                                        ({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}) =>
+                                        <HeadersRow
+                                            columnDefinitions={columnDefinitions}
+                                            mounted={this.state.mounted}
+                                            headerColumnWidths={headerColumnWidthsFilled}
+                                            setHeaderWidths={this.setHeaderWidths}
+                                            sortBy={sortBy}
+                                            sortColumn={sortColumn}
+                                            sortReverse={sortReverse}
+                                            defaultMinColumnWidth={defaultMinColumnWidth}
+                                            tableLeftOffset={tableLeftOffset}
+                                            tableContainerWidth={tableContainerWidth}
+                                            rowHeight={this.props.rowHeight}
+                                            results={this.state.results}
+                                            stickyHeaderTopOffset={this.props.stickyHeaderTopOffset}
+
+                                            stickyStyle={style}
+                                            isSticky={isSticky}
+                                        />
+                                    }</Sticky>
                                 
                                 : null }
                                 <LoadMoreAsYouScroll
@@ -925,7 +966,7 @@ class DimensioningContainer extends React.Component {
                                     rowHeight={this.props.rowHeight}
                                     innerContainerElem={this.refs && this.refs.innerContainer}
                                 >
-                                { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft) }
+                                { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, headerColumnWidthsFilled) }
                                 </LoadMoreAsYouScroll>
                             </div>
                         </div>
@@ -970,6 +1011,32 @@ export class SearchResultTable extends React.Component {
         return !isServerSide() && layout.responsiveGridState() !== 'xs';
     }
 
+    /**
+     * Ensure we have a valid React element to render.
+     * If not, try to detect if Item object, and generate link.
+     * Else, let exception bubble up.
+     * 
+     * @static
+     * @param {any} value 
+     * 
+     * @memberof ResultRowColumnBlock
+     */
+    static sanitizeOutputValue(value){
+        if (typeof value !== 'string' && !React.isValidElement(value)){
+            if (value && typeof value === 'object'){
+                if (typeof value.display_title !== 'undefined'){
+                    if (typeof value.link_id !== 'undefined' || typeof value['@id'] !== 'undefined'){
+                        return <a href={object.atIdFromObject(value)}>{ value.display_title }</a>;
+                    } else {
+                        return value.display_title;
+                    }
+                }
+            } else if (!value) value = null;
+        }
+        if (value === "None") value = null;
+        return value;
+    }
+
     static propTypes = {
         'results' : PropTypes.arrayOf(ResultRow.propTypes.result).isRequired,
         'href'  : PropTypes.string.isRequired,
@@ -996,7 +1063,8 @@ export class SearchResultTable extends React.Component {
         'columnDefinitionOverrideMap' : null,
         'hiddenColumns' : null,
         'limit' : 25,
-        'rowHeight' : 47
+        'rowHeight' : 47,
+        'stickyHeaderTopOffset' : -40
     }
 
     /**

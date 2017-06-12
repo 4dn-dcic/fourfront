@@ -40,7 +40,10 @@ export const Term = {
 
         // Remove 'experiments_in_set' and test as if an experiment field. So can work for both ?type=Experiment, ?type=ExperimentSet.
         if (typeof name === 'string') return name;
-        var standardizedFieldKey = field.replace('experiments_in_set.', '');
+        var standardizedFieldKey = field;
+        if (standardizedFieldKey.slice(0, 19) === 'experiments_in_set.'){
+            standardizedFieldKey = standardizedFieldKey.slice(19);
+        }
 
         switch (standardizedFieldKey) {
             case 'biosample.biosource.individual.organism.name':
@@ -60,7 +63,7 @@ export const Term = {
     },
 
     capitalize : function(word)        {
-        if (typeof sen !== 'string') return word;
+        if (typeof word !== 'string') return word;
         return word.charAt(0).toUpperCase() + word.slice(1);
     },
     capitalizeSentence : function(sen) {

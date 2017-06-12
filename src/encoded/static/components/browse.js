@@ -317,13 +317,7 @@ function typeSelected(href) {
     }
 }
 
-// generate href for one term only
-// remove filter fields, apply these filters
-function generateTypeHref(base, field, term) {
-    var generated = base + field + '=' + encodeURIComponent(term).replace(/%20/g, '+') + '&limit=all';
-    return generated;
-}
-
+/*
 // find all used file formats in the given context graph
 function findFormats(graph) {
     var formats = [];
@@ -337,7 +331,8 @@ function findFormats(graph) {
     }
     return formats;
 }
-
+*/
+/*
 function findFiles(fileFormats) {
     var checkboxes = document.getElementsByName('file-checkbox');
     var fileStats = {};
@@ -371,6 +366,7 @@ function findFiles(fileFormats) {
     }
     return fileStats;
 }
+*/
 
 //Dropdown facet for experimentset_type
 /*
@@ -963,7 +959,7 @@ export class Browse extends React.Component {
     render() {
         //console.log('BROWSE PROPS', this.props);
         var context = this.props.context;
-        var fileFormats = findFormats(context['@graph']);
+        //var fileFormats = findFormats(context['@graph']);
 
         // no results found!
         if(context.total === 0 && context.notification){
@@ -995,7 +991,7 @@ export class Browse extends React.Component {
                 <ControlsAndResults
                     {...this.props}
                     key="controlsAndResults"
-                    fileFormats={fileFormats}
+                    //fileFormats={fileFormats}
                     href={this.props.href}
                     schemas={this.props.schemas}
                 />

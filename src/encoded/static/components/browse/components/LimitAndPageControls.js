@@ -115,6 +115,6 @@ export class ColumnSorterIcon extends React.Component {
             (this.props.currentSortColumn === value ? 'active ' : '') +
             'column-sort-icon'
         );
-        return <a href="#" className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</a>;
+        return <span className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</span>;
     }
 }
