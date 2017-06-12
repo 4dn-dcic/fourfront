@@ -1383,6 +1383,12 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							> .inner {
 								height: 46px;
 								transition : height .35s ease-out, padding-top .35s ease-out;
+
+								.expset-checkbox {
+									float: left;
+									margin-right: 20px;
+									margin-top: 3px;
+								}
 							}
 							&:not(:last-child) {
 								border-right: 1px dotted rgba(0,0,0,0.075);

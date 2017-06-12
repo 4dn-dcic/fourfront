@@ -205,16 +205,18 @@ export class PageLimitSortController extends React.Component {
     }
 
     render(){
+        var propsToPass = _.extend(_.omit(this.props, 'children'), {
+            'maxPage' : Math.ceil(this.props.context.total / this.state.limit),
+            'sortBy' : this.sortBy,
+            'changePage' : this.changePage,
+            'changeLimit' : this.changeLimit
+        }, this.state);
+
         return(
             <div>
                 { 
                     React.Children.map(this.props.children, (c)=>{
-                        return React.cloneElement(c, _.extend({
-                            'maxPage' : Math.ceil(this.props.context.total / this.state.limit),
-                            'sortBy' : this.sortBy,
-                            'changePage' : this.changePage,
-                            'changeLimit' : this.changeLimit
-                        }, this.state));
+                        return React.cloneElement(c, propsToPass);
                     })
                 }
             </div>

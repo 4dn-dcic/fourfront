@@ -1,6 +1,6 @@
 'use strict';
 
-/* @flow */
+// @flow
 
 import React from 'react';
 import createReactClass from 'create-react-class';
@@ -20,6 +20,27 @@ import { PageLimitSortController, SearchResultTable, defaultColumnBlockRenderFxn
 
 
 export class ExperimentSetDetailPane extends React.Component {
+
+    /**
+     * Combine file pairs and unpaired files into one array. 
+     * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
+     * Can always _.flatten() this or map out first file per pair.
+     * 
+     * @param {any} [props=this.props] 
+     * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
+     */
+    static pairsAndFiles(expSet: Object){
+        return expFxn.listAllFilePairs(expSet.experiments_in_set).concat(
+            expFxn.listAllUnpairedFiles(expSet.experiments_in_set)
+        );
+    }
+
+    static allFileIDs(expSet: Object){
+        return ExperimentSetDetailPane.pairsAndFiles(expSet).map(function(f){
+            if (Array.isArray(f)) return f[0].uuid;
+            else return f.uuid;
+        });
+    }
 
     static propTypes = {
         'expSetFilters' : PropTypes.object.isRequired,
@@ -41,41 +62,18 @@ export class ExperimentSetDetailPane extends React.Component {
     constructor(props){
         super(props);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.pairsAndFiles = this.pairsAndFiles.bind(this);
-        this.allFileIDs = this.allFileIDs.bind(this);
         this.handleCheck = this.handleCheck.bind(this);
         this.state = {
-            selectedFiles : this.props.selectAllFilesInitially ? new Set(this.allFileIDs(this.props)) : new Set()
+            selectedFiles : props.selectAllFilesInitially ? new Set(ExperimentSetDetailPane.allFileIDs(props.result)) : new Set()
         };
     }
 
     componentWillReceiveProps(nextProps) {
         if(this.props.expSetFilters !== nextProps.expSetFilters){
             this.setState({
-                selectedFiles: this.props.selectAllFilesInitially ? new Set(this.allFileIDs()) : new Set()
+                selectedFiles: nextProps.selectAllFilesInitially ? new Set(ExperimentSetDetailPane.allFileIDs(nextProps.result)) : new Set()
             });
         }
-    }
-
-    /**
-     * Combine file pairs and unpaired files into one array. 
-     * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
-     * Can always _.flatten() this or map out first file per pair.
-     * 
-     * @param {any} [props=this.props] 
-     * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
-     */
-    pairsAndFiles(props = this.props){
-        return expFxn.listAllFilePairs(props.result.experiments_in_set).concat(
-            expFxn.listAllUnpairedFiles(props.result.experiments_in_set)
-        );
-    }
-
-    allFileIDs(props = this.props){
-        return this.pairsAndFiles(props).map(function(f){
-            if (Array.isArray(f)) return f[0].uuid;
-            else return f.uuid;
-        });
     }
 
     handleCheck(e) {
@@ -85,7 +83,7 @@ export class ExperimentSetDetailPane extends React.Component {
         if (newChecked === false){
             selectedFiles = new Set();
         } else {
-            selectedFiles = new Set(this.allFileIDs());
+            selectedFiles = new Set(ExperimentSetDetailPane.allFileIDs(this.props.result));
         }
 
         this.setState({
@@ -98,7 +96,7 @@ export class ExperimentSetDetailPane extends React.Component {
         var addInfo = this.props.additionalDetailFields;
 
 
-        var files = this.pairsAndFiles();
+        var files = ExperimentSetDetailPane.pairsAndFiles(expSet);
 
         var disabled = files.length === 0;
         var allFilesChecked = this.state.selectedFiles.size === files.length && !disabled;
@@ -164,14 +162,15 @@ export class ExperimentSetCheckBox extends React.Component {
 
     static isDisabled(files: Array){ return files.length === 0; }
 
-    static isAllFilesChecked(selectedFiles: Set, allFiles: Array){ return selectedFiles.size === allFiles.length && !ExperimentSetCheckBox.isDisabled(allFiles); }
+    static isAllFilesChecked(selectedFiles: Array, allFiles: Array){ return selectedFiles.length === allFiles.length && !ExperimentSetCheckBox.isDisabled(allFiles); }
 
-    static isIndeterminate(selectedFiles, allFiles){ return selectedFiles.size > 0 && selectedFiles.size < allFiles.length; }
+    static isIndeterminate(selectedFiles: Array, allFiles){ return selectedFiles.length > 0 && selectedFiles.length < allFiles.length; }
 
     render(){
         var props = this.props;
         return(
             <input
+                className="expset-checkbox"
                 checked={props.checked}
                 disabled={props.disabled}
                 onChange={props.onChange}
@@ -200,25 +199,25 @@ export class SelectedFilesController extends React.Component {
         this.selectFile = this.selectFile.bind(this);
         this.unselectFile = this.unselectFile.bind(this);
         this.state = {
-            'selectedFiles' : new Set(props.initiallySelectedFiles)
+            'selectedFiles' : {}
         };
     }
 
     selectFile(uuid: string){
-        if (this.state.selectedFiles.has(uuid)){
+        if (typeof this.state.selectedFiles[uuid] !== 'undefined'){
             throw new Error("File already selected!");
         }
-        var newSet = new Set(this.state.selectedFiles);
-        newSet.add(uuid);
+        var newSet = _.clone(this.state.selectedFiles);
+        newSet[uuid] = true;
         this.setState({ 'selectedFiles' : newSet });
     }
 
     unselectFile(uuid: string){
-        if (!this.state.selectedFiles.has(uuid)){
+        if (typeof this.state.selectedFiles[uuid] === 'undefined'){
             throw new Error("File not in set!");
         }
-        var newSet = new Set(this.state.selectedFiles);
-        newSet.remove(uuid);
+        var newSet = _.clone(this.state.selectedFiles);
+        delete newSet[uuid];
         this.setState({ 'selectedFiles' : newSet });
     }
 
@@ -267,7 +266,7 @@ class ResultTableContainer extends React.Component {
         super(props);
         this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.getSelectedFiles = this.getSelectedFiles.bind(this);
+        this.colDefOverrides = this.colDefOverrides.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
         this.render = this.render.bind(this);
     }
@@ -290,18 +289,6 @@ class ResultTableContainer extends React.Component {
         }
     }
 
-
-    getSelectedFiles(){
-        if (!this.experimentSetRows) return null;
-        return _(this.experimentSetRows).chain()
-            .pairs()
-            .map(function(expRow){
-                return [expRow[0], expRow[1].state.selectedFiles];
-            })
-            .object()
-            .value();
-    }
-
     isTermSelected(termKey, facetField, expsOrSets = 'sets'){
         var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
         if (
@@ -317,17 +304,25 @@ class ResultTableContainer extends React.Component {
      * IN PROGRESS --- TODO: See SelectedFilesController
      */
     colDefOverrides(){
+        console.log(this.props.selectedFiles, "SSDDS");
+        if (!this.props.selectedFiles) return this.props.columnDefinitionOverrides || null;
+        var allSelectedFileIDs = _.keys(this.props.selectedFiles).sort(); // ALL selectedFiles, need to filter down to set re: result expSet
+
+        // Add Checkboxes
         return _.extend({}, this.props.columnDefinitionOverrides, {
             'display_title' : _.extend({}, defaultColumnDefinitionMap.display_title, {
                 'render' : (expSet, columnDefinition, props, width) => {
                     var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
                     var newChildren = origTitleBlock.props.children.slice(0);
-                    newChildren.unshift(
+                    var allFiles = ExperimentSetDetailPane.allFileIDs(expSet).sort();
+                    var selectedFilesForSet = _.intersection(allSelectedFileIDs, allFiles);
+                    newChildren[2] = newChildren[1];
+                    newChildren[1] = (
                         <ExperimentSetCheckBox
-                            checked={allFilesChecked}
-                            indeterminate={indeterminate}
-                            disabled={disabled}
-                            onChange={this.handleCheck}
+                            checked={ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFiles)}
+                            indeterminate={ExperimentSetCheckBox.isIndeterminate(selectedFilesForSet, allFiles)}
+                            disabled={ExperimentSetCheckBox.isDisabled(allFiles)}
+                            //onChange={this.handleCheck}
                         />
                     );
                     return React.cloneElement(origTitleBlock, { 'children' : newChildren });
@@ -373,7 +368,7 @@ class ResultTableContainer extends React.Component {
                         stickyHeaderTopOffset={-78}
                         constantColumnDefinitions={browseTableConstantColumnDefinitions}
                         hiddenColumns={this.props.constantHiddenColumns}
-                        columnDefinitionOverrideMap={this.props.columnDefinitionOverrides}
+                        columnDefinitionOverrideMap={this.colDefOverrides()}
                         href={this.props.href}
 
                         sortBy={this.props.sortBy}
@@ -394,14 +389,15 @@ class ControlsAndResults extends React.Component {
 
     constructor(props){
         super(props);
-        this.getSelectedFiles = this.getSelectedFiles.bind(this);
+        //this.getSelectedFiles = this.getSelectedFiles.bind(this);
         this.render = this.render.bind(this);
     }
-
+    /*
     getSelectedFiles(){
         if (!this.refs.resultTableContainer) return null;
         return this.refs.resultTableContainer.getSelectedFiles();
     }
+    */
 
     render(){
         //var fileStats = this.state.fileStats;
@@ -444,17 +440,18 @@ class ControlsAndResults extends React.Component {
                     </div>
                 </div>*/}
 
-                <PageLimitSortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
-                    <ResultTableContainer
-                        ref="resultTableContainer"
-                        context={this.props.context}
-                        expSetFilters={this.props.expSetFilters}
-                        session={this.props.session}
-                        href={this.props.href}
-                        schemas={this.props.schemas}
-                    />
-                </PageLimitSortController>
-
+                <SelectedFilesController>
+                    <PageLimitSortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
+                        <ResultTableContainer
+                            //ref="resultTableContainer"
+                            context={this.props.context}
+                            expSetFilters={this.props.expSetFilters}
+                            session={this.props.session}
+                            href={this.props.href}
+                            schemas={this.props.schemas}
+                        />
+                    </PageLimitSortController>
+                </SelectedFilesController>
             </div>
 
         );
