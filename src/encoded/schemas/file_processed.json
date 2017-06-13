@@ -1,6 +1,6 @@
 {
     "title": "Processed file from workflow runs",
-    "description": "Schema for submitting metadata for a pipeline processed file.",
+    "description": "Files produced by 4DN pipelines.",
     "id": "/profiles/file_processed.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

@@ -29,23 +29,7 @@
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "type": "string",
-            "enum": [
-                "reads",
-                "read pairs",
-                "intensity values",
-                "alignments",
-                "unfiltered alignments",
-                "contact matrix",
-                "normalized contact matrix",
-                "long range chromatin interactions",
-                "peaks",
-                "genome reference",
-                "genome index",
-                "blacklisted regions",
-                "repeats",
-                "oligonucleotides"
-            ]
+            "type": "string"
         },
         "file_classification": {
             "title": "General Classification",
