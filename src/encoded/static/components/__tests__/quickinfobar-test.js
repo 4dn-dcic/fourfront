@@ -63,7 +63,7 @@ describe('Testing viz/QuickInfoBar.js', function() {
     it('There are visible filters in the hover-over dropdown', function() {
         // Not hovered over yet
         var crumbs = TestUtils.scryRenderedDOMComponentsWithClass(page, 'chart-crumb');
-        var filterIcon = TestUtils.scryRenderedDOMComponentsWithClass(page, 'glance-label')
+        var filterIcon = TestUtils.scryRenderedDOMComponentsWithClass(page, 'glance-label');
 
         expect(filterIcon.length).toEqual(1);
         expect(crumbs.length).toEqual(0);
@@ -73,10 +73,11 @@ describe('Testing viz/QuickInfoBar.js', function() {
         var crumbs = TestUtils.scryRenderedDOMComponentsWithClass(page, 'chart-crumb');
 
         var filterTerms = _.reduce(_.values(expSetFilters), function(m,v){ return m.concat(Array.from(v.values())); }, []);
+
         console.log("Testing for presence of terms in ActiveFiltersBar: ", filterTerms.join(', '));
         crumbs.forEach(function(c,i){
             expect(filterTerms.filter(function(ft){
-                if (c.innerHTML.indexOf(ft) > -1) return true;
+                if (c.innerHTML.toLowerCase().indexOf(ft) > -1) return true;
                 return false;
             }).length).toBeGreaterThan(0);
         });

@@ -382,12 +382,12 @@ class ResultRow extends React.Component {
         'columnDefinitions'     : PropTypes.arrayOf(PropTypes.shape({
             'title'             : PropTypes.string.isRequired,
             'field'             : PropTypes.string.isRequired,
-            'render'            : PropTypes.func.isRequired,
+            'render'            : PropTypes.func,
             'widthMap'          : PropTypes.shape({
                 'lg'                : PropTypes.number.isRequired,
                 'md'                : PropTypes.number.isRequired,
                 'sm'                : PropTypes.number.isRequired
-            }).isRequired
+            })
         })).isRequired,
         'headerColumnWidths' : PropTypes.array,
         'renderDetailPane'  : PropTypes.func.isRequired
