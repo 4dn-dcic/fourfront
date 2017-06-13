@@ -35,13 +35,14 @@ export class CustomColumnController extends React.Component {
     }
 
     render(){
+        var propsToPass = _.extend(_.omit(this.props, 'children'), {
+            'hiddenColumns'         : this.getAllHiddenColumns(),
+            'addHiddenColumn'       : this.addHiddenColumn,
+            'removeHiddenColumn'    : this.removeHiddenColumn
+        });
         return React.Children.map(this.props.children, (c)=> {
             if (!React.isValidElement(c)) return c;
-            return React.cloneElement(c, _.extend(_.omit(this.props, 'children'), {
-                'hiddenColumns' : this.getAllHiddenColumns(),
-                'addHiddenColumn' : this.addHiddenColumn,
-                'removeHiddenColumn' : this.removeHiddenColumn
-            }));
+            return React.cloneElement(c, propsToPass);
         });
     }
 

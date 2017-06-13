@@ -15,7 +15,7 @@ import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 import ExperimentsTable from './../experiments-table';
 import { isServerSide, expFxn, Filters, navigate, object } from './../util';
 import { FlexibleDescriptionBox } from './../item-pages/components';
-import { SortController, SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap } from './components';
+import { SortController, SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, SelectedFilesController } from './components';
 
 
 
@@ -56,21 +56,6 @@ export class ExperimentSetDetailPane extends React.Component {
             'Lab': 'lab.title',
             'Treatments':'biosample.treatments_summary',
             'Modifications':'biosample.modifications_summary'
-        }
-    }
-
-    constructor(props){
-        super(props);
-        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
-    }
-
-    handleFileCheckboxChange(uuid){
-        if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
-
-        if (typeof this.props.selectedFiles[uuid] === 'undefined') {
-            this.props.selectFile(uuid);
-        } else {
-            this.props.unselectFile(uuid);
         }
     }
 
@@ -116,7 +101,8 @@ export class ExperimentSetDetailPane extends React.Component {
                     width={this.props.containerWidth - 47 /* account for left padding of pane */}
                     fadeIn={false}
                     selectedFiles={this.props.selectedFiles}
-                    handleFileCheckboxChange={this.handleFileCheckboxChange}
+                    selectFile={this.props.selectFile}
+                    unselectFile={this.props.unselectFile}
                 />
             </div>
         );
@@ -156,56 +142,6 @@ export class ExperimentSetCheckBox extends React.Component {
             />
         );
     }
-}
-
-/**
- * IN PROGRESS -- TODO: Decide if we should store "selectedFiles" or "unselectedFiles" (re: 'All files in facet selection are selected by default')
- * 
- * @export
- * @class SelectedFilesController
- * @extends {React.Component}
- */
-export class SelectedFilesController extends React.Component {
-
-    static defaultProps = {
-        'initiallySelectedFiles' : []
-    }
-
-    constructor(props){
-        super(props);
-        this.selectFile = this.selectFile.bind(this);
-        this.unselectFile = this.unselectFile.bind(this);
-        this.state = {
-            'selectedFiles' : {}
-        };
-    }
-
-    selectFile(uuid: string){
-        if (typeof this.state.selectedFiles[uuid] !== 'undefined'){
-            throw new Error("File already selected!");
-        }
-        var newSet = _.clone(this.state.selectedFiles);
-        newSet[uuid] = true;
-        this.setState({ 'selectedFiles' : newSet });
-    }
-
-    unselectFile(uuid: string){
-        if (typeof this.state.selectedFiles[uuid] === 'undefined'){
-            throw new Error("File not in set!");
-        }
-        var newSet = _.clone(this.state.selectedFiles);
-        delete newSet[uuid];
-        this.setState({ 'selectedFiles' : newSet });
-    }
-
-    render(){
-        return React.cloneElement(this.props.children, {
-            'selectedFiles' : this.state.selectedFiles,
-            'selectFile' : this.selectFile,
-            'unselectFile' : this.unselectFile
-        });
-    }
-
 }
 
 

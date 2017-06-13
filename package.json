@@ -26,6 +26,10 @@
       "libs/react-patches",
       "jsdom"
     ],
+    "testPathIgnorePatterns" : [
+      "/node_modules/",
+      "/src/encoded/static/components/lib/"
+    ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/jest/",
