@@ -26,7 +26,7 @@
       "libs/react-patches",
       "jsdom"
     ],
-    "testPathIgnorePatterns" : [
+    "testPathIgnorePatterns": [
       "/node_modules/",
       "/src/encoded/static/components/lib/"
     ],
@@ -89,6 +89,7 @@
     "js-md5": "^0.4.1",
     "jsonwebtoken": "^7.1.9",
     "lodash": "^4.17.4",
+    "lodash.isfinite": "^3.3.2",
     "marked": "^0.3.6",
     "moment": "^2.15.2",
     "prop-types": "^15.5.8",
