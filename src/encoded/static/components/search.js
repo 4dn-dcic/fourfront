@@ -10,7 +10,7 @@ import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtil
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { Detail } from './item-pages/components';
 import FacetList from './facetlist';
-import { PageLimitSortController, LimitAndPageControls, SearchResultTable } from './browse/components';
+import { SortController, LimitAndPageControls, SearchResultTable } from './browse/components';
 
 
 var Listing = function (result, schemas, selectCallback) {
@@ -321,14 +321,14 @@ class ResultTableHandlersContainer extends React.Component {
         });
 
         return (
-            <PageLimitSortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
+            <SortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
                 <ControlsAndResults
                     {...this.props}
                     isTermSelected={this.isTermSelected}
                     onFilter={this.onFilter}
                     facets={facets}
                 />
-            </PageLimitSortController>
+            </SortController>
         );
     }
 
@@ -486,7 +486,9 @@ class ControlsAndResults extends React.Component {
                         <SearchResultTable
                             results={results}
                             columns={context.columns || {}}
-                            detailPane={<ResultDetailPane popLink={this.props.selectCallback ? true : false} />}
+                            renderDetailPane={(result, rowNumber, containerWidth)=>
+                                <ResultDetailPane popLink={this.props.selectCallback ? true : false} result={result} />
+                            }
                             hiddenColumns={hiddenColumns}
                             columnDefinitionOverrideMap={columnDefinitionOverrides}
                             href={this.props.href}

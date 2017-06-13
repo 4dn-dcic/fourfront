@@ -15,7 +15,7 @@ import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 import ExperimentsTable from './../experiments-table';
 import { isServerSide, expFxn, Filters, navigate, object } from './../util';
 import { FlexibleDescriptionBox } from './../item-pages/components';
-import { PageLimitSortController, SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap } from './components';
+import { SortController, SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap } from './components';
 
 
 
@@ -61,46 +61,22 @@ export class ExperimentSetDetailPane extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.handleCheck = this.handleCheck.bind(this);
-        this.state = {
-            selectedFiles : props.selectAllFilesInitially ? new Set(ExperimentSetDetailPane.allFileIDs(props.result)) : new Set()
-        };
+        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
     }
 
-    componentWillReceiveProps(nextProps) {
-        if(this.props.expSetFilters !== nextProps.expSetFilters){
-            this.setState({
-                selectedFiles: nextProps.selectAllFilesInitially ? new Set(ExperimentSetDetailPane.allFileIDs(nextProps.result)) : new Set()
-            });
-        }
-    }
+    handleFileCheckboxChange(uuid){
+        if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
 
-    handleCheck(e) {
-        var newChecked = e.target.checked;
-        var selectedFiles;
-
-        if (newChecked === false){
-            selectedFiles = new Set();
+        if (typeof this.props.selectedFiles[uuid] === 'undefined') {
+            this.props.selectFile(uuid);
         } else {
-            selectedFiles = new Set(ExperimentSetDetailPane.allFileIDs(this.props.result));
+            this.props.unselectFile(uuid);
         }
-
-        this.setState({
-            selectedFiles : selectedFiles
-        });
     }
 
     render(){
         var expSet = this.props.result;
         var addInfo = this.props.additionalDetailFields;
-
-
-        var files = ExperimentSetDetailPane.pairsAndFiles(expSet);
-
-        var disabled = files.length === 0;
-        var allFilesChecked = this.state.selectedFiles.size === files.length && !disabled;
-        var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
             <div className="experiment-set-info-wrapper">
@@ -137,9 +113,10 @@ export class ExperimentSetDetailPane extends React.Component {
                     experimentArray={expSet.experiments_in_set}
                     replicateExpsArray={expSet.replicate_exps}
                     experimentSetType={expSet.experimentset_type}
-                    parentController={this}
                     width={this.props.containerWidth - 47 /* account for left padding of pane */}
                     fadeIn={false}
+                    selectedFiles={this.props.selectedFiles}
+                    handleFileCheckboxChange={this.handleFileCheckboxChange}
                 />
             </div>
         );
@@ -244,8 +221,6 @@ class ResultTableContainer extends React.Component {
     static propTypes = {
         // Props' type validation based on contents of this.props during render.
         href            : PropTypes.string.isRequired,
-        context         : PropTypes.object.isRequired,
-        expSetFilters   : PropTypes.object.isRequired,
         fileFormats     : PropTypes.array,
         fileStats       : PropTypes.object,
         targetFiles     : PropTypes.instanceOf(Set)
@@ -264,14 +239,14 @@ class ResultTableContainer extends React.Component {
 
     constructor(props){
         super(props);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.colDefOverrides = this.colDefOverrides.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
         this.render = this.render.bind(this);
     }
-
+    /*
     shouldComponentUpdate(nextProps, nextState){
+        if (this.props.selectedFiles !== nextProps.selectedFiles) return true;
         if (this.props.context !== nextProps.context) return true;
         if (this.props.page !== nextProps.page) return true;
         if (this.props.limit !== nextProps.limit) return true;
@@ -282,6 +257,7 @@ class ResultTableContainer extends React.Component {
         if (this.props.schemas !== nextProps.schemas) return true;
         return false;
     }
+    */
 
     componentDidUpdate(pastProps, pastState){
         if (this.props.debug) { 
@@ -304,7 +280,6 @@ class ResultTableContainer extends React.Component {
      * IN PROGRESS --- TODO: See SelectedFilesController
      */
     colDefOverrides(){
-        console.log(this.props.selectedFiles, "SSDDS");
         if (!this.props.selectedFiles) return this.props.columnDefinitionOverrides || null;
         var allSelectedFileIDs = _.keys(this.props.selectedFiles).sort(); // ALL selectedFiles, need to filter down to set re: result expSet
 
@@ -316,13 +291,16 @@ class ResultTableContainer extends React.Component {
                     var newChildren = origTitleBlock.props.children.slice(0);
                     var allFiles = ExperimentSetDetailPane.allFileIDs(expSet).sort();
                     var selectedFilesForSet = _.intersection(allSelectedFileIDs, allFiles);
+                    //var isAllFilesChecked
                     newChildren[2] = newChildren[1];
                     newChildren[1] = (
                         <ExperimentSetCheckBox
                             checked={ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFiles)}
                             indeterminate={ExperimentSetCheckBox.isIndeterminate(selectedFilesForSet, allFiles)}
                             disabled={ExperimentSetCheckBox.isDisabled(allFiles)}
-                            //onChange={this.handleCheck}
+                            onChange={(evt)=>{
+                                console.log(evt, evt.target);
+                            }}
                         />
                     );
                     return React.cloneElement(origTitleBlock, { 'children' : newChildren });
@@ -364,7 +342,16 @@ class ResultTableContainer extends React.Component {
                     <SearchResultTable
                         results={results}
                         columns={this.props.context.columns || {}}
-                        detailPane={ <ExperimentSetDetailPane expSetFilters={this.props.expSetFilters} /> }
+                        renderDetailPane={(result, rowNumber, containerWidth)=>
+                            <ExperimentSetDetailPane
+                                result={result}
+                                containerWidth={containerWidth}
+                                expSetFilters={this.props.expSetFilters}
+                                selectedFiles={this.props.selectedFiles}
+                                selectFile={this.props.selectFile}
+                                unselectFile={this.props.unselectFile}
+                            />
+                        }
                         stickyHeaderTopOffset={-78}
                         constantColumnDefinitions={browseTableConstantColumnDefinitions}
                         hiddenColumns={this.props.constantHiddenColumns}
@@ -389,15 +376,8 @@ class ControlsAndResults extends React.Component {
 
     constructor(props){
         super(props);
-        //this.getSelectedFiles = this.getSelectedFiles.bind(this);
         this.render = this.render.bind(this);
     }
-    /*
-    getSelectedFiles(){
-        if (!this.refs.resultTableContainer) return null;
-        return this.refs.resultTableContainer.getSelectedFiles();
-    }
-    */
 
     render(){
         //var fileStats = this.state.fileStats;
@@ -441,16 +421,13 @@ class ControlsAndResults extends React.Component {
                 </div>*/}
 
                 <SelectedFilesController>
-                    <PageLimitSortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
+                    <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
                         <ResultTableContainer
-                            //ref="resultTableContainer"
-                            context={this.props.context}
                             expSetFilters={this.props.expSetFilters}
                             session={this.props.session}
-                            href={this.props.href}
                             schemas={this.props.schemas}
                         />
-                    </PageLimitSortController>
+                    </SortController>
                 </SelectedFilesController>
             </div>
 
@@ -493,7 +470,6 @@ export default class BrowseView extends React.Component {
         var searchBase = url.parse(this.props.href).search || '';
 
         // browse is only for experiment sets
-        //console.log(this.props.href, this.context.location_href, searchBase);
         if(searchBase.indexOf('?type=ExperimentSetReplicate') === -1){
             return(
                 <div className="error-page">

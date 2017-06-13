@@ -255,20 +255,24 @@ class DefaultDetailPane extends React.Component {
 }
 
 class ResultDetailInner extends React.Component {
-
+    /*
     shouldComponentUpdate(nextProps){
         if (nextProps.rowNumber !== this.props.rowNumber) return true;
         if (!_.isEqual(nextProps.result, this.props.result)) return true;
         if (nextProps.tableContainerWidth !== this.props.tableContainerWidth) return true;
         return false;
     }
+    */
 
     render(){
+        return this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth, this.forceUpdate.bind(this));
+        /*
         return React.cloneElement(this.props.detailPane, {
             'result'    : this.props.result,
             'rowNumber' : this.props.rowNumber,
             'containerWidth' : this.props.tableContainerWidth
         });
+        */
     }
 }
 
@@ -278,7 +282,7 @@ class ResultDetail extends React.Component{
     static propTypes = {
         'result'    : PropTypes.object.isRequired,
         'open'      : PropTypes.bool.isRequired,
-        'detailPane': PropTypes.element.isRequired,
+        'renderDetailPane': PropTypes.func.isRequired,
         'rowNumber' : PropTypes.number,
         'toggleDetailOpen' : PropTypes.func.isRequired
     }
@@ -324,7 +328,7 @@ class ResultDetail extends React.Component{
                     }}>
                         <ResultDetailInner
                             result={this.props.result} rowNumber={this.props.rowNumber}
-                            detailPane={this.props.detailPane} tableContainerWidth={this.props.tableContainerWidth}
+                            renderDetailPane={this.props.renderDetailPane} tableContainerWidth={this.props.tableContainerWidth}
                         />
                         { this.props.tableContainerScrollLeft && this.props.tableContainerScrollLeft > 10 ?
                             <div className="close-button-container text-center" onClick={this.props.toggleDetailOpen}>
@@ -386,7 +390,7 @@ class ResultRow extends React.Component {
             }).isRequired
         })).isRequired,
         'headerColumnWidths' : PropTypes.array,
-        'detailPane'        : PropTypes.element.isRequired
+        'renderDetailPane'  : PropTypes.func.isRequired
     }
 
     constructor(props){
@@ -396,10 +400,11 @@ class ResultRow extends React.Component {
         this.isOpen = this.isOpen.bind(this);
         this.render = this.render.bind(this);
     }
-
+    
     shouldComponentUpdate(nextProps, nextState){
+        var isOpen = this.isOpen(nextProps);
         if (
-            this.isOpen(nextProps) !== this.isOpen(this.props) ||
+            isOpen || isOpen !== this.isOpen(this.props) ||
             !_.isEqual(nextProps.result, this.props.result) ||
             nextProps.rowNumber !== this.props.rowNumber ||
             nextProps.schemas !== this.props.schemas ||
@@ -413,7 +418,7 @@ class ResultRow extends React.Component {
             return false;
         }
     }
-
+    
     toggleDetailOpen(){
         this.props.toggleDetailPaneOpen(this.props['data-key']);
     }
@@ -423,7 +428,7 @@ class ResultRow extends React.Component {
     }
 
     render(){
-        var { result, rowNumber, mounted, headerColumnWidths, detailPane, columnDefinitions, schemas,
+        var { result, rowNumber, mounted, headerColumnWidths, renderDetailPane, columnDefinitions, schemas,
               tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href } = this.props;
         var detailOpen = this.isOpen();
         return (
@@ -448,7 +453,7 @@ class ResultRow extends React.Component {
                 <ResultDetail
                     result={result}
                     open={!!(detailOpen)}
-                    detailPane={detailPane}
+                    renderDetailPane={renderDetailPane}
                     rowNumber={rowNumber}
                     tableContainerWidth={tableContainerWidth}
                     tableContainerScrollLeft={tableContainerScrollLeft}
@@ -782,7 +787,7 @@ class DimensioningContainer extends React.Component {
                             props.columnDefinitions.length
                         ),
             'results'   : props.results,
-            'openDetailPanes' : {} // { row key : detail pane height } used for determining if detailPane is open + height for Infinite listview.
+            'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview.
         };
     }
 
@@ -877,7 +882,7 @@ class DimensioningContainer extends React.Component {
     }
 
     renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, headerColumnWidthsFilled, props = this.props){
-        var { columnDefinitions, results, detailPane, href } = props;
+        var { columnDefinitions, results, href, renderDetailPane } = props;
         return this.state.results.map((r, rowNumber)=>
             <ResultRow
                 result={r}
@@ -889,7 +894,7 @@ class DimensioningContainer extends React.Component {
                 mounted={this.state.mounted || false}
                 headerColumnWidths={headerColumnWidthsFilled}
                 schemas={Schemas.get()}
-                detailPane={detailPane}
+                renderDetailPane={renderDetailPane}
                 toggleDetailPaneOpen={this.toggleDetailPaneOpen}
                 openDetailPanes={this.state.openDetailPanes}
                 setDetailHeight={this.setDetailHeight}
@@ -903,7 +908,7 @@ class DimensioningContainer extends React.Component {
     }
 
     render(){
-        var { columnDefinitions, results, sortBy, sortColumn, sortReverse, detailPane, href, limit, defaultMinColumnWidth } = this.props;
+        var { columnDefinitions, results, sortBy, sortColumn, sortReverse, href, limit, defaultMinColumnWidth } = this.props;
         var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, this.state.mounted, this.state.widths);
         var responsiveGridSize = !isServerSide() && this.state.mounted && layout.responsiveGridState();
 
@@ -991,12 +996,12 @@ class DimensioningContainer extends React.Component {
  * @prop {Object[]}         [constantColumnDefinitions]  - Definitions for constant non-changing columns, such as title.
  * @prop {Object}           [defaultWidthMap]   Default column widths per responsive grid state. Applied to all non-constant columns.
  * @prop {string[]}         [hiddenColumns]     Keys of columns to remove from final columnDefinitions before rendering. Useful for hiding constantColumnDefinitions in response to some state.
- * @prop {React.Element}    [detailPane]        An instance of a React component which will receive prop 'result'.
+ * @prop {function}         [renderDetailPane]  An instance of a React component which will receive prop 'result'.
  * @prop {Object}           [columnDefinitionOverrideMap]  - Extend constant and default column-derived column definitions, by column definition field key.
  * 
- * @prop {string}           sortColumn          Current sort column, as fed by PageLimitSortController.
- * @prop {boolean}          sortReverse         Whether current sort column is reversed, as fed by PageLimitSortController.
- * @prop {function}         sortBy              Callback function for performing a sort, acceping 'sortColumn' and 'sortReverse' as params. As fed by PageLimitSortController.
+ * @prop {string}           sortColumn          Current sort column, as fed by SortController.
+ * @prop {boolean}          sortReverse         Whether current sort column is reversed, as fed by SortController.
+ * @prop {function}         sortBy              Callback function for performing a sort, acceping 'sortColumn' and 'sortReverse' as params. As fed by SortController.
  */
 export class SearchResultTable extends React.Component {
 
@@ -1040,13 +1045,13 @@ export class SearchResultTable extends React.Component {
         'constantColumnDefinitions' : ResultRow.propTypes.columnDefinitions,
         'defaultWidthMap' : PropTypes.shape({ 'lg' : PropTypes.number.isRequired, 'md' : PropTypes.number.isRequired, 'sm' : PropTypes.number.isRequired }).isRequired,
         'hiddenColumns' : PropTypes.arrayOf(PropTypes.string),
-        'detailPane' : PropTypes.element,
+        'renderDetailPane' : PropTypes.func,
         'columnDefinitionOverrideMap' : PropTypes.object
     }
 
     static defaultProps = {
         'columns' : {},
-        'detailPane' : <DefaultDetailPane/>,
+        'renderDetailPane' : function(result){ return <DefaultDetailPane result={result} />; },
         'defaultWidthMap' : { 'lg' : 200, 'md' : 180, 'sm' : 120 },
         'defaultMinColumnWidth' : 55,
         'constantColumnDefinitions' : extendColumnDefinitions([
