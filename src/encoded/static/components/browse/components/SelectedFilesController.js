@@ -89,13 +89,13 @@ export class SelectedFilesController extends React.Component {
     getFlatList(){ return SelectedFilesController.objectToCompleteList(this.state.selectedFiles); }
 
     render(){
+        if (!React.isValidElement(this.props.children)) throw new Error('CustomColumnController expects props.children to be a valid React component instance.');
         var propsToPass = _.extend(_.omit(this.props, 'children'), {
             'selectedFiles'         : this.state.selectedFiles,
             'selectFile'            : this.selectFile,
             'unselectFile'          : this.unselectFile,
             'resetSelectedFiles'    : this.resetSelectedFiles
         });
-
         return React.cloneElement(this.props.children, propsToPass);
     }
 

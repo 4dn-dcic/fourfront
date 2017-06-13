@@ -15,7 +15,10 @@ import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 import ExperimentsTable from './../experiments-table';
 import { isServerSide, expFxn, Filters, navigate, object } from './../util';
 import { FlexibleDescriptionBox } from './../item-pages/components';
-import { SortController, SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, SelectedFilesController } from './components';
+import {
+    SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
+    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector
+} from './components';
 
 
 
@@ -243,9 +246,22 @@ class ResultTableContainer extends React.Component {
         });
     }
 
+    hiddenColumns(){
+        var cols = [];
+        if (Array.isArray(this.props.constantHiddenColumns)){
+            cols = cols.concat(this.props.constantHiddenColumns);
+        }
+        if (Array.isArray(this.props.hiddenColumns)){
+            cols = cols.concat(this.props.hiddenColumns);
+        }
+        return _.uniq(cols);
+    }
+
     render() {
         var facets = this.props.context.facets;
         var results = this.props.context['@graph'];
+
+        
         return (
             <div className="row">
                 { facets.length > 0 ?
@@ -273,6 +289,18 @@ class ResultTableContainer extends React.Component {
                     null
                 }
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
+                    <div className="above-results-table-row clearfix">
+                        <CustomColumnSelector
+                            hiddenColumns={this.props.hiddenColumns}
+                            addHiddenColumn={this.props.addHiddenColumn}
+                            removeHiddenColumn={this.props.removeHiddenColumn}
+                            columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
+                                browseTableConstantColumnDefinitions,
+                                this.props.context.columns || {},
+                                this.colDefOverrides()
+                            )}
+                        />
+                    </div>
                     <SearchResultTable
                         results={results}
                         columns={this.props.context.columns || {}}
@@ -288,7 +316,7 @@ class ResultTableContainer extends React.Component {
                         }
                         stickyHeaderTopOffset={-78}
                         constantColumnDefinitions={browseTableConstantColumnDefinitions}
-                        hiddenColumns={this.props.constantHiddenColumns}
+                        hiddenColumns={this.hiddenColumns()}
                         columnDefinitionOverrideMap={this.colDefOverrides()}
                         href={this.props.href}
 
@@ -355,13 +383,15 @@ class ControlsAndResults extends React.Component {
                 </div>*/}
 
                 <SelectedFilesController>
-                    <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
-                        <ResultTableContainer
-                            expSetFilters={this.props.expSetFilters}
-                            session={this.props.session}
-                            schemas={this.props.schemas}
-                        />
-                    </SortController>
+                    <CustomColumnController defaultHiddenColumns={['lab.display_title', 'date_created']}>
+                        <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
+                            <ResultTableContainer
+                                expSetFilters={this.props.expSetFilters}
+                                session={this.props.session}
+                                schemas={this.props.schemas}
+                            />
+                        </SortController>
+                    </CustomColumnController>
                 </SelectedFilesController>
             </div>
 
