@@ -125,10 +125,19 @@ class ExperimentSet(Item):
     })
     def publications_of_set(self, request):
         pubs = set([str(pub) for pub in self.get_rev_links('publications_produced') +
-                self.get_rev_links('publications_using')])
+                   self.get_rev_links('publications_using')])
         pubs = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, pubs )]
+                for uuid in paths_filtered_by_status(request, pubs)]
         return [pub['@id'] for pub in pubs]
+
+    @calculated_property(schema={
+        "title": "Number of Experiments",
+        "description": "The number of Experiments in this Experiment Set.",
+        "type": "integer"
+    })
+    def number_of_experiments(self, request, experiments_in_set=None):
+        if experiments_in_set:
+            return len(experiments_in_set)
 
 
 @collection(
