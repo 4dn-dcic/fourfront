@@ -276,9 +276,6 @@ class ResultTableContainer extends React.Component {
         return false;
     }
 
-    /**
-     * IN PROGRESS --- TODO: See SelectedFilesController
-     */
     colDefOverrides(){
         if (!this.props.selectedFiles) return this.props.columnDefinitionOverrides || null;
         var allSelectedFileIDs = _.keys(this.props.selectedFiles).sort(); // ALL selectedFiles, need to filter down to set re: result expSet
@@ -286,13 +283,14 @@ class ResultTableContainer extends React.Component {
         // Add Checkboxes
         return _.extend({}, this.props.columnDefinitionOverrides, {
             'display_title' : _.extend({}, defaultColumnDefinitionMap.display_title, {
+                'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
                 'render' : (expSet, columnDefinition, props, width) => {
                     var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
                     var newChildren = origTitleBlock.props.children.slice(0);
                     var allFiles = ExperimentSetDetailPane.allFileIDs(expSet).sort();
                     var selectedFilesForSet = _.intersection(allSelectedFileIDs, allFiles);
-                    //var isAllFilesChecked
                     newChildren[2] = newChildren[1];
+                    newChildren[2] = React.cloneElement(newChildren[2], { 'className' : newChildren[2].props.className + ' mono-text' });
                     newChildren[1] = (
                         <ExperimentSetCheckBox
                             checked={ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFiles)}

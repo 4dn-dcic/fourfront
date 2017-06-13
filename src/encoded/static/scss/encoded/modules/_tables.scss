@@ -1202,6 +1202,7 @@ $small-label-accession-font-size : 0.75rem;
 // Common definitions
 @mixin search-result-column-block {
 	float: left;
+	transform: translate3d(0,0,0);
 	> .inner {
 		height : 46px;
 		padding: 15px 8px;
@@ -1383,12 +1384,6 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							> .inner {
 								height: 46px;
 								transition : height .35s ease-out, padding-top .35s ease-out;
-
-								.expset-checkbox {
-									float: left;
-									margin-right: 20px;
-									margin-top: 3px;
-								}
 							}
 							&:not(:last-child) {
 								border-right: 1px dotted rgba(0,0,0,0.075);
@@ -1415,6 +1410,14 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 											box-shadow: none;
 										}
 									}
+								}
+								.expset-checkbox {
+									float: left;
+									margin-right: 20px;
+									margin-top: 3px;
+								}
+								.mono-text {
+									letter-spacing: 0.5px;
 								}
 							}
 							&[data-field="lab.display_title"]{
