@@ -25,7 +25,7 @@ export function tipsFromSchema(schemas, content){
     if(content['@type'] && typeof schemas === 'object' && schemas !== null){
         var type = content['@type'][0];
         if(schemas[type]){
-            tips = schemas[type]['properties'];
+            tips = schemas[type].properties;
         }
     }
     return tips;
@@ -60,7 +60,7 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
     if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName in objectutils.getNestedProperty.');
     try {
         return (function findNestedValue(currentNode, fieldHierarchyLevels, level = 0){
-            if (level == fieldHierarchyLevels.length) return currentNode;
+            if (level === fieldHierarchyLevels.length) return currentNode;
 
             if (Array.isArray(currentNode)){
                 var arrayVals = [];
