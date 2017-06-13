@@ -1140,7 +1140,6 @@ export default class App extends React.Component {
                             setIsSubmitting={this.setIsSubmitting}
                             create={actionList[0] === 'create'}
                             edit={actionList[0] === 'edit'}
-                            create={actionList[0] === 'create'}
                         />
                     );
                     title = getTitleStringFromContext(context);
