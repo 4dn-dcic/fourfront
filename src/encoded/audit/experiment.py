@@ -6,11 +6,8 @@ from collections import defaultdict
 
 
 @audit_checker(
-    'experiment_hi_c',
-    frame=[
-        'files',
-        'files.files'
-    ]
+    'Experiment',
+    frame=['files', 'files.files']
 )
 def audit_experiments_have_raw_files(value, system):
     '''
@@ -34,7 +31,6 @@ def audit_experiments_have_raw_files(value, system):
         level = 'WARNING'
         if value['status'] == 'released':
             level = 'ERROR'
-        detail = 'Experiment {}'.format(value['@id']) + \
-                ' - Raw files are absent!'
+        detail = 'Experiment {}'.format(value['@id']) + ' - Raw files are absent!'
         yield AuditFailure('missing data', detail, level=level)
     return
