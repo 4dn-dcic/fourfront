@@ -287,7 +287,7 @@ export function expSetFiltersToURLQuery(expSetFilters = null){
         var field = filterPair[0];
         var terms = [...filterPair[1]]; // Set to Array
         return terms.map(function(t){
-            return field + '=' + encodeURIComponent(t).replace(/%20/g, '+');
+            return field + '=' + encodeURIComponent(t);
         }).join('&');
     }).join('&');
 }
