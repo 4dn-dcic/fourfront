@@ -1,0 +1,8 @@
+[include]
+./src/encoded/static/
+
+[ignore]
+./src/encoded/static/build
+
+[options]
+all = false

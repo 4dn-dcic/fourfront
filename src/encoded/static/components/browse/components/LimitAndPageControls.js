@@ -102,7 +102,7 @@ export class ColumnSorterIcon extends React.Component {
     
     iconStyle(style = 'descend'){
         if (style === 'descend')        return <i className="icon icon-sort-desc" style={{ transform: 'translateY(-1px)' }}/>;
-        else if (style === 'ascend')    return <i className="icon icon-sort-asc" style={{ transform: 'translateY(2px)' }}/>;
+        else if (style === 'ascend')    return <i className="icon icon-sort-asc" style={{ transform: 'translateY(4px)' }}/>;
     }
 
     render(){
@@ -115,6 +115,6 @@ export class ColumnSorterIcon extends React.Component {
             (this.props.currentSortColumn === value ? 'active ' : '') +
             'column-sort-icon'
         );
-        return <a href="#" className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</a>;
+        return <span className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</span>;
     }
 }
