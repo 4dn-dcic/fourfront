@@ -270,12 +270,14 @@ class File(Item):
         return keys
 
     @calculated_property(schema={
-        "title": "Title",
-        "type": "string",
-        "description" : "Accession of this file"
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
     })
-    def title(self, accession=None, external_accession=None):
-        return accession or external_accession
+    def display_title(self, request, file_format, accession=None, external_accession=None):
+        accession = accession or external_accession
+        file_extension = self.schema['file_format_file_extension'][file_format]
+        return '{}{}'.format(accession, file_extension)
 
     @calculated_property(schema={
         "title": "Download URL",
