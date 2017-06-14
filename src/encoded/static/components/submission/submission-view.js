@@ -1704,7 +1704,7 @@ class IndividualObjectView extends React.Component{
                                 context={this.state.selectData}
                                 navigate={this.inPlaceNavigate}
                                 selectCallback={this.selectComplete}
-                                submissionBase={this.state.selectQuery}/>
+                                submissionBase={'/search/' + this.state.selectQuery}/>
                             : null
                         }
                     </div>
