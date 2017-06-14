@@ -17,7 +17,8 @@ addons:
   postgresql: "9.4"
 env:
   global:
- - ES_VERSION=5.4.1 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+  - ES_VERSION=5.4.1
+  - ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
   - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
   - ELASTIC_BEANSTALK_LABEL=$TRAVIS_COMMIT
   - secure: vovAkyWqRwZdzZYc061JuENHIPxnjek1t7TWnzeo8AwQdFQwhbt76z0XV9g5DvjYclUWdYxfOb7fiUyxc8M0M2wPfwU05uStewWTuBKILobaNqMdsWaxRQ9OSJ3NxqTLabnmIsAuCQPwHFqM6etyHXiMaAgK8EU+r23CRzklMY77vQMN/2Bs+3Y1ngZ17OVvdbmAwzlUS0uE7+P9X2YXz6QVeTvyPWnBr5SMZ/gyA1/LU+44svKLC85BLtG+2YWHwEOPl0+Jt8diOP+UMBVI0GkCl2cN0dLQhVP26Jcp479BpnPVMOsRqH+Ve9qxpfY6aesTjAVc3D7AJcKzlOnA9o7GTaVGj0pWV+eCv9n3pFacIJkTF1/JNI3lmqKlWyeRd1qMCgCi94mNXEKEgXfxVBSczALhZcxHWTMYo1jE1aDAaAj09yukMJ9UEIBVSQsAGywihlFvTtUTwZDpd0cSfl2RYx6z845HU5EX9oNASEYcbC237I83bObu232ljRokBixA5fo4y+TLNLwK97DsFNGocIXsPBKVBq8uCClD3S8kG9sB88vjM9bFnkenw7GfZLjJFChzd4Hw+x4xJQH0L99MbWeMYAl9R/ojqk3tVrpGEpXwmf/MOgTmVGPUEExgeRTSWUn95YrpenOx7FsJJQ4ZpD1rnVRev2X0A21l0H0=
