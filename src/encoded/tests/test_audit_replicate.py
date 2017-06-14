@@ -83,26 +83,6 @@ def fastq_files(testapp, lab, award):
 
 
 @pytest.fixture
-def experiment_data(lab, award, human_biosample, mboI):
-    return {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
-        'digestion_enzyme': mboI['@id']
-    }
-
-
-@pytest.fixture
-def experiments(testapp, experiment_data):
-    expts = []
-    for i in range(4):
-        experiment_data['description'] = 'Experiment ' + str(i)
-        expts.append(testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0])
-    return expts
-
-
-@pytest.fixture
 def bs_f_experiments(testapp, experiment_data, biosamples4rep_set, fastq_files):
     expts = []
     for i in range(4):
@@ -114,20 +94,6 @@ def bs_f_experiments(testapp, experiment_data, biosamples4rep_set, fastq_files):
         experiment_data['files'] = [fastq_files[i]['@id']]
         expts.append(testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0])
     return expts
-
-
-@pytest.fixture
-def rep_set_data(lab, award):
-    return {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'description': 'Test replicate set',
-    }
-
-
-@pytest.fixture
-def empty_replicate_set(testapp, rep_set_data):
-    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -150,20 +116,6 @@ def external_exp_set(testapp, rep_set_data, experiments, external_award):
          'tec_rep_no': 1}
     ]
     rep_set_data['award'] = external_award['@id']
-    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
-
-
-@pytest.fixture
-def two_experiment_replicate_set(testapp, rep_set_data, experiments):
-    rep_set_data['description'] = 'Two one BioRep Experiment Replicate Set'
-    rep_set_data['replicate_exps'] = [
-        {'replicate_exp': experiments[0]['@id'],
-         'bio_rep_no': 1,
-         'tec_rep_no': 1},
-        {'replicate_exp': experiments[1]['@id'],
-         'bio_rep_no': 1,
-         'tec_rep_no': 2}
-    ]
     return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
