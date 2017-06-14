@@ -72,9 +72,13 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### SET TYPE FILTERS
     build_type_filters(result, request, doc_types, types)
 
+    # get the fields that will be used as source for the search
+    # currently, supports frame=raw but live faceting does not work
+    # this is okay because the only frame=raw access will be programmatic
+    result_fields = sorted(list_result_fields(request, doc_types))
+
     ### GET FILTERED QUERY
     # Builds filtered query which supports multiple facet selection
-    result_fields = sorted(list_result_fields(request, doc_types))
     search = build_query(search, prepared_terms, result_fields)
 
     ### Set sort order
@@ -367,8 +371,12 @@ def list_result_fields(request, doc_types):
         for field in fields_requested:
             fields.append('embedded.' + field)
     elif frame in ['embedded', 'object', 'raw']:
-        if frame == 'raw':
-            fields = ['properties.*']
+        if frame != 'embedded':
+            # frame=raw corresponds to 'properties' in ES
+            if frame == 'raw':
+                frame = 'properties'
+            # let embedded be searched as well (for faceting)
+            fields = ['embedded.*', frame + '.*']
         else:
             fields = [frame + '.*']
     else:
@@ -504,26 +512,24 @@ def set_filters(request, search, result, principals, doc_types):
             query_field = 'embedded.' + field + '.raw'
 
         bool_used_filters = used_filters['must_not'] if not_field else used_filters['must']
-
         if field not in bool_used_filters:
             bool_used_filters[field] = [term]
             this_filter = {'terms': {query_field: [term]}}
             if not_field:
                 not_query_filters.append(this_filter)
             else:
-
                 query_filters.append(this_filter)
         else:
             this_filter = {'terms': {query_field: bool_used_filters[field]}}
-            bool_used_filters[field].append(term)
             if not_field:
                 not_query_filters.remove(this_filter)
                 # update this_filter to reflect used_filters change
-                this_filter = {'terms': {query_field: bool_used_filters[field]}}
+                bool_used_filters[field].append(term)
                 not_query_filters.append(this_filter)
             else:
                 query_filters.remove(this_filter)
-                this_filter = {'terms': {query_field: bool_used_filters[field]}}
+                # update this_filter to reflect used_filters change
+                bool_used_filters[field].append(term)
                 query_filters.append(this_filter)
 
     # To modify filters of elasticsearch_dsl Search, must call to_dict(),
@@ -551,7 +557,7 @@ def initialize_facets(types, doc_types, search_audit, principals):
         ('audit.WARNING.category', {'title': 'Audit category: WARNING'}),
         ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION'})
     ]
-    if len(doc_types) == 1 and 'facets' in types[doc_types[0]].schema:
+    if len(doc_types) == 1 and doc_types[0] != 'Item' and 'facets' in types[doc_types[0]].schema:
         facets.extend(types[doc_types[0]].schema['facets'].items())
 
     # Display all audits if logged in, or all but INTERNAL_ACTION if logged out
@@ -595,17 +601,18 @@ def set_facets(search, facets, final_filters):
 
         facet_filters = deepcopy(final_filters['bool'])
 
+
         # Adding facets based on filters
         # handle 'must' and 'must_not' filters separately
         for filter_type in ['must', 'must_not']:
             if final_filters['bool'][filter_type] == []:
                 continue
-            for compare_idx in range(len(final_filters['bool'][filter_type])):
+            for compare_filter in final_filters['bool'][filter_type]:
                 # there should only be one key here
-                for compare_field in final_filters['bool'][filter_type][compare_idx]['terms'].keys():
+                for compare_field in compare_filter['terms'].keys():
                     # remove filter for a given field for that facet
                     if compare_field == query_field:
-                        del facet_filters[filter_type][compare_idx]
+                        facet_filters[filter_type].remove(compare_filter)
 
         aggs[agg_name] = {
             'aggs': {
@@ -695,7 +702,10 @@ def format_results(request, hits):
     else:
         frame = 'embedded'
 
-    if frame in ['embedded', 'object', ]:
+    if frame in ['embedded', 'object', 'raw']:
+        # transform 'raw' to 'properties', which is what is stored in ES
+        if frame == 'raw':
+            frame = 'properties'
         for hit in hits:
             frame_result = hit['_source'][frame]
             if 'audit' in hit['_source'] and 'audit' not in frame_result:
