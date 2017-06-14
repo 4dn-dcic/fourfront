@@ -1,6 +1,6 @@
 {
     "title": "Replicate Experiments",
-    "description": "An Experiment Set containing experiment replicates.",
+    "description": "Experiment Set for technical/biological replicates.",
     "id": "/profiles/experiment_set_replicate.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -28,13 +28,16 @@
             "accessionType": "ES"
         },
         "experimentset_type": {
-            "default" : "replicate"
+            "default" : "replicate",
+            "enum" : [
+              "replicate"
+            ]
         },
         "experiments_in_set": {
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "replicate_exps": {
-            "title": "Set of replicate experiments",
+            "title": "Set of Replicate Experiments",
             "description": "Replicate experiments with biological and technical replication numbers.",
             "type": "array",
             "default": [],
