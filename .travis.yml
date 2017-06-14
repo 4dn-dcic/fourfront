@@ -9,8 +9,8 @@ cache:
 addons:
   apt:
     packages:
+    - oracle-java8-set-default
     - bsdtar
-    - elasticsearch
     - build-essential
     - make
     - graphviz
