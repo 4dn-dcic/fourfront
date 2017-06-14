@@ -41,9 +41,9 @@
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "default": "calibration file",
-            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
-                "calibration file"
+                "calibration file",
+                "image"
             ]
         },
         "file_classification": {

@@ -35,6 +35,25 @@
                 "mcool",
                 "other"
             ]
+        },
+        "file_type": {
+            "title": "File Type",
+            "description": "The type of file based on the information in the file.",
+            "default": "calibration file",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "enum": [
+                "read pairs",
+                "alignments",
+                "unfiltered alignments",
+                "contact list",
+                "contact matrix",
+                "normalized contact matrix",
+                "long range chromatin interactions",
+                "intensity values",
+                "peaks",
+                "image",
+                "other"
+            ]
         }
      },
      "file_format_file_extension": {
