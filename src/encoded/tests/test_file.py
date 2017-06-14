@@ -9,6 +9,13 @@ def test_reference_file_by_md5(testapp, file):
     assert res.json['@id'] == file['@id']
 
 
+def test_file_content_md5sum_unique(testapp, file, fastq_json):
+    testapp.patch_json('/{uuid}'.format(**file), {'content_md5sum': '1234'}, status=200)
+    fastq_json['content_md5sum'] = '1234'
+    res2 = testapp.post_json('/file_fastq', fastq_json, status=409)
+    assert res2.json.get('detail').startswith("Keys conflict")
+
+
 def test_replaced_file_not_uniqued(testapp, file):
     testapp.patch_json('/{uuid}'.format(**file), {'status': 'replaced'}, status=200)
     testapp.get('/md5:{md5sum}'.format(**file), status=404)
@@ -225,12 +232,11 @@ def test_name_for_file_is_accession(registry, fastq_json):
     assert my_file.__name__ == fastq_json['accession']
 
 
-def test_file_type(registry, fastq_json):
-    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = FileFastq.create(registry, uuid, fastq_json)
-    assert 'gz' == my_file.file_type('gz')
-    assert "fastq gz" == my_file.file_type('fastq', 'gz')
-
+# def test_file_type(registry, fastq_json):
+#    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
+#    my_file = FileFastq.create(registry, uuid, fastq_json)
+#    assert 'gz' == my_file.file_type('gz')
+#    assert "fastq gz" == my_file.file_type('fastq', 'gz')
 
 
 def test_post_upload_only_on_uploading(registry, fastq_json, request):
@@ -272,5 +278,3 @@ def test_workflowrun_input_rev_link(testapp, fastq_json, workflow_run_json):
 
     new_file = testapp.get(res['@id']).json
     assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
-
-

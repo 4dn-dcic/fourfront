@@ -1,5 +1,7 @@
 'use strict';
 
+import createReactClass from 'create-react-class';
+
 /**
  * Written by Alex, based on Carl's homepage test, to test the 'Help' page
  * rendered by help.js.
@@ -21,9 +23,9 @@ describe('Testing help.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        HelpPage = require('../static-pages/help');
+        HelpPage = require('../static-pages/help').default;
         context = require('../testdata/static/helppage');
-        Wrapper = React.createClass({
+        Wrapper = createReactClass({
             render: function() {
                 return (
                     <div>{this.props.children}</div>

@@ -1,20 +1,34 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
+import _ from 'underscore';
 import { Collapse, Button } from 'react-bootstrap';
-var ReactTooltip = require('react-tooltip');
-var { console, object, Filters } = require('./../../util');
-var globals = require('./../../globals');
-import PartialList from './PartialList';
-var FilesInSetTable = require('./FilesInSetTable');
+import ReactTooltip from 'react-tooltip';
+import { console, object, Schemas } from './../../util';
+import { PartialList } from './PartialList';
+import { FilesInSetTable } from './FilesInSetTable';
 import { getTitleStringFromContext } from './../item';
 import JSONTree from 'react-json-tree';
 
+
+export class TooltipInfoIconContainer extends React.Component {
+    render(){
+        var { elementType, title, tooltip } = this.props;
+        return React.createElement(elementType || 'div', {
+            'className' : "tooltip-info-container"
+        }, (
+            <span>{ title }&nbsp;{ typeof tooltip === 'string' ?
+                <i data-tip={tooltip} className="icon icon-info-circle"/>
+            : null }</span>
+        ));
+    }
+}
+
+
 /**
  * Contains and toggles visibility/mounting of a Subview.
- * 
+ *
  * @class SubItem
  * @extends {React.Component}
  */
@@ -66,12 +80,16 @@ class SubItem extends React.Component {
     }
 
     render() {
-        var { schemas, content, title, keyTitleDescriptionMap } = this.props;
+        var schemas = this.props.schemas;
+        var content = this.props.content;
+        var title = this.props.title;
+        var popLink = this.props.popLink;
+        var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap;
         return (
             <span>
                 { this.toggleLink(title, this.state.isOpen) }
                 { this.state.isOpen ?
-                    <SubItemView schemas={schemas} content={content} title={title} keyTitleDescriptionMap={keyTitleDescriptionMap} />
+                    <SubItemView schemas={schemas} content={content} popLink={popLink} title={title} keyTitleDescriptionMap={keyTitleDescriptionMap} />
                 : null }
             </span>
         );
@@ -94,6 +112,7 @@ class SubItemView extends React.Component {
     render(){
         var schemas = this.props.schemas;
         var item = this.props.content;
+        var popLink = this.props.popLink;
         var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap || {};
 
         return (
@@ -102,9 +121,10 @@ class SubItemView extends React.Component {
                     <Detail
                         context={item}
                         schemas={schemas}
+                        popLink={popLink}
                         alwaysCollapsibleKeys={[]}
                         excludedKeys={this.props.excludedKeys ||
-                            _.without(Detail.defaultProps,
+                            _.without(Detail.defaultProps.excludedKeys,
                             // Remove
                                 '@id', 'audit', 'lab', 'award', 'description'
                             ).concat([
@@ -127,11 +147,16 @@ class SubItemView extends React.Component {
     }
 }
 
+
 /**
- * @memberof module:item-pages/components.ItemDetailList
+ * The list of properties contained within ItemDetailList.
+ * Isolated to allow use without existing in ItemDetailList parent.
+ *
+ * @class Detail
+ * @type {Component}
  */
 export class Detail extends React.Component {
-    
+
     /**
      * Formats the correct display for each metadata field.
      *
@@ -154,13 +179,7 @@ export class Detail extends React.Component {
             }
         }
 
-        return (
-            <div className="tooltip-info-container">
-                <span>{ title || key } { tooltip !== null ?
-                    <i data-tip={tooltip} className="icon icon-info-circle"/>
-                : null }</span>
-            </div>
-        );
+        return <TooltipInfoIconContainer title={title || key} tooltip={tooltip} />;
     }
 
     /**
@@ -172,7 +191,8 @@ export class Detail extends React.Component {
     * @param {Object} schemas - Object containing schemas for server's JSONized object output.
     * @param {Object|Array|string} item - Item(s) to render recursively.
     */
-    static formValue(schemas, item, keyPrefix = '', atType = 'ExperimentSet', keyTitleDescriptionMap, depth = 0) {
+    static formValue(item, popLink = false, keyPrefix = '', atType = 'ExperimentSet', keyTitleDescriptionMap, depth = 0) {
+        var schemas = Schemas.get();
         if (item === null){
             return <span>No Value</span>;
         } else if (Array.isArray(item)) {
@@ -186,9 +206,10 @@ export class Detail extends React.Component {
             return (
                 <ol>
                     {   item.length === 0 ? <li><em>None</em></li>
-                        :   item.map(function(it, i){
-                                return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
-                            })
+                        :
+                        item.map(function(it, i){
+                            return <li key={i}>{ Detail.formValue(it, popLink, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
+                        })
                     }
                 </ol>
             );
@@ -197,12 +218,20 @@ export class Detail extends React.Component {
 
             // if the following is true, we have an embedded object without significant other data
             if (item.display_title && typeof item.link_id === 'string' && _.keys(item).length < 4){
-                var format_id = item.link_id.replace(/~/g, "/")
-                return (
-                    <a href={format_id}>
-                        { title }
-                    </a>
-                );
+                var format_id = item.link_id.replace(/~/g, "/");
+                if(popLink){
+                    return (
+                        <a href={format_id} target="_blank">
+                            {title}
+                        </a>
+                    );
+                } else {
+                    return (
+                        <a href={format_id}>
+                            { title }
+                        </a>
+                    );
+                }
             } else { // it must be an embedded sub-object (not Item)
                 return (
                     <SubItem
@@ -210,17 +239,26 @@ export class Detail extends React.Component {
                         content={item}
                         key={title}
                         title={title}
+                        popLink={popLink}
                         keyTitleDescriptionMap={keyTitleDescriptionMap}
                     />
                 );
             }
         } else if (typeof item === 'string'){
             if (keyPrefix === '@id'){
-                return (
-                    <a key={item} href={item}>
-                        {item}
-                    </a>
-                );
+                if(popLink){
+                    return (
+                        <a key={item} href={item} target="_blank">
+                            {item}
+                        </a>
+                    );
+                }else{
+                    return (
+                        <a key={item} href={item}>
+                            {item}
+                        </a>
+                    );
+                }
             }
             if(item.indexOf('@@download') > -1/* || item.charAt(0) === '/'*/){
                 // this is a download link. Format appropriately
@@ -232,14 +270,22 @@ export class Detail extends React.Component {
                     </a>
                 );
             } else if (item.charAt(0) === '/') {
-                return (
-                    <a key={item} href={item}>
-                        {item}
-                    </a>
-                );
+                if(popLink){
+                    return (
+                        <a key={item} href={item} target="_blank">
+                            {item}
+                        </a>
+                    );
+                }else{
+                    return (
+                        <a key={item} href={item}>
+                            {item}
+                        </a>
+                    );
+                }
             } else if (item.slice(0,4) === 'http') {
                 // Is a URL. Check if we should render it as a link/uri.
-                var schemaProperty = Filters.Field.getSchemaProperty(keyPrefix, schemas, atType);
+                var schemaProperty = Schemas.Field.getSchemaProperty(keyPrefix, schemas, atType);
                 if (
                     schemaProperty &&
                     typeof schemaProperty.format === 'string' &&
@@ -260,7 +306,6 @@ export class Detail extends React.Component {
     static SubItemView = SubItemView
 
     static propTypes = {
-        'schemas' : PropTypes.object.isRequired,
         'context' : PropTypes.object.isRequired,
         'keyTitleDescriptionMap' : PropTypes.object
     }
@@ -293,7 +338,7 @@ export class Detail extends React.Component {
             // Document
             'attachment',
             // Things to go at bottom consistently
-            'aliases', 
+            'aliases',
         ],
         'alwaysCollapsibleKeys' : [
             '@type', 'accession', 'schema_version', 'uuid', 'replicate_exps', 'dbxrefs', 'status', 'external_references', 'date_created'
@@ -304,7 +349,8 @@ export class Detail extends React.Component {
     render(){
         var context = this.props.context;
         var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
-        var tips = object.tipsFromSchema(this.props.schemas, context);
+        var schemas = this.props.schemas || Schemas.get();
+        var tips = schemas ? object.tipsFromSchema(schemas, context) : {};
         if (typeof this.props.keyTitleDescriptionMap === 'object' && this.props.keyTitleDescriptionMap){
             _.extend(tips, this.props.keyTitleDescriptionMap);
         }
@@ -323,14 +369,14 @@ export class Detail extends React.Component {
         var extraKeys = _.difference(sortKeys, this.props.stickyKeys.slice(0).sort());
         var collapsibleKeys = _.intersection(extraKeys.sort(), this.props.alwaysCollapsibleKeys.slice(0).sort());
         extraKeys = _.difference(extraKeys, collapsibleKeys);
-
+        var popLink = this.props.popLink || false; // determines whether links should be opened in a new tab
         return (
             <PartialList
                 persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
                         { Detail.formValue(
-                            this.props.schemas,
                             context[key],
+                            popLink,
                             key,
                             context['@type'] && context['@type'][0],
                             tips
@@ -340,8 +386,8 @@ export class Detail extends React.Component {
                 collapsible={ collapsibleKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
                         { Detail.formValue(
-                            this.props.schemas,
                             context[key],
+                            popLink,
                             key,
                             context['@type'] && context['@type'][0],
                             tips
@@ -355,12 +401,19 @@ export class Detail extends React.Component {
 
 }
 
-
-export default class ItemDetailList extends React.Component {
+/**
+ * A list of properties which belong to Item shown by ItemView.
+ * Shows 'persistentKeys' fields & values stickied near top of list,
+ * 'excludedKeys' never, and 'hiddenKeys' only when "See More Info" button is clicked.
+ *
+ * @class
+ * @type {Component}
+ */
+export class ItemDetailList extends React.Component {
 
     static Detail = Detail
 
-    static getTabObject(context, schemas){
+    static getTabObject(context){
         return {
             tab : <span><i className="icon icon-list-ul icon-fw"/> Details</span>,
             key : 'details',
@@ -370,7 +423,7 @@ export default class ItemDetailList extends React.Component {
                         <span>Details</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <ItemDetailList context={context} schemas={schemas} />
+                    <ItemDetailList context={context} />
                 </div>
             )
         };
@@ -385,7 +438,7 @@ export default class ItemDetailList extends React.Component {
         this.state = {
             'collapsed' : true,
             'showingJSON' : false
-        }
+        };
     }
 
     seeMoreButton(){
@@ -434,6 +487,8 @@ export default class ItemDetailList extends React.Component {
                             schemas={this.props.schemas}
                             open={!collapsed}
                             keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                            excludedKeys={this.props.excludedKeys || Detail.defaultProps.excludedKeys}
+                            stickyKeys={this.props.stickyKeys || Detail.defaultProps.stickyKeys}
                         />
                         <div className="row">
                             <div className="col-xs-6">{ this.seeMoreButton() }</div>
@@ -451,7 +506,7 @@ export default class ItemDetailList extends React.Component {
                         </div>
                     </div>
                 }
-                
+
             </div>
         );
     }

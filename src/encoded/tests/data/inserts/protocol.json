@@ -4,6 +4,8 @@
         "description": "Stable transfection protocol",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "aliases": ["dcic:test_protocol"],
+        "protocol_type": "Other",
         "submitted_by": "wrangler@wrangler.com",
         "attachment": "test.pdf",
         "status": "in review by lab"

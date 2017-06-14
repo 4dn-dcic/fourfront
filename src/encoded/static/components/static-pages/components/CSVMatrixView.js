@@ -24,7 +24,7 @@ export const CSVParsingUtilities = {
 
         // Grab title from CSV, if set.
         var title = null;
-		if (Array.isArray(options.titleCell)){
+        if (Array.isArray(options.titleCell)){
             title = data[options.titleCell[1] - 1][options.titleCell[0] - 1];
         }
         var xAxisLabels = CSVParsingUtilities.xAxisLabelsFrom2DArray(data, options),
@@ -71,10 +71,10 @@ export const CSVParsingUtilities = {
                     'columnLabel'   : xAxisLabels[columnIndex],
                     'rowLabel'      : yAxisLabels[rowIndex],
                     'tooltip'       : CSVParsingUtilities.generateCellTooltipContent(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options)
-                }
+                };
 
             });
-        })
+        });
     },
 
     generateCellTooltipContent : function(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options){
@@ -108,11 +108,11 @@ export const CSVParsingUtilities = {
     },
 
     xAxisLabelsFrom2DArray : function(data, options){
-       return _.zip.apply(_.zip, options.xaxisRows.map(function(xRow){ 
+        return _.zip.apply(_.zip, options.xaxisRows.map(function(xRow){ 
             return data[xRow - 1].filter(function(colLabel, colIdx){
-	            if (colIdx < options.startCell[0] - 1) return false;
+                if (colIdx < options.startCell[0] - 1) return false;
                 if (colIdx > options.endCell[0] - 1) return false;
-            	return true;
+                return true;
             });
         })).map(function(setOfXLabels){
             return setOfXLabels.map(function(xLabelPart){
@@ -124,12 +124,12 @@ export const CSVParsingUtilities = {
     yAxisLabelsFrom2DArray : function(data, options){
         return _.zip.apply(_.zip, options.yaxisCols.map(function(yCol){ 
             return _.pluck(data, yCol - 1).filter(function(rowLabel, rowIdx){
-	            if (rowIdx < options.startCell[1] - 1) return false;
+                if (rowIdx < options.startCell[1] - 1) return false;
                 if (rowIdx > options.endCell[1] - 1) return false;
-                    if (options.skipRows.indexOf(rowIdx + 1) > -1){
+                if (options.skipRows.indexOf(rowIdx + 1) > -1){
                     return false;
                 }
-            	return true;
+                return true;
             });
         })).map(function(setOfYLabels){
             return setOfYLabels.map(function(yLabelPart){
@@ -140,13 +140,13 @@ export const CSVParsingUtilities = {
 
     filter2DArrayDownToRange : function(data, options){
         return data.filter(function(row, rowIndex){
-			if (rowIndex < options.startCell[1] - 1) return false;
-			if (rowIndex > options.endCell[1] - 1) return false;
+            if (rowIndex < options.startCell[1] - 1) return false;
+            if (rowIndex > options.endCell[1] - 1) return false;
             if (options.skipRows.indexOf(rowIndex + 1) > -1){
                 return false;
             }
-			return true;
-		}).map(function(row, adjustedRowIndex){
+            return true;
+        }).map(function(row, adjustedRowIndex){
             return row.filter(function(cell, colIndex){
                 if (colIndex < options.startCell[0] - 1) return false;
                 if (colIndex > options.endCell[0] - 1) return false;
@@ -161,6 +161,8 @@ export const CSVParsingUtilities = {
 
 /**
  * Extends MatrixView Component to accept a 'csv' {string} prop which can be parsed into Matrix data.
+ * Component which takes in a CSV string as a prop, transforms it into a 2D array, and plots on a matrix.
+ * See src/encoded/static/data/static_pages.json to see options which may be configured (pass as 'options' prop).
  * 
  * @export
  * @class CSVMatrixView
@@ -168,10 +170,10 @@ export const CSVParsingUtilities = {
  * @prop {string} csv - String representation of a CSV file.
  * @prop {Object} options - Options for parsing CSV. TODO: typedef
  */
-export default class CSVMatrixView extends MatrixView {
+export class CSVMatrixView extends MatrixView {
 
     constructor(props){
-		super(props);
+        super(props);
         this.render = this.render.bind(this);
     }
 

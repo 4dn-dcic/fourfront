@@ -1,11 +1,11 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var { Checkbox, Collapse } = require('react-bootstrap');
-var _ = require('underscore');
-var FacetList = require('./facetlist'); // Only used for statics.
-var { expFxn, Filters, console, isServerSide, analytics } = require('./util');
+import { Checkbox, Collapse } from 'react-bootstrap';
+import _ from 'underscore';
+import FacetList from './facetlist'; // Only used for statics.
+import { expFxn, Filters, console, isServerSide, analytics } from './util';
 
 
 
@@ -154,16 +154,16 @@ class StackedBlockName extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
     }
-
+    /*
     shouldComponentUpdate(nextProps){
         if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
         return false;
     }
-
+    */
     getColumnWidthStyle(){
         if (this.props.colWidthStyles && typeof this.props.colWidthStyles[this.props.columnClass] !== 'undefined'){
             return this.props.colWidthStyles[this.props.columnClass];
@@ -313,14 +313,14 @@ class StackedBlockList extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
         if (Array.isArray(this.props.children) && this.props.children.length > this.props.collapseLimit){
             this.state = { 'collapsed' : true };
         }
     }
-
+    /*
     shouldComponentUpdate(nextProps, nextState){
         if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
         if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
@@ -328,6 +328,7 @@ class StackedBlockList extends React.Component {
         if (this.state.collapsed !== nextState.collapsed) return true;
         return false;
     }
+    */
 
     adjustedChildren(){
         return React.Children.map(this.props.children, (c)=>{
@@ -556,9 +557,9 @@ export default class ExperimentsTable extends React.Component {
         useSet = false  // Return as array instead of set.
     ){
         if (!Array.isArray(allExperiments)){
-                // no experiments
-                if (useSet) return new Set();
-                return [];
+            // no experiments
+            if (useSet) return new Set();
+            return [];
         }
         // TODO: If filters === null then filters = store.getState().expSetFilters ?
         if (Array.isArray(allExperiments[0].experiments_in_set)){
@@ -591,17 +592,18 @@ export default class ExperimentsTable extends React.Component {
         if (!experimentArray) return null;
         var experimentsCount = 0;
         var fileSet = new Set();
+        var j;
         for (var i = 0; i < experimentArray.length; i++){
             if (experimentArray[i].files && experimentArray[i].files.length > 0){
                 experimentsCount++; // Exclude empty experiments
-                for (var j = 0; j < experimentArray[i].files.length; j++){
+                for (j = 0; j < experimentArray[i].files.length; j++){
                     if (!fileSet.has(experimentArray[i].files[j]['@id'])){
                         fileSet.add(experimentArray[i].files[j]['@id']);
                     }
                 }
             } else if (experimentArray[i].filesets && experimentArray[i].filesets.length > 0){
                 experimentsCount++;
-                for (var j = 0; j < experimentArray[i].filesets.length; j++){
+                for (j = 0; j < experimentArray[i].filesets.length; j++){
                     for (var k = 0; k < experimentArray[i].filesets[j].files_in_set.length; k++){
                         if (!fileSet.has(experimentArray[i].filesets[j].files_in_set[k]['@id'])){
                             fileSet.add(experimentArray[i].filesets[j].files_in_set[k]['@id']);
@@ -618,66 +620,12 @@ export default class ExperimentsTable extends React.Component {
         };
     }
 
-    static visibleExperimentsCount(experimentArray){
-        if (!Array.isArray(experimentArray)) return null;
-        var fileKeys = Object.keys(fileDetailContainer.fileDetail);
-        var experiments = new Set();
-        var fileSet = new Set(fileKeys);
-
-        for (var i = 0; i < fileKeys.length; i++){
-            if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
-                experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
-            }
-            if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
-                if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
-                    fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
-                }
-            }
-        }
-        return {
-            'experiments' : experiments.size,
-            'files' : fileSet.size,
-            'emptyExperiments' : fileDetailContainer.emptyExps.length
-        };
-    }
-
-    static visibleExperimentsCountDeprecated(fileDetailContainer){
-        if (!fileDetailContainer) return null;
-        var fileKeys = Object.keys(fileDetailContainer.fileDetail);
-        var experiments = new Set();
-        var fileSet = new Set(fileKeys);
-
-        for (var i = 0; i < fileKeys.length; i++){
-            if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
-                experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
-            }
-            if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
-                if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
-                    fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
-                }
-            }
-        }
-        return {
-            'experiments' : experiments.size,
-            'files' : fileSet.size,
-            'emptyExperiments' : fileDetailContainer.emptyExps.length
-        };
-    }
-
     static propTypes = {
         columnHeaders : PropTypes.array,
         experimentArray : PropTypes.array,
         passExperiments : PropTypes.instanceOf(Set),
         expSetFilters : PropTypes.object,
-        selectedFiles : PropTypes.instanceOf(Set),
-        parentController : function(props, propName, componentName){
-            // Custom validation
-            if (props[propName] &&
-                (!(props[propName].state.selectedFiles instanceof Set))
-            ){
-                return new Error('parentController must be a React Component passed in as "this", with "selectedFiles" (Set) and "checked" (bool) in its state.');
-            }
-        },
+        selectedFiles : PropTypes.object.isRequired,
         keepCounts : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
     }
 
@@ -702,8 +650,7 @@ export default class ExperimentsTable extends React.Component {
         this.customColumnHeaders = this.customColumnHeaders.bind(this);
         this.columnHeaders = this.columnHeaders.bind(this);
         this.colWidthStyles = this.colWidthStyles.bind(this);
-        this.selectedFiles = this.selectedFiles.bind(this);
-        this.handleFileUpdate = this.handleFileUpdate.bind(this);
+        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
         this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
         this.renderRootStackedBlockListOfBiosamplesWithExperiments = this.renderRootStackedBlockListOfBiosamplesWithExperiments.bind(this);
@@ -715,15 +662,9 @@ export default class ExperimentsTable extends React.Component {
             oddExpRow : true
         };
         var initialState = {
-            checked: true,
             columnWidths : null, // set on componentDidMount via updateColumnWidths
             mounted : false
         };
-        if (!(
-            props.parentController &&
-            props.parentController.state &&
-            props.parentController.state.selectedFiles
-        )) initialState.selectedFiles = new Set();
         this.state = initialState;
     }
 
@@ -735,7 +676,7 @@ export default class ExperimentsTable extends React.Component {
                 !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
             )
         ){
-            this.setState({ columnWidths : ExperimentsTable.initialColumnWidths(null) })
+            this.setState({ columnWidths : ExperimentsTable.initialColumnWidths(null) });
             return null;
         }
         if (!this.cache.origColumnWidths){
@@ -754,12 +695,12 @@ export default class ExperimentsTable extends React.Component {
         }
 
         var availableWidth = this.props.width || this.refs.header.offsetWidth || 960, // 960 = fallback for tests
-            totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v }, 0);
+            totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
 
         if (totalOrigColsWidth > availableWidth){
             this.setState({ columnWidths : null });
             return; // No room to scale up widths.
-        };
+        }
 
         var scale = (availableWidth / totalOrigColsWidth) || 1;
         var newColWidths = origColumnWidths.map(function(c){
@@ -767,7 +708,7 @@ export default class ExperimentsTable extends React.Component {
         });
 
         // Adjust first column by few px to fit perfectly.
-        var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v }, 0);
+        var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v; }, 0);
         var remainder = availableWidth - totalNewColsWidth;
         newColWidths[0] += Math.floor(remainder - 0.5);
 
@@ -826,54 +767,31 @@ export default class ExperimentsTable extends React.Component {
             'file-pair' : null,
             'file' : null,
             'file-detail' : null
-        }
+        };
 
         if (Array.isArray(this.state.columnWidths)){
             Object.keys(colWidthStyles).forEach((cn) => {
                 colWidthStyles[cn] = {
                     width : this.state.columnWidths[_.findIndex(this.columnHeaders(), { 'columnClass' : cn })]
-                }
+                };
             });
         }
 
         return colWidthStyles;
     }
 
-    selectedFiles(){
-        //if (this.props.selectedFiles) {
-        //    return this.props.selectedFiles;
-        if (this.props.parentController && this.props.parentController.state.selectedFiles){
-            return this.props.parentController.state.selectedFiles;
-        } else if (this.state.selectedFiles){
-            return this.state.selectedFiles;
-        }
-        return null;
-    }
+    handleFileCheckboxChange(uuid, fileObj){
+        if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
 
-    handleFileUpdate(uuid, add=true){
-
-        var selectedFiles = this.selectedFiles();
-        if (!selectedFiles) return null;
-
-        if(add){
-            if(!selectedFiles.has(uuid)){
-                selectedFiles.add(uuid);
+        if (typeof this.props.selectedFiles[uuid] === 'undefined') {
+            var memo = null;
+            if (fileObj && Array.isArray(fileObj.related_files)) {
+                memo = { 'related_files' : fileObj.related_files };
             }
-        } else if (selectedFiles.has(uuid)) {
-            selectedFiles.delete(uuid);
-        }
-
-        if (!this.props.parentController){
-            // Set state on self if no parent controller
-            this.setState({
-                'selectedFiles': selectedFiles
-            });
+            this.props.selectFile(uuid, memo);
         } else {
-            this.props.parentController.setState({
-                'selectedFiles': selectedFiles
-            });
+            this.props.unselectFile(uuid);
         }
-
     }
 
     renderExperimentBlock(exp,i){
@@ -911,10 +829,10 @@ export default class ExperimentsTable extends React.Component {
                         exp.file_pairs.map((filePair,i) =>
                             <FilePairBlock
                                 key={i}
-                                selectedFiles={this.selectedFiles()}
+                                selectedFiles={this.props.selectedFiles}
                                 files={filePair}
                                 columnHeaders={columnHeaders}
-                                handleFileUpdate={this.handleFileUpdate}
+                                handleFileCheckboxChange={this.handleFileCheckboxChange}
                                 label={ exp.file_pairs.length > 1 ?
                                     { title : "Pair " + (i + 1) } : { title : "Pair" }
                                 }
@@ -936,8 +854,8 @@ export default class ExperimentsTable extends React.Component {
                                             key={file['@id']}
                                             file={file}
                                             columnHeaders={columnHeaders}
-                                            handleFileUpdate={this.handleFileUpdate}
-                                            selectedFiles={this.selectedFiles()}
+                                            handleFileCheckboxChange={this.handleFileCheckboxChange}
+                                            selectedFiles={this.props.selectedFiles}
                                             hideNameOnHover={false}
                                             isSingleItem={exp.files.length < 2 ? true : false}
                                         />
@@ -996,7 +914,7 @@ export default class ExperimentsTable extends React.Component {
                         expsWithBiosample.length > 5 ?
                             'with ' + (
                                 _.all(expsWithBiosample.slice(3), function(exp){
-                                    return exp.file_pairs !== 'undefined'
+                                    return exp.file_pairs !== 'undefined';
                                 }) ? /* Do we have filepairs for all exps? */
                                     _.flatten(_.pluck(expsWithBiosample.slice(3), 'file_pairs'), true).length +
                                     ' File Pairs'
@@ -1123,37 +1041,21 @@ export default class ExperimentsTable extends React.Component {
 class FilePairBlock extends React.Component {
 
     static propTypes = {
-        selectedFiles : PropTypes.instanceOf(Set),
-        handleFileUpdate : PropTypes.func
+        selectedFiles : PropTypes.object,
+        handleFileCheckboxChange : PropTypes.func
     }
 
     constructor(props){
         super(props);
-        this.updateFileChecked = this.updateFileChecked.bind(this);
         this.isChecked = this.isChecked.bind(this);
-        this.handleCheck = this.handleCheck.bind(this);
         this.renderFileEntryBlock = this.renderFileEntryBlock.bind(this);
         this.renderCheckBox = this.renderCheckBox.bind(this);
         this.render = this.render.bind(this);
     }
 
-    updateFileChecked(add=true){
-        if(
-            Array.isArray(this.props.files) &&
-            this.props.files[0].uuid &&
-            typeof this.props.handleFileUpdate === 'function'
-        ){
-            this.props.handleFileUpdate(this.props.files[0].uuid, add);
-        }
-    }
-
     isChecked(){
-        if (!Array.isArray(this.props.files) || !(this.props.selectedFiles instanceof Set) || !this.props.files[0].uuid) return null;
-        return this.props.selectedFiles.has(this.props.files[0].uuid);
-    }
-
-    handleCheck() {
-        this.updateFileChecked(!this.isChecked());
+        if (!Array.isArray(this.props.files) || !this.props.selectedFiles || !this.props.files[0].uuid) return null;
+        return !!(this.props.selectedFiles[this.props.files[0].uuid]);
     }
 
     renderFileEntryBlock(file,i){
@@ -1181,7 +1083,7 @@ class FilePairBlock extends React.Component {
                 name="file-checkbox"
                 id={checked + "~" + true + "~" + this.props.files[0].file_format + "~" + this.props.files[0].uuid}
                 className='exp-table-checkbox'
-                onChange={this.handleCheck}
+                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, this.props.files[0].uuid, this.props.files[0])}
             />
         );
     }
@@ -1230,38 +1132,22 @@ class FilePairBlock extends React.Component {
 class FileEntryBlock extends React.Component {
 
     static propTypes = {
-        selectedFiles : React.PropTypes.instanceOf(Set),
-        handleFileUpdate : React.PropTypes.func
+        selectedFiles : PropTypes.object,
+        handleFileCheckboxChange : PropTypes.func
     }
 
     constructor(props){
         super(props);
-        this.updateFileChecked = this.updateFileChecked.bind(this);
         this.isChecked = this.isChecked.bind(this);
-        this.handleCheck = this.handleCheck.bind(this);
         this.filledFileRow = this.filledFileRow.bind(this);
         this.renderCheckBox = this.renderCheckBox.bind(this);
         this.renderName = this.renderName.bind(this);
         this.render = this.render.bind(this);
     }
 
-    updateFileChecked(add=true){
-        if(
-            this.props.file &&
-            this.props.file.uuid &&
-            typeof this.props.handleFileUpdate === 'function'
-        ){
-            this.props.handleFileUpdate(this.props.file.uuid, add);
-        }
-    }
-
     isChecked(){
-        if (!this.props.file || !this.props.file.uuid || !(this.props.selectedFiles instanceof Set)) return null;
-        return this.props.selectedFiles.has(this.props.file.uuid);
-    }
-
-    handleCheck() {
-        this.updateFileChecked(!this.isChecked());
+        if (!this.props.file || !this.props.file.uuid || !this.props.selectedFiles) return null;
+        return this.props.selectedFiles[this.props.file.uuid];
     }
 
     filledFileRow (file = this.props.file){
@@ -1317,7 +1203,7 @@ class FileEntryBlock extends React.Component {
                 name="file-checkbox"
                 id={checked + "~" + true + "~" + this.props.file.file_format + "~" + this.props.file.uuid}
                 className='exp-table-checkbox'
-                onChange={this.handleCheck}
+                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, this.props.file.uuid, this.props.file)}
             />
         );
     }
@@ -1407,92 +1293,4 @@ class FileEntryBlock extends React.Component {
             </div>
         );
     }
-}
-
-
-/**
- * Returns an object containing fileDetail and emptyExps.
- *
- * @param {Object[]} experimentArray - Array of experiments in set. Required.
- * @param {Set} [passedExperiments=null] - Set of experiments which match filter(s).
- * @return {Object} JS object containing two keys with arrays: 'fileDetail' of experiments with formatted details and 'emptyExps' with experiments with no files.
- */
-
-export function getFileDetailContainer(experimentArray, passedExperiments = null){
-
-    var fileDetail = {}; //use @id field as key
-    var emptyExps = [];
-
-    for (var i=0; i<experimentArray.length; i++){
-        if(typeof passedExperiments === 'undefined' || passedExperiments == null || passedExperiments.has(experimentArray[i])){
-            var tempFiles = [];
-            var biosample_accession = experimentArray[i].biosample ? experimentArray[i].biosample.accession : null;
-            var biosample_id = biosample_accession ? experimentArray[i].biosample['@id'] : null;
-
-            var experimentDetails = {
-                'accession':    experimentArray[i].accession,
-                'biosample':    biosample_accession,
-                'biosample_id': biosample_id,
-                'uuid':         experimentArray[i].uuid,
-                '@id' :         experimentArray[i]['@id']
-                // Still missing : 'data', 'related'
-            };
-
-            if(experimentArray[i].files){
-                tempFiles = experimentArray[i].files;
-            } else if (experimentArray[i].filesets) {
-                for (var j=0; j<experimentArray[i].filesets.length; j++) {
-                    if (experimentArray[i].filesets[j].files_in_set) {
-                        tempFiles = tempFiles.concat(experimentArray[i].filesets[j].files_in_set);
-                    }
-                }
-            // No files in experiment
-            } else {
-                emptyExps.push(experimentArray[i]['@id']);
-                experimentDetails.data = {};
-                fileDetail[experimentArray[i]['@id']] = experimentDetails;
-                continue;
-            }
-
-            // save appropriate experiment info
-            if(tempFiles.length > 0){
-                var relatedFiles = {};
-                var relatedData = [];
-                var k;
-                for(k=0;k<tempFiles.length;k++){
-
-                    // only use first file relation for now. Only support one relationship total
-                    if(tempFiles[k].related_files && tempFiles[k].related_files[0].file){
-                        // in form [related file @id, this file @id]
-                        relatedFiles[tempFiles[k].related_files[0].file] =  tempFiles[k]['@id'];
-                        fileDetail[tempFiles[k]['@id']] = _.extend({
-                            'data' : tempFiles[k],
-                            'related' : {
-                                'relationship_type':tempFiles[k].related_files[0].relationship_type,
-                                'file':tempFiles[k].related_files[0].file,
-                                'data':null
-                            }
-                        }, experimentDetails);
-                    } else {
-                        fileDetail[tempFiles[k]['@id']] = _.extend({
-                            'data' : tempFiles[k]
-                        }, experimentDetails);
-                    }
-                }
-                var usedRelations = [];
-                for(k=0;k<tempFiles.length;k++){
-                    if(_.contains(Object.keys(relatedFiles), tempFiles[k]['@id'])){
-                        if(_.contains(usedRelations, tempFiles[k]['@id'])){
-                            // skip already-added related files
-                            delete fileDetail[relatedFiles[tempFiles[k]['@id']]];
-                        }else{
-                            fileDetail[relatedFiles[tempFiles[k]['@id']]]['related']['data'] = tempFiles[k];
-                            usedRelations.push(relatedFiles[tempFiles[k]['@id']]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return { 'fileDetail' : fileDetail, 'emptyExps' : emptyExps };
 }

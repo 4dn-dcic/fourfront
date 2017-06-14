@@ -1,8 +1,8 @@
 'use strict';
 
-var React = require('react');
-var Collapse = require('react-bootstrap').Collapse;
-var { console } = require('./../../util');
+import React from 'react';
+import { Collapse } from 'react-bootstrap';
+import { console } from './../../util';
 
 
 /**
@@ -57,7 +57,7 @@ Row.defaultProps = {
     'colMd' : 4,
     'colLg' : 4,
     'className' : ''
-}
+};
 
 
 /**
@@ -65,7 +65,6 @@ Row.defaultProps = {
  * Takes two lists as props: 'persistent' and 'collapsible'. 
  * Persistent items are always visible, while collapsible are only shown if props.open is true.
  * 
- * @namespace
  * @type {Component}
  * @prop {Component[]|Element[]|string[]} persistent    - React elements or components to always render. 
  * @prop {Component[]|Element[]|string[]} collapsible   - React elements or components to render conditionally.
@@ -73,7 +72,7 @@ Row.defaultProps = {
  * @prop {string}  className     - Class name for outermost element.
  * @prop {string}  containerType - Type of element to use as container for the two lists. Defaults to 'div'.
  */
-export default class PartialList extends React.Component{
+export class PartialList extends React.Component{
 
     static Row = Row
 

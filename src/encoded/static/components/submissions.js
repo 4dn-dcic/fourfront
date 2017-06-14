@@ -1,59 +1,52 @@
 'use strict';
-var React = require('react');
-var globals = require('./globals');
-var _ = require('underscore');
-var { ajax, console, object, isServerSide, DateUtility } = require('./util');
-var { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} = require('react-bootstrap');
+import React from 'react';
+import * as globals from './globals';
+import _ from 'underscore';
+import { ajax, console, object, isServerSide, DateUtility } from './util';
+import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} from 'react-bootstrap';
 
 /*
 Container component for the submissions page. Fetches the user info and
 coordinates individual subscriptions.
 */
-var Submissions = module.exports = React.createClass({
+export default class Submissions extends React.Component {
 
-    contextTypes: {
-        fetch: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
-    },
-
-    getInitialState: function(){
-        return({
+    constructor(props){
+        super(props);
+        this.state = {
             'subscriptions': null,
             'initialized': false
-        });
-    },
+        };
+    }
 
-    componentDidMount: function(){
+    componentDidMount(){
         // make async call to get user subscriptions
         this.getUserInfo();
-    },
+    }
 
-    getUserInfo: function(){
-        this.context.fetch('/me?frame=embedded', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+    getUserInfo = () => {
+        ajax.promise('/me?frame=embedded').then(response => {
+            if (!response.link_id || !response.subscriptions){
+                this.setState({
+                    'subscriptions': null,
+                    'initialized': true
+                });
+            }else{
+                this.setState({
+                    'subscriptions': response.subscriptions,
+                    'initialized': true
+                });
             }
-        })
-        .then(response => {
-            if (!this.context.contentTypeIsJSON(response) || !response.subscriptions) throw response;
-            return response;
-        })
-        .then(response => {
-            this.setState({'subscriptions': response.subscriptions,'initialized': true});
-        }, error => {
-            this.setState({'subscriptions': null,'initialized': true});
         });
-    },
+    }
 
-    generateSubscription: function(scrip){
+    generateSubscription = (scrip) => {
         return(
             <SubscriptionEntry key={scrip.url} url={scrip.url} title={scrip.title} />
         );
-    },
+    }
 
-    render: function(){
+    render(){
         var subscrip_list;
         var main_message;
         if(this.state.subscriptions){
@@ -74,27 +67,24 @@ var Submissions = module.exports = React.createClass({
             </div>
         );
     }
-});
+}
 
 /*
 Main submission/subscription component. One component per subscription.
 Hold data from the search result from the subscription and organizes
 it into a paginated table. Also allows filtering on item type
 */
-var SubscriptionEntry = React.createClass({
+class SubscriptionEntry extends React.Component{
 
-    contextTypes: {
-        fetch: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func,
-    },
-
-    getInitialState: function(){
+    constructor(props){
+        super(props);
+        this.changePage = _.throttle(this.changePage, 250);
         var is_open = false;
         // user submissions default to open
         if(this.props.title == 'My submissions'){
             is_open = true;
         }
-        return({
+        this.state = {
             'data': null,
             'types': null,
             'selected_type': 'Item',
@@ -102,27 +92,27 @@ var SubscriptionEntry = React.createClass({
             'page': 1,
             'changing_page': false,
             'num_pages': null
-        });
-    },
+        };
+    }
 
-    componentDidMount: function(){
+    componentDidMount(){
         // make async call to get first subscription data
         // only call this if open to improve performance
         if(this.state.open){
             this.loadSubscriptionData(this.props.url, this.state.page, this.state.selected_type);
         }
-    },
+    }
 
-    toggleOpen: function(e){
+    toggleOpen = (e) => {
         e.preventDefault();
         // load data if it hasn't been already
         if(!this.state.data){
             this.loadSubscriptionData(this.props.url, this.state.page, this.state.selected_type);
         }
         this.setState({'open':!this.state.open});
-    },
+    }
 
-    loadSubscriptionData: function(url, page, type){
+    loadSubscriptionData = (url, page, type) => {
         // search sorts by date_created as default. Thus, @graph results will be sorted
         // use page number to implement pagination
         var no_type_in_url = url.indexOf("?type=") == -1 && url.indexOf("&type=") == -1;
@@ -132,44 +122,38 @@ var SubscriptionEntry = React.createClass({
         if(no_type_in_url){
             fetch_url = fetch_url + '&type=' + type;
         }
-        this.context.fetch(fetch_url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+
+        ajax.promise(fetch_url).then(response => {
+            if (!response['@graph'] || !response['facets']){
+                this.setState({
+                    'data': null,
+                    'types': null,
+                    'changing_page':false,
+                    'num_pages': null,
+                    'page': 1,
+                    'type': 'Item'
+                });
+            }else{
+                var types;
+                // no specified item type, so set the types state
+                // only want to run this once, with type=Item
+                if(no_type_in_url && this.state.types === null){
+                    this.findTypesFromFacets(response['facets']);
+                }
+                // use 25 items per page. Change when types change
+                var num_pages = Math.ceil(response['total']/25);
+                this.setState({
+                    'data': response['@graph'],
+                    'changing_page': false,
+                    'num_pages': num_pages
+                });
             }
-        })
-        .then(response => {
-            if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['facets']) throw response;
-            var types;
-            // no specified item type, so set the types state
-            // only want to run this once, with type=Item
-            if(no_type_in_url && !this.state.types){
-                this.findTypesFromFacets(response['facets']);
-            }
-            // use 25 items per page. Change when types change
-            var num_pages = Math.ceil(response['total']/25);
-            this.setState({
-                'data': response['@graph'],
-                'changing_page': false,
-                'num_pages': num_pages
-            });
-        },
-        error => {
-            this.setState({
-                'data': null,
-                'types': null,
-                'changing_page':false,
-                'num_pages': null,
-                'page': 1,
-                'type': 'Item'
-            });
         });
-    },
+    }
 
     // find all item types represented in this result by parsing @graph
     // can't use facets because they ignore pagination
-    findTypesFromFacets: function(facets){
+    findTypesFromFacets = (facets) => {
         var types = [];
         for(var i=0; i<facets.length; i++){
             if(facets[i]['field'] == 'type'){
@@ -184,9 +168,9 @@ var SubscriptionEntry = React.createClass({
         types.sort();
         types.unshift('Item'); // add Item to front of the array
         this.setState({'types':types});
-    },
+    }
 
-    displayToggle: function(){
+    displayToggle = () => {
         if(this.state.open && !this.state.data){
             return(
                 <i className="icon icon-spin icon-circle-o-notch" style={{'marginLeft': '5px','opacity': '0.5' }}></i>
@@ -198,9 +182,9 @@ var SubscriptionEntry = React.createClass({
                 </Button>
             );
         }
-    },
+    }
 
-    generateEntry: function(entry){
+    generateEntry = (entry) => {
         if(!entry['@type'] || !entry.date_created || !entry.status || !entry.display_title || !entry.link_id){
             return;
         }
@@ -224,9 +208,9 @@ var SubscriptionEntry = React.createClass({
                 </td>
             </tr>
         );
-    },
+    }
 
-    generateButtonToolbar: function(){
+    generateButtonToolbar = () => {
         if(!this.state.open){
             return null;
         }
@@ -256,40 +240,40 @@ var SubscriptionEntry = React.createClass({
                 </ButtonGroup>
             </ButtonToolbar>
         );
-    },
+    }
 
-    buildEnumEntry: function(val){
+    buildEnumEntry = (val) => {
         return(
             <MenuItem key={val} title={this.filterEnumTitle(val) || ''} eventKey={val} onSelect={this.submitEnumVal}>
                 {this.filterEnumTitle(val) || ''}
             </MenuItem>
         );
-    },
+    }
 
-    submitEnumVal: function(eventKey){
+    submitEnumVal = (eventKey) => {
         // reset page to 1 on a type change
         this.loadSubscriptionData(this.props.url, 1, eventKey);
         this.setState({'page':1, 'selected_type': eventKey});
-    },
+    }
 
     // very simple. If title == Item, return 'All'
-    filterEnumTitle: function(title){
+    filterEnumTitle = (title) => {
         if(title == 'Item'){
             return 'All';
         }else{
             return title;
         }
-    },
+    }
 
-    changePage : _.throttle(function(page){
+    changePage = (page) => {
         if(page > this.state.num_pages || page < 1){
             return;
         }
         this.loadSubscriptionData(this.props.url, page, this.state.selected_type);
         this.setState({'page':page, 'changing_page':true});
-    }, 250),
+    }
 
-    render: function(){
+    render(){
         var submissions;
         if(this.state.data){
             submissions = this.state.data.map((entry) => this.generateEntry(entry));
@@ -322,7 +306,6 @@ var SubscriptionEntry = React.createClass({
             </div>
         );
     }
-
-});
+}
 
 globals.content_views.register(Submissions, 'Submissions');

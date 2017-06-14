@@ -1,9 +1,9 @@
 // Render a simple static error page with a link to return to the homepage
 
-var React = require('react');
+import React from 'react';
 
-var ErrorPage = module.exports = React.createClass({
-    render: function() {
+export default class ErrorPage extends React.Component {
+    render() {
         var homelink;
         if(this.props.currRoute == 'home'){
             homelink = <a href="/">Return</a>;
@@ -38,4 +38,4 @@ var ErrorPage = module.exports = React.createClass({
             </div>
         );
     }
-});
+}

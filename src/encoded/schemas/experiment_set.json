@@ -16,7 +16,8 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/documents" }
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/tags" }
     ],
     "properties": {
         "schema_version": {
@@ -26,7 +27,7 @@
             "accessionType": "ES"
         },
         "date_released": {
-            "title": "Date released",
+            "title": "Date Released",
             "comment": "Do not submit, value is assigned when released.",
             "type": "string",
             "anyOf": [
@@ -37,7 +38,7 @@
             "permission": "import_items"
         },
         "experiments_in_set": {
-            "title": "Set of experiments",
+            "title": "Set of Experiments",
             "description": "List of experiments to be associatedas a set.",
             "type": "array",
             "exclude_from": ["submit4dn"],
@@ -50,14 +51,13 @@
             }
         },
         "experimentset_type": {
-            "title": "Experiment Set type",
+            "title": "Experiment Set Type",
             "description": "The categorization of the set of experiments.",
             "type": "string",
             "default": "custom",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "enum" : [
-              "custom",
-              "replicate"
+              "custom"
             ]
         },
         "description": {
@@ -69,7 +69,7 @@
     },
     "facets": {
         "experimentset_type": {
-            "title": "Experiment Set Type"
+            "title": "Set Type"
         },
         "experiments_in_set.experiment_type": {
             "title": "Experiment Type"
@@ -98,5 +98,11 @@
         "experiments_in_set.lab.title": {
             "title": "Lab"
         }
+    },
+    "columns": {
+        "experimentset_type": {
+            "title": "Set Type"
+        }
     }
+
 }

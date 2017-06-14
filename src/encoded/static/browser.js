@@ -1,17 +1,17 @@
 'use strict';
 // Entry point for browser, compiled into bundle[.chunkHash].js.
-require('./libs/react-patches');
-var React = require('react');
-var _ = require('underscore');
-var ReactDOM = require('react-dom');
+
+import React from 'react';
+import _ from 'underscore';
+import ReactDOM from 'react-dom';
 var ReactMount = require('react-dom/lib/ReactMount');
 ReactMount.allowFullPageRender = true;
 
 var App = require('./components');
 var domready = require('domready');
-var store = require('./store');
+import * as store from './store';
 var { Provider, connect } = require('react-redux');
-var { JWT, Filters } = require('./components/util');
+import { JWT, Filters } from './components/util';
 
 
 /** 
@@ -53,39 +53,43 @@ function reloadIfBadUserInfo(removeJWTIfNoUserDetails = false){
 // Treat domready function as the entry point to the application.
 // Inside this function, kick-off all initialization, everything up to this
 // point should be definitions.
-if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER && !reloadIfBadUserInfo()) domready(function(){
-    console.log('Browser: ready');
+if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
 
-    if (reloadIfBadUserInfo(true)) return;
+    if (!reloadIfBadUserInfo()) domready(function(){
+        console.log('Browser: ready');
 
-    var expSetFiltersPropContainer = App.getRenderedPropValues(document, ['expSetFilters']);
+        if (reloadIfBadUserInfo(true)) return;
 
-    store.dispatch({
-        // Update Redux store from Redux store props that've been rendered into <script data-prop-name={ propName }> elems server-side
-        type: _.extend(
-                App.getRenderedProps(document, Object.keys(store.reducers)),
-                // Convert Arrays back to Sets (which don't work well w. JSON.stringify)
-                { 'expSetFilters' : Filters.convertExpSetFiltersTerms(expSetFiltersPropContainer.expSetFilters, 'set') }
-            )
+        var expSetFiltersPropContainer = App.getRenderedPropValues(document, ['expSetFilters']);
+
+        store.dispatch({
+            // Update Redux store from Redux store props that've been rendered into <script data-prop-name={ propName }> elems server-side
+            type: _.extend(
+                    App.getRenderedProps(document, Object.keys(store.reducers)),
+                    // Convert Arrays back to Sets (which don't work well w. JSON.stringify)
+                    { 'expSetFilters' : Filters.convertExpSetFiltersTerms(expSetFiltersPropContainer.expSetFilters, 'set') }
+                )
+        });
+
+        var server_stats = require('querystring').parse(window.stats_cookie);
+        var UseApp = connect(store.mapStateToProps)(App);
+        var app;
+        
+        try {
+            app = ReactDOM.render(<Provider store={store}><UseApp /></Provider>, document);
+        } catch (e) {
+            console.error("INVARIANT ERROR", e); // To debug
+            // So we can get printout and compare diff of renders.
+            app = require('react-dom/server').renderToString(<Provider store={store}><UseApp /></Provider>);
+        }
+
+        // Set <html> class depending on browser features
+        var BrowserFeat = require('./components/browserfeat').BrowserFeat;
+        BrowserFeat.setHtmlFeatClass();
+
+        // Simplify debugging
+        window.app = app;
+        window.React = React;
     });
-
-    var server_stats = require('querystring').parse(window.stats_cookie);
-    var UseApp = connect(store.mapStateToProps)(App);
-    var app;
     
-    try {
-        app = ReactDOM.render(<Provider store={store}><UseApp /></Provider>, document);
-    } catch (e) {
-        console.error("INVARIANT ERROR", e); // To debug
-        // So we can get printout and compare diff of renders.
-        app = require('react-dom/server').renderToString(<Provider store={store}><UseApp /></Provider>);
-    }
-
-    // Set <html> class depending on browser features
-    var BrowserFeat = require('./components/browserfeat').BrowserFeat;
-    BrowserFeat.setHtmlFeatClass();
-
-    // Simplify debugging
-    window.app = app;
-    window.React = React;
-});
+}

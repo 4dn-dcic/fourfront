@@ -1,10 +1,14 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 
-module.exports = React.createClass({
-    getDefaultProps : function(){ return { 'display' : true }; },
-    render : function(){
+export class FetchingView extends React.Component {
+
+    static defaultProps = {
+        'display' : true
+    }
+
+    render(){
         return (
             <div className={"fetching-view" + (!this.props.display ? ' invisible' : '' )}>
                 <div className="inner">
@@ -13,4 +17,4 @@ module.exports = React.createClass({
             </div>
         );
     }
-});
+}

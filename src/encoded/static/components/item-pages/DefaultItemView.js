@@ -1,11 +1,10 @@
 'use strict';
 
-var React = require('react');
-var globals = require('./../globals');
-var _ = require('underscore');
-var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
-var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
-var { console, object, DateUtility, Filters } = require('./../util');
+import React from 'react';
+import { panel_views, itemClass } from './../globals';
+import _ from 'underscore';
+import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } from './components';
+import { console, object, DateUtility, Filters } from './../util';
 
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
@@ -123,10 +122,10 @@ export default class DefaultItemView extends ItemBaseView {
     render() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
-        var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
+        var itemClassName = itemClass(this.props.context, 'view-detail item-page-container');
 
         return (
-            <div className={itemClass}>
+            <div className={itemClassName}>
 
                 <ItemPageTitle context={context} schemas={schemas} />
                 <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
@@ -155,4 +154,4 @@ export default class DefaultItemView extends ItemBaseView {
 
 }
 
-globals.panel_views.register(DefaultItemView, 'Item');
+panel_views.register(DefaultItemView, 'Item');

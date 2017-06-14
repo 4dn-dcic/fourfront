@@ -1,11 +1,18 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var d3 = require('d3');
-var vizUtil = require('./../utilities');
-var { console, object, expFxn } = require('./../../util');
+import React from 'react';
+import _ from 'underscore';
+import * as d3 from 'd3';
+import * as vizUtil from './../utilities';
+import { console, object, expFxn } from './../../util';
 
+
+/**
+ * Various aggregation functions which are used by BarPlot.Chart and/or BarPlot.Aggregator to convert & aggregate list of experiments
+ * into a chart-friendly structure.
+ * 
+ * @file
+ */
 
 // *************************************
 // **** AGGREGATION FUNCTIONS BELOW ****

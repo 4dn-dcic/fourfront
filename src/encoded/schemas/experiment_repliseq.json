@@ -1,6 +1,6 @@
 {
     "title": "Repliseq Experiment",
-    "description": "Experimental variables for a Repliseq experiment.",
+    "description": "Genome-wide analysis of replication timing by next-generation sequencing.",
     "id": "/profiles/experiment_repliseq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -21,6 +21,9 @@
         { "$ref": "mixins.json#/library"},
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "experiment.json#/properties" }
+    ],
+    "mixinColumns": [
+        { "$ref": "experiment.json#/columns"}
     ],
     "properties": {
         "schema_version": {
@@ -83,7 +86,7 @@
             "title": "Organism"
         },
         "biosample.biosource.biosource_type": {
-            "title": "Biosource type"
+            "title": "Biosource Type"
         },
         "biosample.biosource_summary": {
             "title": "Biosource"
@@ -97,5 +100,8 @@
         "lab.title": {
             "title": "Lab"
         }
+    },
+    "columns": {
+
     }
 }

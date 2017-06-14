@@ -1,5 +1,7 @@
 'use strict';
-var React = require('react');
+
+import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * Page footer which is visible on each page.
@@ -7,13 +9,13 @@ var React = require('react');
  * @module {Component} footer
  * @prop {string} version - App version number
  */
-var Footer = React.createClass({
+export default class Footer extends React.Component {
 
-    propTypes: {
-        version: React.PropTypes.string // App version number
-    },
+    static propTypes = {
+        version: PropTypes.string // App version number
+    }
 
-    render: function() {
+    render() {
         return (
             <footer id="page-footer">
                 <div className="page-footer">
@@ -41,6 +43,4 @@ var Footer = React.createClass({
             </footer>
         );
     }
-});
-
-module.exports = Footer;
+}

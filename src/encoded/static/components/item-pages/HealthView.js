@@ -1,10 +1,10 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var url = require('url');
-var globals = require('./../globals');
-var { console, object, Filters } = require('./../util');
+import url from 'url';
+import { content_views } from './../globals';
+import { console, object, Filters } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
 
 /**
@@ -28,7 +28,7 @@ export class HealthView extends React.Component {
 
     render() {
         var context = this.props.context;
-        var title = typeof context.title == "string" ? context.title : url.parse(this.props.href || this.context.location_href).path;
+        var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
         return (
             <div className="view-item">
                 <ItemPageTitle context={context} schemas={this.props.schemas} showType={false} />
@@ -81,10 +81,6 @@ export class HealthView extends React.Component {
             </div>
         );
     }
-};
-
-HealthView.contextTypes = {
-    location_href: React.PropTypes.string
 }
 
-globals.content_views.register(HealthView, 'Health');
+content_views.register(HealthView, 'Health');

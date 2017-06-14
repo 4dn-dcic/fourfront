@@ -1,11 +1,12 @@
 'use strict';
 
 var React = require('react');
+import createReactClass from 'create-react-class';
+import PropTypes from 'prop-types';
 var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide } = require('./../util');
-var { highlightTerm, unhighlightTerms } = require('./../facetlist');
+var { expFxn, Filters, console, Schemas, object, isServerSide } = require('./../util');
 var { CursorComponent, RotatedLabel } = require('./components');
 
 // Share one instance between all charts because D3 selector acts on common class/elem names.
@@ -18,7 +19,7 @@ var mouseleaveTimeout = null;
  * We re-render chart (via shouldComponentUpdate(), reset()) only when data has changed, or needs to be redrawn due to dimension change.
  */
 
-var MosaicChart = React.createClass({
+var MosaicChart = createReactClass({
 
     statics : {
         /**
@@ -185,7 +186,7 @@ var MosaicChart = React.createClass({
 
                         if      (typeof field.title === 'string')   node.title = field.title;
                         else if (typeof field.title === 'function') node.title = field.title.apply(field.title, callbackArgs);
-                        else if (typeof field.title === 'undefined')node.title = Filters.Field.toName(field.field);
+                        else if (typeof field.title === 'undefined')node.title = Schemas.Field.toName(field.field);
                         
                         if      (typeof field.fallbackSize === 'number')   node.fallbackSize = field.fallbackSize;
                         else if (typeof field.fallbackSize === 'function') node.fallbackSize = field.fallbackSize.apply(field.fallbackSize, callbackArgs);
@@ -525,7 +526,7 @@ var MosaicChart = React.createClass({
 
         vizUtil.requestAnimationFrame(()=>{
 
-            if (d.data.field && d.data.term) highlightTerm(d.data.field, d.data.term, vizUtil.colorForNode(d));
+            if (d.data.field && d.data.term) vizUtil.highlightTerm(d.data.field, d.data.term, vizUtil.colorForNode(d));
 
             // Fade all the segments.
             // Then highlight only those that are an ancestor of the current segment.
@@ -577,7 +578,7 @@ var MosaicChart = React.createClass({
                 d3.selectAll("svg.sunburst-svg-chart path, svg.sunburst-svg-chart > g").classed('hover', false);
                 //_this.vis.selectAll("path").classed('hover', false);
 
-                unhighlightTerms();
+                vizUtil.unhighlightTerms();
 
                 //_this.resetActiveExperimentsCount();
 
@@ -1029,7 +1030,7 @@ var MosaicChart = React.createClass({
                     className={className}
                     onMouseOver={node.depth > 0 ? _this.onPathMouseOver : null }
                     onMouseEnter={ node.depth === 0 ? _this.mouseleave : null }
-                    onMouseLeave={/*node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } :*/ null}
+                    onMouseLeave={/*node.depth > 0 ? function(e){ vizUtil.unhighlightTerms(e.target.__data__.data.field); } :*/ null}
                     onClick={/*clickable ? (e) => _this.props.handleClick(e.target.__data__) : */null}
                     key={node.data.id}
                     data-key={node.data.id}
@@ -1177,7 +1178,7 @@ var MosaicChart = React.createClass({
             // Exclude first item (root node)
             var labels = paths.slice(1).map((pathGroup, i) => {
                 return {
-                    name : Filters.Field.toName(pathGroup.key, this.props.schemas),
+                    name : Schemas.Field.toName(pathGroup.key, this.props.schemas),
                     field : pathGroup.key,
                     x : i * barWidth
                 };

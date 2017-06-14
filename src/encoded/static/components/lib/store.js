@@ -5,6 +5,7 @@
 
 /** @ignore */
 var _ = require('underscore');
+import { ajax } from './../util';
 
 /**
  * @module lib/store
@@ -21,7 +22,7 @@ class ItemStore {
 
     /** @ignore */
     constructor(items, view, stateKey) {
-        this._fetch = view.context ? view.context.fetch : undefined;
+        this._fetch = ajax.fetch;
         this._items = items;
         this._listeners = [{view: view, stateKey: stateKey}];
     }
@@ -85,8 +86,12 @@ class ItemStore {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         });
-        var request = this._fetch(url, options);
-        request.then(response => {
+        ajax.promise(
+            url,
+            options.method || 'GET',
+            options.headers || {},
+            options.body || null
+        ).then(response => {
             console.log(response);
             if (response.status && response.status != 'success') throw response;
             return response;

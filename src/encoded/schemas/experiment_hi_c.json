@@ -1,6 +1,6 @@
 {
     "title": "Hi-C Experiment",
-    "description": "A Hi-C experiment",
+    "description": "Genome-wide chromosome conformation capture experiments including Hi-C, micro-C, DNase Hi-C",
     "id": "/profiles/experiment_hi_c.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -21,6 +21,12 @@
         { "$ref": "mixins.json#/library"},
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "experiment.json#/properties"}
+    ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "experiment.json#/columns"}
     ],
     "dependencies": {
       "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
@@ -70,7 +76,7 @@
             "linkTo": "Enzyme"
         },
         "enzyme_lot_number": {
-            "title": "Enzyme Lot Number",
+            "title": "Digestion Enzyme Lot Number",
             "description": "Lot number of batch of enzyme used to digest DNA",
             "type": "string"
         },
@@ -112,30 +118,7 @@
             "enum": ["Yes", "No"]
         }
     },
-    "facets": {
-        "award.project": {
-            "title": "Project"
-        },
-        "biosample.biosource.individual.organism.name": {
-            "title": "Organism"
-        },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource type"
-        },
-        "biosample.biosource_summary": {
-            "title": "Biosource"
-        },
-        "digestion_enzyme.name": {
-            "title": "Enzyme"
-        },
-        "biosample.modifications_summary": {
-            "title": "Modifications"
-        },
-        "biosample.treatments_summary": {
-            "title": "Treatments"
-        },
-        "lab.title": {
-            "title": "Lab"
-        }
+    "columns": {
+
     }
 }

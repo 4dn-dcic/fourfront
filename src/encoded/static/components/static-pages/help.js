@@ -1,72 +1,87 @@
 // Render a simple static help page
 
-var React = require('react');
-var _ = require('underscore');
-var StaticPageBase = require('./static-page-base');
-var Button = require('react-bootstrap').Button;
-var globals = require('../globals');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import { content_views } from '../globals';
+import * as StaticPageBase from './static-page-base';
+import { Button } from 'react-bootstrap';
 
-var HelpPage = module.exports = React.createClass({
+class Entry extends React.Component {
 
-    statics : {
+    static defaultProps = {
+        'section'   : null,
+        'content'   : null,
+        'entryType' : 'help',
+        'className' : 'text-justified'
+    }
 
-        Entry : React.createClass({
+    constructor(props){
+        super(props);
+        this.renderEntryContent = StaticPageBase.Entry.renderEntryContent.bind(this);
+        this.render = StaticPageBase.Entry.render.bind(this);
+    }
 
-            getDefaultProps : function(){
-                return {
-                    'section'   : null,
-                    'content'   : null,
-                    'entryType' : 'help',
-                    'className' : 'text-justified'
-                };
-            },
+    replacePlaceholder(placeholderString){
+        if (placeholderString === '<SlideCarousel/>'){
+            return (<SlideCarousel />);
+        }
+        return placeholderString;
+    }
+}
 
-            replacePlaceholder : function(placeholderString){
-                if (placeholderString === '<SlideCarousel/>'){
-                    return (<SlideCarousel />);
-                }
-                return placeholderString;
-            },
+export default class HelpPage extends React.Component {
 
-            renderEntryContent : StaticPageBase.Entry.renderEntryContent,
-            render : StaticPageBase.Entry.render
-        })
-
-    },
-
-    propTypes : {
-        context : React.PropTypes.shape({
-            "title" : React.PropTypes.string,
-            "content" : React.PropTypes.shape({
-                "gettingStarted" : React.PropTypes.object,
-                "metadataStructure1" : React.PropTypes.object,
-                "metadataStructure2" : React.PropTypes.object,
-                "restAPI" : React.PropTypes.object
+    static propTypes = {
+        'context' : PropTypes.shape({
+            "title" : PropTypes.string,
+            "content" : PropTypes.shape({
+                "gettingStarted" : PropTypes.object,
+                "metadataStructure1" : PropTypes.object,
+                "metadataStructure2" : PropTypes.object,
+                "restAPI" : PropTypes.object
             }).isRequired
         }).isRequired
-    },
+    }
 
-    entryRenderFxn : function(key, content, context){
-        return (<HelpPage.Entry key={key} section={key} content={content} context={context} />);
-    },
+    static defaultProps = StaticPageBase.getDefaultProps()
 
-    getDefaultProps : StaticPageBase.getDefaultProps,
-    parseSectionsContent : StaticPageBase.parseSectionsContent,
-    renderSections  : StaticPageBase.renderSections,
-    render          : StaticPageBase.render.base
+    constructor(props){
+        super(props);
+        this.entryRenderFxn = this.entryRenderFxn.bind(this);
+        this.parseSectionsContent = StaticPageBase.parseSectionsContent.bind(this);
+        this.renderSections = StaticPageBase.renderSections.bind(this);
+        this.render = StaticPageBase.render.base.bind(this);
+    }
 
-});
+    entryRenderFxn(key, content, context){
+        return (<Entry key={key} section={key} content={content} context={context} />);
+    }
 
-globals.content_views.register(HelpPage, 'HelpPage');
+}
 
-var SlideCarousel = React.createClass({
-    getInitialState() {
-        return {
+
+content_views.register(HelpPage, 'HelpPage');
+
+class SlideCarousel extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.handleForward = this.handleForward.bind(this);
+        this.handleBackward = this.handleBackward.bind(this);
+        this.render = this.render.bind(this);
+        this.state = {
             index: 0,
-            slideTitles: ["Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png", "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png", "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png", "Slide13.png", "Slide14.png", "Slide15.png", "Slide16.png"]
+            slideTitles: [
+                "Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png",
+                "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png",
+                "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png",
+                "Slide13.png", "Slide14.png", "Slide15.png", "Slide16.png"
+            ]
         };
-    },
-    handleForward() {
+    }
+
+    handleForward(){
         var nextIdx;
         if (this.state.index + 1 < this.state.slideTitles.length) {
             nextIdx = this.state.index + 1;
@@ -76,8 +91,9 @@ var SlideCarousel = React.createClass({
         this.setState({
             index: nextIdx
         });
-    },
-    handleBackward() {
+    }
+
+    handleBackward(){
         var nextIdx;
         if (this.state.index - 1 >= 0) {
             nextIdx = this.state.index - 1;
@@ -87,8 +103,9 @@ var SlideCarousel = React.createClass({
         this.setState({
             index: nextIdx
         });
-    },
-    render: function() {
+    }
+
+    render() {
         var slideName = "/static/img/Metadata_structure_slides/" + this.state.slideTitles[this.state.index];
         var slide = <img width={720} height={540} alt="720x540" src={slideName}></img>;
         return(
@@ -101,4 +118,5 @@ var SlideCarousel = React.createClass({
             </div>
         );
     }
-});
+
+}

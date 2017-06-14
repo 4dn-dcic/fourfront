@@ -1,6 +1,7 @@
 'use strict';
-var React = require('react');
-var ReactDOMServer = require('react-dom/server');
+
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 var doctype = '<!DOCTYPE html>\n';
 var transformResponse = require('subprocess-middleware').transformResponse;
 var fs = require('fs');
@@ -8,7 +9,7 @@ var inline = fs.readFileSync(__dirname + '/../build/inline.js', 'utf8').toString
 var store = require('../store');
 var { Provider, connect } = require('react-redux');
 var { JWT, Filters } = require('../components/util');
-var Alerts = require('../components/alerts');
+import Alerts from './../components/alerts';
 
 var render = function (Component, body, res) {
     //var start = process.hrtime();

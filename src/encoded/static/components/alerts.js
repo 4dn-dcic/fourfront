@@ -14,69 +14,66 @@ var store = require('../store');
  * @module {Component} alerts
  */
 
-var Alerts = module.exports = React.createClass({
+export default class Alerts extends React.Component {
 
-    statics : {
+    /**
+     * Open an alert box.
+     * More specifically, saves a new alert to Redux store 'alerts' field.
+     * 
+     * @public
+     * @param {Object} alert - Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
+     * @returns {undefined} Nothing
+     */
+    static queue(alert, callback){
+        var currentAlerts = store.getState().alerts;
+        if (_.pluck(currentAlerts, 'title').indexOf(alert.title) > -1) return null; // Same alert is already set.
+        store.dispatch({
+            type: { 'alerts' : currentAlerts.concat([alert]) }
+        });
+    }
 
-        /**
-         * Open an alert box.
-         * 
-         * More specifically, saves a new alert to Redux store 'alerts' field.
-         * 
-         * @memberof module:alerts
-         * @static
-         * @public
-         * @param {Object} alert - Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
-         * @returns {undefined} Nothing
-         */
-        queue : function(alert, callback){
-            var currentAlerts = store.getState().alerts;
-            if (_.pluck(currentAlerts, 'title').indexOf(alert.title) > -1) return null; // Same alert is already set.
-            store.dispatch({
-                type: { 'alerts' : currentAlerts.concat([alert]) }
-            });
-        },
+    /**
+     * Close an alert box.
+     * 
+     * @public
+     * @param {Object} alert - Object with at least 'title'.
+     * @returns {undefined} Nothing
+     */
+    static deQueue(alert){
+        var currentAlerts = store.getState().alerts;
+        currentAlerts = currentAlerts.filter(function(a){ return a.title != alert.title; });
+        store.dispatch({
+            type: { 'alerts' : currentAlerts }
+        });
+    }
 
-        /**
-         * Close an alert box.
-         * 
-         * @memberof module:alerts
-         * @static
-         * @public
-         * @param {Object} alert - Object with at least 'title'.
-         * @returns {undefined} Nothing
-         */
-        deQueue : function(alert){
-            var currentAlerts = store.getState().alerts;
-            currentAlerts = currentAlerts.filter(function(a){ return a.title != alert.title; });
-            store.dispatch({
-                type: { 'alerts' : currentAlerts }
-            });
-        },
+    // Common alert definitions
+    static LoggedOut = {
+        "title"     : "Logged Out",
+        "message"   : "You have been logged out due to an expired session.",
+        "style"     : 'danger'
+    }
 
-        // Common alert definitions
-        LoggedOut : {
-            "title"     : "Logged Out",
-            "message"   : "You have been logged out due to an expired session.",
-            "style"     : 'danger'
-        },
-        NoFilterResults : {
-            'title'     : "No Results",
-            'message'   : "Selecting this filter returned no results so it was deselected.",
-            'style'     : "warning"
-        },
-        ConnectionError : {
-            "title" : "Connection Error",
-            "message" : "Check your internet connection",
-            "style" : "danger"
-        }
-    },
+    static NoFilterResults = {
+        'title'     : "No Results",
+        'message'   : "Selecting this filter returned no results so it was deselected.",
+        'style'     : "warning"
+    }
 
-    getInitialState : function(){
-        return {
+    static ConnectionError = {
+        "title" : "Connection Error",
+        "message" : "Check your internet connection",
+        "style" : "danger"
+    }
+
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.state = {
             'dismissing' : []
         };
-    },
+    }
 
     /**
      * Renders out Bootstrap Alerts for any queued alerts.
@@ -86,7 +83,7 @@ var Alerts = module.exports = React.createClass({
      * @instance
      * @returns {Element} A <div> element.
      */
-    render : function(){
+    render(){
         if (this.props.alerts.length === 0) return null;
 
         function dismiss(index){
@@ -94,7 +91,7 @@ var Alerts = module.exports = React.createClass({
             var dismissing = _.clone(this.state.dismissing);
             if (_.findIndex(dismissing, currentAlert) === -1) dismissing.push(currentAlert);
             this.setState({ 'dismissing' : dismissing });
-        };
+        }
 
         function finishDismiss(index){
             var currentAlert = this.props.alerts.slice(index, index + 1)[0];
@@ -133,4 +130,6 @@ var Alerts = module.exports = React.createClass({
             </div>
         );
     }
-});
+
+
+}

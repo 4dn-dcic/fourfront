@@ -360,3 +360,4 @@ def main(global_config, **local_config):
         load_workbook(app, workbook_filename, docsdir, test=load_test_only)
 
     return app
+    

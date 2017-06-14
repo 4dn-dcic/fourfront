@@ -1,14 +1,13 @@
 'use strict';
 
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
-var d3 = require('d3');
+import _ from 'underscore';
+import * as d3 from 'd3';
 var store = require('./../../../store');
-var vizUtil = require('./../utilities');
+import * as vizUtil from './../utilities';
 import ChartDetailCursor, { CursorViewBounds } from './../ChartDetailCursor';
-var { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } = require('./../../util');
-var { unhighlightTerms } = require('./../../facetlist');
+import { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } from './../../util';
 
 // Used for transitioning
 var cachedBars = {},
@@ -201,7 +200,7 @@ class Bar extends React.Component {
                 //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
                 return pastNode;
             })
-        )
+        );
 
         var className = "chart-bar";
         if (!this.props.canBeHighlighted) className += ' no-highlight';
@@ -210,10 +209,10 @@ class Bar extends React.Component {
         return (
             <div
                 className={className}
-                onMouseLeave={()=>{
+                //onMouseLeave={()=>{
                     //if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
                     //else unhighlightTerms(d.field);
-                }}
+                //}}
                 data-term={d.term}
                 data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
                 key={"bar-" + d.term}
@@ -239,7 +238,13 @@ class Bar extends React.Component {
     }
 }
 
-
+/**
+ * React Component for wrapping the generated markup of BarPlot.Chart.
+ * Also contains Components Bar and BarSection as static children, for wrapping output bar and bar parts.
+ * 
+ * The top-level ViewContainer component contains state for interactivity of the generated chart mark-up.
+ * The child Bar and BarSection components are stateless and utilize the state passed down from ViewContainer.
+ */
 export class ViewContainer extends React.Component {
 
     static Bar = Bar
@@ -476,7 +481,7 @@ export class PopoverViewContainer extends React.Component {
                 actions={this.cursorDetailActions.call(this)}
                 cursorContainerMargin={this.props.cursorContainerMargin}
                 eventCategory="BarPlot" // For Analytics events
-                //highlightTerm
+                highlightTerm={false}
                 clickCoordsFxn={(node, containerPosition, boundsHeight)=>{
                     var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
                     var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;

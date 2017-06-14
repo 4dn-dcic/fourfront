@@ -1,8 +1,9 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var ExternalReferenceLink = require('./ExternalReferenceLink');
+import React from 'react';
+import _ from 'underscore';
+import { ExternalReferenceLink } from './ExternalReferenceLink';
+import { console } from './../../util';
 
 /**
  * Component for showing Aliases, External References, etc.
@@ -14,7 +15,7 @@ var ExternalReferenceLink = require('./ExternalReferenceLink');
  * @prop {Object} context - JSON representation of current Item object. Should be available through Redux store's context.
  * @prop {Object} schemas - JSON representation of sitewide schemas.
  */
-export default class ItemFooterRow extends React.Component {
+export class ItemFooterRow extends React.Component {
 
     constructor(props){
         super(props);
@@ -120,7 +121,6 @@ export default class ItemFooterRow extends React.Component {
             aliases             = this.aliases(),
             alternateAccessions = this.alternateAccessions();
 
-        
         return (
             <div className="row">
 

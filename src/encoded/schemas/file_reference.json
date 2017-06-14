@@ -1,6 +1,6 @@
 {
     "title": "Reference file",
-    "description": "Schema for submitting metadata for a reference file used in pipelines.",
+    "description": "Files used in pipelines as references.",
     "id": "/profiles/file_reference.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -28,6 +28,8 @@
             "enum": [
                 "bwaIndex",
                 "chromsizes",
+                "reference_fasta",
+                "juicer_format_restriction_site_file",
                 "other"
             ]
         }
@@ -35,6 +37,8 @@
     "file_format_file_extension": {
         "bwaIndex": ".bwaIndex.tgz",
         "chromsizes": ".chrom.sizes",
+        "reference_fasta": ".fasta.gz",
+        "juicer_format_restriction_site_file": ".txt",
         "other": ""
     }
 }

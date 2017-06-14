@@ -1,14 +1,14 @@
 'use strict';
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var _ = require('underscore');
-var { console } = require('./../util');
-var announcements_data = require('../../data/announcements_data');
-var Collapse = require('react-bootstrap').Collapse;
-var store = require('../../store');
-var globals = require('./../globals');
-var { BannerEntry, Announcements } = require('./components');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import { console } from'./../util';
+import * as announcements_data from '../../data/announcements_data';
+import { Collapse } from 'react-bootstrap';
+import * as store from '../../store';
+import * as globals from './../globals';
+import { BannerEntry, Announcements } from './components';
 
 
 /**
@@ -17,16 +17,18 @@ var { BannerEntry, Announcements } = require('./components');
  * @module {Component} static-pages/home
  * @prop {Object} context - Should have properties typically needed for any static page.
  */
-var HomePage = module.exports = React.createClass({
 
-    propTypes: {
-        "context" : React.PropTypes.shape({
-            "content" : React.PropTypes.shape({
-                "description" : React.PropTypes.string,
-                "links" : React.PropTypes.string
+
+export default class HomePage extends React.Component {
+
+    static propTypes = {
+        "context" : PropTypes.shape({
+            "content" : PropTypes.shape({
+                "description" : PropTypes.string,
+                "links" : PropTypes.string
             }).isRequired
         }).isRequired
-    },
+    }
 
     /**
      * Render old subheading
@@ -36,7 +38,7 @@ var HomePage = module.exports = React.createClass({
      * @memberof module:static-pages/home
      * @returns {Element} H4 React Element with quick summary: "The portal currently hosts X from the 4DN network and Y from other sources over Z."
      */
-    summaryHeading : function(){
+    summaryHeading(){
         var experiment4DNBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all" fetchLoc='/search/?type=Experiment&award.project=4DN&format=json'/>;
         var experimentExtBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all" fetchLoc='/search/?type=Experiment&award.project=External&format=json'/>;
         var biosourceBanner = <BannerEntry session={this.props.session} text='cell types' destination='/search/?type=Biosource' fetchLoc='/search/?type=Biosource&format=json'/>;
@@ -47,33 +49,27 @@ var HomePage = module.exports = React.createClass({
                 sources over {biosourceBanner}.
             </h4>
         );
-    },
+    }
 
     /**
      * Render old homepage banner.
-     * 
      * @deprecated
-     * @inner
-     * @memberof module:static-pages/home
      * @returns {Element} A React <div> element.
      */
-    banner : function(){
+    banner(){
         return (
             <div className="fourDN-banner text-left">
                 <h1 className="page-title" style={{ fontSize : '3.25rem' }}>4DN Data Portal</h1>
                 { this.summaryHeading() }
             </div>
         );
-    },
+    }
 
     /**
      * The render function. Renders homepage contents.
-     * 
-     * @inner
-     * @memberof module:static-pages/home
      * @returns {Element} A React <div> element.
      */
-    render: function() {
+    render() {
         var c = this.props.context.content; // Content
        
         return (
@@ -114,6 +110,8 @@ var HomePage = module.exports = React.createClass({
             </div>
         );
     }
-});
+
+
+}
 
 globals.content_views.register(HomePage, 'HomePage');

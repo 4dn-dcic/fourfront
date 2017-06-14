@@ -68,10 +68,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
                                principals,
                                doc_types)
 
-    # TODO: decide if the schemas are useful
-    # commented out as not returning them currently
-    # schemas = [types[doc_type].schema for doc_type in doc_types]
-
     ### Set sort order
     set_sort_order(request, prepared_terms, types, doc_types, query, result)
     # TODO: implement BOOST here?
@@ -116,6 +112,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         result['notification'] = 'No results found'
         result['@graph'] = []
         return result if not return_generator else []
+
+    columns = list_visible_columns_for_schemas(request, schemas)
+    if columns:
+        result['columns'] = columns
 
     result['notification'] = 'Success'
 
@@ -544,8 +544,12 @@ def set_facets(facets, used_filters, principals, doc_types):
 
         agg_name = field.replace('.', '-')
 
+        # default was size = 10, so only top 10 agg results were returned.
+        # set size to 100.
+        # https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
         aggregation = {
             'terms': {
+                'size': 100,
                 'field': query_field,
             }
         }
@@ -561,8 +565,6 @@ def set_facets(facets, used_filters, principals, doc_types):
 
         # Adding facets based on filters
         for q_field, q_terms in used_filters.items():
-            if q_field not in facetFields:
-                continue
 
             if q_field == field:
                 continue
@@ -583,7 +585,6 @@ def set_facets(facets, used_filters, principals, doc_types):
             },
             'filter': termFilter,
         }
-
     # to achieve OR behavior within facets, search among GLOBAL results,
     # not just returned ones. to do this, wrap aggs in ['all_items']
     # and add "global": {} to top level aggs query
@@ -676,7 +677,14 @@ def iter_search_results(context, request):
 
 # DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols
 def list_visible_columns_for_schemas(request, schemas):
-    return []
+    columns = OrderedDict()
+    for schema in schemas:
+        if 'columns' in schema:
+            columns.update(OrderedDict(
+                (name, obj.get('title'))
+                for name,obj in schema['columns'].items() #if name in schema['properties']
+            ))
+    return columns
 
 # DUMMY FUNCTION. TODO: update ./region_search.py
 def search_result_actions(request, doc_types, es_results, position=None):

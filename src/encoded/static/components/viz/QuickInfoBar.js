@@ -7,7 +7,7 @@ var url = require('url');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
 var { expFxn, Filters, console, object, isServerSide, layout, analytics } = require('../util');
-import ActiveFiltersBar from './components/ActiveFiltersBar';
+import { ActiveFiltersBar } from './components/ActiveFiltersBar';
 var MosaicChart = require('./MosaicChart');
 import { ChartDataController } from './chart-data-controller';
 var ReactTooltip = require('react-tooltip');

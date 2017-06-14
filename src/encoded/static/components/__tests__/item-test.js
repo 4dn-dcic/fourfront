@@ -10,7 +10,7 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 
-describe('Testing item-view.js', function() {
+describe('Testing DefaultItemView.js', function() {
     var React, ItemView, testItem, TestUtils, FetchContext, context, schemas, _, Wrapper, sinon, server;
 
     beforeAll(function(){
@@ -47,7 +47,7 @@ describe('Testing item-view.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        ItemView = require('./../item-pages/DefaultItemView');
+        ItemView = require('./../item-pages/DefaultItemView').default;
         var Item = require('./../item-pages/item').default;
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');

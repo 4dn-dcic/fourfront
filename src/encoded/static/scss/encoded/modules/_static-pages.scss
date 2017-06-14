@@ -544,3 +544,28 @@ h5.fourDN-header {
 	}
 
 }
+
+
+/*********************************************
+ *** Temporary NOFIC Matrices Side by Side ***
+ *********************************************/
+
+@media screen and (min-width: $screen-lg-min){
+
+	#content.container > .static-page.row #nofic-matrix-1,
+	#content.container > .static-page.row #nofic-matrix-2 {
+		position: relative;
+		float: left;
+		width: 50%;
+		margin-top: -20px;
+	}
+
+	#content.container > .static-page.row #nofic-matrix-1 {
+		padding-right: 15px;
+	}
+
+	#content.container > .static-page.row #nofic-matrix-2 {
+		padding-left: 15px;
+	}
+
+}

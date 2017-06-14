@@ -11,7 +11,7 @@ const defaultHeaders = {
     "Content-Type" : "application/json; charset=UTF-8",
     "Accept" : "application/json",
     "X-Requested-With" : "XMLHttpRequest" // Allows some server-side libs (incl. pyramid) to identify using `request.is_xhr`.
-}
+};
 
 /**
  * @private
@@ -104,4 +104,30 @@ export function promise(url, method = 'GET', headers = {}, data = null, cache = 
         if (promiseInstance.xhr.readyState !== 4) promiseInstance.xhr.abort();
     };
     return promiseInstance;
+}
+
+/**
+ * Wrapper around function promise() which is slightly more relevant for navigation.
+ * Strips hash from URL, sets same origin police.
+ * 
+ * @export
+ * @param {any} url 
+ * @param {any} options 
+ */
+export function fetch(url, options){
+    options = _.extend({credentials: 'same-origin'}, options);
+    var http_method = options.method || 'GET';
+    var headers = options.headers = _.extend({}, options.headers);
+    // Strip url fragment.
+    var url_hash = url.indexOf('#');
+    if (url_hash > -1) {
+        url = url.slice(0, url_hash);
+    }
+    var data = options.body ? options.body : null;
+    var request = promise(url, http_method, headers, data, options.cache === false ? false : true);
+    request.xhr_begin = 1 * new Date();
+    request.then(response => {
+        request.xhr_end = 1 * new Date();
+    });
+    return request;
 }

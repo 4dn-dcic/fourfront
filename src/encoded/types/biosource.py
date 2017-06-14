@@ -34,6 +34,7 @@ class Biosource(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
     embedded = ["individual", "individual.organism", "tissue", "cell_line"]
+    embedded = ["individual", "individual.organism", "tissue"]
 
     @calculated_property(schema={
         "title": "Biosource name",

@@ -1,13 +1,12 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var d3 = require('d3');
-var vizUtil = require('./../utilities');
-var { expFxn, Filters, console, object, isServerSide } = require('./../../util');
-var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
-var CursorComponent = require('./CursorComponent');
-var { Button } = require('react-bootstrap');
+import React from 'react';
+import _ from 'underscore';
+import * as d3 from 'd3';
+import * as vizUtil from './../utilities';
+import { expFxn, Schemas, console, object, isServerSide } from './../../util';
+import CursorComponent from './CursorComponent';
+import { Button } from 'react-bootstrap';
 
 /**
  * @ignore
@@ -139,7 +138,7 @@ class Body extends React.Component {
             return null;
         }
         var leafNode = this.props.path[this.props.path.length - 1];
-        var leafNodeFieldTitle = Filters.Field.toName(leafNode.field, this.props.schemas);
+        var leafNodeFieldTitle = Schemas.Field.toName(leafNode.field, this.props.schemas);
         return (
             <div className="mosaic-cursor-body">
                 <Crumbs path={this.props.path} schemas={this.props.schemas} />
@@ -159,7 +158,7 @@ class Body extends React.Component {
                         style={{ color : leafNode.color || vizUtil.colorForNode(leafNode) }}
                     />
                     { this.primaryCount(leafNode) }
-                    <span>{ Filters.Term.toName(leafNode.field, leafNode.term) }</span>
+                    <span>{ Schemas.Term.toName(leafNode.field, leafNode.term) }</span>
                     
                 </h3>
                 <div className="details row">
@@ -211,10 +210,10 @@ class Crumbs extends React.Component {
                                 key={i}
                             >
                                 <div className="field col-xs-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
-                                    { Filters.Field.toName(n.field, this.props.schemas) }
+                                    { Schemas.Field.toName(n.field, this.props.schemas) }
                                 </div>
                                 <div className="name col-xs-5">
-                                    { n.name || Filters.Term.toName(n.field, n.term) }
+                                    { n.name || Schemas.Term.toName(n.field, n.term) }
                                 </div>
                                 <div className="count col-xs-2 pull-right text-right">
                                     { n.experiment_sets }
@@ -247,7 +246,7 @@ const initialDetailCursorState = {
     'bodyComponent' : Body,
     'actions' : null,
     'xCoordOverride' : null
-}
+};
 
 
 export default class ChartDetailCursor extends React.Component {
@@ -406,9 +405,9 @@ export default class ChartDetailCursor extends React.Component {
      */
     update(state = {}, cb = null, overrideSticky = false){
         if (overrideSticky) this.overrideSticky = true; // Unset this on subsequent update.
-        if (state.field) state.field = Filters.Field.toName(state.field, this.props.schemas);
+        if (state.field) state.field = Schemas.Field.toName(state.field, this.props.schemas);
         else if (Array.isArray(state.path) && state.path.length > 0 && state.path[state.path.length - 1].field){
-            state.field = Filters.Field.toName(state.path[state.path.length - 1].field, this.props.schemas);
+            state.field = Schemas.Field.toName(state.path[state.path.length - 1].field, this.props.schemas);
         }
         if (this.props.debugStyle && state.path && state.path.length === 0) return null;
         return this.setState(state, cb);

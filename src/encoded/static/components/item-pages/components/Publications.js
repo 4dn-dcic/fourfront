@@ -1,14 +1,13 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var url = require('url');
-var querystring = require('querystring');
-var { Button } = require('react-bootstrap');
-var ReactTooltip = require('react-tooltip');
-var { console, DateUtility, object } = require('./../../util');
-var { FlexibleDescriptionBox } = require('./../../experiment-common');
-import PartialList from './PartialList';
+import React from 'react';
+import _ from 'underscore';
+import url from 'url';
+import { Button } from 'react-bootstrap';
+import ReactTooltip from 'react-tooltip';
+import { console, DateUtility, object } from './../../util';
+import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
+import { PartialList } from './PartialList';
 
 /*
 var testData = [ // Use this to test list view(s) as none defined in test data.
@@ -86,7 +85,6 @@ class ListBlock extends React.Component {
             return <ul>{ pubsToElements(publications) }</ul>;
         } else {
             // Only show first 3, then a 'more' button.
-
             return (
                 <PartialList
                     persistent={pubsToElements(publications.slice(0, this.props.persistentCount))}
@@ -96,7 +94,6 @@ class ListBlock extends React.Component {
                 />
             );
         }
-        return null;
     }
 
     render(){
@@ -123,7 +120,7 @@ class ListBlock extends React.Component {
         );
     }
 
-};
+}
 
 
 /**
@@ -288,15 +285,11 @@ class ShortAttribution extends React.Component {
  * Shows publications for current Item.
  * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView .
  * 
- * @memberof module:item-pages/components
- * @export
  * @class Publications
- * @type {Component}
- * @extends {React.Component}
  * 
  * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
  */
-export default class Publications extends React.Component {
+export class Publications extends React.Component {
 
     static ListBlock = ListBlock;
     static DetailBlock = DetailBlock;
@@ -311,7 +304,7 @@ export default class Publications extends React.Component {
         this.render = this.render.bind(this);
         this.state = {
             'abstractCollapsed' : true
-        }
+        };
     }
 
     /**
@@ -374,7 +367,7 @@ export default class Publications extends React.Component {
             details.push({
                 'label' : 'Author' + (publication.authors.length > 1 ? 's' : ''),
                 'content' : publication.authors.join(', ')
-            })
+            });
         }
 
         if (typeof publication.abstract === 'string'){

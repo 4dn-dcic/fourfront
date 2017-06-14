@@ -51,6 +51,12 @@
                         "description": "a specified input file",
                         "type": "string",
                         "linkTo": "File"
+                    },
+                    "ordinal": {
+                        "title": "Ordinal",
+                        "description": "ordinal of the file in the argument",
+                        "type": "number",
+                        "default": 1
                     }
                 }
             }
@@ -67,7 +73,7 @@
                 "properties": {
                     "workflow_argument_name": {
                         "title": "Workflow argument name",
-                        "description": "the name of the argument of the workflow that corresponds to the output file",
+                        "description": "Argument name of node in workflow that corresponds to the output file",
                         "type": "string"
                     },
                     "value": {
@@ -92,6 +98,11 @@
                     "name": {
                         "title": "Name (type) of quality metric",
                         "description": "quality metric identifier",
+                        "type": "string"
+                    },
+                    "workflow_argument_name" : {
+                        "title": "Workflow argument name",
+                        "description": "Argument name of node in workflow that corresponds to the output file",
                         "type": "string"
                     },
                     "value": {

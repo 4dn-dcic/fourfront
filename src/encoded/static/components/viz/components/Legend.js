@@ -4,8 +4,7 @@ var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
 var barAggrFxn = require('./../BarPlot/aggregation-functions');
-var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
-var { console, isServerSide, Filters, object } = require('./../../util');
+var { console, isServerSide, Schemas, object } = require('./../../util');
 import { CursorViewBounds } from './../ChartDetailCursor';
 import ReactTooltip from 'react-tooltip';
 
@@ -42,7 +41,7 @@ class Term extends React.Component {
     }
 
     onMouseEnter(e){
-        highlightTerm.bind(this, this.props.field, this.props.term, this.props.color);
+        vizUtil.highlightTerm(this.props.field, this.props.term, this.props.color);
         if (typeof this.props.onNodeMouseEnter === 'function'){
             this.props.onNodeMouseEnter(this.generateNode(), e);
         }
@@ -79,7 +78,7 @@ class Term extends React.Component {
                         data-term={this.props.term}
                         style={{ backgroundColor : color }}
                     />
-                    { this.props.name || Filters.Term.toName(this.props.field, this.props.term) }
+                    { this.props.name || Schemas.Term.toName(this.props.field, this.props.term) }
                 </span>
             </div>
         );
@@ -107,7 +106,7 @@ class Field extends React.Component {
      */
     render(){
         return (
-            <div className="field" data-field={this.props.field} onMouseLeave={unhighlightTerms.bind(this, this.props.field)}>
+            <div className="field" data-field={this.props.field} onMouseLeave={vizUtil.unhighlightTerms.bind(this, this.props.field)}>
                 { this.props.includeFieldTitle ? 
                     <h5 className="text-500 legend-field-title">{ this.props.title || this.props.name || this.props.field }</h5>
                 : null }
@@ -209,7 +208,7 @@ class LegendViewContainer extends React.Component {
  * @prop {number} width - How wide should the legend container element (<div>) be.
  * @prop {string|Element|Component} title - Optional title to display at top of fields.
  */
-export default class Legend extends React.Component {
+export class Legend extends React.Component {
 
     static Term = Term
     static Field = Field
@@ -232,7 +231,7 @@ export default class Legend extends React.Component {
         var terms = _.pairs(field.terms).map(function(p){ // p[0] = term, p[1] = term counts
             return {
                 'field' : field.field,
-                'name' : Filters.Term.toName(field.field, p[0]),
+                'name' : Schemas.Term.toName(field.field, p[0]),
                 'term' : p[0],
                 'color' : vizUtil.colorForNode({
                     'term' : p[0],
@@ -288,7 +287,7 @@ export default class Legend extends React.Component {
         return fields.map(function(field){
             if (!field.title && !field.name) {
                 return _.extend({} , field, {
-                    'name' : Filters.Field.toName(field.field, schemas || null)
+                    'name' : Schemas.Field.toName(field.field, schemas || null)
                 });
             }
             return field;
@@ -310,7 +309,7 @@ export default class Legend extends React.Component {
     }
 
     render(){
-        return <LegendExpandContainer {...this.props} />
+        return <LegendExpandContainer {...this.props} />;
     }
 
 }
@@ -330,7 +329,7 @@ class LegendExpandContainer extends React.Component {
         if (this.props.expandable){
             this.state = {
                 'expanded' : props.defaultExpanded
-            }
+            };
         }
     }
 

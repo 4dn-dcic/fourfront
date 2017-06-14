@@ -1,9 +1,10 @@
 'use strict';
 
-var React = require('react');
-var url = require('url');
-var globals = require('./../globals');
-var { console, object, Filters } = require('./../util');
+import React from 'react';
+import PropTypes from 'prop-types';
+import url from 'url';
+import { content_views } from './../globals';
+import { console, object, Filters } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
 
 /**
@@ -23,7 +24,7 @@ export class Fallback extends React.Component {
 
     render() {
         var context = this.props.context;
-        var title = typeof context.title == "string" ? context.title : url.parse(this.context.location_href).path;
+        var title = typeof context.title == "string" ? context.title : url.parse(this.props.href || this.context.location_href).path;
         return (
             <div className="view-item">
                 <ItemPageTitle context={context} showType={false} />
@@ -32,13 +33,13 @@ export class Fallback extends React.Component {
             </div>
         );
     }
-};
-
-Fallback.contextTypes = {
-    location_href: React.PropTypes.string
 }
 
+Fallback.contextTypes = {
+    location_href: PropTypes.string
+};
+
 // Use this view as a fallback for anything we haven't registered
-globals.content_views.fallback = function () {
+content_views.fallback = function () {
     return Fallback;
 };

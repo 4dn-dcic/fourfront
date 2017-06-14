@@ -3,16 +3,17 @@
 
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var { Modal, Alert } = require('react-bootstrap');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import { Modal, Alert } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
-var { ItemStore } = require('./../lib/store');
-var globals = require('./../globals');
+import { ItemStore } from './../lib/store';
+import { panel_views, content_views } from './../globals';
 var store = require('./../../store');
-var { ajax, JWT, console, DateUtility } = require('./../util');
-var FormattedInfoBlock = require('./components/FormattedInfoBlock');
-var { EditableField, FieldSet } = require('./../forms');
+import { ajax, JWT, console, DateUtility, navigate } from './../util';
+import { FormattedInfoBlock } from './components';
+import { EditableField, FieldSet } from './../forms';
 
 
 /**
@@ -47,42 +48,137 @@ class AccessKeyStore extends ItemStore {
  * @type {Component}
  * @private
  */
-var AccessKeyTable = React.createClass({
 
-    /** @ignore */
-    propTypes : {
-        access_keys : React.PropTypes.array.isRequired,
-        user : React.PropTypes.shape({
-            '@id' : React.PropTypes.string.isRequired,
-            'access_keys' : React.PropTypes.array.isRequired,
-            'email' : React.PropTypes.string,
-            'first_name' : React.PropTypes.string,
-            'last_name' : React.PropTypes.string,
-            'groups' : React.PropTypes.array,
-            'status' : React.PropTypes.string,
-            'timezone' : React.PropTypes.string,
-            'job_title' : React.PropTypes.string,
-            'submits_for' : React.PropTypes.array
+
+class AccessKeyTable extends React.Component {
+
+    static propTypes = {
+        'access_keys' : PropTypes.array.isRequired,
+        'session' : PropTypes.bool,
+        'user' : PropTypes.shape({
+            '@id' : PropTypes.string.isRequired,
+            'access_keys' : PropTypes.array.isRequired,
+            'email' : PropTypes.string,
+            'first_name' : PropTypes.string,
+            'last_name' : PropTypes.string,
+            'groups' : PropTypes.array,
+            'status' : PropTypes.string,
+            'timezone' : PropTypes.string,
+            'job_title' : PropTypes.string,
+            'submits_for' : PropTypes.array
         })
-    },
+    }
 
-    /** @ignore */
-    contextTypes: {
-        fetch: React.PropTypes.func,
-        session: React.PropTypes.bool
-    },
+    constructor(props){
+        super(props);
+        this.create = this.create.bind(this);
+        this.doAction = this.doAction.bind(this);
+        this.onCreate = this.onCreate.bind(this);
+        this.onResetSecret = this.onResetSecret.bind(this);
+        this.showNewSecret = this.showNewSecret.bind(this);
+        this.onDelete = this.onDelete.bind(this);
+        this.onError = this.onError.bind(this);
+        this.hideModal = this.hideModal.bind(this);
 
-    /** @ignore */
-    getInitialState: function() {
-        var access_keys = this.props.access_keys;
-        this.store = new AccessKeyStore(access_keys, this, 'access_keys');
-        return {
-            access_keys: access_keys
+        this.renderTable = this.renderTable.bind(this);
+        this.render = this.render.bind(this);
+        
+        this.store = new AccessKeyStore(props.access_keys, this, 'access_keys');
+        this.state = {
+            access_keys : props.access_keys
         };
-    },
+    }
 
-    /** @ignore */
-    renderTable : function(){
+
+    /**
+     * Add new access key for user via AJAX.
+     *
+     * @param {MouseEvent} e - Click event.
+     */
+    create(e) {
+        e.preventDefault();
+        var item = {};
+        if(this.props.session || (this.context && this.context.session)){
+            var idToken = JWT.get();
+            if (idToken){
+                var decoded = jwt.decode(idToken);
+                item['user'] = decoded.email_verified ? decoded.email : "";
+            } else {
+                console.warn("Access key aborted");
+                return;
+            }
+        }
+        this.store.create('/access-keys/', item);
+    }
+
+    doAction(action, arg, e) {
+        e.preventDefault();
+        this.store[action](arg);
+    }
+
+    onCreate(response) {
+        this.showNewSecret('Your secret key has been created.', response);
+    }
+
+    onResetSecret(response) {
+        this.showNewSecret('Your secret key has been reset.', response);
+    }
+
+    showNewSecret(title, response) {
+        this.setState({modal:
+            <Modal show={true} onHide={this.hideModal}>
+            <Modal.Header>
+                <Modal.Title>{title}</Modal.Title>
+            </Modal.Header>
+                <Modal.Body>
+                    Please make a note of the new secret access key.
+                    This is the last time you will be able to view it.
+                    <dl className="key-value">
+                        <div>
+                            <dt>Access Key ID</dt>
+                            <dd>{response.access_key_id}</dd>
+                        </div>
+                        <div>
+                            <dt>Secret Access Key</dt>
+                            <dd>{response.secret_access_key}</dd>
+                        </div>
+                    </dl>
+                </Modal.Body>
+            </Modal>
+        });
+    }
+
+
+    onDelete(item) {
+        this.setState({modal:
+            <Modal show={true} onHide={this.hideModal}>
+                <Modal.Header>
+                    <Modal.Title>{'Access key ' + item['access_key_id'] + ' has been deleted.'}</Modal.Title>
+                </Modal.Header>
+            </Modal>
+        });
+    }
+
+    onError(error) {
+        var View = content_views.lookup(error);
+        this.setState({modal:
+            <Modal show={true} onHide={this.hideModal}>
+                <Modal.Header>
+                    <Modal.Title>Error</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <View context={error} loadingComplete={true} />
+                </Modal.Body>
+            </Modal>
+        });
+    }
+
+    hideModal() {
+        this.setState({modal: null});
+    }
+
+
+    renderTable(){
         if (!this.state.access_keys || !this.state.access_keys.length){
             return (
                 <div className="no-access-keys">
@@ -130,10 +226,10 @@ var AccessKeyTable = React.createClass({
             </table>
         );
 
-    },
+    }
 
-    /** @ignore */
-    render: function() {
+
+    render() {
         return (
             <div className="access-keys-table-container clearfix">
                 { this.state.access_keys.length ?
@@ -145,113 +241,20 @@ var AccessKeyTable = React.createClass({
                 {this.state.modal}
             </div>
         );
-    },
+    }
 
-    /**
-     * Add new access key for user via AJAX.
-     *
-     * @memberof module:item-pages/user.AccessKeyTable
-     * @private
-     * @instance
-     * @param {MouseEvent} e - Click event.
-     */
-    create: function(e) {
-        e.preventDefault();
-        var item = {};
-        if(this.context.session){
-            var idToken = JWT.get();
-            if (idToken){
-                var decoded = jwt.decode(idToken);
-                item['user'] = decoded.email_verified ? decoded.email : "";
-            } else {
-                console.warn("Access key aborted");
-                return;
-            }
-        }
-        this.store.create('/access-keys/', item);
-    },
-
-    /** @ignore */
-    doAction: function(action, arg, e) {
-        e.preventDefault();
-        this.store[action](arg);
-    },
-
-    /** @ignore */
-    onCreate: function(response) {
-        this.showNewSecret('Your secret key has been created.', response);
-    },
-    /** @ignore */
-    onResetSecret: function(response) {
-        this.showNewSecret('Your secret key has been reset.', response);
-    },
-    /** @ignore */
-    showNewSecret: function(title, response) {
-        this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
-            <Modal.Header>
-                <Modal.Title>{title}</Modal.Title>
-            </Modal.Header>
-                <Modal.Body>
-                    Please make a note of the new secret access key.
-                    This is the last time you will be able to view it.
-                    <dl className="key-value">
-                        <div>
-                            <dt>Access Key ID</dt>
-                            <dd>{response.access_key_id}</dd>
-                        </div>
-                        <div>
-                            <dt>Secret Access Key</dt>
-                            <dd>{response.secret_access_key}</dd>
-                        </div>
-                    </dl>
-                </Modal.Body>
-            </Modal>
-        });
-    },
-    /** @ignore */
-    onDelete: function(item) {
-        this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
-                <Modal.Header>
-                    <Modal.Title>{'Access key ' + item['access_key_id'] + ' has been deleted.'}</Modal.Title>
-                </Modal.Header>
-            </Modal>
-        });
-    },
-    /** @ignore */
-    onError: function(error) {
-        var View = globals.content_views.lookup(error);
-        this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
-                <Modal.Header>
-                    <Modal.Title>Error</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <View context={error} loadingComplete={true} />
-                </Modal.Body>
-            </Modal>
-        });
-    },
-    /** @ignore */
-    hideModal: function() {
-        this.setState({modal: null});
-    },
-});
+}
 
 
 /**
  * Generate a URL to get Gravatar image from Gravatar service.
  *
- * @static
- * @public
- * @memberof module:item-pages/user
  * @param {string} email - User's email address.
  * @param {number} size - Width & height of image square.
  * @param {string} [defaultImg='retro'] Style of Gravatar image.
  * @returns {string} A URL.
  */
-var buildGravatarURL = module.exports.buildGravatarURL = function(email, size=null, defaultImg='retro'){
+export function buildGravatarURL(email, size=null, defaultImg='retro'){
     var md5 = require('js-md5');
     if (defaultImg === 'kanye'){
         defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif';
@@ -260,21 +263,19 @@ var buildGravatarURL = module.exports.buildGravatarURL = function(email, size=nu
     url += "?d=" + defaultImg;
     if (size) url += '&s=' + size;
     return url;
-};
+}
+
 
 /**
  * Generate an <img> element with provided size, className, and Gravatar src.
  *
- * @static
- * @public
- * @memberof module:item-pages/user
  * @param {string} email - User's email address.
  * @param {number} size - Width & height of image square.
  * @param {string} className - ClassName of <img> element.
  * @param {string} [defaultImg='retro'] Style of Gravatar image.
  * @returns {Element} A React Image (<img>) element.
  */
-var gravatar = module.exports.gravatar = function(email, size=null, className=null, defaultImg='retro'){
+export function gravatar(email, size=null, className=null, defaultImg='retro'){
     return (
         <img
             src={ buildGravatarURL(email, size, defaultImg)}
@@ -282,66 +283,61 @@ var gravatar = module.exports.gravatar = function(email, size=null, className=nu
             title="Obtained via Gravatar"
         />
     );
-};
+}
+
 
 
 /**
  * Draws a User Profile page.
  *
  * @public
- * @namespace
  * @type {Component}
  * @prop {Object} context - Context value for user, e.g. from Redux store. AKA user object.
  * @prop {Object} schemas - Object of schemas, e.g. passed from app state.
  * @memberof module:item-pages/user
  */
-var UserView = module.exports.UserView = React.createClass({
 
-    /** @ignore */
-    propTypes : {
-        'context' : React.PropTypes.shape({
-            '@id' : React.PropTypes.string.isRequired,
-            'access_keys' : React.PropTypes.array,
-            'email' : React.PropTypes.string,
-            'first_name' : React.PropTypes.string,
-            'last_name' : React.PropTypes.string,
-            'title' : React.PropTypes.string,
-            'groups' : React.PropTypes.array,
-            'lab' : React.PropTypes.object,
-            'status' : React.PropTypes.string,
-            'timezone' : React.PropTypes.string,
-            'job_title' : React.PropTypes.string
+export default class UserView extends React.Component {
+
+    static propTypes = {
+        'context' : PropTypes.shape({
+            '@id' : PropTypes.string.isRequired,
+            'access_keys' : PropTypes.array,
+            'email' : PropTypes.string,
+            'first_name' : PropTypes.string,
+            'last_name' : PropTypes.string,
+            'title' : PropTypes.string,
+            'groups' : PropTypes.array,
+            'lab' : PropTypes.object,
+            'status' : PropTypes.string,
+            'timezone' : PropTypes.string,
+            'job_title' : PropTypes.string
         }),
-        'schemas' : React.PropTypes.shape({
-            'User' : React.PropTypes.shape({
-                'required' : React.PropTypes.array,
-                'properties' : React.PropTypes.shape({
-                    'first_name' : React.PropTypes.object,
-                    'last_name' : React.PropTypes.object,
-                    'email' : React.PropTypes.object,
-                    'phone1' : React.PropTypes.object,
-                    'fax' : React.PropTypes.object,
-                    'skype' : React.PropTypes.object,
+        'href' : PropTypes.string.isRequired,
+        'listActionsFor' : PropTypes.func.isRequired,
+        'schemas' : PropTypes.shape({
+            'User' : PropTypes.shape({
+                'required' : PropTypes.array,
+                'properties' : PropTypes.shape({
+                    'first_name' : PropTypes.object,
+                    'last_name' : PropTypes.object,
+                    'email' : PropTypes.object,
+                    'phone1' : PropTypes.object,
+                    'fax' : PropTypes.object,
+                    'skype' : PropTypes.object,
                     // etc.
                 })
             })
         })
-    },
+    }
 
-    /** @ignore */
-    contextTypes : {
-        listActionsFor : React.PropTypes.func
-    },
-
-    /** @ignore */
-    mayEdit : function(){
-        return this.context.listActionsFor('context').filter(function(action){
+    mayEdit(){
+        return this.props.listActionsFor('context').filter(function(action){
             return action.name && action.name === 'edit';
         }).length > 0 ? true : false;
-    },
+    }
 
-    /** @ignore */
-    render: function() {
+    render() {
 
         var user = this.props.context;
 
@@ -385,6 +381,7 @@ var UserView = module.exports.UserView = React.createClass({
                                                     objectType="User"
                                                     schemas={this.props.schemas}
                                                     disabled={!mayEdit}
+                                                    href={this.props.href}
                                                 >
                                                     <EditableField
                                                         labelID="first_name"
@@ -402,12 +399,12 @@ var UserView = module.exports.UserView = React.createClass({
                                         </div>
                                     </div>
                                 </div>
-                                <ProfileContactFields user={user} parent={this} mayEdit={mayEdit} />
+                                <ProfileContactFields user={user} parent={this} mayEdit={mayEdit} href={this.props.href} />
                             </div>
 
                         </div>
                         <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-5">
-                            <ProfileWorkFields user={user} parent={this} />
+                            <ProfileWorkFields user={user} parent={this} href={this.props.href} />
                         </div>
 
                     </div>
@@ -430,9 +427,10 @@ var UserView = module.exports.UserView = React.createClass({
             </div>
         );
     }
-});
 
-globals.content_views.register(UserView, 'User');
+}
+
+content_views.register(UserView, 'User');
 
 
 /**
@@ -440,19 +438,15 @@ globals.content_views.register(UserView, 'User');
  * Shows Gravatar and User's first and last name at top.
  *
  * @private
- * @namespace
  * @type {Component}
- * @memberof module:item-pages/user
  */
-var ProfileContactFields = React.createClass({
+class ProfileContactFields extends React.Component {
 
-    /** @ignore */
-    icon : function(iconName){
+    static icon(iconName){
         return <i className={"visible-lg-inline icon icon-fw icon-" + iconName }></i>;
-    },
+    }
 
-    /** @ignore */
-    render: function(){
+    render(){
         var user = this.props.user;
 
         return (
@@ -463,29 +457,30 @@ var ProfileContactFields = React.createClass({
                 disabled={!this.props.mayEdit}
                 objectType="User"
                 schemas={this.props.schemas}
+                href={this.props.href}
             >
 
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
-                    { this.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
+                    { ProfileContactFields.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
                 </EditableField>
 
                 <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
-                    { this.icon('phone') }&nbsp; { user.phone1 }
+                    { ProfileContactFields.icon('phone') }&nbsp; { user.phone1 }
                 </EditableField>
 
                 <EditableField label="Fax" labelID="fax" placeholder="17775554321" fallbackText="No fax number" fieldType="phone">
-                    { this.icon('fax') }&nbsp; { user.fax }
+                    { ProfileContactFields.icon('fax') }&nbsp; { user.fax }
                 </EditableField>
 
                 <EditableField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="username">
-                    { this.icon('skype') }&nbsp; { user.skype }
+                    { ProfileContactFields.icon('skype') }&nbsp; { user.skype }
                 </EditableField>
 
             </FieldSet>
         );
     }
 
-});
+}
 
 
 /**
@@ -493,35 +488,33 @@ var ProfileContactFields = React.createClass({
  * Uses AJAX to fetch details for fields which are not embedded.
  *
  * @private
- * @namespace
  * @type {Component}
- * @memberof module:item-pages/user
  */
-var ProfileWorkFields = React.createClass({
 
-    /** @ignore */
-    getDefaultProps : function(){
-        return {
-            containerClassName : 'panel user-work-info shadow-border'
-        };
-    },
+class ProfileWorkFields extends React.Component {
 
-    /** @ignore */
-    getInitialState : function(){
-        return {
+
+    static defaultProps = {
+        containerClassName : 'panel user-work-info shadow-border'
+    }
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
+        this.getAwardsList = this.getAwardsList.bind(this);
+        this.updateAwardsList = this.updateAwardsList.bind(this);
+        this.render = this.render.bind(this);
+        this.state = {
             details_lab : null,        // Use FormattedInfoBlock.ajaxPropertyDetails.call(this, args...) to set.
             awards_list : null
         };
-    },
+    }
 
     /**
-     * If Lab details are not embedded, fetches them.
-     *
-     * @memberof module:item-pages/user.ProfileWorkFields
-     * @private
-     * @instance
+     * If Lab details are not embedded, fetch them.
      */
-    componentDidMount : function(){
+    componentDidMount(){
 
         if (!this.state.details_lab){
             this.isLabFetched = FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.user.lab, (detail) => this.updateAwardsList([detail]) );
@@ -535,22 +528,18 @@ var ProfileWorkFields = React.createClass({
 
             //FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab', (detail) => this.updateAwardsList([detail]) );
         }
-    },
+    }
 
-    /** @ignore */
-    componentWillUnmount : function(){ delete this.isLabFetched; },
+    componentWillUnmount(){ delete this.isLabFetched; }
 
     /**
      * Get list of all awards (unique) from list of labs.
      * ToDo : Migrate somewhere more static-cy.
-     *
-     * @memberof module:item-pages/user.ProfileWorkFields
-     * @private
-     * @instance
+     * 
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @return {Object[]} List of all unique awards in labs.
      */
-    getAwardsList : function(labDetails){
+    getAwardsList(labDetails){
         // Awards are embedded within labs, so we get full details.
         var awardsList = [];
 
@@ -569,18 +558,15 @@ var ProfileWorkFields = React.createClass({
         }
 
         return awardsList;
-    },
+    }
 
     /**
      * Update state.awards_list with award details from list of lab details.
      *
-     * @memberof module:item-pages/user.ProfileWorkFields
-     * @private
-     * @instance
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @returns {undefined} Nothing.
      */
-    updateAwardsList : function(labDetails){
+    updateAwardsList(labDetails){
         var currentAwardsList = (this.state.awards_list || []).slice(0);
         var currentAwardsListIDs = currentAwardsList.map((awd) => {
             if (typeof awd === 'string') return awd;
@@ -596,10 +582,10 @@ var ProfileWorkFields = React.createClass({
         if (!Array.isArray(this.state.awards_list )|| !_.isEqual(this.state.awards_list, currentAwardsList)){
             this.setState({'awards_list' : currentAwardsList});
         }
-    },
+    }
 
-    /** @ignore */
-    render : function(){
+
+    render(){
         var user = this.props.user;
         if (user.submits_for && user.submits_for.length > 0){
             var submits_for = user.submits_for;
@@ -669,40 +655,38 @@ var ProfileWorkFields = React.createClass({
         );
     }
 
-});
+}
+
 
 /**
- * @memberof module:item-pages/user
  * @private
- * @namespace
  * @type {Component}
  */
-var BasicForm = React.createClass({
+class BasicForm extends React.Component {
 
-    /** @ignore */
-    getInitialState: function() {
-        return({
-            value: ''
-        })
-    },
+    constructor(props){
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.state = {
+            'value' : ''
+        };
+    }
 
-    /** @ignore */
-    handleChange: function(e) {
+    handleChange(e) {
         this.setState({ value: e.target.value });
-    },
+    }
 
-    /** @ignore */
-    handleSubmit: function(e){
+    handleSubmit(e){
         e.preventDefault();
         if(this.state.value.length == 0){
             return;
         }
         this.props.submitImpersonate(this.state.value);
         this.setState({ value: '' });
-    },
+    }
 
-    /** @ignore */
-    render: function() {
+    render() {
         return(
             <form onSubmit={this.handleSubmit}>
                 <input className="impersonate-user impersonate-user-field" type='text' placeholder='Enter an email to impersonate...'
@@ -711,44 +695,29 @@ var BasicForm = React.createClass({
             </form>
         );
     }
-});
+
+}
+
 
 /**
- * @memberof module:item-pages/user
  * @private
- * @namespace
  * @type {Component}
  */
-var ImpersonateUserForm = React.createClass({
+export class ImpersonateUserForm extends React.Component {
 
-    /** @ignore */
-    contextTypes: {
-        navigate: React.PropTypes.func,
-        updateUserInfo: React.PropTypes.func
-    },
-
-    /** @ignore */
-    render: function() {
-        var form = <BasicForm submitImpersonate={this.handleSubmit} />;
-        return (
-            <div style={{marginTop : 30}}>
-                <h2>Impersonate User</h2>
-                {form}
-            </div>
-        );
-    },
+    static propTypes = {
+        updateUserInfo: PropTypes.func.isRequired
+    }
 
     /**
      * Handler for Impersonate User submit button/action.
      * Performs AJAX request to '/impersonate-user' endpoint then saves returned JWT
      * as own and in order to pretend to be impersonated user.
      *
-     * @memberof module:item-pages/user.ImpersonateUserForm
-     * @private
      * @instance
      * @param {Object} data - User ID or email address.
      */
-    handleSubmit: function(data) {
+    handleSubmit(data) {
         var url = "/impersonate-user";
         var jsonData = JSON.stringify({'userid':data});
         var callbackFxn = function(payload) {
@@ -757,8 +726,8 @@ var ImpersonateUserForm = React.createClass({
             //    localStorage.setItem("user_info", JSON.stringify(payload));
             //}
             JWT.saveUserInfo(payload);
-            this.context.updateUserInfo();
-            this.context.navigate('/');
+            this.props.updateUserInfo();
+            navigate('/');
         }.bind(this);
         var fallbackFxn = function() {
             alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
@@ -772,5 +741,17 @@ var ImpersonateUserForm = React.createClass({
         //}
         ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData);
     }
-});
-globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');
+
+    render() {
+        var form = <BasicForm submitImpersonate={this.handleSubmit} />;
+        return (
+            <div style={{marginTop : 30}}>
+                <h2>Impersonate User</h2>
+                {form}
+            </div>
+        );
+    }
+
+}
+
+content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');

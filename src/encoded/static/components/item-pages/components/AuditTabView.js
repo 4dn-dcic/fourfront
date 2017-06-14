@@ -1,12 +1,12 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
+import React from 'react';
+import _ from 'underscore';
 import PropTypes from 'prop-types';
-var ReactTooltip = require('react-tooltip');
+import ReactTooltip from 'react-tooltip';
 
 
-export default class AuditTabView extends React.Component {
+export class AuditTabView extends React.Component {
 
     static getTabObject(context){
         var auditIconClass = AuditTabView.getItemIndicatorIcon(context);

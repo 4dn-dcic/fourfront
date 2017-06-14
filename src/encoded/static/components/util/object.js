@@ -1,15 +1,12 @@
 'use strict';
 
-var _ = require('underscore');
+import _ from 'underscore';
 
 
 /**
  * Convert a link_id, if one exists on param 'object', to an '@id' link.
  * If an '@id' exists already, gets that.
  * 
- * @memberof module:item-pages/components.FilesInSetTable
- * @static
- * @public
  * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
  * @returns {string|null} The Item's '@id'.
  */
@@ -32,6 +29,18 @@ export function tipsFromSchema(schemas, content){
         }
     }
     return tips;
+}
+
+/**
+ * Convert tips, as obtained from tipsFromSchema, into a list containing objects with at least the following properties:
+ * 'key', 'title', 'description'
+ */
+export function listFromTips(tips){
+    return _.map(_.pairs(tips), function(p){
+        return _.extend(_.omit(p[1], 'key'), {
+            'key' : p[0],
+        });
+    });
 }
 
 
@@ -76,6 +85,18 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
         return null;
     }
 
+}
+
+
+
+export function isValidJSON(content) {
+    var isJson = true;
+    try{
+        var json = JSON.parse(JSON.stringify(content));
+    } catch(err) {
+        isJson = false;
+    }
+    return isJson;
 }
 
 

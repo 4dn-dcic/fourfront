@@ -601,6 +601,11 @@ $download-button-width : 100px;
 
 		}
 	}
+	.files-in-set-table.smaller-version {
+		.title h6 {
+			margin: 0;
+		}
+	}
 }
 
 
@@ -814,15 +819,107 @@ $download-button-width : 100px;
 				margin-bottom: 0;
 			}
 		}
+		> .detail-pane-body {
+			overflow-x: hidden;
+		}
 		.information {
-			margin-top: 20px;
-			margin-bottom: 20px;
-			> h3 {
-				margin-top: 1px;
-				> pre {
-					margin-top: 2px;
+			margin-top: 12px;
+			padding-bottom: 3px;
+			padding-top: 0;
+			border-top: 1px solid #ccc;
+			
+			> hr {
+				margin-bottom: 0;
+			}
+
+			& + hr {
+				border-color: #ccc;
+			}
+
+
+			> .row > .box {
+				padding-top : 20px;
+				min-height: 64px;
+				> h3 {
+					margin-top: 1px;
+					margin-bottom : 0px;
+					> pre {
+						margin-top: 5px;
+					}
+				}
+				> h4 {
+					margin-top: 4px;
+					margin-bottom: 2px;
+				}
+				> h5 {
+					margin-top: 6px;
+					margin-bottom: 2px;
+				}
+				> .download-button {
+					margin-top: 6px;
+				}
+
+				&.buttons-container {
+					text-align: left;
+					@media screen and (min-width: $screen-sm-min){
+						text-align: right;
+					}
 				}
 			}
+
+			.description-box-container {
+				padding-top: 2px;
+			}
+
+			.file-title {
+
+				> h3.node-file-title {
+					overflow: hidden;
+				}
+
+				.download-button-container {
+					position: absolute;
+					right: 10px;
+					top: 40px;
+				}
+
+				.download-button-container.exists + h3.node-file-title {
+					@media screen and (max-width: $screen-md-max){
+						padding-right: 30px;
+					}
+				}
+			}
+
 		}
 	}
+}
+
+/** MetricsView **/
+
+.metrics-view {
+
+	.metrics-view-item {
+
+		.inner {
+			padding-top: 9px;
+			padding-bottom: 9px;
+
+			border-bottom: 1px solid #f4f4f4;
+
+			.icon-exclamation-circle {
+				color : $audit-color-error;
+			}
+			.icon-warning {
+				color : $audit-color-warning;
+			}
+			.icon-check {
+				color : green;
+			}
+		}
+
+		h1,h2,h3,h4,h5,h6 {
+			margin: 0;
+		}
+	}
+
 }

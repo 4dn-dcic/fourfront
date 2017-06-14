@@ -1,14 +1,31 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var url = require('url');
-var querystring = require('querystring');
-var { console, DateUtility, Filters } = require('./../../util');
-var { FlexibleDescriptionBox } = require('./../../experiment-common');
-import { getItemType, getBaseItemType, getTitleForType, getSchemaForItemType } from './../item';
+import React from 'react';
+import _ from 'underscore';
+import url from 'url';
+import queryString from 'querystring';
+import { console, DateUtility, Filters, Schemas } from './../../util';
+import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 
-
+/**
+ * Object containing components required to build header shown on Item pages.
+ * Includes title, description, date created, status, action buttons, [...].
+ *
+ * Use by combining other components together within an ItemHeader.Wrapper component. See example.
+ *
+ * @module
+ * @type {Object}
+ * @example
+ * <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
+ *     <ItemHeader.TopRow>
+ *         <span data-tip="Experiment Type" className="inline-block">
+ *             { this.props.context.experimentset_type }
+ *         </span>
+ *     </ItemHeader.TopRow>
+ *     <ItemHeader.MiddleRow />
+ *     <ItemHeader.BottomRow />
+ * </ItemHeader.Wrapper>
+ */
 
 
 /**************
@@ -83,7 +100,7 @@ export class TopRow extends React.Component {
         if (!this.props.href) return null;
 
         var urlParts = url.parse(this.props.href, true);
-        urlParts.search = '?' + querystring.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
+        urlParts.search = '?' + queryString.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
         var viewUrl = url.format(urlParts);
         return (
             <div className="expset-indicator right view-ajax-button">
@@ -93,11 +110,11 @@ export class TopRow extends React.Component {
                     target="_blank"
                     data-tip="Open raw JSON in new window"
                     onClick={(e)=>{
-                    if (window && window.open){
-                        e.preventDefault();
-                        window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');
-                    }
-                }}>
+                        if (window && window.open){
+                            e.preventDefault();
+                            window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');
+                        }
+                    }}>
                     View JSON
                 </a>
             </div>
@@ -128,11 +145,11 @@ export class TopRow extends React.Component {
      * @instance
      */
     baseItemTypeInfo(){
-        var baseItemType = getBaseItemType(this.props.context);
-        var itemType = getItemType(this.props.context);
+        var baseItemType = Schemas.getBaseItemType(this.props.context);
+        var itemType = Schemas.getItemType(this.props.context);
         if (itemType === baseItemType) return null;
 
-        return getSchemaForItemType(
+        return Schemas.getSchemaForItemType(
             baseItemType,
             this.props.schemas || null
         );
@@ -178,7 +195,7 @@ export class TopRow extends React.Component {
      * @returns {Element} Div element with .row Bootstrap class and items in top-right section.
      */
     render(){
-        var typeInfo = getSchemaForItemType(getItemType(this.props.context), this.props.schemas || null);
+        var typeInfo = Schemas.getSchemaForItemType(Schemas.getItemType(this.props.context), this.props.schemas || null);
         var accessionTooltip = "Accession";
         if (typeInfo && typeInfo.properties.accession && typeInfo.properties.accession.description){
             accessionTooltip += ': ' + typeInfo.properties.accession.description;
@@ -189,13 +206,13 @@ export class TopRow extends React.Component {
         //}
         return (
             <div className="row clearfix top-row">
-                <h5 className="col-sm-6 item-label-title">
+                <h5 className="col-sm-5 item-label-title">
                     { this.typeInfoLabel(this.props.typeInfo || null) }
                     { this.props.context.accession ?
                         <span className="accession inline-block" data-tip={accessionTooltip}>{ this.props.context.accession }</span>
                     : null }
                 </h5>
-                <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
+                <h5 className="col-sm-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
                     { this.viewJSONButton() }
                     { this.itemActions() }
                     { this.wrapChildren() }
@@ -308,7 +325,7 @@ export class Wrapper extends React.Component {
                 return React.cloneElement(child, {
                     context : this.props.context,
                     href : this.props.href,
-                    schemas : this.props.schemas || (Filters.getSchemas && Filters.getSchemas()) || null
+                    schemas : this.props.schemas || (Schemas.get && Schemas.get()) || null
                 }, child.props.children);
             }
         });

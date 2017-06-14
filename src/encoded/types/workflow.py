@@ -1,5 +1,6 @@
 """The type file for the workflow related items.
 """
+from itertools import chain
 from snovault import (
     calculated_property,
     collection,
@@ -26,6 +27,22 @@ class Workflow(Item):
                 'arguments',
                 'analysis_steps',
                 'arguments.argument_mapping']
+    rev = {
+        'workflow_runs': ('WorkflowRun', 'workflow'),
+    }
+
+    @calculated_property(schema={
+        "title": "Workflow Runs",
+        "description": "All runs of this workflow definition.",
+        "type": "array",
+        "items": {
+            "title": "Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_runs(self, request):
+        return self.rev_link_atids(request, "workflow_runs")
 
 
     @calculated_property(schema={
@@ -182,23 +199,62 @@ class WorkflowRun(Item):
 
         fileCache = {}
 
-        def handleSourceTargetFile(inputOrOutput, sourceOrTarget, ownProperty):
+        def handleSourceTargetFile(inputOrOutput, sourceOrTarget, runParams):
             '''
             Add file metadata in form of 'run_data' : { 'file' : { '@id', 'display_title', etc. } } to AnalysisStep dict's 'input' or 'output' list item dict
             if one of own input or output files' workflow_argument_name matches the AnalysisStep dict's input or output's sourceOrTarget.workflow_argument_name.
             '''
             if 'Workflow' in sourceOrTarget.get('type', ''):
-                for file in self.properties.get(ownProperty,[]):
-                    if sourceOrTarget['name'] == file.get('workflow_argument_name'):
-                        fileUUID = file.get('value')
+                for param in runParams:
+                    if sourceOrTarget['name'] == param.get('workflow_argument_name'):
+                        fileUUID = param.get('value')
                         if fileUUID:
                             fileData = fileCache.get(fileUUID)
                             if not fileData:
-                                fileData = request.embed('/' + file.get('value'), '@@embedded')
-                                fileCache[file.get('value')] = fileData
-                            inputOrOutput['run_data'] = { "file" : fileData }
+                                fileData = request.embed('/' + param.get('value'), '@@embedded')
+                                fileCache[param.get('value')] = fileData
+                            inputOrOutput['run_data'] = { "file" : fileData, "type" : param.get('type') }
                             return True
             return False
+
+
+        def mergeArgumentsWithSameArgumentName(args):
+            seen_argument_names = {}
+            resultArgs = []
+            for arg in args:
+                argName = arg.get('workflow_argument_name')
+                if argName:
+                    priorArgument = seen_argument_names.get(argName)
+                    if priorArgument:
+                        priorArgument.update(arg)
+                    else:
+                        resultArgs.append(arg)
+                        seen_argument_names[argName] = arg
+            return resultArgs
+
+
+        # Metrics will overwrite output_files in case of duplicate keys.
+        combined_outputs = mergeArgumentsWithSameArgumentName(
+            chain(
+                map(
+                    lambda x: dict(x, **{ "type" : "output" }),
+                    self.properties.get('output_files',[])
+                ),
+                map(
+                    lambda x: dict(x, **{ "type" : "quality_metric" }),
+                    self.properties.get('output_quality_metrics',[])
+                )
+            )
+        )
+
+        input_files = mergeArgumentsWithSameArgumentName(
+            map(
+                lambda x: dict(x, **{ "type" : "input" }),
+                self.properties.get('input_files',[])
+            )
+        )
+
+        input_params = mergeArgumentsWithSameArgumentName(self.properties.get('parameters',[]))
 
 
         for step in analysis_steps:
@@ -207,20 +263,21 @@ class WorkflowRun(Item):
             for output in step['outputs']:
                 found = False
                 for outputTarget in output.get('target',[]):
-                    found = handleSourceTargetFile(output, outputTarget, 'output_files')
+                    found = handleSourceTargetFile(output, outputTarget, combined_outputs)
                     if found:
                         break
 
             for input in step['inputs']:
                 found = False
                 for inputSource in input.get('source',[]):
-                    found = handleSourceTargetFile(input, inputSource, 'input_files')
+                    found = handleSourceTargetFile(input, inputSource, input_files)
                     # If we don't have an input file yet for this workflow input, see if have a param
                     if not found and 'Workflow' in inputSource.get('type',''):
-                        for param in self.properties.get('parameters',[]):
+                        for param in input_params:
                             if inputSource['name'] == param.get('workflow_argument_name'):
                                 input['run_data'] = {
-                                    "value" : param.get('value')
+                                    "value" : param.get('value'),
+                                    "type"  : "parameter"
                                 }
                                 found = True
                                 break

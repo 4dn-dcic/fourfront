@@ -1175,6 +1175,7 @@ $workflow-step-node-lineheight: 18px;
                         position: absolute;
                         transition: top .5s ease-out, left .5s ease-out, width .5s ease-out;
                         transform: translate3d(0,0,0);
+                        cursor: pointer;
 
                         > .inner {
                             background-color: #ddd;
@@ -1187,6 +1188,28 @@ $workflow-step-node-lineheight: 18px;
                             i.icon.icon-fw {
                                 margin-right: 5px;
                                 margin-left: 1px;
+                            }
+
+                            .above-node-title {
+                                pointer-events: none;
+                                position: absolute;
+                                left : 0px;
+                                top : -16px;
+                                transform: translate3d(0px,0px,0);
+                                transition: opacity .25s ease-out, transform .33s ease-out;
+                                opacity: 1;
+                                font-size: 75%;
+                                line-height: 12px;
+                            }
+                        }
+
+                        &[data-node-selected],
+                        &:hover {
+                            > .inner {
+                                .above-node-title {
+                                    transform: translate3d(0px,-6px,0);
+                                    //opacity: 0.66;
+                                }
                             }
                         }
 

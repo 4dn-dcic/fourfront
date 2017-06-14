@@ -13,10 +13,10 @@ var ReactTooltip = require('react-tooltip');
 
 function defaultStyle(data, maxValue = 10) {
     var val = (data && data.value) || data;
-	return {
-		backgroundColor: 'rgba(65, 65, 138, '+ val/maxValue + ')',
-		border: val >= 1 ? 'none' : '1px dotted #eee'
-	}
+    return {
+        backgroundColor: 'rgba(65, 65, 138, '+ val/maxValue + ')',
+        border: val >= 1 ? 'none' : '1px dotted #eee'
+    };
 }
 
 
@@ -44,12 +44,18 @@ class Label extends React.Component {
     render(){
         var displayLabel = this.props.label;
         var heightIncrClass = (' height-at-least-' + this.heightIncrement());
+        var registerPostUpdateFxn = this.props.registerPostUpdateFxn;
         if (Array.isArray(displayLabel)){
             displayLabel = (
                 <div className={"label-container" + heightIncrClass}>
                     { displayLabel.map(function(labelPart, i){
-                        return <div key={i} className={"part-" + (i + 1)}>{ labelPart }</div>;
-                    }) }
+                        return <div key={i} className={"part-" + (i + 1)} ref={function(r){
+                            if (!r) return null;
+                            registerPostUpdateFxn(function(){
+                                r.style.marginTop = Math.max(layout.verticalCenterOffset(r, 2), 0) + 'px';
+                            });
+                        }}>{ labelPart }</div>;
+                    }).reverse() }
                 </div>
             );
         }
@@ -60,7 +66,9 @@ class Label extends React.Component {
             >
                 <div className="inner" ref={function(r){
                     if (!r) return null;
-                    r.style.top = Math.max(layout.verticalCenterOffset(r, 2) - 3, 0) + 'px';
+                    registerPostUpdateFxn(function(){
+                        r.style.top = Math.max(layout.verticalCenterOffset(r, 2) - 3, 0) + 'px';
+                    });
                 }}>
                     { displayLabel }
                 </div>
@@ -94,6 +102,7 @@ class YAxis extends React.Component {
                         key={label || i}
                         className="y-axis-matrix-label"
                         height={this.props.cellSize}
+                        registerPostUpdateFxn={this.props.registerPostUpdateFxn}
                     />
                 )
             }
@@ -112,12 +121,13 @@ class XAxis extends React.Component {
 
     render(){
 
-        var translateVector = Math.sqrt(this.props.cellSize * this.props.cellSize * 2) / 2;
+        var translateVector = Math.sqrt(this.props.cellSize * this.props.cellSize * 2) / 2.25;
 
         // These will be drawn at same dimension as Y Axis labels, and rotated (hence width=this.props.height on Label).
         return (
             <div className="matrix-x-axis clearfix" style={{
                 height : Math.sqrt((this.props.height * this.props.height) / 2),
+                width : this.props.gridWidth + this.props.leftOffset
             }}>
                 <div className="prefix" style={{ width : this.props.leftOffset, height : '100%' }}>
                     { this.props.prefixContent }
@@ -142,6 +152,7 @@ class XAxis extends React.Component {
                             className="x-axis-matrix-label"
                             height={this.props.cellSize}
                             width={this.props.height}
+                            registerPostUpdateFxn={this.props.registerPostUpdateFxn}
                             style={{
                                 transform : vizUtil.style.rotate3d(-45) + ' ' + vizUtil.style.translate3d(translateVector, translateVector)
                             }}
@@ -167,30 +178,62 @@ export class MatrixContainer extends React.Component {
         'defaultStyleFxn' : defaultStyle,
         'fitTilesToWidth' : true,
         'cellSize' : null,
-        'yLabelsWidth' : 200,
+        'yLabelsWidth' : 240,
         'xLabelsHeight' : 200,
-        'maxCellSize' : 64,
+        'maxCellSize' : 48,
         'minCellSize' : 20
     }
 
     constructor(props){
-		super(props);
-		this.render = this.render.bind(this);
-		this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.gridWidth = this.gridWidth.bind(this);
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.registerPostUpdateFxn = this.registerPostUpdateFxn.bind(this);
+        this.runPostUpdateFxns = this.runPostUpdateFxns.bind(this);
+        this.maxGridWidth = this.maxGridWidth.bind(this);
         this.cellSize = this.cellSize.bind(this);
         this.cellStyle = this.cellStyle.bind(this);
         this.body = this.body.bind(this);
+        this.render = this.render.bind(this);
     }
 
-	componentDidUpdate(pastProps, pastState){
-		if (pastProps.mounted === false && this.props.mounted === true){
+    componentDidMount(){
+        this.runPostUpdateFxns();
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (pastProps.mounted === false && this.props.mounted === true){
             ReactTooltip.rebuild();
+        }
+        this.runPostUpdateFxns();
+    }
+
+    /**
+     *  These 2 functions are for running batched 'ref' functions from child components/elements.
+     * 
+     * @param {function} fxn - Function to register.
+     */
+    registerPostUpdateFxn(fxn){
+        if (typeof fxn === 'function'){
+            this.postUpdateFxns.push(fxn);
         }
     }
 
+    runPostUpdateFxns(){
+        if (!Array.isArray(this.postUpdateFxns)) return null;
+        vizUtil.requestAnimationFrame(()=>{
+            this.postUpdateFxns.forEach(function(fxn){
+                fxn();
+            });
+        });
+    }
+
+    maxGridWidth(){
+        return Math.floor((this.props.width || 0) - this.props.yLabelsWidth);
+    }
+
     gridWidth(){
-        return (this.props.width || 0) - this.props.yLabelsWidth;
+        return this.props.xAxisLabels.length * (this.cellSize() + 2);
     }
 
     cellSize(){
@@ -200,7 +243,7 @@ export class MatrixContainer extends React.Component {
         var numCols = this.props.grid[0].length;
         var cellSize = Math.max(
             Math.min(
-                Math.floor( this.gridWidth() / numCols ),
+                Math.floor( this.maxGridWidth() / numCols ),
                 this.props.maxCellSize
             ),
             this.props.minCellSize
@@ -222,6 +265,8 @@ export class MatrixContainer extends React.Component {
 
     body(){
         if (!this.props.mounted) return null;
+        var gridWidth = this.gridWidth(),
+            maxGridWidth = this.maxGridWidth();
         return (
             <div className="matrix-view-container clearfix">
                 <MatrixContainer.XAxis
@@ -232,10 +277,13 @@ export class MatrixContainer extends React.Component {
                     prefixContent={this.props.title ? <h4 className="matrix-title">{ this.props.title }</h4> : null}
                     yAxisTitle={this.props.yAxisTitle}
                     xAxisTitle={this.props.xAxisTitle}
+                    gridWidth={gridWidth}
+                    maxGridWidth={maxGridWidth}
+                    registerPostUpdateFxn={this.registerPostUpdateFxn}
                 />
-                <MatrixContainer.YAxis labels={this.props.yAxisLabels} width={this.props.yLabelsWidth} cellSize={this.cellSize()} />
-                <div className="matrix-grid-container" style={{ width : this.gridWidth() }}>
-                    <Matrix data={_.zip.apply(_, this.props.grid)} setStyle={this.cellStyle} />
+                <MatrixContainer.YAxis labels={this.props.yAxisLabels} width={this.props.yLabelsWidth} cellSize={this.cellSize()} registerPostUpdateFxn={this.registerPostUpdateFxn} />
+                <div className="matrix-grid-container" style={{ width : Math.min(maxGridWidth, gridWidth) }}>
+                    <Matrix data={_.zip.apply(_, this.props.grid)} setStyle={this.cellStyle} registerPostUpdateFxn={this.registerPostUpdateFxn} />
                 </div>
             </div>
         );
@@ -246,6 +294,7 @@ export class MatrixContainer extends React.Component {
             this.props.xLabelsHeight + 
             (this.props.grid.length * this.cellSize())
         );
+        this.postUpdateFxns = [];
         return (
             <Fade in={true} transitionAppear={true}>
 				<div className="matrix-view-container-wrapper" style={{ minHeight : totalHeight }}>
@@ -264,7 +313,7 @@ export default class MatrixView extends React.Component {
         return _.reduce(grid, function(mOuter, row){
             return Math.max(
                 _.reduce(row, function(mInner, cell){
-                    if (typeof cell[valueKey] !== 'number') return m;
+                    if (typeof cell[valueKey] !== 'number') return mInner;
                     return Math.max(mInner, cell[valueKey]);
                 }, 0),
                 mOuter
@@ -272,18 +321,18 @@ export default class MatrixView extends React.Component {
         }, 0);
     }
 
-	constructor(props){
-		super(props);
-		this.render = this.render.bind(this);
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.getContainerWidth = this.getContainerWidth.bind(this);
         this.handleResize = _.debounce(this.handleResize.bind(this), 300);
         this.state = {
-    		mounted : false,
+            mounted : false,
             containerWidth : null
-		}
-	}
+        };
+    }
 
     getContainerWidth(){
         if (this.props.width) return this.props.width;
@@ -308,8 +357,8 @@ export default class MatrixView extends React.Component {
                 window.addEventListener('resize', this.handleResize);
             }
         }
-		this.setState(newState);
-	}
+        this.setState(newState);
+    }
 
     componentWillUnmount(){
         if (!isServerSide() && !this.props.width){
@@ -318,7 +367,7 @@ export default class MatrixView extends React.Component {
     }
 
     render(grid, xAxisLabels, yAxisLabels, xAxisTitle, yAxisTitle, title, defaultStyle = defaultStyle) {
-		return (
+        return (
             <div ref="matrixWrapper">
                 <MatrixContainer
                     grid={grid}
@@ -333,7 +382,7 @@ export default class MatrixView extends React.Component {
                     maxValue={MatrixView.findGreatestValueInGrid(grid)}
                 />
             </div>
-		);
-	}
+        );
+    }
 
 }

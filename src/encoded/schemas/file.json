@@ -16,6 +16,7 @@
             "title": "File Name",
             "description": "The local file name used at time of submission. Must be alphanumeric, with the exception of the following special characters: '+=,.@-_'",
             "s3Upload": true,
+            "ff_flag": "second round",
             "type": "string",
             "pattern": "^[\\w+=,.@-]*$",
             "exclude_from": ["submit4dn"],
@@ -28,23 +29,7 @@
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "type": "string",
-            "enum": [
-                "reads",
-                "read pairs",
-                "intensity values",
-                "alignments",
-                "unfiltered alignments",
-                "contact matrix",
-                "normalized contact matrix",
-                "long range chromatin interactions",
-                "peaks",
-                "genome reference",
-                "genome index",
-                "blacklisted regions",
-                "repeats",
-                "oligonucleotides"
-            ]
+            "type": "string"
         },
         "file_classification": {
             "title": "General Classification",
@@ -74,8 +59,8 @@
             "description": "The md5sum of the file being transferred.",
             "comment": "This can vary for files of same content gzipped at different times",
             "type": "string",
-            "exclude_from": ["submit4dn", "FF-calculate"],
-            "ff_clear":"edit",
+            "exclude_from": ["submit4dn"],
+            "ff_flag":"clear edit",
             "format": "hex"
         },
         "content_md5sum": {
@@ -84,7 +69,8 @@
             "comment": "This is only relavant for gzipped files.",
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"],
-            "format": "hex"
+            "format": "hex",
+			"uniqueKey": "file:content_md5sum"
         },
         "file_size": {
             "title": "File Size",
@@ -95,6 +81,7 @@
         "related_files": {
             "title": "Related Files",
             "description": "Files related to this one",
+            "ff_flag": "second round",
             "type": "array",
             "items": {
                 "title": "Related File",

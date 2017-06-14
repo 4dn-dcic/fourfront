@@ -23,7 +23,6 @@ def tier1_cell_culture(testapp, image, lab, award):
     item = {
         'culture_start_date': '2016-01-01',
         'culture_duration': 2,
-        'culture_duration_units': 'days',
         'passage_number': 1,
         'morphology_image': image['@id'],
         'award': award['@id'],

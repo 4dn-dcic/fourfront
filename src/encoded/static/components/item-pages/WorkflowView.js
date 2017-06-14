@@ -1,15 +1,61 @@
 'use strict';
 
-var React = require('react');
-var globals = require('./../globals');
-var _ = require('underscore');
-var { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+import React from 'react';
+import { itemClass, panel_views } from './../globals';
+import _ from 'underscore';
+import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
-var { console, object, DateUtility, Filters, isServerSide } = require('./../util');
-import { Graph, parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-var { DropdownButton, MenuItem } = require('react-bootstrap');
+import { console, object, DateUtility, Schemas, isServerSide, navigate } from './../util';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { DropdownButton, MenuItem } from 'react-bootstrap';
 
+
+/**
+ * Pass this to props.onNodeClick for Graph.
+ * 
+ * @export
+ * @param {Object} node - Node clicked on.
+ * @param {Object|null} selectedNode - Node currently selected, if any.
+ * @param {MouseEvent} evt - onClick MouseEvent.
+ */
+export function onItemPageNodeClick(node, selectedNode, evt){
+    if (node !== selectedNode){
+        navigate('#' + (node.id || node.name), { inPlace: true, skipRequest : true });
+    } else {
+        navigate('#', { inPlace: true, skipRequest : true });
+    }
+}
+
+export function commonGraphPropsFromProps(props){
+    return {
+        'href'        : props.href,
+        'onNodeClick' : onItemPageNodeClick,
+        'detailPane'  : <WorkflowDetailPane schemas={props.schemas} />,
+        'nodeTitle'   : function(node, canBeJSX = false){
+            if (
+                node.type === 'step' && node.meta.uuid &&
+                Array.isArray(node.meta.analysis_step_types) &&
+                node.meta.analysis_step_types.length > 0
+            ){
+                var purposes = node.meta.analysis_step_types.map(Schemas.Term.capitalize).join(', ');
+                if (canBeJSX){
+                    return (
+                        <div className="pull-right">
+                            <div className="text-ellipsis-container above-node-title" style={{ maxWidth : Graph.defaultProps.columnWidth }}>
+                                { purposes }
+                            </div>
+                            <div className="text-ellipsis-container" style={{ width : Graph.defaultProps.columnWidth - 40 }}>
+                                { node.title || node.name }
+                            </div>
+                        </div>
+                    );
+                }
+            }
+            return node.title || node.name;
+        }
+    };
+}
 
 
 /**
@@ -57,12 +103,12 @@ export class WorkflowView extends React.Component {
     render() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
-        var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
+        var ic = itemClass(this.props.context, 'view-detail item-page-container');
 
         return (
-            <div className={itemClass}>
+            <div className={ic}>
 
-                <ItemPageTitle context={context} />
+                <ItemPageTitle context={context} schemas={schemas} />
                 <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
                     <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
                     <ItemHeader.MiddleRow />
@@ -90,7 +136,7 @@ export class WorkflowView extends React.Component {
 }
 
 class GraphSection extends React.Component {
-
+/*
     static parseCWLToAnalysisSteps(cwlJSON){
 
         var stepInputNamesEncountered = {};
@@ -136,58 +182,58 @@ class GraphSection extends React.Component {
 
         return cwlJSON.steps.map(function(step, i){ // Each step will be a node.
 
-                return _.extend(
+            return _.extend(
                     step, 
-                    {
-                        'display_title' : step.id.replace('#',''),
-                        'uuid' : step.id,
-                        'inputs' : step.inputs.map(function(stepInput){
-                            return getFullStepInput(stepInput, step);
-                        }).filter(function(x){ return !!x; }),
-                        'outputs' : step.outputs.map(function(stepOutput){
-                            var outputID = stepOutput.id.replace(step.id + '.', '');
-                            var fullStepOutput = _.find(step.run.outputs, function(runOutput){
-                                if (outputID === runOutput.id.replace('#', '')) return true;
-                                return false;
-                            });
-                            if (fullStepOutput){
-                                stepOutput = _.extend({}, stepOutput, _.omit(fullStepOutput, 'id'));
-                            }
+                {
+                    'display_title' : step.id.replace('#',''),
+                    'uuid' : step.id,
+                    'inputs' : step.inputs.map(function(stepInput){
+                        return getFullStepInput(stepInput, step);
+                    }).filter(function(x){ return !!x; }),
+                    'outputs' : step.outputs.map(function(stepOutput){
+                        var outputID = stepOutput.id.replace(step.id + '.', '');
+                        var fullStepOutput = _.find(step.run.outputs, function(runOutput){
+                            if (outputID === runOutput.id.replace('#', '')) return true;
+                            return false;
+                        });
+                        if (fullStepOutput){
+                            stepOutput = _.extend({}, stepOutput, _.omit(fullStepOutput, 'id'));
+                        }
 
-                            var finalOutput = _.find(cwlJSON.outputs, function(cwlOutput){
-                                if (outputID === cwlOutput.id.replace('#', '')) return true;
-                                return false;
-                            });
+                        var finalOutput = _.find(cwlJSON.outputs, function(cwlOutput){
+                            if (outputID === cwlOutput.id.replace('#', '')) return true;
+                            return false;
+                        });
 
-                            if (finalOutput){
-                                stepOutput = _.extend(stepOutput, _.omit(finalOutput, 'id'));
-                            }
-                            if (!stepOutput.name) stepOutput.name = outputID;
-                            if (!stepOutput.target){
-                                if (stepOutput.source) {
-                                    stepOutput.target = stepOutput.source.map(function(s){
-                                        return {
-                                            'name' : s,
-                                            'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
-                                        };
-                                    });
-                                } else {
-                                    stepOutput.target = [{
-                                        'name' : stepOutput.id,
+                        if (finalOutput){
+                            stepOutput = _.extend(stepOutput, _.omit(finalOutput, 'id'));
+                        }
+                        if (!stepOutput.name) stepOutput.name = outputID;
+                        if (!stepOutput.target){
+                            if (stepOutput.source) {
+                                stepOutput.target = stepOutput.source.map(function(s){
+                                    return {
+                                        'name' : s,
                                         'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
-                                    }]
-                                }
+                                    };
+                                });
+                            } else {
+                                stepOutput.target = [{
+                                    'name' : stepOutput.id,
+                                    'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
+                                }];
                             }
-                            console.log(stepOutput);
-                            return stepOutput;
-                        })
-                    }
+                        }
+                        console.log(stepOutput);
+                        return stepOutput;
+                    })
+                }
                 );
 
 
         });
     }
-
+*/
     static isCwlDataValid(cwlJSON){
         if (!Array.isArray(cwlJSON.steps)) return false;
         if (cwlJSON.steps.length === 0) return false;
@@ -199,26 +245,30 @@ class GraphSection extends React.Component {
         return true;
     }
 
+    static cwlDataExists(props){
+        return props.context && props.context.cwl_data && GraphSection.isCwlDataValid(props.context.cwl_data);
+    }
+
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.cwlDataExists = this.cwlDataExists.bind(this);
+        this.commonGraphProps = this.commonGraphProps.bind(this);
         this.cwlGraph = this.cwlGraph.bind(this);
         this.basicGraph = this.basicGraph.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
         this.dropDownMenu = this.dropDownMenu.bind(this);
         this.body = this.body.bind(this);
+        this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail'
-        }
+        };
     }
 
-    cwlDataExists(props = this.props){
-        return props.context && props.context.cwl_data && GraphSection.isCwlDataValid(props.context.cwl_data);
+    commonGraphProps(){
+        return commonGraphPropsFromProps(this.props);
     }
 
     cwlGraph(){
-        if (!this.cwlDataExists()) return (
+        if (!GraphSection.cwlDataExists(this.props)) return (
             <div>
                 <h4 className="text-400"><em>No graphable data.</em></h4>
             </div>
@@ -228,10 +278,9 @@ class GraphSection extends React.Component {
         );
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
-                href={this.props.href}
-                schemas={this.props.schemas}
             />
         );
     }
@@ -241,13 +290,12 @@ class GraphSection extends React.Component {
         var graphData = parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
-                href={this.props.href}
-                schemas={this.props.schemas}
             />
         );
     }
@@ -257,10 +305,9 @@ class GraphSection extends React.Component {
         var graphData = parseAnalysisSteps(this.props.context.analysis_steps);
         return (
             <Graph
+                { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
-                href={this.props.href}
-                schemas={this.props.schemas}
             />
         );
     }
@@ -289,7 +336,7 @@ class GraphSection extends React.Component {
             </MenuItem>
         );
 
-        var cwl = this.cwlDataExists() ? (
+        var cwl = GraphSection.cwlDataExists(this.props) ? (
             <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>
                 Common Workflow Language (CWL)
             </MenuItem>
@@ -335,4 +382,4 @@ class GraphSection extends React.Component {
 }
 
 
-globals.panel_views.register(WorkflowView, 'Workflow');
+panel_views.register(WorkflowView, 'Workflow');

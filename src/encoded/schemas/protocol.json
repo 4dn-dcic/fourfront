@@ -4,7 +4,7 @@
     "id": "/profiles/protocol.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
+    "required": ["award", "lab", "protocol_type"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -28,7 +28,7 @@
             "default": ""
         },
         "protocol_type": {
-            "title": "Type",
+            "title": "Protocol Type",
             "description": "The category that best describes the protocol.",
             "type": "string",
             "enum": [
