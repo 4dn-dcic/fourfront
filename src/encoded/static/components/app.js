@@ -1138,8 +1138,8 @@ export default class App extends React.Component {
                         <SubmissionView
                             {...commonContentViewProps}
                             setIsSubmitting={this.setIsSubmitting}
-                            edit={actionList[0] === 'edit'}
                             create={actionList[0] === 'create'}
+                            edit={actionList[0] === 'edit'}
                         />
                     );
                     title = getTitleStringFromContext(context);

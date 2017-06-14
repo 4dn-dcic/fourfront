@@ -154,16 +154,16 @@ class StackedBlockName extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
     }
-
+    /*
     shouldComponentUpdate(nextProps){
         if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
         return false;
     }
-
+    */
     getColumnWidthStyle(){
         if (this.props.colWidthStyles && typeof this.props.colWidthStyles[this.props.columnClass] !== 'undefined'){
             return this.props.colWidthStyles[this.props.columnClass];
@@ -313,14 +313,14 @@ class StackedBlockList extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
         if (Array.isArray(this.props.children) && this.props.children.length > this.props.collapseLimit){
             this.state = { 'collapsed' : true };
         }
     }
-
+    /*
     shouldComponentUpdate(nextProps, nextState){
         if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
         if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
@@ -328,6 +328,7 @@ class StackedBlockList extends React.Component {
         if (this.state.collapsed !== nextState.collapsed) return true;
         return false;
     }
+    */
 
     adjustedChildren(){
         return React.Children.map(this.props.children, (c)=>{
@@ -624,15 +625,7 @@ export default class ExperimentsTable extends React.Component {
         experimentArray : PropTypes.array,
         passExperiments : PropTypes.instanceOf(Set),
         expSetFilters : PropTypes.object,
-        selectedFiles : PropTypes.instanceOf(Set),
-        parentController : function(props, propName, componentName){
-            // Custom validation
-            if (props[propName] &&
-                (!(props[propName].state.selectedFiles instanceof Set))
-            ){
-                return new Error('parentController must be a React Component passed in as "this", with "selectedFiles" (Set) and "checked" (bool) in its state.');
-            }
-        },
+        selectedFiles : PropTypes.object.isRequired,
         keepCounts : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
     }
 
@@ -657,8 +650,7 @@ export default class ExperimentsTable extends React.Component {
         this.customColumnHeaders = this.customColumnHeaders.bind(this);
         this.columnHeaders = this.columnHeaders.bind(this);
         this.colWidthStyles = this.colWidthStyles.bind(this);
-        this.selectedFiles = this.selectedFiles.bind(this);
-        this.handleFileUpdate = this.handleFileUpdate.bind(this);
+        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
         this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
         this.renderRootStackedBlockListOfBiosamplesWithExperiments = this.renderRootStackedBlockListOfBiosamplesWithExperiments.bind(this);
@@ -670,15 +662,9 @@ export default class ExperimentsTable extends React.Component {
             oddExpRow : true
         };
         var initialState = {
-            checked: true,
             columnWidths : null, // set on componentDidMount via updateColumnWidths
             mounted : false
         };
-        if (!(
-            props.parentController &&
-            props.parentController.state &&
-            props.parentController.state.selectedFiles
-        )) initialState.selectedFiles = new Set();
         this.state = initialState;
     }
 
@@ -794,41 +780,18 @@ export default class ExperimentsTable extends React.Component {
         return colWidthStyles;
     }
 
-    selectedFiles(){
-        //if (this.props.selectedFiles) {
-        //    return this.props.selectedFiles;
-        if (this.props.parentController && this.props.parentController.state.selectedFiles){
-            return this.props.parentController.state.selectedFiles;
-        } else if (this.state.selectedFiles){
-            return this.state.selectedFiles;
-        }
-        return null;
-    }
+    handleFileCheckboxChange(uuid, fileObj){
+        if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
 
-    handleFileUpdate(uuid, add=true){
-
-        var selectedFiles = this.selectedFiles();
-        if (!selectedFiles) return null;
-
-        if(add){
-            if(!selectedFiles.has(uuid)){
-                selectedFiles.add(uuid);
+        if (typeof this.props.selectedFiles[uuid] === 'undefined') {
+            var memo = null;
+            if (fileObj && Array.isArray(fileObj.related_files)) {
+                memo = { 'related_files' : fileObj.related_files };
             }
-        } else if (selectedFiles.has(uuid)) {
-            selectedFiles.delete(uuid);
-        }
-
-        if (!this.props.parentController){
-            // Set state on self if no parent controller
-            this.setState({
-                'selectedFiles': selectedFiles
-            });
+            this.props.selectFile(uuid, memo);
         } else {
-            this.props.parentController.setState({
-                'selectedFiles': selectedFiles
-            });
+            this.props.unselectFile(uuid);
         }
-
     }
 
     renderExperimentBlock(exp,i){
@@ -866,10 +829,10 @@ export default class ExperimentsTable extends React.Component {
                         exp.file_pairs.map((filePair,i) =>
                             <FilePairBlock
                                 key={i}
-                                selectedFiles={this.selectedFiles()}
+                                selectedFiles={this.props.selectedFiles}
                                 files={filePair}
                                 columnHeaders={columnHeaders}
-                                handleFileUpdate={this.handleFileUpdate}
+                                handleFileCheckboxChange={this.handleFileCheckboxChange}
                                 label={ exp.file_pairs.length > 1 ?
                                     { title : "Pair " + (i + 1) } : { title : "Pair" }
                                 }
@@ -891,8 +854,8 @@ export default class ExperimentsTable extends React.Component {
                                             key={file['@id']}
                                             file={file}
                                             columnHeaders={columnHeaders}
-                                            handleFileUpdate={this.handleFileUpdate}
-                                            selectedFiles={this.selectedFiles()}
+                                            handleFileCheckboxChange={this.handleFileCheckboxChange}
+                                            selectedFiles={this.props.selectedFiles}
                                             hideNameOnHover={false}
                                             isSingleItem={exp.files.length < 2 ? true : false}
                                         />
@@ -1078,37 +1041,21 @@ export default class ExperimentsTable extends React.Component {
 class FilePairBlock extends React.Component {
 
     static propTypes = {
-        selectedFiles : PropTypes.instanceOf(Set),
-        handleFileUpdate : PropTypes.func
+        selectedFiles : PropTypes.object,
+        handleFileCheckboxChange : PropTypes.func
     }
 
     constructor(props){
         super(props);
-        this.updateFileChecked = this.updateFileChecked.bind(this);
         this.isChecked = this.isChecked.bind(this);
-        this.handleCheck = this.handleCheck.bind(this);
         this.renderFileEntryBlock = this.renderFileEntryBlock.bind(this);
         this.renderCheckBox = this.renderCheckBox.bind(this);
         this.render = this.render.bind(this);
     }
 
-    updateFileChecked(add=true){
-        if(
-            Array.isArray(this.props.files) &&
-            this.props.files[0].uuid &&
-            typeof this.props.handleFileUpdate === 'function'
-        ){
-            this.props.handleFileUpdate(this.props.files[0].uuid, add);
-        }
-    }
-
     isChecked(){
-        if (!Array.isArray(this.props.files) || !(this.props.selectedFiles instanceof Set) || !this.props.files[0].uuid) return null;
-        return this.props.selectedFiles.has(this.props.files[0].uuid);
-    }
-
-    handleCheck() {
-        this.updateFileChecked(!this.isChecked());
+        if (!Array.isArray(this.props.files) || !this.props.selectedFiles || !this.props.files[0].uuid) return null;
+        return !!(this.props.selectedFiles[this.props.files[0].uuid]);
     }
 
     renderFileEntryBlock(file,i){
@@ -1136,7 +1083,7 @@ class FilePairBlock extends React.Component {
                 name="file-checkbox"
                 id={checked + "~" + true + "~" + this.props.files[0].file_format + "~" + this.props.files[0].uuid}
                 className='exp-table-checkbox'
-                onChange={this.handleCheck}
+                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, this.props.files[0].uuid, this.props.files[0])}
             />
         );
     }
@@ -1185,38 +1132,22 @@ class FilePairBlock extends React.Component {
 class FileEntryBlock extends React.Component {
 
     static propTypes = {
-        selectedFiles : PropTypes.instanceOf(Set),
-        handleFileUpdate : PropTypes.func
+        selectedFiles : PropTypes.object,
+        handleFileCheckboxChange : PropTypes.func
     }
 
     constructor(props){
         super(props);
-        this.updateFileChecked = this.updateFileChecked.bind(this);
         this.isChecked = this.isChecked.bind(this);
-        this.handleCheck = this.handleCheck.bind(this);
         this.filledFileRow = this.filledFileRow.bind(this);
         this.renderCheckBox = this.renderCheckBox.bind(this);
         this.renderName = this.renderName.bind(this);
         this.render = this.render.bind(this);
     }
 
-    updateFileChecked(add=true){
-        if(
-            this.props.file &&
-            this.props.file.uuid &&
-            typeof this.props.handleFileUpdate === 'function'
-        ){
-            this.props.handleFileUpdate(this.props.file.uuid, add);
-        }
-    }
-
     isChecked(){
-        if (!this.props.file || !this.props.file.uuid || !(this.props.selectedFiles instanceof Set)) return null;
-        return this.props.selectedFiles.has(this.props.file.uuid);
-    }
-
-    handleCheck() {
-        this.updateFileChecked(!this.isChecked());
+        if (!this.props.file || !this.props.file.uuid || !this.props.selectedFiles) return null;
+        return this.props.selectedFiles[this.props.file.uuid];
     }
 
     filledFileRow (file = this.props.file){
@@ -1272,7 +1203,7 @@ class FileEntryBlock extends React.Component {
                 name="file-checkbox"
                 id={checked + "~" + true + "~" + this.props.file.file_format + "~" + this.props.file.uuid}
                 className='exp-table-checkbox'
-                onChange={this.handleCheck}
+                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, this.props.file.uuid, this.props.file)}
             />
         );
     }
