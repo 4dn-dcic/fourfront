@@ -499,3 +499,11 @@ def test_calculated_publications_in_expt_w_repset_two_pubs_in_used(
     publications = response.json['publications_of_exp']
     for pub in publications:
         assert pub['uuid'] in pubuuids
+
+
+def test_calculated_no_of_expts_in_set_w_no_exps(empty_replicate_set):
+    assert 'number_of_experiments' not in empty_replicate_set
+
+
+def test_calculated_no_of_expts_in_set_w_2_exps(two_experiment_replicate_set):
+    assert two_experiment_replicate_set['number_of_experiments'] == 2
