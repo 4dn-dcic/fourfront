@@ -120,7 +120,7 @@ export const defaultColumnDefinitionMap = {
         }
     },
     'experiments_in_set' : {
-        'title' : 'Exps',
+        'title' : '# of Experiments',
         'widthMap' : {'lg' : 60, 'md' : 60, 'sm' : 50},
         'noSort' : true,
         'render' : function(result, columnDefinition, props, width){
@@ -129,7 +129,7 @@ export const defaultColumnDefinitionMap = {
         }
     },
     'experiments_in_set.experiment_type' : {
-        'title' : 'Exp Type',
+        'title' : 'Experiment Type',
         'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120}
     }
 };
@@ -811,9 +811,11 @@ class DimensioningContainer extends React.Component {
         if (nextProps.href !== this.props.href || !compareResultsByID(nextProps.results, this.props.results)){ // <-- the important check, covers different filters, sort, etc.
             this.setState({ 'results' : nextProps.results, 'openDetailPanes' : {} }, ()=>{
                 vizUtil.requestAnimationFrame(()=>{
-                    this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(this.props.columnDefinitions) });
+                    this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
                 });
             });
+        } else if (nextProps.columnDefinitions.length !== this.props.columnDefinitions.length){
+            this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
         }
     }
 

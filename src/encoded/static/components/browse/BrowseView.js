@@ -8,8 +8,9 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'querystring';
 import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
 import * as globals from './../globals';
-import { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
+import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import * as store from './../../store';
 import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 import ExperimentsTable from './../experiments-table';
@@ -148,6 +149,113 @@ export class ExperimentSetCheckBox extends React.Component {
 }
 
 
+
+class AboveTableControls extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.handleOpenToggle = _.throttle(this.handleOpenToggle.bind(this), 350);
+        this.renderPanel = this.renderPanel.bind(this);
+        this.rightButtons = this.rightButtons.bind(this);
+        this.state = {
+            'open' : false,
+            'reallyOpen' : false
+        };
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if (this.state.open && this.state.open !== prevState.open) ReactTooltip.rebuild();
+        console.log(this.state.open, prevState.open);
+    }
+
+    handleOpenToggle(value){
+        //console.log(e);
+        if (this.timeout){
+            clearTimeout(this.timeout);
+            delete this.timeout;
+        }
+        var state = { 'open' : value };
+        if (state.open){
+            state.reallyOpen = state.open;
+        } else {
+            this.timeout = setTimeout(()=>{
+                this.setState({ 'reallyOpen' : false });
+            }, 400);
+        }
+        this.setState(state);
+    }
+
+    handleLayoutToggle(){
+        // TODO
+    }
+
+    renderPanel(){
+        var { open, reallyOpen } = this.state;
+        if (open === 'customColumns' || reallyOpen === 'customColumns') {
+            return (
+                <Collapse in={!!(open)} transitionAppear>
+                    <CustomColumnSelector
+                        hiddenColumns={this.props.hiddenColumns}
+                        addHiddenColumn={this.props.addHiddenColumn}
+                        removeHiddenColumn={this.props.removeHiddenColumn}
+                        columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
+                            browseTableConstantColumnDefinitions,
+                            this.props.context.columns || {},
+                            {}, //this.props.columnDefinitionOverrides,
+                            this.props.constantHiddenColumns
+                        )}
+                    />
+                </Collapse>
+            );
+        }
+        return null;
+    }
+
+    rightButtons(){
+        return this.state.open === false ? (
+            <ButtonToolbar className="pull-right">
+            <ButtonGroup>
+                
+                <Button onClick={this.handleOpenToggle.bind(this, (!this.state.open && 'customColumns') || false)} data-tip="Change visible columns">
+                    <i className="icon icon-eye-slash icon-fw"></i>
+                </Button>
+
+                <Button onClick={this.handleLayoutToggle} data-tip="Expand table width">
+                    <i className="icon icon-arrows-alt icon-fw"></i>
+                </Button>
+                
+            </ButtonGroup>
+            </ButtonToolbar>
+        ) : (
+            <div className="pull-right">
+
+                Close &nbsp;
+                
+                <Button onClick={this.handleOpenToggle.bind(this, false)}>
+                    <i className="icon icon-angle-up icon-fw"></i>
+                </Button>
+                
+            </div>
+        );
+    }
+
+
+    render(){
+
+        return (
+            <div className="above-results-table-row">
+                <div className="clearfix">
+                    
+                        { this.rightButtons() }
+                </div>
+                { this.renderPanel() }
+            </div>
+        );
+    }
+}
+
+
 /**
  * Handles state for Browse results, including page & limit.
  * 
@@ -171,6 +279,12 @@ class ResultTableContainer extends React.Component {
         'columnDefinitionOverrides' : {
             'experiments_in_set.biosample.biosource_summary' : {
                 'title' : "Biosource"
+            },
+            'experiments_in_set.experiment_type' : {
+                'title' : "Exp Type"
+            },
+            'experiments_in_set' : {
+                'title' : "Exps"
             }
         },
         'constantHiddenColumns' : ['experimentset_type']
@@ -289,18 +403,7 @@ class ResultTableContainer extends React.Component {
                     null
                 }
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
-                    <div className="above-results-table-row clearfix">
-                        <CustomColumnSelector
-                            hiddenColumns={this.props.hiddenColumns}
-                            addHiddenColumn={this.props.addHiddenColumn}
-                            removeHiddenColumn={this.props.removeHiddenColumn}
-                            columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
-                                browseTableConstantColumnDefinitions,
-                                this.props.context.columns || {},
-                                this.colDefOverrides()
-                            )}
-                        />
-                    </div>
+                    <AboveTableControls {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'constantHiddenColumns', 'columns')} columnDefinitionOverrides={this.colDefOverrides()} />
                     <SearchResultTable
                         results={results}
                         columns={this.props.context.columns || {}}
