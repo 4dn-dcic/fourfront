@@ -117,7 +117,6 @@ export class CustomColumnSelector extends React.Component {
     }
 
     render(){
-        console.log(this.columnDefinitionsWithHiddenState());
         return (
             <div className={"visible-columns-selector-panel" + (this.props.className ? ' ' + this.props.className : '')}>
                 <div className="inner">

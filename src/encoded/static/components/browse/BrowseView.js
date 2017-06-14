@@ -1,7 +1,5 @@
 'use strict';
 
-// @flow
-
 import React from 'react';
 import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
@@ -14,7 +12,8 @@ import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Che
 import * as store from './../../store';
 import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 import ExperimentsTable from './../experiments-table';
-import { isServerSide, expFxn, Filters, navigate, object } from './../util';
+import { isServerSide, expFxn, Filters, navigate, object, layout } from './../util';
+import * as vizUtil from './../viz/utilities';
 import { FlexibleDescriptionBox } from './../item-pages/components';
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
@@ -152,25 +151,87 @@ export class ExperimentSetCheckBox extends React.Component {
 
 class AboveTableControls extends React.Component {
 
+    componentWillMount: Function;
+    componentWillUnmount: Function;
+    componentDidUpdate: Function;
+    handleWindowResize: Function;
+    handleOpenToggle: Function;
+    handleLayoutToggle: Function;
+    renderPanel: Function;
+
     constructor(props){
         super(props);
+        this.componentWillMount = this.componentWillMount.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.handleWindowResize = _.debounce(this.handleWindowResize.bind(this), 300);
         this.handleOpenToggle = _.throttle(this.handleOpenToggle.bind(this), 350);
+        this.handleLayoutToggle = _.throttle(this.handleLayoutToggle.bind(this), 350);
         this.renderPanel = this.renderPanel.bind(this);
         this.rightButtons = this.rightButtons.bind(this);
         this.state = {
             'open' : false,
-            'reallyOpen' : false
+            'reallyOpen' : false,
+            'layout' : 'normal'
         };
     }
 
+    componentWillMount(){
+        if (!isServerSide()){
+            window.addEventListener('resize', this.handleWindowResize);
+        }
+    }
+
+    componentWillUnmount(){
+        window.removeEventListener('resize', this.handleWindowResize);
+    }
+
     componentDidUpdate(prevProps, prevState){
-        if (this.state.open && this.state.open !== prevState.open) ReactTooltip.rebuild();
-        console.log(this.state.open, prevState.open);
+        if (this.state.open || prevState.open !== this.state.open) ReactTooltip.rebuild();
+        if (this.state.layout === 'wide' && prevState.layout !== 'wide') {
+            this.setWideLayout();
+        } else if (this.state.layout !== 'wide' && prevState.layout === 'wide'){
+            this.unsetWideLayout();
+        }
+    }
+
+    handleWindowResize(e){
+        if (isServerSide() || !document || !document.body) return null;
+        if (this.state.layout === 'wide'){
+            if ((document.body.offsetWidth || window.innerWidth) < 1200) {
+                this.setState({ 'layout' : 'normal' });
+            } else {
+                this.setWideLayout();
+            }
+        }
+    }
+
+    setWideLayout(){
+        if (isServerSide() || !document || !document.getElementsByClassName || !document.body) return null;
+        vizUtil.requestAnimationFrame(()=>{
+            var browsePageContainer = document.getElementsByClassName('browse-page-container')[0];
+            var bodyWidth = document.body.offsetWidth || window.innerWidth;
+            if (bodyWidth < 1200) {
+                this.handleLayoutToggle(); // Cancel
+                throw new Error('Not large enough window width to expand. Aborting.');
+            }
+            var extraWidth = bodyWidth - 1180;
+            browsePageContainer.style.marginLeft = browsePageContainer.style.marginRight = -(extraWidth / 2) + 'px';
+            this.lastBodyWidth = bodyWidth;
+            setTimeout(this.props.parentForceUpdate, 100);
+        });
+    }
+
+    unsetWideLayout(){
+        if (isServerSide() || !document || !document.getElementsByClassName) return null;
+        vizUtil.requestAnimationFrame(()=>{
+            var browsePageContainer = document.getElementsByClassName('browse-page-container')[0];
+            browsePageContainer.style.marginLeft = browsePageContainer.style.marginRight = '';
+            setTimeout(this.props.parentForceUpdate, 100);
+        });
     }
 
     handleOpenToggle(value){
-        //console.log(e);
         if (this.timeout){
             clearTimeout(this.timeout);
             delete this.timeout;
@@ -187,7 +248,14 @@ class AboveTableControls extends React.Component {
     }
 
     handleLayoutToggle(){
-        // TODO
+        if (!SearchResultTable.isDesktopClientside()) return null;
+        var state = { };
+        if (this.state.layout === 'normal'){
+            state.layout = 'wide';
+        } else {
+            state.layout = 'normal';
+        }
+        this.setState(state);
     }
 
     renderPanel(){
@@ -213,20 +281,24 @@ class AboveTableControls extends React.Component {
     }
 
     rightButtons(){
-        return this.state.open === false ? (
-            <ButtonToolbar className="pull-right">
-            <ButtonGroup>
-                
-                <Button onClick={this.handleOpenToggle.bind(this, (!this.state.open && 'customColumns') || false)} data-tip="Change visible columns">
+        var { open, layout } = this.state;
+
+        function expandLayoutButton(){
+            return (
+                <Button className="hidden-xs" onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
+                    <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'arrows-alt' : 'crop')}></i>
+                </Button>
+            );
+        }
+
+        return open === false ? (
+            <div className="pull-right">
+                <Button onClick={this.handleOpenToggle.bind(this, (!open && 'customColumns') || false)} data-effect="float" data-tip="Change visible columns" data-event-off="click, mouseout">
                     <i className="icon icon-eye-slash icon-fw"></i>
                 </Button>
-
-                <Button onClick={this.handleLayoutToggle} data-tip="Expand table width">
-                    <i className="icon icon-arrows-alt icon-fw"></i>
-                </Button>
-                
-            </ButtonGroup>
-            </ButtonToolbar>
+                &nbsp;
+                { expandLayoutButton.call(this) }
+            </div>
         ) : (
             <div className="pull-right">
 
@@ -403,7 +475,11 @@ class ResultTableContainer extends React.Component {
                     null
                 }
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
-                    <AboveTableControls {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'constantHiddenColumns', 'columns')} columnDefinitionOverrides={this.colDefOverrides()} />
+                    <AboveTableControls
+                        {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context', 'constantHiddenColumns', 'columns')}
+                        parentForceUpdate={this.forceUpdate.bind(this)}
+                        columnDefinitionOverrides={this.colDefOverrides()}
+                    />
                     <SearchResultTable
                         results={results}
                         columns={this.props.context.columns || {}}
