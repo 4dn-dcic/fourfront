@@ -142,5 +142,30 @@
         }
     },
     "file_format_file_extension": {
-    }
+    },
+    "facets": {
+        "file_type" : {
+            "title" : "File Type"
+        },
+        "file_format": {
+            "title" : "File Format"
+        },
+        "award.project": {
+            "title": "Project"
+        },
+        "lab.title": {
+            "title": "Lab"
+        }
+    },
+    "columns": {
+        "file_type" : {
+            "title" : "File Type"
+        },
+        "file_format": {
+            "title" : "File Format"
+        },
+        "award.project": {
+            "title": "Project"
+        }
+      }
 }
