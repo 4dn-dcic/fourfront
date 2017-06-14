@@ -16,7 +16,6 @@ addons:
     - graphviz
   postgresql: "9.4"
 env:
-  - ES_VERSION=5.4.1 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
   - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
   - ELASTIC_BEANSTALK_LABEL=$TRAVIS_COMMIT
   - secure: vovAkyWqRwZdzZYc061JuENHIPxnjek1t7TWnzeo8AwQdFQwhbt76z0XV9g5DvjYclUWdYxfOb7fiUyxc8M0M2wPfwU05uStewWTuBKILobaNqMdsWaxRQ9OSJ3NxqTLabnmIsAuCQPwHFqM6etyHXiMaAgK8EU+r23CRzklMY77vQMN/2Bs+3Y1ngZ17OVvdbmAwzlUS0uE7+P9X2YXz6QVeTvyPWnBr5SMZ/gyA1/LU+44svKLC85BLtG+2YWHwEOPl0+Jt8diOP+UMBVI0GkCl2cN0dLQhVP26Jcp479BpnPVMOsRqH+Ve9qxpfY6aesTjAVc3D7AJcKzlOnA9o7GTaVGj0pWV+eCv9n3pFacIJkTF1/JNI3lmqKlWyeRd1qMCgCi94mNXEKEgXfxVBSczALhZcxHWTMYo1jE1aDAaAj09yukMJ9UEIBVSQsAGywihlFvTtUTwZDpd0cSfl2RYx6z845HU5EX9oNASEYcbC237I83bObu232ljRokBixA5fo4y+TLNLwK97DsFNGocIXsPBKVBq8uCClD3S8kG9sB88vjM9bFnkenw7GfZLjJFChzd4Hw+x4xJQH0L99MbWeMYAl9R/ojqk3tVrpGEpXwmf/MOgTmVGPUEExgeRTSWUn95YrpenOx7FsJJQ4ZpD1rnVRev2X0A21l0H0=
@@ -40,6 +39,10 @@ notifications:
   slack:
     secure: DQyUTk6evwPpO0P5+OPhBSgl+fGEerOjBlBwQliXAkDaMKH3Cpi4cTQ3ETR/+3g6bGqPGK+QJ1R+6Ht+hJD7dNomyVIoQmvF0P5afJtpk/A3cDILe90t76ET9jc/iBjWeUFQdokFUJ7Gt1GGYtI6e5XcVu/Qc/xqCvFMtsBN6mnBFuvcQki+WkoIIPPawyhfryCNOLo5vvbi4SZ5dZI+M0MGq9HQjOyF1sdIgKuXhxjupmL+kVPVXAq9kiOANYFkwbNsP9j0BTYW5wFHpAztBqz3NT6EchgCdue8tgV4hC4rRFvM/bsA4qz/TJ5wRRLBRXtnNtPcyhAqTiU+wC6qWt++fjSEMGe4KYqtRRV1YuxQiTVHN84t77DILLNfMh/6uSs0KijwOT+Oazwd/UsN1zYOH93AM4FZ0h92yyb6j6JQ+DUk4WFel1Zr4kZzhtHSPGw+K4fxY0zIt1qpaDPXjtZHQ0+LwIIMtwMp5bBcwDn9d1ADnUhUAuuIN2hHaXrVy4vP2hIcd0LzezBqvc7JXimyd5yRgUeOCTrKGkAeSo8VA7XIj0ZmlpQRYKNTJP+gz4Y6C/RCxISnFDF/vcX+IsDdvreZXJMplE1Aqxf0uR6Zj8Sr8q+QWGKydv6ettlLZuqDuv0l/l/9qpzYfRqLSZcetGRVFHHcR9wuQiDyums=
 before_install:
+- export ES_VERSION=5.4.1
+- export ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+- echo ${ES_DOWNLOAD_URLD}
+- echo $ES_DOWNLOAD_URL
 - echo $tibanna_deploy
 - postgres --version
 - initdb --version
