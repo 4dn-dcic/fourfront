@@ -8,8 +8,6 @@ cache:
   - node_modules
 addons:
   apt:
-    sources:
-    - elasticsearch
     packages:
     - bsdtar
     - elasticsearch
