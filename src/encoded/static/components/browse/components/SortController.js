@@ -8,7 +8,7 @@ import _ from 'underscore';
 import { isServerSide, Filters, navigate, object } from './../../util';
 
 
-export class PageLimitSortController extends React.Component {
+export class SortController extends React.Component {
 
     static propTypes = {
         'href'            : PropTypes.string.isRequired,
@@ -18,7 +18,7 @@ export class PageLimitSortController extends React.Component {
 
     static defaultProps = {
         'navigate' : function(href, options, callback){
-            console.info('Called PageLimitSortController.props.navigate with:', href,options, callback);
+            console.info('Called SortController.props.navigate with:', href,options, callback);
             if (typeof navigate === 'function') return navigate.apply(navigate, arguments);
         }
     }
@@ -30,7 +30,7 @@ export class PageLimitSortController extends React.Component {
      * @param {string} href - Current page href, with query.
      * @returns {Object} { 'page' : int, 'limit' : int }
      * 
-     * @memberof PageLimitSortController
+     * @memberof SortController
      */
     static getPageAndLimitFromURL(href){
         var urlParts = url.parse(href, true);
@@ -80,8 +80,8 @@ export class PageLimitSortController extends React.Component {
 
         this.state = _.extend(
             { changingPage : false },
-            PageLimitSortController.getSortColumnAndReverseFromURL(props.href),
-            PageLimitSortController.getPageAndLimitFromURL(props.href)
+            SortController.getSortColumnAndReverseFromURL(props.href),
+            SortController.getPageAndLimitFromURL(props.href)
         );
     }
 
@@ -90,11 +90,11 @@ export class PageLimitSortController extends React.Component {
 
         // Update page re: href.
         if (this.props.href !== newProps.href){
-            var pageAndLimit = PageLimitSortController.getPageAndLimitFromURL(newProps.href);
+            var pageAndLimit = SortController.getPageAndLimitFromURL(newProps.href);
             if (pageAndLimit.page !== this.state.page) newState.page = pageAndLimit.page;
             if (pageAndLimit.limit !== this.state.limit) newState.limit = pageAndLimit.limit;
 
-            var { sortColumn, sortReverse } = PageLimitSortController.getSortColumnAndReverseFromURL(newProps.href);
+            var { sortColumn, sortReverse } = SortController.getSortColumnAndReverseFromURL(newProps.href);
             if (sortColumn !== this.state.sortColumn) newState.sortColumn = sortColumn;
             if (sortReverse !== this.state.sortReverse) newState.sortReverse = sortReverse;
         }
@@ -205,16 +205,18 @@ export class PageLimitSortController extends React.Component {
     }
 
     render(){
+        var propsToPass = _.extend(_.omit(this.props, 'children'), {
+            'maxPage' : Math.ceil(this.props.context.total / this.state.limit),
+            'sortBy' : this.sortBy,
+            'changePage' : this.changePage,
+            'changeLimit' : this.changeLimit
+        }, this.state);
+
         return(
             <div>
                 { 
                     React.Children.map(this.props.children, (c)=>{
-                        return React.cloneElement(c, _.extend({
-                            'maxPage' : Math.ceil(this.props.context.total / this.state.limit),
-                            'sortBy' : this.sortBy,
-                            'changePage' : this.changePage,
-                            'changeLimit' : this.changeLimit
-                        }, this.state));
+                        return React.cloneElement(c, propsToPass);
                     })
                 }
             </div>

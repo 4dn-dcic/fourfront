@@ -10,7 +10,7 @@ import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtil
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { Detail } from './item-pages/components';
 import FacetList from './facetlist';
-import { PageLimitSortController, LimitAndPageControls, SearchResultTable } from './browse/components';
+import { SortController, LimitAndPageControls, SearchResultTable } from './browse/components';
 
 
 var Listing = function (result, schemas, selectCallback) {
@@ -111,7 +111,12 @@ function buildSearchHref(unselectHref, field, term, searchBase){
     if (unselectHref) {
         href = unselectHref;
     } else {
-        href = searchBase + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
+        var parts = url.parse(searchBase, true);
+        var query = _.clone(parts.query);
+        query[field] = encodeURIComponent(term).replace(/%20/g, '+');
+        query = queryString.stringify(query);
+        parts.search = query && query.length > 0 ? ('?' + query) : '';
+        href = url.format(parts);
     }
     return href;
 }
@@ -242,12 +247,11 @@ class ResultTableHandlersContainer extends React.Component {
     }
 
     onFilter(field, term, callback) {
-        var searchBase = this.props.searchBase;
         var unselectHrefIfSelected = getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters);
 
         var targetSearchHref = buildSearchHref(
             unselectHrefIfSelected,
-            field, term, searchBase ? searchBase + '&' : searchBase + '?'
+            field, term, this.props.searchBase,
         );
 
         // Ensure only 1 type filter is selected at once. Unselect any other type= filters if setting new one.
@@ -261,7 +265,8 @@ class ResultTableHandlersContainer extends React.Component {
                         delete queryParts[""]; // Safety
                         queryParts.type = encodeURIComponent(term).replace(/%20/g, '+'); // Only 1 Item type selected at once.
                         var searchString = queryString.stringify(queryParts);
-                        targetSearchHref = (parts.pathname || '') + (searchString ? '?' + searchString : '');
+                        parts.search = searchString && searchString.length > 0 ? ('?' + searchString) : '';
+                        targetSearchHref = url.format(parts);
                     }
                 }
             }
@@ -316,14 +321,14 @@ class ResultTableHandlersContainer extends React.Component {
         });
 
         return (
-            <PageLimitSortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
+            <SortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
                 <ControlsAndResults
                     {...this.props}
                     isTermSelected={this.isTermSelected}
                     onFilter={this.onFilter}
                     facets={facets}
                 />
-            </PageLimitSortController>
+            </SortController>
         );
     }
 
@@ -398,20 +403,18 @@ class ControlsAndResults extends React.Component {
         var thisTypeTitle = Schemas.getTitleForType(thisType);
         var abstractType = Schemas.getAbstractTypeForType(thisType);
         var hiddenColumns = null;
-        if (abstractType && abstractType !== thisType) {
+        if ((abstractType && abstractType !== thisType) || (!abstractType && thisType !== 'Item')) {
             hiddenColumns = ['@type'];
         }
 
-        // Render out button for "Select" if we have a props.selectCallback
-        var constantColumnDefinitions = SearchResultTable.defaultProps.constantColumnDefinitions.slice(0);
+        var columnDefinitionOverrides = {};
+        
+        // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
         if (typeof this.props.selectCallback === 'function'){
-            var titleBlockColDefIndex = _.findIndex(constantColumnDefinitions, { 'field' : 'display_title' }); // Or just use columnDefinitions[0] ?
-            if (typeof this.props.selectCallback === 'function' && typeof titleBlockColDefIndex === 'number' && titleBlockColDefIndex > -1){
-                var newColDef = _.clone(constantColumnDefinitions[titleBlockColDefIndex]);
-                var origRenderFxn = newColDef.render;
-                newColDef.minColumnWidth = 120;
-                newColDef.render = (result, columnDefinition, props, width) => {
-                    var currentTitleBlock = origRenderFxn(result, columnDefinition, props, width);
+            columnDefinitionOverrides['display_title'] = {
+                'minColumnWidth' : 120,
+                'render' : (result, columnDefinition, props, width) => {
+                    var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(result, columnDefinition, props, width);
                     var newChildren = currentTitleBlock.props.children.slice(0);
                     newChildren.unshift(
                         <div className="select-button-container" onClick={(e)=>{
@@ -424,9 +427,21 @@ class ControlsAndResults extends React.Component {
                         </div>
                     );
                     return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
-                };
-                constantColumnDefinitions[titleBlockColDefIndex] = newColDef;
-            }
+                }
+            };
+        }
+        
+        // We're on an abstract type; show detailType in type column.
+        if (abstractType && abstractType === thisType){
+            columnDefinitionOverrides['@type'] = {
+                'noSort' : true,
+                'render' : (result, columnDefinition, props, width) => {
+                    if (!Array.isArray(result['@type'])) return null;
+                    var itemType = Schemas.getItemType(result);
+                    if (itemType === thisType) return null;
+                    return Schemas.getTitleForType(itemType);
+                }
+            };
         }
 
         return (
@@ -441,12 +456,9 @@ class ControlsAndResults extends React.Component {
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList
-                            {...this.props}
                             className="with-header-bg"
                             facets={facets}
                             filters={filters}
-                            thisType={thisType}
-                            expSetFilters={this.props.expSetFilters}
                             onFilter={this.props.onFilter}
                             filterFacetsFxn={FacetList.filterFacetsForSearch}
                             isTermSelected={this.props.isTermSelected}
@@ -454,6 +466,7 @@ class ControlsAndResults extends React.Component {
                         />
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9 expset-result-table-fix">
+                        {/*
                         <div className="row above-chart-row clearfix">
                             <div className="col-sm-5 col-xs-12">
                                 <h5 className='browse-title'>{results.length} of {total} results</h5>
@@ -469,15 +482,21 @@ class ControlsAndResults extends React.Component {
                                 />
                             </div>
                         </div>
+                        */}
                         <SearchResultTable
                             results={results}
                             columns={context.columns || {}}
-                            detailPane={<ResultDetailPane popLink={this.props.selectCallback ? true : false} />}
+                            renderDetailPane={(result, rowNumber, containerWidth)=>
+                                <ResultDetailPane popLink={this.props.selectCallback ? true : false} result={result} />
+                            }
+                            hiddenColumns={hiddenColumns}
+                            columnDefinitionOverrideMap={columnDefinitionOverrides}
+                            href={this.props.href}
+
                             sortBy={this.props.sortBy}
                             sortColumn={this.props.sortColumn}
                             sortReverse={this.props.sortReverse}
-                            hiddenColumns={hiddenColumns}
-                            constantColumnDefinitions={constantColumnDefinitions}
+
                         />
                     </div>
                 </div>
@@ -488,6 +507,12 @@ class ControlsAndResults extends React.Component {
 }
 
 export class Search extends React.Component {
+
+    fullWidthStyle(){
+        if (!this.refs || !this.refs.container) return null;
+        //var marginLeft = 
+
+    }
 
     componentDidMount(){
         ReactTooltip.rebuild();
@@ -512,7 +537,7 @@ export class Search extends React.Component {
         return (
             <div>
                 {facetdisplay ?
-                    <div className="browse-page-container">
+                    <div className="browse-page-container" ref="container">
                         <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
                     </div>
                 : <div className='error-page'><h4>{notification}</h4></div>}

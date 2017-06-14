@@ -37,7 +37,8 @@ require('./submission/submission-fields');
 require('./inputs');
 require('./search');
 require('./experiments-table');
-require('./browse');
+require('./browse/BrowseView');
+require('./browse/components');
 require('./testwarning');
 
 module.exports = require('./app').default;

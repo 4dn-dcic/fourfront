@@ -308,7 +308,7 @@ export function filtersToNodes(expSetFilters = {}, orderedFieldNames = null, fla
                 return {
                     'data' : {
                         'term' : term,
-                        'name' : Term.toName(fieldPair[0], term),
+                        'name' : Schemas.Term.toName(fieldPair[0], term),
                         'field' : fieldPair[0]
                     }
                 };
