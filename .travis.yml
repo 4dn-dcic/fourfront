@@ -18,7 +18,8 @@ addons:
     - graphviz
   postgresql: "9.4"
 env:
-  global:
+  - ES_VERSION=5.4.1
+  - ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
   - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
   - ELASTIC_BEANSTALK_LABEL=$TRAVIS_COMMIT
   - secure: vovAkyWqRwZdzZYc061JuENHIPxnjek1t7TWnzeo8AwQdFQwhbt76z0XV9g5DvjYclUWdYxfOb7fiUyxc8M0M2wPfwU05uStewWTuBKILobaNqMdsWaxRQ9OSJ3NxqTLabnmIsAuCQPwHFqM6etyHXiMaAgK8EU+r23CRzklMY77vQMN/2Bs+3Y1ngZ17OVvdbmAwzlUS0uE7+P9X2YXz6QVeTvyPWnBr5SMZ/gyA1/LU+44svKLC85BLtG+2YWHwEOPl0+Jt8diOP+UMBVI0GkCl2cN0dLQhVP26Jcp479BpnPVMOsRqH+Ve9qxpfY6aesTjAVc3D7AJcKzlOnA9o7GTaVGj0pWV+eCv9n3pFacIJkTF1/JNI3lmqKlWyeRd1qMCgCi94mNXEKEgXfxVBSczALhZcxHWTMYo1jE1aDAaAj09yukMJ9UEIBVSQsAGywihlFvTtUTwZDpd0cSfl2RYx6z845HU5EX9oNASEYcbC237I83bObu232ljRokBixA5fo4y+TLNLwK97DsFNGocIXsPBKVBq8uCClD3S8kG9sB88vjM9bFnkenw7GfZLjJFChzd4Hw+x4xJQH0L99MbWeMYAl9R/ojqk3tVrpGEpXwmf/MOgTmVGPUEExgeRTSWUn95YrpenOx7FsJJQ4ZpD1rnVRev2X0A21l0H0=
@@ -45,11 +46,14 @@ before_install:
 - echo $tibanna_deploy
 - postgres --version
 - initdb --version
-- elasticsearch -v
 - nvm install 4
 - node --version
 - npm config set python /usr/bin/python2.7
 install:
+- wget ${ES_DOWNLOAD_URL}
+- tar -xzf elasticsearch-${ES_VERSION}.tar.gz
+- ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
+- elasticsearch -v
 - python bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip install awsebcli
@@ -74,6 +78,7 @@ before_script:
     while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
   fi
 script:
+- wget -q --waitretry=1 --retry-connrefused -T 10 -O - http://127.0.0.1:9200
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone" --cov
   src/encoded; fi
