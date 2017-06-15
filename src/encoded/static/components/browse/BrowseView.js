@@ -456,7 +456,6 @@ export default class BrowseView extends React.Component {
     }
 
     render() {
-        //console.log('BROWSE PROPS', this.props);
         var context = this.props.context;
         //var fileFormats = findFormats(context['@graph']);
 

@@ -297,7 +297,6 @@ class ResultDetail extends React.Component{
             if (this.props.open && typeof this.props.setDetailHeight === 'function'){
                 setTimeout(()=>{
                     var detailHeight = parseInt(this.refs.detail.offsetHeight) + 10;
-                    console.log(detailHeight);
                     if (isNaN(detailHeight)) detailHeight = 0;
                     this.props.setDetailHeight(detailHeight);
                 }, 0);
