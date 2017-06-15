@@ -1383,7 +1383,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							@include search-result-column-block;
 							> .inner {
 								height: 46px;
-								transition : height .35s ease-out, padding-top .35s ease-out;
+								//transition : height .35s ease-out, padding-top .35s ease-out;
 							}
 							&:not(:last-child) {
 								border-right: 1px dotted rgba(0,0,0,0.075);

@@ -194,6 +194,7 @@ class ResultRowColumnBlockValue extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState){
         if (
+            nextProps.columnNumber === 0 ||
             nextProps.columnDefinition.field !== this.props.columnDefinition.field ||
             nextProps.schemas !== this.props.schemas ||
             object.atIdFromObject(nextProps.result) !== object.atIdFromObject(this.props.result)
@@ -235,8 +236,8 @@ class ResultRowColumnBlock extends React.Component {
         return (
             <div className="search-result-column-block" style={{ width : blockWidth }} data-field={columnDefinition.field}>
                 <ResultRowColumnBlockValue
-                    width={blockWidth} result={result} columnDefinition={columnDefinition}
-                    mounted={mounted} schemas={this.props.schemas} toggleDetailOpen={this.props.toggleDetailOpen}
+                    width={blockWidth} result={result} columnDefinition={columnDefinition} columnNumber={this.props.columnNumber}
+                    mounted={mounted} schemas={this.props.schemas} toggleDetailOpen={this.props.toggleDetailOpen} detailOpen={this.props.detailOpen}
                 />
             </div>
         );
@@ -263,14 +264,6 @@ class DefaultDetailPane extends React.Component {
     }
 }
 
-class ResultDetailInner extends React.Component {
-
-    render(){
-        return this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth, this.forceUpdate.bind(this));
-
-    }
-}
-
 
 class ResultDetail extends React.Component{
 
@@ -284,11 +277,11 @@ class ResultDetail extends React.Component{
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'closing' : false };
     }
-
+    /*
     componentWillReceiveProps(nextProps){
         if (nextProps.open !== this.props.open){
             if (!nextProps.open){
@@ -298,12 +291,13 @@ class ResultDetail extends React.Component{
             }
         }
     }
-
+    */
     componentDidUpdate(pastProps, pastState){
         if (pastProps.open !== this.props.open){
             if (this.props.open && typeof this.props.setDetailHeight === 'function'){
                 setTimeout(()=>{
-                    var detailHeight = parseInt(this.refs.detail.style.height) + 10;
+                    var detailHeight = parseInt(this.refs.detail.offsetHeight) + 10;
+                    console.log(detailHeight);
                     if (isNaN(detailHeight)) detailHeight = 0;
                     this.props.setDetailHeight(detailHeight);
                 }, 0);
@@ -314,17 +308,13 @@ class ResultDetail extends React.Component{
     render(){
         return (
             <div className={"result-table-detail-container" + (this.props.open || this.state.closing ? ' open' : ' closed')}>
-            <Collapse in={this.props.open}>
-                { this.props.open || this.state.closing ?
+                { this.props.open ?
                 
                     <div className="result-table-detail" ref="detail" style={{
                         'width' : this.props.tableContainerWidth,
                         'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
                     }}>
-                        <ResultDetailInner
-                            result={this.props.result} rowNumber={this.props.rowNumber}
-                            renderDetailPane={this.props.renderDetailPane} tableContainerWidth={this.props.tableContainerWidth}
-                        />
+                        { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth) }
                         { this.props.tableContainerScrollLeft && this.props.tableContainerScrollLeft > 10 ?
                             <div className="close-button-container text-center" onClick={this.props.toggleDetailOpen}>
                                 <i className="icon icon-angle-up"/>
@@ -332,7 +322,6 @@ class ResultDetail extends React.Component{
                         : null }
                     </div>
                 : <div/> }
-            </Collapse>
             </div>
         );
     }
@@ -390,12 +379,12 @@ class ResultRow extends React.Component {
 
     constructor(props){
         super(props);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.toggleDetailOpen = _.throttle(this.toggleDetailOpen.bind(this), 250);
         this.isOpen = this.isOpen.bind(this);
         this.render = this.render.bind(this);
     }
-    
+    /*
     shouldComponentUpdate(nextProps, nextState){
         var isOpen = this.isOpen(nextProps);
         if (
@@ -413,6 +402,7 @@ class ResultRow extends React.Component {
             return false;
         }
     }
+    */
     
     toggleDetailOpen(){
         this.props.toggleDetailPaneOpen(this.props['data-key']);
@@ -847,7 +837,7 @@ class DimensioningContainer extends React.Component {
 
     onScroll(e){
         if (document && document.querySelectorAll && this.refs && this.refs.innerContainer && this.refs.innerContainer.childNodes[0]){
-            var detailPanes = document.querySelectorAll('.result-table-detail.collapse.in');
+            var detailPanes = document.querySelectorAll('.result-table-detail');
             if (detailPanes && detailPanes.length > 0){
                 var transformStyle = vizUtil.style.translate3d(this.refs.innerContainer.scrollLeft);
                 vizUtil.requestAnimationFrame(function(){

@@ -646,6 +646,7 @@ export class ReduxExpSetFiltersInterface extends React.Component {
         newChildProps.href = oldChildProps.href || this.props.href;
         newChildProps.schemas = oldChildProps.schemas || this.props.schemas;
         newChildProps.expSetFilters = oldChildProps.expSetFilters || this.props.expSetFilters;
+        newChildProps.showClearFiltersButtons = newChildProps.expSetFilters && !_.isEmpty(newChildProps.expSetFilters) ? true : false;
         newChildProps.session = oldChildProps.session || this.props.session;
         return React.cloneElement(this.props.children, newChildProps);
     }
@@ -752,6 +753,7 @@ export default class FacetList extends React.Component {
         'title'             : "Properties",
         'filterFacetsFxn'   : FacetList.filterFacetsForBrowse, // Filters out 'Item Type', etc.
         'debug'             : false,
+        'showClearFiltersButton' : false,
 
         /**
          * These 'default' functions don't do anything except show parameters passed.
@@ -876,7 +878,6 @@ export default class FacetList extends React.Component {
             }
         }
 
-        var clearButton = this.props.expSetFilters && !_.isEmpty(this.props.expSetFilters) ? true : false;
         var clearButtonStyle = (this.props.className && this.props.className.indexOf('with-header-bg') > -1) ?
             "btn-outline-white" : "btn-outline-default";
 
@@ -902,7 +903,7 @@ export default class FacetList extends React.Component {
                             &nbsp;
                             <h4 className="facets-title">{ this.props.title }</h4>
                         </div>
-                        <div className={"col-xs-6 clear-filters-control" + (clearButton ? '' : ' placeholder')}>
+                        <div className={"col-xs-6 clear-filters-control" + (this.props.showClearFiltersButton ? '' : ' placeholder')}>
                             <a href="#" onClick={this.props.onClearFilters} className={"btn btn-xs rounded " + clearButtonStyle}>
                                 <i className="icon icon-times"></i> Clear All
                             </a>

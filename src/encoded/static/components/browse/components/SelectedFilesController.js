@@ -65,21 +65,53 @@ export class SelectedFilesController extends React.Component {
     }
 
     selectFile(uuid: string, memo = null){
-        if (typeof this.state.selectedFiles[uuid] !== 'undefined'){
-            throw new Error("File already selected!");
+        
+        var newSelectedFiles = _.clone(this.state.selectedFiles);
+
+        function add(id, memo = null){
+            if (typeof newSelectedFiles[id] !== 'undefined'){
+                throw new Error("File already selected!");
+            }
+            newSelectedFiles[id] = memo || true;
         }
-        var newSet = _.clone(this.state.selectedFiles);
-        newSet[uuid] = memo || true;
-        this.setState({ 'selectedFiles' : newSet });
+
+        if (Array.isArray(uuid)){
+            uuid.forEach((id)=>{
+                if (typeof id === 'string'){
+                    add(id);
+                } else if (Array.isArray(id)){
+                    add(id[0], id[1]);
+                } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
+            });
+        } else if (typeof uuid === 'string') {
+            add(uuid, memo);
+        } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
+
+        this.setState({ 'selectedFiles' : newSelectedFiles });
     }
 
     unselectFile(uuid: string){
-        if (typeof this.state.selectedFiles[uuid] === 'undefined'){
-            throw new Error("File not in set!");
+        var newSelectedFiles = _.clone(this.state.selectedFiles);
+
+        function remove(id) {
+            if (typeof newSelectedFiles[id] === 'undefined'){
+                console.log(id, newSelectedFiles);
+                throw new Error("File not in set!");
+            }
+            delete newSelectedFiles[id];
         }
-        var newSet = _.clone(this.state.selectedFiles);
-        delete newSet[uuid];
-        this.setState({ 'selectedFiles' : newSet });
+
+        if (Array.isArray(uuid)){
+            uuid.forEach((id)=>{
+                if (typeof id === 'string'){
+                    remove(id);
+                } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
+            });
+        } else if (typeof uuid === 'string') {
+            remove(uuid);
+        } else throw new Error("Supplied uuid is not a string or array of strings:", uuid);
+
+        this.setState({ 'selectedFiles' : newSelectedFiles });
     }
 
     resetSelectedFiles(props = this.props){

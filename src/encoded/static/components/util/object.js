@@ -112,6 +112,21 @@ export function randomId() {
 }
 
 
+export function isEqual(obj1, obj2){
+    var ob1Keys = _.keys(obj1).sort();
+    var obj2Keys = _.keys(obj2).sort();
+    if (ob1Keys.length !== obj2Keys.length) return false;
+    var len = ob1Keys.length;
+    var i;
+    for (i = 0; i < len; i++){
+        if (ob1Keys[i] !== obj2Keys[i]) return false;
+    }
+    for (i = 0; i < len; i++){
+        if (obj1[ob1Keys[i]] !== obj2[ob1Keys[i]]) return false;
+    }
+    return true;
+}
+
 
 export function singleTreatment(treatment) {
     var treatmentText = '';
