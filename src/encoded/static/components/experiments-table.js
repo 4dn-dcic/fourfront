@@ -780,15 +780,30 @@ export default class ExperimentsTable extends React.Component {
         return colWidthStyles;
     }
 
+    /**
+     * @param {string|string[]} uuid - String or list of strings (File Item UUID)
+     * @param {Object|Object[]} fileObj - File Item JSON
+     */
     handleFileCheckboxChange(uuid, fileObj){
         if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
 
-        if (typeof this.props.selectedFiles[uuid] === 'undefined') {
-            var memo = null;
-            if (fileObj && Array.isArray(fileObj.related_files)) {
-                memo = { 'related_files' : fileObj.related_files };
+        var willSelect;
+        var isMultiples;
+
+        if (Array.isArray(uuid)){
+            isMultiples = true;
+            willSelect = (typeof this.props.selectedFiles[uuid[0]] === 'undefined');
+        } else {
+            isMultiples = false;
+            willSelect = (typeof this.props.selectedFiles[uuid] === 'undefined');
+        }
+
+        if (willSelect){
+            if (isMultiples){
+                this.props.selectFile(_.zip(uuid, fileObj));
+            } else {
+                this.props.selectFile(uuid, fileObj);
             }
-            this.props.selectFile(uuid, memo);
         } else {
             this.props.unselectFile(uuid);
         }
@@ -1083,7 +1098,8 @@ class FilePairBlock extends React.Component {
                 name="file-checkbox"
                 id={checked + "~" + true + "~" + this.props.files[0].file_format + "~" + this.props.files[0].uuid}
                 className='exp-table-checkbox'
-                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, this.props.files[0].uuid, this.props.files[0])}
+                data-select-files={_.pluck(this.props.files, 'uuid')}
+                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, _.pluck(this.props.files, 'uuid'), this.props.files)}
             />
         );
     }
@@ -1203,6 +1219,7 @@ class FileEntryBlock extends React.Component {
                 name="file-checkbox"
                 id={checked + "~" + true + "~" + this.props.file.file_format + "~" + this.props.file.uuid}
                 className='exp-table-checkbox'
+                data-select-files={[this.props.file.uuid]}
                 onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, this.props.file.uuid, this.props.file)}
             />
         );

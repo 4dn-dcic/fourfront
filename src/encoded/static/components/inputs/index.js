@@ -2,7 +2,7 @@
 
 /**
  * Should we move contents of form.js into this folder and rename it forms?
- * 
+ *
  * @module input
  */
 

@@ -5,4 +5,7 @@
 ./src/encoded/static/build
 
 [options]
-all = false
+all=false
+esproposal.class_instance_fields=ignore
+emoji=true
+disable=true

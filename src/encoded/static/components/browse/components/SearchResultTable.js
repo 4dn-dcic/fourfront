@@ -120,7 +120,7 @@ export const defaultColumnDefinitionMap = {
         }
     },
     'experiments_in_set' : {
-        'title' : 'Exps',
+        'title' : '# of Experiments',
         'widthMap' : {'lg' : 60, 'md' : 60, 'sm' : 50},
         'noSort' : true,
         'render' : function(result, columnDefinition, props, width){
@@ -129,7 +129,7 @@ export const defaultColumnDefinitionMap = {
         }
     },
     'experiments_in_set.experiment_type' : {
-        'title' : 'Exp Type',
+        'title' : 'Experiment Type',
         'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120}
     }
 };
@@ -190,45 +190,55 @@ export function compareResultsByID(listA, listB){
     return true;
 }
 
-
-class ResultRowColumnBlock extends React.Component {
+class ResultRowColumnBlockValue extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.headerColumnWidths[nextProps.columnNumber] !== this.props.headerColumnWidths[this.props.columnNumber]){
+        if (
+            nextProps.columnNumber === 0 ||
+            nextProps.columnDefinition.field !== this.props.columnDefinition.field ||
+            nextProps.schemas !== this.props.schemas ||
+            object.atIdFromObject(nextProps.result) !== object.atIdFromObject(this.props.result)
+        ){
             return true;
         }
-        if (!_.isEqual(nextProps.result, this.props.result)){
-            return true;
-        }
-        if (!_.isEqual(nextProps.columnDefinition, this.props.columnDefinition)){
-            return true;
-        }
-        if (!_.isEqual(nextProps.schemas, this.props.schemas)){
-            return true;
-        }
-        if (nextProps.detailOpen !== this.props.detailOpen) return true;
         return false;
     }
 
     render(){
         var { result, columnDefinition, mounted } = this.props;
-        var isDesktopClientside = SearchResultTable.isDesktopClientside();
-        var blockWidth = (
-            (isDesktopClientside && this.props.headerColumnWidths[this.props.columnNumber]) || // See if have a manually set width first (else is 0)
-            searchResultTableColumnWidth(columnDefinition.widthMap, mounted)
-        );
-
         var value = SearchResultTable.sanitizeOutputValue(
-            columnDefinition.render(result, columnDefinition, _.omit(this.props, 'columnDefinition', 'result'), blockWidth)
+            columnDefinition.render(result, columnDefinition, _.omit(this.props, 'columnDefinition', 'result'))
         );
-
-        var blockClassName = "search-result-column-block" + (!value ? ' no-value' : '');
         if (typeof value === 'string') value = <span className="value">{ value }</span>;
         else if   (value === null)     value = <small className="text-300">-</small>;
+        return (
+            <div className="inner">{ value }</div>
+        );
+    }
+}
+
+
+class ResultRowColumnBlock extends React.Component {
+
+    render(){
+        var { result, columnDefinition, mounted } = this.props;
+        var isDesktopClientside = SearchResultTable.isDesktopClientside();
+        var blockWidth;
+
+        if (mounted &&!isDesktopClientside){
+            blockWidth = '100%';
+        } else if (mounted && isDesktopClientside){
+            blockWidth = this.props.headerColumnWidths[this.props.columnNumber] || searchResultTableColumnWidth(columnDefinition.widthMap, mounted);
+        } else {
+            blockWidth = searchResultTableColumnWidth(columnDefinition.widthMap, mounted);
+        }
 
         return (
-            <div className={blockClassName} style={{ width : blockWidth }} data-field={columnDefinition.field}>
-                <div className="inner">{ value }</div>
+            <div className="search-result-column-block" style={{ width : blockWidth }} data-field={columnDefinition.field}>
+                <ResultRowColumnBlockValue
+                    width={blockWidth} result={result} columnDefinition={columnDefinition} columnNumber={this.props.columnNumber}
+                    mounted={mounted} schemas={this.props.schemas} toggleDetailOpen={this.props.toggleDetailOpen} detailOpen={this.props.detailOpen}
+                />
             </div>
         );
     }
@@ -254,28 +264,6 @@ class DefaultDetailPane extends React.Component {
     }
 }
 
-class ResultDetailInner extends React.Component {
-    /*
-    shouldComponentUpdate(nextProps){
-        if (nextProps.rowNumber !== this.props.rowNumber) return true;
-        if (!_.isEqual(nextProps.result, this.props.result)) return true;
-        if (nextProps.tableContainerWidth !== this.props.tableContainerWidth) return true;
-        return false;
-    }
-    */
-
-    render(){
-        return this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth, this.forceUpdate.bind(this));
-        /*
-        return React.cloneElement(this.props.detailPane, {
-            'result'    : this.props.result,
-            'rowNumber' : this.props.rowNumber,
-            'containerWidth' : this.props.tableContainerWidth
-        });
-        */
-    }
-}
-
 
 class ResultDetail extends React.Component{
 
@@ -289,11 +277,11 @@ class ResultDetail extends React.Component{
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'closing' : false };
     }
-
+    /*
     componentWillReceiveProps(nextProps){
         if (nextProps.open !== this.props.open){
             if (!nextProps.open){
@@ -303,12 +291,12 @@ class ResultDetail extends React.Component{
             }
         }
     }
-
+    */
     componentDidUpdate(pastProps, pastState){
         if (pastProps.open !== this.props.open){
             if (this.props.open && typeof this.props.setDetailHeight === 'function'){
                 setTimeout(()=>{
-                    var detailHeight = parseInt(this.refs.detail.style.height) + 10;
+                    var detailHeight = parseInt(this.refs.detail.offsetHeight) + 10;
                     if (isNaN(detailHeight)) detailHeight = 0;
                     this.props.setDetailHeight(detailHeight);
                 }, 0);
@@ -319,17 +307,13 @@ class ResultDetail extends React.Component{
     render(){
         return (
             <div className={"result-table-detail-container" + (this.props.open || this.state.closing ? ' open' : ' closed')}>
-            <Collapse in={this.props.open}>
-                { this.props.open || this.state.closing ?
+                { this.props.open ?
                 
                     <div className="result-table-detail" ref="detail" style={{
                         'width' : this.props.tableContainerWidth,
                         'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
                     }}>
-                        <ResultDetailInner
-                            result={this.props.result} rowNumber={this.props.rowNumber}
-                            renderDetailPane={this.props.renderDetailPane} tableContainerWidth={this.props.tableContainerWidth}
-                        />
+                        { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth) }
                         { this.props.tableContainerScrollLeft && this.props.tableContainerScrollLeft > 10 ?
                             <div className="close-button-container text-center" onClick={this.props.toggleDetailOpen}>
                                 <i className="icon icon-angle-up"/>
@@ -337,7 +321,6 @@ class ResultDetail extends React.Component{
                         : null }
                     </div>
                 : <div/> }
-            </Collapse>
             </div>
         );
     }
@@ -395,18 +378,18 @@ class ResultRow extends React.Component {
 
     constructor(props){
         super(props);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.toggleDetailOpen = _.throttle(this.toggleDetailOpen.bind(this), 250);
         this.isOpen = this.isOpen.bind(this);
         this.render = this.render.bind(this);
     }
-    
+    /*
     shouldComponentUpdate(nextProps, nextState){
         var isOpen = this.isOpen(nextProps);
         if (
             isOpen || isOpen !== this.isOpen(this.props) ||
-            !_.isEqual(nextProps.result, this.props.result) ||
             nextProps.rowNumber !== this.props.rowNumber ||
+            object.atIdFromObject(nextProps.result) !== object.atIdFromObject(this.props.result) ||
             nextProps.schemas !== this.props.schemas ||
             nextProps.columnDefinitions.length !== this.props.columnDefinitions.length ||
             !ResultRow.areWidthsEqual(nextProps.headerColumnWidths, this.props.headerColumnWidths)
@@ -418,6 +401,7 @@ class ResultRow extends React.Component {
             return false;
         }
     }
+    */
     
     toggleDetailOpen(){
         this.props.toggleDetailPaneOpen(this.props['data-key']);
@@ -489,7 +473,7 @@ class HeadersRow extends React.Component {
             this.setState({ 'widths' : nextProps.headerColumnWidths });
         }
     }
-
+/*
     shouldComponentUpdate(nextProps, nextState){
         if (
             this.props.mounted !== nextProps.mounted ||
@@ -501,7 +485,7 @@ class HeadersRow extends React.Component {
         ) return true;
         return false;
     }
-
+*/
 
     setHeaderWidths(idx, evt, r){
         if (typeof this.props.setHeaderWidths !== 'function') throw new Error('props.setHeaderWidths not a function');
@@ -775,7 +759,7 @@ class DimensioningContainer extends React.Component {
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.throttledUpdate = _.debounce(this.forceUpdate.bind(this), 500);
-        this.toggleDetailPaneOpen = this.toggleDetailPaneOpen.bind(this);
+        this.toggleDetailPaneOpen = _.throttle(this.toggleDetailPaneOpen.bind(this), 500);
         this.setDetailHeight = this.setDetailHeight.bind(this);
         this.onScroll = this.onScroll.bind(this);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
@@ -789,6 +773,7 @@ class DimensioningContainer extends React.Component {
             'results'   : props.results,
             'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview.
         };
+        
     }
 
     componentDidMount(){
@@ -804,16 +789,36 @@ class DimensioningContainer extends React.Component {
             }
             
         }
+        this.lastResponsiveGridSize = layout.responsiveGridState();
         this.setState(state);
     }
 
     componentWillReceiveProps(nextProps){
         if (nextProps.href !== this.props.href || !compareResultsByID(nextProps.results, this.props.results)){ // <-- the important check, covers different filters, sort, etc.
-            this.setState({ 'results' : nextProps.results, 'openDetailPanes' : {} }, ()=>{
+            this.setState({
+                'results' : nextProps.results,
+                'openDetailPanes' : {},
+                'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions.length)
+            }, ()=>{
                 vizUtil.requestAnimationFrame(()=>{
-                    this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(this.props.columnDefinitions) });
+                    this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
                 });
             });
+        } else {
+            var responsiveGridSize = layout.responsiveGridState();
+            if (nextProps.columnDefinitions.length !== this.props.columnDefinitions.length || this.lastResponsiveGridSize !== responsiveGridSize){
+                this.lastResponsiveGridSize = responsiveGridSize;
+                // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
+                this.setState({
+                    'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions.length)
+                }, ()=>{
+                    vizUtil.requestAnimationFrame(()=>{
+                        // 2. Upon render into DOM, decrease col sizes.
+                        this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
+                    });
+                });
+                
+            }
         }
     }
 
@@ -822,13 +827,15 @@ class DimensioningContainer extends React.Component {
     }
 
     toggleDetailPaneOpen(rowKey, cb = null){
-        var openDetailPanes = _.clone(this.state.openDetailPanes);
-        if (openDetailPanes[rowKey]){
-            delete openDetailPanes[rowKey];
-        } else {
-            openDetailPanes[rowKey] = true;
-        }
-        this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
+        setTimeout(() => {
+            var openDetailPanes = _.clone(this.state.openDetailPanes);
+            if (openDetailPanes[rowKey]){
+                delete openDetailPanes[rowKey];
+            } else {
+                openDetailPanes[rowKey] = true;
+            }
+            this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
+        }, 0);
     }
 
     setDetailHeight(rowKey, height, cb){
@@ -840,7 +847,7 @@ class DimensioningContainer extends React.Component {
 
     onScroll(e){
         if (document && document.querySelectorAll && this.refs && this.refs.innerContainer && this.refs.innerContainer.childNodes[0]){
-            var detailPanes = document.querySelectorAll('.result-table-detail.collapse.in');
+            var detailPanes = document.querySelectorAll('.result-table-detail');
             if (detailPanes && detailPanes.length > 0){
                 var transformStyle = vizUtil.style.translate3d(this.refs.innerContainer.scrollLeft);
                 vizUtil.requestAnimationFrame(function(){
