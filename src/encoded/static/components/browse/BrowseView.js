@@ -228,7 +228,6 @@ class ResultTableContainer extends React.Component {
     colDefOverrides(){
         if (!this.props.selectedFiles) return this.props.columnDefinitionOverrides || null;
         var selectedFiles = this.props.selectedFiles;
-        //var allSelectedFileIDs = _.keys(this.props.selectedFiles).sort(); // ALL selectedFiles, need to filter down to set re: result expSet
 
         function getSelectedFileForSet(allFilesForSet){
             var max = allFilesForSet.length;

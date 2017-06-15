@@ -646,7 +646,7 @@ export class ReduxExpSetFiltersInterface extends React.Component {
         newChildProps.href = oldChildProps.href || this.props.href;
         newChildProps.schemas = oldChildProps.schemas || this.props.schemas;
         newChildProps.expSetFilters = oldChildProps.expSetFilters || this.props.expSetFilters;
-        newChildProps.showClearFiltersButtons = newChildProps.expSetFilters && !_.isEmpty(newChildProps.expSetFilters) ? true : false;
+        newChildProps.showClearFiltersButton = newChildProps.expSetFilters && !_.isEmpty(newChildProps.expSetFilters) ? true : false;
         newChildProps.session = oldChildProps.session || this.props.session;
         return React.cloneElement(this.props.children, newChildProps);
     }
