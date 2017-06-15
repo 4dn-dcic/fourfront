@@ -17,6 +17,7 @@ addons:
   postgresql: "9.4"
 env:
   global:
+  - JAVA_HOME=/usr/lib/jvm/java-8-oracle
   - BOTO_CONFIG=/bogus
   - ES_VERSION=5.4.1
   - ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.deb
@@ -52,7 +53,6 @@ before_install:
 install:
 - curl -O  ${ES_DOWNLOAD_URL}
 - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb
-- sudo service elasticsearch start
 - python bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip install awsebcli
