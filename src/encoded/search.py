@@ -50,6 +50,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     from_, size = get_pagination(request)
 
+    # get desired frame for this search
+    search_frame = request.params.get('frame', 'embedded')
+
     ### PREPARE SEARCH TERM
     prepared_terms = prepare_search_term(request)
 
@@ -75,11 +78,11 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # get the fields that will be used as source for the search
     # currently, supports frame=raw but live faceting does not work
     # this is okay because the only frame=raw access will be programmatic
-    result_fields = sorted(list_result_fields(request, doc_types))
+    source_fields = sorted(list_source_fields(request, doc_types, search_frame))
 
     ### GET FILTERED QUERY
     # Builds filtered query which supports multiple facet selection
-    search = build_query(search, prepared_terms, result_fields)
+    search, string_query = build_query(search, prepared_terms, source_fields)
 
     ### Set sort order
     search = set_sort_order(request, search, prepared_terms, types, doc_types, result)
@@ -92,7 +95,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     facets = initialize_facets(types, doc_types, search_audit, principals)
 
     ### Adding facets to the query
-    search = set_facets(search, facets, query_filters)
+    search = set_facets(search, facets, query_filters, string_query)
+
     ### Execute the query
     if size == 'all':
         es_results = get_all_results(search)
@@ -108,7 +112,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     result['total'] = total = es_results['hits']['total']
 
     schemas = (types[item_type].schema for item_type in doc_types)
-    result['facets'] = format_facets(es_results, facets, used_filters, schemas, total)
+    result['facets'] = format_facets(es_results, facets, used_filters, schemas, total, search_frame)
 
     # Add batch actions
     # TODO: figure out exactly what this does. Provide download URLs?
@@ -135,7 +139,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     result['notification'] = 'Success'
 
     ### Format results for JSON-LD
-    graph = format_results(request, es_results['hits']['hits'])
+    graph = format_results(request, es_results['hits']['hits'], search_frame)
 
     if request.__parent__ is not None or return_generator:
         if return_generator:
@@ -260,16 +264,17 @@ def normalize_query(request, search_type):
 
 
 def clear_filters_setup(request, doc_types, forced_type):
-    # Clear Filters path -- make a path that clears all non-datatype filters.
-    # http://stackoverflow.com/questions/16491988/how-to-convert-a-list-of-strings-to-a-query-string#answer-16492046
-    searchterm_specs = request.params.getall('searchTerm')
-    searchterm_only = urlencode([("searchTerm", searchterm) for searchterm in searchterm_specs])
-    if searchterm_only:
-        # Search term in query string; clearing keeps that
-        clear_qs = searchterm_only
+    # Clear Filters path -- make a path that clears all non-datatype filters
+    # and leaves in search query, if present
+    seach_query_specs = request.params.getall('q')
+    seach_query_url = urlencode([("q", seach_query) for seach_query in seach_query_specs])
+    # types_url will always be present (always >=1 doc_type)
+    types_url = urlencode([("type", typ) for typ in doc_types])
+    if seach_query_url:
+        clear_qs = seach_query_url + '&' + types_url
     else:
-        # Possibly type(s) in query string
-        clear_qs = urlencode([("type", typ) for typ in doc_types])
+        # no search query provided
+        clear_qs = types_url
     return request.route_path(forced_type.lower(), slash='/') + (('?' + clear_qs) if clear_qs else '')
 
 
@@ -304,11 +309,14 @@ def prepare_search_term(request):
     for field, val in request.params.iteritems():
         if field.startswith('audit'):
             continue
-        elif field == 'search_query': # searched string
-            if 'search_query' in prepared_terms:
-                prepared_terms['search_query'] = ' '.join(prepared_terms['search_query'], val)
+        elif field == 'q': # searched string has field 'q'
+            # people shouldn't provide multiple queries, but if they do,
+            # combine them with AND logic
+            if 'q' in prepared_terms:
+                join_list = [prepared_terms['q'], val]
+                prepared_terms['q'] = ' | '.join(join_list)
             else:
-                prepared_terms['search_query'] = val
+                prepared_terms['q'] = val
         elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
@@ -355,7 +363,7 @@ def get_search_fields(request, doc_types):
     return fields, highlights
 
 
-def list_result_fields(request, doc_types):
+def list_source_fields(request, doc_types, frame):
     """
     Returns set of fields that are requested by user or default fields.
     These fields are used to further limit the results from the search.
@@ -364,7 +372,6 @@ def list_result_fields(request, doc_types):
     'field=name'
     Add audit to this so we can look at that as well
     """
-    frame = request.params.get('frame')
     fields_requested = request.params.getall('field')
     if fields_requested:
         fields = ['embedded.@id', 'embedded.@type']
@@ -384,27 +391,26 @@ def list_result_fields(request, doc_types):
     return fields
 
 
-def build_query(search, prepared_terms, result_fields):
+def build_query(search, prepared_terms, source_fields):
     """
     Prepare the query within the Search object
     """
-    query_info = None
+    query_info = {}
+    string_query = None
     # set _source fields for the search
-    search = search.source(list(result_fields))
+    search = search.source(list(source_fields))
     # prepare the query from prepared_terms
     for field, value in prepared_terms.items():
-        if field == 'search_query':
-            query_info = {}
-            formatted_val = '\"{0}\"'.format(value)
-            query_info['query'] = formatted_val
+        if field == 'q':
+            query_info['query'] = value
             break
-    if query_info:
+    if query_info != {}:
         string_query = {'must': {'simple_query_string': query_info}}
         query_dict = {'query': {'bool': string_query}}
     else:
         query_dict = {'query': {'bool': {}}}
     search.update_from_dict(query_dict)
-    return search
+    return search, string_query
 
 
 def set_sort_order(request, search, search_term, types, doc_types, result):
@@ -475,7 +481,7 @@ def set_filters(request, search, result, principals, doc_types):
         not_field = False # keep track if query is NOT (!)
         if field in ['limit', 'y.limit', 'x.limit', 'mode', 'annotation',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
-                     'sort', 'from', 'referrer', 'search_query']:
+                     'sort', 'from', 'referrer', 'q']:
             continue
         elif field == 'type' and term != 'Item':
             continue
@@ -567,13 +573,14 @@ def initialize_facets(types, doc_types, search_audit, principals):
     return facets
 
 
-def set_facets(search, facets, final_filters):
+def set_facets(search, facets, final_filters, string_query):
     """
     Sets facets in the query using filters
     ES5: simply sets aggs by calling update_from_dict after adding them in
 
     :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
     :param final_filters: Dict of filters which are set for the ES query in set_filters
+    :param string_query: Dict holding the simple_query_string used in the search.
     """
     aggs = {}
     facet_fields = dict(facets).keys() # List of first entry of tuples in facets list.
@@ -601,7 +608,6 @@ def set_facets(search, facets, final_filters):
 
         facet_filters = deepcopy(final_filters['bool'])
 
-
         # Adding facets based on filters
         # handle 'must' and 'must_not' filters separately
         for filter_type in ['must', 'must_not']:
@@ -613,6 +619,11 @@ def set_facets(search, facets, final_filters):
                     # remove filter for a given field for that facet
                     if compare_field == query_field:
                         facet_filters[filter_type].remove(compare_filter)
+
+        # add the string_query, if present, to the bool term with facet_filters
+        if string_query and string_query['must']:
+            # combine statements within 'must' for each
+            facet_filters['must'].append(string_query['must'])
 
         aggs[agg_name] = {
             'aggs': {
@@ -638,12 +649,17 @@ def set_facets(search, facets, final_filters):
     return search
 
 
-def format_facets(es_results, facets, used_filters, schemas, total):
+def format_facets(es_results, facets, used_filters, schemas, total, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results
-    These are stored within 'aggregations' of the result
+    These are stored within 'aggregations' of the result.
+
+    If the frame for the search != embedded, return no facets
     """
     result = []
+    if search_frame != 'embedded':
+        return result
+
     # Loading facets in to the results
     if 'aggregations' not in es_results:
         return result
@@ -689,7 +705,7 @@ def format_facets(es_results, facets, used_filters, schemas, total):
 
     return result
 
-def format_results(request, hits):
+def format_results(request, hits, search_frame):
     """
     Loads results to pass onto UI
     For now, add audits to the results so we can facet/not facet on audits
@@ -697,8 +713,8 @@ def format_results(request, hits):
     fields_requested = request.params.getall('field')
     if fields_requested:
         frame = 'embedded'
-    elif request.params.get('frame'):
-        frame = request.params.get('frame')
+    elif search_frame:
+        frame = search_frame
     else:
         frame = 'embedded'
 
