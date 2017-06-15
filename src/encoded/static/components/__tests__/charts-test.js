@@ -34,12 +34,12 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
             "&limit=all&from=0&sort=experiments_in_set.accession" +
             ChartDataController.getFieldsRequiredURLQueryPart()
         );
-        
+
         server.respondWith(
             "GET",
             chartRequestHref,
             [
-                200, 
+                200,
                 { "Content-Type" : "application/json" },
                 context /* string */
             ]

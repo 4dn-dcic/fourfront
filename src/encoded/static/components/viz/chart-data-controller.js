@@ -4,7 +4,7 @@
 var React = require('react');
 import PropTypes from 'prop-types';
 var _ = require('underscore');
-var { expFxn, Filters, Schemas, ajax, console, layout, isServerSide, navigate } = require('./../util');
+var { expFxn, Filters, Schemas, ajax, console, layout, isServerSide, navigate, object } = require('./../util');
 var vizUtil = require('./utilities');
 
 
@@ -245,6 +245,15 @@ class Provider extends React.Component {
         'children' : PropTypes.object.isRequired
     }
 
+    constructor(props){
+        super(props);
+        if (typeof props.id === 'string') {
+            this.id = props.id;
+        } else {
+            this.id = object.randomId();
+        }
+    }
+
     /**
      * Registers a callback function, which itself calls this.forceUpdate(), with module-viz_chart-data-controller_
      * using ChartDataController.registerUpdateCallback(cb, this.props.id).
@@ -258,7 +267,7 @@ class Provider extends React.Component {
     componentWillMount(){
         ChartDataController.registerUpdateCallback(()=>{
             this.forceUpdate();
-        }, this.props.id);
+        }, this.id);
     }
 
     /**
@@ -271,7 +280,7 @@ class Provider extends React.Component {
      * @returns {undefined} Nothing
      */
     componentWillUnmount(){
-        ChartDataController.unregisterUpdateCallback(this.props.id);
+        ChartDataController.unregisterUpdateCallback(this.id);
     }
 
     /**

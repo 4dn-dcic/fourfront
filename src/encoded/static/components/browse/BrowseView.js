@@ -1,21 +1,24 @@
 'use strict';
 
-// @flow
-
 import React from 'react';
 import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'querystring';
 import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
 import * as globals from './../globals';
-import { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
+import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import * as store from './../../store';
 import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 import ExperimentsTable from './../experiments-table';
-import { isServerSide, expFxn, Filters, navigate, object } from './../util';
+import { isServerSide, expFxn, Filters, navigate, object, layout } from './../util';
+import * as vizUtil from './../viz/utilities';
 import { FlexibleDescriptionBox } from './../item-pages/components';
-import { SortController, SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, SelectedFilesController } from './components';
+import {
+    SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
+    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls
+} from './components';
 
 
 
@@ -26,7 +29,7 @@ export class ExperimentSetDetailPane extends React.Component {
      * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
      * Can always _.flatten() this or map out first file per pair.
      * 
-     * @param {any} [props=this.props] 
+     * @param {Object} expSet - Experiment Set
      * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
      */
     static pairsAndFiles(expSet: Object){
@@ -35,12 +38,18 @@ export class ExperimentSetDetailPane extends React.Component {
         );
     }
 
-    static allFileIDs(expSet: Object){
-        return ExperimentSetDetailPane.pairsAndFiles(expSet).map(function(f){
-            if (Array.isArray(f)) return f[0].uuid;
-            else return f.uuid;
-        });
+    static allFiles(expSet: Object){
+        return _.reduce(ExperimentSetDetailPane.pairsAndFiles(expSet), function(m, f){
+            if (Array.isArray(f)){
+                return m.concat(f);
+            } else {
+                m.push(f);
+                return m;
+            }
+        }, []);
     }
+
+    static allFileIDs(expSet: Object){ return _.pluck(ExperimentSetDetailPane.allFiles(expSet), 'uuid'); }
 
     static propTypes = {
         'expSetFilters' : PropTypes.object.isRequired,
@@ -145,6 +154,10 @@ export class ExperimentSetCheckBox extends React.Component {
 }
 
 
+
+
+
+
 /**
  * Handles state for Browse results, including page & limit.
  * 
@@ -168,6 +181,12 @@ class ResultTableContainer extends React.Component {
         'columnDefinitionOverrides' : {
             'experiments_in_set.biosample.biosource_summary' : {
                 'title' : "Biosource"
+            },
+            'experiments_in_set.experiment_type' : {
+                'title' : "Exp Type"
+            },
+            'experiments_in_set' : {
+                'title' : "Exps"
             }
         },
         'constantHiddenColumns' : ['experimentset_type']
@@ -175,9 +194,9 @@ class ResultTableContainer extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.colDefOverrides = this.colDefOverrides.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
+        this.hiddenColumns = this.hiddenColumns.bind(this);
         this.render = this.render.bind(this);
     }
     /*
@@ -195,12 +214,6 @@ class ResultTableContainer extends React.Component {
     }
     */
 
-    componentDidUpdate(pastProps, pastState){
-        if (this.props.debug) { 
-            console.log('ResultTableContainer updated.');
-        }
-    }
-
     isTermSelected(termKey, facetField, expsOrSets = 'sets'){
         var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
         if (
@@ -214,7 +227,18 @@ class ResultTableContainer extends React.Component {
 
     colDefOverrides(){
         if (!this.props.selectedFiles) return this.props.columnDefinitionOverrides || null;
-        var allSelectedFileIDs = _.keys(this.props.selectedFiles).sort(); // ALL selectedFiles, need to filter down to set re: result expSet
+        var selectedFiles = this.props.selectedFiles;
+
+        function getSelectedFileForSet(allFilesForSet){
+            var max = allFilesForSet.length;
+            var selected = [];
+            for (var i = 0; i < max; i++){
+                if (typeof selectedFiles[allFilesForSet[i]] !== 'undefined'){
+                    selected.push(allFilesForSet[i]);
+                }
+            }
+            return selected;
+        }
 
         // Add Checkboxes
         return _.extend({}, this.props.columnDefinitionOverrides, {
@@ -223,17 +247,28 @@ class ResultTableContainer extends React.Component {
                 'render' : (expSet, columnDefinition, props, width) => {
                     var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
                     var newChildren = origTitleBlock.props.children.slice(0);
-                    var allFiles = ExperimentSetDetailPane.allFileIDs(expSet).sort();
-                    var selectedFilesForSet = _.intersection(allSelectedFileIDs, allFiles);
+                    var allFiles = ExperimentSetDetailPane.allFiles(expSet);
+                    var allFileIDs = _.pluck(allFiles, 'uuid');
+                    var allFilesKeyedByID = _.object(_.zip(allFileIDs, allFiles));
+                    allFileIDs = allFileIDs.sort();
+                    var selectedFilesForSet = getSelectedFileForSet(allFileIDs);
                     newChildren[2] = newChildren[1];
                     newChildren[2] = React.cloneElement(newChildren[2], { 'className' : newChildren[2].props.className + ' mono-text' });
+                    var isAllFilesChecked = ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFileIDs);
                     newChildren[1] = (
                         <ExperimentSetCheckBox
-                            checked={ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFiles)}
-                            indeterminate={ExperimentSetCheckBox.isIndeterminate(selectedFilesForSet, allFiles)}
-                            disabled={ExperimentSetCheckBox.isDisabled(allFiles)}
+                            checked={isAllFilesChecked}
+                            indeterminate={ExperimentSetCheckBox.isIndeterminate(selectedFilesForSet, allFileIDs)}
+                            disabled={ExperimentSetCheckBox.isDisabled(allFileIDs)}
                             onChange={(evt)=>{
-                                console.log(evt, evt.target);
+                                if (!isAllFilesChecked){
+                                    var fileIDsToSelect = _.difference(allFileIDs, selectedFilesForSet);
+                                    this.props.selectFile(fileIDsToSelect.map(function(fid){
+                                        return [fid, allFilesKeyedByID[fid] || true];
+                                    }));
+                                } else if (isAllFilesChecked) {
+                                    this.props.unselectFile(allFileIDs);
+                                }
                             }}
                         />
                     );
@@ -243,9 +278,22 @@ class ResultTableContainer extends React.Component {
         });
     }
 
+    hiddenColumns(){
+        var cols = [];
+        if (Array.isArray(this.props.constantHiddenColumns)){
+            cols = cols.concat(this.props.constantHiddenColumns);
+        }
+        if (Array.isArray(this.props.hiddenColumns)){
+            cols = cols.concat(this.props.hiddenColumns);
+        }
+        return _.uniq(cols);
+    }
+
     render() {
         var facets = this.props.context.facets;
         var results = this.props.context['@graph'];
+
+        
         return (
             <div className="row">
                 { facets.length > 0 ?
@@ -273,6 +321,19 @@ class ResultTableContainer extends React.Component {
                     null
                 }
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
+                    <AboveTableControls
+                        {..._.pick(this.props,
+                            'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
+                            'columns', 'selectedFiles', 'constantHiddenColumns'
+                        )}
+                        parentForceUpdate={this.forceUpdate.bind(this)}
+                        columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
+                            browseTableConstantColumnDefinitions,
+                            this.props.context.columns || {},
+                            {},
+                            this.props.constantHiddenColumns
+                        )}
+                    />
                     <SearchResultTable
                         results={results}
                         columns={this.props.context.columns || {}}
@@ -288,7 +349,7 @@ class ResultTableContainer extends React.Component {
                         }
                         stickyHeaderTopOffset={-78}
                         constantColumnDefinitions={browseTableConstantColumnDefinitions}
-                        hiddenColumns={this.props.constantHiddenColumns}
+                        hiddenColumns={this.hiddenColumns()}
                         columnDefinitionOverrideMap={this.colDefOverrides()}
                         href={this.props.href}
 
@@ -354,14 +415,16 @@ class ControlsAndResults extends React.Component {
                     </div>
                 </div>*/}
 
-                <SelectedFilesController>
-                    <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
-                        <ResultTableContainer
-                            expSetFilters={this.props.expSetFilters}
-                            session={this.props.session}
-                            schemas={this.props.schemas}
-                        />
-                    </SortController>
+                <SelectedFilesController href={this.props.href}>
+                    <CustomColumnController defaultHiddenColumns={['lab.display_title', 'date_created']}>
+                        <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
+                            <ResultTableContainer
+                                expSetFilters={this.props.expSetFilters}
+                                session={this.props.session}
+                                schemas={this.props.schemas}
+                            />
+                        </SortController>
+                    </CustomColumnController>
                 </SelectedFilesController>
             </div>
 
@@ -392,7 +455,6 @@ export default class BrowseView extends React.Component {
     }
 
     render() {
-        //console.log('BROWSE PROPS', this.props);
         var context = this.props.context;
         //var fileFormats = findFormats(context['@graph']);
 
