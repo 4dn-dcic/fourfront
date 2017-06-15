@@ -115,7 +115,7 @@ function buildSearchHref(unselectHref, field, term, searchBase){
         var query = _.clone(parts.query);
         // format multiple filters on the same field
         if(field in query){
-            if(query[field] instanceof Array){
+            if(Array.isArray(query[field])){
                 query[field] = query[field].concat(term);
             }else{
                 query[field] = [query[field]].concat(term);
@@ -473,8 +473,8 @@ class ControlsAndResults extends React.Component {
                             isTermSelected={this.props.isTermSelected}
                             itemTypeForSchemas={itemTypeForSchemas}
                         />
-                    </div> : ''}
-                    <div className="col-sm-7 col-md-8 col-lg-9 expset-result-table-fix">
+                </div> : null}
+                    <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
                         {/*
                         <div className="row above-chart-row clearfix">
                             <div className="col-sm-5 col-xs-12">
@@ -540,16 +540,11 @@ export class Search extends React.Component {
         }else{
             searchBase = url.parse(this.props.href).search || '';
         }
-        var facetdisplay = context.facets && context.facets.some(function(facet) {
-            return facet.total > 0;
-        });
         return (
             <div>
-                {facetdisplay ?
-                    <div className="browse-page-container" ref="container">
-                        <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
-                    </div>
-                : <div className='error-page'><h4>{notification}</h4></div>}
+                <div className="browse-page-container" ref="container">
+                    <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
+                </div>
             </div>
         );
     }
