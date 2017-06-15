@@ -15,7 +15,6 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
-from elasticsearch_dsl import Search
 
 
 def includeme(config):
