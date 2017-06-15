@@ -12,7 +12,7 @@ jest.dontMock('underscore');
 
 
 describe('Testing experiments-table.js', function() {
-    var React, ExperimentsTable, expFuncs, testExperimentsTable, TestUtils, FetchContext, context, schemas, _, ExperimentsTableWrapper, SelectedFilesController;
+    var React, ExperimentsTable, expFuncs, testExperimentsTable, TestUtils, FetchContext, context, schemas, _, ExperimentsTableWrapper, SelectedFilesController, initiallySelectedFiles;
 
     beforeEach(function() {
         React = require('react');
@@ -25,12 +25,17 @@ describe('Testing experiments-table.js', function() {
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
 
-        var selectedFiles = {
-            "8e39bf85-02e2-4cbf-8352-55ca1ab402c7" : true,
-            "177a19b9-5801-4523-a1bf-c0f174a72864" : true,
-            "30b99b06-3134-41e4-b326-bf922e2d178a" : true,
-            "f08bbdca-247b-4c75-b3bf-a9ba2ac8c1e1" : true,
-            "210a7047-37cc-406d-8246-62fbe3400fc3" : true
+        initiallySelectedFiles = {
+            "8e39bf85-02e2-4cbf-8352-55ca1ab402c7" : true, // Pair 1
+            "dbd37686-1427-4ed0-ba74-bf2ba9367554" : true,
+
+            "177a19b9-5801-4523-a1bf-c0f174a72864" : true, // Pair 2
+            "53eea9be-7b36-42d5-baba-8b138b73ba8d" : true,
+
+            "30b99b06-3134-41e4-b326-bf922e2d178a" : true, // Pair 3 (there's more, but lets leave unselected)
+            "c315f5ae-62d4-4413-8606-9cd5556c2341" : true,
+            //"f08bbdca-247b-4c75-b3bf-a9ba2ac8c1e1" : true,
+            //"210a7047-37cc-406d-8246-62fbe3400fc3" : true
         };
 
         ExperimentsTableWrapper = createReactClass({
@@ -38,7 +43,7 @@ describe('Testing experiments-table.js', function() {
             render: function() {
                 return (
                     <div>
-                        <SelectedFilesController initiallySelectedFiles={selectedFiles} ref="controller">
+                        <SelectedFilesController initiallySelectedFiles={initiallySelectedFiles} ref="controller">
                             <ExperimentsTable
                                 experimentArray={context.experiments_in_set}
                                 replicateExpsArray={context.replicate_exps}
@@ -207,19 +212,22 @@ describe('Testing experiments-table.js', function() {
 
         
         function selectedFilePairBlocksFileUUIDObj(sBlocks){
-            return _.object(filePairBlocksWithCheckboxes.filter(function(sBlock){
+            return _.object(_.flatten(filePairBlocksWithCheckboxes.filter(function(sBlock){
                 var elem = getFilePairCheckboxElement(sBlock);
                 return elem.checked === true;
                 return false;
             }).map(function(sBlock){
-                return getFilePairCheckboxElement(sBlock).id.split('~').pop();
-            }).map(function(uuid){
-                return [uuid, true];
-            }));
+                return getFilePairCheckboxElement(sBlock).getAttribute('data-select-files').split(',');//id.split('~').pop();
+            }).map(function(uuidSet){
+                return uuidSet.map(function(uuid){
+                    return [uuid, true];
+                });
+            }), true));
         }
 
         // Ensure we have 5 initially selected file pairs in parentController state (from test def beforeEach)
-        expect(5).toEqual(_.keys(testExperimentsTable.refs.controller.state.selectedFiles).length);
+        expect(_.keys(initiallySelectedFiles).length).toEqual(_.keys(testExperimentsTable.refs.controller.state.selectedFiles).length);
+
         // Check that the selected file pairs / files in state match checkboxes that are selected.
         function selectedFilesMatchSelectedCheckboxes(stateKeys){
             if (!stateKeys) stateKeys = _.keys(testExperimentsTable.refs.controller.state.selectedFiles).sort();
