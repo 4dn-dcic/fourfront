@@ -466,7 +466,6 @@ class ControlsAndResults extends React.Component {
                             showClearFiltersButton={(()=>{
                                 var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
                                 var clearParts = url.parse(clearFiltersURL, true);
-                                console.log('SHOW?', object.isEqual(clearParts.query, urlParts.query), clearParts.query, urlParts.query);
                                 return !object.isEqual(clearParts.query, urlParts.query);
                             })()}
                             onClearFilters={(evt)=>{

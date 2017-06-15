@@ -796,7 +796,11 @@ class DimensioningContainer extends React.Component {
 
     componentWillReceiveProps(nextProps){
         if (nextProps.href !== this.props.href || !compareResultsByID(nextProps.results, this.props.results)){ // <-- the important check, covers different filters, sort, etc.
-            this.setState({ 'results' : nextProps.results, 'openDetailPanes' : {} }, ()=>{
+            this.setState({
+                'results' : nextProps.results,
+                'openDetailPanes' : {},
+                'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions.length)
+            }, ()=>{
                 vizUtil.requestAnimationFrame(()=>{
                     this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
                 });
@@ -805,9 +809,16 @@ class DimensioningContainer extends React.Component {
             var responsiveGridSize = layout.responsiveGridState();
             if (nextProps.columnDefinitions.length !== this.props.columnDefinitions.length || this.lastResponsiveGridSize !== responsiveGridSize){
                 this.lastResponsiveGridSize = responsiveGridSize;
-                vizUtil.requestAnimationFrame(()=>{
-                    this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
+                // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
+                this.setState({
+                    'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions.length)
+                }, ()=>{
+                    vizUtil.requestAnimationFrame(()=>{
+                        // 2. Upon render into DOM, decrease col sizes.
+                        this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
+                    });
                 });
+                
             }
         }
     }

@@ -17,7 +17,7 @@ import * as vizUtil from './../viz/utilities';
 import { FlexibleDescriptionBox } from './../item-pages/components';
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
-    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector
+    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls
 } from './components';
 
 
@@ -155,175 +155,7 @@ export class ExperimentSetCheckBox extends React.Component {
 
 
 
-class AboveTableControls extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.componentWillMount = this.componentWillMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.handleWindowResize = _.debounce(this.handleWindowResize.bind(this), 300);
-        this.handleOpenToggle = _.throttle(this.handleOpenToggle.bind(this), 350);
-        this.handleLayoutToggle = _.throttle(this.handleLayoutToggle.bind(this), 350);
-        this.renderPanel = this.renderPanel.bind(this);
-        this.rightButtons = this.rightButtons.bind(this);
-        this.state = {
-            'open' : false,
-            'reallyOpen' : false,
-            'layout' : 'normal'
-        };
-    }
-
-    componentWillMount(){
-        if (!isServerSide()){
-            window.addEventListener('resize', this.handleWindowResize);
-        }
-    }
-
-    componentWillUnmount(){
-        window.removeEventListener('resize', this.handleWindowResize);
-    }
-
-    componentDidUpdate(prevProps, prevState){
-        if (this.state.open || prevState.open !== this.state.open) ReactTooltip.rebuild();
-        if (this.state.layout === 'wide' && prevState.layout !== 'wide') {
-            this.setWideLayout();
-        } else if (this.state.layout !== 'wide' && prevState.layout === 'wide'){
-            this.unsetWideLayout();
-        }
-    }
-
-    handleWindowResize(e){
-        if (isServerSide() || !document || !document.body) return null;
-        if (this.state.layout === 'wide'){
-            if ((document.body.offsetWidth || window.innerWidth) < 1200) {
-                this.setState({ 'layout' : 'normal' });
-            } else {
-                this.setWideLayout();
-            }
-        }
-    }
-
-    setWideLayout(){
-        if (isServerSide() || !document || !document.getElementsByClassName || !document.body) return null;
-        vizUtil.requestAnimationFrame(()=>{
-            var browsePageContainer = document.getElementsByClassName('browse-page-container')[0];
-            var bodyWidth = document.body.offsetWidth || window.innerWidth;
-            if (bodyWidth < 1200) {
-                this.handleLayoutToggle(); // Cancel
-                throw new Error('Not large enough window width to expand. Aborting.');
-            }
-            var extraWidth = bodyWidth - 1180;
-            browsePageContainer.style.marginLeft = browsePageContainer.style.marginRight = -(extraWidth / 2) + 'px';
-            this.lastBodyWidth = bodyWidth;
-            setTimeout(this.props.parentForceUpdate, 100);
-        });
-    }
-
-    unsetWideLayout(){
-        if (isServerSide() || !document || !document.getElementsByClassName) return null;
-        vizUtil.requestAnimationFrame(()=>{
-            var browsePageContainer = document.getElementsByClassName('browse-page-container')[0];
-            browsePageContainer.style.marginLeft = browsePageContainer.style.marginRight = '';
-            setTimeout(this.props.parentForceUpdate, 100);
-        });
-    }
-
-    handleOpenToggle(value){
-        if (this.timeout){
-            clearTimeout(this.timeout);
-            delete this.timeout;
-        }
-        var state = { 'open' : value };
-        if (state.open){
-            state.reallyOpen = state.open;
-        } else {
-            this.timeout = setTimeout(()=>{
-                this.setState({ 'reallyOpen' : false });
-            }, 400);
-        }
-        this.setState(state);
-    }
-
-    handleLayoutToggle(){
-        if (!SearchResultTable.isDesktopClientside()) return null;
-        var state = { };
-        if (this.state.layout === 'normal'){
-            state.layout = 'wide';
-        } else {
-            state.layout = 'normal';
-        }
-        this.setState(state);
-    }
-
-    renderPanel(){
-        var { open, reallyOpen } = this.state;
-        if (open === 'customColumns' || reallyOpen === 'customColumns') {
-            return (
-                <Collapse in={!!(open)} transitionAppear>
-                    <CustomColumnSelector
-                        hiddenColumns={this.props.hiddenColumns}
-                        addHiddenColumn={this.props.addHiddenColumn}
-                        removeHiddenColumn={this.props.removeHiddenColumn}
-                        columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
-                            browseTableConstantColumnDefinitions,
-                            this.props.context.columns || {},
-                            {}, //this.props.columnDefinitionOverrides,
-                            this.props.constantHiddenColumns
-                        )}
-                    />
-                </Collapse>
-            );
-        }
-        return null;
-    }
-
-    rightButtons(){
-        var { open, layout } = this.state;
-
-        function expandLayoutButton(){
-            return (
-                <Button className="hidden-xs" onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
-                    <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'arrows-alt' : 'crop')}></i>
-                </Button>
-            );
-        }
-
-        return open === false ? (
-            <div className="pull-right">
-                <Button onClick={this.handleOpenToggle.bind(this, (!open && 'customColumns') || false)} data-effect="float" data-tip="Change visible columns" data-event-off="click, mouseout">
-                    <i className="icon icon-eye-slash icon-fw"></i>
-                </Button>
-                &nbsp;
-                { expandLayoutButton.call(this) }
-            </div>
-        ) : (
-            <div className="pull-right">
-
-                Close &nbsp;
-                
-                <Button onClick={this.handleOpenToggle.bind(this, false)}>
-                    <i className="icon icon-angle-up icon-fw"></i>
-                </Button>
-                
-            </div>
-        );
-    }
-
-
-    render(){
-
-        return (
-            <div className="above-results-table-row">
-                <div className="clearfix">
-                    Selected { _.keys(this.props.selectedFiles).length }
-                    { this.rightButtons() }
-                </div>
-                { this.renderPanel() }
-            </div>
-        );
-    }
-}
 
 
 /**
@@ -493,10 +325,15 @@ class ResultTableContainer extends React.Component {
                     <AboveTableControls
                         {..._.pick(this.props,
                             'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
-                            'constantHiddenColumns', 'columns', 'selectedFiles'
+                            'columns', 'selectedFiles', 'constantHiddenColumns'
                         )}
                         parentForceUpdate={this.forceUpdate.bind(this)}
-                        columnDefinitionOverrides={this.colDefOverrides()}
+                        columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
+                            browseTableConstantColumnDefinitions,
+                            this.props.context.columns || {},
+                            {},
+                            this.props.constantHiddenColumns
+                        )}
                     />
                     <SearchResultTable
                         results={results}
@@ -579,7 +416,7 @@ class ControlsAndResults extends React.Component {
                     </div>
                 </div>*/}
 
-                <SelectedFilesController>
+                <SelectedFilesController href={this.props.href}>
                     <CustomColumnController defaultHiddenColumns={['lab.display_title', 'date_created']}>
                         <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer

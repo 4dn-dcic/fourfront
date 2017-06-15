@@ -50,7 +50,13 @@ export class SelectedFilesController extends React.Component {
     }
 
     static defaultProps = {
-        'initiallySelectedFiles' : null
+        'initiallySelectedFiles' : null,
+        'resetSelectedFilesCheck' : function(nextProps, pastProps){
+            if (typeof nextProps.href === 'string') {
+                if (nextProps.href !== pastProps.href) return true;
+            }
+            return false;
+        }
     }
 
     constructor(props){
@@ -62,6 +68,12 @@ export class SelectedFilesController extends React.Component {
         this.state = {
             'selectedFiles' : SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles)
         };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.resetSelectedFilesCheck(nextProps, this.props)){
+            this.setState({ 'selectedFiles' : SelectedFilesController.parseInitiallySelectedFiles(nextProps.initiallySelectedFiles) });
+        }
     }
 
     selectFile(uuid: string, memo = null){
