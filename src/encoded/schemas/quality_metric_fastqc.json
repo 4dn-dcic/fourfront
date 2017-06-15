@@ -29,7 +29,7 @@
             "description": "FastQC Summary metric"
         },
         "Sequence length": {
-            "type": "string",
+            "type": "integer",
             "description": "FastQC Summary metric"
         },
         "%GC": {
