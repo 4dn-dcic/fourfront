@@ -78,6 +78,7 @@ before_script:
   fi
 script:
 - sudo chown -R $USER /etc/elasticsearch
+- ln -s /etc/elasticsearch/ /usr/share/elasticsearch/config
 - if test -n "$NPM"; then npm test; fi
 - if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone" --cov
   src/encoded; fi
