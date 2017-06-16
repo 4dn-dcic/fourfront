@@ -22,7 +22,7 @@ def test_replaced_file_not_uniqued(testapp, file):
 
 
 @pytest.fixture
-def fastq_json(award, experiment, lab):
+def fastq_json(award, lab):
     return {
         'accession': '4DNFI067APU2',
         'award': award['uuid'],
@@ -35,7 +35,7 @@ def fastq_json(award, experiment, lab):
 
 
 @pytest.fixture
-def fasta_json(award, experiment, lab):
+def fasta_json(award, lab):
     return {
         'accession': '4DNFI067APA2',
         'award': award['uuid'],
@@ -48,8 +48,27 @@ def fasta_json(award, experiment, lab):
 
 
 @pytest.fixture
-def all_file_jsons(fastq_json, fasta_json):
-    return [fastq_json, fasta_json]
+def pairs_index():
+    return {'download': 'test.pairs.txt.gz.px2', 'type': 'application/octet-stream'}
+
+
+@pytest.fixture
+def processed_file_json(award, lab, pairs_index):
+    return {
+        'accession': '4DNFI067PPPP',
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': 'pairs',
+        'filename': 'test.pairs.txt.gz',
+        'md5sum': '0123456789abcdef0123456789111100',
+        'status': 'uploaded',
+        'index': pairs_index
+    }
+
+
+@pytest.fixture
+def all_file_jsons(fastq_json, fasta_json, processed_file_json):
+    return [fastq_json, fasta_json, processed_file_json]
 
 
 @pytest.fixture
@@ -67,7 +86,10 @@ def related_files(all_file_jsons):
 
 def test_file_post_all(testapp, all_file_jsons):
     for f in all_file_jsons:
-        file_url = '/file_' + f['file_format']
+        ff = f['file_format']
+        if ff == 'pairs':
+            ff = 'processed'
+        file_url = '/file_' + ff
         testapp.post_json(file_url, f, status=201)
 
 

@@ -52,6 +52,50 @@
                 "image",
                 "other"
             ]
+        },
+        "index": {
+            "title": "Index File",
+            "description": "The associated index file for the file eg. bai for bam or pairs_px2 for pairs",
+            "type": "object",
+            "additionalProperties": false,
+            "formInput": "file",
+            "attachment": true,
+            "ff_flag": "clear clone",
+            "properties": {
+                "download": {
+                    "title": "File Name",
+                    "type": "string"
+                },
+                "href": {
+                    "internal_comment": "Internal webapp URL for document file",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "MIME type",
+                    "type": "string",
+                    "enum": [
+                        "application/x-gzip",
+                        "application/octet-stream",
+                        "application/zip",
+                        "text/plain",
+                        "text/tab-separated-values"
+                    ]
+                },
+                "md5sum": {
+                    "title": "MD5sum",
+                    "type": "string",
+                    "format": "md5sum"
+                },
+                "size": {
+                    "title": "File size",
+                    "type": "integer"
+                },
+                "blob_id":{
+                    "title": "Blob ID",
+                    "type": "string",
+                    "internal_comment": "blob storage ID. Use to like with s3/rds"
+                }
+            }
         }
      },
      "file_format_file_extension": {
