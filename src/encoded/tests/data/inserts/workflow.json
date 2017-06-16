@@ -666,7 +666,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"chromsizes_file",
-                    "step_argument_type":"Input file"
+                    "step_argument_type":"Input file",
+                    "workflow_step":"/analysis-steps/pairs2hic/"
                 }
             ]
         },
@@ -677,7 +678,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"input_pairs",
-                    "step_argument_type":"Input file"
+                    "step_argument_type":"Input file",
+                    "workflow_step":"/analysis-steps/merge_pairs/"
                 }
             ]
         },
@@ -688,7 +690,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"input_pairs_index",
-                    "step_argument_type":"Input file"
+                    "step_argument_type":"Input file",
+                    "workflow_step":"/analysis-steps/merge_pairs/"
                 }
             ]
         },
@@ -698,7 +701,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"ncores",
-                    "step_argument_type":"parameter"
+                    "step_argument_type":"parameter",
+                    "workflow_step":"/analysis-steps/cooler/"
                 }
             ]
         },
@@ -708,7 +712,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"binsize",
-                    "step_argument_type":"parameter"
+                    "step_argument_type":"parameter",
+                    "workflow_step":"/analysis-steps/cooler/"
                 }
             ]
         },
@@ -718,7 +723,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"min_res",
-                    "step_argument_type":"parameter"
+                    "step_argument_type":"parameter",
+                    "workflow_step":"/analysis-steps/pairs2hic/"
                 }
             ]
         },
@@ -728,7 +734,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"normalization_type",
-                    "step_argument_type":"parameter"
+                    "step_argument_type":"parameter",
+                    "workflow_step":"/analysis-steps/hic2mcool/"
                 }
             ]
         },
@@ -739,7 +746,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"output_pairs_index",
-                    "step_argument_type":"Output file"
+                    "step_argument_type":"Output file",
+                    "workflow_step":"/analysis-steps/merge_pairs/"
                 }
             ]
         },
@@ -750,7 +758,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"output_pairs",
-                    "step_argument_type":"Output file"
+                    "step_argument_type":"Output file",
+                    "workflow_step":"/analysis-steps/merge_pairs/"
                 }
             ]
         },
@@ -761,7 +770,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"out_cool",
-                    "step_argument_type":"Output file"
+                    "step_argument_type":"Output file",
+                    "workflow_step":"/analysis-steps/cooler/"
                 }
             ]
         },
@@ -772,7 +782,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"output_hic",
-                    "step_argument_type":"Output file"
+                    "step_argument_type":"Output file",
+                    "workflow_step":"/analysis-steps/pairs2hic/"
                 }
             ]
         },
@@ -783,7 +794,8 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"out_mcool",
-                    "step_argument_type":"Output file"
+                    "step_argument_type":"Output file",
+                    "workflow_step":"/analysis-steps/hic2mcool/"
                 }
             ]
         },
@@ -791,11 +803,13 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"pairs_index",
-                    "step_argument_type":"Input file or parameter"
+                    "step_argument_type":"Input file or parameter",
+                    "workflow_step":"/analysis-steps/cooler/"
                 },
                 {
                     "step_argument_name":"output_pairs_index",
-                    "step_argument_type":"Output file or parameter"
+                    "step_argument_type":"Output file or parameter",
+                    "workflow_step":"/analysis-steps/merge_pairs/"
                 }
             ]
         },
@@ -803,11 +817,13 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"input_pairs",
-                    "step_argument_type":"Input file or parameter"
+                    "step_argument_type":"Input file or parameter",
+                    "workflow_step":"/analysis-steps/pairs2hic/"
                 },
                 {
                     "step_argument_name":"output_pairs",
-                    "step_argument_type":"Output file or parameter"
+                    "step_argument_type":"Output file or parameter",
+                    "workflow_step":"/analysis-steps/merge_pairs/"
                 }
             ]
         },
@@ -815,11 +831,13 @@
             "argument_mapping":[
                 {
                     "step_argument_name":"input_hic",
-                    "step_argument_type":"Input file or parameter"
+                    "step_argument_type":"Input file or parameter",
+                    "workflow_step":"/analysis-steps/hic2mcool/"
                 },
                 {
                     "step_argument_name":"output_hic",
-                    "step_argument_type":"Output file or parameter"
+                    "step_argument_type":"Output file or parameter",
+                    "workflow_step":"/analysis-steps/pairs2hic/"
                 }
             ]
         }
