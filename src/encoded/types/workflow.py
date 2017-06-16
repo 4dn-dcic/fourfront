@@ -87,7 +87,6 @@ class Workflow(Item):
             for arg in args:
 
                 argName = arg.get('name')
-                    
                 if argName:
                     priorArgument = seen_argument_names.get(argName)
                     if priorArgument and len(arg['target']) > 0:
