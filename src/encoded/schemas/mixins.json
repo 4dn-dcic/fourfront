@@ -37,7 +37,7 @@
             "description": "Accessions previously assigned to objects that have been merged with this object.",
             "type": "array",
             "internal_comment":"Only admins are allowed to set or update this value.",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "default": [],
             "items": {
                 "title": "Alternate Accession",
@@ -69,7 +69,7 @@
     "status": {
         "status": {
             "title": "Status",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "type": "string",
             "default": "in review by lab",
             "permission": "import_items",
@@ -90,7 +90,7 @@
         "date_created": {
             "rdfs:subPropertyOf": "dc:created",
             "title": "Date Created",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -102,7 +102,7 @@
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
             "title": "Submitted By",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "type": "string",
             "linkTo": "User",
             "serverDefault": "userid",
@@ -112,7 +112,7 @@
     "modified": {
       "lastmodified": {
           "title": "Last Modified",
-          "exclude_from": ["submit4dn", "FFedit-create"],
+          "exclude_from": ["submit4dn"],
           "type": "array",
           "items": {
               "date_modified": {
