@@ -34,7 +34,7 @@
                 {"format": "date-time"},
                 {"format": "date"}
             ],
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "permission": "import_items"
         },
         "experiments_in_set": {
