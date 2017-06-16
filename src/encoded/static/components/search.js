@@ -472,6 +472,21 @@ class ControlsAndResults extends React.Component {
                             filterFacetsFxn={FacetList.filterFacetsForSearch}
                             isTermSelected={this.props.isTermSelected}
                             itemTypeForSchemas={itemTypeForSchemas}
+                            showClearFiltersButton={(()=>{
+                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+                                var clearParts = url.parse(clearFiltersURL, true);
+                                return !object.isEqual(clearParts.query, urlParts.query);
+                            })()}
+                            onClearFilters={(evt)=>{
+                                evt.preventDefault();
+                                evt.stopPropagation();
+                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+                                if (!clearFiltersURL) {
+                                    console.error("No Clear Filters URL");
+                                    return;
+                                }
+                                this.props.navigate(clearFiltersURL, {});
+                            }}
                         />
                 </div> : null}
                     <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>

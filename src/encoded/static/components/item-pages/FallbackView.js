@@ -24,7 +24,7 @@ export class Fallback extends React.Component {
 
     render() {
         var context = this.props.context;
-        var title = typeof context.title == "string" ? context.title : url.parse(this.props.href || this.context.location_href).path;
+        var title = typeof context.title === "string" ? context.title : url.parse(this.props.href || this.context.location_href).path;
         return (
             <div className="view-item">
                 <ItemPageTitle context={context} showType={false} />

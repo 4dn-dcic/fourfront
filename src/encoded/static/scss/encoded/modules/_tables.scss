@@ -1383,7 +1383,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							@include search-result-column-block;
 							> .inner {
 								height: 46px;
-								transition : height .35s ease-out, padding-top .35s ease-out;
+								//transition : height .35s ease-out, padding-top .35s ease-out;
 							}
 							&:not(:last-child) {
 								border-right: 1px dotted rgba(0,0,0,0.075);
@@ -1516,7 +1516,36 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 } // .search-results-outer-container
 
+.above-results-table-row {
+	min-height: 40px;
+	padding-bottom: 5px;
+	margin-top: -40px;
 
+	.visible-columns-selector-panel {
+		margin-top: 7px;
+		> .inner {
+			padding: 7px 0;
+			border-top: 1px solid #ddd;
+			> div.row {
+				margin: 0;
+				border-top: 1px solid #eee;
+				padding-top: 10px;
+				padding-left: 10px;
+				padding-right: 10px;
+			}
+			.panel-title {
+				padding-bottom: 17px;
+				padding-top: 10px;
+			}
+		}
+		
+	}
+
+	.box {
+		min-height: 33px;
+		line-height: 33px;
+	}
+}
 
 .result-table {
     position: relative;

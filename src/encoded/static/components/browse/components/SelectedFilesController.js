@@ -50,7 +50,13 @@ export class SelectedFilesController extends React.Component {
     }
 
     static defaultProps = {
-        'initiallySelectedFiles' : null
+        'initiallySelectedFiles' : null,
+        'resetSelectedFilesCheck' : function(nextProps, pastProps){
+            if (typeof nextProps.href === 'string') {
+                if (nextProps.href !== pastProps.href) return true;
+            }
+            return false;
+        }
     }
 
     constructor(props){
@@ -64,22 +70,60 @@ export class SelectedFilesController extends React.Component {
         };
     }
 
-    selectFile(uuid: string, memo = null){
-        if (typeof this.state.selectedFiles[uuid] !== 'undefined'){
-            throw new Error("File already selected!");
+    componentWillReceiveProps(nextProps){
+        if (nextProps.resetSelectedFilesCheck(nextProps, this.props)){
+            this.setState({ 'selectedFiles' : SelectedFilesController.parseInitiallySelectedFiles(nextProps.initiallySelectedFiles) });
         }
-        var newSet = _.clone(this.state.selectedFiles);
-        newSet[uuid] = memo || true;
-        this.setState({ 'selectedFiles' : newSet });
+    }
+
+    selectFile(uuid: string, memo = null){
+        
+        var newSelectedFiles = _.clone(this.state.selectedFiles);
+
+        function add(id, memo = null){
+            if (typeof newSelectedFiles[id] !== 'undefined'){
+                throw new Error("File already selected!");
+            }
+            newSelectedFiles[id] = memo || true;
+        }
+
+        if (Array.isArray(uuid)){
+            uuid.forEach((id)=>{
+                if (typeof id === 'string'){
+                    add(id);
+                } else if (Array.isArray(id)){
+                    add(id[0], id[1]);
+                } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
+            });
+        } else if (typeof uuid === 'string') {
+            add(uuid, memo);
+        } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
+
+        this.setState({ 'selectedFiles' : newSelectedFiles });
     }
 
     unselectFile(uuid: string){
-        if (typeof this.state.selectedFiles[uuid] === 'undefined'){
-            throw new Error("File not in set!");
+        var newSelectedFiles = _.clone(this.state.selectedFiles);
+
+        function remove(id) {
+            if (typeof newSelectedFiles[id] === 'undefined'){
+                console.log(id, newSelectedFiles);
+                throw new Error("File not in set!");
+            }
+            delete newSelectedFiles[id];
         }
-        var newSet = _.clone(this.state.selectedFiles);
-        delete newSet[uuid];
-        this.setState({ 'selectedFiles' : newSet });
+
+        if (Array.isArray(uuid)){
+            uuid.forEach((id)=>{
+                if (typeof id === 'string'){
+                    remove(id);
+                } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
+            });
+        } else if (typeof uuid === 'string') {
+            remove(uuid);
+        } else throw new Error("Supplied uuid is not a string or array of strings:", uuid);
+
+        this.setState({ 'selectedFiles' : newSelectedFiles });
     }
 
     resetSelectedFiles(props = this.props){
@@ -89,13 +133,13 @@ export class SelectedFilesController extends React.Component {
     getFlatList(){ return SelectedFilesController.objectToCompleteList(this.state.selectedFiles); }
 
     render(){
+        if (!React.isValidElement(this.props.children)) throw new Error('CustomColumnController expects props.children to be a valid React component instance.');
         var propsToPass = _.extend(_.omit(this.props, 'children'), {
             'selectedFiles'         : this.state.selectedFiles,
             'selectFile'            : this.selectFile,
             'unselectFile'          : this.unselectFile,
             'resetSelectedFiles'    : this.resetSelectedFiles
         });
-
         return React.cloneElement(this.props.children, propsToPass);
     }
 
