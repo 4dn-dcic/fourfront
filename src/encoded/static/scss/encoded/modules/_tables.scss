@@ -1545,6 +1545,19 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 		min-height: 33px;
 		line-height: 33px;
 	}
+
+	.right-buttons {
+		> button {
+			margin-left: 5px;
+		}
+		.expand-layout-button:not(.expanded) {
+			@media screen and (max-width: 1200px){
+				display: none;
+			}
+		}
+	}
+
+	
 }
 
 .result-table {

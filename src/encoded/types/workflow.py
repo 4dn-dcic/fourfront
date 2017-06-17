@@ -100,7 +100,6 @@ class Workflow(Item):
                                     foundExisting = True
                             if not foundExisting:
                                 priorArgument['target'].append(currentTarget)
-                            
                     else:
                         resultArgs.append(arg)
                         seen_argument_names[argName] = arg

@@ -119,14 +119,13 @@ export const defaultColumnDefinitionMap = {
             return <DateUtility.LocalizedTime timestamp={defaultColumnBlockRenderFxn(result, columnDefinition, props, width)} formatType='date-sm' />;
         }
     },
-    'experiments_in_set' : {
+    'number_of_experiments' : {
         'title' : '# of Experiments',
-        'widthMap' : {'lg' : 60, 'md' : 60, 'sm' : 50},
-        'noSort' : true,
-        'render' : function(result, columnDefinition, props, width){
-            if (!Array.isArray(result.experiments_in_set)) return null;
-            return result.experiments_in_set.length;
-        }
+        'widthMap' : {'lg' : 75, 'md' : 75, 'sm' : 50},
+        //'render' : function(result, columnDefinition, props, width){
+        //    if (!Array.isArray(result.experiments_in_set)) return null;
+        //    return result.experiments_in_set.length;
+        //}
     },
     'experiments_in_set.experiment_type' : {
         'title' : 'Experiment Type',
@@ -794,7 +793,11 @@ class DimensioningContainer extends React.Component {
     }
 
     componentWillReceiveProps(nextProps){
-        if (nextProps.href !== this.props.href || !compareResultsByID(nextProps.results, this.props.results)){ // <-- the important check, covers different filters, sort, etc.
+        // Reset results on change in results, total, or href.
+        if (
+            nextProps.href !== this.props.href ||
+            !compareResultsByID(nextProps.results, this.props.results)
+        ){
             this.setState({
                 'results' : nextProps.results,
                 'openDetailPanes' : {},
@@ -804,6 +807,7 @@ class DimensioningContainer extends React.Component {
                     this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
                 });
             });
+        // Or, reset widths on change in columns
         } else {
             var responsiveGridSize = layout.responsiveGridState();
             if (nextProps.columnDefinitions.length !== this.props.columnDefinitions.length || this.lastResponsiveGridSize !== responsiveGridSize){
