@@ -25,7 +25,6 @@ class Workflow(Item):
     embedded = ['workflow_steps.step',
                 'workflow_steps.step_name',
                 'arguments',
-                'analysis_steps',
                 'arguments.argument_mapping']
     rev = {
         'workflow_runs': ('WorkflowRun', 'workflow'),
@@ -171,7 +170,6 @@ class WorkflowRun(Item):
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow',
                 'workflow.analysis_steps',
-                'workflow.analysis_steps.inputs',
                 'input_files.workflow_argument_name',
                 'input_files.value',
                 'input_files.value.file_format',
