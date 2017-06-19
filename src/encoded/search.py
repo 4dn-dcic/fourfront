@@ -76,8 +76,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     build_type_filters(result, request, doc_types, types)
 
     # get the fields that will be used as source for the search
-    # currently, supports frame=raw but live faceting does not work
-    # this is okay because the only frame=raw access will be programmatic
+    # currently, supports frame=raw/obnject but live faceting does not work
+    # this is okay because the only non-embedded access will be programmatic
     source_fields = sorted(list_source_fields(request, doc_types, search_frame))
 
     ### GET FILTERED QUERY
@@ -89,7 +89,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # TODO: implement BOOST here?
 
     ### Set filters
-    search, query_filters, used_filters = set_filters(request, search, result, principals, doc_types)
+    upper_time = None
+    lower_time = None
+    search, query_filters, used_filters = set_filters(request, search, result, principals, doc_types, upper_time, lower_time)
 
     ### Set starting facets
     facets = initialize_facets(types, doc_types, search_audit, principals)
@@ -408,7 +410,7 @@ def build_query(search, prepared_terms, source_fields):
         string_query = {'must': {'simple_query_string': query_info}}
         query_dict = {'query': {'bool': string_query}}
     else:
-        query_dict = {'query': {'bool': {}}}
+        query_dict = {'query': {'bool':{}}}
     search.update_from_dict(query_dict)
     return search, string_query
 
@@ -466,7 +468,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     return search
 
 
-def set_filters(request, search, result, principals, doc_types):
+def set_filters(request, search, result, principals, doc_types, upper_time=None, lower_time=None):
     """
     Sets filters in the query
     """
@@ -538,6 +540,15 @@ def set_filters(request, search, result, principals, doc_types):
                 bool_used_filters[field].append(term)
                 query_filters.append(this_filter)
 
+    # lastly, add date limits to filters if given
+    if upper_time or lower_time:
+        date_limits = {'format':'yyyy-MM-dd'}
+        if upper_time:
+            date_limits['lte'] = upper_time # lte is >=
+        if lower_time:
+            date_limits['gte'] = lower_time # gte is <=
+        query_filters.append({'range':{'embedded.date_created': date_limits}})
+
     # To modify filters of elasticsearch_dsl Search, must call to_dict(),
     # modify that, then update from the new dict
     prev_search = search.to_dict()
@@ -608,12 +619,17 @@ def set_facets(search, facets, final_filters, string_query):
 
         facet_filters = deepcopy(final_filters['bool'])
 
-        # Adding facets based on filters
-        # handle 'must' and 'must_not' filters separately
+        # Remove filters from fields they apply to.
+        # For example, the 'biosource_type' aggs should not have any
+        # biosource_type filter in place.
+        # Handle 'must' and 'must_not' filters separately
         for filter_type in ['must', 'must_not']:
             if final_filters['bool'][filter_type] == []:
                 continue
             for compare_filter in final_filters['bool'][filter_type]:
+                # if not a terms filter, dont do anything (do use as a filter)
+                if 'terms' not in compare_filter:
+                    continue
                 # there should only be one key here
                 for compare_field in compare_filter['terms'].keys():
                     # remove filter for a given field for that facet
