@@ -196,7 +196,7 @@ class File(Item):
         "description": "Attachments that can be bundled and downloaded along with the File eg. bam index with bam file",
         "type": "array",
         "items": {
-            "title": "Input of Workflow Run",
+            "title": "Attached downloads",
             "type": ["string", "object"],
         }
     })

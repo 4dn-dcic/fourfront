@@ -254,13 +254,6 @@ def test_name_for_file_is_accession(registry, fastq_json):
     assert my_file.__name__ == fastq_json['accession']
 
 
-# def test_file_type(registry, fastq_json):
-#    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-#    my_file = FileFastq.create(registry, uuid, fastq_json)
-#    assert 'gz' == my_file.file_type('gz')
-#    assert "fastq gz" == my_file.file_type('fastq', 'gz')
-
-
 def test_post_upload_only_on_uploading(registry, fastq_json, request):
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
     my_file = FileFastq.create(registry, uuid, fastq_json)
@@ -286,7 +279,7 @@ def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq_
 
 def test_workflowrun_output_rev_link(testapp, fastq_json, workflow_run_json):
     res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
-    workflow_run_json['output_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    workflow_run_json['output_files'] = [{'workflow_argument_name': 'test', 'value': res['@id']}]
     res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
 
     new_file = testapp.get(res['@id']).json
@@ -295,8 +288,21 @@ def test_workflowrun_output_rev_link(testapp, fastq_json, workflow_run_json):
 
 def test_workflowrun_input_rev_link(testapp, fastq_json, workflow_run_json):
     res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
-    workflow_run_json['input_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    workflow_run_json['input_files'] = [{'workflow_argument_name': 'test', 'value': res['@id']}]
     res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
 
     new_file = testapp.get(res['@id']).json
     assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
+
+
+def test_calculated_associated_download_no_index(file):
+    assert not file['associated_downloads']
+
+
+# currently only set up to have a single associated download but in the future it may be
+# feasible to have an index and an attachment (or some other document associated file to
+# bundle so calc prop is an array - if so will need additional test
+def test_calculated_associated_download_single_index(testapp, processed_file_json):
+    res = testapp.post_json('/file_processed', processed_file_json, status=201).json['@graph'][0]
+    assoc_dl = res['associated_downloads']
+    assert assoc_dl[0]['download'] == 'test.pairs.txt.gz.px2'
