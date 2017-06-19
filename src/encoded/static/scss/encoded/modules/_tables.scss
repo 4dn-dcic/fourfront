@@ -907,7 +907,7 @@ $small-label-accession-font-size : 0.75rem;
 				position: absolute;
 				font-family: 'Work Sans', sans-serif;
 				left: 0;
-				top: 0%;
+				top: 2px;
 				font-size: 0.625rem;
 				//font-size: 0.4875rem;
 				text-transform: uppercase;
@@ -950,7 +950,8 @@ $small-label-accession-font-size : 0.75rem;
 			.s-block > .name > .label-ext-info {
 				opacity: 0.4;
 				font-weight: 600;
-				transform: scale3d(0.75,0.75,1) translate3d(-15%,0%,0);
+				transform: scale3d(0.75,0.75,1) translate3d(0,0,0);
+				transform-origin: 0px 0px;
 				transition: opacity .4s, transform .4s, top .4s, margin-top .4s;
 				/* pointer-events: none; */
 			}
@@ -988,15 +989,15 @@ $small-label-accession-font-size : 0.75rem;
 			.s-block:hover > .name > .label-ext-info {
 				opacity: 1 !important;
 				color: #000;
-				transform: scale3d(1,1,1) translate3d(0%,20%,0);
+				transform: scale3d(1,1,1) translate3d(0,0,0);
 			}
 			.s-block:hover > .name:not(:hover) > .label-ext-info {
-				transform: scale3d(1, 1, 1) translate3d(1%, 20%, 0);
+				transform: scale3d(1, 1, 1) translate3d(0, 0, 0);
 			}
 			.s-block.hide-name-on-block-hover:hover > .name:not(:hover) > .label-ext-info {
 				top: 50%;
     			margin-top: -9px;
-				transform: scale3d(1, 1, 1) translate3d(1%, 12%, 0);
+				transform: scale3d(1, 1, 1) translate3d(0, 0, 0);
 			}
 			.s-block.hide-name-on-block-hover:hover > .name:not(:hover) > .label-ext-info.has-subtitle {
     			margin-top: -13px;
@@ -1011,7 +1012,7 @@ $small-label-accession-font-size : 0.75rem;
 			}
 			.s-block:hover > .name > .label-ext-info > span.ext,
 			.s-block:hover .s-block > .name > .label-ext-info > span.ext {
-				transform: translate3d(3px,0,0);
+				transform: translate3d(0px,0,0);
 			}
 			.s-block > .name > .label-ext-info > .label-title {
 				transition: opacity .25s, margin-top .25s;
@@ -1147,8 +1148,7 @@ $small-label-accession-font-size : 0.75rem;
 						}
 
 
-						.files,
-						.file-pairs {
+						.files, .file-pairs {
 
 							.s-block.file-pair {
 								&:not(:last-child){
@@ -1159,6 +1159,10 @@ $small-label-accession-font-size : 0.75rem;
 								> .s-block-list.files > .s-block.file:not(:last-child) {
 									border-bottom-style: dotted;
 								}
+
+								.name.col-file-pair {
+									line-height: 25px;
+								}
 							}
 
 							.s-block.file {
@@ -1168,8 +1172,8 @@ $small-label-accession-font-size : 0.75rem;
 									border-color: rgba(0,0,0,0.2);
 								}
 
-								&.single-item {
-									line-height: 50px;
+								&.single-item .name.col-file {
+									line-height: 55px;
 								}
 
 								&:not(.single-item) .name.col-file {
