@@ -124,7 +124,7 @@ export class ExperimentSetDetailPane extends React.Component {
 const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'display_title', },
     { 'field' : 'experiments_in_set.experiment_type', },
-    { 'field' : 'experiments_in_set', },
+    { 'field' : 'number_of_experiments', },
     { 'field' : 'lab.display_title', },
     { 'field' : 'date_created',  }
 ], defaultColumnDefinitionMap);
@@ -185,7 +185,7 @@ class ResultTableContainer extends React.Component {
             'experiments_in_set.experiment_type' : {
                 'title' : "Exp Type"
             },
-            'experiments_in_set' : {
+            'number_of_experiments' : {
                 'title' : "Exps"
             }
         },

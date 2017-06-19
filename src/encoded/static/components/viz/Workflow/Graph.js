@@ -85,7 +85,7 @@ export default class Graph extends React.Component {
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
         'nodeTitle'     : function(node, canBeJSX = false){ return node.title || node.name; },
         'innerMargin'   : {
-            'top' : 32,
+            'top' : 60,
             'bottom' : 60,
             'left' : 20,
             'right' : 20
