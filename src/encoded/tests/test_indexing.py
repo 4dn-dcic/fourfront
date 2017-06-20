@@ -128,7 +128,6 @@ def test_indexing_simple(testapp, indexer_testapp):
     assert uuids == [indv_res['uuid'] for indv_res in res.json['@graph']]
 
 
-
 def test_listening(testapp, listening_conn):
     import time
     testapp.post_json('/testing-post-put-patch/', {'required': ''})
