@@ -1,9 +1,14 @@
 'use strict';
 
-var React = require('react');
-var { Alert, Fade } = require('react-bootstrap');
-var _ = require('underscore');
-var store = require('../store');
+import React from 'react';
+import { Alert, Fade } from 'react-bootstrap';
+import _ from 'underscore';
+import * as store from '../store';
+
+
+const defaultNavigateDisappearThreshold = 1;
+
+let alertNavigatationCountMap = {};
 
 /**
  * A Component and utility (via Component's 'statics' property & functions) to 
@@ -11,9 +16,9 @@ var store = require('../store');
  * the end user, which is the same functionality as calling Alerts.deQueue(alert) from anywhere in application, supplying the same
  * title for alert that was queued.
  * 
- * @module {Component} alerts
+ * @class Alerts
+ * @prop {Object[]} alerts - List of Alert objects currently being displayed. Should be passed down from Redux store from App.
  */
-
 export default class Alerts extends React.Component {
 
     /**
@@ -24,11 +29,12 @@ export default class Alerts extends React.Component {
      * @param {Object} alert - Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
      * @returns {undefined} Nothing
      */
-    static queue(alert, callback){
-        var currentAlerts = store.getState().alerts;
+    static queue(alert, callback, currentAlerts = null){
+        if (!Array.isArray(currentAlerts)) currentAlerts = store.getState().alerts;
         if (_.pluck(currentAlerts, 'title').indexOf(alert.title) > -1) return null; // Same alert is already set.
+        var newAlerts = currentAlerts.concat([alert]);
         store.dispatch({
-            type: { 'alerts' : currentAlerts.concat([alert]) }
+            type: { 'alerts' : newAlerts }
         });
     }
 
@@ -39,11 +45,30 @@ export default class Alerts extends React.Component {
      * @param {Object} alert - Object with at least 'title'.
      * @returns {undefined} Nothing
      */
-    static deQueue(alert){
-        var currentAlerts = store.getState().alerts;
+    static deQueue(alert, currentAlerts = null){
+        if (!Array.isArray(currentAlerts)) currentAlerts = store.getState().alerts;
         currentAlerts = currentAlerts.filter(function(a){ return a.title != alert.title; });
         store.dispatch({
             type: { 'alerts' : currentAlerts }
+        });
+    }
+
+    static updateCurrentAlertsTitleMap(currentAlerts = null){
+        if (!Array.isArray(currentAlerts)) currentAlerts = store.getState().alerts;
+        var titles = _.pluck(currentAlerts, 'title').sort();
+        var removedTitles = _.difference(_.keys(alertNavigatationCountMap).sort(), titles);
+        removedTitles.forEach(function(rt){
+            delete alertNavigatationCountMap[rt];
+        });
+        currentAlerts.forEach(function(a){
+            if (typeof alertNavigatationCountMap[a.title] === 'undefined'){
+                alertNavigatationCountMap[a.title] = [ 1, a.navigateDisappearThreshold || defaultNavigateDisappearThreshold ];
+            } else {
+                alertNavigatationCountMap[a.title][0]++;
+            }
+            if (alertNavigatationCountMap[a.title][0] >= alertNavigatationCountMap[a.title][1]){
+                Alerts.deQueue(a, currentAlerts);
+            }
         });
     }
 
@@ -130,6 +155,4 @@ export default class Alerts extends React.Component {
             </div>
         );
     }
-
-
 }
