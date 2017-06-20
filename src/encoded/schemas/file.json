@@ -155,9 +155,6 @@
         },
         "lab.title": {
             "title": "Lab"
-        },
-        "experiments": {
-            "title": "Experiments"
         }
     },
     "columns": {
@@ -169,6 +166,12 @@
         },
         "award.project": {
             "title": "Project"
+        },
+        "experiments.display_title": {
+            "title": "Experiments"
+        },
+        "experiments.biosample.biosource.display_title": {
+            "title": "Biosource"
         }
       }
 }

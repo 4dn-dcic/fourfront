@@ -144,7 +144,8 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ['lab', 'file_format', 'related_files.file']
+    embedded = ['lab', 'related_files.file', 'award.project',
+                'experiments.biosample.biosource.display_title']
     name_key = 'accession'
     rev = {
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
