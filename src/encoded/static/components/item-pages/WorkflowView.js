@@ -81,7 +81,7 @@ export class WorkflowView extends React.Component {
 
     getTabViewContents(){
 
-        var listWithGraph = !Array.isArray(this.props.context.analysis_steps) || this.props.context.analysis_steps.length === 0 ? [] : [
+        var listWithGraph = /* !Array.isArray(this.props.context.analysis_steps) || this.props.context.analysis_steps.length === 0 ? [] : */[
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
@@ -249,6 +249,12 @@ class GraphSection extends React.Component {
         return props.context && props.context.cwl_data && GraphSection.isCwlDataValid(props.context.cwl_data);
     }
 
+    static analysisStepsSet(context){
+        if (!Array.isArray(context.analysis_steps)) return false;
+        if (context.analysis_steps.length === 0) return false;
+        return true;
+    }
+
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
@@ -259,7 +265,7 @@ class GraphSection extends React.Component {
         this.body = this.body.bind(this);
         this.render = this.render.bind(this);
         this.state = {
-            'showChart' : 'detail'
+            'showChart' : GraphSection.analysisStepsSet(props.context) ? 'detail' : 'basic'
         };
     }
 
@@ -330,11 +336,11 @@ class GraphSection extends React.Component {
 
     dropDownMenu(){
 
-        var detail = (
+        var detail = GraphSection.analysisStepsSet(this.props.context) ? (
             <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
                 Analysis Steps
             </MenuItem>
-        );
+        ) : null;
 
         var cwl = GraphSection.cwlDataExists(this.props) ? (
             <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>

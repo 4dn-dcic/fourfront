@@ -48,9 +48,8 @@ export class ViewMetricButton extends React.Component {
 export class FileDownloadButton extends React.Component {
     render(){
         var { href, className, disabled, title, filename } = this.props;
-        if (!filename) filename = title;
         return (
-            <a href={ href } className={(className || '') + " btn btn-default btn-info download-button " + (disabled ? ' disabled' : '')} download data-tip={filename}>
+            <a href={ href } className={(className || '') + " btn btn-default btn-info download-button " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
                 <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
@@ -439,8 +438,6 @@ export class WorkflowDetailPane extends React.Component {
 
     body(){
         var node = this.props.selectedNode;
-
-        console.log('NODE', node);
         
         if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file['@id']){
             // File
