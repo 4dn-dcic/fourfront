@@ -241,7 +241,7 @@ def add_schemas_to_html_responses(config):
     def add_schemas(event):
         request = event.get('request')
         if request is not None:
-            
+
             if event.get('renderer_name') != 'null_renderer' and ('application/html' in request.accept or 'text/html' in request.accept):
                 #print('\n\n\n\n')
                 #print(event.keys())
@@ -320,18 +320,6 @@ def main(global_config, **local_config):
         config.include('snovault.elasticsearch')
         config.include('.search')
 
-    if 'snp_search.server' in config.registry.settings:
-        addresses = aslist(config.registry.settings['snp_search.server'])
-        config.registry['snp_search'] = Elasticsearch(
-            addresses,
-            serializer=PyramidJSONSerializer(json_renderer),
-            connection_class=TimedUrllib3HttpConnection,
-            retry_on_timeout=True,
-            timeout=30,
-        )
-        config.include('.region_search')
-        # we don't do no peak stuff
-        # config.include('.peak_indexer')
     config.include(static_resources)
     config.include(changelogs)
 
@@ -360,4 +348,3 @@ def main(global_config, **local_config):
         load_workbook(app, workbook_filename, docsdir, test=load_test_only)
 
     return app
-    

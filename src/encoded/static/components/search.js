@@ -488,8 +488,8 @@ class ControlsAndResults extends React.Component {
                                 this.props.navigate(clearFiltersURL, {});
                             }}
                         />
-                    </div> : ''}
-                    <div className="col-sm-7 col-md-8 col-lg-9 expset-result-table-fix">
+                </div> : null}
+                    <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
                         {/*
                         <div className="row above-chart-row clearfix">
                             <div className="col-sm-5 col-xs-12">
@@ -555,16 +555,11 @@ export class Search extends React.Component {
         }else{
             searchBase = url.parse(this.props.href).search || '';
         }
-        var facetdisplay = context.facets && context.facets.some(function(facet) {
-            return facet.total > 0;
-        });
         return (
             <div>
-                {facetdisplay ?
-                    <div className="browse-page-container" ref="container">
-                        <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
-                    </div>
-                : <div className='error-page'><h4>{notification}</h4></div>}
+                <div className="browse-page-container" ref="container">
+                    <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
+                </div>
             </div>
         );
     }
