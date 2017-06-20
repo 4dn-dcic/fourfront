@@ -155,6 +155,9 @@
         },
         "lab.title": {
             "title": "Lab"
+        },
+        "experiments": {
+            "title": "Experiments"
         }
     },
     "columns": {
