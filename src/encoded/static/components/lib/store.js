@@ -50,7 +50,7 @@ class ItemStore {
             method: 'PUT',
             body: JSON.stringify(data),
         }, response => {
-            var item = _.find(this._items, i => i['@id'] == data['@id']);
+            var item = _.find(this._items, i => i['@id'] === data['@id']);
             _.extend(item, data);
             this.dispatch('onUpdate', item);
         });
@@ -72,8 +72,8 @@ class ItemStore {
             method: 'PATCH',
             body: JSON.stringify(dispatch_body),
         }, response => {
-            var item = _.find(this._items, i => i['@id'] == del_item['@id']);
-            this._items = _.reject(this._items, i => i['@id'] == del_item['@id']);
+            var item = _.find(this._items, i => i['@id'] === del_item['@id']);
+            this._items = _.reject(this._items, i => i['@id'] === del_item['@id']);
             this.dispatch('onDelete', item);
         });
     }

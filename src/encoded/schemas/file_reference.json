@@ -38,6 +38,19 @@
                 "juicer_format_restriction_site_file",
                 "other"
             ]
+        },
+        "file_type": {
+            "title": "File Type",
+            "description": "The type of file based on the information in the file.",
+            "enum": [
+                "genome reference",
+                "genome index",
+                "index",
+                "restriction sites",
+                "blacklisted regions",
+                "repeats",
+                "other"
+            ]
         }
     },
     "file_format_file_extension": {

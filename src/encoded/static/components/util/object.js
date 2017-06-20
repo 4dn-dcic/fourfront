@@ -25,7 +25,7 @@ export function tipsFromSchema(schemas, content){
     if(content['@type'] && typeof schemas === 'object' && schemas !== null){
         var type = content['@type'][0];
         if(schemas[type]){
-            tips = schemas[type]['properties'];
+            tips = schemas[type].properties;
         }
     }
     return tips;
@@ -60,7 +60,7 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
     if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName in objectutils.getNestedProperty.');
     try {
         return (function findNestedValue(currentNode, fieldHierarchyLevels, level = 0){
-            if (level == fieldHierarchyLevels.length) return currentNode;
+            if (level === fieldHierarchyLevels.length) return currentNode;
 
             if (Array.isArray(currentNode)){
                 var arrayVals = [];
@@ -111,6 +111,21 @@ export function randomId() {
     return 'random-id-' + ++randomIdIncrement;
 }
 
+
+export function isEqual(obj1, obj2){
+    var ob1Keys = _.keys(obj1).sort();
+    var obj2Keys = _.keys(obj2).sort();
+    if (ob1Keys.length !== obj2Keys.length) return false;
+    var len = ob1Keys.length;
+    var i;
+    for (i = 0; i < len; i++){
+        if (ob1Keys[i] !== obj2Keys[i]) return false;
+    }
+    for (i = 0; i < len; i++){
+        if (obj1[ob1Keys[i]] !== obj2[ob1Keys[i]]) return false;
+    }
+    return true;
+}
 
 
 export function singleTreatment(treatment) {

@@ -119,7 +119,7 @@
             "type": "string",
             "default": "uploading",
             "permission": "import_items",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "enum" : [
                 "uploading",
                 "uploaded",

@@ -2,7 +2,7 @@
 var React = require('react');
 var globals = require('../globals');
 var _ = require('underscore');
-var { ajax, console, object, isServerSide, layout, Schemas } = require('../util');
+var { ajax, console, JWT, object, isServerSide, layout, Schemas } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
 import { getTitleStringFromContext } from '../item-pages/item';
@@ -1461,11 +1461,13 @@ class IndividualObjectView extends React.Component{
     inPlaceNavigate = (destination, options, callback) => {
         if(this.state.selectQuery){
             var dest = destination;
-            // to clear filters
+            // ensure destination is formatted correctly when clearing/removing filters
             if(destination == '/'){
-                dest = '?type=' + this.state.selectType;
+                dest = '/search/?type=' + this.state.selectType;
+            }else if(destination.slice(0,8) != '/search/' && destination.slice(0,1) == '?'){
+                dest = '/search/' + destination;
             }
-            ajax.promise('/search/' + dest).then(data => {
+            ajax.promise(dest).then(data => {
                 if (data && data['@graph']){
                     this.setState({
                         'selectData': data,
@@ -1504,7 +1506,7 @@ class IndividualObjectView extends React.Component{
                     this.setState({
                         'selectType': collection,
                         'selectData': data,
-                        'selectQuery': '?type=' + collection,
+                        'selectQuery': '/search/?type=' + collection,
                         'selectField': field,
                         'selectLink': newLink,
                         'selectArrayIdx': array
@@ -1842,11 +1844,21 @@ class WarningBanner extends React.Component {
 
 export function buildContext(context, schema, objList=null, edit=false, create=true, roundTwoSwitch=null, initObjs=null){
     // Build context based off an object's and populate values from
-    // pre-existing context. Empty fields are given null value
-    // All linkTo fields are added to objList
+    // pre-existing context. Empty fields are given null value.
+    // All linkTo fields are added to objList.
     // If initObjs provided (edit or clone functionality), pre-existing objs
-    // will be added
+    // will be added.
+    // Also checks user info to see if user is admin, which affects which
+    // fields are displayed.
     var built = {};
+    var userInfo = JWT.getUserInfo();
+    var userGroups = [];
+    if (userInfo){
+        var currGroups = object.getNestedProperty(userInfo, ['details', 'groups'], true);
+        if(currGroups && Array.isArray(currGroups)){
+            userGroups = currGroups;
+        }
+    }
     var fields = schema['properties'] ? Object.keys(schema['properties']) : [];
     for(var i=0; i<fields.length; i++){
         if(schema.properties[fields[i]]){
@@ -1862,8 +1874,11 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
                 continue;
             }
             // check to see if permission == import items
+            // if admin, allow import_items fields
             if (fieldSchema.permission && fieldSchema.permission == "import_items"){
-                continue;
+                if(!_.contains(userGroups, 'admin')){
+                    continue;
+                }
             }
             if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
                 // register that this object will need round 2 submission
