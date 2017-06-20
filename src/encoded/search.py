@@ -105,10 +105,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     elif size:
         offset_size = from_ + size
         size_search = search[from_:offset_size]
-        es_results = size_search.execute().to_dict()
+        es_results = execute_search(size_search)
     else:
         # fallback size for elasticsearch is 10
-        es_results = search.execute().to_dict()
+        es_results = execute_search(search)
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
@@ -230,7 +230,7 @@ def get_all_results(search):
     size = from_ + sizeIncrement
 
     first_search = search[from_:size] # get aggregations from here
-    es_result = first_search.execute().to_dict()
+    es_result = execute_search(first_search)
 
     total = es_result['hits'].get('total',0)
     extraRequestsNeeded = int(math.ceil(total / sizeIncrement)) - 1 # Decrease by 1 (first es_result already happened)
@@ -246,7 +246,7 @@ def get_all_results(search):
         from_ = from_ + sizeIncrement
         size = from_ + sizeIncrement
         subsequent_search = search[from_:size]
-        subsequent_es_result = subsequent_search.execute().to_dict()
+        subsequent_es_result = execute_search(subsequent_search)
         es_result['hits']['hits'] = es_result['hits']['hits'] + subsequent_es_result['hits'].get('hits', [])
         extraRequestsNeeded -= 1
         # print("Found " + str(len(es_result['hits']['hits'])) + ' results so far.')
@@ -326,14 +326,35 @@ def prepare_search_term(request):
             # combine them with AND logic
             if 'q' in prepared_terms:
                 join_list = [prepared_terms['q'], val]
-                prepared_terms['q'] = ' | '.join(join_list)
+                prepared_terms['q'] = ' AND '.join(join_list)
             else:
                 prepared_terms['q'] = val
         elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field', 'before', 'after']:
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
             prepared_terms['embedded.' + field].append(val)
+        if 'q' in prepared_terms:
+            prepared_terms['q'] = process_query_string(prepared_terms['q'])
     return prepared_terms
+
+
+def process_query_string(search_query):
+    from antlr4 import IllegalStateException
+    from lucenequery.prefixfields import prefixfields
+    from lucenequery import dialects
+
+    if search_query == '*':
+        return search_query
+
+    # avoid interpreting slashes as regular expressions
+    search_query = search_query.replace('/', r'\/')
+    try:
+        query = prefixfields('embedded.', search_query, dialects.elasticsearch)
+    except IllegalStateException:
+        msg = "Invalid query: {}".format(search_query)
+        raise HTTPBadRequest(explanation=msg)
+    else:
+        return query.getText()
 
 
 def set_doc_types(request, types, search_type):
@@ -417,7 +438,7 @@ def build_query(search, prepared_terms, source_fields):
             query_info['query'] = value
             break
     if query_info != {}:
-        string_query = {'must': {'simple_query_string': query_info}}
+        string_query = {'must': {'query_string': query_info}}
         query_dict = {'query': {'bool': string_query}}
     else:
         query_dict = {'query': {'bool':{}}}
@@ -673,6 +694,17 @@ def set_facets(search, facets, final_filters, string_query):
     search.update_from_dict(prev_search)
 
     return search
+
+
+def execute_search(search):
+    """
+    Use a general try-except here for now
+    """
+    try:
+        es_results = search.execute().to_dict()
+    except:
+        raise HTTPBadRequest(explanation='Failed search query')
+    return es_results
 
 
 def format_facets(es_results, facets, used_filters, schemas, total, search_frame='embedded'):
