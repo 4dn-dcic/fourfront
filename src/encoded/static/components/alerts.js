@@ -5,7 +5,6 @@ import { Alert, Fade } from 'react-bootstrap';
 import _ from 'underscore';
 import * as store from '../store';
 
-
 const defaultNavigateDisappearThreshold = 1;
 
 let alertNavigatationCountMap = {};

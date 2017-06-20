@@ -171,15 +171,14 @@ def health_check(config):
         db = request.registry['dbsession']
         db_count = db.scalar("""SELECT count(*) FROM "propsheets";""")
 
-        # how much stuff in elasticsearch
-        es_index = settings.get('snovault.elasticsearch.index')
+        # how much stuff in elasticsearch (among ALL indexes)
         es = request.registry['elasticsearch']
         query = {"aggs":
                  { "count_by_type":
                   {"terms": { "field": "_type"}}
                  }
                 }
-        es_count = es.search(index=es_index, body=query, size=0)
+        es_count = es.search(index='_all', body=query, size=0)
 
         # when ontologies were imported
         try:
@@ -192,7 +191,7 @@ def health_check(config):
             "file_upload_bucket" : settings.get('file_upload_bucket'),
             "blob_bucket" : settings.get('blob_bucket'),
             "system_bucket" : settings.get('system_bucket'),
-            "elasticserach" : settings.get('elasticsearch.server') + '/' +es_index,
+            "elasticsearch" : settings.get('elasticsearch.server'),
             "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
             'ontology_updated': ont_date,
