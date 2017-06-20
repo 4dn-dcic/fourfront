@@ -35,6 +35,19 @@ def fastq_json(award, experiment, lab):
 
 
 @pytest.fixture
+def proc_file_json(award, experiment, lab):
+    return {
+        'accession': '4DNFI067APU2',
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': 'pairs',
+        'filename': 'test.pairs.gz',
+        'md5sum': '0123456789abcdef0123456789abcdef',
+        'status': 'uploading',
+    }
+
+
+@pytest.fixture
 def fasta_json(award, experiment, lab):
     return {
         'accession': '4DNFI067APA2',
@@ -75,6 +88,18 @@ def test_file_post_all(testapp, all_file_jsons):
 def fastq_uploading(fastq_json):
     fastq_json['status'] = 'uploading'
     return fastq_json
+
+
+def test_extra_files(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    assert len(resobj['extra_files']) == len(extra_files)
+    file_name = ("%s.pairs.gz.px2" % (resobj['accession']))
+    expected_key = "%s/%s" % (resobj['uuid'], file_name)
+    assert resobj['extra_files'][0]['key'] == expected_key
+    assert resobj['extra_files'][0]['upload_credentials']
 
 
 def test_files_aws_credentials(testapp, fastq_uploading):

@@ -201,9 +201,20 @@ class File(Item):
         new_creds = old_creds
 
         # don't get new creds
-        if properties.get('status', None) in ('uploading', 'to be uploaded by workflow', 'upload failed'):
+        if properties.get('status', None) in ('uploading', 'to be uploaded by workflow',
+                                              'upload failed'):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
+
+            # handle extra files
+            for idx, xfile in enumerate(properties.get('extra_files', [])):
+                xfile['accession'] = properties.get('accession')
+                # just need a filename to trigger creation of credentials
+                xfile['filename'] = xfile['accession']
+                xfile['uuid'] = uuid
+                ext = self.build_external_creds(self.registry, uuid, xfile)
+                xfile.update(ext)
+                properties[idx] = xfile
 
         if old_creds:
             if old_creds.get('key') != new_creds.get('key'):
