@@ -50,6 +50,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     from_, size = get_pagination(request)
 
+    before_date, after_date = get_date_range(request)
+
     # get desired frame for this search
     search_frame = request.params.get('frame', 'embedded')
 
@@ -89,9 +91,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # TODO: implement BOOST here?
 
     ### Set filters
-    upper_time = None
-    lower_time = None
-    search, query_filters, used_filters = set_filters(request, search, result, principals, doc_types, upper_time, lower_time)
+    search, query_filters, used_filters = set_filters(request, search, result, principals, doc_types, before_date, after_date)
 
     ### Set starting facets
     facets = initialize_facets(types, doc_types, search_audit, principals)
@@ -214,6 +214,16 @@ def get_pagination(request):
     return from_, size
 
 
+def get_date_range(request):
+    """
+    Get 'before' and 'after' params from the request.
+    These determine the greater than and less than dates for the search
+    """
+    before = request.params.get('before', None)
+    after = request.params.get('after', None)
+    return before, after
+
+
 def get_all_results(search):
     from_ = 0
     sizeIncrement = 1000 # Decrease this to like 5 or 10 to test.
@@ -319,7 +329,7 @@ def prepare_search_term(request):
                 prepared_terms['q'] = ' | '.join(join_list)
             else:
                 prepared_terms['q'] = val
-        elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
+        elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field', 'before', 'after']:
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
             prepared_terms['embedded.' + field].append(val)
@@ -468,7 +478,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     return search
 
 
-def set_filters(request, search, result, principals, doc_types, upper_time=None, lower_time=None):
+def set_filters(request, search, result, principals, doc_types, before_date=None, after_date=None):
     """
     Sets filters in the query
     """
@@ -483,7 +493,7 @@ def set_filters(request, search, result, principals, doc_types, upper_time=None,
         not_field = False # keep track if query is NOT (!)
         if field in ['limit', 'y.limit', 'x.limit', 'mode', 'annotation',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
-                     'sort', 'from', 'referrer', 'q']:
+                     'sort', 'from', 'referrer', 'q', 'before', 'after']:
             continue
         elif field == 'type' and term != 'Item':
             continue
@@ -541,12 +551,12 @@ def set_filters(request, search, result, principals, doc_types, upper_time=None,
                 query_filters.append(this_filter)
 
     # lastly, add date limits to filters if given
-    if upper_time or lower_time:
+    if before_date or after_date:
         date_limits = {'format':'yyyy-MM-dd'}
-        if upper_time:
-            date_limits['lte'] = upper_time # lte is >=
-        if lower_time:
-            date_limits['gte'] = lower_time # gte is <=
+        if before_date:
+            date_limits['lte'] = before_date # lte is >=
+        if after_date:
+            date_limits['gte'] = after_date # gte is <=
         query_filters.append({'range':{'embedded.date_created': date_limits}})
 
     # To modify filters of elasticsearch_dsl Search, must call to_dict(),
