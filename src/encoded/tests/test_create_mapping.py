@@ -18,8 +18,7 @@ def test_create_mapping(registry, item_type):
     for embed in embeds:
         mapping_pointer = mapping
         split_embed = embed.split('.')
-        for idx in range(len(split_embed)):
-            split_ = split_embed[idx]
+        for idx, split_ in enumerate(split_embed):
             # see if this is last level of embedding- may be a field or object
             if idx == len(split_embed) - 1:
                 if 'properties' in mapping_pointer and split_ in mapping_pointer['properties']:
