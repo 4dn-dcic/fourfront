@@ -119,5 +119,54 @@
         "version": "1",
         "analysis_step_types": ["file format conversion"],
         "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547"
+    },
+    {
+        "title":"pairs2hic",
+        "uuid":"a9d0e56c-49e5-4c33-afab-9ec90d65faf3",
+        "software_used":"02d636b9-d8dd-4da9-950c-2ca994b23576",
+        "schema_version":"1",
+        "name":"pairs2hic",
+        "version":"12",
+        "analysis_step_types":[ "aggregation", "normalization" ],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"cooler",
+        "uuid":"302366fb-49e5-4c33-afab-9ec90d65faf3",
+        "version":"12",
+        "software_used":"02d636b9-d8dd-4da9-950c-2ca994b23555",
+        "name":"cooler",
+        "analysis_step_types":[ "aggregation" ],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"hic2mcool",
+        "uuid":"0786554a-49e5-4c33-afab-9ec90d65faf3",
+        "version":"6",
+        "software_used":"02d636b9-d8dd-4da9-950c-2ca994b23555",
+        "name":"hic2mcool",
+        "analysis_step_types":["file format conversion"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"md5",
+        "uuid":"0786554a-49e5-4c33-afab-9ec90d657777",
+        "version":"4",
+        "name":"md5",
+        "analysis_step_types":["QC calculation"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"validatefiles",
+        "uuid":"0786554a-49e5-4c33-afab-9ec90d658888",
+        "version":"10",
+        "name":"validatefiles",
+        "analysis_step_types":["QC calculation"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
     }
 ]

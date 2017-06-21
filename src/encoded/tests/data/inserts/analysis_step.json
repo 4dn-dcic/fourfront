@@ -150,5 +150,23 @@
         "analysis_step_types":["file format conversion"],
         "award":"1U01CA200059-01",
         "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"md5",
+        "uuid":"0786554a-49e5-4c33-afab-9ec90d657777",
+        "version":"4",
+        "name":"md5",
+        "analysis_step_types":["QC calculation"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"validatefiles",
+        "uuid":"0786554a-49e5-4c33-afab-9ec90d658888",
+        "version":"10",
+        "name":"validatefiles",
+        "analysis_step_types":["QC calculation"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
     }
 ]
