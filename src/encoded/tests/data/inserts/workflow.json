@@ -430,7 +430,7 @@
         {
             "step_name":"bam2pairs",
             "step":"02d636b9-d82d-4da9-950c-2ca994a1330c"
-        },
+        }
     ],
     "arguments": [
         {
@@ -579,7 +579,7 @@
         {
             "step_name":"bam2pairs",
             "step":"02d636b9-d82d-4da9-950c-2ca994a1330c"
-        },
+        }
     ],
     "arguments": [
         {
