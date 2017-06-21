@@ -108,17 +108,48 @@ class Workflow(Item):
 
         steps = None
 
-        if self.properties.get('workflow_steps') is not None:
-            # Attempt to grab from 'workflow_steps' property, as it would have explicit steps order built-in.
-            steps = list(map(
-                lambda step: request.embed('/' + str(step['step']), '@@embedded'),
-                self.properties['workflow_steps']
-            ))
-        else:
-            steps = list(map(
-                lambda uuid: request.embed('/' + str(uuid), '@@embedded'),
-                collect_steps_from_arguments()
-            ))
+        if self.properties.get('workflow_steps') is not None:   # Attempt to grab from 'workflow_steps' property, as it would have explicit steps order built-in.
+            steps = [ step['step'] for step in self.properties['workflow_steps'] ]
+        else:   # Else, fall back to 'collect_steps_from_arguments'
+            steps = collect_steps_from_arguments()
+        
+        if steps is None or len(steps) == 0:
+           titleToUse = self.properties.get('name', self.properties.get('title', "Process"))
+           return [
+               {
+                   "uuid" : self.uuid,
+                   "@id" : self.jsonld_id(request),
+                   "name" : titleToUse,
+                   "title" : titleToUse,
+                   "analysis_step_types" : ["Workflow Process"],
+                   "inputs" : [
+                       { 
+                           "name" : arg.get('workflow_argument_name'),
+                           "source" : [
+                               {
+                                   "name" : arg.get('workflow_argument_name'),
+                                   "type" : "Workflow Input File"
+                               }
+                           ]
+                       } for arg in self.properties['arguments'] if 'input' in str(arg.get('argument_type')).lower()
+                   ],
+                   "outputs" : [
+                       { 
+                           "name" : arg.get('workflow_argument_name'),
+                           "target" : [
+                               {
+                                  "name" : arg.get('workflow_argument_name'),
+                                   "type" : "Workflow Output File"
+                              }
+                           ]
+                       } for arg in self.properties['arguments'] if 'output' in str(arg.get('argument_type')).lower()
+                  ]
+              }
+           ]
+
+        steps = map( lambda uuid: request.embed('/' + str(uuid), '@@embedded'), steps)
+
+        resultSteps = []
 
         # Distribute arguments into steps' "inputs" and "outputs" arrays.
         for step in steps:
@@ -142,7 +173,10 @@ class Workflow(Item):
                             }
 
                             doesOutputMappingExist = len([
-                                mp for mp in mapping if mp.get('step_argument_type').lower() == 'output file' or mp.get('step_argument_type').lower() == 'output file or parameter'
+                                mp for mp in mapping if (
+                                    mp.get('step_argument_type').lower() == 'output file' or
+                                    mp.get('step_argument_type').lower() == 'output file or parameter'
+                                )
                             ]) > 0
 
                             if arg.get("workflow_argument_name") is not None and not doesOutputMappingExist:
@@ -194,7 +228,8 @@ class Workflow(Item):
 
 
             step['outputs'] = mergeOutputsForStep(step['outputs'])
-        return steps
+            resultSteps.append(step)
+        return resultSteps
 
 
 @collection(
@@ -217,7 +252,8 @@ class WorkflowRun(Item):
                 'output_files.value',
                 'output_files.value.file_format',
                 'output_quality_metrics.name',
-                'output_quality_metrics.value']
+                #'output_quality_metrics.value'
+                ]
 
     @calculated_property(schema={
         "title": "Workflow Analysis Steps",

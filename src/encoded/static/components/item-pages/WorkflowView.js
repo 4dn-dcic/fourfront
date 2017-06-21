@@ -31,7 +31,7 @@ export function commonGraphPropsFromProps(props){
     return {
         'href'        : props.href,
         'onNodeClick' : onItemPageNodeClick,
-        'detailPane'  : <WorkflowDetailPane schemas={props.schemas} />,
+        'detailPane'  : <WorkflowDetailPane schemas={props.schemas} context={props.context} />,
         'nodeTitle'   : function(node, canBeJSX = false){
             if (
                 node.type === 'step' && node.meta.uuid &&
@@ -81,7 +81,7 @@ export class WorkflowView extends React.Component {
 
     getTabViewContents(){
 
-        var listWithGraph = !Array.isArray(this.props.context.analysis_steps) || this.props.context.analysis_steps.length === 0 ? [] : [
+        var listWithGraph = /* !Array.isArray(this.props.context.analysis_steps) || this.props.context.analysis_steps.length === 0 ? [] : */[
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
@@ -133,6 +133,50 @@ export class WorkflowView extends React.Component {
         );
     }
 
+}
+
+
+export function dropDownMenuMixin(){
+    var detail = GraphSection.analysisStepsSet(this.props.context) ? (
+        <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
+            Analysis Steps
+        </MenuItem>
+    ) : null;
+    
+    /*
+    var cwl = GraphSection.cwlDataExists(this.props) ? (
+        <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>
+            Common Workflow Language (CWL)
+        </MenuItem>
+    ) : null;
+    */
+
+    var basic = (
+        <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
+            Basic Inputs & Outputs
+        </MenuItem>
+    );
+
+
+    return (
+        <DropdownButton
+            pullRight
+            onSelect={(eventKey, evt)=>{
+                if (eventKey === this.state.showChart) return;
+                this.setState({ showChart : eventKey });
+            }}
+            title={GraphSection.keyTitleMap[this.state.showChart]}
+        >
+            { basic }{ detail }
+        </DropdownButton>
+    );
+}
+
+export function graphBodyMixin(){
+    if (this.state.showChart === 'cwl') return this.cwlGraph();
+    if (this.state.showChart === 'detail') return this.detailGraph();
+    if (this.state.showChart === 'basic') return this.basicGraph();
+    return null;
 }
 
 class GraphSection extends React.Component {
@@ -249,17 +293,23 @@ class GraphSection extends React.Component {
         return props.context && props.context.cwl_data && GraphSection.isCwlDataValid(props.context.cwl_data);
     }
 
+    static analysisStepsSet(context){
+        if (!Array.isArray(context.analysis_steps)) return false;
+        if (context.analysis_steps.length === 0) return false;
+        return true;
+    }
+
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.cwlGraph = this.cwlGraph.bind(this);
         this.basicGraph = this.basicGraph.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
-        this.dropDownMenu = this.dropDownMenu.bind(this);
-        this.body = this.body.bind(this);
+        this.dropDownMenu = dropDownMenuMixin.bind(this);
+        this.body = graphBodyMixin.bind(this);
         this.render = this.render.bind(this);
         this.state = {
-            'showChart' : 'detail'
+            'showChart' : GraphSection.analysisStepsSet(props.context) ? 'detail' : 'basic'
         };
     }
 
@@ -312,54 +362,10 @@ class GraphSection extends React.Component {
         );
     }
 
-    body(){
-        if (this.state.showChart === 'cwl') return this.cwlGraph();
-        if (this.state.showChart === 'detail') return this.detailGraph();
-        if (this.state.showChart === 'basic') return this.basicGraph();
-
-        return (
-            null
-        );
-    }
-
     static keyTitleMap = {
         'detail' : 'Analysis Steps',
         'basic' : 'Basic Inputs & Outputs',
         'cwl' : 'CWL Graph'
-    }
-
-    dropDownMenu(){
-
-        var detail = (
-            <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
-                Analysis Steps
-            </MenuItem>
-        );
-
-        var cwl = GraphSection.cwlDataExists(this.props) ? (
-            <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>
-                Common Workflow Language (CWL)
-            </MenuItem>
-        ) : null;
-
-        var basic = (
-            <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
-                Basic Inputs & Outputs
-            </MenuItem>
-        );
-
-        return (
-            <DropdownButton
-                pullRight
-                onSelect={(eventKey, evt)=>{
-                    if (eventKey === this.state.showChart) return;
-                    this.setState({ showChart : eventKey });
-                }}
-                title={GraphSection.keyTitleMap[this.state.showChart]}
-            >
-                { basic }{ detail }{ cwl }
-            </DropdownButton>
-        );
     }
 
     render(){
