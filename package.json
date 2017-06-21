@@ -71,8 +71,8 @@
     "webpack": "^1.13.3"
   },
   "dependencies": {
-    "auth0-lock": "^10.11.0",
-    "aws-sdk": "^2.74.0",
+    "auth0-lock": "10.11.0",
+    "aws-sdk": "^2.24.0",
     "babel-polyfill": "^6.23.0",
     "brace": "^0.3.0",
     "ckeditor": "file:node_shims/ckeditor",
@@ -87,7 +87,7 @@
     "google-analytics": "file:node_shims/google-analytics",
     "immutable": "^3.8.1",
     "js-md5": "^0.4.2",
-    "jsonwebtoken": "^7.4.1",
+    "jsonwebtoken": "^7.1.9",
     "lodash": "^4.17.4",
     "lodash.isfinite": "^3.3.2",
     "marked": "^0.3.6",
