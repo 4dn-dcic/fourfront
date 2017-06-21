@@ -519,30 +519,55 @@ def post_upload(context, request):
     return result
 
 
-@view_config(name='download', context=File, request_method='GET',
-             permission='view', subpath_segments=[0, 1])
-def download(context, request):
-    #import pdb; pdb.set_trace()
-    properties = context.upgrade_properties()
-    mapping = context.schema['file_format_file_extension']
+def is_file_to_download(properties, mapping, expected_filename=None):
     file_extension = mapping[properties['file_format']]
     accession_or_external = properties.get('accession') or properties['external_accession']
     filename = accession_or_external + file_extension
-    if request.subpath:
-        _filename, = request.subpath
-        if filename != _filename:
-            # TODO: check and see if this bad boy is in extra-files
-            raise HTTPNotFound(_filename)
+    if expected_filename is None:
+        return filename
+    elif expected_filename != filename:
+        return False
+    else:
+        return filename
 
+
+@view_config(name='download', context=File, request_method='GET',
+             permission='view', subpath_segments=[0, 1])
+def download(context, request):
+
+    #import pdb; pdb.set_trace()
+    # to use or not to use the proxy
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
-
     try:
         use_download_proxy = request.client_addr not in request.registry['aws_ipset']
     except TypeError:
         # this fails in testing due to testapp not having ip
         use_download_proxy = False
 
-    external = context.propsheets.get('external', {})
+    # with extra_files the user may be trying to download the main file
+    # or one of the files in extra files, the following logic will 
+    # search to find the "right" file and redirect to a download link for that one
+    properties = context.upgrade_properties()
+    mapping = context.schema['file_format_file_extension']
+
+    _filename = None
+    if request.subpath:
+        _filename, = request.subpath
+    filename = is_file_to_download(properties, mapping, _filename)
+    if not filename:
+        found = False
+        for extra in properties.get('extra_files'):
+            filename = is_file_to_download(extra, mapping, _filename)
+            if filename:
+                found = True
+                properties = extra
+                external = context.propsheets.get('external' + extra['file_format'])
+                break
+        if not found:
+            raise HTTPNotFound(_filename)
+    else:
+        external = context.propsheets.get('external', {})
+
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
