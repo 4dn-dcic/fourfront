@@ -100,6 +100,7 @@ def test_extra_files(testapp, proc_file_json):
     expected_key = "%s/%s" % (resobj['uuid'], file_name)
     assert resobj['extra_files'][0]['key'] == expected_key
     assert resobj['extra_files'][0]['upload_credentials']
+    assert resobj['extra_files'][0]['status'] == proc_file_json['status']
 
 
 def test_files_aws_credentials(testapp, fastq_uploading):

@@ -205,14 +205,17 @@ class File(Item):
                                               'upload failed'):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
+            file_formats = [properties.get('file_format'),]
 
             # handle extra files
             for idx, xfile in enumerate(properties.get('extra_files', [])):
                 # todo, make sure file_format is unique
+                if xfile
                 xfile['accession'] = properties.get('accession')
                 # just need a filename to trigger creation of credentials
                 xfile['filename'] = xfile['accession']
                 xfile['uuid'] = uuid
+                xfile['status'] = properties.get('status')
                 ext = self.build_external_creds(self.registry, uuid, xfile)
                 xfile.update(ext)
                 properties[idx] = xfile
