@@ -208,6 +208,7 @@ class File(Item):
 
             # handle extra files
             for idx, xfile in enumerate(properties.get('extra_files', [])):
+                # todo, make sure file_format is unique
                 xfile['accession'] = properties.get('accession')
                 # just need a filename to trigger creation of credentials
                 xfile['filename'] = xfile['accession']
