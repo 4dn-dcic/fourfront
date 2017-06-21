@@ -161,7 +161,7 @@ class Publication(Item):
     """Publication class."""
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
-    embedded = ["exp_sets_prod_in_pub", "exp_sets_used_in_pub"]
+    embedded = ["exp_sets_prod_in_pub.*", "exp_sets_used_in_pub.*"]
 
     def _update(self, properties, sheets=None):
         # import pdb; pdb.set_trace()

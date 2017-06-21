@@ -23,10 +23,10 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
-    embedded = ['workflow_steps.step',
+    embedded = ['workflow_steps.step.*',
                 'workflow_steps.step_name',
-                'arguments',
-                'arguments.argument_mapping']
+                'arguments.*',
+                'arguments.argument_mapping.*']
     rev = {
         'workflow_runs': ('WorkflowRun', 'workflow'),
     }
@@ -112,7 +112,7 @@ class Workflow(Item):
             steps = [ step['step'] for step in self.properties['workflow_steps'] ]
         else:   # Else, fall back to 'collect_steps_from_arguments'
             steps = collect_steps_from_arguments()
-        
+
         if steps is None or len(steps) == 0:
            titleToUse = self.properties.get('name', self.properties.get('title', "Process"))
            return [
@@ -123,7 +123,7 @@ class Workflow(Item):
                    "title" : titleToUse,
                    "analysis_step_types" : ["Workflow Process"],
                    "inputs" : [
-                       { 
+                       {
                            "name" : arg.get('workflow_argument_name'),
                            "source" : [
                                {
@@ -134,7 +134,7 @@ class Workflow(Item):
                        } for arg in self.properties['arguments'] if 'input' in str(arg.get('argument_type')).lower()
                    ],
                    "outputs" : [
-                       { 
+                       {
                            "name" : arg.get('workflow_argument_name'),
                            "target" : [
                                {
@@ -243,13 +243,13 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow',
-                'workflow.analysis_steps',
+    embedded = ['workflow.*',
+                'workflow.analysis_steps.*',
                 'input_files.workflow_argument_name',
-                'input_files.value',
+                'input_files.value.*',
                 'input_files.value.file_format',
                 'output_files.workflow_argument_name',
-                'output_files.value',
+                'output_files.value.*',
                 'output_files.value.file_format',
                 'output_quality_metrics.name',
                 #'output_quality_metrics.value'
