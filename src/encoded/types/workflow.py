@@ -52,7 +52,7 @@ class Workflow(Item):
             "title": "Analysis Step",
             "type": "object",
         }
-    }, category='page')
+    })
     def analysis_steps(self, request):
         """smth."""
         if not request.has_permission('view_details'):
