@@ -54,7 +54,7 @@
                     },
                     "ordinal": {
                         "title": "Ordinal",
-                        "description": "ordinal of the file in the argument",
+                        "description": "Ordinal of the file in the argument",
                         "type": "number",
                         "default": 1
                     }

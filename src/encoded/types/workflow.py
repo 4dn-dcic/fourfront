@@ -26,7 +26,8 @@ class Workflow(Item):
     embedded = ['workflow_steps.step',
                 'workflow_steps.step_name',
                 'arguments',
-                'arguments.argument_mapping']
+                'arguments.argument_mapping',
+                'analysis_steps']
     rev = {
         'workflow_runs': ('WorkflowRun', 'workflow'),
     }
@@ -52,7 +53,7 @@ class Workflow(Item):
             "title": "Analysis Step",
             "type": "object",
         }
-    }, category='page')
+    })
     def analysis_steps(self, request):
         """smth."""
         if not request.has_permission('view_details'):
@@ -107,6 +108,9 @@ class Workflow(Item):
 
 
         steps = None
+
+        print('\n\n\n\n\n\n\n\n')
+        print(self.properties.get('workflow_steps'))
 
         if self.properties.get('workflow_steps') is not None:   # Attempt to grab from 'workflow_steps' property, as it would have explicit steps order built-in.
             steps = [ step['step'] for step in self.properties['workflow_steps'] ]
@@ -246,6 +250,8 @@ class WorkflowRun(Item):
     embedded = ['workflow',
                 'workflow.analysis_steps',
                 'input_files.workflow_argument_name',
+                'input_files.value.filename',
+                'input_files.value.display_title',
                 'input_files.value',
                 'input_files.value.file_format',
                 'output_files.workflow_argument_name',
