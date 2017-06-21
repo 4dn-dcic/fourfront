@@ -834,7 +834,7 @@ export default class FacetList extends React.Component {
         var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
             if (m.end) return m;
             m.facetIndex = index;
-            m.termCount += Math.min( // Take into account 'view more' button
+            m.termCount = m.termCount + Math.min( // Take into account 'view more' button
                 facet.terms.length,
                 this.props.persistentCount || FacetTermsList.defaultProps.persistentCount
             );
