@@ -134,7 +134,6 @@
                                     "title": "Corresponding workflow step",
                                     "description": "the step of the workflow that takes the input file",
                                     "type": "string",
-                                    "linkTo": "AnalysisStep",
                                     "internal_comment": "the same analysis step may appear multiple times"
                                 },
                                 "step_argument_name": {

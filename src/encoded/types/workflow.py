@@ -26,8 +26,7 @@ class Workflow(Item):
     embedded = ['workflow_steps.step',
                 'workflow_steps.step_name',
                 'arguments',
-                'arguments.argument_mapping',
-                'analysis_steps']
+                'arguments.argument_mapping']
     rev = {
         'workflow_runs': ('WorkflowRun', 'workflow'),
     }
@@ -53,33 +52,19 @@ class Workflow(Item):
             "title": "Analysis Step",
             "type": "object",
         }
-    })
+    }, category="page")
     def analysis_steps(self, request):
         """smth."""
+
+
         if not request.has_permission('view_details'):
-            return
+            return []
 
         if self.properties.get('arguments') is None:
-            return
+            return []
 
-        def collect_steps_from_arguments():
-            '''Fallback function to use in case there is no "workflow_steps" list available on Item.'''
-            steps = []
-            for arg in self.properties['arguments']:
-                mapping = arg.get('argument_mapping')
-                if mapping is None:
-                    continue
-                for mappedArg in mapping:
-                    step = mappedArg.get('workflow_step')
-                    if step is not None:
-                        steps.append(step)
-
-            # Unique-ify steps list while preserving list order
-            unique_steps_unordered = set()
-            unique_add = unique_steps_unordered.add
-            return [
-                step for step in steps if not (step in unique_steps_unordered or unique_add(step))
-            ]
+        if self.properties.get('workflow_steps') is None:
+            return []
 
         def mergeOutputsForStep(args):
             seen_argument_names = {}
@@ -108,14 +93,8 @@ class Workflow(Item):
 
 
         steps = None
-
-        print('\n\n\n\n\n\n\n\n')
-        print(self.properties.get('workflow_steps'))
-
-        if self.properties.get('workflow_steps') is not None:   # Attempt to grab from 'workflow_steps' property, as it would have explicit steps order built-in.
-            steps = [ step['step'] for step in self.properties['workflow_steps'] ]
-        else:   # Else, fall back to 'collect_steps_from_arguments'
-            steps = collect_steps_from_arguments()
+        
+        steps = [ step['step'] for step in self.properties['workflow_steps'] ]
         
         if steps is None or len(steps) == 0:
            titleToUse = self.properties.get('name', self.properties.get('title', "Process"))
@@ -154,18 +133,24 @@ class Workflow(Item):
         steps = map( lambda uuid: request.embed('/' + str(uuid), '@@embedded'), steps)
 
         resultSteps = []
+        resultStepProperties = ['uuid', 'inputs', 'outputs', 'name', 'software_used', '@id', 'display_title', 'description', 'analysis_step_types']
 
         # Distribute arguments into steps' "inputs" and "outputs" arrays.
         for step in steps:
             step['inputs'] = []
             step['outputs'] = []
+
+            stepKeys = list(step.keys())
+            for key in stepKeys:
+                if key not in resultStepProperties:
+                    del step[key]
+
             for arg in self.properties['arguments']:
                 mapping = arg.get('argument_mapping')
                 if mapping is None:
                     continue
                 for mappingIndex, mappedArg in enumerate(mapping):
-
-                    if mappedArg.get('workflow_step') == step['uuid']:
+                    if mappedArg.get('workflow_step') == step['name']:
                         step_argument_name = mappedArg.get('step_argument_type','').lower()
                         if (step_argument_name == 'input file' or
                             step_argument_name == 'input file or parameter' or
@@ -248,7 +233,7 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow',
-                'workflow.analysis_steps',
+                'analysis_steps',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
                 'input_files.value.display_title',
