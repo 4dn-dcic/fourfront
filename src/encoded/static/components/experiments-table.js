@@ -573,16 +573,16 @@ export default class ExperimentsTable extends React.Component {
         var ignoredFilters = null;
         if (getIgnoredFiltersMethod === 'missing-facets') {
             if (Array.isArray(facets) && facets.length > 0) {
-                if (typeof facets[0].restrictions === 'undefined'){
-                    // No restrictions added yet. TODO: Grab & include restrictions object.
-                    facets = FacetList.adjustedFacets(facets);
-                }
-                ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, filters);
+                //if (typeof facets[0].restrictions === 'undefined'){
+                //    // No restrictions added yet. TODO: Grab & include restrictions object.
+                //    facets = FacetList.adjustedFacets(facets);
+                //}
+                ignoredFilters = Filters.findIgnoredFiltersByMissingFacets(facets, filters);
             }
         } else if (getIgnoredFiltersMethod === 'single-term') {
             // Ignore filters if none in current experiment_set match it so that if coming from
             // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
-            ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(allExperiments, filters);
+            ignoredFilters = Filters.findIgnoredFiltersByStaticTerms(allExperiments, filters);
         }
         if (useSet) return Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
         else return [...Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array

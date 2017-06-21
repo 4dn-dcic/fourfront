@@ -550,12 +550,14 @@ export class ReduxExpSetFiltersInterface extends React.Component {
         'experimentsOrSets' : PropTypes.oneOf([ 'sets', 'experiments' ]),
         'expSetFilters' : PropTypes.object,
         'href' : PropTypes.string.isRequired,
-        'experimentSets' : PropTypes.array // Required if no facets supplied.
+        'experimentSets' : PropTypes.array, // Required if no facets supplied.
+        'filterOnClientSide' : PropTypes.bool
     }
 
     static defaultProps = {
         'facets' : null,
-        'experimentsOrSets' : 'sets'
+        'experimentsOrSets' : 'sets',
+        'filterOnClientSide' : false
     }
 
     constructor(props){
@@ -615,21 +617,24 @@ export class ReduxExpSetFiltersInterface extends React.Component {
     }
 
     changeFilter(field, term, callback) {
-        return Filters.changeFilter(
+
+        var filtrationArgs = [
             field,
             term,
             this.props.experimentsOrSets,
             this.props.expSetFilters,
             callback,
-            false,      // Only return new expSetFilters vs saving them == set to false
-            true,
+            false,
+            this.props.filterOnClientSide ? false : true,
             this.props.href
-        );
+        ];
+
+        return Filters.changeFilter.apply(Filters.changeFilter, filtrationArgs);
     }
 
     clearFilters(e) {
         e.preventDefault();
-        setTimeout(()=> Filters.saveChangedFilters({}, true, this.props.href) , 0);
+        setTimeout(()=> Filters.saveChangedFilters({}, !(this.props.filterOnClientSide), this.props.href) , 0);
     }
 
     render(){
@@ -663,7 +668,7 @@ export default class FacetList extends React.Component {
      */
     static compareExperimentLists(exps1, exps2){
         if (exps1.length != exps2.length) return false;
-        for (var i; i < exps1.length; i++){
+        for (var i = 0; i < exps1.length; i++){
             if (exps1[i]['@id'] != exps2[i]['@id']) return false;
         }
         return true;
@@ -676,7 +681,7 @@ export default class FacetList extends React.Component {
      */
     static checkFilledFacets(facets){
         if (!facets.length) return false;
-        for (var i; i < facets.length; i++){
+        for (var i = 0; i < facets.length; i++){
             if (typeof facets[i].total !== 'number') return false;
             if (typeof facets[i].terms === 'undefined') return false;
         }
@@ -828,14 +833,14 @@ export default class FacetList extends React.Component {
 
         var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
             if (m[2]) return m;
-            m[0] = index;
-            m[1] += Math.min( // Take into account 'view more' button
+            m.facetIndex = index;
+            m.termCount += Math.min( // Take into account 'view more' button
                 facet.terms.length,
                 this.props.persistentCount || FacetTermsList.defaultProps.persistentCount
             );
-            if (m[1] > maxTermsToShow) m[2] = true;
+            if (m.termCount > maxTermsToShow) m.end = true;
             return m;
-        }, [0, 0, false])[0]; // [facetIndex, termCount, done]...facetIndex
+        }, { facetIndex : 0, termCount: 0, end : false }).facetIndex;
 
         return facets.map((facet, i) =>
             <Facet
