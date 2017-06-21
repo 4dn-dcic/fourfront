@@ -7,6 +7,7 @@ import os
 BASE = '''[buildout]
 extends = buildout.cfg
 
+
 [production-ini]
 file_upload_bucket = elasticbeanstalk-{env_name}-files
 blob_bucket = elasticbeanstalk-{env_name}-blobs
