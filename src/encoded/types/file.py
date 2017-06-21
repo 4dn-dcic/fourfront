@@ -191,6 +191,21 @@ class File(Item):
     def experiments(self, request):
         return self.rev_link_atids(request, "experiments")
 
+    @calculated_property(schema={
+        "title": "Associated Downloads",
+        "description": "Attachments that can be bundled and downloaded along with the File eg. bam index with bam file",
+        "type": "array",
+        "items": {
+            "title": "Attached downloads",
+            "type": ["string", "object"],
+        }
+    })
+    def associated_downloads(self, request, index=None):
+        dls = []
+        if index is not None:
+            dls.append(index)
+        return dls
+
     def _update(self, properties, sheets=None):
         if not properties:
             return

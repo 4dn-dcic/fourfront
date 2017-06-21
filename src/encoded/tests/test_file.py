@@ -22,7 +22,7 @@ def test_replaced_file_not_uniqued(testapp, file):
 
 
 @pytest.fixture
-def fastq_json(award, experiment, lab):
+def fastq_json(award, lab):
     return {
         'accession': '4DNFI067APU2',
         'award': award['uuid'],
@@ -35,7 +35,7 @@ def fastq_json(award, experiment, lab):
 
 
 @pytest.fixture
-def fasta_json(award, experiment, lab):
+def fasta_json(award, lab):
     return {
         'accession': '4DNFI067APA2',
         'award': award['uuid'],
@@ -48,8 +48,27 @@ def fasta_json(award, experiment, lab):
 
 
 @pytest.fixture
-def all_file_jsons(fastq_json, fasta_json):
-    return [fastq_json, fasta_json]
+def pairs_index():
+    return {'download': 'test.pairs.txt.gz.px2', 'type': 'application/octet-stream'}
+
+
+@pytest.fixture
+def processed_file_json(award, lab, pairs_index):
+    return {
+        'accession': '4DNFI067PPPP',
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': 'pairs',
+        'filename': 'test.pairs.txt.gz',
+        'md5sum': '0123456789abcdef0123456789111100',
+        'status': 'uploaded',
+        'index': pairs_index
+    }
+
+
+@pytest.fixture
+def all_file_jsons(fastq_json, fasta_json, processed_file_json):
+    return [fastq_json, fasta_json, processed_file_json]
 
 
 @pytest.fixture
@@ -67,7 +86,10 @@ def related_files(all_file_jsons):
 
 def test_file_post_all(testapp, all_file_jsons):
     for f in all_file_jsons:
-        file_url = '/file_' + f['file_format']
+        ff = f['file_format']
+        if ff == 'pairs':
+            ff = 'processed'
+        file_url = '/file_' + ff
         testapp.post_json(file_url, f, status=201)
 
 
@@ -232,13 +254,6 @@ def test_name_for_file_is_accession(registry, fastq_json):
     assert my_file.__name__ == fastq_json['accession']
 
 
-# def test_file_type(registry, fastq_json):
-#    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-#    my_file = FileFastq.create(registry, uuid, fastq_json)
-#    assert 'gz' == my_file.file_type('gz')
-#    assert "fastq gz" == my_file.file_type('fastq', 'gz')
-
-
 def test_post_upload_only_on_uploading(registry, fastq_json, request):
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
     my_file = FileFastq.create(registry, uuid, fastq_json)
@@ -264,7 +279,7 @@ def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq_
 
 def test_workflowrun_output_rev_link(testapp, fastq_json, workflow_run_json):
     res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
-    workflow_run_json['output_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    workflow_run_json['output_files'] = [{'workflow_argument_name': 'test', 'value': res['@id']}]
     res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
 
     new_file = testapp.get(res['@id']).json
@@ -273,8 +288,21 @@ def test_workflowrun_output_rev_link(testapp, fastq_json, workflow_run_json):
 
 def test_workflowrun_input_rev_link(testapp, fastq_json, workflow_run_json):
     res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
-    workflow_run_json['input_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    workflow_run_json['input_files'] = [{'workflow_argument_name': 'test', 'value': res['@id']}]
     res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
 
     new_file = testapp.get(res['@id']).json
     assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
+
+
+def test_calculated_associated_download_no_index(file):
+    assert not file['associated_downloads']
+
+
+# currently only set up to have a single associated download but in the future it may be
+# feasible to have an index and an attachment (or some other document associated file to
+# bundle so calc prop is an array - if so will need additional test
+def test_calculated_associated_download_single_index(testapp, processed_file_json):
+    res = testapp.post_json('/file_processed', processed_file_json, status=201).json['@graph'][0]
+    assoc_dl = res['associated_downloads']
+    assert assoc_dl[0]['download'] == 'test.pairs.txt.gz.px2'
