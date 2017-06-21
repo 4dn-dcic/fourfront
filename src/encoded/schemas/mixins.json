@@ -369,16 +369,15 @@
     },
     "tags": {
         "tags": {
-            "title": "Key Words",
-            "description": "Key Words that can tag an item - useful for filtering.",
+            "title": "Tags",
+            "description": "Key words that can tag an item - useful for filtering.",
             "type": "array",
             "uniqueItems": true,
             "ff_clear": "clone",
             "items": {
-                "title": "Key Word",
+                "title": "Tag",
                 "description": "A tag for the item.",
-                "type":  "string",
-                "enum": ["Joint Analysis Project"]
+                "type":  "string"
             }
         }
     }
