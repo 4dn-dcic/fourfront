@@ -144,8 +144,10 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ['lab', 'related_files.file', 'award.project',
-                'experiments.biosample.biosource.display_title']
+    embedded = ['lab',
+                'file_format',
+                'related_files.relationship_type',
+                'related_files.file']
     name_key = 'accession'
     rev = {
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -271,14 +273,12 @@ class File(Item):
         return keys
 
     @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
+        "title": "Title",
+        "type": "string",
+        "description": "Accession of this file"
     })
-    def display_title(self, request, file_format, accession=None, external_accession=None):
-        accession = accession or external_accession
-        file_extension = self.schema['file_format_file_extension'][file_format]
-        return '{}{}'.format(accession, file_extension)
+    def title(self, accession=None, external_accession=None):
+        return accession or external_accession
 
     @calculated_property(schema={
         "title": "Download URL",

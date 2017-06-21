@@ -111,7 +111,7 @@ export default class Edge extends React.Component {
             path = d3.path();
             path.moveTo(startPt.x, startPt.y);
             path.lineTo(
-                startPt.x + 2,
+                startPt.x + 3,
                 startPt.y
             );
             path.bezierCurveTo(

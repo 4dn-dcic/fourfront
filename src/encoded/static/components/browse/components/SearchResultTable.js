@@ -472,7 +472,7 @@ class HeadersRow extends React.Component {
             this.setState({ 'widths' : nextProps.headerColumnWidths });
         }
     }
-/*
+    /*
     shouldComponentUpdate(nextProps, nextState){
         if (
             this.props.mounted !== nextProps.mounted ||
@@ -484,7 +484,7 @@ class HeadersRow extends React.Component {
         ) return true;
         return false;
     }
-*/
+    */
 
     setHeaderWidths(idx, evt, r){
         if (typeof this.props.setHeaderWidths !== 'function') throw new Error('props.setHeaderWidths not a function');
@@ -620,21 +620,24 @@ class LoadMoreAsYouScroll extends React.Component {
     }
 
     handleLoad(e,p,t){
+        
         var nextHref = this.rebuiltHref();
-        this.setState({ 'isLoading' : true }, ()=>{
-            ajax.load(nextHref, (r)=>{
-                if (r && r['@graph'] && r['@graph'].length > 0){
-                    this.props.setResults(this.props.results.concat(r['@graph']));
-                    this.setState({ 'isLoading' : false });
-                } else {
-                    if (this.state.canLoad){
-                        this.setState({
-                            'isLoading' : false,
-                            'canLoad' : false
-                        }, () => this.props.setResults(this.props.results));
-                    }
+        var loadCallback = (function(resp){
+            if (resp && resp['@graph'] && resp['@graph'].length > 0){
+                this.props.setResults(this.props.results.concat(resp['@graph']));
+                this.setState({ 'isLoading' : false });
+            } else {
+                if (this.state.canLoad){
+                    this.setState({
+                        'isLoading' : false,
+                        'canLoad' : false
+                    }, () => this.props.setResults(this.props.results));
                 }
-            });
+            }
+        }).bind(this);
+
+        this.setState({ 'isLoading' : true }, ()=>{
+            ajax.load(nextHref, loadCallback, 'GET', loadCallback);
         });
     }
 
