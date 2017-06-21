@@ -335,7 +335,7 @@ class File(Item):
         external = self.propsheets.get('external', None)
         if external is not None:
             extras = []
-            for idx, extra in enumerate(self.properties.get('extra_files')):
+            for idx, extra in enumerate(self.properties.get('extra_files'), []):
                 extra_creds = self.propsheets.get('external' + extra['file_format'])
                 extra['upload_credentials'] = extra_creds['upload_credentials']
                 extras.append(extra)
