@@ -112,35 +112,40 @@ class Workflow(Item):
             steps = [ step['step'] for step in self.properties['workflow_steps'] ]
         else:   # Else, fall back to 'collect_steps_from_arguments'
             steps = collect_steps_from_arguments()
-
+        
         if steps is None or len(steps) == 0:
-            return [
-                {
-                    "uuid" : self.uuid,
-                    "inputs" : [
-                        { 
-                            "name" : arg.get('workflow_argument_name'),
-                            "source" : [
-                                {
-                                    "name" : arg.get('workflow_argument_name'),
-                                    "type" : "Workflow Input File"
-                                }
-                            ]
-                        } for arg in self.properties['arguments'] if 'input' in str(arg.get('argument_type')).lower()
-                    ],
-                    "outputs" : [
-                        { 
-                            "name" : arg.get('workflow_argument_name'),
-                            "target" : [
-                                {
-                                    "name" : arg.get('workflow_argument_name'),
-                                    "type" : "Workflow Output File"
-                                }
-                            ]
-                        } for arg in self.properties['arguments'] if 'output' in str(arg.get('argument_type')).lower()
-                    ]
-                }
-            ]
+           titleToUse = self.properties.get('name', self.properties.get('title', "Process"))
+           return [
+               {
+                   "uuid" : self.uuid,
+                   "@id" : self.jsonld_id(request),
+                   "name" : titleToUse,
+                   "title" : titleToUse,
+                   "analysis_step_types" : ["Workflow Process"],
+                   "inputs" : [
+                       { 
+                           "name" : arg.get('workflow_argument_name'),
+                           "source" : [
+                               {
+                                   "name" : arg.get('workflow_argument_name'),
+                                   "type" : "Workflow Input File"
+                               }
+                           ]
+                       } for arg in self.properties['arguments'] if 'input' in str(arg.get('argument_type')).lower()
+                   ],
+                   "outputs" : [
+                       { 
+                           "name" : arg.get('workflow_argument_name'),
+                           "target" : [
+                               {
+                                  "name" : arg.get('workflow_argument_name'),
+                                   "type" : "Workflow Output File"
+                              }
+                           ]
+                       } for arg in self.properties['arguments'] if 'output' in str(arg.get('argument_type')).lower()
+                  ]
+              }
+           ]
 
         steps = map( lambda uuid: request.embed('/' + str(uuid), '@@embedded'), steps)
 
