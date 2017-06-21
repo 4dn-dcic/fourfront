@@ -205,19 +205,26 @@ class File(Item):
                                               'upload failed'):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
-            file_formats = [properties.get('file_format'),]
+            file_formats = [properties.get('file_format'), ]
 
             # handle extra files
             for idx, xfile in enumerate(properties.get('extra_files', [])):
                 # todo, make sure file_format is unique
-                if xfile
+                if xfile['file_format'] in file_formats:
+                    raise Exception("Each file in extra_files must have unique file_format")
+                file_formats.append(xfile['file_format'])
                 xfile['accession'] = properties.get('accession')
                 # just need a filename to trigger creation of credentials
                 xfile['filename'] = xfile['accession']
-                xfile['uuid'] = uuid
+                xfile['uuid'] = str(uuid)
                 xfile['status'] = properties.get('status')
                 ext = self.build_external_creds(self.registry, uuid, xfile)
-                xfile.update(ext)
+                # build href
+                file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
+                filename = '{}{}'.format(xfile['accession'], file_extension)
+                xfile['href'] = '/' + str(uuid) + '/@@download/' + filename
+                xfile['upload_key'] = ext['key']
+                sheets['external' + xfile['file_format']] = ext
                 properties[idx] = xfile
 
         if old_creds:
@@ -320,6 +327,19 @@ class File(Item):
         external = self.propsheets.get('external', None)
         if external is not None:
             return external['upload_credentials']
+
+    @calculated_property(condition=show_upload_credentials, schema={
+        "type": "object",
+    })
+    def extra_files_creds(self):
+        external = self.propsheets.get('external', None)
+        if external is not None:
+            extras = []
+            for idx, extra in enumerate(self.properties.get('extra_files')):
+                extra_creds = self.propsheets.get('external' + extra['file_format'])
+                extra['upload_credentials'] = extra_creds['upload_credentials']
+                extras.append(extra)
+            return extras
 
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
@@ -440,6 +460,7 @@ def get_upload(context, request):
         '@graph': [{
             '@id': request.resource_path(context),
             'upload_credentials': upload_credentials,
+            'extra_files_creds': context.extra_files_creds(),
         }],
     }
 
@@ -501,6 +522,7 @@ def post_upload(context, request):
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
+    #import pdb; pdb.set_trace()
     properties = context.upgrade_properties()
     mapping = context.schema['file_format_file_extension']
     file_extension = mapping[properties['file_format']]
@@ -509,6 +531,7 @@ def download(context, request):
     if request.subpath:
         _filename, = request.subpath
         if filename != _filename:
+            # TODO: check and see if this bad boy is in extra-files
             raise HTTPNotFound(_filename)
 
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers

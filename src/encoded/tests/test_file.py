@@ -98,9 +98,50 @@ def test_extra_files(testapp, proc_file_json):
     assert len(resobj['extra_files']) == len(extra_files)
     file_name = ("%s.pairs.gz.px2" % (resobj['accession']))
     expected_key = "%s/%s" % (resobj['uuid'], file_name)
-    assert resobj['extra_files'][0]['key'] == expected_key
-    assert resobj['extra_files'][0]['upload_credentials']
+    assert resobj['extra_files'][0]['upload_key'] == expected_key
+    assert resobj['extra_files'][0]['href']
+    assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
+    assert resobj['extra_files_creds'][0]['upload_credentials']
     assert resobj['extra_files'][0]['status'] == proc_file_json['status']
+
+
+def test_extra_files_download(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    download_link = resobj['extra_files'][0]['href']
+    testapp.get(download_link)
+
+def test_extra_files_get_upload(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+
+    get_res = testapp.get(resobj['@id']+'/upload')
+    get_resobj = get_res.json['@graph'][0]
+    assert get_resobj['upload_credentials']
+    assert get_resobj['extra_files_creds'][0]
+
+
+def test_extra_files_throws_on_duplicate_file_format(testapp, proc_file_json):
+    # same file_format as original file
+    extra_files = [{'file_format': 'pairs'}]
+    proc_file_json['extra_files'] = extra_files
+    with pytest.raises(Exception) as exc:
+        testapp.post_json('/file_processed', proc_file_json, status=201)
+        assert "must have unique file_format" in exc.value
+
+
+def test_extra_files_throws_on_duplicate_file_format_in_extra(testapp, proc_file_json):
+    # same file_format as original file
+    extra_files = [{'file_format': 'pairs_px2'},
+                   {'file_format': 'pairs_px'}]
+    proc_file_json['extra_files'] = extra_files
+    with pytest.raises(Exception) as exc:
+        testapp.post_json('/file_processed', proc_file_json, status=201)
+        assert "must have unique file_format" in exc.value
 
 
 def test_files_aws_credentials(testapp, fastq_uploading):
