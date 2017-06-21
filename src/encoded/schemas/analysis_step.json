@@ -23,11 +23,10 @@
         },
         "name": {
             "title": "Name",
-            "description": "Unique name of the analysis step",
-            "comment": "Unique for each parent analysis_step, using a naming system where the pipeline, software used, the purpose and the version of the step is described: rampage-grit-peak-calling-step-v-1",
+            "description": "non-unique name of the analysis step",
+            "comment": "non-unique for each parent analysis_step, using a naming system where the pipeline, software used, the purpose and the version of the step is described: rampage-grit-peak-calling-step-v-1",
             "type": "string",
-            "pattern": "^[a-zA-Z0-9\\-\\_]+$",
-            "uniqueKey": "analysis_step:name"
+            "pattern": "^[a-zA-Z0-9\\-\\_]+$"
         },
         "title": {
             "title": "Title",
