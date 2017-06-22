@@ -1167,7 +1167,7 @@
         }
     ],
     "workflow_type": "Hi-C data analysis",
-    "name": "hi-c-processing-parta-juicer/14",
+    "name": "hi-c-processing-parta-juicer/15",
     "uuid": "a9caf6f3-49e5-4c33-bfab-9ec90d65111c",
     "arguments": [
         {

@@ -35,6 +35,19 @@ def fastq_json(award, experiment, lab):
 
 
 @pytest.fixture
+def proc_file_json(award, experiment, lab):
+    return {
+        'accession': '4DNFI067APU2',
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': 'pairs',
+        'filename': 'test.pairs.gz',
+        'md5sum': '0123456789abcdef0123456789abcdef',
+        'status': 'uploading',
+    }
+
+
+@pytest.fixture
 def fasta_json(award, experiment, lab):
     return {
         'accession': '4DNFI067APA2',
@@ -75,6 +88,62 @@ def test_file_post_all(testapp, all_file_jsons):
 def fastq_uploading(fastq_json):
     fastq_json['status'] = 'uploading'
     return fastq_json
+
+
+def test_extra_files(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    assert len(resobj['extra_files']) == len(extra_files)
+    file_name = ("%s.pairs.gz.px2" % (resobj['accession']))
+    expected_key = "%s/%s" % (resobj['uuid'], file_name)
+    assert resobj['extra_files'][0]['upload_key'] == expected_key
+    assert resobj['extra_files'][0]['href']
+    assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
+    assert resobj['extra_files_creds'][0]['upload_credentials']
+    assert resobj['extra_files'][0]['status'] == proc_file_json['status']
+
+
+def test_extra_files_download(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    download_link = resobj['extra_files'][0]['href']
+    testapp.get(download_link, status=307)
+    testapp.get(resobj['href'], status=307)
+
+
+def test_extra_files_get_upload(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+
+    get_res = testapp.get(resobj['@id']+'/upload')
+    get_resobj = get_res.json['@graph'][0]
+    assert get_resobj['upload_credentials']
+    assert get_resobj['extra_files_creds'][0]
+
+
+def test_extra_files_throws_on_duplicate_file_format(testapp, proc_file_json):
+    # same file_format as original file
+    extra_files = [{'file_format': 'pairs'}]
+    proc_file_json['extra_files'] = extra_files
+    with pytest.raises(Exception) as exc:
+        testapp.post_json('/file_processed', proc_file_json, status=201)
+        assert "must have unique file_format" in exc.value
+
+
+def test_extra_files_throws_on_duplicate_file_format_in_extra(testapp, proc_file_json):
+    # same file_format as original file
+    extra_files = [{'file_format': 'pairs_px2'},
+                   {'file_format': 'pairs_px'}]
+    proc_file_json['extra_files'] = extra_files
+    with pytest.raises(Exception) as exc:
+        testapp.post_json('/file_processed', proc_file_json, status=201)
+        assert "must have unique file_format" in exc.value
 
 
 def test_files_aws_credentials(testapp, fastq_uploading):
