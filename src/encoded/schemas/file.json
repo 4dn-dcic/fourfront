@@ -83,6 +83,22 @@
             "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
             "type": "integer"
         },
+		"extra_files": {
+			"title": "Extra Files",
+			"description": "Links to extra files on s3 that don't have associated metadata",
+			"type": "array",
+			"items": {
+			   "title": "Extra File",
+			   "type": "object",
+			   "additionalProperties": true,
+			   "properties": {
+				   "file_format": {
+					    "title": "File Format",
+					    "type": "string"
+				    }
+				}
+			}
+		},
         "related_files": {
             "title": "Related Files",
             "description": "Files related to this one",

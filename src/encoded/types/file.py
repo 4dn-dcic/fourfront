@@ -13,7 +13,6 @@ from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     collection_add,
-    paths_filtered_by_status
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -34,6 +33,7 @@ import pytz
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
+
 
 def show_upload_credentials(request=None, context=None, status=None):
     if request is None or status not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
@@ -204,9 +204,37 @@ class File(Item):
         new_creds = old_creds
 
         # don't get new creds
-        if properties.get('status', None) in ('uploading', 'to be uploaded by workflow', 'upload failed'):
+        if properties.get('status', None) in ('uploading', 'to be uploaded by workflow',
+                                              'upload failed'):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
+            file_formats = [properties.get('file_format'), ]
+
+
+            # handle extra files
+            updated_extra_files = []
+            for idx, xfile in enumerate(properties.get('extra_files', [])):
+                # ensure a file_format (identifier for extra_file) is given and non-null
+                if not('file_format' in xfile and bool(xfile['file_format'])):
+                    continue
+                # todo, make sure file_format is unique
+                if xfile['file_format'] in file_formats:
+                    raise Exception("Each file in extra_files must have unique file_format")
+                file_formats.append(xfile['file_format'])
+                xfile['accession'] = properties.get('accession')
+                # just need a filename to trigger creation of credentials
+                xfile['filename'] = xfile['accession']
+                xfile['uuid'] = str(uuid)
+                xfile['status'] = properties.get('status')
+                ext = self.build_external_creds(self.registry, uuid, xfile)
+                # build href
+                file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
+                filename = '{}{}'.format(xfile['accession'], file_extension)
+                xfile['href'] = '/' + str(uuid) + '/@@download/' + filename
+                xfile['upload_key'] = ext['key']
+                sheets['external' + xfile['file_format']] = ext
+                updated_extra_files.append(xfile)
+            properties['extra_files'] = updated_extra_files
 
         if old_creds:
             if old_creds.get('key') != new_creds.get('key'):
@@ -309,11 +337,28 @@ class File(Item):
         if external is not None:
             return external['upload_credentials']
 
+    @calculated_property(condition=show_upload_credentials, schema={
+        "type": "object",
+    })
+    def extra_files_creds(self):
+        external = self.propsheets.get('external', None)
+        if external is not None:
+            extras = []
+            for extra in self.properties.get('extra_files', []):
+                extra_creds = self.propsheets.get('external' + extra['file_format'])
+                extra['upload_credentials'] = extra_creds['upload_credentials']
+                extras.append(extra)
+            return extras
+
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
         bucket = registry.settings['file_upload_bucket']
         mapping = cls.schema['file_format_file_extension']
-        file_extension = mapping[properties['file_format']]
+        prop_format = properties['file_format']
+        try:
+            file_extension = mapping[prop_format]
+        except KeyError:
+            raise Exception('File format not in list of supported file types')
         key = '{uuid}/{accession}{file_extension}'.format(
             file_extension=file_extension, uuid=uuid,
             accession=properties.get('accession'))
@@ -428,6 +473,7 @@ def get_upload(context, request):
         '@graph': [{
             '@id': request.resource_path(context),
             'upload_credentials': upload_credentials,
+            'extra_files_creds': context.extra_files_creds(),
         }],
     }
 
@@ -486,28 +532,53 @@ def post_upload(context, request):
     return result
 
 
-@view_config(name='download', context=File, request_method='GET',
-             permission='view', subpath_segments=[0, 1])
-def download(context, request):
-    properties = context.upgrade_properties()
-    mapping = context.schema['file_format_file_extension']
+def is_file_to_download(properties, mapping, expected_filename=None):
     file_extension = mapping[properties['file_format']]
     accession_or_external = properties.get('accession') or properties['external_accession']
     filename = accession_or_external + file_extension
-    if request.subpath:
-        _filename, = request.subpath
-        if filename != _filename:
-            raise HTTPNotFound(_filename)
+    if expected_filename is None:
+        return filename
+    elif expected_filename != filename:
+        return False
+    else:
+        return filename
 
+
+@view_config(name='download', context=File, request_method='GET',
+             permission='view', subpath_segments=[0, 1])
+def download(context, request):
+    # to use or not to use the proxy
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
-
     try:
         use_download_proxy = request.client_addr not in request.registry['aws_ipset']
     except TypeError:
         # this fails in testing due to testapp not having ip
         use_download_proxy = False
 
-    external = context.propsheets.get('external', {})
+    # with extra_files the user may be trying to download the main file
+    # or one of the files in extra files, the following logic will
+    # search to find the "right" file and redirect to a download link for that one
+    properties = context.upgrade_properties()
+    mapping = context.schema['file_format_file_extension']
+
+    _filename = None
+    if request.subpath:
+        _filename, = request.subpath
+    filename = is_file_to_download(properties, mapping, _filename)
+    if not filename:
+        found = False
+        for extra in properties.get('extra_files'):
+            filename = is_file_to_download(extra, mapping, _filename)
+            if filename:
+                found = True
+                properties = extra
+                external = context.propsheets.get('external' + extra['file_format'])
+                break
+        if not found:
+            raise HTTPNotFound(_filename)
+    else:
+        external = context.propsheets.get('external', {})
+
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
@@ -538,8 +609,10 @@ def download(context, request):
     # 307 redirect specifies to keep original method
     raise HTTPTemporaryRedirect(location=location)
 
-# validator for filename field
+
 def validate_file_filename(context, request):
+    ''' validator for filename field '''
+
     data = request.json
     if 'filename' not in data or 'file_format' not in data:
         return
@@ -567,6 +640,6 @@ def validate_file_filename(context, request):
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post,validate_file_filename])
+             validators=[validate_item_content_post, validate_file_filename])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
