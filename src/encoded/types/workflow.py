@@ -12,7 +12,7 @@ from .base import (
 
 
 
-
+# This is the schema used for both Workflow.analysis_steps and WorkflowRun.analysis_steps.
 workflow_analysis_steps_schema = {
     "title": "Workflow Analysis Steps",
     "type": "array",
@@ -221,8 +221,6 @@ class Workflow(Item):
             return resultArgs
 
 
-        steps = None
-        
         steps = [ step['step'] for step in self.properties['workflow_steps'] ]
         
         if steps is None or len(steps) == 0:
