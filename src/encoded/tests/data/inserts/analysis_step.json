@@ -116,7 +116,7 @@
         "lab": "4dn-dcic-lab",
         "title": "juicer",
         "name": "juicer",
-        "version": "16",
+        "version": "17",
         "analysis_step_types": ["alignment","filtering"],
         "software_used": "02d636b9-d82d-4da9-950c-2ca994a23599"
     },
