@@ -1,4 +1,5 @@
 import pytest
+from ..loadxl import ORDER
 
 
 targets = [
@@ -74,3 +75,14 @@ def test_embedded_uuids_experiment(experiment, replicate, library, biosample, or
     assert library['uuid'] in embedded_uuids
     assert biosample['uuid'] in embedded_uuids
     assert organism['uuid'] in embedded_uuids
+
+@pytest.mark.parametrize('item_type', ORDER)
+def test_add_default_embeds(registry, item_type):
+    """
+    Ensure
+    """
+    from snovault.fourfront_utils import add_default_embeds
+    from snovault import TYPES
+    type_info = registry[TYPES].by_item_type[item_type]
+    schema = type_info.schema
+    embeds = add_default_embeds(item_type, registry[TYPES], type_info.embedded, schema)
