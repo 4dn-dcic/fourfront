@@ -22,7 +22,7 @@ class QualityMetricFlag(Item):
 
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
-    embedded = ['quality_metrics']
+    embedded = ['quality_metrics.*']
 
 
 @abstract_collection(

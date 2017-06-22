@@ -64,10 +64,8 @@ def test_experiment_update_experiment_relation(testapp, base_experiment, experim
 
     # patching an experiement should also update the related experiement
     exp_res = testapp.get(experiment['@id'])
-
-    exp_relation = [{'relationship_type': 'control for',
-                     'experiment': base_experiment['@id']}]
-    assert exp_res.json['experiment_relation'] == exp_relation
+    exp_res_id = exp_res.json['experiment_relation'][0]['experiment']['@id']
+    assert exp_res_id == base_experiment['@id']
 
 
 def test_experiment_update_hic_sop_mapping_added_on_submit(testapp, experiment_data, sop_map_data):
@@ -169,16 +167,16 @@ def test_experiment_set_default_embedded_list(registry):
     # are called automatically
     test_exp = ExperimentHiC.create(registry, None, exp_data)
     embedded = test_exp.embedded
-    experiment_set_emb = 'experiment_sets' in embedded
-    assert 'digestion_enzyme' in embedded
-    if 'references' not in embedded:
+    experiment_set_emb = 'experiment_sets.*' in embedded
+    assert 'digestion_enzyme.*' in embedded
+    if 'references.*' not in embedded:
         assert 'references.link_id' in embedded
         assert 'references.display_title' in embedded
     if not experiment_set_emb:
         assert 'experiment_sets.link_id' in embedded
         assert 'experiment_sets.display_title' in embedded
     else:
-        assert 'experiment_sets' in embedded
+        assert 'experiment_sets.*' in embedded
 
 
 # tests for the experiment_sets calculated properties

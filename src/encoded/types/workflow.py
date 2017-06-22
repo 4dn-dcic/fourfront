@@ -193,7 +193,7 @@ class Workflow(Item):
                    "title" : titleToUse,
                    "analysis_step_types" : ["Workflow Process"],
                    "inputs" : [
-                       { 
+                       {
                            "name" : arg.get('workflow_argument_name'),
                            "source" : [
                                {
@@ -204,7 +204,7 @@ class Workflow(Item):
                        } for arg in self.properties['arguments'] if 'input' in str(arg.get('argument_type')).lower()
                    ],
                    "outputs" : [
-                       { 
+                       {
                            "name" : arg.get('workflow_argument_name'),
                            "target" : [
                                {
@@ -324,7 +324,7 @@ class WorkflowRun(Item):
                 'input_files.value',
                 'input_files.value.file_format',
                 'output_files.workflow_argument_name',
-                'output_files.value',
+                'output_files.value.*',
                 'output_files.value.file_format',
                 'output_quality_metrics.name',
                 #'output_quality_metrics.value'
