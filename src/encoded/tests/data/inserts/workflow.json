@@ -1004,12 +1004,12 @@
     "lab": "4dn-dcic-lab"
 },
 {
-    "title": "hi-c-processing-parta-juicer",
-    "accession": "4DNWFSOZLJBM",
+    "title": "hi-c-processing-parta-juicer from data",
+    "accession": "4DNWFSOAAAA",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
     "workflow_diagram": "",
-    "description": "Hi-C processing partA based on Juicer",
+    "description": "Hi-C processing partA based on Juicer, test insert data",
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.5.cwl",
     "workflow_steps": [
         {
@@ -1150,7 +1150,7 @@
 },
 {
     "title": "hi-c-processing-parta-juicer",
-    "accession": "4DNWFSOZLJBM",
+    "accession": "4DNWFSOBBBBB",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
     "workflow_diagram": "",

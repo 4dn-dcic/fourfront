@@ -23,9 +23,9 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
-    embedded = ['workflow_steps.step',
-                'workflow_steps.step_name',
-                'arguments',
+    embedded = ['analysis_steps',
+                'analysis_steps.*',
+                'arguments.*',
                 'arguments.argument_mapping']
     rev = {
         'workflow_runs': ('WorkflowRun', 'workflow'),
@@ -51,20 +51,107 @@ class Workflow(Item):
         "items": {
             "title": "Analysis Step",
             "type": "object",
+            "additionalProperties": True,
+            "properties": {
+                "uuid": {
+                    "title": "UUID",
+                    "description": "Unique Identifier for AnalysisStep",
+                    "type": "string"
+                },
+                "inputs" : {
+                    "title" : "Step Inputs",
+                    "type" : "array",
+                    "items" : {
+                        "type" : "object",
+                        "properties" : {
+                            "name" : {
+                                "title" : "Input Name",
+                                "type" : "string"
+                            },
+                            "source" : {
+                                "title" : "Source Step",
+                                "description" : "Where this input file came from.",
+                                "type" : "array",
+                                "items" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "name" : { "type" : "string" },
+                                        "type" : { "type" : "string" },
+                                        "step" : { "type" : "string" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "outputs" : {
+                    "title" : "Step Outputs",
+                    "type" : "array",
+                    "items" : {
+                        "type" : "object",
+                        "properties" : {
+                            "name" : {
+                                "title" : "Input Name",
+                                "type" : "string"
+                            },
+                            "target" : {
+                                "title" : "Target Step",
+                                "description" : "Where this output file should go next.",
+                                "type" : "array",
+                                "items" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "name" : { "type" : "string" },
+                                        "type" : { "type" : "string" },
+                                        "step" : { "type" : "string" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "software_used": {
+                    "title": "Software Used",
+                    "description": "Reference to Software Used",
+                    "type": "string"
+                },
+                "name" : {
+                    "title" : "Step Name",
+                    "type" : "string"
+                },
+                "analysis_step_types" : {
+                    "title" : "Step Purposes",
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string"
+                    }
+                }
+            }
         }
-    }, category="page")
+    })
     def analysis_steps(self, request):
         """smth."""
-
-
-        if not request.has_permission('view_details'):
-            return []
 
         if self.properties.get('arguments') is None:
             return []
 
         if self.properties.get('workflow_steps') is None:
             return []
+
+
+        def buildStepDict(uuid):
+            resultStepProperties = ['uuid', 'inputs', 'outputs', 'name', 'software_used', '@id', 'title', 'display_title', 'description', 'analysis_step_types', 'status'] # props to leave in
+            step = self.collection.get(str(uuid))
+            stepDict = {}
+            stepDict.update(step.properties)
+            stepKeys = list(stepDict.keys())
+            for key in stepKeys:
+                if key not in resultStepProperties:
+                    del stepDict[key]
+            stepDict.update({
+                'uuid' : str(step.uuid),
+            })
+            return stepDict
 
         def mergeOutputsForStep(args):
             seen_argument_names = {}
@@ -130,20 +217,16 @@ class Workflow(Item):
               }
            ]
 
-        steps = map( lambda uuid: request.embed('/' + str(uuid), '@@embedded'), steps)
+        steps = map(buildStepDict, steps)
+
+        #steps = map( lambda uuid: request.embed('/' + str(uuid), '@@embedded'), steps)
 
         resultSteps = []
-        resultStepProperties = ['uuid', 'inputs', 'outputs', 'name', 'software_used', '@id', 'display_title', 'description', 'analysis_step_types']
 
         # Distribute arguments into steps' "inputs" and "outputs" arrays.
         for step in steps:
             step['inputs'] = []
             step['outputs'] = []
-
-            stepKeys = list(step.keys())
-            for key in stepKeys:
-                if key not in resultStepProperties:
-                    del step[key]
 
             for arg in self.properties['arguments']:
                 mapping = arg.get('argument_mapping')
@@ -234,6 +317,7 @@ class WorkflowRun(Item):
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow',
                 'analysis_steps',
+                'analysis_steps.*',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
                 'input_files.value.display_title',
@@ -252,15 +336,109 @@ class WorkflowRun(Item):
         "items": {
             "title": "Analysis Step",
             "type": "object",
+            "properties" : {
+                "inputs" : {
+                    "title" : "Step Inputs",
+                    "type" : "array",
+                    "items" : {
+                        "type" : "object",
+                        "properties" : {
+                            "name" : {
+                                "title" : "Input Name",
+                                "type" : "string"
+                            },
+                            "source" : {
+                                "title" : "Source Step",
+                                "description" : "Where this input file came from.",
+                                "type" : "array",
+                                "items" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "name" : { "type" : "string" },
+                                        "type" : { "type" : "string" },
+                                        "step" : { "type" : "string" }
+                                    }
+                                }
+                            },
+                            "run_data" : {
+                                "type" : "object",
+                                "properties" : {
+                                    "file" : {
+                                        "type" : "string",
+                                        "title" : "File",
+                                        "linkTo" : "File"
+                                    },
+                                    "value" : {
+                                        "title" : "Value",
+                                        "type" : "string"
+                                    },
+                                    "type" : {
+                                        "type" : "string",
+                                        "title" : "I/O Type"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "outputs" : {
+                    "title" : "Step Outputs",
+                    "type" : "array",
+                    "items" : {
+                        "type" : "object",
+                        "properties" : {
+                            "name" : {
+                                "title" : "Input Name",
+                                "type" : "string"
+                            },
+                            "target" : {
+                                "title" : "Target Step",
+                                "description" : "Where this output file should go next.",
+                                "type" : "array",
+                                "items" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "name" : { "type" : "string" },
+                                        "type" : { "type" : "string" },
+                                        "step" : { "type" : "string" }
+                                    }
+                                }
+                            },
+                            "run_data" : {
+                                "type" : "object",
+                                "properties" : {
+                                    "file" : {
+                                        "type" : "string",
+                                        "title" : "File",
+                                        "linkTo" : "File"
+                                    },
+                                    "value" : {
+                                        "title" : "Value",
+                                        "type" : "string"
+                                    },
+                                    "type" : {
+                                        "type" : "string",
+                                        "title" : "I/O Type"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-    }, category="page")
+    })
     def analysis_steps(self, request):
+
         workflow = self.properties.get('workflow')
         if workflow is None:
-            return
+            return []
 
         workflow = self.collection.get(workflow)
         analysis_steps = workflow.analysis_steps(request)
+
+        if not analysis_steps or len(analysis_steps) == 0:
+            return []
 
         fileCache = {}
 
@@ -274,11 +452,14 @@ class WorkflowRun(Item):
                     if sourceOrTarget['name'] == param.get('workflow_argument_name'):
                         fileUUID = param.get('value')
                         if fileUUID:
-                            fileData = fileCache.get(fileUUID)
-                            if not fileData:
-                                fileData = request.embed('/' + param.get('value'), '@@embedded')
-                                fileCache[param.get('value')] = fileData
-                            inputOrOutput['run_data'] = { "file" : fileData, "type" : param.get('type') }
+                            #fileData = fileCache.get(fileUUID)
+                            #if not fileData:
+                            #    fileObj = self.collection.get(param.get('value'))
+                            #    fileData = fileObj.__json__(request) #request.embed('/' + param.get('value'), '@@embedded')
+                            #    fileData['uuid'] = fileObj.uuid
+                            #    fileCache[param.get('value')] = fileData
+                            #    print('\n\n\n\n\n', fileData)
+                            inputOrOutput['run_data'] = { "file" : fileUUID, "type" : param.get('type') }
                             return True
             return False
 

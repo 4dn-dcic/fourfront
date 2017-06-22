@@ -36,7 +36,6 @@ class AnalysisStep(Item):
     """The AnalysisStep class that descrbes a step in a workflow."""
 
     item_type = 'analysis_step'
-    name_key = 'name'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded = ['software_used', 'qa_stats_generated']
 
