@@ -222,7 +222,7 @@ class Workflow(Item):
 
 
         steps = [ step['step'] for step in self.properties['workflow_steps'] ]
-        
+
         if steps is None or len(steps) == 0:
            titleToUse = self.properties.get('name', self.properties.get('title', "Process"))
            return [
