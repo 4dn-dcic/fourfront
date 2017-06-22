@@ -66,28 +66,28 @@ class ExperimentSet(Item):
         'publications_using': ('Publication', 'exp_sets_used_in_pub'),
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
-    embedded = ["award",
-                "lab",
-                "produced_in_pub",
-                "publications_of_set",
-                "experiments_in_set",
-                "experiments_in_set.protocol",
-                "experiments_in_set.protocol_variation",
-                "experiments_in_set.lab",
-                "experiments_in_set.award",
-                "experiments_in_set.biosample",
-                "experiments_in_set.biosample.biosource",
-                "experiments_in_set.biosample.modifications",
-                "experiments_in_set.biosample.treatments",
-                "experiments_in_set.biosample.biosource.individual.organism",
-                "experiments_in_set.files",
+    embedded = ["award.*",
+                "lab.*",
+                "produced_in_pub.*",
+                "publications_of_set.*",
+                "experiments_in_set.*",
+                "experiments_in_set.protocol.*",
+                "experiments_in_set.protocol_variation.*",
+                "experiments_in_set.lab.*",
+                "experiments_in_set.award.*",
+                "experiments_in_set.biosample.*",
+                "experiments_in_set.biosample.biosource.*",
+                "experiments_in_set.biosample.modifications.*",
+                "experiments_in_set.biosample.treatments.*",
+                "experiments_in_set.biosample.biosource.individual.organism.*",
+                "experiments_in_set.files.*",
                 "experiments_in_set.files.related_files.relationship_type",
                 "experiments_in_set.files.related_files.file.uuid",
-                "experiments_in_set.filesets",
-                "experiments_in_set.filesets.files_in_set",
+                "experiments_in_set.filesets.*",
+                "experiments_in_set.filesets.files_in_set.*",
                 "experiments_in_set.filesets.files_in_set.related_files.relationship_type",
                 "experiments_in_set.filesets.files_in_set.related_files.file.uuid",
-                "experiments_in_set.digestion_enzyme"]
+                "experiments_in_set.digestion_enzyme.*"]
 
     def _update(self, properties, sheets=None):
         if 'date_released' not in properties:
@@ -125,10 +125,19 @@ class ExperimentSet(Item):
     })
     def publications_of_set(self, request):
         pubs = set([str(pub) for pub in self.get_rev_links('publications_produced') +
-                self.get_rev_links('publications_using')])
+                   self.get_rev_links('publications_using')])
         pubs = [request.embed('/', uuid, '@@object')
-                for uuid in paths_filtered_by_status(request, pubs )]
+                for uuid in paths_filtered_by_status(request, pubs)]
         return [pub['@id'] for pub in pubs]
+
+    @calculated_property(schema={
+        "title": "Number of Experiments",
+        "description": "The number of Experiments in this Experiment Set.",
+        "type": "integer"
+    })
+    def number_of_experiments(self, request, experiments_in_set=None):
+        if experiments_in_set:
+            return len(experiments_in_set)
 
 
 @collection(

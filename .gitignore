@@ -14,11 +14,13 @@ coverage.xml
 /eggs/
 /.eggs/
 /extends/
+/jsconfig.json
 /node_modules/
 /documentation/
 /ontology.json
 /parts/
 /session-secret.b64
+/src/encoded/static/components/lib/react-infinite
 /src/encoded/static/css/bootstrap.css
 /src/encoded/static/css/responsive.css
 /src/encoded/static/css/style.css

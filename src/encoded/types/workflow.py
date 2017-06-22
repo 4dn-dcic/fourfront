@@ -11,6 +11,7 @@ from .base import (
 )
 
 
+
 @collection(
     name='workflows',
     properties={
@@ -22,11 +23,10 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
-    embedded = ['workflow_steps.step',
+    embedded = ['workflow_steps.step.*',
                 'workflow_steps.step_name',
-                'arguments',
-                'analysis_steps',
-                'arguments.argument_mapping']
+                'arguments.*',
+                'arguments.argument_mapping.*']
     rev = {
         'workflow_runs': ('WorkflowRun', 'workflow'),
     }
@@ -52,7 +52,7 @@ class Workflow(Item):
             "title": "Analysis Step",
             "type": "object",
         }
-    }, category='page')
+    })
     def analysis_steps(self, request):
         """smth."""
         if not request.has_permission('view_details'):
@@ -61,29 +61,95 @@ class Workflow(Item):
         if self.properties.get('arguments') is None:
             return
 
-        steps = []
+        def collect_steps_from_arguments():
+            '''Fallback function to use in case there is no "workflow_steps" list available on Item.'''
+            steps = []
+            for arg in self.properties['arguments']:
+                mapping = arg.get('argument_mapping')
+                if mapping is None:
+                    continue
+                for mappedArg in mapping:
+                    step = mappedArg.get('workflow_step')
+                    if step is not None:
+                        steps.append(step)
 
-        # Find all unique steps in arguments, order of occurrence.
-        for arg in self.properties['arguments']:
-            mapping = arg.get('argument_mapping')
-            if mapping is None:
-                continue
-            for mappedArg in mapping:
-                step = mappedArg.get('workflow_step')
-                if step is not None:
-                    steps.append(step)
+            # Unique-ify steps list while preserving list order
+            unique_steps_unordered = set()
+            unique_add = unique_steps_unordered.add
+            return [
+                step for step in steps if not (step in unique_steps_unordered or unique_add(step))
+            ]
 
-        # Unique-ify steps list while preserving list order
-        unique_steps_unordered = set()
-        unique_add = unique_steps_unordered.add
-        steps = [
-            step for step in steps if not (step in unique_steps_unordered or unique_add(step))
-        ]
+        def mergeOutputsForStep(args):
+            seen_argument_names = {}
+            resultArgs = []
+            for arg in args:
 
-        steps = list(map(
-            lambda uuid: request.embed('/' + str(uuid), '@@embedded'),
-            steps
-        ))
+                argName = arg.get('name')
+                if argName:
+                    priorArgument = seen_argument_names.get(argName)
+                    if priorArgument and len(arg['target']) > 0:
+                        for currentTarget in arg['target']:
+                            foundExisting = False
+                            for existingTarget in priorArgument['target']:
+                                if (
+                                    existingTarget['name'] == currentTarget['name']
+                                    and existingTarget.get('step','a') == currentTarget.get('step','b')
+                                ):
+                                    existingTarget.update(currentTarget)
+                                    foundExisting = True
+                            if not foundExisting:
+                                priorArgument['target'].append(currentTarget)
+                    else:
+                        resultArgs.append(arg)
+                        seen_argument_names[argName] = arg
+            return resultArgs
+
+
+        steps = None
+
+        if self.properties.get('workflow_steps') is not None:   # Attempt to grab from 'workflow_steps' property, as it would have explicit steps order built-in.
+            steps = [ step['step'] for step in self.properties['workflow_steps'] ]
+        else:   # Else, fall back to 'collect_steps_from_arguments'
+            steps = collect_steps_from_arguments()
+
+        if steps is None or len(steps) == 0:
+           titleToUse = self.properties.get('name', self.properties.get('title', "Process"))
+           return [
+               {
+                   "uuid" : self.uuid,
+                   "@id" : self.jsonld_id(request),
+                   "name" : titleToUse,
+                   "title" : titleToUse,
+                   "analysis_step_types" : ["Workflow Process"],
+                   "inputs" : [
+                       {
+                           "name" : arg.get('workflow_argument_name'),
+                           "source" : [
+                               {
+                                   "name" : arg.get('workflow_argument_name'),
+                                   "type" : "Workflow Input File"
+                               }
+                           ]
+                       } for arg in self.properties['arguments'] if 'input' in str(arg.get('argument_type')).lower()
+                   ],
+                   "outputs" : [
+                       {
+                           "name" : arg.get('workflow_argument_name'),
+                           "target" : [
+                               {
+                                  "name" : arg.get('workflow_argument_name'),
+                                   "type" : "Workflow Output File"
+                              }
+                           ]
+                       } for arg in self.properties['arguments'] if 'output' in str(arg.get('argument_type')).lower()
+                  ]
+              }
+           ]
+
+        steps = map( lambda uuid: request.embed('/' + str(uuid), '@@embedded'), steps)
+
+        resultSteps = []
 
         # Distribute arguments into steps' "inputs" and "outputs" arrays.
         for step in steps:
@@ -96,17 +162,22 @@ class Workflow(Item):
                 for mappingIndex, mappedArg in enumerate(mapping):
 
                     if mappedArg.get('workflow_step') == step['uuid']:
-
-                        if (mappedArg.get('step_argument_type') == 'Input file' or
-                            mappedArg.get('step_argument_type') == 'Input file or parameter' or
-                            mappedArg.get('step_argument_type') == 'parameter' ):
+                        step_argument_name = mappedArg.get('step_argument_type','').lower()
+                        if (step_argument_name == 'input file' or
+                            step_argument_name == 'input file or parameter' or
+                            step_argument_name == 'parameter' ):
 
                             inputNode = {
                                 "name" : mappedArg.get('step_argument_name'),
                                 "source" : []
                             }
 
-                            doesOutputMappingExist = len([ mp for mp in mapping if mp.get('step_argument_type') == 'Output file' or mp.get('step_argument_type') == 'Output file or parameter' ]) > 0
+                            doesOutputMappingExist = len([
+                                mp for mp in mapping if (
+                                    mp.get('step_argument_type').lower() == 'output file' or
+                                    mp.get('step_argument_type').lower() == 'output file or parameter'
+                                )
+                            ]) > 0
 
                             if arg.get("workflow_argument_name") is not None and not doesOutputMappingExist:
                                 source = { "name" : arg["workflow_argument_name"] }
@@ -127,8 +198,8 @@ class Workflow(Item):
 
                             step["inputs"].append(inputNode)
 
-                        elif (mappedArg.get('step_argument_type') == 'Output file' or
-                            mappedArg.get('step_argument_type') == 'Output file or parameter' ):
+                        elif (step_argument_name == 'output file' or
+                            step_argument_name == 'output file or parameter' ):
 
                             outputNode = {
                                 "name" : mappedArg.get("step_argument_name"),
@@ -155,7 +226,10 @@ class Workflow(Item):
 
                             step["outputs"].append(outputNode)
 
-        return steps
+
+            step['outputs'] = mergeOutputsForStep(step['outputs'])
+            resultSteps.append(step)
+        return resultSteps
 
 
 @collection(
@@ -169,17 +243,17 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow',
-                'workflow.analysis_steps',
-                'workflow.analysis_steps.inputs',
+    embedded = ['workflow.*',
+                'workflow.analysis_steps.*',
                 'input_files.workflow_argument_name',
-                'input_files.value',
+                'input_files.value.*',
                 'input_files.value.file_format',
                 'output_files.workflow_argument_name',
-                'output_files.value',
+                'output_files.value.*',
                 'output_files.value.file_format',
                 'output_quality_metrics.name',
-                'output_quality_metrics.value']
+                #'output_quality_metrics.value'
+                ]
 
     @calculated_property(schema={
         "title": "Workflow Analysis Steps",

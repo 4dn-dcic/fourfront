@@ -83,5 +83,38 @@
         "name": "juicer",
         "software_type": ["quality metric generator"],
         "commit": "855e6291c6926371aeeab3d5f96b3895c0cdb171"
+    },
+    {
+        "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23588",
+        "version":"0.3.3",
+        "name":"hic2cool",
+        "software_type":["file format converter"],
+        "title":"hic2cool_0.3.3",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab"
+    },
+    {
+        "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23555",
+        "version":"0.7.4",
+        "name":"cooler",
+        "software_type":[
+            "aggregator",
+            "normalizer"
+        ],
+        "title":"cooler_0.7.4",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab"
+    },
+    {
+        "uuid":"02d636b9-d8dd-4da9-950c-2ca994b23576",
+        "version":"1.6.2-cuda8",
+        "name":"juicebox",
+        "software_type":[
+            "aggregator",
+            "normalizer"
+        ],
+        "title":"juicebox_1.6.2-cuda8",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab"
     }
 ]

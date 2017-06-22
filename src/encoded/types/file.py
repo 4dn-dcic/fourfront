@@ -126,9 +126,9 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded = ['files_in_set.submitted_by',
-                'files_in_set.lab',
-                'files_in_set'
+    embedded = ['files_in_set.submitted_by.*',
+                'files_in_set.lab.*',
+                'files_in_set.*'
                 ]
 
 
@@ -144,7 +144,10 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ['lab', 'file_format', 'related_files.file']
+    embedded = ['lab.*',
+                'file_format',
+                'related_files.relationship_type',
+                'related_files.file.*']
     name_key = 'accession'
     rev = {
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),

@@ -12,6 +12,11 @@
         "accession": {
             "accessionType": "FI"
         },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the task.",
+            "type": "string"
+        },
         "filename": {
             "title": "File Name",
             "description": "The local file name used at time of submission. Must be alphanumeric, with the exception of the following special characters: '+=,.@-_'",
@@ -119,7 +124,7 @@
             "type": "string",
             "default": "uploading",
             "permission": "import_items",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "enum" : [
                 "uploading",
                 "uploaded",
