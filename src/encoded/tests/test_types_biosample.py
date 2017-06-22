@@ -33,8 +33,10 @@ def test_biosample_has_link_id(testapp, biosample_1):
 def test_update_biosample_relation(testapp, human_biosample, biosample_1):
     patch_res = testapp.patch_json(human_biosample['@id'], biosample_relation(biosample_1))
     res = testapp.get(biosample_1['@id'])
-    expected_relation = [{'biosample': human_biosample['@id'], 'relationship_type': 'parent of'}]
-    assert res.json['biosample_relation'] == expected_relation
+    # expected relation: 'biosample': human_biosample['@id'],
+    #                    'relationship_type': 'parent of'
+    assert res.json['biosample_relation'][0]['biosample']['@id'] == human_biosample['@id']
+    assert res.json['biosample_relation'][0]['relationship_type'] == 'parent of'
 
 
 def test_biosample_calculated_properties(testapp, biosample_1):
