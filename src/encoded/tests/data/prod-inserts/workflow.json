@@ -1155,7 +1155,7 @@
     "lab": "4dn-dcic-lab",
     "workflow_diagram": "",
     "description": "Hi-C processing partA based on Juicer",
-    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.14.cwl",
+    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.15.cwl",
     "workflow_steps": [
         {
             "step": "98a6e081-49e5-4c33-afab-9ec90d65dddd",
@@ -1252,6 +1252,17 @@
                 }
             ],
             "workflow_argument_name": "nsplit"
+        },
+        {
+            "argument_type": "parameter",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "ncores",
+                    "workflow_step": "juicer",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "ncores"
         },
         {
             "argument_format": "pairs",
