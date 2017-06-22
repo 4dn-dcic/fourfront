@@ -13,7 +13,6 @@ from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     collection_add,
-    paths_filtered_by_status
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -34,6 +33,7 @@ import pytz
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
+
 
 def show_upload_credentials(request=None, context=None, status=None):
     if request is None or status not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
@@ -534,8 +534,6 @@ def is_file_to_download(properties, mapping, expected_filename=None):
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
-
-    #import pdb; pdb.set_trace()
     # to use or not to use the proxy
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
     try:
@@ -545,7 +543,7 @@ def download(context, request):
         use_download_proxy = False
 
     # with extra_files the user may be trying to download the main file
-    # or one of the files in extra files, the following logic will 
+    # or one of the files in extra files, the following logic will
     # search to find the "right" file and redirect to a download link for that one
     properties = context.upgrade_properties()
     mapping = context.schema['file_format_file_extension']
@@ -598,8 +596,10 @@ def download(context, request):
     # 307 redirect specifies to keep original method
     raise HTTPTemporaryRedirect(location=location)
 
-# validator for filename field
+
 def validate_file_filename(context, request):
+    ''' validator for filename field '''
+
     data = request.json
     if 'filename' not in data or 'file_format' not in data:
         return
@@ -627,6 +627,6 @@ def validate_file_filename(context, request):
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post,validate_file_filename])
+             validators=[validate_item_content_post, validate_file_filename])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
