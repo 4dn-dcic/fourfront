@@ -12,6 +12,130 @@ from .base import (
 
 
 
+
+workflow_analysis_steps_schema = {
+    "title": "Workflow Analysis Steps",
+    "type": "array",
+    "items": {
+        "title": "Analysis Step",
+        "type": "object",
+        "additionalProperties": True,
+        "properties": {
+            "uuid": {
+                "title": "UUID",
+                "description": "Unique Identifier for AnalysisStep",
+                "type": "string"
+            },
+            "inputs" : {
+                "title" : "Step Inputs",
+                "type" : "array",
+                "items" : {
+                    "type" : "object",
+                    "properties" : {
+                        "name" : {
+                            "title" : "Input Name",
+                            "type" : "string"
+                        },
+                        "source" : {
+                            "title" : "Source Step",
+                            "description" : "Where this input file came from.",
+                            "type" : "array",
+                            "items" : {
+                                "type" : "object",
+                                "properties" : {
+                                    "name" : { "type" : "string" },
+                                    "type" : { "type" : "string" },
+                                    "step" : { "type" : "string" }
+                                }
+                            }
+                        },
+                        "run_data" : {
+                            "type" : "object",
+                            "properties" : {
+                                "file" : {
+                                    "type" : "string",
+                                    "title" : "File",
+                                    "linkTo" : "File"
+                                },
+                                "value" : {
+                                    "title" : "Value",
+                                    "type" : "string"
+                                },
+                                "type" : {
+                                    "type" : "string",
+                                    "title" : "I/O Type"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "outputs" : {
+                "title" : "Step Outputs",
+                "type" : "array",
+                "items" : {
+                    "type" : "object",
+                    "properties" : {
+                        "name" : {
+                            "title" : "Input Name",
+                            "type" : "string"
+                        },
+                        "target" : {
+                            "title" : "Target Step",
+                            "description" : "Where this output file should go next.",
+                            "type" : "array",
+                            "items" : {
+                                "type" : "object",
+                                "properties" : {
+                                    "name" : { "type" : "string" },
+                                    "type" : { "type" : "string" },
+                                    "step" : { "type" : "string" }
+                                }
+                            }
+                        },
+                        "run_data" : {
+                            "type" : "object",
+                            "properties" : {
+                                "file" : {
+                                    "type" : "string",
+                                    "title" : "File",
+                                    "linkTo" : "File"
+                                },
+                                "value" : {
+                                    "title" : "Value",
+                                    "type" : "string"
+                                },
+                                "type" : {
+                                    "type" : "string",
+                                    "title" : "I/O Type"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "software_used": {
+                "title": "Software Used",
+                "description": "Reference to Software Used",
+                "type": "string",
+                "linkTo" : "Software"
+            },
+            "name" : {
+                "title" : "Step Name",
+                "type" : "string"
+            },
+            "analysis_step_types" : {
+                "title" : "Step Purposes",
+                "type" : "array",
+                "items" : {
+                    "type" : "string"
+                }
+            }
+        }
+    }
+}
+
+
 @collection(
     name='workflows',
     properties={
@@ -46,91 +170,7 @@ class Workflow(Item):
         return self.rev_link_atids(request, "workflow_runs")
 
 
-    @calculated_property(schema={
-        "title": "Workflow Analysis Steps",
-        "type": "array",
-        "items": {
-            "title": "Analysis Step",
-            "type": "object",
-            "additionalProperties": True,
-            "properties": {
-                "uuid": {
-                    "title": "UUID",
-                    "description": "Unique Identifier for AnalysisStep",
-                    "type": "string"
-                },
-                "inputs" : {
-                    "title" : "Step Inputs",
-                    "type" : "array",
-                    "items" : {
-                        "type" : "object",
-                        "properties" : {
-                            "name" : {
-                                "title" : "Input Name",
-                                "type" : "string"
-                            },
-                            "source" : {
-                                "title" : "Source Step",
-                                "description" : "Where this input file came from.",
-                                "type" : "array",
-                                "items" : {
-                                    "type" : "object",
-                                    "properties" : {
-                                        "name" : { "type" : "string" },
-                                        "type" : { "type" : "string" },
-                                        "step" : { "type" : "string" }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "outputs" : {
-                    "title" : "Step Outputs",
-                    "type" : "array",
-                    "items" : {
-                        "type" : "object",
-                        "properties" : {
-                            "name" : {
-                                "title" : "Input Name",
-                                "type" : "string"
-                            },
-                            "target" : {
-                                "title" : "Target Step",
-                                "description" : "Where this output file should go next.",
-                                "type" : "array",
-                                "items" : {
-                                    "type" : "object",
-                                    "properties" : {
-                                        "name" : { "type" : "string" },
-                                        "type" : { "type" : "string" },
-                                        "step" : { "type" : "string" }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "software_used": {
-                    "title": "Software Used",
-                    "description": "Reference to Software Used",
-                    "type": "string",
-                    "linkTo" : "Software"
-                },
-                "name" : {
-                    "title" : "Step Name",
-                    "type" : "string"
-                },
-                "analysis_step_types" : {
-                    "title" : "Step Purposes",
-                    "type" : "array",
-                    "items" : {
-                        "type" : "string"
-                    }
-                }
-            }
-        }
-    })
+    @calculated_property(schema=workflow_analysis_steps_schema)
     def analysis_steps(self, request):
         """smth."""
 
@@ -336,110 +376,7 @@ class WorkflowRun(Item):
                 #'output_quality_metrics.value'
                 ]
 
-    @calculated_property(schema={
-        "title": "Workflow Analysis Steps",
-        "type": "array",
-        "items": {
-            "title": "Analysis Step",
-            "type": "object",
-            "properties" : {
-                "inputs" : {
-                    "title" : "Step Inputs",
-                    "type" : "array",
-                    "items" : {
-                        "type" : "object",
-                        "properties" : {
-                            "name" : {
-                                "title" : "Input Name",
-                                "type" : "string"
-                            },
-                            "source" : {
-                                "title" : "Source Step",
-                                "description" : "Where this input file came from.",
-                                "type" : "array",
-                                "items" : {
-                                    "type" : "object",
-                                    "properties" : {
-                                        "name" : { "type" : "string" },
-                                        "type" : { "type" : "string" },
-                                        "step" : { "type" : "string" }
-                                    }
-                                }
-                            },
-                            "run_data" : {
-                                "type" : "object",
-                                "properties" : {
-                                    "file" : {
-                                        "type" : "string",
-                                        "title" : "File",
-                                        "linkTo" : "File"
-                                    },
-                                    "value" : {
-                                        "title" : "Value",
-                                        "type" : "string"
-                                    },
-                                    "type" : {
-                                        "type" : "string",
-                                        "title" : "I/O Type"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "outputs" : {
-                    "title" : "Step Outputs",
-                    "type" : "array",
-                    "items" : {
-                        "type" : "object",
-                        "properties" : {
-                            "name" : {
-                                "title" : "Input Name",
-                                "type" : "string"
-                            },
-                            "target" : {
-                                "title" : "Target Step",
-                                "description" : "Where this output file should go next.",
-                                "type" : "array",
-                                "items" : {
-                                    "type" : "object",
-                                    "properties" : {
-                                        "name" : { "type" : "string" },
-                                        "type" : { "type" : "string" },
-                                        "step" : { "type" : "string" }
-                                    }
-                                }
-                            },
-                            "run_data" : {
-                                "type" : "object",
-                                "properties" : {
-                                    "file" : {
-                                        "type" : "string",
-                                        "title" : "File",
-                                        "linkTo" : "File"
-                                    },
-                                    "value" : {
-                                        "title" : "Value",
-                                        "type" : "string"
-                                    },
-                                    "type" : {
-                                        "type" : "string",
-                                        "title" : "I/O Type"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "software_used": {
-                    "title": "Software Used",
-                    "description": "Reference to Software Used",
-                    "type": "string",
-                    "linkTo" : "Software"
-                }
-            }
-        }
-    })
+    @calculated_property(schema=workflow_analysis_steps_schema)
     def analysis_steps(self, request):
 
         workflow = self.properties.get('workflow')
