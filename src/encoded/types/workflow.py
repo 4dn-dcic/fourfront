@@ -25,6 +25,7 @@ class Workflow(Item):
     schema = load_schema('encoded:schemas/workflow.json')
     embedded = ['analysis_steps',
                 'analysis_steps.*',
+                'analysis_steps.software_used.*',
                 'arguments.*',
                 'arguments.argument_mapping']
     rev = {
@@ -113,7 +114,8 @@ class Workflow(Item):
                 "software_used": {
                     "title": "Software Used",
                     "description": "Reference to Software Used",
-                    "type": "string"
+                    "type": "string",
+                    "linkTo" : "Software"
                 },
                 "name" : {
                     "title" : "Step Name",
@@ -148,9 +150,9 @@ class Workflow(Item):
             for key in stepKeys:
                 if key not in resultStepProperties:
                     del stepDict[key]
-            stepDict.update({
-                'uuid' : str(step.uuid),
-            })
+            stepDict['uuid'] = str(step.uuid)
+            if stepDict.get('software_used') is not None:
+                stepDict['software_used'] = '/software/' + stepDict['software_used'] + '/'
             return stepDict
 
         def mergeOutputsForStep(args):
@@ -315,13 +317,17 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow',
-                'analysis_steps',
+    embedded = ['workflow.*',
                 'analysis_steps.*',
+                'analysis_steps.software_used.*',
+                'analysis_steps.outputs.*',
+                'analysis_steps.inputs.*',
+                'analysis_steps.outputs.run_data.file.*',
+                'analysis_steps.inputs.run_data.file.*',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
                 'input_files.value.display_title',
-                'input_files.value',
+                'input_files.value.*',
                 'input_files.value.file_format',
                 'output_files.workflow_argument_name',
                 'output_files.value.*',
@@ -424,6 +430,12 @@ class WorkflowRun(Item):
                             }
                         }
                     }
+                },
+                "software_used": {
+                    "title": "Software Used",
+                    "description": "Reference to Software Used",
+                    "type": "string",
+                    "linkTo" : "Software"
                 }
             }
         }
@@ -452,14 +464,10 @@ class WorkflowRun(Item):
                     if sourceOrTarget['name'] == param.get('workflow_argument_name'):
                         fileUUID = param.get('value')
                         if fileUUID:
-                            #fileData = fileCache.get(fileUUID)
-                            #if not fileData:
-                            #    fileObj = self.collection.get(param.get('value'))
-                            #    fileData = fileObj.__json__(request) #request.embed('/' + param.get('value'), '@@embedded')
-                            #    fileData['uuid'] = fileObj.uuid
-                            #    fileCache[param.get('value')] = fileData
-                            #    print('\n\n\n\n\n', fileData)
-                            inputOrOutput['run_data'] = { "file" : fileUUID, "type" : param.get('type') }
+                            inputOrOutput['run_data'] = {
+                                "file" : '/files/' + fileUUID + '/',
+                                "type" : param.get('type')
+                            }
                             return True
             return False
 
