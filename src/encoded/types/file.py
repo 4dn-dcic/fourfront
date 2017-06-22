@@ -207,8 +207,13 @@ class File(Item):
             sheets['external'] = new_creds
             file_formats = [properties.get('file_format'), ]
 
+
             # handle extra files
+            updated_extra_files = []
             for idx, xfile in enumerate(properties.get('extra_files', [])):
+                # ensure a file_format (identifier for extra_file) is given and non-null
+                if not('file_format' in xfile and bool(xfile['file_format'])):
+                    continue
                 # todo, make sure file_format is unique
                 if xfile['file_format'] in file_formats:
                     raise Exception("Each file in extra_files must have unique file_format")
@@ -225,7 +230,8 @@ class File(Item):
                 xfile['href'] = '/' + str(uuid) + '/@@download/' + filename
                 xfile['upload_key'] = ext['key']
                 sheets['external' + xfile['file_format']] = ext
-                properties[idx] = xfile
+                updated_extra_files.append(xfile)
+            properties['extra_files'] = updated_extra_files
 
         if old_creds:
             if old_creds.get('key') != new_creds.get('key'):
@@ -345,7 +351,11 @@ class File(Item):
     def build_external_creds(cls, registry, uuid, properties):
         bucket = registry.settings['file_upload_bucket']
         mapping = cls.schema['file_format_file_extension']
-        file_extension = mapping[properties['file_format']]
+        prop_format = properties['file_format']
+        try:
+            file_extension = mapping[prop_format]
+        except KeyError:
+            raise Exception('File format not in list of supported file types')
         key = '{uuid}/{accession}{file_extension}'.format(
             file_extension=file_extension, uuid=uuid,
             accession=properties.get('accession'))
