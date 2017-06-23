@@ -121,7 +121,7 @@ export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, ca
     }
 
     // Else we fetch new experiment_sets (i.e. (props.)context['@graph'] ) via AJAX.
-    if (typeof href !== 'string') throw new Error("No valid href (3rd arg) supplied to saveChangedFilters:", href);
+    if (typeof href !== 'string') throw new Error("No valid href (3rd arg) supplied to saveChangedFilters: " + href);
 
     var newHref = filtersToHref(newExpSetFilters, href);
 
@@ -175,6 +175,24 @@ export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, ca
             if (typeof callback === 'function') setTimeout(callback, 0);
         });
     }
+
+}
+
+
+export function isTermSelectedAccordingToExpSetFilters(term, field, expSetFilters = null){
+    // If no expSetFilters are supplied, get them from Redux store.
+    if (!expSetFilters){
+        if (!store) store = require('./../../store');
+        var storeState = store.getState();
+        expSetFilters = storeState.expSetFilters;
+    }
+
+    if (typeof expSetFilters[field] !== 'undefined'){
+        if (expSetFilters[field].has && expSetFilters[field].has(term)){
+            return true;
+        }
+    }
+    return false;
 
 }
 
@@ -474,3 +492,83 @@ export function standardizeFieldKey(field, expsOrSets = 'sets', reverse = false)
     }
     return field;
 }
+
+/****
+ **** Legacy Client-Side Filtering Facets Functions. For local filtering, e.g. of ExperimentSets' Experiments
+ ****/
+
+/**
+ * Find filters to ignore - i.e. filters which are set in expSetFilters but are
+ * not present in facets.
+ * 
+ * @param {Object[]} facets - Array of complete facet objects (must have 'terms' & 'fields' properties).
+ * @param {Object} expSetFilters - Object containing facet fields and their enabled terms: '{string} Field in item JSON hierarchy, using object dot notation : {Set} terms'.
+ * 
+ * @return {Object} The filters which are ignored. Object looks like expSetFilters.
+ */
+export function findIgnoredFiltersByMissingFacets(facets, expSetFilters){
+    var ignoredFilters = {};
+    for(var i=0; i < facets.length; i++){
+        var ignoredSet = new Set();
+        if(expSetFilters[facets[i].field]){
+            for(let expFilter of [...expSetFilters[facets[i].field]]){ // [... ] to convert Set to Array
+                var found = false;
+                for(var j=0; j < facets[i].terms.length; j++){
+                    if(expFilter === facets[i].terms[j].key){
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found){
+                    ignoredSet.add(expFilter);
+                }
+            }
+            if(ignoredSet.size > 0){
+                ignoredFilters[facets[i].field] = ignoredSet;
+            }
+        }
+
+    }
+    return ignoredFilters;
+}
+
+
+/**
+ * Find filters which to ignore based on if all experiments in experimentArray which are being filtered
+ * have the same term for that selected filter. Geared towards usage by ExperimentSetView.
+ * 
+ * @param {Object[]} experimentArray - Experiments which are being filtered.
+ * @param {Object} expSetFilters - Object containing facet field name as key and set of terms to filter by as value.
+ * @param {string} [expsOrSets] - Whether are filtering experiments or sets, in order to standardize facet names.
+ */
+export function findIgnoredFiltersByStaticTerms(experimentArray, expSetFilters, expsOrSets = 'experiments'){
+    var ignored = {};
+    _.forEach(_.keys(expSetFilters), (selectedFacet, i)=>{ // Get facets/filters w/ only 1 applicable term
+
+        // Unique terms in all experiments per filter
+        if (
+            _.flatten(
+                // getNestedProperty returns array(s) if property is nested within array(s), so we needa flatten to get list of terms.
+                experimentArray.map((experiment, j)=>{
+                    var termVal = object.getNestedProperty(
+                        experiment,
+                        standardizeFieldKey(selectedFacet, expsOrSets, true)
+                    );
+                    if (Array.isArray(termVal)){ // Only include terms by which we're filtering
+                        return termVal.filter((term) => expSetFilters[selectedFacet].has(term));
+                    }
+                    return termVal;
+                })
+            ).filter((experimentTermValue, j, allTermValues)=>{ 
+                // Reduce to unique term vals (indexOf returns first index, so if is repeat occurance, returns false)
+                return allTermValues.indexOf(experimentTermValue) === j;
+            }).length < 2
+        ) {
+            ignored[selectedFacet] = expSetFilters[selectedFacet]; // Ignore all terms in filter.
+        }
+
+    });
+    return ignored;
+}
+
+
