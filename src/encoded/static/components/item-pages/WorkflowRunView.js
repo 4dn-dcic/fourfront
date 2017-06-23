@@ -9,7 +9,7 @@ import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { commonGraphPropsFromProps, dropDownMenuMixin, graphBodyMixin } from './WorkflowView';
+import { commonGraphPropsFromProps, dropDownMenuMixin, graphBodyMixin, doValidAnalysisStepsExist } from './WorkflowView';
 
 
 
@@ -36,10 +36,7 @@ export class WorkflowRunView extends React.Component {
 
     getTabViewContents(){
 
-        var listWithGraph = (
-            !Array.isArray(this.props.context.analysis_steps) ||
-            this.props.context.analysis_steps.length === 0
-        ) ? [] : [
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
