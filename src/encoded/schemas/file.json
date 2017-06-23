@@ -85,6 +85,7 @@
         },
 		"extra_files": {
 			"title": "Extra Files",
+            "exclude_from": ["submit4dn", "FFedit-create"],
 			"description": "Links to extra files on s3 that don't have associated metadata",
 			"type": "array",
 			"items": {
