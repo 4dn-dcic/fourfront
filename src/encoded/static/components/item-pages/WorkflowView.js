@@ -57,6 +57,21 @@ export function commonGraphPropsFromProps(props){
     };
 }
 
+/** Optional check to ensure steps are there and properly formatted */
+export function doValidAnalysisStepsExist(steps){
+    if (
+        !Array.isArray(steps) ||
+        steps.length === 0 ||
+        !Array.isArray(steps[0].inputs) ||
+        !Array.isArray(steps[0].outputs) ||
+        !Array.isArray(steps[0].inputs)
+    ) {
+        console.warn("Analysis Steps are in an improper format. Make sure they exist and contain 'inputs' and 'outputs");
+        return false;
+    }
+    return true;
+}
+
 
 /**
  * @export
@@ -81,7 +96,7 @@ export class WorkflowView extends React.Component {
 
     getTabViewContents(){
 
-        var listWithGraph = /* !Array.isArray(this.props.context.analysis_steps) || this.props.context.analysis_steps.length === 0 ? [] : */[
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
