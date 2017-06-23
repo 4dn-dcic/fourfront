@@ -98,7 +98,7 @@ def test_manual_embeds(registry, item_type):
     """
     Ensure manual embedding in the types files are valid
     """
-    from snovault.fourfront_utils import add_default_embeds, confirm_embed_with_schemas
+    from snovault.fourfront_utils import confirm_embed_with_schemas
     from snovault import TYPES
     type_info = registry[TYPES].by_item_type[item_type]
     schema = type_info.schema
