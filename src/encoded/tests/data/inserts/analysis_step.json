@@ -111,6 +111,16 @@
         "software_used": "02d636b9-d82d-4da9-950c-2ca994a23548"
     },
     {
+        "uuid": "98a6e081-49e5-4c33-afab-9ec90d65dddd",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "juicer",
+        "name": "juicer",
+        "version": "17",
+        "analysis_step_types": ["alignment","filtering"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23599"
+    },
+    {
         "uuid": "b1fe75f9-49e5-4c33-afab-9ec90d65faf3",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
@@ -148,6 +158,24 @@
         "software_used":"02d636b9-d8dd-4da9-950c-2ca994b23555",
         "name":"hic2mcool",
         "analysis_step_types":["file format conversion"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"md5",
+        "uuid":"0786554a-49e5-4c33-afab-9ec90d657777",
+        "version":"4",
+        "name":"md5",
+        "analysis_step_types":["QC calculation"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"validatefiles",
+        "uuid":"0786554a-49e5-4c33-afab-9ec90d658888",
+        "version":"10",
+        "name":"validatefiles",
+        "analysis_step_types":["QC calculation"],
         "award":"1U01CA200059-01",
         "lab":"4dn-dcic-lab"
     }

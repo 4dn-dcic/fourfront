@@ -124,7 +124,8 @@ def test_indexing_simple(testapp, indexer_testapp):
         res = testapp.get('/search/?type=TestingPostPutPatch')
         uuids = [indv_res['uuid'] for indv_res in res.json['@graph']]
         count += 1
-    assert res.json['total'] == 2
+    assert res.json['total'] >= 2
+    assert uuid in uuids
 
 
 def test_listening(testapp, listening_conn):

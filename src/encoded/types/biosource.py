@@ -33,7 +33,7 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
-    embedded = ["individual", "individual.organism", "tissue"]
+    embedded = ["individual.*", "individual.organism.*", "tissue.*"]
 
     def _update(self, properties, sheets=None):
         name2info = {

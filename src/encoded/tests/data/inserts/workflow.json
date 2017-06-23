@@ -353,6 +353,27 @@
     "name": "validate",
     "workflow_type": "Data QC",
     "workflow_diagram": "",
+    "arguments": [
+        {
+            "workflow_argument_name": "input_file",
+            "argument_type": "Input file",
+            "argument_format": "fastq",
+            "argument_mapping": [],
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "report",
+            "argument_type": "Output report file",
+            "argument_mapping": [],
+            "description": ""
+        }
+    ],
+    "workflow_steps": [
+        {
+            "step_name":"validatefiles",
+            "step":"0786554a-49e5-4c33-afab-9ec90d658888"
+        }
+    ],
     "description": "ValidateFiles quality control step for fastq files"
 },
 {
@@ -379,6 +400,12 @@
             "description": ""
         }
     ],
+    "workflow_steps": [
+        {
+            "step_name":"md5",
+            "step":"0786554a-49e5-4c33-afab-9ec90d657777"
+        }
+    ],
     "description": "md5 on uncompressed file"
 },
 {
@@ -391,6 +418,20 @@
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
+    "workflow_steps": [
+        {
+            "step_name":"bwa-mem",
+            "step":"02d636b9-d82d-4da9-950c-2ca994a73514"
+        },
+        {
+            "step_name":"sort_bam",
+            "step":"02d636b9-d82d-4da9-950c-2ca994a3625a"
+        },
+        {
+            "step_name":"bam2pairs",
+            "step":"02d636b9-d82d-4da9-950c-2ca994a1330c"
+        }
+    ],
     "arguments": [
         {
             "workflow_argument_name": "fastq1",
@@ -526,6 +567,20 @@
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
+    "workflow_steps": [
+        {
+            "step_name":"bwa-mem",
+            "step":"02d636b9-d82d-4da9-950c-2ca994a73514"
+        },
+        {
+            "step_name":"sort_bam",
+            "step":"02d636b9-d82d-4da9-950c-2ca994a3625a"
+        },
+        {
+            "step_name":"bam2pairs",
+            "step":"02d636b9-d82d-4da9-950c-2ca994a1330c"
+        }
+    ],
     "arguments": [
         {
             "workflow_argument_name": "fastq1",
@@ -667,7 +722,7 @@
                 {
                     "step_argument_name":"chromsizes_file",
                     "step_argument_type":"Input file",
-                    "workflow_step":"/analysis-steps/pairs2hic/"
+                    "workflow_step":"pairs2hic"
                 }
             ]
         },
@@ -679,7 +734,7 @@
                 {
                     "step_argument_name":"input_pairs",
                     "step_argument_type":"Input file",
-                    "workflow_step":"/analysis-steps/merge_pairs/"
+                    "workflow_step":"merge_pairs"
                 }
             ]
         },
@@ -691,7 +746,7 @@
                 {
                     "step_argument_name":"input_pairs_index",
                     "step_argument_type":"Input file",
-                    "workflow_step":"/analysis-steps/merge_pairs/"
+                    "workflow_step":"merge_pairs"
                 }
             ]
         },
@@ -702,7 +757,7 @@
                 {
                     "step_argument_name":"ncores",
                     "step_argument_type":"parameter",
-                    "workflow_step":"/analysis-steps/cooler/"
+                    "workflow_step":"cooler"
                 }
             ]
         },
@@ -713,7 +768,7 @@
                 {
                     "step_argument_name":"binsize",
                     "step_argument_type":"parameter",
-                    "workflow_step":"/analysis-steps/cooler/"
+                    "workflow_step":"cooler"
                 }
             ]
         },
@@ -724,7 +779,7 @@
                 {
                     "step_argument_name":"min_res",
                     "step_argument_type":"parameter",
-                    "workflow_step":"/analysis-steps/pairs2hic/"
+                    "workflow_step":"pairs2hic"
                 }
             ]
         },
@@ -735,7 +790,7 @@
                 {
                     "step_argument_name":"normalization_type",
                     "step_argument_type":"parameter",
-                    "workflow_step":"/analysis-steps/hic2mcool/"
+                    "workflow_step":"hic2mcool"
                 }
             ]
         },
@@ -747,7 +802,7 @@
                 {
                     "step_argument_name":"output_pairs_index",
                     "step_argument_type":"Output file",
-                    "workflow_step":"/analysis-steps/merge_pairs/"
+                    "workflow_step":"merge_pairs"
                 }
             ]
         },
@@ -759,7 +814,7 @@
                 {
                     "step_argument_name":"output_pairs",
                     "step_argument_type":"Output file",
-                    "workflow_step":"/analysis-steps/merge_pairs/"
+                    "workflow_step":"merge_pairs"
                 }
             ]
         },
@@ -771,7 +826,7 @@
                 {
                     "step_argument_name":"out_cool",
                     "step_argument_type":"Output file",
-                    "workflow_step":"/analysis-steps/cooler/"
+                    "workflow_step":"cooler"
                 }
             ]
         },
@@ -783,7 +838,7 @@
                 {
                     "step_argument_name":"output_hic",
                     "step_argument_type":"Output file",
-                    "workflow_step":"/analysis-steps/pairs2hic/"
+                    "workflow_step":"pairs2hic"
                 }
             ]
         },
@@ -795,7 +850,7 @@
                 {
                     "step_argument_name":"out_mcool",
                     "step_argument_type":"Output file",
-                    "workflow_step":"/analysis-steps/hic2mcool/"
+                    "workflow_step":"hic2mcool"
                 }
             ]
         },
@@ -804,12 +859,12 @@
                 {
                     "step_argument_name":"pairs_index",
                     "step_argument_type":"Input file or parameter",
-                    "workflow_step":"/analysis-steps/cooler/"
+                    "workflow_step":"cooler"
                 },
                 {
                     "step_argument_name":"output_pairs_index",
                     "step_argument_type":"Output file or parameter",
-                    "workflow_step":"/analysis-steps/merge_pairs/"
+                    "workflow_step":"merge_pairs"
                 }
             ]
         },
@@ -818,12 +873,12 @@
                 {
                     "step_argument_name":"input_pairs",
                     "step_argument_type":"Input file or parameter",
-                    "workflow_step":"/analysis-steps/pairs2hic/"
+                    "workflow_step":"pairs2hic"
                 },
                 {
                     "step_argument_name":"output_pairs",
                     "step_argument_type":"Output file or parameter",
-                    "workflow_step":"/analysis-steps/merge_pairs/"
+                    "workflow_step":"merge_pairs"
                 }
             ]
         },
@@ -832,12 +887,12 @@
                 {
                     "step_argument_name":"input_hic",
                     "step_argument_type":"Input file or parameter",
-                    "workflow_step":"/analysis-steps/hic2mcool/"
+                    "workflow_step":"hic2mcool"
                 },
                 {
                     "step_argument_name":"output_hic",
                     "step_argument_type":"Output file or parameter",
-                    "workflow_step":"/analysis-steps/pairs2hic/"
+                    "workflow_step":"pairs2hic"
                 }
             ]
         }
@@ -949,12 +1004,12 @@
     "lab": "4dn-dcic-lab"
 },
 {
-    "title": "hi-c-processing-parta-juicer",
-    "accession": "4DNWFSOZLJBM",
+    "title": "hi-c-processing-parta-juicer from data",
+    "accession": "4DNWFSOAAAA",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
     "workflow_diagram": "",
-    "description": "Hi-C processing partA based on Juicer",
+    "description": "Hi-C processing partA based on Juicer, test insert data",
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.5.cwl",
     "workflow_steps": [
         {
@@ -1052,6 +1107,162 @@
                 }
             ],
             "workflow_argument_name": "nsplit"
+        },
+        {
+            "argument_format": "pairs",
+            "argument_type": "Output processed file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "out_pairs",
+                    "workflow_step": "juicer2pairs",
+                    "step_argument_type": "Output file"
+                }
+            ],
+            "workflow_argument_name": "out_pairs"
+        },
+        {
+            "argument_format": "pairs_px2",
+            "argument_type": "Output processed file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "out_pairs_px",
+                    "workflow_step": "juicer2pairs",
+                    "step_argument_type": "Output file"
+                }
+            ],
+            "workflow_argument_name": "out_pairs_index"
+        },
+        {
+            "argument_mapping": [
+                {
+                    "step_argument_name": "input_merged_nodups",
+                    "workflow_step": "juicer2pairs",
+                    "step_argument_type": "Input file or parameter"
+                },
+                {
+                    "step_argument_name": "merged_nodups",
+                    "workflow_step": "juicer",
+                    "step_argument_type": "Output file or parameter"
+                }
+            ]
+        }
+    ]
+},
+{
+    "title": "hi-c-processing-parta-juicer",
+    "accession": "4DNWFSOBBBBB",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "workflow_diagram": "",
+    "description": "Hi-C processing partA based on Juicer",
+    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.15.cwl",
+    "workflow_steps": [
+        {
+            "step": "98a6e081-49e5-4c33-afab-9ec90d65dddd",
+            "step_name": "juicer"
+        },
+        {
+            "step": "b1fe75f9-49e5-4c33-afab-9ec90d65faf3",
+            "step_name": "juicer2pairs"
+        }
+    ],
+    "workflow_type": "Hi-C data analysis",
+    "name": "hi-c-processing-parta-juicer/15",
+    "uuid": "a9caf6f3-49e5-4c33-bfab-9ec90d65111c",
+    "arguments": [
+        {
+            "argument_format": "fastq",
+            "argument_type": "Input file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "input_fastq1",
+                    "workflow_step": "juicer",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "fastq1"
+        },
+        {
+            "argument_format": "fastq",
+            "argument_type": "Input file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "input_fastq2",
+                    "workflow_step": "juicer",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "fastq2"
+        },
+        {
+            "argument_format": "bwaIndex",
+            "argument_type": "Input file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "bwaIndex",
+                    "workflow_step": "juicer",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "bwa_index"
+        },
+        {
+            "argument_format": "chromsizes",
+            "argument_type": "Input file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "chromsize",
+                    "workflow_step": "juicer2pairs",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "chrsizes"
+        },
+        {
+            "argument_format": "reference_fasta",
+            "argument_type": "Input file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "reference_fasta",
+                    "workflow_step": "juicer",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "reference_fasta"
+        },
+        {
+            "argument_format": "juicer_format_restriction_site_file",
+            "argument_type": "Input file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "restriction_file",
+                    "workflow_step": "juicer",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "restriction_file"
+        },
+        {
+            "argument_type": "parameter",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "nsplit",
+                    "workflow_step": "juicer2pairs",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "nsplit"
+        },
+        {
+            "argument_type": "parameter",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "ncores",
+                    "workflow_step": "juicer",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "ncores"
         },
         {
             "argument_format": "pairs",

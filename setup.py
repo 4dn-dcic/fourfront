@@ -16,7 +16,7 @@ requires = [
     'WSGIProxy2',
     'WebTest',
     'boto',
-    'botocore==1.5.7',
+    'botocore==1.5.71',
     'jmespath',
     'boto3',
     'elasticsearch>=5.0.0,<6.0.0',

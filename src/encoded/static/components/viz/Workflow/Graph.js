@@ -89,7 +89,8 @@ export default class Graph extends React.Component {
             'bottom' : 60,
             'left' : 20,
             'right' : 20
-        }
+        },
+        'minimumHeight' : 120
     }
 
     constructor(props){
@@ -194,6 +195,11 @@ export default class Graph extends React.Component {
         var nodes = this.nodesWithCoordinates(width, contentWidth);
         var edges = this.props.edges;
 
+        var verticalMargin = 0;
+        if (typeof this.props.minimumHeight === 'number' && (height + this.props.innerMargin.top + this.props.innerMargin.bottom) < this.props.minimumHeight){
+            verticalMargin += (this.props.minimumHeight - (height + this.props.innerMargin.top + this.props.innerMargin.bottom)) / 2;
+        }
+
         return (
             <div ref="outerContainer" className="worfklow-chart-outer-container">
                 <Fade transitionAppear in>
@@ -211,7 +217,7 @@ export default class Graph extends React.Component {
                             href={this.props.href}
                             onNodeClick={this.props.onNodeClick}
                         >
-                            <ScrollContainer>
+                            <ScrollContainer verticalMargin={verticalMargin}>
                                 <EdgesLayer edgeElement={this.props.edgeElement} isNodeDisabled={this.props.isNodeDisabled} />
                                 <NodesLayer nodeElement={this.props.nodeElement} isNodeDisabled={this.props.isNodeDisabled} title={this.props.nodeTitle} />
                             </ScrollContainer>

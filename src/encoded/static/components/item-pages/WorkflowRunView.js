@@ -9,7 +9,7 @@ import { ItemBaseView } from './DefaultItemView';
 import { getTabForAudits } from './item';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { commonGraphPropsFromProps } from './WorkflowView';
+import { commonGraphPropsFromProps, dropDownMenuMixin, graphBodyMixin, doValidAnalysisStepsExist } from './WorkflowView';
 
 
 
@@ -36,12 +36,9 @@ export class WorkflowRunView extends React.Component {
 
     getTabViewContents(){
 
-        var listWithGraph = (
-            !Array.isArray(this.props.context.analysis_steps) ||
-            this.props.context.analysis_steps.length === 0
-        ) ? [] : [
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
             {
-                tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
+                tab : <span><i className="icon icon-code-fork icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
                 content : <GraphSection {...this.props} mounted={this.state.mounted} />
             }
@@ -107,8 +104,8 @@ class GraphSection extends React.Component {
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.basicGraph = this.basicGraph.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
-        this.dropDownMenu = this.dropDownMenu.bind(this);
-        this.body = this.body.bind(this);
+        this.dropDownMenu = dropDownMenuMixin.bind(this);
+        this.body = graphBodyMixin.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail'
@@ -148,44 +145,9 @@ class GraphSection extends React.Component {
         );
     }
 
-    body(){
-        if (this.state.showChart === 'detail') return this.detailGraph();
-        if (this.state.showChart === 'basic') return this.basicGraph();
-
-        return (
-            null
-        );
-    }
-
     static keyTitleMap = {
         'detail' : 'Analysis Steps',
         'basic' : 'Basic Inputs & Outputs',
-    }
-
-    dropDownMenu(){
-
-        var detail = (
-            <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
-                Analysis Steps
-            </MenuItem>
-        );
-
-        var basic = (
-            <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
-                Basic Inputs & Outputs
-            </MenuItem>
-        );
-
-        return (
-            <DropdownButton
-                pullRight
-                onSelect={(eventKey, evt)=>{
-                    if (eventKey === this.state.showChart) return;
-                    this.setState({ showChart : eventKey });
-                }}
-                title={GraphSection.keyTitleMap[this.state.showChart]}
-            >{ basic }{ detail }</DropdownButton>
-        );
     }
 
     render(){

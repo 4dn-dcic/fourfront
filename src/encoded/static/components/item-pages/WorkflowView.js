@@ -31,7 +31,7 @@ export function commonGraphPropsFromProps(props){
     return {
         'href'        : props.href,
         'onNodeClick' : onItemPageNodeClick,
-        'detailPane'  : <WorkflowDetailPane schemas={props.schemas} />,
+        'detailPane'  : <WorkflowDetailPane schemas={props.schemas} context={props.context} />,
         'nodeTitle'   : function(node, canBeJSX = false){
             if (
                 node.type === 'step' && node.meta.uuid &&
@@ -55,6 +55,21 @@ export function commonGraphPropsFromProps(props){
             return node.title || node.name;
         }
     };
+}
+
+/** Optional check to ensure steps are there and properly formatted */
+export function doValidAnalysisStepsExist(steps){
+    if (
+        !Array.isArray(steps) ||
+        steps.length === 0 ||
+        !Array.isArray(steps[0].inputs) ||
+        !Array.isArray(steps[0].outputs) ||
+        !Array.isArray(steps[0].inputs)
+    ) {
+        console.warn("Analysis Steps are in an improper format. Make sure they exist and contain 'inputs' and 'outputs");
+        return false;
+    }
+    return true;
 }
 
 
@@ -81,7 +96,7 @@ export class WorkflowView extends React.Component {
 
     getTabViewContents(){
 
-        var listWithGraph = !Array.isArray(this.props.context.analysis_steps) || this.props.context.analysis_steps.length === 0 ? [] : [
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
@@ -135,154 +150,66 @@ export class WorkflowView extends React.Component {
 
 }
 
+
+export function dropDownMenuMixin(){
+    
+    var detail = GraphSection.analysisStepsSet(this.props.context) ? (
+        <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
+            Analysis Steps
+        </MenuItem>
+    ) : null;
+
+    var basic = (
+        <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
+            Basic Inputs & Outputs
+        </MenuItem>
+    );
+
+
+    return (
+        <DropdownButton
+            pullRight
+            onSelect={(eventKey, evt)=>{
+                if (eventKey === this.state.showChart) return;
+                this.setState({ showChart : eventKey });
+            }}
+            title={GraphSection.keyTitleMap[this.state.showChart]}
+        >
+            { basic }{ detail }
+        </DropdownButton>
+    );
+}
+
+export function graphBodyMixin(){
+    if (this.state.showChart === 'cwl') return this.cwlGraph();
+    if (this.state.showChart === 'detail') return this.detailGraph();
+    if (this.state.showChart === 'basic') return this.basicGraph();
+    return null;
+}
+
 class GraphSection extends React.Component {
-/*
-    static parseCWLToAnalysisSteps(cwlJSON){
 
-        var stepInputNamesEncountered = {};
-
-        function getFullStepInput(stepInput, step){
-            var inputID = stepInput.id.replace(step.id + '.', '');
-            var fullStepInput = _.find(step.run.inputs, function(runInput){
-                if (inputID === runInput.id.replace('#', '')) return true;
-                return false;
-            });
-            if (fullStepInput){
-                stepInput = _.extend({}, stepInput, _.omit(fullStepInput, 'id'));
-            } else {
-                stepInput = _.clone(stepInput);
-            }
-            if (!stepInput.name) stepInput.name = inputID;
-            if (stepInputNamesEncountered[stepInput.name]){
-                return null;
-                stepInput.name += '-' + stepInputNamesEncountered[stepInput.name]++;
-            }
-            if (Array.isArray(stepInput.source) && typeof stepInput.source[0] === 'string'){
-                stepInput.source = stepInput.source.map(function(s){
-                    var splitID = s.replace('#','').split('.');
-                    return {
-                        'name' : splitID[1] || splitID[0],
-                        'type' : stepInput.type && stepInput.type.indexOf('File') > -1 ? 'Input File' : stepInput.type.join(' | '),
-                        'step' : splitID.length > 0 ? splitID[0] : null
-                    };
-                });
-            } else if (!Array.isArray(stepInput.source)) {
-                return null;
-                var splitID = step.id.replace('#','').split('.');
-                stepInput.source = [{
-                    'name' : splitID[1] || splitID[0],
-                    'type' : (stepInput.type && stepInput.type.indexOf('File') > -1 ? 'Input File' : stepInput.type.join(' | ')),
-                    'step' : splitID.length > 0 ? splitID[0] : null
-                }];
-            }
-            stepInputNamesEncountered[inputID] = 1;
-            return stepInput;
-        }
-
-
-        return cwlJSON.steps.map(function(step, i){ // Each step will be a node.
-
-            return _.extend(
-                    step, 
-                {
-                    'display_title' : step.id.replace('#',''),
-                    'uuid' : step.id,
-                    'inputs' : step.inputs.map(function(stepInput){
-                        return getFullStepInput(stepInput, step);
-                    }).filter(function(x){ return !!x; }),
-                    'outputs' : step.outputs.map(function(stepOutput){
-                        var outputID = stepOutput.id.replace(step.id + '.', '');
-                        var fullStepOutput = _.find(step.run.outputs, function(runOutput){
-                            if (outputID === runOutput.id.replace('#', '')) return true;
-                            return false;
-                        });
-                        if (fullStepOutput){
-                            stepOutput = _.extend({}, stepOutput, _.omit(fullStepOutput, 'id'));
-                        }
-
-                        var finalOutput = _.find(cwlJSON.outputs, function(cwlOutput){
-                            if (outputID === cwlOutput.id.replace('#', '')) return true;
-                            return false;
-                        });
-
-                        if (finalOutput){
-                            stepOutput = _.extend(stepOutput, _.omit(finalOutput, 'id'));
-                        }
-                        if (!stepOutput.name) stepOutput.name = outputID;
-                        if (!stepOutput.target){
-                            if (stepOutput.source) {
-                                stepOutput.target = stepOutput.source.map(function(s){
-                                    return {
-                                        'name' : s,
-                                        'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
-                                    };
-                                });
-                            } else {
-                                stepOutput.target = [{
-                                    'name' : stepOutput.id,
-                                    'type' : stepOutput.type && stepOutput.type.indexOf('File') > -1 ? 'Output File' : stepOutput.type.join(' | ')
-                                }];
-                            }
-                        }
-                        console.log(stepOutput);
-                        return stepOutput;
-                    })
-                }
-                );
-
-
-        });
-    }
-*/
-    static isCwlDataValid(cwlJSON){
-        if (!Array.isArray(cwlJSON.steps)) return false;
-        if (cwlJSON.steps.length === 0) return false;
-        if (!Array.isArray(cwlJSON.steps[0].inputs)) return false;
-        if (!Array.isArray(cwlJSON.steps[0].outputs)) return false;
-        if (cwlJSON.steps[0].inputs.length === 0) return false;
-        if (typeof cwlJSON.steps[0].inputs[0].id !== 'string') return false;
-        if (typeof cwlJSON.steps[0].outputs[0].id !== 'string') return false;
+    static analysisStepsSet(context){
+        if (!Array.isArray(context.analysis_steps)) return false;
+        if (context.analysis_steps.length === 0) return false;
         return true;
-    }
-
-    static cwlDataExists(props){
-        return props.context && props.context.cwl_data && GraphSection.isCwlDataValid(props.context.cwl_data);
     }
 
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
-        this.cwlGraph = this.cwlGraph.bind(this);
         this.basicGraph = this.basicGraph.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
-        this.dropDownMenu = this.dropDownMenu.bind(this);
-        this.body = this.body.bind(this);
+        this.dropDownMenu = dropDownMenuMixin.bind(this);
+        this.body = graphBodyMixin.bind(this);
         this.render = this.render.bind(this);
         this.state = {
-            'showChart' : 'detail'
+            'showChart' : GraphSection.analysisStepsSet(props.context) ? 'detail' : 'basic'
         };
     }
 
     commonGraphProps(){
         return commonGraphPropsFromProps(this.props);
-    }
-
-    cwlGraph(){
-        if (!GraphSection.cwlDataExists(this.props)) return (
-            <div>
-                <h4 className="text-400"><em>No graphable data.</em></h4>
-            </div>
-        );
-        var graphData = parseAnalysisSteps(
-            GraphSection.parseCWLToAnalysisSteps(this.props.context.cwl_data)
-        );
-        return (
-            <Graph
-                { ...this.commonGraphProps() }
-                nodes={graphData.nodes}
-                edges={graphData.edges}
-            />
-        );
     }
 
     basicGraph(){
@@ -312,54 +239,10 @@ class GraphSection extends React.Component {
         );
     }
 
-    body(){
-        if (this.state.showChart === 'cwl') return this.cwlGraph();
-        if (this.state.showChart === 'detail') return this.detailGraph();
-        if (this.state.showChart === 'basic') return this.basicGraph();
-
-        return (
-            null
-        );
-    }
-
     static keyTitleMap = {
         'detail' : 'Analysis Steps',
         'basic' : 'Basic Inputs & Outputs',
         'cwl' : 'CWL Graph'
-    }
-
-    dropDownMenu(){
-
-        var detail = (
-            <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
-                Analysis Steps
-            </MenuItem>
-        );
-
-        var cwl = GraphSection.cwlDataExists(this.props) ? (
-            <MenuItem eventKey='cwl' active={this.state.showChart === 'cwl'}>
-                Common Workflow Language (CWL)
-            </MenuItem>
-        ) : null;
-
-        var basic = (
-            <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
-                Basic Inputs & Outputs
-            </MenuItem>
-        );
-
-        return (
-            <DropdownButton
-                pullRight
-                onSelect={(eventKey, evt)=>{
-                    if (eventKey === this.state.showChart) return;
-                    this.setState({ showChart : eventKey });
-                }}
-                title={GraphSection.keyTitleMap[this.state.showChart]}
-            >
-                { basic }{ detail }{ cwl }
-            </DropdownButton>
-        );
     }
 
     render(){

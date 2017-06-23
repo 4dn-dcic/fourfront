@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Panel } from 'react-bootstrap';
-import { ajax, console, DateUtility, object, isServerSide } from './../util';
+import { ajax, console, DateUtility, object, isServerSide, Filters } from './../util';
 import * as globals from './../globals';
 import ExperimentsTable from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView } from './components';
@@ -162,6 +162,7 @@ export default class ExperimentSetView extends React.Component {
                             experimentSets={this.props.context.experiments_in_set}
                             expSetFilters={this.props.expSetFilters}
                             experimentsOrSets="experiments"
+                            filterOnClientSide
                             facets={null}
                             href={this.props.href}
                             schemas={this.props.schemas}
@@ -172,6 +173,9 @@ export default class ExperimentSetView extends React.Component {
                                 itemTypes={this.props.context['@type'] || ['ExperimentSetReplicate']}
                                 className="with-header-bg"
                                 filterFacetsFxn={FacetList.filterFacetsForExpSetView}
+                                isTermSelected={(term, field, expsOrSets)=>
+                                    Filters.isTermSelectedAccordingToExpSetFilters(term, field, this.props.expSetFilters)
+                                }
                             />
                         </ReduxExpSetFiltersInterface>
                         : <div>&nbsp;</div> }

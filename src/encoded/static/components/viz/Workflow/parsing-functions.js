@@ -13,8 +13,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
 
     /**** Functions ****/
 
-    function stepNodeID   (step) { return step.uuid || step['@id'] || step.link_id; }
-    function stepNodeName (step) { return step.display_title || step.title || step['@id']; }
+    function stepNodeID   (step) { return step.uuid || step['@id'] || step.link_id || step.name; }
+    function stepNodeName (step) { return step.display_title || step.title || step.name || step['@id']; }
 
 
     function generateStepNode(step, column){
@@ -146,7 +146,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
             if (oN.meta && Array.isArray(oN.meta.target)){
                 var target = oN.meta.target[1] || oN.meta.target[0]; // Optimization. If input of another step, it'll be second item in array if a Workflow Output target also present.
                 if (typeof target.step === 'string'){
-                    var matchedStep = _.findWhere(remainingSteps, { 'uuid' : target.step });
+                    var matchedStep = _.findWhere(remainingSteps, { 'name' : target.step });
                     if (matchedStep) {
                         nextSteps.add(matchedStep);
                     }
