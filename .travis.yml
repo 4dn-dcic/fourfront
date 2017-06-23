@@ -132,14 +132,14 @@ after_success:
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
           eb use fourfront-webprod --debug
-          python deploy/deploy_beanstalk.py
+          travis_wait 30 python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
             echo "Job succeeded! PUBLISHING to 4dn-web-dev environment..."
             git config --global user.email "travis@builder.com"
             git config --global user.name "Travis"
             eb use fourfront-webdev --debug
-            python deploy/deploy_beanstalk.py --prod
+            travis_wait 30 python deploy/deploy_beanstalk.py --prod
           fi
         fi
      fi

@@ -149,6 +149,10 @@ class Workflow(Item):
     schema = load_schema('encoded:schemas/workflow.json')
     embedded = ['analysis_steps',
                 'analysis_steps.*',
+                'analysis_steps.inputs.*',
+                'analysis_steps.outputs.*',
+                'analysis_steps.outputs.target.*',
+                'analysis_steps.inputs.source.*',
                 'analysis_steps.software_used.*',
                 'arguments.*',
                 'arguments.argument_mapping']
@@ -360,6 +364,8 @@ class WorkflowRun(Item):
                 'analysis_steps.software_used.*',
                 'analysis_steps.outputs.*',
                 'analysis_steps.inputs.*',
+                'analysis_steps.outputs.run_data.*',
+                'analysis_steps.inputs.run_data.*',
                 'analysis_steps.outputs.run_data.file.*',
                 'analysis_steps.inputs.run_data.file.*',
                 'input_files.workflow_argument_name',
