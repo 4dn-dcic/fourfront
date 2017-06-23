@@ -29,12 +29,11 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 // Navbar search
 #navbar-search {
 	font-family: 'Work Sans', sans-serif;
-	width: 150px;
-	font-size: 1em;
-	border-radius: 0px;
-	border-top: none;
-	border-left: none;
-	border-right: none;
+    font-size: 1em;
+	width: 140px;
+    color: rgba(0,0,0,0.5);
+	border-radius: 5px;
+	border: 1px solid rgba(125,125,125,0.5);
 	height: 30px;
 	padding: 2px 5px 0px 5px;
 	margin-top: 25px;
@@ -44,12 +43,13 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	-webkit-transition: width 0.3s ease-out;
 	transition: width 0.3s ease-out;
 	@media (min-width: $screen-sm-min) {
-		font-size: 1.4em;
+		font-size: 1em;
 		margin-left: 30px;
 	}
 	&:focus {
-		width: 250px;
-		color: #000000;
+		width: 300px;
+		color: rgba(0,0,0,1.0);
+        border-color: rgba(125,125,125,1.0);
 		@include transition(width 0.3s ease-out);
 	}
 }
@@ -60,8 +60,8 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		display: inline-block;
 		outline: none !important;
 		box-shadow: none;
-	}
 
+	}
 }
 
 // large text inputBorder
@@ -496,11 +496,11 @@ div.fieldset.editable-fields {
     position: absolute; top: 0; bottom: 0;
     right: 20px;
     border: 2px solid #E3E3E3; border-radius: 20px;
-    transition: all 0.3s ease-in 0s; 
+    transition: all 0.3s ease-in 0s;
 }
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
     margin-left: 0;
 }
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
-    right: 0px; 
+    right: 0px;
 }
