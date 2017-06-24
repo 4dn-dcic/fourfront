@@ -125,11 +125,11 @@ export default class Graph extends React.Component {
             // Use highest count of nodes in a column * 60.
             height = _.reduce(_.groupBy(this.props.nodes, 'column'), function(maxCount, nodeSet){
                 return Math.max(nodeSet.length, maxCount);
-            }, 0) * this.props.rowSpacing;
+            }, 0) * (this.props.rowSpacing);
         } else if (isNaN(height)){
             return null;
         }
-        return ((height - this.props.innerMargin.top) - this.props.innerMargin.bottom);
+        return height;
     }
 
     scrollableWidth(){
@@ -138,24 +138,29 @@ export default class Graph extends React.Component {
         }, 0) + 1) * (this.props.columnWidth + this.props.columnSpacing) + this.props.innerMargin.left + this.props.innerMargin.right - this.props.columnSpacing;
     }
 
-    nodesWithCoordinates(viewportWidth = null, contentWidth = null){
+    nodesWithCoordinates(viewportWidth = null, contentWidth = null, contentHeight = null, verticalMargin = 0){
+
+        if (!contentHeight) contentHeight = this.height();
+
+        console.log(verticalMargin, this.props.innerMargin.top, contentHeight);
+
         var nodes = _.sortBy(this.props.nodes.slice(0), 'column');
 
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
         _.pairs(_.groupBy(nodes, 'column')).forEach((columnGroup) => {
             var countInCol = columnGroup[1].length;
             if (countInCol === 1){
-                columnGroup[1][0].y = (this.height() / 2) + this.props.innerMargin.top;
+                columnGroup[1][0].y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
                 columnGroup[1][0].nodesInColumn = countInCol;
             } else if (this.props.rowSpacingType === 'compact') {
-                var padding = Math.max(0,this.height() - ((countInCol - 1) * this.props.rowSpacing)) / 2;
+                var padding = Math.max(0, contentHeight - ((countInCol - 1) * this.props.rowSpacing)) / 2;
                 d3.range(countInCol).forEach((i) => {
-                    columnGroup[1][i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding;
+                    columnGroup[1][i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
                     columnGroup[1][i].nodesInColumn = countInCol;
                 });
             } else {
                 d3.range(countInCol).forEach((i) => {
-                    columnGroup[1][i].y = ((i / Math.max(countInCol - 1, 1)) * this.height()) + this.props.innerMargin.top;
+                    columnGroup[1][i].y = ((i / Math.max(countInCol - 1, 1)) * contentHeight) + (this.props.innerMargin.top + verticalMargin);
                     columnGroup[1][i].nodesInColumn = countInCol;
                 });
             }
@@ -192,13 +197,24 @@ export default class Graph extends React.Component {
             );
         }
 
-        var nodes = this.nodesWithCoordinates(width, contentWidth);
-        var edges = this.props.edges;
-
+        // Difference/2 between minimumHeight and height, if any.
         var verticalMargin = 0;
-        if (typeof this.props.minimumHeight === 'number' && (height + this.props.innerMargin.top + this.props.innerMargin.bottom) < this.props.minimumHeight){
-            verticalMargin += (this.props.minimumHeight - (height + this.props.innerMargin.top + this.props.innerMargin.bottom)) / 2;
+        if (typeof this.props.minimumHeight === 'number' && height < this.props.minimumHeight){
+            verticalMargin += (this.props.minimumHeight - height) / 2;
         }
+
+        var fullHeight = Math.max(
+            (typeof this.props.minimumHeight === 'number' && this.props.minimumHeight) || 0,
+            height
+        );
+
+        var nodes = this.nodesWithCoordinates(
+            width,
+            contentWidth,
+            height - this.props.innerMargin.top - this.props.innerMargin.bottom,
+            verticalMargin
+        );
+        var edges = this.props.edges;
 
         return (
             <div ref="outerContainer" className="worfklow-chart-outer-container">
@@ -217,7 +233,7 @@ export default class Graph extends React.Component {
                             href={this.props.href}
                             onNodeClick={this.props.onNodeClick}
                         >
-                            <ScrollContainer verticalMargin={verticalMargin}>
+                            <ScrollContainer outerHeight={fullHeight}>
                                 <EdgesLayer edgeElement={this.props.edgeElement} isNodeDisabled={this.props.isNodeDisabled} />
                                 <NodesLayer nodeElement={this.props.nodeElement} isNodeDisabled={this.props.isNodeDisabled} title={this.props.nodeTitle} />
                             </ScrollContainer>

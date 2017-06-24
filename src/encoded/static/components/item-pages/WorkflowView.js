@@ -3,9 +3,11 @@
 import React from 'react';
 import { itemClass, panel_views } from './../globals';
 import _ from 'underscore';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane } from './components';
+import { 
+    ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
+    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane
+} from './components';
 import { ItemBaseView } from './DefaultItemView';
-import { getTabForAudits } from './item';
 import { console, object, DateUtility, Schemas, isServerSide, navigate } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
@@ -63,8 +65,7 @@ export function doValidAnalysisStepsExist(steps){
         !Array.isArray(steps) ||
         steps.length === 0 ||
         !Array.isArray(steps[0].inputs) ||
-        !Array.isArray(steps[0].outputs) ||
-        !Array.isArray(steps[0].inputs)
+        !Array.isArray(steps[0].outputs)
     ) {
         console.warn("Analysis Steps are in an improper format. Make sure they exist and contain 'inputs' and 'outputs");
         return false;

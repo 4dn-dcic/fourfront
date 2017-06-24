@@ -173,5 +173,10 @@
             "description": "Url to AWS run info",
             "format": "uri"
         }
+    },
+    "facets" : {
+        "workflow.title": {
+            "title": "Workflow"
+        }
     }
 }

@@ -6,7 +6,6 @@ import _ from 'underscore';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ItemFooterRow, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
-import { getTabForAudits } from './item';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { commonGraphPropsFromProps, dropDownMenuMixin, graphBodyMixin, doValidAnalysisStepsExist } from './WorkflowView';

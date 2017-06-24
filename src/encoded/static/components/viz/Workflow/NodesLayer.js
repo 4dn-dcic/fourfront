@@ -48,10 +48,11 @@ export default class NodesLayer extends React.Component {
 
     render(){
         var p = this.props;
-        var fullHeight = p.innerHeight + p.innerMargin.top + p.innerMargin.bottom;
+        var fullHeight = p.outerHeight;
+        var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
         return (
-            <div className="nodes-layer-wrapper" style={{ width : p.contentWidth, height : fullHeight }}>
-                <div className="nodes-layer" style={{ width : p.contentWidth, height : fullHeight }}>
+            <div className="nodes-layer-wrapper" style={{ width : Math.max(p.contentWidth, fullWidth), height : fullHeight }}>
+                <div className="nodes-layer" style={{ width : Math.max(p.contentWidth, fullWidth), height : fullHeight }}>
                     {
                         NodesLayer.processNodes(this.props.nodes).map(function(node, i){
                             var nodeProps = _.extend( _.omit(p, 'children', 'nodes'), {

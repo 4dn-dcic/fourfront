@@ -390,14 +390,22 @@
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [],
-            "description": ""
+            "argument_mapping": [{
+                "workflow_step" : "md5",
+                "step_argument_name" : "input_file",
+                "step_argument_type" : "Input file"
+            }],
+            "description": "File on which MD5 calculation is run on."
         },
         {
             "workflow_argument_name": "report",
             "argument_type": "Output report file",
-            "argument_mapping": [],
-            "description": ""
+            "argument_mapping": [{
+                "workflow_step" : "md5",
+                "step_argument_name" : "report",
+                "step_argument_type" : "Output file or parameter"
+            }],
+            "description": "The MD5 checksum generated."
         }
     ],
     "workflow_steps": [

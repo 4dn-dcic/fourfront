@@ -77,6 +77,29 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
         };
     }
 
+    /**
+     * Generate multiple nodes from one step input or output.
+     * Checks to see if WorkflowRun (via presence of run_data object in step input/output), and if multiple files exist in run_data.file, 
+     * will generate that many nodes.
+     *
+     * @returns {Object[]} List of extrapolated I/O nodes.
+     */
+    function extrapolateIONodes(stepInput, column, inputOfNode){
+        if (typeof stepInput.run_data === 'undefined' || !Array.isArray(stepInput.run_data.file) || stepInput.run_data.file.length === 0) { // Not valid WorkflowRun
+            return [generateInputNode(stepInput, column, inputOfNode)];
+        }
+        return _.map(stepInput.run_data.file, function(file, idx){
+            var stepInputAdjusted = _.extend({}, stepInput, {
+                'name' : stepInput.name + '.' + idx,
+                'run_data' : _.extend({}, stepInput.run_data, {
+                    'file' : file,
+                    'meta' : (stepInput.run_data.meta && stepInput.run_data.meta[idx]) || null
+                })
+            });
+            return generateInputNode(stepInputAdjusted, column, inputOfNode);
+        });
+    }
+
 
     /**
      * Find existing or generate new input nodes for each input in step.inputs and
@@ -98,6 +121,39 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
         step.inputs.forEach(function(fullStepInput){
             if (!Array.isArray(fullStepInput.source)) return;
 
+
+            var inputNodes = _.filter(allInputOutputNodes, function(n){
+                if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
+                    return true;
+                }
+                return false;
+            });
+
+            if (inputNodes.length > 0){ // Cool, associate these.
+                //inputNodesMatched.push(inputNode);
+                inputNodesMatched = inputNodesMatched.concat(inputNodes);
+            } else { // Else create new one.
+                inputNodes = extrapolateIONodes(fullStepInput, column, stepNode);
+                //inputNode = generateInputNode(fullStepInput, column, stepNode);
+                nodes = nodes.concat(inputNodes);
+                //nodes.push(inputNode);
+                inputNodesCreated = inputNodesCreated.concat(inputNodes);
+                //inputNodesCreated.push(inputNode);
+            }
+
+            // Finally, attach edge. Add to return arr (inputNodesUsedOrCreated).
+            if (inputNodes.length > 0) {
+                _.forEach(inputNodes, function(n){
+                    edges.push({
+                        'source' : n,
+                        'target' : stepNode,
+                        'capacity' : 'Input'
+                    });
+                });
+            }
+
+
+            /*
             // Try to find existing matching node first.
             var inputNode = _.find(allInputOutputNodes, function(n){
                 if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
@@ -123,6 +179,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
                     'capacity' : 'Input'
                 });
             }
+            */
 
         });
 
