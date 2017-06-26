@@ -87,3 +87,18 @@ Database snapshots are automatically taken every day.  To restore a backup on pr
 5. Go to 4dnweb-prod environment and select configuration -> software configuration
 6. Change the enviornment variable bnSTaLk_HOSTNAME to the name you just used for the new database.
 7. Redeploy the applicaition production.
+
+
+## Rebuilding beanstalk environemtns
+
+Any attempt to delete one of the beanstalk environment will most likely fail due to an inability to delete a secuirty group.  This is because our RDS security group sets inbound rules for the beanstalk enviroments.  So before you rebuild a beanstalk environment do the following:
+
+1.  Go to EC2's (aws console)
+2.  Select Security Groups
+3.  Search for sg-ab1d63d1  (this is our RDS security group)
+4.  Select inboud rules.
+5.  Find the inboud rule associated with the beanstalk environment security group (probably sg-something)
+6.  Remove that inboud rule.
+7.  Rebuild the envrionemnt.
+8.  You will need to add a new inbound rule to the RDS security group with the security group of the rebuilt Abeanstalk environment before deployment will be successful.
+9.  Security group id for beanstalk environment can be found under configuration -> Instances -> EC2 security Groups.
