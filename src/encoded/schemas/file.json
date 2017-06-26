@@ -46,7 +46,7 @@
                 "processed file",
                 "ancillary file",
                 "other file"
-              ]
+            ]
         },
         "file_format_specifications": {
             "title": "File format specifications documents",
@@ -54,10 +54,10 @@
             "type": "array",
             "uniqueItems": true,
             "items": {
-                    "comment": "See document.json for a list of available identifiers.",
-                    "type": "string",
-                    "linkTo": "Document"
-                    }
+                "comment": "See document.json for a list of available identifiers.",
+                "type": "string",
+                "linkTo": "Document"
+            }
         },
         "md5sum": {
             "title": "MD5sum",
@@ -75,7 +75,7 @@
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "format": "hex",
-			"uniqueKey": "file:content_md5sum"
+            "uniqueKey": "file:content_md5sum"
         },
         "file_size": {
             "title": "File Size",
@@ -83,22 +83,23 @@
             "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
             "type": "integer"
         },
-		"extra_files": {
-			"title": "Extra Files",
-			"description": "Links to extra files on s3 that don't have associated metadata",
-			"type": "array",
-			"items": {
-			   "title": "Extra File",
-			   "type": "object",
-			   "additionalProperties": true,
-			   "properties": {
-				   "file_format": {
-					    "title": "File Format",
-					    "type": "string"
-				    }
-				}
-			}
-		},
+        "extra_files": {
+            "title": "Extra Files",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "description": "Links to extra files on s3 that don't have associated metadata",
+            "type": "array",
+            "items": {
+                "title": "Extra File",
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                    "file_format": {
+                        "title": "File Format",
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "related_files": {
             "title": "Related Files",
             "description": "Files related to this one",
@@ -122,9 +123,9 @@
                         ]
                     },
                     "file": {
-                      "type": "string",
-                      "description": "The related file",
-                      "linkTo": "File"
+                        "type": "string",
+                        "description": "The related file",
+                        "linkTo": "File"
                     }
                 }
             }
@@ -155,11 +156,11 @@
             ]
         },
         "quality_metric": {
-          "type": "string",
-          "title": "Quality Metric",
-          "description": "The associated QC reports",
-          "exclude_from": ["submit4dn", "FFedit-create"],
-          "linkTo": "QualityMetric"
+            "type": "string",
+            "title": "Quality Metric",
+            "description": "The associated QC reports",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "linkTo": "QualityMetric"
         }
     },
     "file_format_file_extension": {
