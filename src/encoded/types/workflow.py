@@ -147,34 +147,29 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
-    embedded = ['analysis_steps',
-                'analysis_steps.*',
-                'analysis_steps.inputs.*',
-                'analysis_steps.outputs.*',
-                'analysis_steps.outputs.target.*',
-                'analysis_steps.inputs.source.*',
-                'analysis_steps.software_used.*',
-                'arguments.*',
+    embedded = ['arguments.*',
                 'arguments.argument_mapping']
-    rev = {
-        'workflow_runs': ('WorkflowRun', 'workflow'),
-    }
+    
+    #rev = {
+    #    'workflow_runs': ('WorkflowRun', 'workflow'),
+    #}
+    #
+    #@calculated_property(schema={
+    #    "title": "Workflow Runs",
+    #    "description": "All runs of this workflow definition.",
+    #    "type": "array",
+    #    "items": {
+    #        "title": "Workflow Run",
+    #        "type": ["string", "object"],
+    #        "linkTo": "WorkflowRun"
+    #    }
+    #})
+    #def workflow_runs(self, request):
+    #    return self.rev_link_atids(request, "workflow_runs")
 
-    @calculated_property(schema={
-        "title": "Workflow Runs",
-        "description": "All runs of this workflow definition.",
-        "type": "array",
-        "items": {
-            "title": "Workflow Run",
-            "type": ["string", "object"],
-            "linkTo": "WorkflowRun"
-        }
-    })
-    def workflow_runs(self, request):
-        return self.rev_link_atids(request, "workflow_runs")
 
-
-    @calculated_property(schema=workflow_analysis_steps_schema)
+    @calculated_property(schema=workflow_analysis_steps_schema,
+                         category='page')
     def analysis_steps(self, request):
         """smth."""
 
