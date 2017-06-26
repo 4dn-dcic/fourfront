@@ -156,22 +156,23 @@ class Workflow(Item):
                 'analysis_steps.software_used.*',
                 'arguments.*',
                 'arguments.argument_mapping']
-    rev = {
-        'workflow_runs': ('WorkflowRun', 'workflow'),
-    }
-
-    @calculated_property(schema={
-        "title": "Workflow Runs",
-        "description": "All runs of this workflow definition.",
-        "type": "array",
-        "items": {
-            "title": "Workflow Run",
-            "type": ["string", "object"],
-            "linkTo": "WorkflowRun"
-        }
-    })
-    def workflow_runs(self, request):
-        return self.rev_link_atids(request, "workflow_runs")
+    
+    #rev = {
+    #    'workflow_runs': ('WorkflowRun', 'workflow'),
+    #}
+    #
+    #@calculated_property(schema={
+    #    "title": "Workflow Runs",
+    #    "description": "All runs of this workflow definition.",
+    #    "type": "array",
+    #    "items": {
+    #        "title": "Workflow Run",
+    #        "type": ["string", "object"],
+    #        "linkTo": "WorkflowRun"
+    #    }
+    #})
+    #def workflow_runs(self, request):
+    #    return self.rev_link_atids(request, "workflow_runs")
 
 
     @calculated_property(schema=workflow_analysis_steps_schema)
