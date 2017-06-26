@@ -33,7 +33,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
         return {
             column      : column,
             format      : stepOutput.target && stepOutput.target[0].type,
-            name        : stepOutput.name, 
+            id          : stepOutput.id || stepOutput.name,
+            name        : stepOutput.name,
             type        : 'output',
             meta        : _.omit(stepOutput, 'required', 'name'),
             outputOf    : outputOfNode
@@ -69,6 +70,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
         return {
             column      : column,
             format      : stepInput.source && stepInput.source[0].type, // First source type takes priority
+            id          : stepInput.id || stepInput.name,
             name        : stepInput.name, 
             type        : 'input',
             inputOf     : inputOfNode,
@@ -82,15 +84,16 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
      * Checks to see if WorkflowRun (via presence of run_data object in step input/output), and if multiple files exist in run_data.file, 
      * will generate that many nodes.
      *
-     * @returns {Object[]} List of extrapolated I/O nodes.
+     * @returns {Object[]} List of expanded I/O nodes.
      */
-    function extrapolateIONodes(stepInput, column, inputOfNode){
+    function expandIONodes(stepInput, column, inputOfNode){
         if (typeof stepInput.run_data === 'undefined' || !Array.isArray(stepInput.run_data.file) || stepInput.run_data.file.length === 0) { // Not valid WorkflowRun
             return [generateInputNode(stepInput, column, inputOfNode)];
         }
         return _.map(stepInput.run_data.file, function(file, idx){
             var stepInputAdjusted = _.extend({}, stepInput, {
-                'name' : stepInput.name + '.' + idx,
+                'name' : stepInput.name,
+                'id' : stepInput.name + '.' + idx,
                 'run_data' : _.extend({}, stepInput.run_data, {
                     'file' : file,
                     'meta' : (stepInput.run_data.meta && stepInput.run_data.meta[idx]) || null
@@ -121,27 +124,36 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
         step.inputs.forEach(function(fullStepInput){
             if (!Array.isArray(fullStepInput.source)) return;
 
+            var inputNodes = []; // All input nodes matched to step input will be in here
 
-            var inputNodes = _.filter(allInputOutputNodes, function(n){
+            // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
+            var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode);
+
+            var currentInputNodesMatched = _.filter(allInputOutputNodes, function(n){
                 if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
                     return true;
                 }
                 return false;
             });
 
-            if (inputNodes.length > 0){ // Cool, associate these.
-                //inputNodesMatched.push(inputNode);
-                inputNodesMatched = inputNodesMatched.concat(inputNodes);
-            } else { // Else create new one.
-                inputNodes = extrapolateIONodes(fullStepInput, column, stepNode);
-                //inputNode = generateInputNode(fullStepInput, column, stepNode);
-                nodes = nodes.concat(inputNodes);
-                //nodes.push(inputNode);
-                inputNodesCreated = inputNodesCreated.concat(inputNodes);
-                //inputNodesCreated.push(inputNode);
+            if (currentInputNodesMatched.length > 0){
+                inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
+                inputNodes = inputNodes.concat(currentInputNodesMatched);
             }
 
-            // Finally, attach edge. Add to return arr (inputNodesUsedOrCreated).
+            // Step 2. For any unmatched input nodes, create them (via adding to 'nodes' list).
+            if (currentInputNodesMatched.length < inputNodesToMatch.length){
+                var matchedNames = _.pluck(currentInputNodesMatched, 'name');
+                var unmatchedInputNodes = _.filter(inputNodesToMatch, function(n,idx){
+                    if (matchedNames.indexOf(n.name) > -1) return false;
+                    return true;
+                });
+                nodes = nodes.concat(unmatchedInputNodes);
+                inputNodesCreated = inputNodesCreated.concat(unmatchedInputNodes);
+                inputNodes = inputNodes.concat(unmatchedInputNodes);
+            }
+
+            // Finally, attach edge to all input nodes associated to step input.
             if (inputNodes.length > 0) {
                 _.forEach(inputNodes, function(n){
                     edges.push({
@@ -151,35 +163,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
                     });
                 });
             }
-
-
-            /*
-            // Try to find existing matching node first.
-            var inputNode = _.find(allInputOutputNodes, function(n){
-                if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
-                    return true;
-                }
-                return false;
-            });
-
-            
-            if (inputNode){ // Cool, associate this 1.
-                inputNodesMatched.push(inputNode);
-            } else { // Else create new one.
-                inputNode = generateInputNode(fullStepInput, column, stepNode);
-                nodes.push(inputNode);
-                inputNodesCreated.push(inputNode);
-            }
-
-            // Finally, attach edge. Add to return arr (inputNodesUsedOrCreated).
-            if (inputNode){
-                edges.push({
-                    'source' : inputNode,
-                    'target' : stepNode,
-                    'capacity' : 'Input'
-                });
-            }
-            */
 
         });
 

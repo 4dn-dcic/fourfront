@@ -132,11 +132,12 @@ export default class Edge extends React.Component {
     render(){
         var edge = this.props.edge;
         var disabled = Edge.isDisabled(edge, this.props.isNodeDisabled);
+        var selected = Edge.isSelected(edge, this.props.selectedNode, disabled);
         return (
             <path
                 d={this.generatePathDimension(edge, this.props.edgeStyle, this.props.radius)}
                 className={"edge-path" + (disabled ? ' disabled' : '' )}
-                data-edge-selected={Edge.isSelected(edge, this.props.selectedNode, disabled)}
+                data-edge-selected={selected}
                 data-source={edge.source.name}
                 data-target={edge.target.name}
                 markerEnd={this.props.pathArrows ? "url(#pathArrow)" : null}

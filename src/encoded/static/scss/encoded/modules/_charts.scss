@@ -1287,7 +1287,7 @@ $workflow-step-node-lineheight: 18px;
                                 z-index: 1;
                                 outline: 2px solid transparent;
                                 outline-offset: 4px;
-                                transition: outline-color .2s;
+                                transition: outline-color .2s, outline-width .2s;
                             }
                             > .inner {
                                 height : $workflow-io-node-height;
@@ -1311,6 +1311,12 @@ $workflow-step-node-lineheight: 18px;
                             &[data-node-selected="true"]:not(.disabled){
                                 &:before {
                                     outline-color: #000;
+                                }
+                            }
+                            &[data-node-related="true"]:not(.disabled):not([data-node-selected="true"]){
+                                &:before {
+                                    outline-color: rgba(0,0,0,0.25);
+                                    outline-width: 1px;
                                 }
                             }
                         }

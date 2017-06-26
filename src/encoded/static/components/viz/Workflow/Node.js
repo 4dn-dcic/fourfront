@@ -7,17 +7,31 @@ import { console } from './../../util';
 
 export default class Node extends React.Component {
 
+    /**
+     * @param {Object} currentNode - Current node, e.g. node calling this function
+     * @param {?Object} selectedNode - Currently-selected node reference for view.
+     * @returns {boolean} True if currentNode matches selectedNode, and is thus the selectedNode.
+     */
     static isSelected(currentNode, selectedNode){
         if (!selectedNode) return false;
         if (selectedNode === currentNode) return true;
-        if (selectedNode.id && currentNode.id && selectedNode.id === currentNode.id) return true;
-        if (selectedNode.name && currentNode.name && selectedNode.name === currentNode.name) return true;
-        //if (
-        //    _.isEqual(
-        //        _.omit(selectedNode, 'nodesInColumn', 'x', 'y', 'column'),
-        //        _.omit(currentNode, 'nodesInColumn', 'x', 'y', 'column')
-        //    )
-        //) return true;
+        if (typeof selectedNode.id === 'string' && typeof currentNode.id === 'string') {
+            if (selectedNode.id === currentNode.id) return true;
+            return false;
+        }
+        if (selectedNode.name && currentNode.name) {
+            if (selectedNode.name === currentNode.name) return true;
+            return false;
+        }
+        return false;
+    }
+
+    static isRelated(currentNode, selectedNode) {
+        if (!selectedNode) return false;
+        if (selectedNode.name && currentNode.name) {
+            if (selectedNode.name === currentNode.name) return true;
+            return false;
+        }
         return false;
     }
 
@@ -143,9 +157,8 @@ export default class Node extends React.Component {
         return output; 
     }
 
-    isSelected(){
-        return Node.isSelected(this.props.node, this.props.selectedNode);
-    }
+    isSelected(){ return Node.isSelected(this.props.node, this.props.selectedNode); }
+    isRelated() { return Node.isRelated(this.props.node, this.props.selectedNode); }
 
     render(){
         var node        = this.props.node,
@@ -169,6 +182,7 @@ export default class Node extends React.Component {
                 data-node-type={node.type}
                 data-node-global={node.isGlobal || null}
                 data-node-selected={this.isSelected() || null}
+                data-node-related={this.isRelated() || null}
                 style={{
                     'top' : node.y,
                     'left' : node.x,
