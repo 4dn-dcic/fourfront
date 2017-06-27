@@ -179,11 +179,14 @@ class Workflow(Item):
             return []
 
 
-        def getStepDict(uuid):
+        def getStepDict(stepContainer):
             '''
             This function is needed to convert an AnalysisStep UUID to a basic dictionary representation of the AnalysisStep, by grabbing it from the database.
-            Alternatively, request.embed(uuid, '@embedded') could work in place of this function, if can access it while embedding.
+            Alternatively, request.embed(uuid, '@embedded') could work in lieu of self.collection.get(<uuid>), if can access it while embedding.
+
+            :param stepContainer: A dictionary containing 'step' - a UUID of an AnalysisStep, and 'step_name', a name for the step used within workflow (overrides AnalysisStep.properties.name).
             '''
+            uuid = stepContainer['step']
             resultStepProperties = ['uuid', 'inputs', 'outputs', 'name', 'software_used', '@id', 'title', 'display_title', 'description', 'analysis_step_types', 'status'] # props to leave in
             step = self.collection.get(str(uuid))
             stepDict = {}
@@ -193,22 +196,26 @@ class Workflow(Item):
                 if key not in resultStepProperties:
                     del stepDict[key]
             stepDict['uuid'] = str(step.uuid)
+
+            # Use 'step_name' as provided in Workflow's 'workflow_steps', to override AnalysisStep 'name', in case step is renamed in Workflow.
+            # Is unlikely, but possible, to differ from AnalysisStep own name.
+            stepDict['name'] = stepContainer.get('step_name', stepDict.get('name'))
             if stepDict.get('software_used') is not None:
                 stepDict['software_used'] = '/software/' + stepDict['software_used'] + '/' # Convert to '@id' form so is picked up for embedding.
+                
             return stepDict
 
         def mergeIOForStep(outputArgs, argType = "output"):
             '''
             IMPORTANT:
-            *This function shouldn't be necessary, but totally is, because we get multiple 'arguments' which may contain non-combined data.*
-            Each 'argument' item has up to two argument_mappings in current Workflows, though there could be many more mappings than that, so in practice there are
-            multiple 'argument' items for the same argument node. To handle this, we distribute arguments->argument_mappings among steps first, then in this function,
-            combine them when step & step_argument_name are equal.
+            Each 'argument' item has up to two argument_mappings in current Workflows data structure, though there could be many more mappings than that, so in practice there are
+            multiple 'argument' items for the same argument node. To handle this, we distribute arguments->argument_mappings among steps first, as inputs with sources or outputs with targets,
+            then in this function, combine them when step & step_argument_name are equal.
 
-            It is only run for outputs because such case has not yet been encountered for an input -- but if occurs, simply duplicate function call for step['inputs'] and
-            pass in argType='input' to function, which would describe "input" vs "output" and inform whethere to check 'arg["source"]' (for input) or 'arg["target"]' (for output).
+            :param outputArgs: 'input' or 'output' items of a 'constructed' analysis_step item.
+            :param argType: Whether we are merging/combining inputs or outputs.
             '''
-            argTargetsProperty = 'target' if argType == 'output' else 'source' # Inputs have a 'source', outputs have a 'target'
+            argTargetsPropertyName = 'target' if argType == 'output' else 'source' # Inputs have a 'source', outputs have a 'target'.
             seen_argument_names = {}
             resultArgs = []
             for arg in outputArgs:
@@ -216,10 +223,10 @@ class Workflow(Item):
                 argName = arg.get('name')
                 if argName:
                     priorArgument = seen_argument_names.get(argName)
-                    if priorArgument and len(arg[argTargetsProperty]) > 0:
-                        for currentTarget in arg[argTargetsProperty]:
+                    if priorArgument and len(arg[argTargetsPropertyName]) > 0:
+                        for currentTarget in arg[argTargetsPropertyName]:
                             foundExisting = False
-                            for existingTarget in priorArgument[argTargetsProperty]:
+                            for existingTarget in priorArgument[argTargetsPropertyName]:
                                 if (
                                     existingTarget['name'] == currentTarget['name']
                                     and existingTarget.get('step','a') == currentTarget.get('step','b')
@@ -227,7 +234,7 @@ class Workflow(Item):
                                     existingTarget.update(currentTarget)
                                     foundExisting = True
                             if not foundExisting:
-                                priorArgument[argTargetsProperty].append(currentTarget)
+                                priorArgument[argTargetsPropertyName].append(currentTarget)
                     else:
                         resultArgs.append(arg)
                         seen_argument_names[argName] = arg
@@ -239,6 +246,12 @@ class Workflow(Item):
             Given an argument_mapping item & its index (currentArgumentMap, currentMapIndex),
             its parent argument (currentArgument), and type of node to create ("input" or "output"; argumentType),
             generates an input or output node with "source" or "target" properties which reference the previous or next step, including if is a 'global' "Workflow Input/Output File".
+
+            :param currentArgument: Dictionary item from 'arguments' property list. Should have an 'argument_mapping' list with a maximum of 2 entries and/or 'workflow_argument_name' (if global input/output).
+            :param currentArgumentMap: Dictionary item from 'arguments' item's 'argument_mapping' list.
+            :param currentMapIndex: Index of currentArgumentMap within its parent 'arguments'->'argument_mapping' list.
+            :param argumentType: "input" or "output", to know what form of node is being created.
+            :returns: Dictionary representing an I/O node of a step, containing a list for "source" or "target" which directs to where I/O node came from or is going to next.
             '''
 
             # Input nodes have a 'source', output nodes have a 'target'
@@ -286,47 +299,7 @@ class Workflow(Item):
             return node
 
 
-        steps = [ step['step'] for step in self.properties['workflow_steps'] ]
-
-        # FALLBACK for missing/empty workflow_steps.
-        # *This shouldn't be necessary.* (May be replaced with an Exception when we can expect to never hit it.)
-        # If no workflow_steps is defined on our Workflow Item (or is empty), return the Workflow Item itself as the Analysis Step.
-        # With all 'global' 'workflow' added as inputs/outputs of step, thus allowing a basic 1-step graph.
-        if steps is None or len(steps) == 0:
-           titleToUse = self.properties.get('name', self.properties.get('title', "Process"))
-           return [
-               {
-                   "uuid" : self.uuid,
-                   "@id" : self.jsonld_id(request),
-                   "name" : titleToUse,
-                   "title" : titleToUse,
-                   "analysis_step_types" : ["Workflow Process"],
-                   "inputs" : [
-                       {
-                           "name" : arg.get('workflow_argument_name'),
-                           "source" : [
-                               {
-                                   "name" : arg.get('workflow_argument_name'),
-                                   "type" : "Workflow Input File"
-                               }
-                           ]
-                       } for arg in self.properties['arguments'] if 'input' in str(arg.get('argument_type')).lower()
-                   ],
-                   "outputs" : [
-                       {
-                           "name" : arg.get('workflow_argument_name'),
-                           "target" : [
-                               {
-                                  "name" : arg.get('workflow_argument_name'),
-                                   "type" : "Workflow Output File"
-                              }
-                           ]
-                       } for arg in self.properties['arguments'] if 'output' in str(arg.get('argument_type')).lower()
-                  ]
-              }
-           ]
-
-        steps = map(getStepDict, steps) # replaces: steps = map( lambda uuid: request.embed('/' + str(uuid), '@@embedded'), steps)
+        steps = map(getStepDict, self.properties['workflow_steps'])
 
         resultSteps = []
 
