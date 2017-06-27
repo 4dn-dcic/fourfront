@@ -179,10 +179,10 @@ class Workflow(Item):
             return []
 
 
-        def buildStepDict(uuid):
+        def getStepDict(uuid):
             '''
             This function is needed to convert an AnalysisStep UUID to a basic dictionary representation of the AnalysisStep, by grabbing it from the database.
-            Alternatively, request.embed(uuid, '@embedded') could work here as well, though we do not want or need software_used to be returned in embedded form, for performance.
+            Alternatively, request.embed(uuid, '@embedded') could work in place of this function, if can access it while embedding.
             '''
             resultStepProperties = ['uuid', 'inputs', 'outputs', 'name', 'software_used', '@id', 'title', 'display_title', 'description', 'analysis_step_types', 'status'] # props to leave in
             step = self.collection.get(str(uuid))
@@ -199,9 +199,11 @@ class Workflow(Item):
 
         def mergeIOForStep(outputArgs, argType = "output"):
             '''
-            *This function shouldn't be necessary.*
-            It merges step outputs with duplicate names & their 'targets' into one dict/object,
-            which may occur due to duplicate or multiple 'arguments'/'argument_mapping' provided with the same workflow_argument_name.
+            IMPORTANT:
+            *This function shouldn't be necessary, but totally is, because we get multiple 'arguments' which may contain non-combined data.*
+            Each 'argument' item has up to two argument_mappings in current Workflows, though there could be many more mappings than that, so in practice there are
+            multiple 'argument' items for the same argument node. To handle this, we distribute arguments->argument_mappings among steps first, then in this function,
+            combine them when step & step_argument_name are equal.
 
             It is only run for outputs because such case has not yet been encountered for an input -- but if occurs, simply duplicate function call for step['inputs'] and
             pass in argType='input' to function, which would describe "input" vs "output" and inform whethere to check 'arg["source"]' (for input) or 'arg["target"]' (for output).
@@ -232,11 +234,64 @@ class Workflow(Item):
             return resultArgs
 
 
+        def buildIONodeFromMapping(currentArgument, currentArgumentMap, currentMapIndex, argumentType):
+            '''
+            Given an argument_mapping item & its index (currentArgumentMap, currentMapIndex),
+            its parent argument (currentArgument), and type of node to create ("input" or "output"; argumentType),
+            generates an input or output node with "source" or "target" properties which reference the previous or next step, including if is a 'global' "Workflow Input/Output File".
+            '''
+
+            # Input nodes have a 'source', output nodes have a 'target'
+            argTargetsPropertyName = 'target' if argumentType == 'output' else 'source'
+            
+            node = {
+                "name" : currentArgumentMap.get('step_argument_name'),
+                argTargetsPropertyName : []     # To become list of "source" or "target" steps.
+            }
+
+            mapping = currentArgument['argument_mapping'] # siblings, inclusive, of 'currentArgumentMap'
+
+            doesOppositeIOMappingExist = len([
+                mp for mp in mapping if (
+                    mp.get('step_argument_type').lower() == ('input' if argumentType == 'output' else 'output') + ' file' or
+                    mp.get('step_argument_type').lower() == ('input' if argumentType == 'output' else 'output') + ' file or parameter'
+                )
+            ]) > 0
+
+            # Confirmed Valid Assumption : If a "workflow_argument_name" is present on argument, then it is a "global" "workflow output" or "workflow input" argument.
+            # So, we create/add an explicit source or target item to node to indicate this.
+            # 'doesOppositeIOMappingExist' check may not be necessary, operates on optimization assumption (comment in next if statement)
+            #  -- if doesOppositeIOMappingExist is **true** and workflow_argument_name is not None, we could throw an Exception.
+            if currentArgument.get("workflow_argument_name") is not None and not doesOppositeIOMappingExist:
+                argTargetsProperty = { "name" : currentArgument["workflow_argument_name"] }
+                if currentArgumentMap['step_argument_type'] == 'parameter':
+                    argTargetsProperty["type"] = "Workflow Parameter"
+                else:
+                    argTargetsProperty["type"] = "Workflow " + argumentType.capitalize() + " File"
+                node[argTargetsPropertyName].append(argTargetsProperty)
+            if len(mapping) > 1:
+                # Optimization. There is at most two mappings in argument_mapping. Use other 1 (not mapping of current step) to build "source" or "target" of where argument came from or is going to.
+                otherIndex = 0
+                if currentMapIndex == 0:
+                    otherIndex = 1
+                node[argTargetsPropertyName].append({
+                    "name" : mapping[otherIndex]["step_argument_name"],
+                    "step" : mapping[otherIndex]["workflow_step"],
+                    "type" : mapping[otherIndex].get("step_argument_type")
+                })
+
+            # Dump anything else defined on current arguments[] property item into 'meta' property of our input or output node.
+            # Info such as "cardinality", "argument_format" may be available from here.
+            node["meta"] = { k:v for (k,v) in currentArgument.items() if k not in ["argument_mapping", "workflow_argument_name"] }
+            return node
+
+
         steps = [ step['step'] for step in self.properties['workflow_steps'] ]
 
-        # *This shouldn't be necessary.*
-        # If no workflow_steps is defined on our Workflow Item (or is empty), it will return the Workflow Item itself as the Analysis Step.
-        # All arguments will be added as inputs/outputs of step, thus allowing a basic 1-step graph.
+        # FALLBACK for missing/empty workflow_steps.
+        # *This shouldn't be necessary.* (May be replaced with an Exception when we can expect to never hit it.)
+        # If no workflow_steps is defined on our Workflow Item (or is empty), return the Workflow Item itself as the Analysis Step.
+        # With all 'global' 'workflow' added as inputs/outputs of step, thus allowing a basic 1-step graph.
         if steps is None or len(steps) == 0:
            titleToUse = self.properties.get('name', self.properties.get('title', "Process"))
            return [
@@ -271,13 +326,13 @@ class Workflow(Item):
               }
            ]
 
-        steps = map(buildStepDict, steps)
-
-        #steps = map( lambda uuid: request.embed('/' + str(uuid), '@@embedded'), steps)
+        steps = map(getStepDict, steps) # replaces: steps = map( lambda uuid: request.embed('/' + str(uuid), '@@embedded'), steps)
 
         resultSteps = []
 
         # Distribute arguments into steps' "inputs" and "outputs" arrays.
+        # Transform 'argument_mapping' to be 'source' or 'target' of the 'input' or 'output' argument, re: context of step it is attached to (the other mapping). @see def buildIONodeFromMapping.
+        # Then combine them for each step where step_argument_name & step are equal. @see def mergeIOForStep.
         for step in steps:
             step['inputs'] = []
             step['outputs'] = []
@@ -289,78 +344,14 @@ class Workflow(Item):
                 for mappingIndex, mappedArg in enumerate(mapping):
                     if mappedArg.get('workflow_step') == step['name']:
                         step_argument_name = mappedArg.get('step_argument_type','').lower()
-                        if (step_argument_name == 'input file' or
-                            step_argument_name == 'input file or parameter' or
-                            step_argument_name == 'parameter' ):
-
-                            inputNode = {
-                                "name" : mappedArg.get('step_argument_name'),
-                                "source" : []
-                            }
-
-                            doesOutputMappingExist = len([
-                                mp for mp in mapping if (
-                                    mp.get('step_argument_type').lower() == 'output file' or
-                                    mp.get('step_argument_type').lower() == 'output file or parameter'
-                                )
-                            ]) > 0
-
-                            if arg.get("workflow_argument_name") is not None and not doesOutputMappingExist:
-                                source = { "name" : arg["workflow_argument_name"] }
-                                if mappedArg['step_argument_type'] == 'parameter':
-                                    source["type"] = "Workflow Parameter"
-                                else:
-                                    source["type"] = "Workflow Input File"
-                                inputNode["source"].append(source)
-                            if len(mapping) > 1:
-                                otherIndex = 0
-                                if mappingIndex == 0:
-                                    otherIndex = 1
-                                inputNode["source"].append({
-                                    "name" : mapping[otherIndex]["step_argument_name"],
-                                    "step" : mapping[otherIndex]["workflow_step"],
-                                    "type" : mapping[otherIndex].get("step_argument_type")
-                                })
-
-                            # Dump anything else defined on current arguments[] property item into 'meta' property of an input or output item.
-                            inputNode["meta"] = { k:v for (k,v) in arg.items() if k not in ["argument_mapping", "workflow_argument_name"] }
-
-                            step["inputs"].append(inputNode)
-
-                        elif (step_argument_name == 'output file' or
-                            step_argument_name == 'output file or parameter' ):
-
-                            outputNode = {
-                                "name" : mappedArg.get("step_argument_name"),
-                                "target" : []
-                            }
-
-                            if arg.get("workflow_argument_name") is not None:
-                                target = {}
-                                target["name"] = arg["workflow_argument_name"]
-                                if mappedArg['step_argument_type'] == 'parameter': # shouldn't happen, but just in case
-                                    target["type"] = "Workflow Output Parameter"
-                                else:
-                                    target["type"] = "Workflow Output File"
-                                outputNode["target"].append(target)
-                            if len(mapping) > 1:
-                                otherIndex = 0
-                                if mappingIndex == 0:
-                                    otherIndex = 1
-                                outputNode["target"].append({
-                                    "name" : mapping[otherIndex]["step_argument_name"],
-                                    "step" : mapping[otherIndex]["workflow_step"],
-                                    "type" : mapping[otherIndex].get("step_argument_type")
-                                })
-
-                            # Dump anything else defined on current arguments[] property item into 'meta' property of an input or output item.
-                            outputNode["meta"] = { k:v for (k,v) in arg.items() if k not in ["argument_mapping", "workflow_argument_name"] }
-
-                            step["outputs"].append(outputNode)
-
-
+                        if   ( step_argument_name == 'input file'  or step_argument_name == 'input file or parameter' or step_argument_name == 'parameter' ):
+                            step["inputs"].append(buildIONodeFromMapping(arg, mappedArg, mappingIndex, 'input'))
+                        elif ( step_argument_name == 'output file' or step_argument_name == 'output file or parameter' ):
+                            step["outputs"].append(buildIONodeFromMapping(arg, mappedArg, mappingIndex, 'output'))
             step['outputs'] = mergeIOForStep(step['outputs'], 'output')
+            step['inputs']  = mergeIOForStep( step['inputs'], 'input' )
             resultSteps.append(step)
+
         return resultSteps
 
 

@@ -32,7 +32,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
     function generateOutputNode(stepOutput, column, outputOfNode){
         return {
             column      : column,
-            format      : stepOutput.target && stepOutput.target[0].type,
+            format      : (Array.isArray(stepOutput.target) && stepOutput.target.length > 0 && stepOutput.target[0].type) || null,
             id          : stepOutput.id || stepOutput.name,
             name        : stepOutput.name,
             type        : 'output',
@@ -69,7 +69,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
     function generateInputNode(stepInput, column, inputOfNode){
         return {
             column      : column,
-            format      : stepInput.source && stepInput.source[0].type, // First source type takes priority
+            format      : (Array.isArray(stepInput.source) && stepInput.source.length > 0 && stepInput.source[0].type) || null, // First source type takes priority
             id          : stepInput.id || stepInput.name,
             name        : stepInput.name, 
             type        : 'input',
