@@ -49,7 +49,7 @@ const portal = {
             title: 'Browse',
             //url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
             url : function(currentUrlParts){
-                if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'; // Default/fallback
+                if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate'; // Default/fallback
                 return Filters.filtersToHref(
                     store.getState().expSetFilters,
                     currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
