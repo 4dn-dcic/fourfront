@@ -102,6 +102,7 @@ def test_extra_files(testapp, proc_file_json):
     assert resobj['extra_files'][0]['href']
     assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
     assert resobj['extra_files_creds'][0]['upload_credentials']
+    assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
     assert resobj['extra_files'][0]['status'] == proc_file_json['status']
 
 
@@ -154,6 +155,7 @@ def test_files_aws_credentials(testapp, fastq_uploading):
     res_put = testapp.put_json(resobj['@id'], fastq_uploading)
 
     assert resobj['upload_credentials']['key'] == res_put.json['@graph'][0]['upload_credentials']['key']
+    assert 'test-bucket' in resobj['upload_credentials']['upload_url']
 
 
 def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
