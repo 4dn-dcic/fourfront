@@ -22,6 +22,11 @@ export class WorkflowNodeElement extends React.Component {
         var node = this.props.node;
         return (node.meta && node.meta.run_data && node.meta.run_data.file && typeof node.meta.run_data.file.display_title === 'string');
     }
+
+    doesRunDataValueExist(){
+        var node = this.props.node;
+        return (node.meta && node.meta.run_data && node.meta.run_data.value && (typeof node.meta.run_data.value === 'string' || typeof node.meta.run_data.value === 'number'));
+    }
     
     icon(){
         var iconClass;
@@ -36,7 +41,7 @@ export class WorkflowNodeElement extends React.Component {
                 } else if (
                     formats.indexOf('parameter') > -1 || formats.indexOf('int') > -1 || formats.indexOf('string') > -1
                 ){
-                    iconClass = 'cog';
+                    iconClass = 'wrench';
                 } else {
                     iconClass = 'question';
                 }
@@ -50,7 +55,7 @@ export class WorkflowNodeElement extends React.Component {
                     (formats[0] === 'int' || formats[0] === 'string') ||
                     (formats[0] === 'null' && (formats[1] === 'int' || formats[1] === 'string'))
                 ){
-                    iconClass = 'cog';
+                    iconClass = 'wrench';
                 }
             }
 
@@ -145,6 +150,11 @@ export class WorkflowNodeElement extends React.Component {
             return <div {...elemProps}>{ this.props.title }</div>;
         }
 
+        if (this.doesRunDataValueExist()){
+            elemProps.className += ' mono-text';
+            return <div {...elemProps}>{ this.props.title }</div>;
+        }
+
         var node = this.props.node;
         if (
             node.type === 'step' && node.meta.uuid &&
@@ -158,27 +168,34 @@ export class WorkflowNodeElement extends React.Component {
 
     }
 
-    belowNodeTitleContent(){
-        var node = this.props.node;
-        if (node.meta && typeof node.meta.argument_format === 'string') {
-            return <span className="lighter"><span className="text-500">Format: </span>{ node.meta.argument_format }</span>;
-        }
-        return null;
-    }
-
     belowNodeTitle(){
-        var content = this.belowNodeTitleContent();
-        if (!content) return null;
-        return (
-            <div className="text-ellipsis-container below-node-title" style={{ maxWidth : this.props.columnWidth }}>
-                { content }
-            </div>
-        );
+        var elemProps = {
+            'style'     : { 'maxWidth' : this.props.columnWidth },
+            'className' : "text-ellipsis-container below-node-title"
+        };
+
+        var node = this.props.node;
+
+        if (node.meta && typeof node.meta.argument_format === 'string') {
+            return <div {...elemProps}><span className="lighter"><span className="text-500">Format: </span>{ node.meta.argument_format }</span></div>;
+        }
+
+        if (node.type === 'step' && node.meta && node.meta.software_used && node.meta.software_used.title){
+            if (typeof node.meta.software_used.name === 'string' && typeof node.meta.software_used.version === 'string'){
+                return <div {...elemProps}>{ node.meta.software_used.name } <span className="lighter">v{ node.meta.software_used.version }</span></div>;
+            }
+            return <div {...elemProps}>{ node.meta.software_used.title }</div>;
+        }
+
+        return null;
     }
 
     nodeTitle(){
         if (this.doesRunDataFileExist()){
             return <span className="node-name">{ this.icon() }{ this.props.node.meta.run_data.file.display_title }</span>;
+        }
+        if (this.doesRunDataValueExist()){
+            return <span className="node-name mono-text">{ this.icon() }{ this.props.node.meta.run_data.value }</span>;
         }
         return <span className="node-name mono-text">{ this.icon() }{ this.props.title }</span>;
     }

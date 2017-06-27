@@ -167,13 +167,8 @@ class Workflow(Item):
     #def workflow_runs(self, request):
     #    return self.rev_link_atids(request, "workflow_runs")
 
-
-<<<<<<< HEAD
-    @calculated_property(schema=workflow_analysis_steps_schema)
-=======
     @calculated_property(schema=workflow_analysis_steps_schema,
                          category='page')
->>>>>>> 922e39a9d68e1b2935cf98b19118a0259d7857af
     def analysis_steps(self, request):
         """smth."""
 
@@ -185,6 +180,10 @@ class Workflow(Item):
 
 
         def buildStepDict(uuid):
+            '''
+            This function is needed to convert an AnalysisStep UUID to a basic dictionary representation of the AnalysisStep, by grabbing it from the database.
+            Alternatively, request.embed(uuid, '@embedded') could work here as well, though we do not want or need software_used to be returned in embedded form, for performance.
+            '''
             resultStepProperties = ['uuid', 'inputs', 'outputs', 'name', 'software_used', '@id', 'title', 'display_title', 'description', 'analysis_step_types', 'status'] # props to leave in
             step = self.collection.get(str(uuid))
             stepDict = {}
@@ -195,21 +194,30 @@ class Workflow(Item):
                     del stepDict[key]
             stepDict['uuid'] = str(step.uuid)
             if stepDict.get('software_used') is not None:
-                stepDict['software_used'] = '/software/' + stepDict['software_used'] + '/'
+                stepDict['software_used'] = '/software/' + stepDict['software_used'] + '/' # Convert to '@id' form so is picked up for embedding.
             return stepDict
 
-        def mergeOutputsForStep(args):
+        def mergeIOForStep(outputArgs, argType = "output"):
+            '''
+            *This function shouldn't be necessary.*
+            It merges step outputs with duplicate names & their 'targets' into one dict/object,
+            which may occur due to duplicate or multiple 'arguments'/'argument_mapping' provided with the same workflow_argument_name.
+
+            It is only run for outputs because such case has not yet been encountered for an input -- but if occurs, simply duplicate function call for step['inputs'] and
+            pass in argType='input' to function, which would describe "input" vs "output" and inform whethere to check 'arg["source"]' (for input) or 'arg["target"]' (for output).
+            '''
+            argTargetsProperty = 'target' if argType == 'output' else 'source' # Inputs have a 'source', outputs have a 'target'
             seen_argument_names = {}
             resultArgs = []
-            for arg in args:
+            for arg in outputArgs:
 
                 argName = arg.get('name')
                 if argName:
                     priorArgument = seen_argument_names.get(argName)
-                    if priorArgument and len(arg['target']) > 0:
-                        for currentTarget in arg['target']:
+                    if priorArgument and len(arg[argTargetsProperty]) > 0:
+                        for currentTarget in arg[argTargetsProperty]:
                             foundExisting = False
-                            for existingTarget in priorArgument['target']:
+                            for existingTarget in priorArgument[argTargetsProperty]:
                                 if (
                                     existingTarget['name'] == currentTarget['name']
                                     and existingTarget.get('step','a') == currentTarget.get('step','b')
@@ -217,7 +225,7 @@ class Workflow(Item):
                                     existingTarget.update(currentTarget)
                                     foundExisting = True
                             if not foundExisting:
-                                priorArgument['target'].append(currentTarget)
+                                priorArgument[argTargetsProperty].append(currentTarget)
                     else:
                         resultArgs.append(arg)
                         seen_argument_names[argName] = arg
@@ -226,6 +234,9 @@ class Workflow(Item):
 
         steps = [ step['step'] for step in self.properties['workflow_steps'] ]
 
+        # *This shouldn't be necessary.*
+        # If no workflow_steps is defined on our Workflow Item (or is empty), it will return the Workflow Item itself as the Analysis Step.
+        # All arguments will be added as inputs/outputs of step, thus allowing a basic 1-step graph.
         if steps is None or len(steps) == 0:
            titleToUse = self.properties.get('name', self.properties.get('title', "Process"))
            return [
@@ -348,7 +359,7 @@ class Workflow(Item):
                             step["outputs"].append(outputNode)
 
 
-            step['outputs'] = mergeOutputsForStep(step['outputs'])
+            step['outputs'] = mergeIOForStep(step['outputs'], 'output')
             resultSteps.append(step)
         return resultSteps
 

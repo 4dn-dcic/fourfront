@@ -1135,7 +1135,7 @@
 
 $workflow-io-node-height : 28px;
 $workflow-io-node-lineheight: 18px;
-$workflow-step-node-height: 50px;
+$workflow-step-node-height: 40px;
 $workflow-step-node-lineheight: 18px;
 
 .worfklow-chart-outer-container {
@@ -1231,7 +1231,7 @@ $workflow-step-node-lineheight: 18px;
                                     transform: translate3d(0px,-6px,0);
                                 }
                                 .below-node-title {
-                                    transform: translate3d(6px,5px,0);
+                                    transform: translate3d(0px,6px,0);
                                     .lighter {
                                         opacity: 1;
                                     }

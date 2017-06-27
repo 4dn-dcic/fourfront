@@ -78,6 +78,18 @@ export function doValidAnalysisStepsExist(steps){
 }
 
 
+
+/**
+ * @param {Object}      graphData 
+ * @param {Object[]}    graphData.nodes
+ * @param {Object[]}    graphData.edges
+ * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
+ */
+export function filterOutParametersFromGraphData(graphData){
+    
+}
+
+
 /**
  * @export
  * @class WorkflowView
@@ -244,6 +256,10 @@ class GraphSection extends React.Component {
                 rowSpacing={72}
             />
         );
+    }
+
+    detailGraphWithoutParameters() {
+
     }
 
     static keyTitleMap = {

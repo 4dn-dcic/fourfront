@@ -72,7 +72,8 @@ export default class Graph extends React.Component {
             'target'            : PropTypes.object.isRequired,
             'capacity'          : PropTypes.string
         })).isRequired,
-        'nodeTitle'         : PropTypes.func
+        'nodeTitle'         : PropTypes.func,
+        'rowSpacingType'    : PropTypes.oneOf([ 'compact', 'wide' ])
     }
 
     static defaultProps = {
@@ -81,9 +82,9 @@ export default class Graph extends React.Component {
         'columnSpacing' : 56,
         'columnWidth'   : 150,
         'rowSpacing'    : 85,
+        'rowSpacingType': 'wide',
         'pathArrows'    : true,
         'detailPane'    : <DefaultDetailPane />,
-        'rowSpacingType': 'wide',
         'nodeElement'   : <DefaultNodeElement />,
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
         'nodeTitle'     : function(node, canBeJSX = false){ return node.title || node.name; },
@@ -144,8 +145,6 @@ export default class Graph extends React.Component {
     nodesWithCoordinates(viewportWidth = null, contentWidth = null, contentHeight = null, verticalMargin = 0){
 
         if (!contentHeight) contentHeight = this.height();
-
-        console.log(verticalMargin, this.props.innerMargin.top, contentHeight);
 
         var nodes = _.sortBy(this.props.nodes.slice(0), 'column');
 

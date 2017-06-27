@@ -893,6 +893,20 @@
         {
             "argument_mapping":[
                 {
+                    "step_argument_name":"pairs",
+                    "step_argument_type":"Input file or parameter",
+                    "workflow_step":"cooler"
+                },
+                {
+                    "step_argument_name":"output_pairs",
+                    "step_argument_type":"Output file or parameter",
+                    "workflow_step":"merge_pairs"
+                }
+            ]
+        },
+        {
+            "argument_mapping":[
+                {
                     "step_argument_name":"input_hic",
                     "step_argument_type":"Input file or parameter",
                     "workflow_step":"hic2mcool"
