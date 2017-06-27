@@ -18,6 +18,13 @@ export default class Edge extends React.Component {
         ) && !Edge.isDisabled(edge, isNodeDisabled);
     }
 
+    static isRelated(edge, selectedNode, isNodeDisabled = null){
+        return (
+            Node.isRelated(edge.source, selectedNode) ||
+            Node.isRelated(edge.target, selectedNode)
+        ) && !Edge.isDisabled(edge, isNodeDisabled);
+    }
+
     static isDisabled(edge, isNodeDisabled = null){
         if (typeof isNodeDisabled === 'boolean') return isNodeDisabled;
         return (
@@ -133,11 +140,13 @@ export default class Edge extends React.Component {
         var edge = this.props.edge;
         var disabled = Edge.isDisabled(edge, this.props.isNodeDisabled);
         var selected = Edge.isSelected(edge, this.props.selectedNode, disabled);
+        var related = Edge.isRelated(edge, this.props.selectedNode, disabled);
         return (
             <path
                 d={this.generatePathDimension(edge, this.props.edgeStyle, this.props.radius)}
                 className={"edge-path" + (disabled ? ' disabled' : '' )}
                 data-edge-selected={selected}
+                data-edge-related={related}
                 data-source={edge.source.name}
                 data-target={edge.target.name}
                 markerEnd={this.props.pathArrows ? "url(#pathArrow)" : null}

@@ -313,6 +313,9 @@ class Workflow(Item):
                                     "type" : mapping[otherIndex].get("step_argument_type")
                                 })
 
+                            # Dump anything else defined on current arguments[] property item into 'meta' property of an input or output item.
+                            inputNode["meta"] = { k:v for (k,v) in arg.items() if k not in ["argument_mapping", "workflow_argument_name"] }
+
                             step["inputs"].append(inputNode)
 
                         elif (step_argument_name == 'output file' or
@@ -340,6 +343,9 @@ class Workflow(Item):
                                     "step" : mapping[otherIndex]["workflow_step"],
                                     "type" : mapping[otherIndex].get("step_argument_type")
                                 })
+
+                            # Dump anything else defined on current arguments[] property item into 'meta' property of an input or output item.
+                            outputNode["meta"] = { k:v for (k,v) in arg.items() if k not in ["argument_mapping", "workflow_argument_name"] }
 
                             step["outputs"].append(outputNode)
 

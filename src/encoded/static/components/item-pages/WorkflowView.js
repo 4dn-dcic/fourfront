@@ -5,7 +5,8 @@ import { itemClass, panel_views } from './../globals';
 import _ from 'underscore';
 import { 
     ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
-    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane
+    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane,
+    WorkflowNodeElement
 } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Schemas, isServerSide, navigate } from './../util';
@@ -34,6 +35,8 @@ export function commonGraphPropsFromProps(props){
         'href'        : props.href,
         'onNodeClick' : onItemPageNodeClick,
         'detailPane'  : <WorkflowDetailPane schemas={props.schemas} context={props.context} />,
+        'nodeElement' : <WorkflowNodeElement schemas={props.schemas} />,
+        /*
         'nodeTitle'   : function(node, canBeJSX = false){
             if (
                 node.type === 'step' && node.meta.uuid &&
@@ -56,6 +59,7 @@ export function commonGraphPropsFromProps(props){
             }
             return node.title || node.name;
         }
+        */
     };
 }
 
@@ -221,6 +225,7 @@ class GraphSection extends React.Component {
                 { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
+                rowSpacing={72}
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
@@ -236,6 +241,7 @@ class GraphSection extends React.Component {
                 { ...this.commonGraphProps() }
                 nodes={graphData.nodes}
                 edges={graphData.edges}
+                rowSpacing={72}
             />
         );
     }

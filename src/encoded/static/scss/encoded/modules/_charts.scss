@@ -1178,37 +1178,63 @@ $workflow-step-node-lineheight: 18px;
                         cursor: pointer;
 
                         > .inner {
-                            background-color: #ddd;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            padding-left: 2px;
-                            padding-right: 5px;
-                            
-                            i.icon.icon-fw {
-                                margin-right: 5px;
-                                margin-left: 1px;
+
+                            .node-visible-element {
+                                background-color: #ddd;
+                                white-space: nowrap;
+
+                                > .node-name {
+                                    padding-left: 2px;
+                                    padding-right: 5px;
+                                    display: inline-block;
+                                    max-width: 100%;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                }
+
+                                i.icon.icon-fw {
+                                    margin-right: 5px;
+                                    margin-left: 1px;
+                                }
                             }
 
-                            .above-node-title {
+                            .above-node-title ,
+                            .below-node-title {
                                 pointer-events: none;
                                 position: absolute;
                                 left : 0px;
-                                top : -16px;
                                 transform: translate3d(0px,0px,0);
                                 transition: opacity .25s ease-out, transform .33s ease-out;
                                 opacity: 1;
                                 font-size: 75%;
                                 line-height: 12px;
                             }
+
+                            .above-node-title {
+                                top : -16px;
+                            }
+
+                            .below-node-title {
+                                bottom : -16px;
+                                transform: translate3d(0px,0px,0);
+                                .lighter {
+                                    opacity: 0.66;
+                                }
+                            }
                         }
 
-                        &[data-node-selected],
+                        &[data-node-selected="true"],
+                        &[data-node-related="true"],
                         &:hover {
                             > .inner {
                                 .above-node-title {
                                     transform: translate3d(0px,-6px,0);
-                                    //opacity: 0.66;
+                                }
+                                .below-node-title {
+                                    transform: translate3d(6px,5px,0);
+                                    .lighter {
+                                        opacity: 1;
+                                    }
                                 }
                             }
                         }
@@ -1230,15 +1256,21 @@ $workflow-step-node-lineheight: 18px;
                             transition: outline-color .2s;
 
                             > .inner {
-                                height : $workflow-step-node-height;
-                                line-height: $workflow-step-node-lineheight;
-                                padding-top: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
-                                padding-bottom: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
-                                padding-left: 10px;
-                                padding-right: 4px;
-                                background-color: #b0c4da;
-                                border-radius: 2px;
-                                border: 1px solid rgba(0,0,0,0.2);
+                                
+                                .node-visible-element {
+                                    height : $workflow-step-node-height;
+                                    line-height: $workflow-step-node-lineheight;
+                                    padding-top: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
+                                    padding-bottom: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
+                                    
+                                    background-color: #b0c4da;
+                                    border-radius: 2px;
+                                    border: 1px solid rgba(0,0,0,0.2);
+                                    > .node-name {
+                                        padding-left: 10px;
+                                        padding-right: 4px;
+                                    }
+                                }
                             }
 
                             &:hover{
@@ -1290,17 +1322,42 @@ $workflow-step-node-lineheight: 18px;
                                 transition: outline-color .2s, outline-width .2s;
                             }
                             > .inner {
-                                height : $workflow-io-node-height;
-                                line-height: $workflow-io-node-lineheight;
-                                padding-top: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
-                                padding-bottom: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
-                                display: inline-block;
-                                vertical-align: middle;
-                                position: relative;
-                                z-index: 5;
-                                background-color: transparent;
-                                padding-left: 7px;
                                 
+                                .node-visible-element {
+                                    height : $workflow-io-node-height;
+                                    line-height: $workflow-io-node-lineheight;
+                                    padding-top: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
+                                    padding-bottom: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
+                                    display: inline-block;
+                                    vertical-align: middle;
+                                    position: relative;
+                                    z-index: 5;
+                                    background-color: transparent;
+                                    > .node-name {
+                                        padding-left: 7px;
+                                    }
+                                }
+
+                                .above-node-title {
+                                    transform: translate3d(-6px,0px,0);
+                                }
+                                .below-node-title {
+                                    transform: translate3d(6px,0px,0);
+                                }
+                                
+                            }
+
+                            &[data-node-selected="true"],
+                            &[data-node-related="true"],
+                            &:hover {
+                                > .inner {
+                                    .above-node-title {
+                                        transform: translate3d(-6px,-6px,0);
+                                    }
+                                    .below-node-title {
+                                        transform: translate3d(6px,5px,0);
+                                    }
+                                }
                             }
 
                             &:hover:not(.disabled){
@@ -1392,6 +1449,10 @@ $workflow-step-node-lineheight: 18px;
                         &[data-edge-selected="true"]{
                             stroke-width: 3px;
                             stroke: #000;
+                        }
+                        &[data-edge-related="true"]:not([data-edge-selected="true"]){
+                            stroke-width: 3px;
+                            stroke: rgba(0,0,0,0.75);
                         }
                         &.disabled {
                             stroke-width: 1px;

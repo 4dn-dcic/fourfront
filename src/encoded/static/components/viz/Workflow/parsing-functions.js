@@ -22,7 +22,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
             id : stepNodeID(step),
             type : 'step',
             name : stepNodeName(step),
-            meta : _.omit(step, 'inputs', 'outputs'),
+            meta : _.extend({}, step.meta || {}, _.omit(step, 'inputs', 'outputs', 'meta')),
             description : step.description,
             column : column
         };
@@ -36,7 +36,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
             id          : stepOutput.id || stepOutput.name,
             name        : stepOutput.name,
             type        : 'output',
-            meta        : _.omit(stepOutput, 'required', 'name'),
+            meta        : _.extend({}, stepOutput.meta || {}, _.omit(stepOutput, 'required', 'name', 'meta')),
             outputOf    : outputOfNode
         };
     }
@@ -50,10 +50,10 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
      */
     function generateOutputNodes(step, column, stepNode){
 
-        var outputNodes = step.outputs.map(function(stepOutput, j){
-            return generateOutputNode(stepOutput, column, stepNode);
-        });
-
+        var outputNodes = _.flatten(step.outputs.map(function(stepOutput, j){
+            return expandIONodes(stepOutput, column, stepNode, "output");
+        }), true);
+        
         outputNodes.forEach(function(n){
             edges.push({
                 'source' : stepNode,
@@ -74,7 +74,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
             name        : stepInput.name, 
             type        : 'input',
             inputOf     : inputOfNode,
-            meta        : _.omit(stepInput, 'required', 'name'),
+            meta        : _.extend({}, stepInput.meta || {}, _.omit(stepInput, 'required', 'name', 'meta')),
             required    : stepInput.required || false,
         };
     }
@@ -86,20 +86,24 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
      *
      * @returns {Object[]} List of expanded I/O nodes.
      */
-    function expandIONodes(stepInput, column, inputOfNode){
+    function expandIONodes(stepInput, column, inputOfNode, inputOrOutput="input"){
+
+        var nodeGenerateFxn = inputOrOutput === 'output' ? generateOutputNode : generateInputNode;
+
         if (typeof stepInput.run_data === 'undefined' || !Array.isArray(stepInput.run_data.file) || stepInput.run_data.file.length === 0) { // Not valid WorkflowRun
-            return [generateInputNode(stepInput, column, inputOfNode)];
+            return [nodeGenerateFxn(stepInput, column, inputOfNode)];
         }
+        
         return _.map(stepInput.run_data.file, function(file, idx){
             var stepInputAdjusted = _.extend({}, stepInput, {
                 'name' : stepInput.name,
-                'id' : stepInput.name + '.' + idx,
+                'id' : stepInput.name + '.' + (file.accession || file.uuid || idx),
                 'run_data' : _.extend({}, stepInput.run_data, {
                     'file' : file,
                     'meta' : (stepInput.run_data.meta && stepInput.run_data.meta[idx]) || null
                 })
             });
-            return generateInputNode(stepInputAdjusted, column, inputOfNode);
+            return nodeGenerateFxn(stepInputAdjusted, column, inputOfNode);
         });
     }
 

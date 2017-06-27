@@ -12,6 +12,7 @@ import ScrollContainer from './ScrollContainer';
 import NodesLayer from './NodesLayer';
 import EdgesLayer from './EdgesLayer';
 import DefaultDetailPane from './DefaultDetailPane';
+import { DefaultNodeElement } from './Node';
 
 /**
  * Primary/entry component for the Workflow graph.
@@ -19,19 +20,20 @@ import DefaultDetailPane from './DefaultDetailPane';
  * @export
  * @class Graph
  * @extends {React.Component}
- * @prop {Object[]} nodes                   Array of node objects to plot. Both nodes and edges can be generated from a CWL-like structure using static functions, including the provided 'parseAnalysisSteps'. See propTypes in class def below for object structure.
- * @prop {Object[]} edges                   Array of edge objects to plot. See propTypes in class def below for object structure.
- * @prop {React.Component} [detailPane]     Provide a React Component instance (e.g. as JSX) to use to display node metadata at bottom of graph. A default pane applicable to 4DN is used if not provided. Pass in null to perform your own logic in onNodeClick.
- * @prop {function} [onNodeClick]           A function to be executed each time a node is clicked. 'this' will refer to internal statecontainer. Should accept params: {Object} 'node', {Object|null} 'selectedNode', and {MouseEvent} 'evt'. By default, it changes internal state's selectedNode. You should either disable props.checkHrefForSelectedNode -or- change href in this function.
- * @prop {function} [isNodeDisabled]        Function which accepts a 'node' object and returns a boolean.
- * @prop {boolean} [checkHrefForSelectedNode=true] - If true, will check props.href or window.location.href on updates as well as mounting and update selectedNode if '#' + node.name is in URL. Recommended to leave as true and in props.onNodeClick, to change href to contain '#' + node.name.
- * @prop {boolean} [checkWindowLocationHref=true] - If true, checks window.location.href on updates instead of props.href. Must still trigger component update on page or href changes.
- * @prop {string} [href]                    Must provide current HREF of page, if setting props.checkHrefForSelectedNode to true and turning off props.checkWindowLocationHref.
- * @prop {Object} [innerMargin={top : 20, bottom: 48, left: 15, right: 15}]     Provide this object, containing numbers for 'top', 'bottom', 'left', and 'right', if want to adjust chart margins.
- * @prop {boolean} [pathArrows=true]        Whether to display arrows at the end side of edges.
- * @prop {number} [columnSpacing=56]        Adjust default spacing between columns, where edges are drawn.
- * @prop {number} [columnWidth=150]         Adjust width of columns, where nodes are drawn.
- * @prop {number} [rowSpacing=56]           Adjust vertical spacing between node centers (NOT between their bottom/top).
+ * @prop {Object[]}     nodes                   Array of node objects to plot. Both nodes and edges can be generated from a CWL-like structure using static functions, including the provided 'parseAnalysisSteps'. See propTypes in class def below for object structure.
+ * @prop {Object[]}     edges                   Array of edge objects to plot. See propTypes in class def below for object structure.
+ * @prop {React.Component} [detailPane]         Provide a React Component instance (e.g. as JSX) to use to display node metadata at bottom of graph. A default pane applicable to 4DN is used if not provided. Pass in null to perform your own logic in onNodeClick.
+ * @prop {function}     [onNodeClick]           A function to be executed each time a node is clicked. 'this' will refer to internal statecontainer. Should accept params: {Object} 'node', {Object|null} 'selectedNode', and {MouseEvent} 'evt'. By default, it changes internal state's selectedNode. You should either disable props.checkHrefForSelectedNode -or- change href in this function.
+ * @prop {function}     [isNodeDisabled]        Function which accepts a 'node' object and returns a boolean.
+ * @prop {boolean}      [checkHrefForSelectedNode=true] - If true, will check props.href or window.location.href on updates as well as mounting and update selectedNode if '#' + node.name is in URL. Recommended to leave as true and in props.onNodeClick, to change href to contain '#' + node.name.
+ * @prop {boolean}      [checkWindowLocationHref=true] - If true, checks window.location.href on updates instead of props.href. Must still trigger component update on page or href changes.
+ * @prop {string}       [href]                  Must provide current HREF of page, if setting props.checkHrefForSelectedNode to true and turning off props.checkWindowLocationHref.
+ * @prop {Object}       [innerMargin={top : 20, bottom: 48, left: 15, right: 15}]     Provide this object, containing numbers for 'top', 'bottom', 'left', and 'right', if want to adjust chart margins.
+ * @prop {boolean}      [pathArrows=true]       Whether to display arrows at the end side of edges.
+ * @prop {number}       [columnSpacing=56]      Adjust default spacing between columns, where edges are drawn.
+ * @prop {number}       [columnWidth=150]       Adjust width of columns, where nodes are drawn.
+ * @prop {number}       [rowSpacing=56]         Adjust vertical spacing between node centers (NOT between their bottom/top).
+ * @prop {function}     [nodeTitle]             Optional function to supply to get node title, before is passed to visible Node element. Useful if want to display some meta sub-property rather than technical title.
  */
 export default class Graph extends React.Component {
 
@@ -69,7 +71,8 @@ export default class Graph extends React.Component {
             'source'            : PropTypes.object.isRequired,
             'target'            : PropTypes.object.isRequired,
             'capacity'          : PropTypes.string
-        })).isRequired
+        })).isRequired,
+        'nodeTitle'         : PropTypes.func
     }
 
     static defaultProps = {
@@ -77,11 +80,11 @@ export default class Graph extends React.Component {
         'width'         : null,
         'columnSpacing' : 56,
         'columnWidth'   : 150,
-        'rowSpacing'    : 64,
+        'rowSpacing'    : 85,
         'pathArrows'    : true,
         'detailPane'    : <DefaultDetailPane />,
         'rowSpacingType': 'wide',
-        'nodeElement'   : null, // Use default Node component.
+        'nodeElement'   : <DefaultNodeElement />,
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
         'nodeTitle'     : function(node, canBeJSX = false){ return node.title || node.name; },
         'innerMargin'   : {

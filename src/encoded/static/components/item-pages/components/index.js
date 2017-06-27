@@ -23,4 +23,5 @@ export { ItemDetailList, Detail, TooltipInfoIconContainer } from './ItemDetailLi
 export { AuditTabView } from './AuditTabView';
 export { AttributionTabView } from './AttributionTabView';
 export { WorkflowDetailPane, MetricsView, ViewMetricButton, FileDownloadButton } from './WorkflowDetailPane';
+export { WorkflowNodeElement } from './WorkflowNodeElement';
 export { FlexibleDescriptionBox, FlexibleCharacterCountBox } from './FlexibleDescriptionBox';
