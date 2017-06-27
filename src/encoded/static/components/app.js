@@ -61,12 +61,14 @@ const portal = {
             }
         },
         {id: 'help', sid:'sHelp', title: 'Help', children: [
-            {id: 'gettingstarted', title: 'Getting started', url: '/help', children : [
+            {id: 'introduction', title: 'Introduction to Data Submission', url: '/help', children : [
                 {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
                 {id: 'datasubmission', title: 'Data submission', url: '/help#data-submission'},
                 {id: 'restapi', title: 'REST API', url: '/help#rest-api'},
             ]},
-            {id: 'submitting-metadata', title: 'Submitting Metadata', url: '/help/submitting'},
+            {id: 'getting-started', title: 'Getting Started', url: '/help/getting-started'},
+            {id: 'spreadsheet', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
+            {id: 'rest-api', title: 'REST API', url: '/help/rest-api'},
             {id: 'about', title: 'About', url: '/about'}
         ]}
     ],
@@ -736,10 +738,10 @@ export default class App extends React.Component {
         return true;
     }
 
-    /** 
+    /**
      * Check this.state.isSubmitting to prompt user if navigating away
      * from the submissions page.
-     * 
+     *
      * @param {string} [href] - Href we are navigating to (in case of navigate, confirmNavigation) or have just navigated to (in case of popState event).
      */
     stayOnSubmissionsPage(href = null) {

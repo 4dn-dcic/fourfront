@@ -36,7 +36,7 @@ export default class HelpPage extends React.Component {
         'context' : PropTypes.shape({
             "title" : PropTypes.string,
             "content" : PropTypes.shape({
-                "gettingStarted" : PropTypes.object,
+                "introduction" : PropTypes.object,
                 "metadataStructure1" : PropTypes.object,
                 "metadataStructure2" : PropTypes.object,
                 "restAPI" : PropTypes.object
