@@ -145,7 +145,9 @@ class File(Item):
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab.*',
-                'file_format',
+                'award.project',
+                'experiments.display_title',
+                'experiments.biosample.biosource.display_title',
                 'related_files.relationship_type',
                 'related_files.file.*']
     name_key = 'accession'
@@ -165,6 +167,16 @@ class File(Item):
     })
     def experiments(self, request):
         return self.rev_link_atids(request, "experiments")
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, file_format, accession=None, external_accession=None):
+        accession = accession or external_accession
+        file_extension = self.schema['file_format_file_extension'][file_format]
+        return '{}{}'.format(accession, file_extension)
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -275,7 +287,7 @@ class File(Item):
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
-        "description" : "Accession of this file"
+        "description": "Accession of this file"
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
