@@ -168,12 +168,8 @@ class Workflow(Item):
     #    return self.rev_link_atids(request, "workflow_runs")
 
 
-<<<<<<< HEAD
-    @calculated_property(schema=workflow_analysis_steps_schema)
-=======
     @calculated_property(schema=workflow_analysis_steps_schema,
                          category='page')
->>>>>>> 922e39a9d68e1b2935cf98b19118a0259d7857af
     def analysis_steps(self, request):
         """smth."""
 
