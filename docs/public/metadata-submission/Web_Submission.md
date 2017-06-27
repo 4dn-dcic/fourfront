@@ -11,4 +11,21 @@ Currently you can find **Create** and **Edit** links near the top of a page for 
 
 When you click **Create** the first thing you will be asked is to create an alias for your item.  This is a lab specific unique identifier for this object taking the form of xxxx:xxxxx where the portion before the colon is a lab designation eg. 4dndcic and the portion after is an identifier that you choose that is unique within your lab group (see section on aliases here).
 
-When you submit your alias you will be brought to a page where you can start entering metadata.  You will see two gray bars *Fields* and *Linked Objects* and selecting the *+* will expand those bars to show the fields and objects that can be entered.  Hovering your pointer over the **i** next to Navigation provides information and a key about the status of items in your sub
+When you submit your alias you will be brought to a page where you can start entering metadata.  You will see two gray bars *Fields* and *Linked Objects* and selecting the *+* will expand those bars to show the fields and objects that can be entered.  Hovering your pointer over the **i** next to Navigation pops up an explanation for what the different colors of the objects displayed in the Navigation tree.
+
+If a field or object are required that is indicated.  The *Fields* section is where you fill out basic fields that are not linked to other database objects.  In the *Linked Objects* section you can link other Objects to the one you are working on, either by selecting from a list of available existing objects or by creating a new object of the type needed for the particular field it is linked to.
+
+**WARNING: Be careful with the BACK and RELOAD buttons.** Currently, if you choose to create a new linked object and then decide you actually don't want to or should have actually chosen an existing object you still should create the object with only the minimum information required, Validate and then Submit it.  You will then be taken back to the previous form you were working on and be able to *remove* the unwanted object.  If you try to navigate back to the previous page using your browser buttons you will lose the previously unsubmitted changes.  We are working to improve this aspect of the interface.
+
+As you create or add linked Objects you will see the Objects listed in the *Navigate* section change colors accordingly.  You can use the *Navigate* section to review what you have submitted, validated and what remains to be added.
+
+And finally when all your linked objects are submitted and validated (green) you can validate and submit the object to complete your submission. 
+
+## Editing Existing Objects
+
+You can use the online submission interface to make edits to existing items providing you have permission to do so.  If an object has been 'released' either to the 4DN project or to the public it can no longer be changed.  However, if the object has an 'in review' status then you can make changes to fields provided you are the submitter of that object or a submitter for the lab that submitted the object.  
+
+**WARNING: Please take care to be sure that the object you are editing is really the one you want to change.**
+
+Navigate to that objects page and if the object is editable then you should see an **Edit** button.  After clicking the button you will be brought to a page as described above.  This time if you click on the **+** in the *Fields* or *Linked Objects* sections you will see the existing values, to which you can make changes as needed.  Then validate and submit to commit the changes to the system.
+
