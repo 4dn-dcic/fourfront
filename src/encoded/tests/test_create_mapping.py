@@ -27,7 +27,8 @@ def test_create_mapping(registry, item_type):
                     final_mapping = mapping_pointer
                 if split_ != '*':
                     assert split_ in final_mapping
-                    assert 'type' in final_mapping[split_]
+                else:
+                    assert 'properties' in final_mapping or final_mapping.get('type') == 'object'
             else:
                 assert split_ in mapping_pointer['properties']
                 mapping_pointer = mapping_pointer['properties'][split_]
