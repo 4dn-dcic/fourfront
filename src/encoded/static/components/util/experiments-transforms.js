@@ -268,7 +268,7 @@ export function groupFilesByPairs(files_in_experiment){
 }
 
 export function groupFilesByPairsForEachExperiment(experiments){
-    return (experiments || []).map(function(exp){
+    return (experiments || []).map(function(exp) {
         var file_pairs;
         if (Array.isArray(exp.files)){
             file_pairs = groupFilesByPairs(exp.files);

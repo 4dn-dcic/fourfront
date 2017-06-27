@@ -19,6 +19,12 @@
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "file.json#/properties" }
     ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
