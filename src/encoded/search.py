@@ -662,7 +662,9 @@ def set_facets(search, facets, final_filters, string_query):
                 # there should only be one key here
                 for compare_field in compare_filter['terms'].keys():
                     # remove filter for a given field for that facet
-                    if compare_field == query_field:
+                    # skip this for type facet (field = 'type')
+                    # since we always want to include that filter.
+                    if compare_field == query_field and field != 'type':
                         facet_filters[filter_type].remove(compare_filter)
 
         # add the string_query, if present, to the bool term with facet_filters
