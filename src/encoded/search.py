@@ -238,9 +238,6 @@ def get_all_results(search):
     if extraRequestsNeeded <= 0:
         return es_result
 
-    # We don't need to grab aggs for subsequent queries, already obtained from first one, incr. performance instead maybe.
-    query = { k:v for k,v in origQuery.items() if k != 'aggs' }
-
     while extraRequestsNeeded > 0:
         # print(str(extraRequestsNeeded) + " requests left to get all results.")
         from_ = from_ + sizeIncrement
@@ -594,10 +591,11 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
 def initialize_facets(types, doc_types, search_audit, principals):
     """
     Initialize the facets used for the search. If searching across multiple
-    doc_types, only use the 'Data Type' facet
+    doc_types, only use the swfault 'Data Type' and 'Status' facets.
     """
     facets = [
         ('type', {'title': 'Data Type'}),
+        ('status', {'title': 'Status'})
     ]
     audit_facets = [
         ('audit.ERROR.category', {'title': 'Audit category: ERROR'}),
@@ -810,7 +808,10 @@ def find_index_by_doc_types(request, doc_types, ignore):
     return index_string
 
 
-def get_jsonld_types_from_collection_type(request, doc_type):
+def get_jsonld_types_from_collection_type(request, doc_type, types_covered=[]):
+    """
+    Recursively find item types using a given type registry
+    """
     types_found = []
     try:
         registry_type = request.registry['types'][doc_type]
@@ -818,12 +819,15 @@ def get_jsonld_types_from_collection_type(request, doc_type):
         return [] # no types found
     # add the item_type of this collection if applicable
     if hasattr(registry_type, 'item_type'):
-        types_found.append(registry_type.item_type)
+        if registry_type.name not in types_covered:
+            types_found.append(registry_type.item_type)
+        types_covered.append(registry_type.name)
     # see if we're dealing with an abstract type
-    elif hasattr(registry_type, 'subtypes'):
+    if hasattr(registry_type, 'subtypes'):
         subtypes = registry_type.subtypes
         for subtype in subtypes:
-            types_found.extend(get_jsonld_types_from_collection_type(request, subtype))
+            if subtype not in types_covered:
+                types_found.extend(get_jsonld_types_from_collection_type(request, subtype, types_covered))
     return types_found
 
 
