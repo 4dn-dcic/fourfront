@@ -52,6 +52,24 @@
             }
         },
 
+        "help/web-submission": {
+            "title": "Online Submissions",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "title"     : "Online Submission Tool",
+                    "filename"  : "web_submission.md"
+                }
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false
+            }
+        },
+
+
         "help/spreadsheet": {
             "title": "Spreadsheet Submissions",
             "directory" : "/docs/public/metadata-submission",
@@ -79,7 +97,7 @@
             "sections"  : [
                 {
                     "title" : null,
-                    "filename"  : "REST_API_submission.md"
+                    "filename"  : "rest_api_submission.md"
                 }
             ],
             "table-of-contents" : {
