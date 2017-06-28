@@ -48,9 +48,8 @@ export class ViewMetricButton extends React.Component {
 export class FileDownloadButton extends React.Component {
     render(){
         var { href, className, disabled, title, filename } = this.props;
-        if (!filename) filename = title;
         return (
-            <a href={ href } className={(className || '') + " btn btn-default btn-info download-button " + (disabled ? ' disabled' : '')} download data-tip={filename}>
+            <a href={ href } className={(className || '') + " btn btn-default btn-info download-button " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
                 <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
@@ -292,15 +291,25 @@ class FileDetailBody extends React.Component {
 class AnalysisStepDetailBody extends React.Component {
 
     stepTitleBox(){
-        var step = this.props.step;
+        var { step, context } = this.props;
+        var stepHref = object.atIdFromObject(step) || '/' + step.uuid;
+        console.log(object.atIdFromObject(step), object.atIdFromObject(context), step, context);
+        var titleString = step.name || step.title || step.display_title || step.uuid;
+
+        var isStepWorkflow = context && (
+            object.atIdFromObject(context) === stepHref ||
+            (step && Array.isArray(step.analysis_step_types) && step.analysis_step_types.indexOf('Workflow Process') > -1)
+        );
+        
+        var content = isStepWorkflow ? (
+            <h3 className="text-300 text-ellipsis-container">{ titleString }</h3>
+        ) : (
+            <h3 className="text-400 text-ellipsis-container"><a href={stepHref}>{ titleString }</a></h3>
+        );
         return (
             <div className="col-sm-6 col-md-4 box">
-                <span className="text-600">Step Name</span>
-                <h3 className="text-400 text-ellipsis-container">
-                    <a href={object.atIdFromObject(step) || '/' + step.uuid}>
-                        { step.name || step.title || step.display_title || step.uuid }
-                    </a>
-                </h3>
+                <span className="text-600">{ isStepWorkflow ? 'Workflow Process' : 'Step Name'}</span>
+                { content }
             </div>
         );
     }
@@ -308,6 +317,9 @@ class AnalysisStepDetailBody extends React.Component {
     purposesBox(){
         var step = this.props.step;
         var purposeList = step.analysis_step_types;
+        if (!Array.isArray(purposeList)){
+            return <div className="col-sm-6 col-md-8 box"/>;
+        }
         var elementType = 'h5';
         if (purposeList.length  === 1) elementType = 'h4';
         return(
@@ -323,9 +335,19 @@ class AnalysisStepDetailBody extends React.Component {
     softwareUsedBox(){
         var step = this.props.step;
         var soft = step.software_used;
+        if (!soft){
+            return (
+                <div className="col-sm-6 col-md-4 box">
+                    <span className="text-600">Software Used</span>
+                    <h5 className="text-400 text-ellipsis-container">
+                        <em>N/A</em>
+                    </h5>
+                </div>
+            );
+        }
         var link = object.atIdFromObject(soft);
         var title;
-        if (soft.name && soft.version){
+        if (typeof soft.name === 'string' && soft.version){
             title = soft.name + ' v' + soft.version;
         } else if (soft.title) {
             title = soft.title;
@@ -375,8 +397,14 @@ class AnalysisStepDetailBody extends React.Component {
     softwareLinkBox(){
         var step = this.props.step;
         var soft = step.software_used;
-        if (!soft) return null;
-        if (!soft.source_url) return null;
+        if (!soft || !soft.source_url) return (
+            <div className="col-sm-6 col-md-8 box">
+                <span className="text-600">Software Source</span>
+                <h5 className="text-400 text-ellipsis-container">
+                    <em>N/A</em>
+                </h5>
+            </div>
+        );
         return (
             <div className="col-sm-6 col-md-8 box">
                 <span className="text-600">Software Source</span>
@@ -389,7 +417,7 @@ class AnalysisStepDetailBody extends React.Component {
 
     render(){
         var node = this.props.node;
-        
+        //var isThereAssociatedSoftware = !!(this.props.step && this.props.step.software_used);
         return(
             <div style={{ minHeight : this.props.minHeight }}>
                 <div className="information">
@@ -439,8 +467,6 @@ export class WorkflowDetailPane extends React.Component {
 
     body(){
         var node = this.props.selectedNode;
-
-        console.log('NODE', node);
         
         if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file['@id']){
             // File
@@ -481,6 +507,7 @@ export class WorkflowDetailPane extends React.Component {
                     node={node}
                     schemas={this.props.schemas}
                     minHeight={this.props.minHeight}
+                    context={this.props.context}
                     keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
                 />
             );

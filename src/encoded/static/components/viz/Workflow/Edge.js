@@ -30,7 +30,8 @@ export default class Edge extends React.Component {
     }
 
     static defaultProps = {
-        'edgeStyle' : 'curve',
+        'edgeStyle' : 'bezier',
+        //'edgeStyle' : 'curve',
         'radius' : 12
     }
 
@@ -40,7 +41,7 @@ export default class Edge extends React.Component {
         this.generatePathDimension = this.generatePathDimension.bind(this);
     }
 
-    generatePathDimension(edge, edgeStyle = 'curve', radius = 12, startOffset = 5, endOffset = -5){
+    generatePathDimension(edge, edgeStyle = 'bezier', radius = 12, startOffset = 5, endOffset = -5){
         if (this.props.pathArrows){
             endOffset -= 8;
         }
@@ -103,6 +104,27 @@ export default class Edge extends React.Component {
             );
             
             //path.closePath();
+            return path.toString();
+        }
+        if (edgeStyle === 'bezier'){
+            var pathAscend = endPt.y > startPt.y ? 10 : (endPt.y === startPt.y ? 0 : -10);
+            path = d3.path();
+            path.moveTo(startPt.x, startPt.y);
+            path.lineTo(
+                startPt.x + 3,
+                startPt.y
+            );
+            path.bezierCurveTo(
+                startPt.x + ((endPt.x - startPt.x) * 0.5),    // cp1x
+                startPt.y,// - pathAscend,                                  // cp1y
+                endPt.x - ((endPt.x - startPt.x) * 0.8),    // cp2x
+                endPt.y,// + pathAscend,                                    // cp2y
+                endPt.x - 5, endPt.y
+            );
+            path.lineTo(
+                endPt.x,
+                endPt.y
+            );
             return path.toString();
         }
     }

@@ -36,7 +36,6 @@ class AnalysisStep(Item):
     """The AnalysisStep class that descrbes a step in a workflow."""
 
     item_type = 'analysis_step'
-    name_key = 'name'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded = ['software_used', 'qa_stats_generated']
 
@@ -54,7 +53,7 @@ class Award(Item):
     item_type = 'award'
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
-    embedded = ['pi']
+    embedded = ['pi.*']
 
     # define some customs acls; awards can only be created/edited by admin
     ONLY_ADMIN_VIEW = [

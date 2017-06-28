@@ -18,6 +18,12 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "file.json#/properties" }
     ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -57,8 +63,8 @@
      "file_format_file_extension": {
         "bam": ".bam",
         "bai": ".bam.bai",
-        "pairs": ".pairs.txt.gz",
-        "pairs_px2": ".pairs.txt.gz.px2",
+        "pairs": ".pairs.gz",
+        "pairs_px2": ".pairs.gz.px2",
         "cool": ".cool",
         "mcool": ".mcool",
         "hic": ".hic",

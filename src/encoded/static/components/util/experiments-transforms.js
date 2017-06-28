@@ -82,7 +82,7 @@ export function listAllExperimentsFromExperimentSets(experiment_sets){
     var uniqExpAccessions = {};
     return _(experiment_sets).chain()
         .map(function(set){
-            return set.experiments_in_set.map(function(exp){
+            return (set.experiments_in_set || []).map(function(exp){
                 // Make sure we return new exp & set objects instead of mutating existing ones.
                 var cExp = _.clone(exp);
                 var cSet = _.clone(set);
@@ -151,6 +151,8 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
         })
     );
 }
+
+
 
 
 /*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** * 
@@ -266,7 +268,13 @@ export function groupFilesByPairs(files_in_experiment){
 }
 
 export function groupFilesByPairsForEachExperiment(experiments){
-    return experiments.map(function(exp){
+    if (!Array.isArray(experiments)) {
+        // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
+        // entire list of experiment_sets to fail.
+        console.error("param 'experiments' is not an array! Perhaps this experiment_set is missing property experiments_in_set.");
+        return [];
+    }
+    return experiments.map(function(exp) {
         var file_pairs;
         if (Array.isArray(exp.files)){
             file_pairs = groupFilesByPairs(exp.files);

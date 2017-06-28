@@ -113,7 +113,16 @@ function buildSearchHref(unselectHref, field, term, searchBase){
     } else {
         var parts = url.parse(searchBase, true);
         var query = _.clone(parts.query);
-        query[field] = encodeURIComponent(term).replace(/%20/g, '+');
+        // format multiple filters on the same field
+        if(field in query){
+            if(Array.isArray(query[field])){
+                query[field] = query[field].concat(term);
+            }else{
+                query[field] = [query[field]].concat(term);
+            }
+        }else{
+            query[field] = term;
+        }
         query = queryString.stringify(query);
         parts.search = query && query.length > 0 ? ('?' + query) : '';
         href = url.format(parts);
@@ -263,7 +272,7 @@ class ResultTableHandlersContainer extends React.Component {
                     if (types.length > 1){
                         var queryParts = _.clone(parts.query);
                         delete queryParts[""]; // Safety
-                        queryParts.type = encodeURIComponent(term).replace(/%20/g, '+'); // Only 1 Item type selected at once.
+                        queryParts.type = encodeURIComponent(term); // Only 1 Item type selected at once.
                         var searchString = queryString.stringify(queryParts);
                         parts.search = searchString && searchString.length > 0 ? ('?' + searchString) : '';
                         targetSearchHref = url.format(parts);
@@ -271,7 +280,7 @@ class ResultTableHandlersContainer extends React.Component {
                 }
             }
         }
-        
+
         this.props.navigate(targetSearchHref, {});
         setTimeout(callback, 100);
     }
@@ -373,7 +382,7 @@ class ControlsAndResults extends React.Component {
         super(props);
         this.render = this.render.bind(this);
     }
-    
+
     render() {
         const batchHubLimit = 100;
         var context = this.props.context;
@@ -408,7 +417,7 @@ class ControlsAndResults extends React.Component {
         }
 
         var columnDefinitionOverrides = {};
-        
+
         // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
         if (typeof this.props.selectCallback === 'function'){
             columnDefinitionOverrides['display_title'] = {
@@ -430,7 +439,7 @@ class ControlsAndResults extends React.Component {
                 }
             };
         }
-        
+
         // We're on an abstract type; show detailType in type column.
         if (abstractType && abstractType === thisType){
             columnDefinitionOverrides['@type'] = {
@@ -463,9 +472,24 @@ class ControlsAndResults extends React.Component {
                             filterFacetsFxn={FacetList.filterFacetsForSearch}
                             isTermSelected={this.props.isTermSelected}
                             itemTypeForSchemas={itemTypeForSchemas}
+                            showClearFiltersButton={(()=>{
+                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+                                var clearParts = url.parse(clearFiltersURL, true);
+                                return !object.isEqual(clearParts.query, urlParts.query);
+                            })()}
+                            onClearFilters={(evt)=>{
+                                evt.preventDefault();
+                                evt.stopPropagation();
+                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+                                if (!clearFiltersURL) {
+                                    console.error("No Clear Filters URL");
+                                    return;
+                                }
+                                this.props.navigate(clearFiltersURL, {});
+                            }}
                         />
-                    </div> : ''}
-                    <div className="col-sm-7 col-md-8 col-lg-9 expset-result-table-fix">
+                </div> : null}
+                    <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
                         {/*
                         <div className="row above-chart-row clearfix">
                             <div className="col-sm-5 col-xs-12">
@@ -510,7 +534,7 @@ export class Search extends React.Component {
 
     fullWidthStyle(){
         if (!this.refs || !this.refs.container) return null;
-        //var marginLeft = 
+        //var marginLeft =
 
     }
 
@@ -531,16 +555,11 @@ export class Search extends React.Component {
         }else{
             searchBase = url.parse(this.props.href).search || '';
         }
-        var facetdisplay = context.facets && context.facets.some(function(facet) {
-            return facet.total > 0;
-        });
         return (
             <div>
-                {facetdisplay ?
-                    <div className="browse-page-container" ref="container">
-                        <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
-                    </div>
-                : <div className='error-page'><h4>{notification}</h4></div>}
+                <div className="browse-page-container" ref="container">
+                    <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
+                </div>
             </div>
         );
     }

@@ -13,7 +13,6 @@ from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     collection_add,
-    paths_filtered_by_status
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -34,6 +33,7 @@ import pytz
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
+
 
 def show_upload_credentials(request=None, context=None, status=None):
     if request is None or status not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
@@ -126,9 +126,9 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded = ['files_in_set.submitted_by',
-                'files_in_set.lab',
-                'files_in_set'
+    embedded = ['files_in_set.submitted_by.*',
+                'files_in_set.lab.*',
+                'files_in_set.*'
                 ]
 
 
@@ -144,39 +144,16 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ['lab', 'file_format', 'related_files.file']
+    embedded = ['lab.*',
+                'award.project',
+                'experiments.display_title',
+                'experiments.biosample.biosource.display_title',
+                'related_files.relationship_type',
+                'related_files.file.*']
     name_key = 'accession'
     rev = {
-        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
-        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
         'experiments': ('Experiment', 'files')
     }
-
-    @calculated_property(schema={
-        "title": "Input of Workflow Runs",
-        "description": "All workflow runs that this file serves as an input to",
-        "type": "array",
-        "items": {
-            "title": "Input of Workflow Run",
-            "type": ["string", "object"],
-            "linkTo": "WorkflowRun"
-        }
-    })
-    def workflow_run_inputs(self, request):
-        return self.rev_link_atids(request, "workflow_run_inputs")
-
-    @calculated_property(schema={
-        "title": "Output of Workflow Runs",
-        "description": "All workflow runs that this file serves as an output from",
-        "type": "array",
-        "items": {
-            "title": "Output of Workflow Run",
-            "type": "string",
-            "linkTo": "WorkflowRun"
-        }
-    })
-    def workflow_run_outputs(self, request):
-        return self.rev_link_atids(request, "workflow_run_outputs")
 
     @calculated_property(schema={
         "title": "Experiments",
@@ -191,6 +168,16 @@ class File(Item):
     def experiments(self, request):
         return self.rev_link_atids(request, "experiments")
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, file_format, accession=None, external_accession=None):
+        accession = accession or external_accession
+        file_extension = self.schema['file_format_file_extension'][file_format]
+        return '{}{}'.format(accession, file_extension)
+
     def _update(self, properties, sheets=None):
         if not properties:
             return
@@ -201,9 +188,37 @@ class File(Item):
         new_creds = old_creds
 
         # don't get new creds
-        if properties.get('status', None) in ('uploading', 'to be uploaded by workflow', 'upload failed'):
+        if properties.get('status', None) in ('uploading', 'to be uploaded by workflow',
+                                              'upload failed'):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
+            file_formats = [properties.get('file_format'), ]
+
+
+            # handle extra files
+            updated_extra_files = []
+            for idx, xfile in enumerate(properties.get('extra_files', [])):
+                # ensure a file_format (identifier for extra_file) is given and non-null
+                if not('file_format' in xfile and bool(xfile['file_format'])):
+                    continue
+                # todo, make sure file_format is unique
+                if xfile['file_format'] in file_formats:
+                    raise Exception("Each file in extra_files must have unique file_format")
+                file_formats.append(xfile['file_format'])
+                xfile['accession'] = properties.get('accession')
+                # just need a filename to trigger creation of credentials
+                xfile['filename'] = xfile['accession']
+                xfile['uuid'] = str(uuid)
+                xfile['status'] = properties.get('status')
+                ext = self.build_external_creds(self.registry, uuid, xfile)
+                # build href
+                file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
+                filename = '{}{}'.format(xfile['accession'], file_extension)
+                xfile['href'] = '/' + str(uuid) + '/@@download/' + filename
+                xfile['upload_key'] = ext['key']
+                sheets['external' + xfile['file_format']] = ext
+                updated_extra_files.append(xfile)
+            properties['extra_files'] = updated_extra_files
 
         if old_creds:
             if old_creds.get('key') != new_creds.get('key'):
@@ -272,7 +287,7 @@ class File(Item):
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
-        "description" : "Accession of this file"
+        "description": "Accession of this file"
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
@@ -306,11 +321,28 @@ class File(Item):
         if external is not None:
             return external['upload_credentials']
 
+    @calculated_property(condition=show_upload_credentials, schema={
+        "type": "object",
+    })
+    def extra_files_creds(self):
+        external = self.propsheets.get('external', None)
+        if external is not None:
+            extras = []
+            for extra in self.properties.get('extra_files', []):
+                extra_creds = self.propsheets.get('external' + extra['file_format'])
+                extra['upload_credentials'] = extra_creds['upload_credentials']
+                extras.append(extra)
+            return extras
+
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
         bucket = registry.settings['file_upload_bucket']
         mapping = cls.schema['file_format_file_extension']
-        file_extension = mapping[properties['file_format']]
+        prop_format = properties['file_format']
+        try:
+            file_extension = mapping[prop_format]
+        except KeyError:
+            raise Exception('File format not in list of supported file types')
         key = '{uuid}/{accession}{file_extension}'.format(
             file_extension=file_extension, uuid=uuid,
             accession=properties.get('accession'))
@@ -348,6 +380,35 @@ class FileFastq(File):
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
     name_key = 'accession'
+    rev=dict(File.rev, **{
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    })
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
 @collection(
@@ -363,6 +424,35 @@ class FileFasta(File):
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
     name_key = 'accession'
+    rev=dict(File.rev, **{
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    })
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
 @collection(
@@ -378,6 +468,35 @@ class FileProcessed(File):
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded = File.embedded
     name_key = 'accession'
+    rev=dict(File.rev, **{
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    })
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
 @collection(
@@ -425,6 +544,7 @@ def get_upload(context, request):
         '@graph': [{
             '@id': request.resource_path(context),
             'upload_credentials': upload_credentials,
+            'extra_files_creds': context.extra_files_creds(),
         }],
     }
 
@@ -483,28 +603,53 @@ def post_upload(context, request):
     return result
 
 
-@view_config(name='download', context=File, request_method='GET',
-             permission='view', subpath_segments=[0, 1])
-def download(context, request):
-    properties = context.upgrade_properties()
-    mapping = context.schema['file_format_file_extension']
+def is_file_to_download(properties, mapping, expected_filename=None):
     file_extension = mapping[properties['file_format']]
     accession_or_external = properties.get('accession') or properties['external_accession']
     filename = accession_or_external + file_extension
-    if request.subpath:
-        _filename, = request.subpath
-        if filename != _filename:
-            raise HTTPNotFound(_filename)
+    if expected_filename is None:
+        return filename
+    elif expected_filename != filename:
+        return False
+    else:
+        return filename
 
+
+@view_config(name='download', context=File, request_method='GET',
+             permission='view', subpath_segments=[0, 1])
+def download(context, request):
+    # to use or not to use the proxy
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
-
     try:
         use_download_proxy = request.client_addr not in request.registry['aws_ipset']
     except TypeError:
         # this fails in testing due to testapp not having ip
         use_download_proxy = False
 
-    external = context.propsheets.get('external', {})
+    # with extra_files the user may be trying to download the main file
+    # or one of the files in extra files, the following logic will
+    # search to find the "right" file and redirect to a download link for that one
+    properties = context.upgrade_properties()
+    mapping = context.schema['file_format_file_extension']
+
+    _filename = None
+    if request.subpath:
+        _filename, = request.subpath
+    filename = is_file_to_download(properties, mapping, _filename)
+    if not filename:
+        found = False
+        for extra in properties.get('extra_files'):
+            filename = is_file_to_download(extra, mapping, _filename)
+            if filename:
+                found = True
+                properties = extra
+                external = context.propsheets.get('external' + extra['file_format'])
+                break
+        if not found:
+            raise HTTPNotFound(_filename)
+    else:
+        external = context.propsheets.get('external', {})
+
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
@@ -535,8 +680,10 @@ def download(context, request):
     # 307 redirect specifies to keep original method
     raise HTTPTemporaryRedirect(location=location)
 
-# validator for filename field
+
 def validate_file_filename(context, request):
+    ''' validator for filename field '''
+
     data = request.json
     if 'filename' not in data or 'file_format' not in data:
         return
@@ -564,6 +711,6 @@ def validate_file_filename(context, request):
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post,validate_file_filename])
+             validators=[validate_item_content_post, validate_file_filename])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)

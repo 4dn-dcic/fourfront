@@ -559,20 +559,25 @@ class AttachmentInput extends React.Component{
     }
 
     acceptedTypes(){
-        var types = [
-            "application/pdf",
-            "application/zip",
-            "application/msword",
-            "text/plain",
-            "text/tab-separated-values",
-            "image/jpeg",
-            "image/tiff",
-            "image/gif",
-            "text/html",
-            "image/png",
-            "image/svs",
-            "text/autosql"
-        ];
+        // hardcoded back-up
+        var types = object.getNestedProperty(this.props.schema, ['properties', 'type', 'enum'], true);
+        if(!types){
+            // generic backup types
+            types = [
+                "application/pdf",
+                "application/zip",
+                "application/msword",
+                "text/plain",
+                "text/tab-separated-values",
+                "image/jpeg",
+                "image/tiff",
+                "image/gif",
+                "text/html",
+                "image/png",
+                "image/svs",
+                "text/autosql"
+            ];
+        }
         return(types.toString());
     }
 

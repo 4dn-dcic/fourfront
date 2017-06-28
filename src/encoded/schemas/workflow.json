@@ -76,6 +76,17 @@
                         "description": "the name of the argument of the workflow",
                         "type": "string"
                     },
+                    "is_primaryfile": {
+                        "title": "Is primary file",
+                        "description": "a flag indicating whether the argument is a primary or secondary file. not applicable for types other than Input file and Output processed file",
+                        "type": "boolean"
+                    },
+                    "linkto_primaryfile": {
+                        "title": "linkto primary file",
+                        "description": "a primary file that is related this argument. applicable only for Input file and Output processed file that is not a primary file",
+                        "type": "string",
+                        "linkTo": "File"
+                    },
                     "argument_type":{
                         "title": "Workflow argument type",
                         "description": "type of the argument",
@@ -134,7 +145,6 @@
                                     "title": "Corresponding workflow step",
                                     "description": "the step of the workflow that takes the input file",
                                     "type": "string",
-                                    "linkTo": "AnalysisStep",
                                     "internal_comment": "the same analysis step may appear multiple times"
                                 },
                                 "step_argument_name": {

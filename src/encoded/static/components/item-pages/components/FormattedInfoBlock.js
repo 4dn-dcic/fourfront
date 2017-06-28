@@ -40,12 +40,12 @@ class FormattedInfoBlockList extends React.Component {
             ajax.load(endpoint + '?format=json&frame=embedded', function(result){
                 results[i] = result;
                 console.log('Obtained ' + propertyName + '[' + i + '] via AJAX.');
-                if (results.length == endpoints.length){
+                if (results.length === endpoints.length){
                     // All loaded
                     var newState = {};
                     newState['details_' + propertyName] = results;
                     this.setState(newState, ()=>{
-                        if (typeof callback == 'function'){
+                        if (typeof callback === 'function'){
                             callback(results);
                         }
                     });
