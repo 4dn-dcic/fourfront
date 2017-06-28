@@ -81,7 +81,7 @@ export default class Graph extends React.Component {
         'width'         : null,
         'columnSpacing' : 56,
         'columnWidth'   : 150,
-        'rowSpacing'    : 85,
+        'rowSpacing'    : 75,
         'rowSpacingType': 'wide',
         'pathArrows'    : true,
         'detailPane'    : <DefaultDetailPane />,
@@ -94,7 +94,8 @@ export default class Graph extends React.Component {
             'left' : 20,
             'right' : 20
         },
-        'minimumHeight' : 120
+        'minimumHeight' : 120,
+        'edgeStyle' : 'bezier'
     }
 
     constructor(props){
@@ -124,16 +125,9 @@ export default class Graph extends React.Component {
     }
 
     height() {
-        var height = this.props.height;
-        if ((!height || isNaN(height)) && this.state.mounted && !isServerSide()){
-            // Use highest count of nodes in a column * 60.
-            height = _.reduce(_.groupBy(this.props.nodes, 'column'), function(maxCount, nodeSet){
-                return Math.max(nodeSet.length, maxCount);
-            }, 0) * (this.props.rowSpacing);
-        } else if (isNaN(height)){
-            return null;
-        }
-        return height;
+        return _.reduce(_.pairs(_.groupBy(this.props.nodes, 'column')), function(maxCount, nodeSet){
+            return Math.max(nodeSet[1].length, maxCount);
+        }, 0) * (this.props.rowSpacing) - this.props.rowSpacing;
     }
 
     scrollableWidth(){
@@ -161,9 +155,9 @@ export default class Graph extends React.Component {
                     columnGroup[1][i].nodesInColumn = countInCol;
                 });
             } else {
-                d3.range(countInCol).forEach((i) => {
-                    columnGroup[1][i].y = ((i / Math.max(countInCol - 1, 1)) * contentHeight) + (this.props.innerMargin.top + verticalMargin);
-                    columnGroup[1][i].nodesInColumn = countInCol;
+                _.forEach(d3.range(0, contentHeight, contentHeight / (countInCol - 1) ).concat([contentHeight]), (num, idx)=>{
+                    columnGroup[1][idx].y = num + (this.props.innerMargin.top + verticalMargin);
+                    columnGroup[1][idx].nodesInColumn = countInCol;
                 });
             }
         });
@@ -207,13 +201,13 @@ export default class Graph extends React.Component {
 
         var fullHeight = Math.max(
             (typeof this.props.minimumHeight === 'number' && this.props.minimumHeight) || 0,
-            height
+            height + this.props.innerMargin.top + this.props.innerMargin.bottom
         );
 
         var nodes = this.nodesWithCoordinates(
             width,
             contentWidth,
-            height - this.props.innerMargin.top - this.props.innerMargin.bottom,
+            height,
             verticalMargin
         );
         var edges = this.props.edges;
@@ -236,7 +230,7 @@ export default class Graph extends React.Component {
                             onNodeClick={this.props.onNodeClick}
                         >
                             <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer edgeElement={this.props.edgeElement} isNodeDisabled={this.props.isNodeDisabled} />
+                                <EdgesLayer edgeElement={this.props.edgeElement} isNodeDisabled={this.props.isNodeDisabled} edgeStyle={this.props.edgeStyle} />
                                 <NodesLayer nodeElement={this.props.nodeElement} isNodeDisabled={this.props.isNodeDisabled} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }

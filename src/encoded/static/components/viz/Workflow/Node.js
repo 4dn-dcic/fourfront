@@ -4,6 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { console } from './../../util';
 import _ from 'underscore';
+import { Fade } from 'react-bootstrap';
+import * as vizUtil from './../utilities';
 
 
 
@@ -225,7 +227,15 @@ export default class Node extends React.Component {
                 style={{
                     'top' : node.y,
                     'left' : node.x,
+                    'opacity' : 0,
                     'width' : this.props.columnWidth || 100
+                }}
+                ref={(r)=>{
+                    if (r){
+                        vizUtil.requestAnimationFrame(()=>{
+                            r.style.opacity = "1";
+                        });
+                    }
                 }}
             >
                 <div

@@ -192,7 +192,7 @@ export class WorkflowNodeElement extends React.Component {
 
     nodeTitle(){
         if (this.doesRunDataFileExist()){
-            return <span className="node-name">{ this.icon() }{ this.props.node.meta.run_data.file.display_title }</span>;
+            return <span className="node-name">{ this.icon() }{ this.props.node.meta.run_data.file.accession || this.props.node.meta.run_data.file.display_title }</span>;
         }
         if (this.doesRunDataValueExist()){
             return <span className="node-name mono-text">{ this.icon() }{ this.props.node.meta.run_data.value }</span>;
@@ -201,7 +201,6 @@ export class WorkflowNodeElement extends React.Component {
     }
     
     render(){
-        console.log(this.props.node);
         return (
             <div
                 className="node-visible-element"

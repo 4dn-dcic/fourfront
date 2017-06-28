@@ -271,7 +271,7 @@ class Workflow(Item):
                 )
             ]) > 0
 
-            # Confirmed Valid Assumption : If a "workflow_argument_name" is present on argument, then it is a "global" "workflow output" or "workflow input" argument.
+            # Confirmed Assumption : If a "workflow_argument_name" is present on argument, then it is a "global" "workflow output" or "workflow input" argument.
             # So, we create/add an explicit source or target item to node to indicate this.
             # 'doesOppositeIOMappingExist' check may not be necessary, operates on optimization assumption (comment in next if statement)
             #  -- if doesOppositeIOMappingExist is **true** and workflow_argument_name is not None, we could throw an Exception.

@@ -38,8 +38,7 @@ export default class Edge extends React.Component {
 
     static defaultProps = {
         'edgeStyle' : 'bezier',
-        //'edgeStyle' : 'curve',
-        'radius' : 12
+        'curveRadius' : 12
     }
 
     constructor(props){
@@ -143,7 +142,7 @@ export default class Edge extends React.Component {
         var related = Edge.isRelated(edge, this.props.selectedNode, disabled);
         return (
             <path
-                d={this.generatePathDimension(edge, this.props.edgeStyle, this.props.radius)}
+                d={this.generatePathDimension(edge, this.props.edgeStyle, this.props.curveRadius)}
                 className={"edge-path" + (disabled ? ' disabled' : '' )}
                 data-edge-selected={selected}
                 data-edge-related={related}

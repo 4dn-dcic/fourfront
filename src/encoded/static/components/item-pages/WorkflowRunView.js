@@ -8,7 +8,7 @@ import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, It
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { commonGraphPropsFromProps, dropDownMenuMixin, graphBodyMixin, doValidAnalysisStepsExist } from './WorkflowView';
+import { commonGraphPropsFromProps, dropDownMenuMixin, graphBodyMixin, parseAnalysisStepsMixin, doValidAnalysisStepsExist } from './WorkflowView';
 
 
 
@@ -105,26 +105,26 @@ class GraphSection extends React.Component {
         this.detailGraph = this.detailGraph.bind(this);
         this.dropDownMenu = dropDownMenuMixin.bind(this);
         this.body = graphBodyMixin.bind(this);
+        this.parseAnalysisSteps = parseAnalysisStepsMixin.bind(this);
         this.render = this.render.bind(this);
         this.state = {
-            'showChart' : 'detail'
+            'showChart' : 'detail',
+            'showParameters' : false
         };
     }
 
     commonGraphProps(){
         return _.extend(commonGraphPropsFromProps(this.props), {
             'isNodeDisabled' : GraphSection.isNodeDisabled
-        });
+        }, this.parseAnalysisSteps());
     }
 
     basicGraph(){
         if (!Array.isArray(this.props.context.analysis_steps)) return null;
-        var graphData = parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context);
         return (
             <Graph
                 { ...this.commonGraphProps() }
-                nodes={graphData.nodes}
-                edges={graphData.edges}
+                edgeStyle="curve"
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
@@ -134,12 +134,9 @@ class GraphSection extends React.Component {
 
     detailGraph(){
         if (!Array.isArray(this.props.context.analysis_steps)) return null;
-        var graphData = parseAnalysisSteps(this.props.context.analysis_steps);
         return (
             <Graph
                 { ...this.commonGraphProps() }
-                nodes={graphData.nodes}
-                edges={graphData.edges}
             />
         );
     }

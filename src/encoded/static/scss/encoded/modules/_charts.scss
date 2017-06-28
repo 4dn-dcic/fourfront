@@ -1156,6 +1156,7 @@ $workflow-step-node-lineheight: 18px;
 
             overflow: hidden;
             position: relative;
+            transition: height .5s ease-out;
 
             .nodes-layer-wrapper,
             .edges-layer-wrapper {
@@ -1173,7 +1174,7 @@ $workflow-step-node-lineheight: 18px;
                     .node {
                         pointer-events: all;
                         position: absolute;
-                        transition: top .5s ease-out, left .5s ease-out, width .5s ease-out;
+                        transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out;
                         transform: translate3d(0,0,0);
                         cursor: pointer;
 
@@ -1253,7 +1254,7 @@ $workflow-step-node-lineheight: 18px;
                             margin-top: - ($workflow-step-node-height / 2);
                             outline: 2px solid transparent;
                             outline-offset: 4px;
-                            transition: outline-color .2s;
+                            transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out, outline-color .2s;
 
                             > .inner {
                                 
@@ -1372,8 +1373,9 @@ $workflow-step-node-lineheight: 18px;
                             }
                             &[data-node-related="true"]:not(.disabled):not([data-node-selected="true"]){
                                 &:before {
-                                    outline-color: rgba(0,0,0,0.25);
+                                    outline-color: rgba(0,0,0,0.55);
                                     outline-width: 1px;
+                                    outline-style: dashed;
                                 }
                             }
                         }
@@ -1470,8 +1472,22 @@ $workflow-step-node-lineheight: 18px;
 
 }
 
-.workflow-view-dropdown-container {
+.workflow-view-controls-container {
     margin-top: -10px;
+    font-size: 1rem;
+    div.inline-block {
+        vertical-align: middle;
+    }
+    .show-params-checkbox-container {
+        padding-right: 12px;
+        vertical-align: middle;
+        div.checkbox {
+            margin: 0;
+            input[type="checkbox"]{
+                margin-top: 6px;
+            }
+        }
+    }
 }
 
 
