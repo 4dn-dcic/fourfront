@@ -33,6 +33,9 @@ export const Term = {
             case 'type':
                 name = getTitleForType(term);
                 break;
+            case 'status':
+                name = Term.capitalizeSentence(term);
+                break;
             default:
                 name = null;
                 break;

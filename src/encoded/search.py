@@ -594,8 +594,7 @@ def initialize_facets(types, doc_types, search_audit, principals):
     doc_types, only use the swfault 'Data Type' and 'Status' facets.
     """
     facets = [
-        ('type', {'title': 'Data Type'}),
-        ('status', {'title': 'Status'})
+        ('type', {'title': 'Data Type'})
     ]
     audit_facets = [
         ('audit.ERROR.category', {'title': 'Audit category: ERROR'}),
@@ -605,6 +604,8 @@ def initialize_facets(types, doc_types, search_audit, principals):
     ]
     if len(doc_types) == 1 and doc_types[0] != 'Item' and 'facets' in types[doc_types[0]].schema:
         facets.extend(types[doc_types[0]].schema['facets'].items())
+
+    facets.append(('status', {'title': 'Status'}))
 
     # Display all audits if logged in, or all but INTERNAL_ACTION if logged out
     for audit_facet in audit_facets:
