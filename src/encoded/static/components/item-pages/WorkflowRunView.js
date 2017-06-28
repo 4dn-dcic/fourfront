@@ -8,7 +8,7 @@ import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, It
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { commonGraphPropsFromProps, dropDownMenuMixin, graphBodyMixin, parseAnalysisStepsMixin, doValidAnalysisStepsExist } from './WorkflowView';
+import { commonGraphPropsFromProps, graphBodyMixin, parseAnalysisStepsMixin, uiControlsMixin, doValidAnalysisStepsExist } from './WorkflowView';
 
 
 
@@ -103,9 +103,9 @@ class GraphSection extends React.Component {
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.basicGraph = this.basicGraph.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
-        this.dropDownMenu = dropDownMenuMixin.bind(this);
         this.body = graphBodyMixin.bind(this);
         this.parseAnalysisSteps = parseAnalysisStepsMixin.bind(this);
+        this.uiControls = uiControlsMixin.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
@@ -152,9 +152,7 @@ class GraphSection extends React.Component {
             <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
-                    <span className="pull-right workflow-view-dropdown-container">
-                        { this.dropDownMenu() }
-                    </span>
+                    { this.uiControls() }
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 { this.body() }

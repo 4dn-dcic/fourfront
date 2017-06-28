@@ -258,7 +258,7 @@ class Workflow(Item):
             argTargetsPropertyName = 'target' if argumentType == 'output' else 'source'
             
             node = {
-                "name" : currentArgumentMap.get('step_argument_name'),
+                "name" : currentArgument.get("workflow_argument_name", currentArgumentMap.get('step_argument_name')),
                 argTargetsPropertyName : []     # To become list of "source" or "target" steps.
             }
 

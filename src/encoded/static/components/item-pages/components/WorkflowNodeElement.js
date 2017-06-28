@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { console, Schemas } from './../../util';
 import _ from 'underscore';
+import { requestAnimationFrame } from './../../viz/utilities';
 
 
 
@@ -133,7 +134,8 @@ export class WorkflowNodeElement extends React.Component {
     containerStyle(){
         if (this.props.node.type === 'input' || this.props.node.type === 'output'){
             return {
-                width : (this.props.columnWidth || 100)
+                width : (this.props.columnWidth || 100),
+                opacity : 0 // We change this to one post-mount.
             };
         }
     }
@@ -208,6 +210,13 @@ export class WorkflowNodeElement extends React.Component {
                 data-place="top"
                 data-html
                 style={this.containerStyle()}
+                ref={(r)=>{
+                    if (r){
+                        requestAnimationFrame(()=>{
+                            r.style.opacity = "1";
+                        });
+                    }
+                }}
             >
                 { this.nodeTitle() }
                 { this.belowNodeTitle() }

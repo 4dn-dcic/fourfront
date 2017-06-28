@@ -25,7 +25,7 @@ import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 export function filterOutParametersFromGraphData(graphData){
     var deleted = {  };
     var nodes = _.filter(graphData.nodes, function(n, i){
-        if (n.type === 'input' && typeof n.format === 'string' && n.format.toLowerCase().indexOf('parameter') > -1) {
+        if (n.type === 'input' && n.format === 'Workflow Parameter') {
             deleted[n.id] = true;
             return false;
         }
@@ -198,13 +198,15 @@ export function dropDownMenuMixin(){
     );
 }
 
+export const onShowParametersCheckboxChangeMixin = _.throttle(function(){
+    this.setState({ showParameters : !this.state.showParameters });
+}, 500, { trailing : false });
+
 export function uiControlsMixin(){
     return (
         <div className="pull-right workflow-view-controls-container">
             <div className="inline-block show-params-checkbox-container">
-                <Checkbox checked={this.state.showParameters} onChange={()=>{
-                    this.setState({ showParameters : !this.state.showParameters });
-                }}>
+                <Checkbox checked={this.state.showParameters} onChange={onShowParametersCheckboxChangeMixin.bind(this)}>
                     Show Parameters
                 </Checkbox>
             </div>

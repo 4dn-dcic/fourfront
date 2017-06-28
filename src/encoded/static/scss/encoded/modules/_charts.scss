@@ -1405,6 +1405,12 @@ $workflow-step-node-lineheight: 18px;
                                 &:before {
                                     background-color: #d1cde2;
                                 }
+                                &[data-node-type-detail="Workflow Parameter"] {
+                                    &:before {
+                                        // background-color: #d1cde2;
+                                        background-color: #cfdff1;
+                                    }
+                                }
                                 &:after {
                                     content: '';
                                     top: 50%;

@@ -3,7 +3,7 @@
 import _ from 'underscore';
 
 
-export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
+export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
 
     /**** Outputs ****/
 
@@ -133,12 +133,14 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
             // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
             var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode);
 
-            var currentInputNodesMatched = _.filter(allInputOutputNodes, function(n){
-                if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
-                    return true;
-                }
-                return false;
-            });
+            var currentInputNodesMatched = (
+                _.filter(allInputOutputNodes, function(n){
+                    if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
+                        return true;
+                    }
+                    return false;
+                })
+            );
 
             if (currentInputNodesMatched.length > 0){
                 inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
@@ -173,9 +175,89 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
         return { 'created' : inputNodesCreated, 'matched' : inputNodesMatched };
     }
 
+    function generateInputNodesSimple(step, column, stepNode){
+
+        var inputNodes = _.flatten(step.inputs.map(function(stepInput, j){
+            return expandIONodes(stepInput, column, stepNode, "input");
+        }), true);
+        
+        inputNodes.forEach(function(n){
+            edges.push({
+                'source' : n,
+                'target' : stepNode,
+                'capacity' : 'Input',
+            });
+        });
+
+        nodes = nodes.concat(inputNodes);
+        return inputNodes;
+    }
+
+    function generateOutputNodesComplex(step, column, stepNode){
+
+        var allInputOutputNodes = _.filter(nodes, function(n){
+            if (n.type === 'output' || n.type === 'input') return true;
+            return false;
+        });
+
+        var inputNodesMatched = [];
+        var inputNodesCreated = [];
+
+        step.outputs.forEach(function(fullStepOutput){
+            if (!Array.isArray(fullStepOutput.target)) return;
+
+            var outputNodes = []; // All input nodes matched to step input will be in here
+
+            // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
+            var outputNodesToMatch = expandIONodes(fullStepOutput, column, stepNode, "output");
+
+            var currentOutputNodesMatched = (
+                _.filter(allInputOutputNodes, function(n){
+                    if (n.name === (fullStepOutput.target[1] || fullStepOutput.target[0]).name){
+                        return true;
+                    }
+                    return false;
+                })
+            );
+
+            if (currentOutputNodesMatched.length > 0){
+                inputNodesMatched = inputNodesMatched.concat(currentOutputNodesMatched);
+                outputNodes = outputNodes.concat(currentOutputNodesMatched);
+            }
+
+            // Step 2. For any unmatched input nodes, create them (via adding to 'nodes' list).
+            if (currentOutputNodesMatched.length < outputNodesToMatch.length){
+                var matchedNames = _.pluck(currentOutputNodesMatched, 'name');
+                var unmatchedInputNodes = _.filter(outputNodesToMatch, function(n,idx){
+                    if (matchedNames.indexOf(n.name) > -1) return false;
+                    return true;
+                });
+                nodes = nodes.concat(unmatchedInputNodes);
+                inputNodesCreated = inputNodesCreated.concat(unmatchedInputNodes);
+                outputNodes = outputNodes.concat(unmatchedInputNodes);
+            }
+
+            // Finally, attach edge to all input nodes associated to step input.
+            if (outputNodes.length > 0) {
+                _.forEach(outputNodes, function(n){
+                    edges.push({
+                        'source' : stepNode,
+                        'target' : n,
+                        'capacity' : 'Output'
+                    });
+                });
+            }
+
+        });
+
+        return { 'created' : inputNodesCreated, 'matched' : inputNodesMatched };
+    }
+
     var processedSteps = {}; // Just for optimization
 
-    function findNextStepsFromOutputs(outputNodes){
+    function findNextStepsFromIONode(ioNodes){
+
+        var targetPropertyName = parsingMethod === 'output' ? 'target' : 'source';
         
         var remainingSteps = analysis_steps.filter(function(step){
             if (typeof processedSteps[stepNodeID(step) || stepNodeName(step)] !== 'undefined'){
@@ -186,11 +268,12 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
 
         var nextSteps = new Set();
 
-        outputNodes.forEach(function(oN){
-            if (oN.meta && Array.isArray(oN.meta.target)){
-                var target = oN.meta.target[1] || oN.meta.target[0]; // Optimization. If input of another step, it'll be second item in array if a Workflow Output target also present.
+        ioNodes.forEach(function(n){
+            if (n.meta && Array.isArray(n.meta[targetPropertyName])){
+                var target = n.meta[targetPropertyName][1] || n.meta[targetPropertyName][0]; // Optimization. If input of another step, it'll be second item in array if a Workflow Output target also present.
                 if (typeof target.step === 'string'){
-                    var matchedStep = _.findWhere(remainingSteps, { 'name' : target.step });
+                    var matchedStep = _.findWhere(analysis_steps, { 'name' : target.step });
+                    console.log(n, target.step, matchedStep, analysis_steps);
                     if (matchedStep) {
                         nextSteps.add(matchedStep);
                     }
@@ -211,16 +294,33 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
     function processStepInPath(step, level = 0){
         var stepNode = generateStepNode(step, (level + 1) * 2 - 1);
 
-        var inputNodesUsedOrCreated  = generateInputNodes(step, (level + 1) * 2 - 2, stepNode);
-        var outputNodesCreated = generateOutputNodes(step, (level + 1) * 2, stepNode);
+        var inputNodesUsedOrCreated, outputNodesCreated;
 
-        nodes.push(stepNode);
+        if (parsingMethod === 'output'){
+            inputNodesUsedOrCreated  = generateInputNodes(step, (level + 1) * 2 - 2, stepNode);
+            outputNodesCreated = generateOutputNodes(step, (level + 1) * 2, stepNode);
 
-        processedSteps[stepNode.id || stepNode.name] = step;
+            nodes.push(stepNode);
 
-        findNextStepsFromOutputs(outputNodesCreated).forEach(function(nextStep){
-            processStepInPath(nextStep, level + 1);
-        });
+            processedSteps[stepNode.id || stepNode.name] = step;
+
+            findNextStepsFromIONode(outputNodesCreated).forEach(function(nextStep){
+                processStepInPath(nextStep, level + 1);
+            });
+        } else {
+            inputNodesUsedOrCreated  = generateInputNodesSimple(step, (level + 1) * 2 - 2, stepNode);
+            outputNodesCreated = generateOutputNodesComplex(step, (level + 1) * 2, stepNode);
+
+            nodes.push(stepNode);
+
+            processedSteps[stepNode.id || stepNode.name] = step;
+
+            findNextStepsFromIONode(inputNodesUsedOrCreated).forEach(function(nextStep){
+                processStepInPath(nextStep, level - 1);
+            });
+        }
+        
+        
     }
 
     /***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
@@ -231,9 +331,13 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
      * Process step[]->output[]->step[]->output[] graph.
      * Start at first analysis step in array.
      */
-    function processStepOutputPath(){
+    function processStepIOPath(){
         if (Array.isArray(analysis_steps) && analysis_steps.length > 0){
-            processStepInPath(analysis_steps[0]);
+            if (parsingMethod === 'output'){
+                processStepInPath(analysis_steps[0]);
+            } else if (parsingMethod === 'input') {
+                processStepInPath(analysis_steps[analysis_steps.length - 1], analysis_steps.length - 1);
+            }
         }
     }
 
@@ -258,9 +362,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'path'){
     
     if (parsingMethod === 'linear'){
         processStepsLinearly();
-    } else {
-        processStepOutputPath();
+    } else if (parsingMethod === 'input' || parsingMethod === 'output') {
+        processStepIOPath();
     }
+
+    console.log(nodes);
 
     return {
         'nodes' : nodes,
