@@ -301,11 +301,8 @@ def test_name_for_file_is_accession(registry, fastq_json):
     assert my_file.__name__ == fastq_json['accession']
 
 
-# def test_file_type(registry, fastq_json):
-#    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-#    my_file = FileFastq.create(registry, uuid, fastq_json)
-#    assert 'gz' == my_file.file_type('gz')
-#    assert "fastq gz" == my_file.file_type('fastq', 'gz')
+def test_calculated_display_title_for_fastq(file):
+    assert file['display_title'] == file['accession'] + '.fastq.gz'
 
 
 def test_post_upload_only_on_uploading(registry, fastq_json, request):
