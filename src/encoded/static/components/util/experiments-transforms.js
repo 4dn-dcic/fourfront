@@ -343,7 +343,10 @@ export function ensureArray(someArray){
         // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
         // entire list of experiment_sets to fail.
         console.error("Parameter is not an array! Most likely an experiment_set has undefined property experiments_in_set instead of an empty array. Or files for an experiment. etc.");
+<<<<<<< 194f215884c72317e04e709704b61e00be275c8e
         //patchedConsoleInstance.trace();
+=======
+>>>>>>> HotFix
         return [];
     }
     return someArray;
