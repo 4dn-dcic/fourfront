@@ -28,6 +28,10 @@ def test_search_with_no_query(workbook, testapp):
     assert res.json['title'] == 'Search'
     assert res.json['total'] > 0
     assert 'facets' in res
+    # test default facets (data type and status)
+    default_facets = [facet['field'] for facet in res.json['facets']]
+    assert 'type' in default_facets
+    assert 'status' in default_facets
     assert 'filters' in res
     assert '@graph' in res
 

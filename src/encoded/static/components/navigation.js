@@ -263,8 +263,8 @@ export default class Navigation extends React.Component {
                         </Navbar.Header>
                         <Navbar.Collapse>
                             <Nav>
-                            { 
-                                this.props.listActionsFor('global_sections').map((a)=> 
+                            {
+                                this.props.listActionsFor('global_sections').map((a)=>
                                     Navigation.buildDropdownMenu.call(this, a, this.state.mounted)
                                 )
                             }
@@ -277,7 +277,7 @@ export default class Navigation extends React.Component {
                                 updateUserInfo={this.props.updateUserInfo} // function
                                 listActionsFor={this.props.listActionsFor} // function
                             />
-                            {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
+                        <SearchBar href={this.props.href} />
                         </Navbar.Collapse>
                     </Navbar>
                     <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={this.props.expSetFilters} schemas={this.props.schemas} />
@@ -293,7 +293,7 @@ Navigation.propTypes = {
 };
 
 
-class Search extends React.Component{
+class SearchBar extends React.Component{
 
     constructor(props){
         super(props);
@@ -302,11 +302,11 @@ class Search extends React.Component{
 
     render() {
         var id = url.parse(this.props.href, true);
-        var searchTerm = id.query['searchTerm'] || '';
+        var searchQuery = id.query['q'] || '';
         return (
             <form className="navbar-form navbar-right" action="/search/">
-                <input className="form-control search-query" id="navbar-search" type="text" placeholder="Search..."
-                    ref="searchTerm" name="searchTerm" defaultValue={searchTerm} key={searchTerm} />
+                <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
+                    ref="q" name="q" defaultValue={searchQuery} key={searchQuery} />
             </form>
         );
     }
