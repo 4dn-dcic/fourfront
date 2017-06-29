@@ -509,7 +509,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
     used_filters = {'must': {}, 'must_not': {}}
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
-        if field in ['limit', 'y.limit', 'x.limit', 'mode', 'annotation',
+        if field in ['limit', 'y.limit', 'x.limit', 'mode',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
                      'sort', 'from', 'referrer', 'q', 'before', 'after']:
             continue
