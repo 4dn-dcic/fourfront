@@ -13,7 +13,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
 
     /* Temp Vars */
     var ioIdsUsed = {  }; // Keep track of IO arg node ids used, via keys; prevent duplicates by incrementing int val.
-    var columnDepth = 0;
 
     /**** Functions ****/
 
@@ -282,7 +281,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
             var currentOutputNodesMatched = (
                 _.filter(allRelatedIONodes, function(n){
                     if (n.type === 'input'
-                    &&  _.find(n.source, function(s){
+                    &&  _.find(n.meta.source, function(s){
                         if (s.step === step.name && s.name === fullStepOutput.name) return true;
                         return false;
                     })
@@ -292,15 +291,10 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
                     }
                     // Same thing as above but double-check against own output target name instead of own output name
                     if (_.find(fullStepOutput.target, function(t){
-                        if (t.type.toLowerCase().indexOf('output') > -1
-                        &&  _.find(
-                                n.meta.source || [],
-                                function(s){
-                                    if (s.step === step.name && s.name === t.name) return true;
-                                    return false;
-                                }
-                            )
+                        if (n.type === 'input' && t.step === n.inputOf.name &&
+                            (t.name === n.name)
                         ) return true;
+                        return false;
                     })){
                         nodesNamesMatched[n.name] = fullStepOutput.name;
                         return true;
@@ -397,7 +391,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
      * @param {number} [level=0] - Step level or depth. Used for nodes' column (precursor to X axis position).
      */
     function processStepInPath(step, level = 0){
-        columnDepth = Math.max(columnDepth, level);
         var stepNode = generateStepNode(step, (level + 1) * 2 - 1);
 
         var inputNodesUsedOrCreated, outputNodesCreated;
@@ -444,10 +437,10 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
                 processStepInPath(analysis_steps[0]);
             } else if (parsingMethod === 'input') {
                 processStepInPath(analysis_steps[analysis_steps.length - 1], analysis_steps.length - 1);
-                console.log('COLDEPTH', columnDepth, analysis_steps.length - 1);
-                if (columnDepth - 1 < analysis_steps.length - 1){
-                    _.forEach(nodes, function(n){
-                        n.column -= (analysis_steps.length - columnDepth) * 2;
+                var colDepthMin = _.reduce(nodes, function(m,n){ return Math.min(n.column, m); }, 100);
+                if (colDepthMin > 0){
+                    nodes.forEach(function(n){
+                        n.column -= colDepthMin;
                     });
                 }
                 
