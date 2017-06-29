@@ -149,7 +149,7 @@ class Workflow(Item):
     schema = load_schema('encoded:schemas/workflow.json')
     embedded = ['arguments.*',
                 'arguments.argument_mapping']
-    
+
     #rev = {
     #    'workflow_runs': ('WorkflowRun', 'workflow'),
     #}
@@ -355,14 +355,6 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow.*',
-                'analysis_steps.*',
-                'analysis_steps.software_used.*',
-                'analysis_steps.outputs.*',
-                'analysis_steps.inputs.*',
-                'analysis_steps.outputs.run_data.*',
-                'analysis_steps.inputs.run_data.*',
-                'analysis_steps.outputs.run_data.file.*',
-                'analysis_steps.inputs.run_data.file.*',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
                 'input_files.value.display_title',
@@ -375,7 +367,8 @@ class WorkflowRun(Item):
                 #'output_quality_metrics.value'
                 ]
 
-    @calculated_property(schema=workflow_analysis_steps_schema)
+    @calculated_property(schema=workflow_analysis_steps_schema,
+                        category='page')
     def analysis_steps(self, request):
 
         workflow = self.properties.get('workflow')
