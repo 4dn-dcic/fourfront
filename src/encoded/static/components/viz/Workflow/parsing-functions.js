@@ -1,6 +1,7 @@
 'use strict';
 
 import _ from 'underscore';
+import { console } from './../../util';
 
 
 export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
@@ -10,11 +11,40 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
     var nodes = [];
     var edges = [];
 
+    /* Temp Vars */
+    var ioIdsUsed = {  }; // Keep track of IO arg node ids used, via keys; prevent duplicates by incrementing int val.
+    var columnDepth = 0;
 
     /**** Functions ****/
 
     function stepNodeID   (step) { return step.uuid || step['@id'] || step.link_id || step.name; }
     function stepNodeName (step) { return step.display_title || step.title || step.name || step['@id']; }
+    function inputNodeID  (stepInput, readOnly = true) {
+        return preventDuplicateNodeID(
+            stepInput.id /*|| (Array.isArray(stepInput.source) && stepInput.source.length > 0 && stepInput.source[0].name)*/ || stepInput.name,
+            readOnly
+        );
+    }
+    function outputNodeID (stepOutput, readOnly = true){
+        return preventDuplicateNodeID(
+            stepOutput.id /*|| (Array.isArray(stepOutput.target) && stepOutput.target.length > 0 && (stepOutput.target[1] || stepOutput.target[0]).name)*/ || stepOutput.name,
+            readOnly
+        );
+    }
+
+
+    function preventDuplicateNodeID(id, readOnly = true){
+        if (typeof id !== 'string') throw new Error('param id is not a string.');
+        console.warn('PREVENTDUPEID', id, ioIdsUsed[id], readOnly);
+        if (readOnly) {
+            return (typeof ioIdsUsed[id] === 'number' ? id + '~' + ioIdsUsed[id] : id);
+        }
+        if (typeof ioIdsUsed[id] === 'undefined') {
+            ioIdsUsed[id] = 1;
+            return id;
+        }
+        return id + '~' + (++ioIdsUsed[id]);
+    }
 
 
     function generateStepNode(step, column){
@@ -29,11 +59,12 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
     }
 
 
-    function generateOutputNode(stepOutput, column, outputOfNode){
+    function generateOutputNode(stepOutput, column, outputOfNode, readOnly = true){
+        //console.log('STREP OUTPUT', stepOutput);
         return {
             column      : column,
             format      : (Array.isArray(stepOutput.target) && stepOutput.target.length > 0 && stepOutput.target[0].type) || null,
-            id          : stepOutput.id || stepOutput.name,
+            id          : outputNodeID(stepOutput, readOnly),
             name        : stepOutput.name,
             type        : 'output',
             meta        : _.extend({}, stepOutput.meta || {}, _.omit(stepOutput, 'required', 'name', 'meta')),
@@ -48,10 +79,10 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
      * @param {number} column - Column index (later translated into X coordinate).
      * @param {Object} stepNode - Analysis Step Node Reference
      */
-    function generateOutputNodes(step, column, stepNode){
+    function generateOutputNodesSimple(step, column, stepNode){
 
         var outputNodes = _.flatten(step.outputs.map(function(stepOutput, j){
-            return expandIONodes(stepOutput, column, stepNode, "output");
+            return expandIONodes(stepOutput, column, stepNode, "output", false);
         }), true);
         
         outputNodes.forEach(function(n){
@@ -66,11 +97,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
         return outputNodes;
     }
 
-    function generateInputNode(stepInput, column, inputOfNode){
+    function generateInputNode(stepInput, column, inputOfNode, readOnly = true){
         return {
             column      : column,
             format      : (Array.isArray(stepInput.source) && stepInput.source.length > 0 && stepInput.source[0].type) || null, // First source type takes priority
-            id          : stepInput.id || stepInput.name,
+            id          : inputNodeID(stepInput, readOnly),
             name        : stepInput.name, 
             type        : 'input',
             inputOf     : inputOfNode,
@@ -86,12 +117,12 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
      *
      * @returns {Object[]} List of expanded I/O nodes.
      */
-    function expandIONodes(stepInput, column, inputOfNode, inputOrOutput="input"){
-
+    function expandIONodes(stepInput, column, inputOfNode, inputOrOutput, readOnly){
+        console.log('expand read', readOnly);
         var nodeGenerateFxn = inputOrOutput === 'output' ? generateOutputNode : generateInputNode;
 
         if (typeof stepInput.run_data === 'undefined' || !Array.isArray(stepInput.run_data.file) || stepInput.run_data.file.length === 0) { // Not valid WorkflowRun
-            return [nodeGenerateFxn(stepInput, column, inputOfNode)];
+            return [nodeGenerateFxn(stepInput, column, inputOfNode, readOnly)];
         }
         
         return _.map(stepInput.run_data.file, function(file, idx){
@@ -103,7 +134,21 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
                     'meta' : (stepInput.run_data.meta && stepInput.run_data.meta[idx]) || null
                 })
             });
-            return nodeGenerateFxn(stepInputAdjusted, column, inputOfNode);
+            return nodeGenerateFxn(stepInputAdjusted, column, inputOfNode, readOnly);
+        });
+    }
+
+    function filterNodesToRelatedIONodes(allNodes, stepName){
+        return _.filter(nodes, function(n){
+            if (n.type === 'output' || n.type === 'input'){
+                var targetPropertyName = n.type === 'input' ? 'source' : 'target';
+                if (!Array.isArray(n.meta[targetPropertyName])) return false;
+                for (var i = 0; i < n.meta[targetPropertyName].length; i++){
+                    if (n.meta[targetPropertyName][i].step === stepName) return true;
+                }
+                return false;
+            }
+            return false;
         });
     }
 
@@ -116,12 +161,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
      * @param {number} column - Column index (later translated into X coordinate).
      * @param {Object} stepNode - Analysis Step Node Reference
      */
-    function generateInputNodes(step, column, stepNode){
-        var allInputOutputNodes = _.filter(nodes, function(n){
-            if (n.type === 'output' || n.type === 'input') return true;
-            return false;
-        });
-
+    function generateInputNodesComplex(step, column, stepNode){
+        var allRelatedIONodes = filterNodesToRelatedIONodes(nodes, step.name);
         var inputNodesMatched = [];
         var inputNodesCreated = [];
 
@@ -131,29 +172,57 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
             var inputNodes = []; // All input nodes matched to step input will be in here
 
             // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
-            var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode);
+            var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode, "input", true);
+            var nodesNamesMatched = {  };
 
             var currentInputNodesMatched = (
-                _.filter(allInputOutputNodes, function(n){
-                    if (n.name === (fullStepInput.source[1] || fullStepInput.source[0]).name){
+                _.filter(allRelatedIONodes, function(n){
+                    if (_.find(fullStepInput.source, function(s){
+                        if (s.name === n.name && s.step === n.outputOf.name) return true;
+
+                        if ( _.find(
+                                n.meta.target || [],
+                                function(t){
+                                    if (t.step === step.name && fullStepInput.name === t.name) return true;
+                                    return false;
+                                }
+                            )
+                        ) return true;
+                        else return false;
+                    })){
+                        nodesNamesMatched[n.name] = fullStepInput.name;
                         return true;
                     }
-                    return false;
+                    else return false;
                 })
             );
+
+            var matchedNames = _.keys(nodesNamesMatched);
 
             if (currentInputNodesMatched.length > 0){
                 inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
                 inputNodes = inputNodes.concat(currentInputNodesMatched);
+                _.forEach(currentInputNodesMatched, function(n){
+                    var inNodeName = nodesNamesMatched[n.name];
+                    if (typeof inNodeName === 'undefined') return;
+                    var inNode = _.findWhere(inputNodesToMatch, { 'name' : inNodeName });
+                    if (!inNode) return;
+                    _.extend(n, { 'inputOf' : inNode.inputOf, 'meta' : _.extend(n.meta, inNode.meta) });
+                });
             }
 
             // Step 2. For any unmatched input nodes, create them (via adding to 'nodes' list).
             if (currentInputNodesMatched.length < inputNodesToMatch.length){
-                var matchedNames = _.pluck(currentInputNodesMatched, 'name');
-                var unmatchedInputNodes = _.filter(inputNodesToMatch, function(n,idx){
-                    if (matchedNames.indexOf(n.name) > -1) return false;
-                    return true;
-                });
+                var unmatchedInputNodes = _.map(
+                    _.filter(inputNodesToMatch, function(n,idx){
+                        if (matchedNames.indexOf(n.name) > -1) return false;
+                        return true;
+                    }),
+                    function(n){
+                        n.id = preventDuplicateNodeID(n.id, false);
+                        return n;
+                    }
+                );
                 nodes = nodes.concat(unmatchedInputNodes);
                 inputNodesCreated = inputNodesCreated.concat(unmatchedInputNodes);
                 inputNodes = inputNodes.concat(unmatchedInputNodes);
@@ -178,7 +247,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
     function generateInputNodesSimple(step, column, stepNode){
 
         var inputNodes = _.flatten(step.inputs.map(function(stepInput, j){
-            return expandIONodes(stepInput, column, stepNode, "input");
+            console.log('expand, simple');
+            return expandIONodes(stepInput, column, stepNode, "input", false);
         }), true);
         
         inputNodes.forEach(function(n){
@@ -194,11 +264,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
     }
 
     function generateOutputNodesComplex(step, column, stepNode){
-
-        var allInputOutputNodes = _.filter(nodes, function(n){
-            if (n.type === 'output' || n.type === 'input') return true;
-            return false;
-        });
+        var allRelatedIONodes = filterNodesToRelatedIONodes(nodes, step.name);
 
         var inputNodesMatched = [];
         var inputNodesCreated = [];
@@ -209,29 +275,68 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
             var outputNodes = []; // All input nodes matched to step input will be in here
 
             // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
-            var outputNodesToMatch = expandIONodes(fullStepOutput, column, stepNode, "output");
+            var outputNodesToMatch = expandIONodes(fullStepOutput, column, stepNode, "output", true);
+            var nodesNamesMatched = {  };
 
+            // Sorry. Try to match up a previous input node by its source (s) with one of our output target (t)
             var currentOutputNodesMatched = (
-                _.filter(allInputOutputNodes, function(n){
-                    if (n.name === (fullStepOutput.target[1] || fullStepOutput.target[0]).name){
+                _.filter(allRelatedIONodes, function(n){
+                    if (n.type === 'input'
+                    &&  _.find(n.source, function(s){
+                        if (s.step === step.name && s.name === fullStepOutput.name) return true;
+                        return false;
+                    })
+                    ){
+                        nodesNamesMatched[n.name] = fullStepOutput.name;
                         return true;
                     }
-                    return false;
+                    // Same thing as above but double-check against own output target name instead of own output name
+                    if (_.find(fullStepOutput.target, function(t){
+                        if (t.type.toLowerCase().indexOf('output') > -1
+                        &&  _.find(
+                                n.meta.source || [],
+                                function(s){
+                                    if (s.step === step.name && s.name === t.name) return true;
+                                    return false;
+                                }
+                            )
+                        ) return true;
+                    })){
+                        nodesNamesMatched[n.name] = fullStepOutput.name;
+                        return true;
+                    }
+                    else return false;
                 })
             );
+
+            var matchedNames = _.keys(nodesNamesMatched); //_.pluck(currentOutputNodesMatched, 'name');
 
             if (currentOutputNodesMatched.length > 0){
                 inputNodesMatched = inputNodesMatched.concat(currentOutputNodesMatched);
                 outputNodes = outputNodes.concat(currentOutputNodesMatched);
+                // Merge any bound-metadata from 'output' node version to its existing 'input' counterpart.
+                _.forEach(currentOutputNodesMatched, function(n){
+                    var outNodeName = nodesNamesMatched[n.name];
+                    if (typeof outNodeName === 'undefined') return;
+                    var outNode = _.findWhere(outputNodesToMatch, { 'name' : outNodeName });
+                    if (!outNode) return;
+                    _.extend(n, { 'outputOf' : outNode.outputOf, 'meta' : _.extend(n.meta, outNode.meta) });
+                });
             }
 
             // Step 2. For any unmatched input nodes, create them (via adding to 'nodes' list).
             if (currentOutputNodesMatched.length < outputNodesToMatch.length){
-                var matchedNames = _.pluck(currentOutputNodesMatched, 'name');
-                var unmatchedInputNodes = _.filter(outputNodesToMatch, function(n,idx){
-                    if (matchedNames.indexOf(n.name) > -1) return false;
-                    return true;
-                });
+                //var matchedNames = _.pluck(currentOutputNodesMatched, 'name');
+                var unmatchedInputNodes = _.map(
+                    _.filter(outputNodesToMatch, function(n,idx){
+                        if (matchedNames.indexOf(n.name) > -1) return false;
+                        return true;
+                    }),
+                    function(n){
+                        n.id = preventDuplicateNodeID(n.id, false);
+                        return n;
+                    }
+                );
                 nodes = nodes.concat(unmatchedInputNodes);
                 inputNodesCreated = inputNodesCreated.concat(unmatchedInputNodes);
                 outputNodes = outputNodes.concat(unmatchedInputNodes);
@@ -292,13 +397,14 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
      * @param {number} [level=0] - Step level or depth. Used for nodes' column (precursor to X axis position).
      */
     function processStepInPath(step, level = 0){
+        columnDepth = Math.max(columnDepth, level);
         var stepNode = generateStepNode(step, (level + 1) * 2 - 1);
 
         var inputNodesUsedOrCreated, outputNodesCreated;
 
         if (parsingMethod === 'output'){
-            inputNodesUsedOrCreated  = generateInputNodes(step, (level + 1) * 2 - 2, stepNode);
-            outputNodesCreated = generateOutputNodes(step, (level + 1) * 2, stepNode);
+            inputNodesUsedOrCreated  = generateInputNodesComplex(step, (level + 1) * 2 - 2, stepNode);
+            outputNodesCreated = generateOutputNodesSimple(step, (level + 1) * 2, stepNode);
 
             nodes.push(stepNode);
 
@@ -308,8 +414,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
                 processStepInPath(nextStep, level + 1);
             });
         } else {
-            inputNodesUsedOrCreated  = generateInputNodesSimple(step, (level + 1) * 2 - 2, stepNode);
+            
             outputNodesCreated = generateOutputNodesComplex(step, (level + 1) * 2, stepNode);
+            inputNodesUsedOrCreated  = generateInputNodesSimple(step, (level + 1) * 2 - 2, stepNode);
 
             nodes.push(stepNode);
 
@@ -337,8 +444,16 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
                 processStepInPath(analysis_steps[0]);
             } else if (parsingMethod === 'input') {
                 processStepInPath(analysis_steps[analysis_steps.length - 1], analysis_steps.length - 1);
+                console.log('COLDEPTH', columnDepth, analysis_steps.length - 1);
+                if (columnDepth - 1 < analysis_steps.length - 1){
+                    _.forEach(nodes, function(n){
+                        n.column -= (analysis_steps.length - columnDepth) * 2;
+                    });
+                }
+                
             }
         }
+        
     }
 
     /**
@@ -350,8 +465,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
     function processStepsLinearly(){
         analysis_steps.forEach(function(step, i){
             var stepNode = generateStepNode(step, (i + 1) * 2 - 1);
-            generateInputNodes(step, (i + 1) * 2 - 2, stepNode);
-            generateOutputNodes(step, (i + 1) * 2, stepNode);
+            generateInputNodesComplex(step, (i + 1) * 2 - 2, stepNode);
+            generateOutputNodesSimple(step, (i + 1) * 2, stepNode);
             nodes.push(stepNode);
         });
     }

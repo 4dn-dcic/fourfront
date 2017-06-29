@@ -241,11 +241,11 @@ class Workflow(Item):
             return resultArgs
 
 
-        def buildIONodeFromMapping(currentArgument, currentArgumentMap, currentMapIndex, argumentType):
+        def buildIOFromMapping(currentArgument, currentArgumentMap, currentMapIndex, argumentType):
             '''
             Given an argument_mapping item & its index (currentArgumentMap, currentMapIndex),
             its parent argument (currentArgument), and type of node to create ("input" or "output"; argumentType),
-            generates an input or output node with "source" or "target" properties which reference the previous or next step, including if is a 'global' "Workflow Input/Output File".
+            generates an input or output object for a step with "source" or "target" properties which reference the previous or next step, including if is a 'global' "Workflow Input/Output File".
 
             :param currentArgument: Dictionary item from 'arguments' property list. Should have an 'argument_mapping' list with a maximum of 2 entries and/or 'workflow_argument_name' (if global input/output).
             :param currentArgumentMap: Dictionary item from 'arguments' item's 'argument_mapping' list.
@@ -257,8 +257,10 @@ class Workflow(Item):
             # Input nodes have a 'source', output nodes have a 'target'
             argTargetsPropertyName = 'target' if argumentType == 'output' else 'source'
             
-            node = {
-                "name" : currentArgument.get("workflow_argument_name", currentArgumentMap.get('step_argument_name')),
+            io = {
+                "name" : currentArgument.get("workflow_argument_name",
+                    currentArgumentMap.get('step_argument_name')
+                ),
                 argTargetsPropertyName : []     # To become list of "source" or "target" steps.
             }
 
@@ -281,22 +283,23 @@ class Workflow(Item):
                     argTargetsProperty["type"] = "Workflow Parameter"
                 else:
                     argTargetsProperty["type"] = "Workflow " + argumentType.capitalize() + " File"
-                node[argTargetsPropertyName].append(argTargetsProperty)
+                io[argTargetsPropertyName].append(argTargetsProperty)
             if len(mapping) > 1:
                 # Optimization. There is at most two mappings in argument_mapping. Use other 1 (not mapping of current step) to build "source" or "target" of where argument came from or is going to.
                 otherIndex = 0
                 if currentMapIndex == 0:
                     otherIndex = 1
-                node[argTargetsPropertyName].append({
+                other_arg_type = mapping[otherIndex].get("step_argument_type")
+                io[argTargetsPropertyName].append({
                     "name" : mapping[otherIndex]["step_argument_name"],
                     "step" : mapping[otherIndex]["workflow_step"],
-                    "type" : mapping[otherIndex].get("step_argument_type")
+                    "type" : other_arg_type
                 })
 
             # Dump anything else defined on current arguments[] property item into 'meta' property of our input or output node.
             # Info such as "cardinality", "argument_format" may be available from here.
-            node["meta"] = { k:v for (k,v) in currentArgument.items() if k not in ["argument_mapping", "workflow_argument_name"] }
-            return node
+            io["meta"] = { k:v for (k,v) in currentArgument.items() if k not in ["argument_mapping", "workflow_argument_name"] }
+            return io
 
 
         steps = map(getStepDict, self.properties['workflow_steps'])
@@ -316,11 +319,11 @@ class Workflow(Item):
                     continue
                 for mappingIndex, mappedArg in enumerate(mapping):
                     if mappedArg.get('workflow_step') == step['name']:
-                        step_argument_name = mappedArg.get('step_argument_type','').lower()
-                        if   ( step_argument_name == 'input file'  or step_argument_name == 'input file or parameter' or step_argument_name == 'parameter' ):
-                            step["inputs"].append(buildIONodeFromMapping(arg, mappedArg, mappingIndex, 'input'))
-                        elif ( step_argument_name == 'output file' or step_argument_name == 'output file or parameter' ):
-                            step["outputs"].append(buildIONodeFromMapping(arg, mappedArg, mappingIndex, 'output'))
+                        step_argument_type = mappedArg.get('step_argument_type','').lower()
+                        if   ( step_argument_type == 'input file'  or step_argument_type == 'input file or parameter' or step_argument_type == 'parameter' ):
+                            step["inputs"].append(buildIOFromMapping(arg, mappedArg, mappingIndex, 'input'))
+                        elif ( step_argument_type == 'output file' or step_argument_type == 'output file or parameter' ):
+                            step["outputs"].append(buildIOFromMapping(arg, mappedArg, mappingIndex, 'output'))
             step['outputs'] = mergeIOForStep(step['outputs'], 'output')
             step['inputs']  = mergeIOForStep( step['inputs'], 'input' )
             resultSteps.append(step)
@@ -340,14 +343,14 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow.*',
-                'analysis_steps.*',
-                'analysis_steps.software_used.*',
-                'analysis_steps.outputs.*',
-                'analysis_steps.inputs.*',
-                'analysis_steps.outputs.run_data.*',
-                'analysis_steps.inputs.run_data.*',
-                'analysis_steps.outputs.run_data.file.*',
-                'analysis_steps.inputs.run_data.file.*',
+                #'analysis_steps.*',
+                #'analysis_steps.software_used.*',
+                #'analysis_steps.outputs.*',
+                #'analysis_steps.inputs.*',
+                #'analysis_steps.outputs.run_data.*',
+                #'analysis_steps.inputs.run_data.*',
+                #'analysis_steps.outputs.run_data.file.*',
+                #'analysis_steps.inputs.run_data.file.*',
                 'input_files.*',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
@@ -360,7 +363,7 @@ class WorkflowRun(Item):
                 #'output_quality_metrics.value'
                 ]
 
-    @calculated_property(schema=workflow_analysis_steps_schema)
+    @calculated_property(schema=workflow_analysis_steps_schema, category="page")
     def analysis_steps(self, request):
         '''
         Extends the 'inputs' & 'outputs' (lists of dicts) properties of calculated property 'analysis_steps' (list of dicts) from
@@ -381,37 +384,38 @@ class WorkflowRun(Item):
 
         fileCache = {}
 
-        def handleSourceTargetFile(inputOrOutput, sourceOrTarget, runParams):
+        def handleSourceTargetFile(stepOutput, stepOutputTarget, runParams):
             '''
             Add file metadata in form of 'run_data' : { 'file' : { '@id', 'display_title', etc. } } to AnalysisStep dict's 'input' or 'output' list item dict
             if one of own input or output files' workflow_argument_name matches the AnalysisStep dict's input or output's sourceOrTarget.workflow_argument_name.
             
-            :param inputOrOutput: Reference to an 'input' or 'output' dict passed in from a Workflow-derived analysis_step.
-            :param sourceOrTarget: Reference to an 'source' or 'target' array item belonging to the 'input' or 'output' above.
+            :param stepOutput: Reference to an 'input' or 'output' dict passed in from a Workflow-derived analysis_step.
+            :param stepTarget: Reference to an 'source' or 'target' array item belonging to the 'input' or 'output' above.
             :param runParams: List Step inputs or outputs, such as 'input_files', 'output_files', 'quality_metric', or 'parameters'.
             :returns: True if found and added run_data property to analysis_step.input or analysis_step.output (param inputOrOutput).
             '''
-            if 'Workflow' in sourceOrTarget.get('type', ''):
+            if 'Workflow' in stepOutputTarget.get('type', ''):
 
-                # Gather params of same argument_name. Assume these have been combined correctly unless have differing ordinal number.
-                paramsForSourceOrTarget = []
+                # Gather params (e.g. files) with same workflow_argument_name.
+                # Assume these have been combined correctly unless have differing ordinal number.
+                paramsForTarget = []
                 for param in runParams:
-                    if sourceOrTarget['name'] == param.get('workflow_argument_name') and param.get('value') is not None:
-                        paramsForSourceOrTarget.append(param)
+                    if (stepOutputTarget['name'] == param.get('workflow_argument_name')) and param.get('value') is not None:
+                        paramsForTarget.append(param)
 
-                if len(paramsForSourceOrTarget) > 0:
+                if len(paramsForTarget) > 0:
 
-                    # Sort by ordinal.
-                    paramsForSourceOrTarget = sorted( paramsForSourceOrTarget, key=lambda p: p.get('ordinal', 1) )
+                    # Ensure sort by ordinal.
+                    paramsForTarget = sorted( paramsForTarget, key=lambda p: p.get('ordinal', 1) )
 
-                    inputOrOutput['run_data'] = {
-                        "file" : [ '/files/' + p['value'] + '/' for p in paramsForSourceOrTarget ], # List of file @ids.
-                        "type" : paramsForSourceOrTarget[0].get('type'),
-                        "meta" : [ # Aligned list of file metadata
+                    stepOutput['run_data'] = {
+                        "file" : [ '/files/' + p['value'] + '/' for p in paramsForTarget ], # List of file @ids.
+                        "type" : paramsForTarget[0].get('type'),
+                        "meta" : [ # Aligned-to-file-list list of file metadata
                             {   # All remaining properties from dict in (e.g.) 'input_files','output_files',etc. list.
                                 k:v for (k,v) in param.items()
                                 if k not in [ 'value', 'type', 'workflow_argument_name' ]
-                            } for p in paramsForSourceOrTarget
+                            } for p in paramsForTarget
                         ]
                     }
                     return True
@@ -420,7 +424,7 @@ class WorkflowRun(Item):
 
 
         def mergeArgumentsWithSameArgumentName(args):
-            '''Merge arguments with the same workflow_argument_name, TODO: Unless differing ordinals'''
+            '''Merge arguments with the same workflow_argument_name, unless differing ordinals'''
             seen_argument_names = {}
             resultArgs = []
             for arg in args:
@@ -437,23 +441,12 @@ class WorkflowRun(Item):
 
         # Metrics will overwrite output_files in case of duplicate keys.
         combined_outputs = mergeArgumentsWithSameArgumentName(
-            chain(
-                map(
-                    lambda x: dict(x, **{ "type" : "output" }),
-                    self.properties.get('output_files',[])
-                ),
-                map(
-                    lambda x: dict(x, **{ "type" : "quality_metric" }),
-                    self.properties.get('output_quality_metrics',[])
-                )
-            )
+            [ dict(f, **{ "type" : "output" }) for f in self.properties.get('output_files',[]) ] +
+            [ dict(f, **{ "type" : "quality_metric" }) for f in self.properties.get('output_quality_metrics',[]) ]
         )
 
         input_files = mergeArgumentsWithSameArgumentName(
-            map(
-                lambda x: dict(x, **{ "type" : "input" }),
-                self.properties.get('input_files',[])
-            )
+            [ dict(f, **{ "type" : "input" }) for f in self.properties.get('input_files',[]) ]
         )
 
         input_params = mergeArgumentsWithSameArgumentName(self.properties.get('parameters',[]))
