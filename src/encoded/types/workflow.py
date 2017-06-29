@@ -147,34 +147,29 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
-    embedded = ['analysis_steps',
-                'analysis_steps.*',
-                'analysis_steps.inputs.*',
-                'analysis_steps.outputs.*',
-                'analysis_steps.outputs.target.*',
-                'analysis_steps.inputs.source.*',
-                'analysis_steps.software_used.*',
-                'arguments.*',
+    embedded = ['arguments.*',
                 'arguments.argument_mapping']
-    rev = {
-        'workflow_runs': ('WorkflowRun', 'workflow'),
-    }
 
-    @calculated_property(schema={
-        "title": "Workflow Runs",
-        "description": "All runs of this workflow definition.",
-        "type": "array",
-        "items": {
-            "title": "Workflow Run",
-            "type": ["string", "object"],
-            "linkTo": "WorkflowRun"
-        }
-    })
-    def workflow_runs(self, request):
-        return self.rev_link_atids(request, "workflow_runs")
+    #rev = {
+    #    'workflow_runs': ('WorkflowRun', 'workflow'),
+    #}
+    #
+    #@calculated_property(schema={
+    #    "title": "Workflow Runs",
+    #    "description": "All runs of this workflow definition.",
+    #    "type": "array",
+    #    "items": {
+    #        "title": "Workflow Run",
+    #        "type": ["string", "object"],
+    #        "linkTo": "WorkflowRun"
+    #    }
+    #})
+    #def workflow_runs(self, request):
+    #    return self.rev_link_atids(request, "workflow_runs")
 
 
-    @calculated_property(schema=workflow_analysis_steps_schema)
+    @calculated_property(schema=workflow_analysis_steps_schema,
+                         category='page')
     def analysis_steps(self, request):
         """smth."""
 
@@ -360,14 +355,6 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow.*',
-                'analysis_steps.*',
-                'analysis_steps.software_used.*',
-                'analysis_steps.outputs.*',
-                'analysis_steps.inputs.*',
-                'analysis_steps.outputs.run_data.*',
-                'analysis_steps.inputs.run_data.*',
-                'analysis_steps.outputs.run_data.file.*',
-                'analysis_steps.inputs.run_data.file.*',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
                 'input_files.value.display_title',
@@ -380,7 +367,8 @@ class WorkflowRun(Item):
                 #'output_quality_metrics.value'
                 ]
 
-    @calculated_property(schema=workflow_analysis_steps_schema)
+    @calculated_property(schema=workflow_analysis_steps_schema,
+                        category='page')
     def analysis_steps(self, request):
 
         workflow = self.properties.get('workflow')
