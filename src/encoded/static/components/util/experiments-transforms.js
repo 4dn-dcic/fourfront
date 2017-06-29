@@ -1,7 +1,7 @@
 'use strict';
 
 import _ from 'underscore';
-import patchedConsoleInstance from './patched-console';
+//import patchedConsoleInstance from './patched-console';
 
 /** 
  * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
@@ -343,7 +343,7 @@ export function ensureArray(someArray){
         // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
         // entire list of experiment_sets to fail.
         console.error("Parameter is not an array! Most likely an experiment_set has undefined property experiments_in_set instead of an empty array. Or files for an experiment. etc.");
-        patchedConsoleInstance.trace();
+        //patchedConsoleInstance.trace();
         return [];
     }
     return someArray;
