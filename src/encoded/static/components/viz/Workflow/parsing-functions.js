@@ -4,7 +4,7 @@ import _ from 'underscore';
 import { console } from './../../util';
 
 
-export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
+export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
     /**** Outputs ****/
 
@@ -34,7 +34,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
 
     function preventDuplicateNodeID(id, readOnly = true){
         if (typeof id !== 'string') throw new Error('param id is not a string.');
-        console.warn('PREVENTDUPEID', id, ioIdsUsed[id], readOnly);
         if (readOnly) {
             return (typeof ioIdsUsed[id] === 'number' ? id + '~' + ioIdsUsed[id] : id);
         }
@@ -246,7 +245,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
     function generateInputNodesSimple(step, column, stepNode){
 
         var inputNodes = _.flatten(step.inputs.map(function(stepInput, j){
-            console.log('expand, simple');
             return expandIONodes(stepInput, column, stepNode, "input", false);
         }), true);
         
@@ -289,7 +287,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'input'){
                         nodesNamesMatched[n.name] = fullStepOutput.name;
                         return true;
                     }
-                    // Same thing as above but double-check against own output target name instead of own output name
                     if (_.find(fullStepOutput.target, function(t){
                         if (n.type === 'input' && t.step === n.inputOf.name &&
                             (t.name === n.name)
