@@ -11,6 +11,6 @@
         "award": "1U01CA200059-01",
         "uuid": "40041e2f-3e43-4388-8bbb-e861f209c555",
         "submitted_by": "4dndcic@gmail.com",
-        "imaging_paths":["test:imagepath001"]
+        "imaging_paths":[{"imaging_path": "test:imagepath001", "channel": "ch01"}]
     }
 ]
