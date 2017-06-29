@@ -149,7 +149,7 @@ class Workflow(Item):
     schema = load_schema('encoded:schemas/workflow.json')
     embedded = ['arguments.*',
                 'arguments.argument_mapping']
-    
+
     #rev = {
     #    'workflow_runs': ('WorkflowRun', 'workflow'),
     #}
@@ -351,7 +351,6 @@ class WorkflowRun(Item):
                 #'analysis_steps.inputs.run_data.*',
                 #'analysis_steps.outputs.run_data.file.*',
                 #'analysis_steps.inputs.run_data.file.*',
-                'input_files.*',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
                 'input_files.value.display_title',
@@ -363,7 +362,8 @@ class WorkflowRun(Item):
                 #'output_quality_metrics.value'
                 ]
 
-    @calculated_property(schema=workflow_analysis_steps_schema, category="page")
+    @calculated_property(schema=workflow_analysis_steps_schema,
+                        category='page')
     def analysis_steps(self, request):
         '''
         Extends the 'inputs' & 'outputs' (lists of dicts) properties of calculated property 'analysis_steps' (list of dicts) from
