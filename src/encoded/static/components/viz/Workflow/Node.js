@@ -174,7 +174,7 @@ export default class Node extends React.Component {
                 if (((selectedNode.inputOf && selectedNode.inputOf.name) || 'a') === ((currentNode.inputOf && currentNode.inputOf.name) || 'b')) return true;
                 if (selectedNode.inputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
                     for (var i = 0; i < currentNode.meta.target.length; i++){
-                        if (currentNode.meta.target[i].step === selectedNode.inputOf.name) {
+                        if (typeof selectedNode.inputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.inputOf.name) {
                             return true;
                         }
                     }

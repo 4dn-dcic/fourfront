@@ -58,7 +58,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
 
     function generateOutputNode(stepOutput, column, outputOfNode, readOnly = true){
-        //console.log('STREP OUTPUT', stepOutput);
         return {
             column      : column,
             format      : (Array.isArray(stepOutput.target) && stepOutput.target.length > 0 && stepOutput.target[0].type) || null,
@@ -116,7 +115,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      * @returns {Object[]} List of expanded I/O nodes.
      */
     function expandIONodes(stepInput, column, inputOfNode, inputOrOutput, readOnly){
-        console.log('expand read', readOnly);
         var nodeGenerateFxn = inputOrOutput === 'output' ? generateOutputNode : generateInputNode;
 
         if (typeof stepInput.run_data === 'undefined' || !Array.isArray(stepInput.run_data.file) || stepInput.run_data.file.length === 0) { // Not valid WorkflowRun
@@ -369,7 +367,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 var target = n.meta[targetPropertyName][1] || n.meta[targetPropertyName][0]; // Optimization. If input of another step, it'll be second item in array if a Workflow Output target also present.
                 if (typeof target.step === 'string'){
                     var matchedStep = _.findWhere(analysis_steps, { 'name' : target.step });
-                    console.log(n, target.step, matchedStep, analysis_steps);
                     if (matchedStep) {
                         nextSteps.add(matchedStep);
                     }
