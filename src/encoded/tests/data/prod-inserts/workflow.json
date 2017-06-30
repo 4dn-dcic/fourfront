@@ -404,9 +404,9 @@
             "argument_format": "fastq",
             "argument_mapping": [
                 {
-                    "workflow_step" : "md5",
-                    "step_argument_name" : "input_file",
-                    "step_argument_type" : "Input file"
+                    "workflow_step": "md5",
+                    "step_argument_name": "input_file",
+                    "step_argument_type": "Input file"
                 }
             ],
             "description": ""
@@ -416,9 +416,9 @@
             "argument_type": "Output report file",
             "argument_mapping": [
                 {
-                    "workflow_step" : "md5",
-                    "step_argument_name" : "report_zip",
-                    "step_argument_type" : "Output file"
+                    "workflow_step": "md5",
+                    "step_argument_name": "report",
+                    "step_argument_type": "Output file"
                 }
             ],
             "description": ""
@@ -1174,12 +1174,12 @@
 },
 {
     "title": "hi-c-processing-parta-juicer",
-    "accession": "4DNWFSOZLJBM",
+    "accession": "4DNWFSOBBBBB",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
     "workflow_diagram": "",
     "description": "Hi-C processing partA based on Juicer",
-    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.15.cwl",
+    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.16.cwl",
     "workflow_steps": [
         {
             "step": "98a6e081-49e5-4c33-afab-9ec90d65dddd",
@@ -1191,7 +1191,7 @@
         }
     ],
     "workflow_type": "Hi-C data analysis",
-    "name": "hi-c-processing-parta-juicer/15",
+    "name": "hi-c-processing-parta-juicer/16",
     "uuid": "a9caf6f3-49e5-4c33-bfab-9ec90d65111c",
     "arguments": [
         {

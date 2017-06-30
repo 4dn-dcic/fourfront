@@ -390,21 +390,25 @@
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [{
-                "workflow_step" : "md5",
-                "step_argument_name" : "input_file",
-                "step_argument_type" : "Input file"
-            }],
+            "argument_mapping": [
+                {
+                    "workflow_step": "md5",
+                    "step_argument_name": "input_file",
+                    "step_argument_type": "Input file"
+                }
+            ],
             "description": "File on which MD5 calculation is run on."
         },
         {
             "workflow_argument_name": "report",
             "argument_type": "Output report file",
-            "argument_mapping": [{
-                "workflow_step" : "md5",
-                "step_argument_name" : "report",
-                "step_argument_type" : "Output file or parameter"
-            }],
+            "argument_mapping": [
+                {
+                    "workflow_step": "md5",
+                    "step_argument_name": "report",
+                    "step_argument_type": "Output file"
+                }
+            ],
             "description": "The MD5 checksum generated."
         }
     ],
@@ -448,7 +452,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "fastq1", 
                     "step_argument_type": "Input file"
                 }
@@ -461,7 +465,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "fastq2", 
                     "step_argument_type": "Input file"
                 }
@@ -474,7 +478,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "bwa_index", 
                     "step_argument_type": "Input file"
                 }
@@ -483,7 +487,7 @@
         {
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "nThreads", 
                     "step_argument_type": "parameter"
                 }
@@ -512,7 +516,7 @@
         {
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "out_bam", 
                     "step_argument_type": "Output file"
                 },
@@ -597,7 +601,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "fastq1", 
                     "step_argument_type": "Input file"
                 }
@@ -610,7 +614,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "fastq2", 
                     "step_argument_type": "Input file"
                 }
@@ -623,7 +627,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "bwa_index", 
                     "step_argument_type": "Input file"
                 }
@@ -632,7 +636,7 @@
         {
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "nThreads", 
                     "step_argument_type": "parameter"
                 }
@@ -661,7 +665,7 @@
         {
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "out_bam", 
                     "step_argument_type": "Output file"
                 },
@@ -1026,12 +1030,12 @@
     "lab": "4dn-dcic-lab"
 },
 {
-    "title": "hi-c-processing-parta-juicer from data",
-    "accession": "4DNWFSOAAAA",
+    "title": "hi-c-processing-parta-juicer",
+    "accession": "4DNWFSOZLJBM",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
     "workflow_diagram": "",
-    "description": "Hi-C processing partA based on Juicer, test insert data",
+    "description": "Hi-C processing partA based on Juicer",
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.5.cwl",
     "workflow_steps": [
         {
@@ -1177,7 +1181,7 @@
     "lab": "4dn-dcic-lab",
     "workflow_diagram": "",
     "description": "Hi-C processing partA based on Juicer",
-    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.15.cwl",
+    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.16.cwl",
     "workflow_steps": [
         {
             "step": "98a6e081-49e5-4c33-afab-9ec90d65dddd",
@@ -1189,7 +1193,7 @@
         }
     ],
     "workflow_type": "Hi-C data analysis",
-    "name": "hi-c-processing-parta-juicer/15",
+    "name": "hi-c-processing-parta-juicer/16",
     "uuid": "a9caf6f3-49e5-4c33-bfab-9ec90d65111c",
     "arguments": [
         {
