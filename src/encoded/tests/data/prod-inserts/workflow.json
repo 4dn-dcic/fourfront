@@ -358,13 +358,25 @@
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step" : "validatefiles",
+                    "step_argument_name" : "input_file",
+                    "step_argument_type" : "Input file"
+                }
+            ],
             "description": ""
         },
         {
             "workflow_argument_name": "report",
             "argument_type": "Output report file",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step" : "validatefiles",
+                    "step_argument_name" : "report_zip",
+                    "step_argument_type" : "Output file"
+                }
+            ],
             "description": ""
         }
     ],
@@ -390,13 +402,25 @@
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step" : "md5",
+                    "step_argument_name" : "input_file",
+                    "step_argument_type" : "Input file"
+                }
+            ],
             "description": ""
         },
         {
             "workflow_argument_name": "report",
             "argument_type": "Output report file",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step" : "md5",
+                    "step_argument_name" : "report_zip",
+                    "step_argument_type" : "Output file"
+                }
+            ],
             "description": ""
         }
     ],
@@ -440,7 +464,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "fastq1", 
                     "step_argument_type": "Input file"
                 }
@@ -453,7 +477,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "fastq2", 
                     "step_argument_type": "Input file"
                 }
@@ -466,7 +490,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "bwa_index", 
                     "step_argument_type": "Input file"
                 }
@@ -475,7 +499,7 @@
         {
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "nThreads", 
                     "step_argument_type": "parameter"
                 }
@@ -504,7 +528,7 @@
         {
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "out_bam", 
                     "step_argument_type": "Output file"
                 },
@@ -589,7 +613,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "fastq1", 
                     "step_argument_type": "Input file"
                 }
@@ -602,7 +626,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "fastq2", 
                     "step_argument_type": "Input file"
                 }
@@ -615,7 +639,7 @@
             "description": "",
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "bwa_index", 
                     "step_argument_type": "Input file"
                 }
@@ -624,7 +648,7 @@
         {
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "nThreads", 
                     "step_argument_type": "parameter"
                 }
@@ -653,7 +677,7 @@
         {
             "argument_mapping": [
                 {
-                    "workflow_step": "bwa_mem", 
+                    "workflow_step": "bwa-mem", 
                     "step_argument_name": "out_bam", 
                     "step_argument_type": "Output file"
                 },
