@@ -304,7 +304,7 @@ def test_calculated_analysis_steps(testapp, workflow_dependencies, custom_workfl
     assert isinstance(res['analysis_steps'][0]["outputs"], list)
     assert len(res['analysis_steps'][0]["inputs"]) == 2
     assert len(res['analysis_steps'][0]["outputs"]) == 2
-    
+
     assert isinstance(res['analysis_steps'][0]["inputs"][0]["source"], list)
     assert isinstance(res['analysis_steps'][0]["outputs"][0]["target"], list)
     assert len(res['analysis_steps'][0]["inputs"][0]["source"]) == 1

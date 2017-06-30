@@ -179,7 +179,7 @@ class FileDetailBody extends React.Component {
     }
 
     canDownload(){
-        if (this.props.canDownloadStatuses.indexOf(this.props.file.status) > -1){
+        if (this.state.file && typeof this.state.file !== 'string' && this.props.canDownloadStatuses.indexOf(this.state.file.status) > -1){
             return true;
         }
         return false;

@@ -21,7 +21,7 @@ export class WorkflowNodeElement extends React.Component {
 
     doesRunDataFileExist(){
         var node = this.props.node;
-        return (node.meta && node.meta.run_data && node.meta.run_data.file && typeof node.meta.run_data.file.display_title === 'string');
+        return (node.meta && node.meta.run_data && node.meta.run_data.file/* && typeof node.meta.run_data.file.display_title === 'string'*/);
     }
 
     doesRunDataValueExist(){
@@ -166,6 +166,10 @@ export class WorkflowNodeElement extends React.Component {
             return <div {...elemProps}>{  node.meta.analysis_step_types.map(Schemas.Term.capitalize).join(', ') }</div>;
         }
 
+        if (typeof node.format === 'string') {
+            return <div {...elemProps}>{ node.format }</div>;
+        }
+
         return null;
 
     }
@@ -194,7 +198,11 @@ export class WorkflowNodeElement extends React.Component {
 
     nodeTitle(){
         if (this.doesRunDataFileExist()){
-            return <span className="node-name">{ this.icon() }{ this.props.node.meta.run_data.file.accession || this.props.node.meta.run_data.file.display_title }</span>;
+            var file = this.props.node.meta.run_data.file;
+            return <span className="node-name">
+                { this.icon() }
+                { typeof file === 'string' ? this.props.node.format.replace('Workflow ', '') : file.accession || file.display_title }
+            </span>;
         }
         if (this.doesRunDataValueExist()){
             return <span className="node-name mono-text">{ this.icon() }{ this.props.node.meta.run_data.value }</span>;
