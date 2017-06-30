@@ -145,41 +145,15 @@ class File(Item):
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab.*',
-                'file_format',
+                'award.project',
+                'experiments.display_title',
+                'experiments.biosample.biosource.display_title',
                 'related_files.relationship_type',
                 'related_files.file.*']
     name_key = 'accession'
     rev = {
-        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
-        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
         'experiments': ('Experiment', 'files')
     }
-
-    @calculated_property(schema={
-        "title": "Input of Workflow Runs",
-        "description": "All workflow runs that this file serves as an input to",
-        "type": "array",
-        "items": {
-            "title": "Input of Workflow Run",
-            "type": ["string", "object"],
-            "linkTo": "WorkflowRun"
-        }
-    })
-    def workflow_run_inputs(self, request):
-        return self.rev_link_atids(request, "workflow_run_inputs")
-
-    @calculated_property(schema={
-        "title": "Output of Workflow Runs",
-        "description": "All workflow runs that this file serves as an output from",
-        "type": "array",
-        "items": {
-            "title": "Output of Workflow Run",
-            "type": "string",
-            "linkTo": "WorkflowRun"
-        }
-    })
-    def workflow_run_outputs(self, request):
-        return self.rev_link_atids(request, "workflow_run_outputs")
 
     @calculated_property(schema={
         "title": "Experiments",
@@ -193,6 +167,16 @@ class File(Item):
     })
     def experiments(self, request):
         return self.rev_link_atids(request, "experiments")
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, file_format, accession=None, external_accession=None):
+        accession = accession or external_accession
+        file_extension = self.schema['file_format_file_extension'][file_format]
+        return '{}{}'.format(accession, file_extension)
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -303,7 +287,7 @@ class File(Item):
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
-        "description" : "Accession of this file"
+        "description": "Accession of this file"
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
@@ -351,8 +335,12 @@ class File(Item):
             return extras
 
     @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['file_upload_bucket']
+
+    @classmethod
     def build_external_creds(cls, registry, uuid, properties):
-        bucket = registry.settings['file_upload_bucket']
+        bucket = cls.get_bucket(registry)
         mapping = cls.schema['file_format_file_extension']
         prop_format = properties['file_format']
         try:
@@ -396,6 +384,35 @@ class FileFastq(File):
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
     name_key = 'accession'
+    rev=dict(File.rev, **{
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    })
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
 @collection(
@@ -411,6 +428,35 @@ class FileFasta(File):
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
     name_key = 'accession'
+    rev=dict(File.rev, **{
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    })
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
 @collection(
@@ -426,6 +472,40 @@ class FileProcessed(File):
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded = File.embedded
     name_key = 'accession'
+    rev = dict(File.rev, **{
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    })
+
+    @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['file_wfout_bucket']
+
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
 @collection(

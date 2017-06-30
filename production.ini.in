@@ -2,6 +2,7 @@
 use = config:base.ini#app
 session.secret = %(here)s/session-secret.b64
 file_upload_bucket = ${file_upload_bucket}
+file_wfout_bucket = ${file_wfout_bucket}
 blob_bucket = ${blob_bucket}
 system_bucket = ${system_bucket} 
 # blob_store_profile_name = encoded-4dn-files
