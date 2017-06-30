@@ -290,8 +290,35 @@ def test_workflow_dependencies(workflow_dependencies):
 
 def test_calculated_analysis_steps(testapp, workflow_dependencies, custom_workflow_data):
     res = testapp.post_json('/workflow', custom_workflow_data).json['@graph'][0]
-    print('\n\n\n\n', res)
 
-    # TODO: MORE TESTING!!!!!!!!! MAKE SURE INPUTS AND OUTPUTS ARE GOOD.
     assert res['display_title'] == custom_workflow_data["title"]
 
+    # Remove this line if analysis_steps becomes embedded. Maybe.
+    res = testapp.get('/workflows/' + custom_workflow_data['uuid'] + '/').json
+
+    assert isinstance(res['analysis_steps'], list)
+
+    assert len(res['analysis_steps']) == len(custom_workflow_data['workflow_steps'])
+
+    assert isinstance(res['analysis_steps'][0]["inputs"], list)
+    assert isinstance(res['analysis_steps'][0]["outputs"], list)
+    assert len(res['analysis_steps'][0]["inputs"]) == 2
+    assert len(res['analysis_steps'][0]["outputs"]) == 2
+    
+    assert isinstance(res['analysis_steps'][0]["inputs"][0]["source"], list)
+    assert isinstance(res['analysis_steps'][0]["outputs"][0]["target"], list)
+    assert len(res['analysis_steps'][0]["inputs"][0]["source"]) == 1
+
+    assert res['analysis_steps'][0]["inputs"][0]["name"] == 'input_pairs'
+    assert res['analysis_steps'][0]["inputs"][0]["source"][0]["name"] == 'input_pairs'
+    assert res['analysis_steps'][0]["inputs"][0]["source"][0]["type"] == 'Workflow Input File'
+
+    assert res['analysis_steps'][0]["outputs"][0]["name"] in ['output_pairs', 'output_pairs_index']
+    assert res['analysis_steps'][0]["outputs"][1]["name"] in ['output_pairs', 'output_pairs_index']
+
+    assert len(res['analysis_steps'][0]["outputs"][0]["target"]) == 2
+    assert res['analysis_steps'][0]["outputs"][0]["target"][0]["type"] == "Workflow Output File"
+    assert res['analysis_steps'][0]["outputs"][0]["target"][1]["type"] == "Input file or parameter"
+    assert res['analysis_steps'][0]["outputs"][0]["target"][1]["step"] == "cooler"
+
+#TODO: Tests for WorkflowRun. Will do after that structure / method is stable for some time.
