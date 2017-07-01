@@ -218,7 +218,7 @@ def get_date_range(request):
     """
     Get 'before' and 'after' params from the request.
     These determine the greater than and less than dates for the search
-    Date format is yyyy-MM-dd HH:mm
+    Date format is yyyy-MM-dd HH:mm.
     """
     before = request.params.get('before', None)
     after = request.params.get('after', None)
