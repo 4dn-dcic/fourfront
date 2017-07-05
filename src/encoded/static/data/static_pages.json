@@ -9,7 +9,7 @@
             "sections"  : [
                 {
                     "filename" : "introduction.html",
-                    "title" : "Introduction"
+                    "toc-title" : "Introduction to Data Submission"
                 },
                 {
                     "title" : "Metadata Structure",
@@ -32,12 +32,11 @@
         },
 
         "help/getting-started" : {
-            "title"     : "Getting Started with Submission",
             "directory" : "/docs/public/metadata-submission",
             "sections"  : [
                 {
                     "filename"  : "introduction.md",
-                    "toc-title" : "Introduction"
+                    "toc-title" : "Getting Started with Submission"
                 },
                 {
                     "title"     : "Getting a Submitter Account",
