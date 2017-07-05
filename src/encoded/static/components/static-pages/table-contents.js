@@ -6,10 +6,17 @@ import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
 import * as globals from './../globals';
 import { getElementTop, animateScrollTo } from './../util/layout';
-import { isServerSide, console } from './../util';
+import { isServerSide, console, navigate } from './../util';
 
 
 class TableEntry extends React.Component {
+
+    static getChildHeaders(content, maxHeaderDepth, currentDepth){
+        if (!TableOfContents.isContentJSX(content)) return [];
+        return content.props.children.filter((child,i,a) =>
+            TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && child.props.type === 'h' + (currentDepth + 1)
+        );
+    }
 
     static defaultProps = {
         'title' : 'Table of Content Entry',
@@ -168,10 +175,8 @@ class TableEntry extends React.Component {
             title = "Top of Page";
         }
 
-        var childHeaders = TableOfContents.isContentJSX(this.props.content) ? this.props.content.props.children.filter((child,i,a) =>
-            TableOfContents.isHeaderComponent(child, this.props.maxHeaderDepth || 6) && child.props.type === 'h' + (this.props.depth + 1)
-        ) : [];
-        
+        var childHeaders = TableEntry.getChildHeaders(this.props.content, this.props.maxHeaderDepth, this.props.depth);
+   
         var collapsibleButton;
         if (this.props.collapsible && childHeaders.length > 0){
             collapsibleButton = <i
@@ -231,6 +236,7 @@ class TableEntry extends React.Component {
                             link={this.props.link}
                             maxHeaderDepth={this.props.maxHeaderDepth}
                             parentClosed={this.state && !this.state.open}
+                            skipDepth={this.props.skipDepth}
                         />
                     </div>
                 </Collapse>
@@ -244,11 +250,88 @@ class TableEntry extends React.Component {
 
 class TableEntryChildren extends React.Component {
 
+    static getHeadersFromContent(jsxContent, maxHeaderDepth, currentDepth){
+        if (!TableOfContents.isContentJSX(jsxContent)) return [];
+        return jsxContent.props.children.filter((child,i,a) =>
+            TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && child.props.type === 'h' + (currentDepth + 1)
+        );
+    }
+
+    static getSubsequentChildHeaders(header, jsxContent, maxHeaderDepth, currentDepth){
+        if (!TableOfContents.isContentJSX(jsxContent)) return null;
+
+        var getNext = null;
+        var nextMajorHeader = null;
+        var nextHeaderComponents = _.reduce(jsxContent.props.children, (m, child)=>{
+            if (getNext === null && child === header){
+                getNext = true;
+                return m;
+            }
+            if (getNext && TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6)){
+                if (
+                    child.props.type === 'h' + Math.max(currentDepth + 1, 1) ||
+                    child.props.type === 'h' + Math.max(currentDepth    , 1) ||
+                    child.props.type === 'h' + Math.max(currentDepth - 1, 1) ||
+                    child.props.type === 'h' + Math.max(currentDepth - 2, 1)
+                ){
+                    nextMajorHeader = child;
+                    getNext = false;
+                } else {
+                    m.push(child);
+                }
+            }
+            return m;
+        }, /* m = */ []);
+
+        return { 
+            'content' : React.cloneElement(jsxContent, {}, nextHeaderComponents),
+            'nextMajorHeader' : nextMajorHeader
+        };
+    }
+
+    static renderChildrenElements(childHeaders, jsxContent, maxHeaderDepth, currentDepth, listStyleTypes, pageScrollTop, mounted, skipDepth, nextHeader = null){
+        if (childHeaders && childHeaders.length){
+            return childHeaders.map((h, index) =>{
+
+                var childContent = TableEntryChildren.getSubsequentChildHeaders(h, jsxContent, maxHeaderDepth, currentDepth);                
+                
+                if (currentDepth + 1 > 0 && skipDepth >= currentDepth + 1){
+                    return TableEntryChildren.renderChildrenElements(
+                        childHeaders, childContent.content, maxHeaderDepth, currentDepth + 1,
+                        listStyleTypes, pageScrollTop, mounted, skipDepth, childContent.nextMajorHeader || nextHeader || null
+                    );
+                }
+
+
+                var hString = TableOfContents.textFromReactChildren(h.props.children);
+                var link = TableOfContents.slugify(hString);
+                var collapsible = currentDepth >= 1;
+                return (
+                    <TableEntry 
+                        link={link}
+                        title={hString}
+                        key={link}
+                        depth={(currentDepth || 0) + 1}
+                        listStyleTypes={listStyleTypes}
+                        pageScrollTop={pageScrollTop}
+                        mounted={mounted}
+                        content={childContent.content}
+                        nextHeader={childContent.nextMajorHeader || nextHeader || null}
+                        navigate={navigate}
+                        maxHeaderDepth={maxHeaderDepth}
+                        collapsible={collapsible}
+                        skipDepth={skipDepth}
+                    />
+                );
+            });
+        }
+        return null;
+    }
+
     constructor(props){
         super(props);
         this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.getHeadersFromContent = this.getHeadersFromContent.bind(this);
-        this.getSubsequentChildHeaders = this.getSubsequentChildHeaders.bind(this);
         this.children = this.children.bind(this);
         this.render = this.render.bind(this);
     }
@@ -263,70 +346,17 @@ class TableEntryChildren extends React.Component {
     }
 
     getHeadersFromContent(){
-        if (!TableOfContents.isContentJSX(this.props.content)) return [];
-        return this.props.content.props.children.filter((child,i,a) =>
-            TableOfContents.isHeaderComponent(child, this.props.maxHeaderDepth || 6) && child.props.type === 'h' + (this.props.depth + 1)
-        );
-    }
-
-    getSubsequentChildHeaders(header){
-        if (!TableOfContents.isContentJSX(this.props.content)) return null;
-
-        var getNext = null;
-        var nextMajorHeader = null;
-        var nextHeaderComponents = _.reduce(this.props.content.props.children, (m, child)=>{
-            if (getNext === null && child === header){
-                getNext = true;
-                return m;
-            }
-            if (getNext && TableOfContents.isHeaderComponent(child, this.props.maxHeaderDepth || 6)){
-                if (
-                    child.props.type === 'h' + Math.max(this.props.depth + 1, 1) ||
-                    child.props.type === 'h' + Math.max(this.props.depth    , 1) ||
-                    child.props.type === 'h' + Math.max(this.props.depth - 1, 1) ||
-                    child.props.type === 'h' + Math.max(this.props.depth - 2, 1)
-                ){
-                    nextMajorHeader = child;
-                    getNext = false;
-                } else {
-                    m.push(child);
-                }
-            }
-            return m;
-        }, /* m = */ []);
-
-        return { 
-            'content' : React.cloneElement(this.props.content, {}, nextHeaderComponents),
-            'nextMajorHeader' : nextMajorHeader
-        };
+        return TableEntryChildren.getHeadersFromContent(this.props.content, this.props.maxHeaderDepth, this.props.depth);
     }
 
     children(){
         var childHeaders = this.getHeadersFromContent();
         if (childHeaders && childHeaders.length){
-            //console.log(this.props.depth, childHeaders);
-            return childHeaders.map((h, index) =>{
-                var hString = TableOfContents.textFromReactChildren(h.props.children);
-                var childContent = this.getSubsequentChildHeaders(h);
-                var link = TableOfContents.slugify(hString);
-                var collapsible = this.props.depth >= 1;
-                return (
-                    <TableEntry 
-                        link={link}
-                        title={hString}
-                        key={link}
-                        depth={(this.props.depth || 0) + 1}
-                        listStyleTypes={this.props.listStyleTypes}
-                        pageScrollTop={this.props.pageScrollTop}
-                        mounted={this.props.mounted}
-                        content={childContent.content}
-                        nextHeader={childContent.nextMajorHeader || this.props.nextHeader || null}
-                        navigate={this.props.navigate}
-                        maxHeaderDepth={this.props.maxHeaderDepth}
-                        collapsible={collapsible}
-                    />
-                );
-            });
+            return TableEntryChildren.renderChildrenElements(
+                childHeaders, this.props.content, this.props.maxHeaderDepth,
+                this.props.depth, this.props.listStyleTypes, this.props.pageScrollTop,
+                this.props.mounted, this.props.nextHeader
+            );
         } else {
             return this.props.children;
         }
@@ -465,7 +495,8 @@ export default class TableOfContents extends React.Component {
                     return _.extend(entryPair[1], { 'link' : entryPair[0] });
                 })
                 .sortBy('order')
-                .filter(function(s){
+                .filter((s)=>{
+                    if (this.props.skipDepth && this.props.skipDepth > 0) return true;
                     if (typeof s.title === 'string' || typeof s['toc-title'] === 'string'){
                         //if (lastSections.length) lastSections.forEach(function(ls){
                         //    ls.nextHeader = s.link;
@@ -478,6 +509,14 @@ export default class TableOfContents extends React.Component {
                     return false;
                 })
                 .map((s,i,all) => {
+                    if (this.props.skipDepth && this.props.skipDepth > 0) {
+                        
+                        var childHeaders = TableEntryChildren.getHeadersFromContent(s.content, this.props.maxHeaderDepth, 1);
+                        return TableEntryChildren.renderChildrenElements(
+                            childHeaders, s.content, this.props.maxHeaderDepth, 1,
+                            listStyleTypes, this.state.scrollTop, this.state.mounted, this.props.skipDepth, s.nextHeader || (i === all.length - 1 ? 'bottom' : null)//this.props.nextMajorHeader
+                        );
+                    }
                     return (<TableEntry 
                         link={s.link}
                         title={s['toc-title'] || s.title}
@@ -490,6 +529,7 @@ export default class TableOfContents extends React.Component {
                         nextHeader={s.nextHeader || (i === all.length - 1 ? 'bottom' : null) }
                         navigate={this.props.navigate}
                         maxHeaderDepth={this.props.maxHeaderDepth}
+                        skipDepth={this.props.skipDepth}
                     />);
                 })
                 .value();
@@ -510,6 +550,7 @@ export default class TableOfContents extends React.Component {
                     navigate={this.props.navigate}
                     nextHeader={(children[0] && children[0].props && children[0].props.link) || null}
                     maxHeaderDepth={this.props.maxHeaderDepth}
+                    skipDepth={this.props.skipDepth}
                 >
                     { children }
                 </TableEntry>
