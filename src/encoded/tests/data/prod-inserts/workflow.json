@@ -1224,7 +1224,7 @@
                     "step_argument_type": "Output file"
                 }    
             ],   
-            "workflow_argument_name": "out_pairs_index"
+            "workflow_argument_name": "out_pairs_px2"
         } 
     ]
 },
