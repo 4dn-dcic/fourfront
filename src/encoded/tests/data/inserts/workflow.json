@@ -1161,6 +1161,74 @@
     ]
 },
 {
+    "title": "hi-c-processing-parta-juicer-patch",
+    "accession": "4DNWFSOBBBGG",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "workflow_diagram": "",
+    "description": "Patch for Hi-C processing partA based on Juicer",
+    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer-patch.1.cwl",
+    "workflow_steps": [
+        {
+            "step": "bf1c3088-fe2e-4210-8b49-58aac06f2a11",
+            "step_name": "addfragtopairs"
+        }
+    ],
+    "workflow_type": "Hi-C data analysis",
+    "name": "hi-c-processing-parta-juicer-patch/1",
+    "uuid": "a16d2764-0a2b-45f0-8595-17db78d0c0d9",
+    "arguments": [
+        {
+            "argument_format": "pairs",
+            "argument_type": "Input file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "input_pairs",
+                    "workflow_step": "addfragtopairs",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "input_pairs"
+        },
+        {
+            "argument_format": "juicer_format_restriction_site_file",
+            "argument_type": "Input file",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "restriction_file",
+                    "workflow_step": "addfragtopairs",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "restriction_file"
+        },
+        {    
+            "argument_format": "pairs",
+            "argument_type": "Output processed file",
+            "argument_mapping": [
+                {    
+                    "step_argument_name": "out_pairs",
+                    "workflow_step": "addfragtopairs",
+                    "step_argument_type": "Output file"
+                }    
+            ],   
+            "workflow_argument_name": "out_pairs"
+        },   
+        {    
+            "argument_format": "pairs_px2",
+            "argument_type": "Output processed file",
+            "argument_mapping": [
+                {    
+                    "step_argument_name": "out_pairs_px2",
+                    "workflow_step": "addfragtopairs",
+                    "step_argument_type": "Output file"
+                }    
+            ],   
+            "workflow_argument_name": "out_pairs_index"
+        } 
+    ]
+},
+{
     "title": "hi-c-processing-parta-juicer",
     "accession": "4DNWFSOBBBBB",
     "award": "1U01CA200059-01",
