@@ -81,7 +81,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "name": "juicer",
-        "software_type": ["quality metric generator"],
+        "software_type": ["aligner","filter","normalizer"],
         "commit": "855e6291c6926371aeeab3d5f96b3895c0cdb171"
     },
     {
@@ -89,7 +89,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "name": "juicer",
-        "software_type": ["quality metric generator"],
+        "software_type": ["aligner","filter","normalizer"],
         "version": "1.5.5"
     },
     {

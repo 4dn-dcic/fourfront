@@ -78,7 +78,8 @@ class Award(Item):
         'current': ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT,
         'deleted': ONLY_ADMIN_VIEW,
         'revoked': ALLOW_EVERYONE_VIEW,
-        'inactive': ALLOW_EVERYONE_VIEW,
+        'replaced': ALLOW_EVERYONE_VIEW,
+        'inactive': ALLOW_EVERYONE_VIEW
     }
 
 

@@ -84,8 +84,8 @@
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a73514",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
-        "title": "bwa_mem",
-        "name": "bwa_mem",
+        "title": "bwa-mem",
+        "name": "bwa-mem",
         "version": "8",
         "analysis_step_types": ["alignment"],
         "software_used": "02d636b9-d82d-4da9-950c-2ca994a13209"
