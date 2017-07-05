@@ -389,7 +389,7 @@ class WorkflowRun(Item):
         if not analysis_steps or len(analysis_steps) == 0:
             return []
 
-        fileCache = {}
+        # fileCache = {} # Unnecessary unless we'll convert file @id into plain embedded dictionary, in which case we use this to avoid re-requests for same file UUID.
 
         def handleSourceTargetFile(stepOutput, stepOutputTarget, runParams):
             '''
