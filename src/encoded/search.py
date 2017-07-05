@@ -105,10 +105,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     elif size:
         offset_size = from_ + size
         size_search = search[from_:offset_size]
-        es_results = size_search.execute().to_dict()
+        es_results = execute_search(size_search)
     else:
         # fallback size for elasticsearch is 10
-        es_results = search.execute().to_dict()
+        es_results = execute_search(search)
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
@@ -218,6 +218,7 @@ def get_date_range(request):
     """
     Get 'before' and 'after' params from the request.
     These determine the greater than and less than dates for the search
+    Date format is yyyy-MM-dd HH:mm.
     """
     before = request.params.get('before', None)
     after = request.params.get('after', None)
@@ -230,7 +231,7 @@ def get_all_results(search):
     size = from_ + sizeIncrement
 
     first_search = search[from_:size] # get aggregations from here
-    es_result = first_search.execute().to_dict()
+    es_result = execute_search(first_search)
 
     total = es_result['hits'].get('total',0)
     extraRequestsNeeded = int(math.ceil(total / sizeIncrement)) - 1 # Decrease by 1 (first es_result already happened)
@@ -238,15 +239,12 @@ def get_all_results(search):
     if extraRequestsNeeded <= 0:
         return es_result
 
-    # We don't need to grab aggs for subsequent queries, already obtained from first one, incr. performance instead maybe.
-    query = { k:v for k,v in origQuery.items() if k != 'aggs' }
-
     while extraRequestsNeeded > 0:
         # print(str(extraRequestsNeeded) + " requests left to get all results.")
         from_ = from_ + sizeIncrement
         size = from_ + sizeIncrement
         subsequent_search = search[from_:size]
-        subsequent_es_result = subsequent_search.execute().to_dict()
+        subsequent_es_result = execute_search(subsequent_search)
         es_result['hits']['hits'] = es_result['hits']['hits'] + subsequent_es_result['hits'].get('hits', [])
         extraRequestsNeeded -= 1
         # print("Found " + str(len(es_result['hits']['hits'])) + ' results so far.')
@@ -326,14 +324,35 @@ def prepare_search_term(request):
             # combine them with AND logic
             if 'q' in prepared_terms:
                 join_list = [prepared_terms['q'], val]
-                prepared_terms['q'] = ' | '.join(join_list)
+                prepared_terms['q'] = ' AND '.join(join_list)
             else:
                 prepared_terms['q'] = val
         elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field', 'before', 'after']:
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
             prepared_terms['embedded.' + field].append(val)
+        if 'q' in prepared_terms:
+            prepared_terms['q'] = process_query_string(prepared_terms['q'])
     return prepared_terms
+
+
+def process_query_string(search_query):
+    from antlr4 import IllegalStateException
+    from lucenequery.prefixfields import prefixfields
+    from lucenequery import dialects
+
+    if search_query == '*':
+        return search_query
+
+    # avoid interpreting slashes as regular expressions
+    search_query = search_query.replace('/', r'\/')
+    try:
+        query = prefixfields('embedded.', search_query, dialects.elasticsearch)
+    except IllegalStateException:
+        msg = "Invalid query: {}".format(search_query)
+        raise HTTPBadRequest(explanation=msg)
+    else:
+        return query.getText()
 
 
 def set_doc_types(request, types, search_type):
@@ -417,7 +436,7 @@ def build_query(search, prepared_terms, source_fields):
             query_info['query'] = value
             break
     if query_info != {}:
-        string_query = {'must': {'simple_query_string': query_info}}
+        string_query = {'must': {'query_string': query_info}}
         query_dict = {'query': {'bool': string_query}}
     else:
         query_dict = {'query': {'bool':{}}}
@@ -491,7 +510,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
     used_filters = {'must': {}, 'must_not': {}}
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
-        if field in ['limit', 'y.limit', 'x.limit', 'mode', 'annotation',
+        if field in ['limit', 'y.limit', 'x.limit', 'mode',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
                      'sort', 'from', 'referrer', 'q', 'before', 'after']:
             continue
@@ -552,7 +571,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
 
     # lastly, add date limits to filters if given
     if before_date or after_date:
-        date_limits = {'format':'yyyy-MM-dd'}
+        date_limits = {'format':'yyyy-MM-dd HH:mm'}
         if before_date:
             date_limits['lte'] = before_date # lte is >=
         if after_date:
@@ -573,10 +592,10 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
 def initialize_facets(types, doc_types, search_audit, principals):
     """
     Initialize the facets used for the search. If searching across multiple
-    doc_types, only use the 'Data Type' facet
+    doc_types, only use the swfault 'Data Type' and 'Status' facets.
     """
     facets = [
-        ('type', {'title': 'Data Type'}),
+        ('type', {'title': 'Data Type'})
     ]
     audit_facets = [
         ('audit.ERROR.category', {'title': 'Audit category: ERROR'}),
@@ -586,6 +605,8 @@ def initialize_facets(types, doc_types, search_audit, principals):
     ]
     if len(doc_types) == 1 and doc_types[0] != 'Item' and 'facets' in types[doc_types[0]].schema:
         facets.extend(types[doc_types[0]].schema['facets'].items())
+
+    facets.append(('status', {'title': 'Status'}))
 
     # Display all audits if logged in, or all but INTERNAL_ACTION if logged out
     for audit_facet in audit_facets:
@@ -601,7 +622,7 @@ def set_facets(search, facets, final_filters, string_query):
 
     :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
     :param final_filters: Dict of filters which are set for the ES query in set_filters
-    :param string_query: Dict holding the simple_query_string used in the search.
+    :param string_query: Dict holding the query_string used in the search.
     """
     aggs = {}
     facet_fields = dict(facets).keys() # List of first entry of tuples in facets list.
@@ -643,7 +664,9 @@ def set_facets(search, facets, final_filters, string_query):
                 # there should only be one key here
                 for compare_field in compare_filter['terms'].keys():
                     # remove filter for a given field for that facet
-                    if compare_field == query_field:
+                    # skip this for type facet (field = 'type')
+                    # since we always want to include that filter.
+                    if compare_field == query_field and field != 'type':
                         facet_filters[filter_type].remove(compare_filter)
 
         # add the string_query, if present, to the bool term with facet_filters
@@ -673,6 +696,17 @@ def set_facets(search, facets, final_filters, string_query):
     search.update_from_dict(prev_search)
 
     return search
+
+
+def execute_search(search):
+    """
+    Use a general try-except here for now
+    """
+    try:
+        es_results = search.execute().to_dict()
+    except:
+        raise HTTPBadRequest(explanation='Failed search query')
+    return es_results
 
 
 def format_facets(es_results, facets, used_filters, schemas, total, search_frame='embedded'):
@@ -778,7 +812,10 @@ def find_index_by_doc_types(request, doc_types, ignore):
     return index_string
 
 
-def get_jsonld_types_from_collection_type(request, doc_type):
+def get_jsonld_types_from_collection_type(request, doc_type, types_covered=[]):
+    """
+    Recursively find item types using a given type registry
+    """
     types_found = []
     try:
         registry_type = request.registry['types'][doc_type]
@@ -786,12 +823,15 @@ def get_jsonld_types_from_collection_type(request, doc_type):
         return [] # no types found
     # add the item_type of this collection if applicable
     if hasattr(registry_type, 'item_type'):
-        types_found.append(registry_type.item_type)
+        if registry_type.name not in types_covered:
+            types_found.append(registry_type.item_type)
+        types_covered.append(registry_type.name)
     # see if we're dealing with an abstract type
-    elif hasattr(registry_type, 'subtypes'):
+    if hasattr(registry_type, 'subtypes'):
         subtypes = registry_type.subtypes
         for subtype in subtypes:
-            types_found.extend(get_jsonld_types_from_collection_type(request, subtype))
+            if subtype not in types_covered:
+                types_found.extend(get_jsonld_types_from_collection_type(request, subtype, types_covered))
     return types_found
 
 

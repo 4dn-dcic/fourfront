@@ -335,8 +335,12 @@ class File(Item):
             return extras
 
     @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['file_upload_bucket']
+
+    @classmethod
     def build_external_creds(cls, registry, uuid, properties):
-        bucket = registry.settings['file_upload_bucket']
+        bucket = cls.get_bucket(registry)
         mapping = cls.schema['file_format_file_extension']
         prop_format = properties['file_format']
         try:
@@ -468,10 +472,15 @@ class FileProcessed(File):
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded = File.embedded
     name_key = 'accession'
-    rev=dict(File.rev, **{
+    rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
     })
+
+    @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['file_wfout_bucket']
+
     @calculated_property(schema={
         "title": "Input of Workflow Runs",
         "description": "All workflow runs that this file serves as an input to",
