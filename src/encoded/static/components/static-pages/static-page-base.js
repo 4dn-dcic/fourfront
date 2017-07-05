@@ -225,6 +225,7 @@ export class Wrapper extends React.Component {
                     fixedWidth={(1140 * ((12 - contentColSize) / 12))}
                     navigate={this.props.navigate}
                     href={this.props.href}
+                    skipDepth={toc && context.toc['skip-depth'] || 0}
                     maxHeaderDepth={toc && context.toc['header-depth'] || 6}
                     includeTop={toc && context.toc['include-top-link']}
                     listStyleTypes={['none'].concat((toc && context.toc['list-styles']) || this.props.tocListStyles)}
