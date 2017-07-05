@@ -47,7 +47,7 @@
  {
     "uuid": "4a6d10ee-2edb-4402-a98f-0edb1d582084",
     "accession": "4DNFI823L812",
-    "status": "deleted",
+    "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
     "file_format": "juicer_format_restriction_site_file",
     "notes": "restriction sites for MboI on hg38, juicer-formatted",
@@ -74,17 +74,6 @@
     "file_format": "juicer_format_restriction_site_file",
     "notes": "restriction sites for HindIII on hg38, juicer-formatted",
     "filename": "GRCh38_HindIII_new.txt",
-    "lab": "4dn-dcic-lab",
-    "award": "1U01CA200059-01"
- },
- {
-    "uuid": "7c6b934a-18f7-4233-9b2d-4d2387eef55f",
-    "accession": "4DNFI823HE73",
-    "status": "uploaded",
-    "submitted_by": "4dndcic@gmail.com",
-    "file_format": "juicer_format_restriction_site_file",
-    "notes": "restriction sites for MboI on hg38, juicer-formatted",
-    "filename": "GRCh38_MboI_new.txt",
     "lab": "4dn-dcic-lab",
     "award": "1U01CA200059-01"
  }
