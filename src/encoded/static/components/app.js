@@ -61,7 +61,7 @@ const portal = {
             }
         },
         {id: 'help', sid:'sHelp', title: 'Help', children: [
-            {id: 'introduction', title: 'Introduction to Data Submission', url: '/help', children : [
+            {id: 'introduction-menu-item', title: 'Introduction to Data Submission', url: '/help', children : [
                 {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
                 {id: 'datasubmission', title: 'Data submission', url: '/help#data-submission'},
                 {id: 'restapi', title: 'REST API', url: '/help#rest-api'},
