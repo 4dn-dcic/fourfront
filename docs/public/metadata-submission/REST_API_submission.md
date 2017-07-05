@@ -5,7 +5,7 @@ The 4DN-DCIC metadata database can be accessed using a Hypertext-Transfer-Protoc
 [encode]: https://www.encodeproject.org/
 
 ## Connecting to the server
-Your script will need to use an access key and secret that you can obtain by following [these instructions](./excel_submission.md#access) to connect with either the test or production server.  Exactly how you format and pass the connection information to the server depends on your scripting language and the libraries that you use with it.
+Your script will need to use an access key and secret that you can obtain by following [these instructions](./getting_started.md#access) to connect with either the test or production server.  Exactly how you format and pass the connection information to the server depends on your scripting language and the libraries that you use with it.
 
 **Base URLs for submitting and fetching data are:**
 *Test Server:* <https://testportal.4dnucleome.org/>
