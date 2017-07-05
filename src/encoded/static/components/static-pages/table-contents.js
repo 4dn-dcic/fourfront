@@ -289,7 +289,7 @@ class TableEntryChildren extends React.Component {
         };
     }
 
-    static renderChildrenElements(childHeaders, jsxContent, maxHeaderDepth, currentDepth, listStyleTypes, pageScrollTop, mounted, skipDepth, nextHeader = null){
+    static renderChildrenElements(childHeaders, jsxContent, maxHeaderDepth, currentDepth, listStyleTypes, pageScrollTop, mounted, skipDepth = 0, nextHeader = null){
         if (childHeaders && childHeaders.length){
             return childHeaders.map((h, index) =>{
 
@@ -305,7 +305,7 @@ class TableEntryChildren extends React.Component {
 
                 var hString = TableOfContents.textFromReactChildren(h.props.children);
                 var link = TableOfContents.slugify(hString);
-                var collapsible = currentDepth >= 1;
+                var collapsible = currentDepth >= (1 - (skipDepth || 0));
                 return (
                     <TableEntry 
                         link={link}
@@ -355,7 +355,7 @@ class TableEntryChildren extends React.Component {
             return TableEntryChildren.renderChildrenElements(
                 childHeaders, this.props.content, this.props.maxHeaderDepth,
                 this.props.depth, this.props.listStyleTypes, this.props.pageScrollTop,
-                this.props.mounted, this.props.nextHeader
+                this.props.mounted, this.props.skipDepth, this.props.nextHeader
             );
         } else {
             return this.props.children;
