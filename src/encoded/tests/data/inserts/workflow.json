@@ -1167,7 +1167,7 @@
     "lab": "4dn-dcic-lab",
     "workflow_diagram": "",
     "description": "Patch for Hi-C processing partA based on Juicer",
-    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer-patch.1.cwl",
+    "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer-patch.2.cwl",
     "workflow_steps": [
         {
             "step": "bf1c3088-fe2e-4210-8b49-58aac06f2a11",
@@ -1175,7 +1175,7 @@
         }
     ],
     "workflow_type": "Hi-C data analysis",
-    "name": "hi-c-processing-parta-juicer-patch/1",
+    "name": "hi-c-processing-parta-juicer-patch/2",
     "uuid": "a16d2764-0a2b-45f0-8595-17db78d0c0d9",
     "arguments": [
         {

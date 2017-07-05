@@ -86,7 +86,7 @@
         "lab": "4dn-dcic-lab",
         "title": "addfragtopairs",
         "name": "addfragtopairs",
-        "version": "1",
+        "version": "2",
         "analysis_step_types": ["file format conversion"],
         "software_used": "02d636b9-d82d-4da9-950c-2ca994aababc"
     },
