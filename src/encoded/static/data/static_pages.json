@@ -5,11 +5,12 @@
         "about" : true,
 
         "help"  : {
+            "title": "Introduction to 4DN Metadata",
             "directory" : "/src/encoded/static/data/help",
             "sections"  : [
                 {
                     "filename" : "introduction.html",
-                    "toc-title" : "Introduction to Data Submission"
+                    "toc-title" : "Introduction to 4DN Metadata"
                 },
                 {
                     "title" : "Metadata Structure",
@@ -32,22 +33,20 @@
         },
 
         "help/getting-started" : {
+            "title": "Getting Started with Submissions",
             "directory" : "/docs/public/metadata-submission",
             "sections"  : [
                 {
-                    "filename"  : "introduction.md",
-                    "toc-title" : "Getting Started with Submission"
-                },
-                {
-                    "title"     : "Getting a Submitter Account",
-                    "filename"  : "getting_added_as_user.md"
+                    "filename"  : "getting_started.md",
+                    "title" : null
                 }
             ],
             "table-of-contents" : {
                 "enabled"       : true,
                 "header-depth"  : 4,
                 "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
-                "include-top-link" : false
+                "include-top-link" : false,
+                "skip-depth": 1
             }
         },
 
@@ -56,7 +55,7 @@
             "directory" : "/docs/public/metadata-submission",
             "sections"  : [
                 {
-                    "title"     : "Online Submission Tool",
+                    "title" : null,
                     "filename"  : "web_submission.md"
                 }
             ],
@@ -64,7 +63,8 @@
                 "enabled"       : true,
                 "header-depth"  : 4,
                 "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
-                "include-top-link" : false
+                "include-top-link" : false,
+                "skip-depth": 1
             }
         },
 
@@ -74,11 +74,11 @@
             "directory" : "/docs/public/metadata-submission",
             "sections"  : [
                 {
-                    "title"     : "Using Excel Workbooks",
+                    "title"     : null,
                     "filename"  : "excel_submission.md"
                 },
                 {
-                    "title"     : "Information About Schemas",
+                    "toc-title"     : "Schema Information",
                     "filename"  : "schema_info.md"
                 }
             ],
@@ -104,7 +104,8 @@
                 "enabled"       : true,
                 "header-depth"  : 4,
                 "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
-                "include-top-link" : false
+                "include-top-link" : false,
+                "skip-depth": 1
             }
         },
 
