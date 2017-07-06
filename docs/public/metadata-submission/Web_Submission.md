@@ -1,13 +1,13 @@
-## Overview 
+## Overview
 
-An online submission interface has been developed to help with the submission of 4DN metadata.  This web interface is especially useful for; submitting one or a few experiments, editing the metadata for an existing experiment and can also be helpful for understanding object dependencies in our metadata schemas (for example every experiment needs a biosample).  The system has been developed as a submission wizard that allows both the stepwise creation of database objects and full submission of an entire experiment with all required associated objects.  However, we do recommend you review the Note on Experiments and Replicate Sets on the [Introduction page](./introduction.md).
+An online submission interface has been developed to help with the submission of 4DN metadata.  This web interface is especially useful for; submitting one or a few experiments, editing the metadata for an existing experiment and can also be helpful for understanding object dependencies in our metadata schemas (for example learning that every experiment needs a type and a biosample).  The system has been developed as a submission wizard that allows both the stepwise creation of database objects and full submission of an entire experiment with all required associated objects.  However, we do recommend you review the Note on Experiments and Replicate Sets on the [Introduction page](/help).
 
 ## Creating New Items
 
 You are very likely want to start by entering metadata for an ExperimentSetReplicate object or an Experiment object of a particular type (eg. a Hi-C experiment or Microscopy experiment).  It may make the most sense for you to start by creating experiments and then as a subsequent step associating multiple experiments with a Replicate Set.  However, you can start your submission at a lower level item type if that makes things easier for you.
-Navigate to an item of the type for which you want to create metadata eg. [Hi-C Experiment 4DNEX5LRCIOK](https://testportal.4dnucleome.org/experiments-hi-c/4DNEX5LRCIOK/)  
+Navigate to an item of the type for which you want to create metadata eg. [Hi-C Experiment 4DNEX5LRCIOK](https://testportal.4dnucleome.org/experiments-hi-c/4DNEX5LRCIOK/)
 
-Currently you can find **Create** and **Edit** links near the top of a page for most items in our system.  You will not see one or both of these buttons if you lack permission to perform these operations, which may be due to the status of the item and/or your role in our system. 
+Currently you can find **Create** and **Edit** links near the top of a page for most items in our system.  You will not see one or both of these buttons if you lack permission to perform these operations, which may be due to the status of the item and/or your role in our system.
 
 When you click **Create** the first thing you will be asked is to create an alias for your item.  This is a lab specific unique identifier for this object taking the form of xxxx:xxxxx where the portion before the colon is a lab designation eg. 4dndcic and the portion after is an identifier that you choose that is unique within your lab group (see section on aliases here).
 
@@ -19,13 +19,12 @@ If a field or object are required that is indicated.  The *Fields* section is wh
 
 As you create or add linked Objects you will see the Objects listed in the *Navigate* section change colors accordingly.  You can use the *Navigate* section to review what you have submitted, validated and what remains to be added.
 
-And finally when all your linked objects are submitted and validated (green) you can validate and submit the object to complete your submission. 
+And finally when all your linked objects are submitted and validated (green) you can validate and submit the object to complete your submission.
 
 ## Editing Existing Objects
 
-You can use the online submission interface to make edits to existing items providing you have permission to do so.  If an object has been 'released' either to the 4DN project or to the public it can no longer be changed.  However, if the object has an 'in review' status then you can make changes to fields provided you are the submitter of that object or a submitter for the lab that submitted the object.  
+You can use the online submission interface to make edits to existing items providing you have permission to do so.  If an object has been 'released' either to the 4DN project or to the public it can no longer be changed.  However, if the object has an 'in review' status then you can make changes to fields provided you are the submitter of that object or a submitter for the lab that submitted the object.
 
 **WARNING: Please take care to be sure that the object you are editing is really the one you want to change.**
 
 Navigate to that objects page and if the object is editable then you should see an **Edit** button.  After clicking the button you will be brought to a page as described above.  This time if you click on the **+** in the *Fields* or *Linked Objects* sections you will see the existing values, to which you can make changes as needed.  Then validate and submit to commit the changes to the system.
-
