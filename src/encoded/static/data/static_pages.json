@@ -6,29 +6,27 @@
 
         "help"  : {
             "title": "Introduction to 4DN Metadata",
-            "directory" : "/src/encoded/static/data/help",
+            "directory" : "/docs/public/help",
             "sections"  : [
                 {
-                    "filename" : "introduction.html",
-                    "toc-title" : "Introduction to 4DN Metadata"
-                },
-                {
-                    "title" : "Metadata Structure",
-                    "filename" : "metadataStructure1.html"
+                    "filename" : "introduction.md",
+                    "title": null
                 },
                 {
                     "filename" : "carousel-place-holder",
                     "content" : "placeholder: <SlideCarousel />"
                 },
-                {   "filename" : "metadataStructure2.html"  },
                 {
-                    "title" : "Data Submission via Spreadsheet",
-                    "filename" : "submissionXLS.html"
-                },
-                {   "title" : "REST API", "filename" : "restAPI.html" }
+                    "filename" : "introduction2.md",
+                    "title": null
+                }
             ],
             "table-of-contents" : {
-                "enabled" : true
+                "enabled" : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth": 1
             }
         },
 
@@ -78,13 +76,13 @@
                     "filename"  : "excel_submission.md"
                 },
                 {
-                    "toc-title"     : "Schema Information",
+                    "title"     : null,
                     "filename"  : "schema_info.md"
                 }
             ],
             "table-of-contents" : {
                 "enabled"       : true,
-                "header-depth"  : 4,
+                "header-depth"  : 3,
                 "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
                 "include-top-link" : false,
                 "skip-depth"    : 1

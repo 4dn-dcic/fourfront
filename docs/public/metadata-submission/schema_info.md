@@ -1,3 +1,5 @@
+## Schema information
+
 Schema Filename | Worksheet Name | Collection Name(s)
 ---|---|---
 analysis\_step.json | AnalysisStep | analysis-steps, analysis\_step

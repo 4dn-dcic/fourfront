@@ -2,7 +2,7 @@
 
 In order to make your data accessible, searchable and assessable you should submit as much metadata as possible to the 4DN system along with the raw files you have generated in your experiments. These pages can show you how to find out what kind of metadata we collect for your particular type of experiment and the mechanisms by which you can submit your metadata and data to the 4DN system.
 
-For an overview of the metadata structure and relationships between different items please see [the slides](./metadataStructure1.html) available on the [introductory page](.introduction.html).
+For an overview of the metadata structure and relationships between different items please see [the slides](/help#metadata-structure) available on the [introductory page](/help).
 
 ## A note on Experiments and Replicate Sets
 
@@ -12,11 +12,11 @@ You may also have multiple sequencing runs performed at different times using a 
 
 The replicate information is stored and represented as a set of experiments that includes labels indicating the replicate type and replicate number of each experiment in the set.
 
-The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with, though in the database the information will always end up directly associated with ExperimentSetReplicate objects.  Specific details on formatting information regarding replicates is given in the [Excel Work Book Submission](./excel_submission.md) page.  When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](./REST_API_submission.md).
+The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with, though in the database the information will always end up directly associated with ExperimentSetReplicate objects.  Specific details on formatting information regarding replicates is given in the [Excel Work Book Submission](/help/spreadsheet) page.  When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](/help/rest-api).
 
 ## Getting Added as a 4DN User or Submitter
 
-Before you can view protected lab or project data or submit data to the 4DN system you must be a registered user of the site and have the appropriate access credentials. To view lab data that is still in the review phase you must be registered as a member of the lab that produced the data.  You must be designated as a submitter for the lab for which you want to submit files and metadata.  Most current 4DN lab members should already be registered in our system.  If you are a lab submitter or new to the project to get set up with an account with the correct access contact the data wranglers at <support@4dnucleome.org>.  To validate your credentials, please also cc your PI.
+Before you can view protected lab or project data or submit data to the 4DN system you must be a registered user of the site and have the appropriate access credentials. To view lab data that is still in the review phase you must be registered as a member of the lab that produced the data.  You must be designated as a submitter for the lab for which you want to submit files and metadata.  Most current 4DN lab members should already be registered in our system.  If you are a lab submitter or new to the project to get set up with an account with the correct access contact the data wranglers at [support@4dnucleome.org](mailto:support@4dnucleome.org).  To validate your credentials, please also cc your PI.
 
 
 **A note on metadata and data accessibility.**
@@ -36,7 +36,7 @@ If you have been designated as a submitter for the project and plan to use eithe
 2. Once logged in, go to your ”Profile” page by clicking **Account** on the upper right side of the page.  In your profile page, click the green “Add Access Key” button, and copy the “access key ID” and “secret access key” values from the pop-up page. _Note that once the pop-up page disappears you will not be able to see the secret access key value._ However, if you forget or lose your secret key you can always delete and add new access keys from your profile page at any time.
 
 
-3. Once you have your access key information, for use with Submit4DN our spreadsheet submission system, create a file in your home directory named “keypairs.json”. This file will contain your key information in json format and will be read by the Submit4DN scripts to establish a secure connection. The contents of the file must be formatted as shown below - replace key and secret with your new “Access Key ID” and “Secret Access Key”.  You can use the same key and secret to use the 4DN REST-API.
+3. Once you have your access key information, for use with Submit4DN our spreadsheet submission system, create a file in your home directory named “keypairs.json”. This file will contain your key information in json format and will be read by the Submit4DN scripts to establish a secure connection. The contents of the file must be formatted as shown below - replace key and secret with your new “Access Key ID” and “Secret Access Key”.  You can use the same key and secret to use the 4DN [REST-API](/help/rest-api).
 
 **Sample content for keypairs.json**
 
