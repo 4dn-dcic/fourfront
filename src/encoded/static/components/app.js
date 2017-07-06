@@ -62,7 +62,7 @@ const portal = {
         },
 
         {id: 'help-menu-item', sid:'sHelp', title: 'Help', children: [
-            {id: 'introduction-menu-item', title: 'Introduction to Data Submission', url: '/help'},
+            {id: 'introduction-menu-item', title: 'Introduction to 4DN Metadata', url: '/help'},
             {id: 'getting-started-menu-item', title: 'Getting Started', url: '/help/getting-started'},
             {id: 'web-submission-menu-item', title: 'Online Submission', url: '/help/web-submission'},
             {id: 'spreadsheet-menu-item', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
