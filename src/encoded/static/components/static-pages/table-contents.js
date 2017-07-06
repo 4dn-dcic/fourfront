@@ -123,7 +123,7 @@ class TableEntry extends React.Component {
                 elemTop = Math.min(document.body.scrollHeight - window.innerHeight, elemTop);
             }
         }
-        
+
         if (typeof elemTop !== 'number') return null;
 
         if (props.nextHeader) {
@@ -514,7 +514,7 @@ export default class TableOfContents extends React.Component {
                         var childHeaders = TableEntryChildren.getHeadersFromContent(s.content, this.props.maxHeaderDepth, 1);
                         return TableEntryChildren.renderChildrenElements(
                             childHeaders, s.content, this.props.maxHeaderDepth, 1,
-                            listStyleTypes, this.state.scrollTop, this.state.mounted, this.props.skipDepth, s.nextHeader || (i === all.length - 1 ? 'bottom' : null)//this.props.nextMajorHeader
+                            listStyleTypes, this.state.scrollTop, this.state.mounted, this.props.skipDepth, s.nextHeader || (i === all.length - 1 ? 'bottom' : all[i + 1].link || null  )
                         );
                     }
                     return (<TableEntry 
