@@ -68,7 +68,7 @@ Once you have your prerequisites, do the following:
        
     
 5. Click "Backup". PgAdmin should pop up a little box on bottom right of their GUI showing time elapsed and then a success or error message. This should take about 30 seconds (or longer) as of 2017-07-06.
-![https://gyazo.com/3b00d4e6364c87a9dcd45e1cece03a64](https://i.gyazo.com/3b00d4e6364c87a9dcd45e1cece03a64.png)
+![https://i.gyazo.com/8947db89fe2739a5729d54cfce10958d.png](https://i.gyazo.com/8947db89fe2739a5729d54cfce10958d.png)
 
 6. Navigate to your newly backed up SQL file. There it is!
    Remember to disconnect the server and SSH tunnel when done.
