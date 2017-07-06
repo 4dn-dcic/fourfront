@@ -141,31 +141,32 @@ If it is already installed upgrade to the latest version:
     pip3 install submit4dn --upgrade
 
 
-### Submit4DN Source code
+#### Submit4DN Source code
 The source code for the submission scripts is available on [github](https://github.com/4dn-dcic/Submit4DN).
 
-
-<span id="access"></span>
 
 Note if you are attempting to run the scripts in the wranglertools directory without installing the package, then in order to get the correct sys.path you need to run the scripts from the parent directory as modules using the -m flag.
 
 ```python3 -m wranglertools.import_data  filename.xls```
 
-### Get access keys
-
-Described here.
 
 ### Using import_data script for submission
 You can use `import_data` either to upload new items or to modify metadata fields of existing items. This script will accept the excel workbook you prepared, and will upload every new item in the sheets.  This script is also used to upload data files to the 4DN data store - this is done in a separate step after your File metadata has been successfully uploaded.
 
 
-### Testing your metadata
-When you run the import_data  script on your metadata excel workbook without any arguments the system will test your data for compatibility with our metadata structure and report back to you any problems (in effect a dry run). The metadata will not be submitted, so you can take advantage of this feature to test your excel workbook.
+#### Get access keys
+
+You will need to generate access keys to submit data.  How to get these is described [here](/help/getting-started#getting-connection-keys-for-the-4dn-dcic-servers).
+
+
+### Workbook Submission
+
+#### Testing your metadata
+Before actually updating the 4DN database you can check your spreadsheet for formatting and missing required data by doing a 'dry run'.  When you run the import_data  script on your metadata excel workbook without any arguments the system will test your data for compatibility with our metadata structure and report back to you any problems. The metadata will not be submitted to the database, so you can take advantage of this feature to test your excel workbook.
 
 ```import_data My_metadata.xls```
 
-
-### Uploading (posting) & Modifying (patching) Metadata
+#### Uploading (posting) & Modifying (patching) Metadata
 When you submit your metadata, if a row in any sheet corresponds to a new item that has not previously been submitted to the 4DN database you will be POSTing that data via the REST API. Most of your entries in the first submission will be POSTs. To activate posting you need to include the ```--update``` argument to ```import_data```.
 
 
@@ -176,7 +177,7 @@ If you need to modify an existing item, you can use the patch function. To be ab
 
 	import_data My_metadata.xls --patchall
 
-### When your upload is aborted
+#### When your upload is aborted
 If for some reason the script fails in the middle of the upload process or errors are encountered for certain items, some items will have been posted while others will have not. When you fix the problem that caused the process to terminate, you can rerun the script using both the ```--patchall``` and ```--update``` arguments. Those items that had already been posted will be ‘patched’ using the data in the sheet and the items that had not been posted yet will be loaded.
 
 	import_data My_metadata.xls --patchall --update
@@ -233,4 +234,3 @@ The scripts accepts the following parameters:.
 **To get the complete list of relevant sheets in one workbook:**
 
     get_field_info --type Publication --type Document --type Vendor --type Protocol --type BiosampleCellCulture --type Biosource --type Enzyme --type Construct --type TreatmentChemical --type TreatmentRnai --type Modification --type Biosample --type FileFastq --type FileSet --type IndividualHuman --type IndividualMouse --type ExperimentHiC --type ExperimentCaptureC --type ExperimentRepliseq --type Target --type GenomicRegion --type ExperimentSet --type ExperimentSetReplicate --type Image --comments --outfile AllItems.xls
-

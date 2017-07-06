@@ -67,6 +67,7 @@ const portal = {
                 {id: 'restapi', title: 'REST API', url: '/help#rest-api'},
             ]},
             {id: 'getting-started', title: 'Getting Started', url: '/help/getting-started'},
+            {id: 'web-submission', title: 'Online Submission', url: '/help/web-submission'},
             {id: 'spreadsheet', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
             {id: 'rest-api', title: 'REST API', url: '/help/rest-api'},
             {id: 'about', title: 'About', url: '/about'}

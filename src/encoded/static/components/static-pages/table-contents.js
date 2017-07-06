@@ -305,7 +305,7 @@ class TableEntryChildren extends React.Component {
 
                 var hString = TableOfContents.textFromReactChildren(h.props.children);
                 var link = TableOfContents.slugify(hString);
-                var collapsible = currentDepth >= (1 - (skipDepth || 0));
+                var collapsible = currentDepth >= (1 + (skipDepth || 0));
                 return (
                     <TableEntry 
                         link={link}
