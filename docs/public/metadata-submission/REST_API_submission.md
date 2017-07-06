@@ -7,8 +7,7 @@ The 4DN-DCIC metadata database can be accessed using a Hypertext-Transfer-Protoc
 ## Connecting to the server
 Your script will need to use an access key and secret that you can obtain by following [these instructions](/help/getting-started#getting-connection-keys-for-the-4dn-dcic-servers) to connect to the server.  Exactly how you format and pass the connection information to the server depends on your scripting language and the libraries that you use with it.
 
-**Base URLs for submitting and fetching data are:**
-*Server:* <https://testportal.4dnucleome.org/>
+**Base URL for submitting and fetching data are:** <https://testportal.4dnucleome.org/>
 
 You can refer to the ```FDN_key``` and ```FDN_connection``` classes in [the ```fdnDCIC.py``` library](https://github.com/4dn-dcic/Submit4DN/blob/master/wranglertools/fdnDCIC.py) in Submit4DN for an example of how to generate the necessary information that will be passed to the server with each request.
 
