@@ -81,6 +81,16 @@
         "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547"
     },
     {
+        "uuid": "bf1c3088-fe2e-4210-8b49-58aac06f2a11",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "addfragtopairs",
+        "name": "addfragtopairs",
+        "version": "2",
+        "analysis_step_types": ["file format conversion"],
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994aababc"
+    },
+    {
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a73514",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",

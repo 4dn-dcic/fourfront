@@ -69,6 +69,14 @@
         "version": "0.1.1"
     },
     {
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994aababc",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "pairix",
+        "software_type": ["file format converter", "indexer"],
+        "version": "0.1.8"
+    },
+    {
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a13131",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
