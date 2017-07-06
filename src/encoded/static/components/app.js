@@ -61,16 +61,12 @@ const portal = {
             }
         },
         {id: 'help-menu-item', sid:'sHelp', title: 'Help', children: [
-            {id: 'introduction-menu-item', title: 'Introduction to Data Submission', url: '/help', children : [
-                {id: 'metadatastructure-menu-item', title: 'Metadata structure', url: '/help#metadata-structure'},
-                {id: 'datasubmission-menu-item', title: 'Data submission', url: '/help#data-submission'},
-                {id: 'restapi-menu-item', title: 'REST API', url: '/help#rest-api'},
-            ]},
-            {id: 'getting-started-menu-item', title: 'Getting Started', url: '/help/getting-started'},
-            {id: 'web-submission-menu-item', title: 'Online Submission', url: '/help/web-submission'},
-            {id: 'spreadsheet-menu-item', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
-            {id: 'rest-api-menu-item', title: 'REST API', url: '/help/rest-api'},
-            {id: 'about-menu-item', title: 'About', url: '/about'}
+                    {id: 'introduction-menu-item', title: 'Introduction to 4DN Metadata', url: '/help'},
+                    {id: 'getting-started-menu-item', title: 'Getting Started', url: '/help/getting-started'},
+                    {id: 'web-submission-menu-item', title: 'Online Submission', url: '/help/web-submission'},
+                    {id: 'spreadsheet-menu-item', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
+                    {id: 'rest-api-menu-item', title: 'REST API', url: '/help/rest-api'},
+                    {id: 'about-menu-item', title: 'About', url: '/about'}
         ]}
     ],
     user_section: [
