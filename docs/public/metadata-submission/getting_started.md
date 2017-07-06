@@ -12,7 +12,7 @@ You may also have multiple sequencing runs performed at different times using a 
 
 The replicate information is stored and represented as a set of experiments that includes labels indicating the replicate type and replicate number of each experiment in the set.
 
-The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with, though in the database the information will always end up directly associated with ExperimentSetReplicate objects.  Specific details on formatting information regarding replicates is given in the [Excel Work Book Submission](/help/spreadsheet) page.  When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](/help/rest-api).
+The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with, though in the database the information will always end up directly associated with ExperimentSetReplicate objects.  Specific details on formatting information regarding replicates is given in the [Spreadsheet Submission](/help/spreadsheet) page.  When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](/help/rest-api).
 
 ## Getting Added as a 4DN User or Submitter
 
@@ -28,8 +28,7 @@ Before you can view protected lab or project data or submit data to the 4DN syst
 ## Getting Connection Keys for the 4DN-DCIC servers
 If you have been designated as a submitter for the project and plan to use either our spreadsheet-based submission system or the REST-API an access key and a secret key are required to establish a connection to the 4DN database and to fetch, upload (post), or change (patch) data. Please follow these steps to get your keys.
 
-1. Log in to the 4DN website with your username (email) and password.
-    - server: <https://testportal.4dnucleome.org>
+1. Log in to the 4DN [website](https://testportal.4dnucleome.org) with your username (email) and password.
 
     Note that we are using the [Oauth](https://oauth.net/) authentication system which will allow you to login with a google or github login.  _The email associated with the account you use for login must be the same as the one registered with the 4DN-DCIC._
 

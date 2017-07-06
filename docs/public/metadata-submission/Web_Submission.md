@@ -1,6 +1,6 @@
 ## Overview
 
-An online submission interface has been developed to help with the submission of 4DN metadata.  This web interface is especially useful for; submitting one or a few experiments, editing the metadata for an existing experiment and can also be helpful for understanding object dependencies in our metadata schemas (for example learning that every experiment needs a type and a biosample).  The system has been developed as a submission wizard that allows both the stepwise creation of database objects and full submission of an entire experiment with all required associated objects.  However, we do recommend you review the Note on Experiments and Replicate Sets on the [Introduction page](/help).
+An online submission interface has been developed to help with the submission of 4DN metadata.  This web interface is especially useful for; submitting one or a few experiments, editing the metadata for an existing experiment and can also be helpful for understanding object dependencies in our metadata schemas (for example learning that every experiment needs a type and a biosample).  The system has been developed as a submission wizard that allows both the stepwise creation of database objects and full submission of an entire experiment with all required associated objects.  However, we do recommend you review the Note on Experiments and Replicate Sets on the [Getting Started page](/help/getting-started).
 
 ## Creating New Items
 
