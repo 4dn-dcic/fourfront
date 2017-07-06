@@ -61,11 +61,7 @@ const portal = {
             }
         },
         {id: 'help', sid:'sHelp', title: 'Help', children: [
-            {id: 'introduction-menu-item', title: 'Introduction to Data Submission', url: '/help', children : [
-                {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
-                {id: 'datasubmission', title: 'Data submission', url: '/help#data-submission'},
-                {id: 'restapi', title: 'REST API', url: '/help#rest-api'},
-            ]},
+            {id: 'introduction-menu-item', title: 'Introduction to 4DN Metadata', url: '/help'},
             {id: 'getting-started', title: 'Getting Started', url: '/help/getting-started'},
             {id: 'web-submission', title: 'Online Submission', url: '/help/web-submission'},
             {id: 'spreadsheet', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
