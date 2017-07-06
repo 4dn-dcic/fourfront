@@ -339,7 +339,7 @@ class UserActions extends React.Component {
 
         var actions = [];
         this.props.listActionsFor('user_section').forEach((action) => {
-            if (action.id === "login"){
+            if (action.id === "login-menu-item"){
                 actions.push(
                     <Login
                         key={action.id}
@@ -349,7 +349,7 @@ class UserActions extends React.Component {
                         updateUserInfo={this.props.updateUserInfo}
                     />
                 );
-            } else if (action.id === "accountactions"){
+            } else if (action.id === "accountactions-menu-item"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session) {
                     actions.push(Navigation.buildMenuItem.call(this, action, this.props.mounted));
@@ -359,7 +359,7 @@ class UserActions extends React.Component {
                         return Navigation.buildMenuItem.call(this, action, this.props.mounted, {"data-no-cache" : true});
                     }));
                 }
-            } else if (action.id === "contextactions") {
+            } else if (action.id === "contextactions-menu-item") {
                 // Context Actions
                 actions = actions.concat(this.props.listActionsFor('context').map((action) => {
                     return Navigation.buildMenuItem.call(
