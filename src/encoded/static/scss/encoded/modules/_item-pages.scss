@@ -348,6 +348,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				border-bottom: 1px solid #eee;
 				padding-top: 8px;
 				padding-bottom: 8px;
+				transition: padding .3s ease-out;
 			}
 		}
 		.item-label {
@@ -363,6 +364,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		.subitem-toggle {
 			display: inline-block;
 			> .link {
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
 				color: #00cca3; // temporary?
 				cursor:pointer;
 				&:hover {
@@ -390,6 +396,84 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			}
 		}
 
+		&.array-group-row {
+			&:not(.last-item):not(.open) {
+				> .item-label, .item-value {
+					> .inner {
+						border-bottom-color: transparent;
+						padding-bottom: 2px;
+						min-height: 24px;
+					}
+				}
+			}
+			&:not(.first-item) {
+				> .item-label, .item-value {
+					> .inner {
+						padding-top: 2px;
+					}
+				}
+			}
+			> .item-label {
+				.label-number {
+					transition: transform .3s ease-out, color .3s ease-out;
+					transform: scale3d(0.85, 0.85, 0.85) translate3d(16px,1px,0);
+					transform-origin: 100% 25%;
+					margin-top: -1px;
+					color: #888;
+					.number-icon {
+						opacity: 0;
+						transition: opacity .3s ease-out;
+					}
+					&.active {
+						color: #000;
+						transform: scale3d(1,1,1);
+						.number-icon {
+							opacity: 1;
+						}
+					}
+				}
+				span.dim-duplicate {
+					color: transparent;
+					transition: color .3s ease-out;
+					white-space: nowrap;
+					overflow-x: hidden;
+					text-overflow: ellipsis;
+					i.icon {
+						display: none;
+					}
+				}
+			}
+		}
+
+		&.open {
+			> .item-label {
+				> .inner {
+					border-bottom-color: transparent;
+					span.dim-duplicate {
+						color: #bbb;
+					}
+				}
+			}
+			> .item-value {
+				> .inner {
+					border-bottom-color: transparent;
+				}
+			}
+		}
+
+	}
+
+	.sub-panel {
+		padding-left: 40px;
+		padding-bottom: 0;
+		border-left: 1px dotted #aaa;
+		.item-label {
+			.tooltip-info-container {
+				white-space: nowrap;
+				overflow-x: hidden;
+				text-overflow: ellipsis;
+			}
+		}
 	}
 
 }
@@ -413,6 +497,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	ul {
 		margin-bottom: 0px;
 	}
+
 }
 
 /*** Files In Set Table ***/

@@ -36,21 +36,30 @@ class SubItem extends React.Component {
 
     constructor(props){
         super(props);
-        this.handleToggle = this.handleToggle.bind(this);
         this.toggleLink = this.toggleLink.bind(this);
         this.render = this.render.bind(this);
+        if (typeof props.onToggle !== 'function'){
+            this.onToggle = this.handleToggleFallback.bind(this);
+        } else {
+            this.onToggle = this.props.onToggle;
+        }
         this.state = {
             isOpen : false
         };
+        
+    }
+
+    componentDidMount(){
+        ReactTooltip.rebuild();
     }
 
     /**
      * Handler for rendered title element. Toggles visiblity of Subview.
      *
-     * @param {MouseEvent} e - Mouse click event. Its preventDefault() method is called.
+     * @param {React.SyntheticEvent} e - Mouse click event. Its preventDefault() method is called.
      * @returns {Object} 'isOpen' : false
      */
-    handleToggle (e) {
+    handleToggleFallback (e) {
         e.preventDefault();
         this.setState({
             isOpen: !this.state.isOpen,
@@ -64,14 +73,14 @@ class SubItem extends React.Component {
      * @param {boolean} isOpen - Whether state.isOpen is true or not. Used for if plus or minus icon.
      * @returns {Element} <span> element.
      */
-    toggleLink(title = this.props.title, isOpen = this.state.isOpen){
+    toggleLink(title = this.props.title, isOpen = (this.props.isOpen || this.state.isOpen)){
         var iconType = isOpen ? 'icon-minus' : 'icon-plus';
         if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
             title = isOpen ? "Collapse" : "Expand";
         }
         return (
             <span className="subitem-toggle">
-                <span className="link" onClick={this.handleToggle}>
+                <span className="link" onClick={this.onToggle}>
                     <i style={{'color':'black', 'paddingRight': 10, 'paddingLeft' : 5}} className={"icon " + iconType}/>
                     { title }
                 </span>
@@ -79,42 +88,37 @@ class SubItem extends React.Component {
         );
     }
 
+    /**
+     * @returns {JSX.Element} React Span element containing expandable link, and maybe open panel below it.
+     */
     render() {
-        var schemas = this.props.schemas;
-        var content = this.props.content;
-        var title = this.props.title;
-        var popLink = this.props.popLink;
-        var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap;
         return (
             <span>
-                { this.toggleLink(title, this.state.isOpen) }
-                { this.state.isOpen ?
-                    <SubItemView schemas={schemas} content={content} popLink={popLink} title={title} keyTitleDescriptionMap={keyTitleDescriptionMap} />
-                : null }
+                { this.toggleLink(this.props.title, this.props.isOpen || this.state.isOpen) }
+                { this.state.isOpen ? <SubItemView {...this.props} isOpen /> : <div/> }
             </span>
         );
     }
 }
 
-
-
-/**
- * Renders a panel <div> element containing a list.
- *
- * @memberof module:item-pages/components.ItemDetailList.Detail
- */
 class SubItemView extends React.Component {
 
-    componentDidMount(){
-        ReactTooltip.rebuild();
+    static shouldRenderTable(content){
+        var itemKeys = _.keys(content);
+        var itemKeysLength = itemKeys.length;
+        if (itemKeysLength > 6) {
+            return false;
+        }
+        for (var i = 0; i < itemKeysLength; i++){
+            if ( typeof content[itemKeys[i]] !== 'string' && typeof content[itemKeys[i]] !== 'number' ) return false;
+        }
     }
 
-    render(){
+    renderListView(){
         var schemas = this.props.schemas;
         var item = this.props.content;
         var popLink = this.props.popLink;
         var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap || {};
-
         return (
             <div className="sub-panel data-display panel-body-with-header">
                 <div className="key-value sub-descriptions">
@@ -129,7 +133,7 @@ class SubItemView extends React.Component {
                                 '@id', 'audit', 'lab', 'award', 'description'
                             ).concat([
                             // Add
-                                'link_id', 'schema_version'
+                                'link_id', 'schema_version', 'uuid'
                             ])
                         }
 
@@ -145,6 +149,103 @@ class SubItemView extends React.Component {
             </div>
         );
     }
+
+    renderTableView(){
+
+    }
+
+    render(){
+        if (!this.props.isOpen) return null;
+        return this.renderListView();
+    }
+}
+
+
+class DetailRow extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.handleToggle = this.handleToggle.bind(this);
+        this.render = this.render.bind(this);
+        this.state = { 'isOpen' : false };
+    }
+
+    /**
+     * Handler for rendered title element. Toggles visiblity of Subview.
+     *
+     * @param {React.SyntheticEvent} e - Mouse click event. Its preventDefault() method is called.
+     * @returns {Object} 'isOpen' : false
+     */
+    handleToggle (e, id = null) {
+        e.preventDefault();
+        this.setState({
+            isOpen: !this.state.isOpen,
+        });
+    }
+
+    render(){
+        var value = Detail.formValue(
+            this.props.item,
+            this.props.popLink,
+            this.props['data-key'],
+            this.props.itemType,
+            this.props.keyTitleDescriptionMap
+        );
+        var label = this.props.label;
+        if (this.props.labelNumber) {
+            label = (
+                <span>
+                    <span className={"label-number right inline-block" + (this.state.isOpen ? ' active' : '')}><span className="number-icon text-200">#</span> { this.props.labelNumber }</span>
+                    { label }
+                </span>
+            );
+        }
+
+        if (value.type === SubItem) {
+            // What we have here is an embedded object of some sort. Lets override its 'isOpen' & 'onToggle' functions.
+            value = React.cloneElement(value, { onToggle : this.handleToggle, isOpen : this.state.isOpen });
+            
+            return (
+                <div>
+                    <PartialList.Row label={label} children={value} className={(this.props.className || '') + (this.state.isOpen ? ' open' : '')} />
+                    <SubItemView
+                        popLink={this.props.popLink}
+                        content={this.props.item}
+                        schemas={this.props.schemas}
+                        keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                        isOpen={this.state.isOpen}
+                    />
+                </div>
+            );
+        }
+
+        if (value.type === "ol" && value.props.children[0] && value.props.children[0].type === "li" &&
+            value.props.children[0].props.children && value.props.children[0].props.children.type === SubItem) {
+            // What we have here is a list of embedded objects. Render them out recursively and adjust some styles.
+            return (
+                <div className="array-group" data-length={this.props.item.length}>
+                { React.Children.map(value.props.children, (c, i)=>
+                    <DetailRow
+                        {...this.props}
+                        label={
+                            i === 0 ? label : <span className="dim-duplicate">{ label }</span>
+                        }
+                        labelNumber={i + 1}
+                        className={
+                            ("array-group-row item-index-" + i) +
+                            (i === this.props.item.length - 1 ? ' last-item' : '') +
+                            (i === 0 ? ' first-item' : '')
+                        }
+                        item={this.props.item[i]}
+                    />
+                ) }
+                </div>
+            );
+        }
+        // Default / Pass-Thru
+        return <PartialList.Row label={label} children={value} className={(this.props.className || '') + (this.state.isOpen ? ' open' : '')} />;
+    }
+
 }
 
 
@@ -166,17 +267,14 @@ export class Detail extends React.Component {
      * @param {Object} key - Key to use to get 'description' for tooltip from the 'tips' param.
      * @returns {Element} <div> element with a tooltip and info-circle icon.
      */
-    static formKey(tips, key){
+    static formKey(tips, key, includeTooltip = true){
         var tooltip = null;
         var title = null;
         if (tips[key]){
             var info = tips[key];
-            if (info.description){
-                tooltip = info.description;
-            }
-            if (info.title){
-                title = info.title;
-            }
+            if (info.title)         title = info.title;
+            if (!includeTooltip)    return title;
+            if (info.description)   tooltip = info.description;
         }
 
         return <TooltipInfoIconContainer title={title || key} tooltip={tooltip} />;
@@ -217,17 +315,18 @@ export class Detail extends React.Component {
             var title = getTitleStringFromContext(item);
 
             // if the following is true, we have an embedded object without significant other data
-            if (item.display_title && typeof item.link_id === 'string' && _.keys(item).length < 4){
-                var format_id = item.link_id.replace(/~/g, "/");
+            if (item.display_title && (typeof item.link_id === 'string' || typeof item['@id'] === 'string') && _.keys(item).length < 4){
+                //var format_id = item.link_id.replace(/~/g, "/");
+                var link = object.atIdFromObject(item);
                 if(popLink){
                     return (
-                        <a href={format_id} target="_blank">
+                        <a href={link} target="_blank">
                             {title}
                         </a>
                     );
                 } else {
                     return (
-                        <a href={format_id}>
+                        <a href={link}>
                             { title }
                         </a>
                     );
@@ -303,7 +402,6 @@ export class Detail extends React.Component {
     }
 
     static SubItem = SubItem
-    static SubItemView = SubItemView
 
     static propTypes = {
         'context' : PropTypes.object.isRequired,
@@ -373,6 +471,8 @@ export class Detail extends React.Component {
         return (
             <PartialList
                 persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
+                    <DetailRow key={key} label={Detail.formKey(tips,key)} item={context[key]} popLink={popLink} data-key={key} itemType={context['@type'] && context['@type'][0]} keyTitleDescriptionMap={tips}/>
+                    /*
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
                         { Detail.formValue(
                             context[key],
@@ -382,6 +482,7 @@ export class Detail extends React.Component {
                             tips
                         ) }
                     </PartialList.Row>
+                    */
                 )}
                 collapsible={ collapsibleKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>

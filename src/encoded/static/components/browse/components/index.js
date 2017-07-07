@@ -7,3 +7,4 @@ export { CustomColumnController, CustomColumnSelector } from './CustomColumnCont
 export { SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions } from './SearchResultTable';
 export { AboveTableControls } from './AboveTableControls';
 export { ExperimentSetDetailPane } from './ExperimentSetDetailPane';
+export { SearchResultDetailPane } from './SearchResultDetailPane';

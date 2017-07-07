@@ -37,7 +37,7 @@
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "replicate_exps": {
-            "title": "Set of Replicate Experiments",
+            "title": "Replicates",
             "description": "Replicate experiments with biological and technical replication numbers.",
             "type": "array",
             "default": [],
