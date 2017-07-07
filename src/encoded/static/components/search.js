@@ -1,4 +1,5 @@
 'use strict';
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
@@ -8,93 +9,10 @@ import * as globals from './globals';
 import ReactTooltip from 'react-tooltip';
 import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import { Detail } from './item-pages/components';
 import FacetList from './facetlist';
-import { SortController, LimitAndPageControls, SearchResultTable } from './browse/components';
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane } from './browse/components';
 
 
-var Listing = function (result, schemas, selectCallback) {
-    var props;
-    if (result['@id']) {
-        props = {'context': result,  'key': result['@id'], 'schemas': schemas, 'selectCallback': selectCallback};
-    }
-    if(props){
-        return(<ResultTableEntry {...props} />);
-    }else{
-        return null;
-    }
-
-};
-
-class ResultTableEntry extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            'open': false
-        };
-    }
-
-    handleToggle = (e) => {
-        e.preventDefault();
-        this.setState({'open': !this.state.open});
-    }
-
-    handleSelect = (e) => {
-        e.preventDefault();
-        if(!this.props.selectCallback){
-            return;
-        }
-        var processed_link = object.atIdFromObject(this.props.context);
-        this.props.selectCallback(processed_link);
-    }
-
-    render() {
-        var result = this.props.context || null;
-        var item_type = result['@type'][0];
-        var processed_link = object.atIdFromObject(result);
-        var detailPop = false;
-        if(this.props.selectCallback){
-            detailPop = true;
-        }
-        return (
-            <div className="result-table-result">
-                <div className="row">
-                    <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
-                        <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
-                            <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
-                        </Button>
-                        {this.props.selectCallback ?
-                            <Button bsSize="xsmall" bsStyle="success" className="icon-container pull-left" onClick={this.handleSelect}>
-                                <i className={"icon icon-check"}></i>
-                            </Button>
-                            : null
-                        }
-                        {detailPop ?
-                            <a href={processed_link} target="_blank">{result.display_title}</a>
-                            : <a href={processed_link}>{result.display_title}</a>
-                        }
-                    </div>
-                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                        {result.lab ? result.lab.display_title : ""}
-                    </div>
-                    <div className="col-xs-12 col-md-2 col-lg-2 result-table-entry-div">
-                        {result.submitted_by ? result.submitted_by.display_title : ""}
-                    </div>
-                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                        {result.date_created ?
-                            <DateUtility.LocalizedTime timestamp={result.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
-                        : null}
-                    </div>
-                </div>
-                <Collapse in={this.state.open}>
-                    <div>
-                        <ResultDetail result={result} schemas={this.props.schemas} popLink={detailPop}/>
-                    </div>
-                </Collapse>
-            </div>
-        );
-    }
-}
 
 // If the given term is selected, return the href for the term
 export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
@@ -156,69 +74,6 @@ class InfoIcon extends React.Component{
         if (!this.props.children) return null;
         return (
             <i className="icon icon-info-circle" data-tip={this.props.children}/>
-        );
-    }
-}
-
-
-// the old Search tabular-style result display
-class TabularTableResults extends React.Component{
-
-    static propTypes = {
-        results: PropTypes.array.isRequired,
-        schemas: PropTypes.object,
-    }
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        var results = this.props.results;
-        var schemas = this.props.schemas || {};
-        // Buttons are included in title bar for correct spacing
-        return(
-            <div>
-                <div className="result-table-header-row-container">
-                    <div className="row hidden-xs hidden-sm result-table-header-row">
-                        <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
-                            <Button style={{'visibility':'hidden','marginRight':'4px'}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
-                                <i className="icon icon-plus"></i>
-                            </Button>
-                            {this.props.selectCallback ?
-                                <Button style={{'visibility':'hidden','marginRight':'4px'}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
-                                    <i className={"icon icon-check"}></i>
-                                </Button>
-                                : null
-                            }
-                            <div>Title</div>
-                        </div>
-                        <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                            <div>Lab</div>
-                        </div>
-                        <div className="col-xs-12 col-md-2 col-lg-2 result-table-entry-div">
-                            <div>Submitter</div>
-                        </div>
-                        <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                            <div>Date Created</div>
-                        </div>
-                        <div className="col-xs-12 col-md-12 divider-column">
-                            <div className="divider"/>
-                        </div>
-                    </div>
-                </div>
-                <div className="nav result-table row" id="result-table">
-                    {results.length ?
-                        results.map(function (result) {
-                            if(this.props.selectCallback){
-                                return Listing(result, schemas, this.props.selectCallback);
-                            }else{
-                                return Listing(result, schemas, null);
-                            }
-                        }.bind(this))
-                    : null}
-                </div>
-            </div>
         );
     }
 }
@@ -343,33 +198,7 @@ class ResultTableHandlersContainer extends React.Component {
 
 }
 
-class ResultDetailPane extends React.Component {
 
-    componentDidMount(){
-        ReactTooltip.rebuild();
-    }
-
-    componentDidUpdate(pastProps, pastState){
-        if (this.props.open && !pastProps.open) ReactTooltip.rebuild();
-    }
-
-    render (){
-        var { result, popLink } = this.props;
-        return (
-            <div>
-                {result.description ?
-                        <div className="data-row flexible-description-box result-table-result-heading">
-                            {result.description}
-                        </div>
-                        : null}
-                    { <div className="item-page-detail">
-                        <h4 className="text-300">Details</h4>
-                        <Detail context={result} open={false} popLink={popLink}/>
-                    </div> }
-            </div>
-        );
-    }
-}
 
 class ControlsAndResults extends React.Component {
 
@@ -511,7 +340,7 @@ class ControlsAndResults extends React.Component {
                             results={results}
                             columns={context.columns || {}}
                             renderDetailPane={(result, rowNumber, containerWidth)=>
-                                <ResultDetailPane popLink={this.props.selectCallback ? true : false} result={result} />
+                                <SearchResultDetailPane popLink={this.props.selectCallback ? true : false} result={result} />
                             }
                             hiddenColumns={hiddenColumns}
                             columnDefinitionOverrideMap={columnDefinitionOverrides}
