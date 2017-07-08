@@ -1394,17 +1394,6 @@
             ]
         },
         {
-            "workflow_argument_name":"normalization_type",
-            "argument_type":"parameter",
-            "argument_mapping":[
-                {
-                    "step_argument_name":"normalization_type",
-                    "step_argument_type":"parameter",
-                    "workflow_step":"hic2mcool"
-                }
-            ]
-        },
-        {
             "workflow_argument_name":"output_pairs_index",
             "argument_type":"Output processed file",
             "argument_format":"pairs_px2",
