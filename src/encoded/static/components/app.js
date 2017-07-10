@@ -49,7 +49,7 @@ const portal = {
             title: 'Browse',
             //url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
             url : function(currentUrlParts){
-                if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'; // Default/fallback
+                if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate'; // Default/fallback
                 return Filters.filtersToHref(
                     store.getState().expSetFilters,
                     currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
@@ -736,10 +736,10 @@ export default class App extends React.Component {
         return true;
     }
 
-    /** 
+    /**
      * Check this.state.isSubmitting to prompt user if navigating away
      * from the submissions page.
-     * 
+     *
      * @param {string} [href] - Href we are navigating to (in case of navigate, confirmNavigation) or have just navigated to (in case of popState event).
      */
     stayOnSubmissionsPage(href = null) {

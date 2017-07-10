@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { ItemDetailList, TooltipInfoIconContainer } from './ItemDetailList';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
-import { console, object, layout } from './../../util';
+import { console, object, layout, ajax } from './../../util';
 
 
 export class ViewMetricButton extends React.Component {
@@ -124,6 +124,22 @@ class FileDetailBody extends React.Component {
         if (node.meta && node.meta.run_data && node.meta.run_data.type === 'quality_metric') return true;
     }
 
+    /**
+     * Use presence of 'status' property to determine if File object/Item we have
+     * is complete in its properties or not.
+     * 
+     * @param {Object} file - Object representing an embedded file. Should have display_title, at minimum.
+     * @returns {boolean} True if complete, false if not.
+     * @throws Error if file is not an object.
+     */
+    static isFileDataComplete(file){
+        if (!file || typeof file !== 'object') throw new Error('File param is not an object.');
+        if (typeof file.display_title === 'string' && typeof file.status !== 'string') {
+            return false;
+        }
+        return true;
+    }
+
     static propTypes = {
         'node' : PropTypes.object.isRequired,
         'file' : PropTypes.object.isRequired,
@@ -142,13 +158,52 @@ class FileDetailBody extends React.Component {
         ]
     }
 
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.maybeLoadFile = this.maybeLoadFile.bind(this);
+        this.state = {
+            file : this.props.file
+        };
+    }
+
+    componentDidMount(){
+        this.maybeLoadFile();
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.file !== this.props.file) {
+            this.setState({ file : nextProps.file }, this.maybeLoadFile.bind(this, nextProps.file));
+        }
+    }
+
+    maybeLoadFile(file = this.state.file){
+        var hrefToRequest = null;
+        
+        if (typeof file === 'string') {
+            hrefToRequest = '/files/' + file + '/';
+        } else if (file && typeof file === 'object'){
+            if (!FileDetailBody.isFileDataComplete(file)) hrefToRequest = object.atIdFromObject(file);
+        }
+
+        if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.
+            ajax.load(hrefToRequest, (res)=>{
+                if (res && typeof res === 'object'){
+                    this.setState({ file : res });
+                }
+            }, 'GET', () => {
+                this.setState({ file : null });
+            });
+        }
+    }
+
     doesDescriptionOrNotesExist(){
         var file = this.props.file;
         return !!(file.description || file.notes || false);
     }
 
     canDownload(){
-        if (this.props.canDownloadStatuses.indexOf(this.props.file.status) > -1){
+        if (this.state.file && typeof this.state.file !== 'string' && this.props.canDownloadStatuses.indexOf(this.state.file.status) > -1){
             return true;
         }
         return false;
@@ -156,11 +211,19 @@ class FileDetailBody extends React.Component {
 
     fileTitleBox(){
         var node = this.props.node;
-        var file = this.props.file;
-        var fileTitle = getTitleStringFromContext(file);
+        var file = this.state.file;
+        var fileTitle;
+        var fileTitleFormatted;
         var colClassName = "col-sm-6 col-lg-4";
-        if (!this.doesDescriptionOrNotesExist()){
-            colClassName = "col-sm-6 col-lg-6";
+        if (typeof file === 'string' || !FileDetailBody.isFileDataComplete(file)) {
+            fileTitle = null;
+            fileTitleFormatted = <small><i className="icon icon-circle-o-notch icon-spin icon-fw"/></small>;
+        } else {
+            fileTitle = getTitleStringFromContext(file);
+            if (!this.doesDescriptionOrNotesExist()){
+                colClassName = "col-sm-6 col-lg-6";
+            }
+            fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid}>{ fileTitle }</a>;
         }
         return (
             <div className={colClassName + " file-title box"}>
@@ -172,7 +235,7 @@ class FileDetailBody extends React.Component {
                     } File
                 </span>
                 <h3 className="text-400 text-ellipsis-container node-file-title" title={fileTitle}>
-                    <a href={object.atIdFromObject(file) || '/' + file.uuid}>{ fileTitle }</a>
+                    { fileTitleFormatted }
                 </h3>
             </div>
         );
@@ -181,8 +244,8 @@ class FileDetailBody extends React.Component {
     downloadLinkBox(){
         var gridSize = layout.responsiveGridState();
         //if (gridSize === 'sm' || gridSize === 'xs') return null;
-        var file = this.props.file;
-        if (!file.filename && !file.href && !file.url) return <div className="col-sm-4 col-lg-4 box">&nbsp;</div>;
+        var file = this.state.file;
+        if ((!file.href && !file.url)) return <div className="col-sm-4 col-lg-4 box">&nbsp;</div>;
 
         var title = file.href ? <span>Download</span> : 'File Name';
         var disabled = !this.canDownload();
@@ -204,7 +267,7 @@ class FileDetailBody extends React.Component {
     }
 
     descriptionBox(){
-        var file = this.props.file;
+        var file = this.state.file;
         var gridSize = layout.responsiveGridState();
         if (!this.doesDescriptionOrNotesExist()) return null;
         return (
@@ -224,7 +287,7 @@ class FileDetailBody extends React.Component {
     }
 
     iframeBox(){
-        var file = this.props.file;
+        var file = this.state.file;
         var node = this.props.node;
         if (!node.meta || !node.meta.run_data || node.meta.run_data.type !== 'quality_metric') return null; // IFrames only for quality metrics.
         if (typeof file.url !== 'string') return null;
@@ -240,29 +303,32 @@ class FileDetailBody extends React.Component {
     }
 
     render(){
+        if (!this.state.file){
+            return null;
+        }
 
         var node = this.props.node;
-        var file = this.props.file;
-
         var body;
-        if (FileDetailBody.isNodeQCMetric(node)){
-            var metrics = object.listFromTips(object.tipsFromSchema(this.props.schemas, node.meta.run_data.file))
+        if (typeof this.state.file === 'string'/* || !FileDetailBody.isFileDataComplete(this.state.file)*/){
+            body = null;
+        } else if (FileDetailBody.isNodeQCMetric(node)){
+            var metrics = object.listFromTips(object.tipsFromSchema(this.props.schemas, this.state.file))
             .filter(function(m){
                 if (m.key === 'status') return false;
                 if (m.enum) return true;
                 if (m.type === 'number') return true;
                 return false;
             })
-            .map(function(m){
+            .map((m)=>{
                 return _.extend(m, {
-                    'result' : node.meta.run_data.file[m.key]
+                    'result' : this.state.file[m.key]
                 });
             });
             body = <MetricsView metrics={metrics} />;
         } else {
             body = (
                 <ItemDetailList
-                    context={node.meta.run_data.file}
+                    context={this.state.file}
                     schemas={this.props.schemas}
                     minHeight={this.props.minHeight}
                     keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
@@ -287,6 +353,113 @@ class FileDetailBody extends React.Component {
     }
 }
 
+class AnalysisStepSoftwareDetailRow extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.maybeLoadSoftware = this.maybeLoadSoftware.bind(this);
+        this.state = {
+            software : this.props.software
+        };
+    }
+
+    componentDidMount(){
+        this.maybeLoadSoftware();
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.software !== this.props.software) {
+            this.setState({ software : nextProps.software }, this.maybeLoadSoftware.bind(this, nextProps.software));
+        }
+    }
+
+    maybeLoadSoftware(software = this.state.software){
+        if (typeof software === 'string') { // Our software is not embedded.
+            ajax.load(software, (res)=>{
+                if (res && typeof res === 'object'){
+                    this.setState({ software : res });
+                }
+            }, 'GET', () => {
+                this.setState({ software : null });
+            });
+        }
+    }
+
+    softwareUsedBox(){
+        var soft = this.state.software;
+        if (!soft){
+            return (
+                <div className="col-sm-6 col-md-4 box">
+                    <span className="text-600">Software Used</span>
+                    <h5 className="text-400 text-ellipsis-container">
+                        <em>N/A</em>
+                    </h5>
+                </div>
+            );
+        }
+        if (typeof soft === 'string'){
+            return (
+                <div className="col-sm-6 col-md-4 box">
+                    <span className="text-600">Software Used</span>
+                    <h5 className="text-400 text-ellipsis-container">
+                        <i className="icon icon-circle-o-notch icon-spin icon-fw"/>
+                    </h5>
+                </div>
+            );
+        }
+        var link = object.atIdFromObject(soft);
+        var title;
+        if (typeof soft.name === 'string' && soft.version){
+            title = soft.name + ' v' + soft.version;
+        } else if (soft.title) {
+            title = soft.title;
+        } else {
+            title = link;
+        }
+
+        return (
+            <div className="col-sm-6 col-md-4 box">
+                <span className="text-600">Software Used</span>
+                <h4 className="text-400 text-ellipsis-container">
+                    <a href={link}>{ title }</a>
+                </h4>
+            </div>
+        );
+    }
+
+    softwareLinkBox(){
+        var soft = this.state.software;
+        if (!soft || !soft.source_url) return (
+            <div className="col-sm-6 col-md-8 box">
+                <span className="text-600">Software Source</span>
+                <h5 className="text-400 text-ellipsis-container">
+                    <em>N/A</em>
+                </h5>
+            </div>
+        );
+        return (
+            <div className="col-sm-6 col-md-8 box">
+                <span className="text-600">Software Source</span>
+                <h5 className="text-400 text-ellipsis-container">
+                    <a href={soft.source_url} title={soft.source_url}>{ soft.source_url }</a>
+                </h5>
+            </div>
+        );
+    }
+
+    render(){
+        
+        return (
+            <div className="row">
+
+                { this.softwareUsedBox() }
+                { this.softwareLinkBox() }
+
+            </div>
+        );
+    }
+
+}
 
 class AnalysisStepDetailBody extends React.Component {
 
@@ -332,89 +505,6 @@ class AnalysisStepDetailBody extends React.Component {
         );
     }
 
-    softwareUsedBox(){
-        var step = this.props.step;
-        var soft = step.software_used;
-        if (!soft){
-            return (
-                <div className="col-sm-6 col-md-4 box">
-                    <span className="text-600">Software Used</span>
-                    <h5 className="text-400 text-ellipsis-container">
-                        <em>N/A</em>
-                    </h5>
-                </div>
-            );
-        }
-        var link = object.atIdFromObject(soft);
-        var title;
-        if (typeof soft.name === 'string' && soft.version){
-            title = soft.name + ' v' + soft.version;
-        } else if (soft.title) {
-            title = soft.title;
-        } else {
-            title = link;
-        }
-
-        return (
-            <div className="col-sm-6 col-md-4 box">
-                <span className="text-600">Software Used</span>
-                <h4 className="text-400 text-ellipsis-container">
-                    <a href={link}>{ title }</a>
-                </h4>
-            </div>
-        );
-    }
-
-    softwareBody(){
-        var step = this.props.step;
-        var soft = step.software_used;
-        var link = object.atIdFromObject(soft);
-        var title;
-        if (soft.name && soft.version){
-            title = soft.name + ' v' + soft.version;
-        } else if (soft.title) {
-            title = soft.title;
-        } else {
-            title = link;
-        }
-
-        return (
-            <div>
-                <span className="text-600">Software Used</span>
-                <div>
-                    <h4 className="text-400"><a href={link}>{ title }</a></h4>
-                </div>
-                <ItemDetailList
-                    context={step.software_used}
-                    schemas={this.props.schemas}
-                    minHeight={this.props.minHeight}
-                    keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
-                />
-            </div>
-        );
-    }
-
-    softwareLinkBox(){
-        var step = this.props.step;
-        var soft = step.software_used;
-        if (!soft || !soft.source_url) return (
-            <div className="col-sm-6 col-md-8 box">
-                <span className="text-600">Software Source</span>
-                <h5 className="text-400 text-ellipsis-container">
-                    <em>N/A</em>
-                </h5>
-            </div>
-        );
-        return (
-            <div className="col-sm-6 col-md-8 box">
-                <span className="text-600">Software Source</span>
-                <h5 className="text-400 text-ellipsis-container">
-                    <a href={soft.source_url} title={soft.source_url}>{ soft.source_url }</a>
-                </h5>
-            </div>
-        );
-    }
-
     render(){
         var node = this.props.node;
         //var isThereAssociatedSoftware = !!(this.props.step && this.props.step.software_used);
@@ -428,12 +518,7 @@ class AnalysisStepDetailBody extends React.Component {
 
                     </div>
                     <hr/>
-                    <div className="row">
-
-                        { this.softwareUsedBox() }
-                        { this.softwareLinkBox() }
-
-                    </div>
+                    <AnalysisStepSoftwareDetailRow software={this.props.step.software_used}/>
                 </div>
                 <hr/>
             </div>
@@ -468,19 +553,13 @@ export class WorkflowDetailPane extends React.Component {
     body(){
         var node = this.props.selectedNode;
         
-        if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file['@id']){
+        if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file){
             // File
-            var file = node.meta.run_data.file;
-            var fileTitle = getTitleStringFromContext(file);
-            var className = null;
-            if (fileTitle === file.accession){
-                //className = 'mono-text';
-            }
             return (
                 <layout.WindowResizeUpdateTrigger>
                     <FileDetailBody
-                        file={node.meta.run_data.file}
                         node={node}
+                        file={node.meta.run_data.file}
                         schemas={this.props.schemas}
                         minHeight={this.props.minHeight}
                         keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
@@ -516,7 +595,13 @@ export class WorkflowDetailPane extends React.Component {
 
     render(){
         var node = this.props.selectedNode;
-        if (!node) return null;
+        if (!node) return (
+            <div className="detail-pane">
+                <h5 className="text-400 text-center" style={{ paddingTop : 7 }}>
+                    <small>Select a node above for more detail.</small>
+                </h5>
+            </div>
+        );
 
         var type;
         if (node.type === 'step'){

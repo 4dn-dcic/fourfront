@@ -18,6 +18,12 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "file.json#/properties" }
     ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -33,6 +39,7 @@
                 "cool",
                 "hic",
                 "mcool",
+                "normvector_juicerformat",
                 "other"
             ]
         },
@@ -62,6 +69,7 @@
         "cool": ".cool",
         "mcool": ".mcool",
         "hic": ".hic",
+        "normvector_juicerformat": ".normvector.juicerformat.gz",
         "other": ""
     }
 }

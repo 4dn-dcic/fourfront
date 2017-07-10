@@ -48,10 +48,11 @@ export default class NodesLayer extends React.Component {
 
     render(){
         var p = this.props;
-        var fullHeight = p.innerHeight + p.innerMargin.top + p.innerMargin.bottom;
+        var fullHeight = p.outerHeight;
+        var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
         return (
-            <div className="nodes-layer-wrapper" style={{ width : p.contentWidth, height : fullHeight }}>
-                <div className="nodes-layer" style={{ width : p.contentWidth, height : fullHeight }}>
+            <div className="nodes-layer-wrapper" style={{ width : Math.max(p.contentWidth, fullWidth), height : fullHeight }}>
+                <div className="nodes-layer" style={{ width : Math.max(p.contentWidth, fullWidth), height : fullHeight }}>
                     {
                         NodesLayer.processNodes(this.props.nodes).map(function(node, i){
                             var nodeProps = _.extend( _.omit(p, 'children', 'nodes'), {
@@ -59,10 +60,10 @@ export default class NodesLayer extends React.Component {
                                 onMouseEnter : p.onNodeMouseEnter && p.onNodeMouseEnter.bind(p.onNodeMouseEnter, node),
                                 onMouseLeave : p.onNodeMouseLeave && p.onNodeMouseLeave.bind(p.onNodeMouseLeave, node),
                                 onClick : typeof p.onNodeClick === 'function' && p.onNodeClick.bind(p.onNodeClick, node),
-                                key : node.id || node.name || i
+                                key : node.id || node.name || i,
+                                nodeElement : p.nodeElement || null
                             });
-                            if (p.nodeElement) return React.cloneElement(p.nodeElement, nodeProps);
-                            else return <Node {...nodeProps} />;
+                            return <Node {...nodeProps} />;
                         })
                     }
                 </div>

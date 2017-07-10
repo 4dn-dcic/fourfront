@@ -12,6 +12,7 @@ extends = buildout.cfg
 file_upload_bucket = elasticbeanstalk-{env_name}-files
 blob_bucket = elasticbeanstalk-{env_name}-blobs
 system_bucket = elasticbeanstalk-{env_name}-system
+file_wfout_bucket = elasticbeanstalk-{env_name}-wfoutput
 region_search_instance = {es_server}
 elasticsearch_instance = {es_server}
 elasticsearch_index = {env_name}

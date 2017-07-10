@@ -102,6 +102,7 @@ def test_extra_files(testapp, proc_file_json):
     assert resobj['extra_files'][0]['href']
     assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
     assert resobj['extra_files_creds'][0]['upload_credentials']
+    assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
     assert resobj['extra_files'][0]['status'] == proc_file_json['status']
 
 
@@ -154,6 +155,7 @@ def test_files_aws_credentials(testapp, fastq_uploading):
     res_put = testapp.put_json(resobj['@id'], fastq_uploading)
 
     assert resobj['upload_credentials']['key'] == res_put.json['@graph'][0]['upload_credentials']['key']
+    assert 'test-bucket' in resobj['upload_credentials']['upload_url']
 
 
 def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
@@ -301,11 +303,8 @@ def test_name_for_file_is_accession(registry, fastq_json):
     assert my_file.__name__ == fastq_json['accession']
 
 
-# def test_file_type(registry, fastq_json):
-#    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-#    my_file = FileFastq.create(registry, uuid, fastq_json)
-#    assert 'gz' == my_file.file_type('gz')
-#    assert "fastq gz" == my_file.file_type('fastq', 'gz')
+def test_calculated_display_title_for_fastq(file):
+    assert file['display_title'] == file['accession'] + '.fastq.gz'
 
 
 def test_post_upload_only_on_uploading(registry, fastq_json, request):

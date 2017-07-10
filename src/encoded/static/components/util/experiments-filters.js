@@ -7,7 +7,7 @@ var Alerts = null; //require('./../alerts');
 var store = null;
 var object = require('./object');
 import * as Schemas from './Schemas';
-var navigate = require('./navigate').default;
+import { navigate } from './navigate';
 
 
 export let getSchemas = null;
@@ -236,9 +236,7 @@ export function filtersToHref(expSetFilters, currentHref, page = null, limit = n
 
     var urlString = (
         baseHref +
-        sep+'limit=' + limit +
-        '&from=' + (Math.max(page - 1, 0) * (typeof limit === 'number' ? limit : 0)) +
-        (filterQuery.length > 0 ? '&' + filterQuery : '')
+        (filterQuery.length > 0 ? sep + filterQuery : '')
     );
 
     if (!sortColumn){

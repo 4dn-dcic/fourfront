@@ -3,13 +3,42 @@
 import React from 'react';
 import { itemClass, panel_views } from './../globals';
 import _ from 'underscore';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane } from './components';
+import { 
+    ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
+    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, WorkflowDetailPane,
+    WorkflowNodeElement
+} from './components';
 import { ItemBaseView } from './DefaultItemView';
-import { getTabForAudits } from './item';
 import { console, object, DateUtility, Schemas, isServerSide, navigate } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { DropdownButton, MenuItem } from 'react-bootstrap';
+import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 
+
+/**
+ * For when "Show Parameters" UI setting === false.
+ * 
+ * @param {Object}      graphData 
+ * @param {Object[]}    graphData.nodes
+ * @param {Object[]}    graphData.edges
+ * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
+ */
+export function filterOutParametersFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+        if (n.type === 'input' && n.format === 'Workflow Parameter') {
+            deleted[n.id] = true;
+            return false;
+        }
+        return true;
+    });
+    var edges = _.filter(graphData.edges, function(e,i){
+        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
+            return false;
+        }
+        return true;
+    });
+    return { nodes, edges };
+}
 
 /**
  * Pass this to props.onNodeClick for Graph.
@@ -32,28 +61,7 @@ export function commonGraphPropsFromProps(props){
         'href'        : props.href,
         'onNodeClick' : onItemPageNodeClick,
         'detailPane'  : <WorkflowDetailPane schemas={props.schemas} context={props.context} />,
-        'nodeTitle'   : function(node, canBeJSX = false){
-            if (
-                node.type === 'step' && node.meta.uuid &&
-                Array.isArray(node.meta.analysis_step_types) &&
-                node.meta.analysis_step_types.length > 0
-            ){
-                var purposes = node.meta.analysis_step_types.map(Schemas.Term.capitalize).join(', ');
-                if (canBeJSX){
-                    return (
-                        <div className="pull-right">
-                            <div className="text-ellipsis-container above-node-title" style={{ maxWidth : Graph.defaultProps.columnWidth }}>
-                                { purposes }
-                            </div>
-                            <div className="text-ellipsis-container" style={{ width : Graph.defaultProps.columnWidth - 40 }}>
-                                { node.title || node.name }
-                            </div>
-                        </div>
-                    );
-                }
-            }
-            return node.title || node.name;
-        }
+        'nodeElement' : <WorkflowNodeElement schemas={props.schemas} />
     };
 }
 
@@ -63,13 +71,23 @@ export function doValidAnalysisStepsExist(steps){
         !Array.isArray(steps) ||
         steps.length === 0 ||
         !Array.isArray(steps[0].inputs) ||
-        !Array.isArray(steps[0].outputs) ||
-        !Array.isArray(steps[0].inputs)
+        !Array.isArray(steps[0].outputs)
     ) {
         console.warn("Analysis Steps are in an improper format. Make sure they exist and contain 'inputs' and 'outputs");
         return false;
     }
     return true;
+}
+
+export function parseAnalysisStepsMixin(){
+    var graphData = (
+        this.state.showChart === 'basic' ?
+            parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context)
+            :
+            parseAnalysisSteps(this.props.context.analysis_steps)
+    );
+    if (this.state.showParameters) return graphData;
+    else return filterOutParametersFromGraphData(graphData);
 }
 
 
@@ -180,6 +198,25 @@ export function dropDownMenuMixin(){
     );
 }
 
+export const onShowParametersCheckboxChangeMixin = _.throttle(function(){
+    this.setState({ showParameters : !this.state.showParameters });
+}, 500, { trailing : false });
+
+export function uiControlsMixin(){
+    return (
+        <div className="pull-right workflow-view-controls-container">
+            <div className="inline-block show-params-checkbox-container">
+                <Checkbox checked={this.state.showParameters} onChange={onShowParametersCheckboxChangeMixin.bind(this)}>
+                    Show Parameters
+                </Checkbox>
+            </div>
+            <div className="inline-block">
+                { dropDownMenuMixin.call(this) }
+            </div>
+        </div>
+    );
+}
+
 export function graphBodyMixin(){
     if (this.state.showChart === 'cwl') return this.cwlGraph();
     if (this.state.showChart === 'detail') return this.detailGraph();
@@ -202,24 +239,25 @@ class GraphSection extends React.Component {
         this.detailGraph = this.detailGraph.bind(this);
         this.dropDownMenu = dropDownMenuMixin.bind(this);
         this.body = graphBodyMixin.bind(this);
+        this.parseAnalysisSteps = parseAnalysisStepsMixin.bind(this);
+        this.uiControls = uiControlsMixin.bind(this);
         this.render = this.render.bind(this);
         this.state = {
-            'showChart' : GraphSection.analysisStepsSet(props.context) ? 'detail' : 'basic'
+            'showChart' : GraphSection.analysisStepsSet(props.context) ? 'detail' : 'basic',
+            'showParameters' : false
         };
     }
 
     commonGraphProps(){
-        return commonGraphPropsFromProps(this.props);
+        return _.extend(commonGraphPropsFromProps(this.props), this.parseAnalysisSteps());
     }
 
     basicGraph(){
         if (!Array.isArray(this.props.context.analysis_steps)) return null;
-        var graphData = parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context);
         return (
             <Graph
                 { ...this.commonGraphProps() }
-                nodes={graphData.nodes}
-                edges={graphData.edges}
+                edgeStyle="curve"
                 columnWidth={this.props.mounted && this.refs.container ?
                     (this.refs.container.offsetWidth - 180) / 3
                 : 180}
@@ -229,14 +267,7 @@ class GraphSection extends React.Component {
 
     detailGraph(){
         if (!Array.isArray(this.props.context.analysis_steps)) return null;
-        var graphData = parseAnalysisSteps(this.props.context.analysis_steps);
-        return (
-            <Graph
-                { ...this.commonGraphProps() }
-                nodes={graphData.nodes}
-                edges={graphData.edges}
-            />
-        );
+        return <Graph { ...this.commonGraphProps() } />;
     }
 
     static keyTitleMap = {
@@ -251,9 +282,7 @@ class GraphSection extends React.Component {
             <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
-                    <span className="pull-right workflow-view-dropdown-container">
-                        { this.dropDownMenu() }
-                    </span>
+                    { this.uiControls() }
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 { this.body() }
