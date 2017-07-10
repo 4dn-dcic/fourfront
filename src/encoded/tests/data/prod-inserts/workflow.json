@@ -1423,6 +1423,7 @@
         {   
             "workflow_argument_name": "output_mcool",
             "argument_type": "Output processed file",
+            "argument_format": "mcool",
             "argument_mapping": [
                 {   
                     "workflow_step": "add-hic-normvector-to-mcool",
@@ -1467,6 +1468,7 @@
         {   
             "workflow_argument_name": "output_normvector",
             "argument_type": "Output processed file",
+            "argument_format": "other",
             "argument_mapping": [
                 {   
                     "workflow_step": "extract-mcool-normvector-for-juicebox",
