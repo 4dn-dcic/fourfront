@@ -188,5 +188,25 @@
         "analysis_step_types":["QC calculation"],
         "award":"1U01CA200059-01",
         "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"add-hic-normvector-to-mcool",
+        "uuid":"11775554-5f85-4d0c-93e4-fa9d7f20d47a",
+        "version":"2",
+        "software_used":"02d636b9-d8dd-4da9-950c-2ca994b23555",
+        "name":"add-hic-normvector-to-mcool",
+        "analysis_step_types":["file format conversion"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"extract-mcool-normvector-for-juicebox",
+        "uuid":"53e7b46f-1d3b-4a16-812f-c79456614bda",
+        "version":"2",
+        "software_used":"c91a2c9d-079c-4647-9951-da95f2c9baf1",
+        "name":"extract-mcool-normvector-for-juicebox",
+        "analysis_step_types":["file format conversion"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
     }
 ]
