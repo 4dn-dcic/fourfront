@@ -55,7 +55,7 @@ workflow_analysis_steps_schema = {
                                 "file" : {
                                     "type" : "string",
                                     "title" : "File",
-                                    # "linkTo" : "File" 
+                                    # "linkTo" : "File"
                                 },
                                 "value" : {
                                     "title" : "Value",
@@ -99,7 +99,7 @@ workflow_analysis_steps_schema = {
                                 "file" : {
                                     "type" : "string",
                                     "title" : "File",
-                                    "linkTo" : "File"
+                                    # "linkTo" : "File"
                                 },
                                 "value" : {
                                     "title" : "Value",
@@ -209,7 +209,6 @@ class Workflow(Item):
             stepDict['name'] = stepContainer.get('step_name', stepDict.get('name'))
             if stepDict.get('software_used') is not None:
                 stepDict['software_used'] = '/software/' + stepDict['software_used'] + '/' # Convert to '@id' form so is picked up for embedding.
-                
             return stepDict
 
         def mergeIOForStep(outputArgs, argType = "output"):
@@ -226,7 +225,6 @@ class Workflow(Item):
             seen_argument_names = {}
             resultArgs = []
             for arg in outputArgs:
-
                 argName = arg.get('name')
                 if argName:
                     priorArgument = seen_argument_names.get(argName)
