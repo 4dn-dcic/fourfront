@@ -29,13 +29,14 @@ export class SearchResultDetailPane extends React.Component {
         if (!description) return null;
         return (
             <div className="flex-description-container">
-                <h6>Description</h6>
+                <h5><i className="icon icon-fw icon-align-left"/>&nbsp; Description</h5>
                 <FlexibleDescriptionBox
                     description={ description }
                     fitTo="self"
                     textClassName="text-medium"
                     dimensions={null}
                 />
+                <hr className="desc-separator" />
             </div>
         );
     }
@@ -46,7 +47,7 @@ export class SearchResultDetailPane extends React.Component {
             <div>
                 { this.descriptionBox(result.description) }
                 <div className="item-page-detail">
-                    <h4 className="text-300">Details</h4>
+                    <h5 className="text-500"><i className="icon icon-fw icon-list"/>&nbsp; Details</h5>
                     <Detail context={result} open={false} popLink={popLink}/>
                 </div>
             </div>
