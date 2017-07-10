@@ -299,10 +299,10 @@ def add_slim_to_term(term, slim_terms):
     for slimterm in slim_terms:
         if term.get('closure') and slimterm['term_id'] in term['closure']:
             if slimterm['is_slim_for'] != 'developmental':
-                slimterms2add[slimterm['term_id']] = slimterm['uuid']
+                slimterms2add[slimterm['term_id']] = slimterm['term_id']
         if term.get('closure_with_develops_from') and slimterm['term_id'] in term['closure_with_develops_from']:
             if slimterm['is_slim_for'] == 'developmental':
-                slimterms2add[slimterm['term_id']] = slimterm['uuid']
+                slimterms2add[slimterm['term_id']] = slimterm['term_id']
     if slimterms2add:
         term['slim_terms'] = list(slimterms2add.values())
     return term
@@ -456,6 +456,17 @@ def verify_and_update_ontology(terms, ontologies):
     return terms
 
 
+def _get_t_id(val):
+    # val can be: uuid string, dict with link_id, dict with uuid if fully embedded
+    try:
+        linkid = val.get('link_id')
+        if linkid is None:
+            linkid = val.get('term_id')
+        return linkid
+    except:
+        return val
+
+
 def _terms_match(t1, t2):
     '''check that all the fields in the first term t1 are in t2 and
         have the same values
@@ -470,16 +481,19 @@ def _terms_match(t1, t2):
                 for p1 in val:
                     found = False
                     for p2 in t2[k]:
-                        # this bit depends on the {link_id: val, display_title: val}
-                        # form of embedded info - may need to make more complex to deal with
-                        # other scenarios like a list of uuids or fully embedded terms
-                        if p1 in p2['link_id']:
+                        # p1 will be a uuid - need to get a string with uuid in it
+                        # from dbterm
+                        p2id = _get_t_id(p2)
+                        if p1 in p2id:
                             found = True
+                        else:
+                            # need to lookup p1 info - it should be in terms
+                            pass
                     if not found:
                         return False
             elif k == 'source_ontology':
                 # same as above comment to potentially deal with different response
-                t2ont = t2['source_ontology']['link_id']
+                t2ont = _get_t_id(t2['source_ontology'])
                 if val not in t2ont:
                     return False
             elif k == 'synonyms':
@@ -535,6 +549,19 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
     return {'post': to_post, 'patch': to_patch, 'idmap': tid2uuid}
 
 
+def _get_uuids_for_linked(term, idmap):
+    puuids = {}
+    for rt in ['parents', 'slim_terms']:
+        if term.get(rt):
+            puuids[rt] = []
+            for p in term[rt]:
+                if p in idmap:
+                    puuids[rt].append(idmap[p])
+                else:
+                    print('WARNING - ', p, ' MISSING FROM IDMAP')
+    return puuids
+
+
 def add_uuids(partitioned_terms):
     '''adds new uuids to terms to post and existing uuids to patch terms
         this function depends on the partitioned term dictionary that
@@ -552,26 +579,16 @@ def add_uuids(partitioned_terms):
         # now that we should have all uuids go through again
         # and switch parent term ids for uuids
         for term in newterms.values():
-            if term.get('parents'):
-                puuids = []
-                for p in term['parents']:
-                    if p in idmap:
-                        puuids.append(idmap[p])
-                    else:
-                        print('WARNING - ', p, ' MISSING FROM IDMAP')
-                term['parents'] = puuids
+            puuids = _get_uuids_for_linked(term, idmap)
+            for rt, uuids in puuids.items():
+                term[rt] = uuids
     # and finally do the same for the patches
     patches = partitioned_terms.get('patch', None)
     if patches:
         for term in patches.values():
-            if term.get('parents'):
-                puuids = []
-                for p in term['parents']:
-                    if p in idmap:
-                        puuids.append(idmap[p])
-                    else:
-                        print('WARNING - ', p, ' MISSING FROM IDMAP')
-                term['parents'] = puuids
+            puuids = _get_uuids_for_linked(term, idmap)
+            for rt, uuids in puuids.items():
+                term[rt] = uuids
     try:
         post = list(newterms.values())
     except AttributeError:
