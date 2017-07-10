@@ -192,7 +192,7 @@ export class TopRow extends React.Component {
      * @memberof module:item-pages/components.ItemHeader.TopRow
      * @private
      * @instance
-     * @returns {Element} Div element with .row Bootstrap class and items in top-right section.
+     * @returns {*} Div element with .row Bootstrap class and items in top-right section.
      */
     render(){
         var typeInfo = Schemas.getSchemaForItemType(Schemas.getItemType(this.props.context), this.props.schemas || null);

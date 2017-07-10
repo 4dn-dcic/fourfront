@@ -12,6 +12,7 @@ import ScrollContainer from './ScrollContainer';
 import NodesLayer from './NodesLayer';
 import EdgesLayer from './EdgesLayer';
 import DefaultDetailPane from './DefaultDetailPane';
+import { DefaultNodeElement } from './Node';
 
 /**
  * Primary/entry component for the Workflow graph.
@@ -19,19 +20,20 @@ import DefaultDetailPane from './DefaultDetailPane';
  * @export
  * @class Graph
  * @extends {React.Component}
- * @prop {Object[]} nodes                   Array of node objects to plot. Both nodes and edges can be generated from a CWL-like structure using static functions, including the provided 'parseAnalysisSteps'. See propTypes in class def below for object structure.
- * @prop {Object[]} edges                   Array of edge objects to plot. See propTypes in class def below for object structure.
- * @prop {React.Component} [detailPane]     Provide a React Component instance (e.g. as JSX) to use to display node metadata at bottom of graph. A default pane applicable to 4DN is used if not provided. Pass in null to perform your own logic in onNodeClick.
- * @prop {function} [onNodeClick]           A function to be executed each time a node is clicked. 'this' will refer to internal statecontainer. Should accept params: {Object} 'node', {Object|null} 'selectedNode', and {MouseEvent} 'evt'. By default, it changes internal state's selectedNode. You should either disable props.checkHrefForSelectedNode -or- change href in this function.
- * @prop {function} [isNodeDisabled]        Function which accepts a 'node' object and returns a boolean.
- * @prop {boolean} [checkHrefForSelectedNode=true] - If true, will check props.href or window.location.href on updates as well as mounting and update selectedNode if '#' + node.name is in URL. Recommended to leave as true and in props.onNodeClick, to change href to contain '#' + node.name.
- * @prop {boolean} [checkWindowLocationHref=true] - If true, checks window.location.href on updates instead of props.href. Must still trigger component update on page or href changes.
- * @prop {string} [href]                    Must provide current HREF of page, if setting props.checkHrefForSelectedNode to true and turning off props.checkWindowLocationHref.
- * @prop {Object} [innerMargin={top : 20, bottom: 48, left: 15, right: 15}]     Provide this object, containing numbers for 'top', 'bottom', 'left', and 'right', if want to adjust chart margins.
- * @prop {boolean} [pathArrows=true]        Whether to display arrows at the end side of edges.
- * @prop {number} [columnSpacing=56]        Adjust default spacing between columns, where edges are drawn.
- * @prop {number} [columnWidth=150]         Adjust width of columns, where nodes are drawn.
- * @prop {number} [rowSpacing=56]           Adjust vertical spacing between node centers (NOT between their bottom/top).
+ * @prop {Object[]}     nodes                   Array of node objects to plot. Both nodes and edges can be generated from a CWL-like structure using static functions, including the provided 'parseAnalysisSteps'. See propTypes in class def below for object structure.
+ * @prop {Object[]}     edges                   Array of edge objects to plot. See propTypes in class def below for object structure.
+ * @prop {React.Component} [detailPane]         Provide a React Component instance (e.g. as JSX) to use to display node metadata at bottom of graph. A default pane applicable to 4DN is used if not provided. Pass in null to perform your own logic in onNodeClick.
+ * @prop {function}     [onNodeClick]           A function to be executed each time a node is clicked. 'this' will refer to internal statecontainer. Should accept params: {Object} 'node', {Object|null} 'selectedNode', and {MouseEvent} 'evt'. By default, it changes internal state's selectedNode. You should either disable props.checkHrefForSelectedNode -or- change href in this function.
+ * @prop {function}     [isNodeDisabled]        Function which accepts a 'node' object and returns a boolean.
+ * @prop {boolean}      [checkHrefForSelectedNode=true] - If true, will check props.href or window.location.href on updates as well as mounting and update selectedNode if '#' + node.name is in URL. Recommended to leave as true and in props.onNodeClick, to change href to contain '#' + node.name.
+ * @prop {boolean}      [checkWindowLocationHref=true] - If true, checks window.location.href on updates instead of props.href. Must still trigger component update on page or href changes.
+ * @prop {string}       [href]                  Must provide current HREF of page, if setting props.checkHrefForSelectedNode to true and turning off props.checkWindowLocationHref.
+ * @prop {Object}       [innerMargin={top : 20, bottom: 48, left: 15, right: 15}]     Provide this object, containing numbers for 'top', 'bottom', 'left', and 'right', if want to adjust chart margins.
+ * @prop {boolean}      [pathArrows=true]       Whether to display arrows at the end side of edges.
+ * @prop {number}       [columnSpacing=56]      Adjust default spacing between columns, where edges are drawn.
+ * @prop {number}       [columnWidth=150]       Adjust width of columns, where nodes are drawn.
+ * @prop {number}       [rowSpacing=56]         Adjust vertical spacing between node centers (NOT between their bottom/top).
+ * @prop {function}     [nodeTitle]             Optional function to supply to get node title, before is passed to visible Node element. Useful if want to display some meta sub-property rather than technical title.
  */
 export default class Graph extends React.Component {
 
@@ -69,7 +71,9 @@ export default class Graph extends React.Component {
             'source'            : PropTypes.object.isRequired,
             'target'            : PropTypes.object.isRequired,
             'capacity'          : PropTypes.string
-        })).isRequired
+        })).isRequired,
+        'nodeTitle'         : PropTypes.func,
+        'rowSpacingType'    : PropTypes.oneOf([ 'compact', 'wide' ])
     }
 
     static defaultProps = {
@@ -77,11 +81,11 @@ export default class Graph extends React.Component {
         'width'         : null,
         'columnSpacing' : 56,
         'columnWidth'   : 150,
-        'rowSpacing'    : 64,
+        'rowSpacing'    : 75,
+        'rowSpacingType': 'wide',
         'pathArrows'    : true,
         'detailPane'    : <DefaultDetailPane />,
-        'rowSpacingType': 'wide',
-        'nodeElement'   : null, // Use default Node component.
+        'nodeElement'   : <DefaultNodeElement />,
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
         'nodeTitle'     : function(node, canBeJSX = false){ return node.title || node.name; },
         'innerMargin'   : {
@@ -90,7 +94,8 @@ export default class Graph extends React.Component {
             'left' : 20,
             'right' : 20
         },
-        'minimumHeight' : 120
+        'minimumHeight' : 120,
+        'edgeStyle' : 'bezier'
     }
 
     constructor(props){
@@ -120,16 +125,9 @@ export default class Graph extends React.Component {
     }
 
     height() {
-        var height = this.props.height;
-        if ((!height || isNaN(height)) && this.state.mounted && !isServerSide()){
-            // Use highest count of nodes in a column * 60.
-            height = _.reduce(_.groupBy(this.props.nodes, 'column'), function(maxCount, nodeSet){
-                return Math.max(nodeSet.length, maxCount);
-            }, 0) * this.props.rowSpacing;
-        } else if (isNaN(height)){
-            return null;
-        }
-        return ((height - this.props.innerMargin.top) - this.props.innerMargin.bottom);
+        return _.reduce(_.pairs(_.groupBy(this.props.nodes, 'column')), function(maxCount, nodeSet){
+            return Math.max(nodeSet[1].length, maxCount);
+        }, 0) * (this.props.rowSpacing) - this.props.rowSpacing;
     }
 
     scrollableWidth(){
@@ -138,25 +136,28 @@ export default class Graph extends React.Component {
         }, 0) + 1) * (this.props.columnWidth + this.props.columnSpacing) + this.props.innerMargin.left + this.props.innerMargin.right - this.props.columnSpacing;
     }
 
-    nodesWithCoordinates(viewportWidth = null, contentWidth = null){
+    nodesWithCoordinates(viewportWidth = null, contentWidth = null, contentHeight = null, verticalMargin = 0){
+
+        if (!contentHeight) contentHeight = this.height();
+
         var nodes = _.sortBy(this.props.nodes.slice(0), 'column');
 
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
         _.pairs(_.groupBy(nodes, 'column')).forEach((columnGroup) => {
             var countInCol = columnGroup[1].length;
             if (countInCol === 1){
-                columnGroup[1][0].y = (this.height() / 2) + this.props.innerMargin.top;
+                columnGroup[1][0].y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
                 columnGroup[1][0].nodesInColumn = countInCol;
             } else if (this.props.rowSpacingType === 'compact') {
-                var padding = Math.max(0,this.height() - ((countInCol - 1) * this.props.rowSpacing)) / 2;
+                var padding = Math.max(0, contentHeight - ((countInCol - 1) * this.props.rowSpacing)) / 2;
                 d3.range(countInCol).forEach((i) => {
-                    columnGroup[1][i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding;
+                    columnGroup[1][i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
                     columnGroup[1][i].nodesInColumn = countInCol;
                 });
             } else {
-                d3.range(countInCol).forEach((i) => {
-                    columnGroup[1][i].y = ((i / Math.max(countInCol - 1, 1)) * this.height()) + this.props.innerMargin.top;
-                    columnGroup[1][i].nodesInColumn = countInCol;
+                _.forEach(d3.range(0, contentHeight, contentHeight / (countInCol - 1) ).concat([contentHeight]), (num, idx)=>{
+                    columnGroup[1][idx].y = num + (this.props.innerMargin.top + verticalMargin);
+                    columnGroup[1][idx].nodesInColumn = countInCol;
                 });
             }
         });
@@ -192,13 +193,24 @@ export default class Graph extends React.Component {
             );
         }
 
-        var nodes = this.nodesWithCoordinates(width, contentWidth);
-        var edges = this.props.edges;
-
+        // Difference/2 between minimumHeight and height, if any.
         var verticalMargin = 0;
-        if (typeof this.props.minimumHeight === 'number' && (height + this.props.innerMargin.top + this.props.innerMargin.bottom) < this.props.minimumHeight){
-            verticalMargin += (this.props.minimumHeight - (height + this.props.innerMargin.top + this.props.innerMargin.bottom)) / 2;
+        if (typeof this.props.minimumHeight === 'number' && height < this.props.minimumHeight){
+            verticalMargin += (this.props.minimumHeight - height) / 2;
         }
+
+        var fullHeight = Math.max(
+            (typeof this.props.minimumHeight === 'number' && this.props.minimumHeight) || 0,
+            height + this.props.innerMargin.top + this.props.innerMargin.bottom
+        );
+
+        var nodes = this.nodesWithCoordinates(
+            width,
+            contentWidth,
+            height,
+            verticalMargin
+        );
+        var edges = this.props.edges;
 
         return (
             <div ref="outerContainer" className="worfklow-chart-outer-container">
@@ -217,8 +229,8 @@ export default class Graph extends React.Component {
                             href={this.props.href}
                             onNodeClick={this.props.onNodeClick}
                         >
-                            <ScrollContainer verticalMargin={verticalMargin}>
-                                <EdgesLayer edgeElement={this.props.edgeElement} isNodeDisabled={this.props.isNodeDisabled} />
+                            <ScrollContainer outerHeight={fullHeight}>
+                                <EdgesLayer edgeElement={this.props.edgeElement} isNodeDisabled={this.props.isNodeDisabled} edgeStyle={this.props.edgeStyle} />
                                 <NodesLayer nodeElement={this.props.nodeElement} isNodeDisabled={this.props.isNodeDisabled} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }

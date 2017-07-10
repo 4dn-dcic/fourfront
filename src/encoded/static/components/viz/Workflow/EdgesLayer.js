@@ -32,7 +32,7 @@ export default class EdgesLayer extends React.Component {
     }
 
     render(){
-        var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
+        var fullHeight = this.props.outerHeight;
         var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
         var divWidth = Math.max(fullWidth, this.props.contentWidth);
         var edges = this.props.edges;

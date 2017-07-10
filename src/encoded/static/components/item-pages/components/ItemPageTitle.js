@@ -6,6 +6,7 @@ import { Filters, console, Schemas } from './../../util';
 import _ from 'underscore';
 import { title, isDisplayTitleAccession } from './../item';
 
+
 /**
  * Renders page title appropriately for a provided props.context.
  * 
@@ -41,7 +42,7 @@ export class ItemPageTitle extends React.Component {
      * The render function. If the display title is an accession, we do
      * 
      * @instance
-     * @returns {Element} An <h1> element with .page-title class.
+     * @returns {*} An <h1> element with .page-title class.
      */
     render(){
         var itemPageTitle = title(this.props);
