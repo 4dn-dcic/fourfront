@@ -56,6 +56,8 @@ export function extendColumnDefinitions(columnDefinitions: Array<Object>, column
     return columnDefinitions;
 }
 
+export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
+
 export const defaultColumnDefinitionMap = {
     'display_title' : {
         'title' : "Title",
@@ -130,6 +132,11 @@ export const defaultColumnDefinitionMap = {
     'experiments_in_set.experiment_type' : {
         'title' : 'Experiment Type',
         'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120}
+    },
+    'status' : {
+        'title' : 'Status',
+        'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120},
+        'order' : 500
     }
 };
 
@@ -159,7 +166,7 @@ export function searchResultTableColumnWidth(widthMap, mounted=true){
  * @param {Object} defaultWidthMap          Map of responsive grid states (lg, md, sm) to pixel number sizes.
  * @returns {Object[]}                      List of objects containing keys 'title', 'field', 'widthMap', and 'render'.
  */
-export function columnsToColumnDefinitions(columns, constantDefinitions, defaultWidthMap){
+export function columnsToColumnDefinitions(columns, constantDefinitions, defaultWidthMap = DEFAULT_WIDTH_MAP){
     let newColDefs = _.pairs(columns).map(function(p){
         return {
             'title' : p[1],
@@ -677,7 +684,6 @@ class LoadMoreAsYouScroll extends React.Component {
                         <i className="icon icon-circle-o-notch icon-spin" />&nbsp; Loading...
                     </div>
                 )}
-                onChangeScrollState={this.handleScrollingStateChange}
                 infiniteLoadBeginEdgeOffset={this.state.canLoad ? 200 : undefined}
                 preloadAdditionalHeight={Infinite.containerHeightScaleFactor(1.5)}
                 preloadBatchSize={Infinite.containerHeightScaleFactor(1.5)}
@@ -1066,13 +1072,14 @@ export class SearchResultTable extends React.Component {
     static defaultProps = {
         'columns' : {},
         'renderDetailPane' : function(result){ return <DefaultDetailPane result={result} />; },
-        'defaultWidthMap' : { 'lg' : 200, 'md' : 180, 'sm' : 120 },
+        'defaultWidthMap' : DEFAULT_WIDTH_MAP,
         'defaultMinColumnWidth' : 55,
         'constantColumnDefinitions' : extendColumnDefinitions([
             { 'field' : 'display_title', },
             { 'field' : '@type', },
             { 'field' : 'lab.display_title', },
-            { 'field' : 'date_created', }
+            { 'field' : 'date_created', },
+            { 'field' : 'status', }
         ], defaultColumnDefinitionMap),
         'columnDefinitionOverrideMap' : null,
         'hiddenColumns' : null,

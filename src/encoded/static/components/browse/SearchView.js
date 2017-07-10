@@ -5,12 +5,12 @@ import PropTypes from 'prop-types';
 import queryString from 'query-string';
 import url from 'url';
 import _ from 'underscore';
-import * as globals from './globals';
+import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './util';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import FacetList from './facetlist';
-import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController } from './browse/components';
+import FacetList from './../facetlist';
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController } from './components';
 
 
 
@@ -59,7 +59,7 @@ function countSelectedTerms(terms, field, filters) {
     return count;
 }
 
-
+/*
 class TypeTerm extends React.Component {
     render() {
         var term = this.props.term['key'];
@@ -68,6 +68,7 @@ class TypeTerm extends React.Component {
         return <Term {...this.props} title={term} filters={filters} total={total} />;
     }
 }
+*/
 
 class InfoIcon extends React.Component{
     render() {
@@ -357,7 +358,7 @@ class ControlsAndResults extends React.Component {
 
 }
 
-export class Search extends React.Component {
+export default class SearchView extends React.Component {
 
     fullWidthStyle(){
         if (!this.refs || !this.refs.container) return null;
@@ -392,4 +393,4 @@ export class Search extends React.Component {
     }
 }
 
-globals.content_views.register(Search, 'Search');
+globals.content_views.register(SearchView, 'Search');

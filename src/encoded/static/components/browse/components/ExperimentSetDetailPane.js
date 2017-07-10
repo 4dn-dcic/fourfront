@@ -76,7 +76,6 @@ export class ExperimentSetDetailPane extends React.Component {
                         </div>
                         <div className="col-sm-6 addinfo-properties-section">
                         { _.keys(addInfo).map(function(title){
-                            console.log(expSet, addInfo[title]);
                             var value = SearchResultTable.sanitizeOutputValue(defaultColumnBlockRenderFxn(expSet, { 'field' : addInfo[title] }, null, 0)); // Uses object.getNestedProperty, pretty prints JSX. Replaces value probe stuff.
                             return (
                                 <div className="row expset-addinfo-row clearfix" key={title}>

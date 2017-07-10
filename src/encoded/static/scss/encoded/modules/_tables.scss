@@ -1283,12 +1283,15 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							padding-right: 15px;
 							//transition: height .35s ease, transform .1s ease;
 							@include font-size(0.85);
-							.expandable-list { margin-bottom: 0; }
 							.item-page-detail {
 								margin-top: 0;
 								margin-bottom: 0;
 								padding-top: 10px;
 								padding-bottom: 10px;
+								.expandable-list {
+									margin-bottom: 0;
+									margin-left: 28px;
+								}
 							}
 							> .close-button-container {
 								position: absolute;
@@ -1307,14 +1310,22 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							}
 							.flex-description-container {
 								margin-top: 16px;
+								> .flexible-description-box {
+									margin-left: 28px;
+								}
 								.description-expand-button {
 									margin-top: -2px;
 								}
 								> h5, > h6 {
-									margin-bottom: 0;
+									margin-bottom: 5px;
 									margin-top: 0;
 									font-weight: 500;
-								} 
+								}
+								> .desc-separator {
+									margin-top: 15px;
+									margin-bottom: 0;
+									border-top-color: #ddd;
+								}
 							}
 						}
 					}

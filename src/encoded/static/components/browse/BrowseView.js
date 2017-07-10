@@ -25,7 +25,8 @@ const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'experiments_in_set.experiment_type', },
     { 'field' : 'number_of_experiments', },
     { 'field' : 'lab.display_title', },
-    { 'field' : 'date_created',  }
+    { 'field' : 'date_created',  },
+    { 'field' : 'status',  }
 ], defaultColumnDefinitionMap);
 
 
@@ -232,6 +233,7 @@ class ResultTableContainer extends React.Component {
                             {},
                             this.props.constantHiddenColumns
                         )}
+                        showSelectedFileCount
                     />
                     <SearchResultTable
                         results={results}
@@ -315,7 +317,7 @@ class ControlsAndResults extends React.Component {
                 </div>*/}
 
                 <SelectedFilesController href={this.props.href}>
-                    <CustomColumnController defaultHiddenColumns={['lab.display_title', 'date_created']}>
+                    <CustomColumnController defaultHiddenColumns={['lab.display_title', 'date_created', 'status']}>
                         <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer
                                 expSetFilters={this.props.expSetFilters}
