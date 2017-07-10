@@ -1465,6 +1465,17 @@
             ],
             "description": ""
         },
+        {
+            "argument_type": "parameter",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "nres",
+                    "workflow_step": "extract-mcool-normvector-for-juicebox",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "nres"
+        },
         {   
             "workflow_argument_name": "output_normvector",
             "argument_type": "Output processed file",
