@@ -451,12 +451,12 @@ class WorkflowRun(Item):
 
         # Metrics will overwrite output_files in case of duplicate keys.
         combined_outputs = mergeArgumentsWithSameArgumentName(
-            [ dict(f, **{ "type" : "output" }) for f in self.properties.get('output_files',[]) ] +
-            [ dict(f, **{ "type" : "quality_metric" }) for f in self.properties.get('output_quality_metrics',[]) ]
+            [ dict(f, type = "output" ) for f in self.properties.get('output_files',[]) ] +
+            [ dict(f, type = "quality_metric" ) for f in self.properties.get('output_quality_metrics',[]) ]
         )
 
         input_files = mergeArgumentsWithSameArgumentName(
-            [ dict(f, **{ "type" : "input" }) for f in self.properties.get('input_files',[]) ]
+            [ dict(f, type = "input" ) for f in self.properties.get('input_files',[]) ]
         )
 
         input_params = mergeArgumentsWithSameArgumentName(self.properties.get('parameters',[]))
