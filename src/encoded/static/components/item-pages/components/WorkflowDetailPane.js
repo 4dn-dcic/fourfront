@@ -124,6 +124,22 @@ class FileDetailBody extends React.Component {
         if (node.meta && node.meta.run_data && node.meta.run_data.type === 'quality_metric') return true;
     }
 
+    /**
+     * Use presence of 'status' property to determine if File object/Item we have
+     * is complete in its properties or not.
+     * 
+     * @param {Object} file - Object representing an embedded file. Should have display_title, at minimum.
+     * @returns {boolean} True if complete, false if not.
+     * @throws Error if file is not an object.
+     */
+    static isFileDataComplete(file){
+        if (!file || typeof file !== 'object') throw new Error('File param is not an object.');
+        if (typeof file.display_title === 'string' && typeof file.status !== 'string') {
+            return false;
+        }
+        return true;
+    }
+
     static propTypes = {
         'node' : PropTypes.object.isRequired,
         'file' : PropTypes.object.isRequired,
@@ -162,8 +178,16 @@ class FileDetailBody extends React.Component {
     }
 
     maybeLoadFile(file = this.state.file){
-        if (typeof file === 'string') { // Our file is not embedded.
-            ajax.load(file, (res)=>{
+        var hrefToRequest = null;
+        
+        if (typeof file === 'string') {
+            hrefToRequest = '/files/' + file + '/';
+        } else if (file && typeof file === 'object'){
+            if (!FileDetailBody.isFileDataComplete(file)) hrefToRequest = object.atIdFromObject(file);
+        }
+
+        if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.
+            ajax.load(hrefToRequest, (res)=>{
                 if (res && typeof res === 'object'){
                     this.setState({ file : res });
                 }
@@ -191,7 +215,7 @@ class FileDetailBody extends React.Component {
         var fileTitle;
         var fileTitleFormatted;
         var colClassName = "col-sm-6 col-lg-4";
-        if (typeof file === 'string') {
+        if (typeof file === 'string' || !FileDetailBody.isFileDataComplete(file)) {
             fileTitle = null;
             fileTitleFormatted = <small><i className="icon icon-circle-o-notch icon-spin icon-fw"/></small>;
         } else {
@@ -221,7 +245,7 @@ class FileDetailBody extends React.Component {
         var gridSize = layout.responsiveGridState();
         //if (gridSize === 'sm' || gridSize === 'xs') return null;
         var file = this.state.file;
-        if (!file.filename && !file.href && !file.url) return <div className="col-sm-4 col-lg-4 box">&nbsp;</div>;
+        if ((!file.href && !file.url)) return <div className="col-sm-4 col-lg-4 box">&nbsp;</div>;
 
         var title = file.href ? <span>Download</span> : 'File Name';
         var disabled = !this.canDownload();
@@ -279,14 +303,14 @@ class FileDetailBody extends React.Component {
     }
 
     render(){
+        if (!this.state.file){
+            return null;
+        }
 
         var node = this.props.node;
-
         var body;
-        if (typeof this.state.file === 'string'){
+        if (typeof this.state.file === 'string'/* || !FileDetailBody.isFileDataComplete(this.state.file)*/){
             body = null;
-        } else if (!this.state.file) {
-            return null;
         } else if (FileDetailBody.isNodeQCMetric(node)){
             var metrics = object.listFromTips(object.tipsFromSchema(this.props.schemas, this.state.file))
             .filter(function(m){

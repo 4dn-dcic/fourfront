@@ -109,7 +109,7 @@
                         "title": "Link to quality metric object",
                         "description": "a specific quality metric object",
                         "type": "string",
-                        "LinkTo": "QualityMetric"
+                        "linkTo": "QualityMetric"
                     }
                 }
             }

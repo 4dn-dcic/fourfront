@@ -468,8 +468,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         processStepIOPath();
     }
 
-    console.log(nodes);
-
     return {
         'nodes' : nodes,
         'edges' : edges

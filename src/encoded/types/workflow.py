@@ -55,7 +55,7 @@ workflow_analysis_steps_schema = {
                                 "file" : {
                                     "type" : "string",
                                     "title" : "File",
-                                    "linkTo" : "File"
+                                    # "linkTo" : "File" 
                                 },
                                 "value" : {
                                     "title" : "Value",
@@ -362,10 +362,15 @@ class WorkflowRun(Item):
                 'input_files.value.filename',
                 'input_files.value.display_title',
                 'input_files.value.file_format',
+                'input_files.value.uuid',
+                'input_files.value.accession',
                 'output_files.workflow_argument_name',
                 'output_files.*',
                 'output_files.value.file_format',
+                'output_files.value.uuid',
+                'output_files.value.accession',
                 'output_quality_metrics.name',
+                'output_quality_metrics.value.uuid',
                 #'output_quality_metrics.value'
                 ]
 
@@ -416,7 +421,7 @@ class WorkflowRun(Item):
                     paramsForTarget = sorted( paramsForTarget, key=lambda p: p.get('ordinal', 1) )
 
                     stepOutput['run_data'] = {
-                        "file" : [ '/files/' + p['value'] + '/' for p in paramsForTarget ], # List of file @ids.
+                        "file" : [ p['value'] for p in paramsForTarget ], #[ '/files/' + p['value'] + '/' for p in paramsForTarget ], # List of file @ids.
                         "type" : paramsForTarget[0].get('type'),
                         "meta" : [ # Aligned-to-file-list list of file metadata
                             {   # All remaining properties from dict in (e.g.) 'input_files','output_files',etc. list.
