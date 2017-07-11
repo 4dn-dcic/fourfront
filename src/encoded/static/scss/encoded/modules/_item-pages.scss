@@ -401,7 +401,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 					> .inner {
 						border-bottom-color: transparent;
 						padding-bottom: 2px;
-						min-height: 24px;
+						min-height: 20px;
 					}
 				}
 			}
@@ -442,6 +442,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 					}
 				}
 			}
+			//> .item-value {
+			//	> .inner {
+			//		border-bottom-color: transparent;
+			//	}
+			//}
 		}
 
 		&.open {
@@ -465,6 +470,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	.sub-panel {
 		padding-left: 40px;
 		padding-bottom: 0;
+		margin-bottom: 8px;
+		border-bottom: 1px dotted #bbb;
 		border-left: 1px dotted #aaa;
 		.item-label {
 			.tooltip-info-container {
