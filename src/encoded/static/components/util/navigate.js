@@ -7,7 +7,25 @@ import _ from 'underscore';
 let cachedNavFunction = null;
 let callbackFunctions = [];
 
-
+/**
+ * Navigation function, defined globally to act as alias of App.navigate.
+ * Is set in App constructor via navigate.setNavigateFunction.
+ * 
+ * Singleton function, defined the old fashioned way (pre ES6).
+ * Uses the same parameters as app.prototype.navigate(..).
+ * 
+ * Use by importing and calling in the same way app.navigate might be used.
+ * 
+ * @param {string}      href                        Where to navigate to.
+ * @param {Object}      [options={}]                Additional options, examine App.navigate for details.
+ * @param {function}    [callback]                  Optional callback, accepts the response object.
+ * @param {function}    [fallbackCallback]          Optional callback called if any error with response, including 404 error. Accepts response object -or- error object, if AJAX request failed.
+ * @param {Object}      [includeReduxDispatch={}]   Optional state to save to Redux store, in addition to the 'href' and 'context' set by navigate function.
+ * 
+ * @example
+ * var { navigate } = require('./util');
+ * navigate('/a/different/page', options);
+ */
 var navigate = function(href, options = {}, callback = null, fallbackCallback = null, includeReduxDispatch = {}){
     if (typeof cachedNavFunction !== 'function') throw new Error('No navigate function cached.');
     var callbackFxn = function(jsonResponse){
@@ -57,4 +75,4 @@ navigate.deregisterCallbackFunction = function(fxn){
     callbackFunctions = _.without(callbackFunctions, fxn);
 };
 
-export default navigate;
+export { navigate };

@@ -1,13 +1,13 @@
 'use strict';
 
-var _ = require('underscore');
-var url = require('url');
-var { isServerSide } = require('./misc');
+import _ from 'underscore';
+import url from 'url';
+import { isServerSide } from './misc';
 var console = require('./patched-console').default;
-var Filters = require('./experiments-filters');
-var navigate = require('./navigate').default;
-var object = require('./object');
-var JWT = require('./json-web-token');
+import * as Filters from './experiments-filters';
+import { navigate } from './navigate';
+import * as object from './object';
+import * as JWT from './json-web-token';
 
 
 

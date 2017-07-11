@@ -335,7 +335,7 @@ export function groupExperimentsByBiosample(experiments){
 /**
  * Use this to fail gracefully but also inform that some data is missing.
  * 
- * @param {Object[]} someArray 
+ * @param {Object[]} someArray - Any list that should be a list.
  * @returns {Object[]} Array if valid array, or empty array if not.
  */
 export function ensureArray(someArray){

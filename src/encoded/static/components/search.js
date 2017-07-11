@@ -473,9 +473,10 @@ class ControlsAndResults extends React.Component {
                             isTermSelected={this.props.isTermSelected}
                             itemTypeForSchemas={itemTypeForSchemas}
                             showClearFiltersButton={(()=>{
+                                // N.B. Search considers 'type' to not be a clearable filter. It will not clear current type.
                                 var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
                                 var clearParts = url.parse(clearFiltersURL, true);
-                                return !object.isEqual(clearParts.query, urlParts.query);
+                                return !object.isEqual(clearParts.query, urlParts.query) && _.keys(urlParts.query).length !== 0;
                             })()}
                             onClearFilters={(evt)=>{
                                 evt.preventDefault();

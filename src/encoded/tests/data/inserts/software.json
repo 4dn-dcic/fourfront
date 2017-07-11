@@ -132,5 +132,14 @@
         "title":"juicebox_1.6.2-cuda8",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab"
+    },
+    {
+        "uuid":"c91a2c9d-079c-4647-9951-da95f2c9baf1",
+        "commit":"34b5430e8b9cfd8f01203e0821b68efe4897b18f",
+        "name":"mcool2hic",
+        "software_type":["file format converter"],
+        "title":"hic2cool_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab"
     }
 ]

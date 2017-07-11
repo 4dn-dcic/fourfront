@@ -149,6 +149,7 @@ class File(Item):
                 'experiments.display_title',
                 'experiments.biosample.biosource.display_title',
                 'related_files.relationship_type',
+                'uuid',
                 'related_files.file.*']
     name_key = 'accession'
     rev = {
