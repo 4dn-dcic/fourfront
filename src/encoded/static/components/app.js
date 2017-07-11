@@ -732,7 +732,7 @@ export default class App extends React.Component {
         var partsNew = url.parse(href),
             partsOld = url.parse(this.props.href);
 
-        if (partsNew.path === partsOld.path && globals.isHashPartOfHref(null, partsNew)){
+        if (partsNew.path === partsOld.path && !globals.isHashPartOfHref(null, partsNew)){
             return false;
         }
 

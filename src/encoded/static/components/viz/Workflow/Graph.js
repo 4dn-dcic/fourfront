@@ -125,9 +125,16 @@ export default class Graph extends React.Component {
     }
 
     height() {
-        return _.reduce(_.pairs(_.groupBy(this.props.nodes, 'column')), function(maxCount, nodeSet){
-            return Math.max(nodeSet[1].length, maxCount);
-        }, 0) * (this.props.rowSpacing) - this.props.rowSpacing;
+        return Math.max(
+            _(this.props.nodes).chain()
+            .groupBy('column')
+            .pairs()
+            .reduce(function(maxCount, nodeSet){
+                return Math.max(nodeSet[1].length, maxCount);
+            }, 0)
+            .value() * (this.props.rowSpacing) - this.props.rowSpacing,
+            this.props.minimumHeight
+        );
     }
 
     scrollableWidth(){
@@ -193,12 +200,6 @@ export default class Graph extends React.Component {
             );
         }
 
-        // Difference/2 between minimumHeight and height, if any.
-        var verticalMargin = 0;
-        if (typeof this.props.minimumHeight === 'number' && height < this.props.minimumHeight){
-            verticalMargin += (this.props.minimumHeight - height) / 2;
-        }
-
         var fullHeight = Math.max(
             (typeof this.props.minimumHeight === 'number' && this.props.minimumHeight) || 0,
             height + this.props.innerMargin.top + this.props.innerMargin.bottom
@@ -207,8 +208,7 @@ export default class Graph extends React.Component {
         var nodes = this.nodesWithCoordinates(
             width,
             contentWidth,
-            height,
-            verticalMargin
+            height
         );
         var edges = this.props.edges;
 
