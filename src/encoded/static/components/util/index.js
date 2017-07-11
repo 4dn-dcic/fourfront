@@ -14,21 +14,7 @@ module.exports.isServerSide = misc.isServerSide;
 module.exports.object       = require('./object');
 
 
-/**
- * A singleton function, defined the old fashioned way (pre ES6).
- * Uses the same parameters as app.prototype.navigate(..).
- * 
- * Use by importing and calling in the same way app.navigate might be used.
- * 
- * @member
- * @namespace
- * @type {function}
- * @see module:app.navigate
- * @example
- * var { navigate } = require('./util');
- * navigate('/a/different/page', options);
- */
-module.exports.navigate     = require('./navigate').default;
+module.exports.navigate     = require('./navigate').navigate;
 
 /** Analytics utilities */
 module.exports.analytics    = require('./analytics');

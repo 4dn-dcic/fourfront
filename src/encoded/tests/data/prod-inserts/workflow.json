@@ -358,13 +358,25 @@
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step" : "validatefiles",
+                    "step_argument_name" : "input_file",
+                    "step_argument_type" : "Input file"
+                }
+            ],
             "description": ""
         },
         {
             "workflow_argument_name": "report",
             "argument_type": "Output report file",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step" : "validatefiles",
+                    "step_argument_name" : "report_zip",
+                    "step_argument_type" : "Output file"
+                }
+            ],
             "description": ""
         }
     ],
