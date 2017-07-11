@@ -373,9 +373,12 @@ def get_slim_terms(connection):
     slim_terms = []
     for cat in slim_categories:
         terms = get_FDN(None, connection, None, search_suffix + cat)
-        if terms.get('notification') is None:
+        try:
             # a notification indicates a problem like a bad response so only
             # add extend slim_terms if not present
+            terms.get('notification')
+            pass
+        except AttributeError:
             slim_terms.extend(terms)
     return slim_terms
 
