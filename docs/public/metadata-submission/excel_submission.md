@@ -20,7 +20,7 @@ Any row that starts with “#” in the first column will be ignored, so you can
 
 <span id="preparing-workbook"></span>
 
-You may notice that in some sheets there are additional commented rows that contain data values. These are rows corresponding to items that already exist in the database and can provide you with identifiers that you can reuse in your submission (see [Referencing existing items](#existing-items) below.  Only those items that either are associated with your lab or are already released to the public will appear in these commented data rows.   Your data entry should begin at the first non-commented row.
+You may notice that in some sheets there are additional commented rows that contain data values. These are rows corresponding to items that already exist in the database and can provide you with identifiers that you can reuse in your submission (see [Referencing existing items](/help/getting-started#referencing-existing-items).  Only those items that either are associated with your lab or are already released to the public will appear in these commented data rows.   Your data entry should begin at the first non-commented row.
 
 ## Preparing Excel Workbooks
 A field can be one of a few different types; string, number/integer, array/list or Item and the type will be indicated in the second row.
@@ -48,7 +48,7 @@ _Database Cross Reference (DBxref) fields_, which contain identifiers that refer
 Some fields in a Sheet for an Item may contain references to another Item. These may be of the same type or different types. Examples of this type of field include the *‘biosource’* field in Biosample or the *‘files’* field in the ExperimentHiC. Note that the latter is also an example of a list field that can take multiple values.
 
 
-You can reference an item in the excel workbooks using one of four possible ways: UUID, accession, lab-specific alias, or item-type-specific identifier. More information about these four identifiers is provided in the [Using aliases](#using-aliases) section below.
+You can reference an item in the excel workbooks using one of four possible ways: UUID, accession, lab-specific alias, or item-type-specific identifier. More information about these four identifiers is provided in [Using aliases](/help/getting-started#referencing-existing-objects).
 
 
 ### Field(s) with subobjects
@@ -71,19 +71,17 @@ For example, to submit a total of three related experiments to an ExperimentHiC 
 
 and enter a valid *relationship\_type* term and *experiment* identifier to each of the three pairs of columns.
 
-<span id="using-aliases"></span>
+
+<span id="existing-items"></span>
 
 **Multiple linked columns for lists of embedded objects**
 ![Embedded fields](/static/img/docs/submitting-metadata/embedded_objects.png)
 
-<span id="existing-items"></span>
-
-### Using aliases
-An **alias** is a lab specific identifier that you can assign to an item. Aliases take the form of *lab:id\_string* eg. ```parklab:myalias```. An alias must be unique within all items. Once you submit an alias for an Item then that alias can be used as an identifier for that Item in the current submission as well as in any subsequent submission.
-
-You don't need to use an alias if you are referencing an item that already exists in the database.
 
 ### Referencing existing items
+
+Ways that you can reference items that already exist in the 4DN database in your spreadsheet submission is described [here](/help/getting-started#referencing-existing-items)
+).
 Every item in our database is assigned a “uuid” upon its creation, e.g. “44d3cdd1-a842-408e-9a60-7afadca11575”. Items from some item types (Files, Experiments, Biosamples, Biosources, Individuals...) also get a shorter “accession” assigned, e.g. 4DNEX4723419. These two are the default identifying terms of any item. Besides these two, there can also be object specific identifying terms, like award number for awards, or lab name for labs.
 
 
@@ -173,7 +171,7 @@ When you submit your metadata, if a row in any sheet corresponds to a new item t
 	import_data My_metadata.xls --update
 
 
-If you need to modify an existing item, you can use the patch function. To be able to match your item to the one on the server, a pre-existing identifier must be used in the spreadsheet. If you included an alias when you posted the item, you can use this alias to reference the existing item in the database -- uuids, @ids, or accessions can also be used to [reference existing items](#existing-items) in the database. When you run ```import_data``` and an existing entry is encountered, the script will prompt you ‘Do you wish to PATCH this item?’. You will be prompted for every existing item that is found in your workbook. The ```--patchall``` argument will allow automatic patching of each existing item, bypassing the prompts.
+If you need to modify an existing item, you can use the patch function. To be able to match your item to the one on the server, a pre-existing identifier must be used in the spreadsheet. If you included an alias when you posted the item, you can use this alias to reference the existing item in the database -- uuids, @ids, or accessions can also be used to [reference existing items](/help/getting-started#referencing-existing-items) in the database. When you run ```import_data``` and an existing entry is encountered, the script will prompt you ‘Do you wish to PATCH this item?’. You will be prompted for every existing item that is found in your workbook. The ```--patchall``` argument will allow automatic patching of each existing item, bypassing the prompts.
 
 	import_data My_metadata.xls --patchall
 

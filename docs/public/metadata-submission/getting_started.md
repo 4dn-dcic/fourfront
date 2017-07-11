@@ -9,7 +9,7 @@ We have three primary ways that you can submit data to the 4DN data portal.
 ### Web Submission
 
 To submit one or a few experiments or for a hands on way to gain familiarity with the 4DN data model the online submission interface is a useful tool.
-Documentation on how to get started with this interface is [here](help/web-submission/).
+Documentation on how to get started with this interface is [here](/help/web-submission).
 
 ### Data Submission via Spreadsheet
 
@@ -18,7 +18,7 @@ containing fields that actually can and should be submitted.
 We also provide software tools that handle the interaction with our REST API to generate these forms and push the
 content of the forms to our database.
 Documentation of the data submission process using these forms can be found
-[here](help/spreadsheet).
+[here](/help/spreadsheet).
 
 ### REST API
 
@@ -26,7 +26,7 @@ For both meta/data submission and retrival, you can also access our database dir
 Data objects exchanged with the server conform to the standard JavaScript Object Notation (JSON) format.
 Our implementation is analagous to the one developed
 by the [ENCODE DCC](https://www.encodeproject.org/help/rest-api/).
-If you would like to directly interact with the REST API for data submission see the documentation [here](help/rest-api).
+If you would like to directly interact with the REST API for data submission see the documentation [here](/help/rest-api).
 
 
 ## A note on Experiments and Replicate Sets
@@ -38,6 +38,34 @@ You may also have multiple sequencing runs performed at different times using a 
 The replicate information is stored and represented as a set of experiments that includes labels indicating the replicate type and replicate number of each experiment in the set.
 
 The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with, though in the database the information will always end up directly associated with ExperimentSetReplicate objects.  Specific details on formatting information regarding replicates is given in the [Spreadsheet Submission](/help/spreadsheet) page.  When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](/help/rest-api).
+
+
+## Referencing existing objects
+
+### Using aliases
+**Aliases** are a convenient way for you to refer to other items that you are submitting or have submitted in the past.
+An **alias** is a lab specific identifier that you can assign to any item and take the form of *lab:id\_string* eg. ```parklab:myalias```. Note that an alias must be unique within all items. Generally it is good practice to assign an alias to any item that you submit and if you use the Online Submission Interface to create new items designating an alias is the first required step.  Once you submit an alias for an Item then that alias can be used as an identifier for that Item in the current submission as well as in any subsequent submission.
+
+You don't need to use an alias if you are referencing an item that already exists in the database.
+
+### Other ways to reference existing items
+Every item in our database is assigned a “uuid” upon its creation, e.g. “44d3cdd1-a842-408e-9a60-7afadca11575”. Items from some item types (Files, Experiments, Biosamples, Biosources, Individuals...) also get a shorter “accession” assigned, e.g. 4DNEX4723419. These two are the default identifying terms of any item. In some special cases object specific identifying terms are also available, eg. award number for awards, or lab name for labs.
+
+
+| Object | Field | Example | Example (simple)|
+|---|---|---|---|
+| Lab | name | /labs/peter-park-lab/ | peter-park-lab |
+| Award | number | /awards/ODO1234567-01/ | ODO1234567-01 |
+| User | email | /users/test@test.com/ | test@test.com |
+| Vendor | name | /vendors/fermentas/ | fermentas |
+| Enzyme | name | /enzymes/HindIII/ | HindIII |
+| Construct | name | /constructs/GFP-H1B/ | GFP-H1B
+
+
+These types of values can be used for referencing items in the excel sheets or when using the REST-API for items that already exist in the 4DN database.
+
+
+The DCIC has already created all the labs and awards that are part of the 4DN consortium. There will also be other items, for example vendors, enzymes and biosources that will already exist in the database and can be reused in your submissions.  If there is an existing biosource (e.g. accession 4DNSRV3SKQ8M forH1-hESC (Tier 1) ) for the new biosample you are creating, you should reference the existing one instead of creating a new one.
 
 ## Getting Added as a 4DN User or Submitter
 
