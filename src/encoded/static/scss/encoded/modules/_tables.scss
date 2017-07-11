@@ -1290,6 +1290,9 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 								padding-bottom: 10px;
 								.expandable-list {
 									margin-bottom: 0;
+								}
+								> .expandable-list,
+								> .array-group-row > .expandable-list {
 									margin-left: 28px;
 								}
 							}
