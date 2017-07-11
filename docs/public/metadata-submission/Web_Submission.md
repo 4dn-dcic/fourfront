@@ -5,7 +5,7 @@ An online submission interface has been developed to help with the submission of
 ## Creating New Items
 
 You are very likely want to start by entering metadata for an ExperimentSetReplicate object or an Experiment object of a particular type (eg. a Hi-C experiment or Microscopy experiment).  It may make the most sense for you to start by creating experiments and then as a subsequent step associating multiple experiments with a Replicate Set.  However, you can start your submission at a lower level item type if that makes things easier for you.
-Navigate to an item of the type for which you want to create metadata eg. [Hi-C Experiment 4DNEX5LRCIOK](https://testportal.4dnucleome.org/experiments-hi-c/4DNEX5LRCIOK/)
+Navigate to an item of the type for which you want to create metadata eg. [Hi-C Experiment 4DNEX5LRCIOK](https://data.4dnucleome.org/experiments-hi-c/4DNEX5LRCIOK/)
 
 Currently you can find **Create** and **Edit** links near the top of a page for most items in our system.  You will not see one or both of these buttons if you lack permission to perform these operations, which may be due to the status of the item and/or your role in our system.
 

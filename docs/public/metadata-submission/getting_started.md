@@ -76,12 +76,12 @@ Before you can view protected lab or project data or submit data to the 4DN syst
  For most metadata items the default permission will be that the data will only be viewable by the members of the submitting lab and will only be editable by users who have been designated as submitters for that lab. The metadata will also be accessible to data wranglers who can help you review the data and alert you to any issues as the submission is ongoing. Once the data and metadata are complete and quality controlled, they will be released according to the data release policy adopted by the 4DN network.
 
 
-**A note on the test deployment:** We are deploying the 4DN Data Portal at <https://data.4dnucleome.org>. But at the moment, please use the test portal accessible at <https://testportal.4dnucleome.org>. Data submitted to the test portal may be deleted when server redeployments are necessary; however the forms you prepare can be used for submission to our production portal later.
+**A note on the test deployment:** We are deploying the 4DN Data Portal at <https://data.4dnucleome.org>. We also have a test portal accessible at <https://testportal.4dnucleome.org>. Data submitted to the test portal may be deleted when server redeployments are necessary; however the forms you prepare can be used for submission to our production portal later.
 
 ## Getting Connection Keys for the 4DN-DCIC servers
 If you have been designated as a submitter for the project and plan to use either our spreadsheet-based submission system or the REST-API an access key and a secret key are required to establish a connection to the 4DN database and to fetch, upload (post), or change (patch) data. Please follow these steps to get your keys.
 
-1. Log in to the 4DN [website](https://testportal.4dnucleome.org) with your username (email) and password.
+1. Log in to the 4DN [website](https://data.4dnucleome.org) with your username (email) and password.
 
     Note that we are using the [Oauth](https://oauth.net/) authentication system which will allow you to login with a google or github login.  _The email associated with the account you use for login must be the same as the one registered with the 4DN-DCIC._
 
@@ -97,7 +97,7 @@ If you have been designated as a submitter for the project and plan to use eithe
   "default": {
     "key": "ABCDEFG",
     "secret": "abcdefabcd1ab",
-    "server": "https://testportal.4dnucleome.org/"
+    "server": "https://data.4dnucleome.org/"
   }
 }
 ```
