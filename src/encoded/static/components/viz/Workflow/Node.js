@@ -3,44 +3,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { console } from './../../util';
+import _ from 'underscore';
+import { Fade } from 'react-bootstrap';
 
 
-export default class Node extends React.Component {
 
-    static isSelected(currentNode, selectedNode){
-        if (!selectedNode) return false;
-        if (selectedNode === currentNode) return true;
-        if (selectedNode.id && currentNode.id && selectedNode.id === currentNode.id) return true;
-        if (selectedNode.name && currentNode.name && selectedNode.name === currentNode.name) return true;
-        //if (
-        //    _.isEqual(
-        //        _.omit(selectedNode, 'nodesInColumn', 'x', 'y', 'column'),
-        //        _.omit(currentNode, 'nodesInColumn', 'x', 'y', 'column')
-        //    )
-        //) return true;
-        return false;
-    }
+export class DefaultNodeElement extends React.Component {
 
     static propTypes = {
-        'title' : PropTypes.func.isRequired
+        'node' : PropTypes.object.isRequired,
+        'title': PropTypes.string.isRequired,
+        'disabled' : PropTypes.bool,
+        'selected' : PropTypes.bool,
+        'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+        'columnWidth' : PropTypes.number
     }
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-        this.icon = this.icon.bind(this);
-        this.tooltip = this.tooltip.bind(this);
-        this.isSelected = this.isSelected.bind(this);
-    }
-
-    innerStyle(){
-        if (this.props.node.type === 'input' || this.props.node.type === 'output'){
-            return {
-                width : (this.props.columnWidth || 100)
-            };
-        }
-    }
-
+    
     icon(){
         var iconClass;
         if (this.props.node.type === 'input' || this.props.node.type === 'output'){
@@ -79,7 +57,7 @@ export default class Node extends React.Component {
         return <i className={"icon icon-fw icon-" + iconClass}/>;
     }
 
-    tooltip(title = null){
+    tooltip(){
         var node = this.props.node;
         var output = '';
 
@@ -101,7 +79,7 @@ export default class Node extends React.Component {
 
         // Title
         output += '<h5 class="text-600 tooltip-title">' +
-            (this.props.title(node, false)) +
+            this.props.titleString +
             '</h5>';
 
         // Argument Type
@@ -143,14 +121,84 @@ export default class Node extends React.Component {
         return output; 
     }
 
-    isSelected(){
-        return Node.isSelected(this.props.node, this.props.selectedNode);
+    style(){
+        if (this.props.node.type === 'input' || this.props.node.type === 'output'){
+            return {
+                width : (this.props.columnWidth || 100)
+            };
+        }
     }
+    
+    render(){
+        return (
+            <div
+                className="node-visible-element"
+                data-tip={this.tooltip()}
+                data-place="top"
+                data-html
+                style={this.style()}
+            >
+                <span className="node-name">{ this.icon() }{ this.props.title }</span>
+            </div>
+        );
+    }
+}
+
+
+export default class Node extends React.Component {
+
+    /**
+     * @param {Object} currentNode - Current node, e.g. node calling this function
+     * @param {?Object} selectedNode - Currently-selected node reference for view.
+     * @returns {boolean} True if currentNode matches selectedNode, and is thus the selectedNode.
+     */
+    static isSelected(currentNode, selectedNode){
+        if (!selectedNode) return false;
+        if (selectedNode === currentNode) return true;
+        if (typeof selectedNode.id === 'string' && typeof currentNode.id === 'string') {
+            if (selectedNode.id === currentNode.id) return true;
+            return false;
+        }
+        if (selectedNode.name && currentNode.name) {
+            if (selectedNode.name === currentNode.name) return true;
+            return false;
+        }
+        return false;
+    }
+
+    static isRelated(currentNode, selectedNode) {
+        if (!selectedNode) return false;
+        if (selectedNode.name && currentNode.name) {
+            if (selectedNode.name === currentNode.name) {
+                // Make sure target.step == selectedNode.inputOf.name
+                if (((selectedNode.inputOf && selectedNode.inputOf.name) || 'a') === ((currentNode.inputOf && currentNode.inputOf.name) || 'b')) return true;
+                if (selectedNode.inputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
+                    for (var i = 0; i < currentNode.meta.target.length; i++){
+                        if (typeof selectedNode.inputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.inputOf.name) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    static propTypes = {
+        'title' : PropTypes.func.isRequired
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.isSelected = this.isSelected.bind(this);
+    }
+
+    isSelected(){ return Node.isSelected(this.props.node, this.props.selectedNode); }
+    isRelated() { return Node.isRelated(this.props.node, this.props.selectedNode); }
 
     render(){
         var node        = this.props.node,
-            title       = this.props.title(node, true),
-            tooltip     = this.tooltip(title),
             disabled    = typeof node.disabled !== 'undefined' ? node.disabled : null,
             className   = "node node-type-" + node.type;
 
@@ -158,9 +206,23 @@ export default class Node extends React.Component {
             disabled = this.props.isNodeDisabled(node);
         }
 
+        var selected = this.isSelected() || false;
+        var related = this.isRelated() || false;
+
         if      (disabled)                                   className += ' disabled';
         if      (typeof this.props.className === 'function') className += ' ' + this.props.className(node);
-        else if (typeof this.props.className === 'string'  ) className += ' ' + this.props.className; 
+        else if (typeof this.props.className === 'string'  ) className += ' ' + this.props.className;
+
+        var visibleNode = React.cloneElement(
+            this.props.nodeElement,
+            _.extend(_.omit(this.props, 'children', 'onMouseEnter', 'onMouseLeave', 'onClick', 'className', 'nodeElement'), {
+                'title' : this.props.title(node, true),
+                'titleString' : this.props.title(node, false),
+                'disabled' : disabled,
+                'selected' : selected,
+                'related' : related
+            })
+        );
 
         return (
             <div
@@ -168,7 +230,9 @@ export default class Node extends React.Component {
                 data-node-key={node.id || node.name}
                 data-node-type={node.type}
                 data-node-global={node.isGlobal || null}
-                data-node-selected={this.isSelected() || null}
+                data-node-selected={selected}
+                data-node-related={related}
+                data-node-type-detail={node.format}
                 style={{
                     'top' : node.y,
                     'left' : node.x,
@@ -177,15 +241,11 @@ export default class Node extends React.Component {
             >
                 <div
                     className="inner"
-                    style={this.innerStyle()}
                     onMouseEnter={this.props.onMouseEnter}
                     onMouseLeave={this.props.onMouseLeave}
-                    data-tip={tooltip}
-                    data-place="top"
-                    data-html
                     onClick={disabled ? null : this.props.onClick}
                 >
-                    <span className="node-name">{ this.icon() }{ title }</span>
+                    { visibleNode }
                 </div>
             </div>
         );

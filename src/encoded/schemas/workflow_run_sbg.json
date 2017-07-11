@@ -15,8 +15,11 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/notes"},
-        { "$ref": "workflow_run.json#/properties"}
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "workflow_run.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "workflow_run.json#/facets" }
     ],
     "properties": {
         "run_platform": {

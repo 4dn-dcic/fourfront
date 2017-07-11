@@ -397,7 +397,7 @@
                     "step_argument_type": "Input file"
                 }
             ],
-            "description": ""
+            "description": "File on which MD5 calculation is run on."
         },
         {
             "workflow_argument_name": "report",
@@ -409,7 +409,7 @@
                     "step_argument_type": "Output file"
                 }
             ],
-            "description": ""
+            "description": "The MD5 checksum generated."
         }
     ],
     "workflow_steps": [
@@ -886,6 +886,20 @@
                     "step_argument_name":"input_pairs",
                     "step_argument_type":"Input file or parameter",
                     "workflow_step":"pairs2hic"
+                },
+                {
+                    "step_argument_name":"output_pairs",
+                    "step_argument_type":"Output file or parameter",
+                    "workflow_step":"merge_pairs"
+                }
+            ]
+        },
+        {
+            "argument_mapping":[
+                {
+                    "step_argument_name":"pairs",
+                    "step_argument_type":"Input file or parameter",
+                    "workflow_step":"cooler"
                 },
                 {
                     "step_argument_name":"output_pairs",
@@ -1383,5 +1397,119 @@
             ]
         }
     ]
+},
+{   
+    "title": "add-hic-normvector-to-mcool",
+    "accession": "4DNWFG6JYY2P",
+    "uuid": "e8b6d4be-20c4-4e39-b1a3-f04592894521",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "name": "add-hic-normvector-to-mcool/2",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "arguments": [
+        {   
+            "workflow_argument_name": "input_hic",
+            "argument_type": "Input file",
+            "argument_format": "hic",
+            "argument_mapping": [
+                {   
+                    "workflow_step": "add-hic-normvector-to-mcool",
+                    "step_argument_name": "input_hic",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "input_mcool",
+            "argument_type": "Input file",
+            "argument_format": "mcool",
+            "argument_mapping": [
+                {
+                    "workflow_step": "add-hic-normvector-to-mcool",
+                    "step_argument_name": "input_mcool",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "description": ""
+        },
+        {   
+            "workflow_argument_name": "output_mcool",
+            "argument_type": "Output processed file",
+            "argument_format": "mcool",
+            "argument_mapping": [
+                {   
+                    "workflow_step": "add-hic-normvector-to-mcool",
+                    "step_argument_name": "output_mcool",
+                    "step_argument_type": "Output file"
+                }
+            ],
+            "description": ""
+        }
+    ],
+    "workflow_steps": [
+        {   
+            "step_name":"add-hic-normvector-to-mcool",
+            "step":"11775554-5f85-4d0c-93e4-fa9d7f20d47a"
+        }
+    ],
+    "description": "add-hic-normvector-to-mcool"
+},
+{   
+    "title": "extract-mcool-normvector-for-juicebox",
+    "accession": "4DNWFG6JJBM8",
+    "uuid": "441b46f5-5193-41ee-a90e-c7a74fbb65c1",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "name": "extract-mcool-normvector-for-juicebox/2",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "arguments": [
+        {   
+            "workflow_argument_name": "input_mcool",
+            "argument_type": "Input file",
+            "argument_format": "mcool",
+            "argument_mapping": [
+                {   
+                    "workflow_step": "extract-mcool-normvector-for-juicebox",
+                    "step_argument_name": "input_mcool",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "description": ""
+        },
+        {
+            "argument_type": "parameter",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "nres",
+                    "workflow_step": "extract-mcool-normvector-for-juicebox",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "nres"
+        },
+        {   
+            "workflow_argument_name": "output_normvector",
+            "argument_type": "Output processed file",
+            "argument_format": "other",
+            "argument_mapping": [
+                {   
+                    "workflow_step": "extract-mcool-normvector-for-juicebox",
+                    "step_argument_name": "output_normvector",
+                    "step_argument_type": "Output file"
+                }
+            ],
+            "description": ""
+        }
+    ],
+    "workflow_steps": [
+        {   
+            "step_name":"extract-mcool-normvector-for-juicebox",
+            "step":"53e7b46f-1d3b-4a16-812f-c79456614bda"
+        }
+    ],
+    "description": "extract-mcool-normvector-for-juicebox"
 }
 ]
