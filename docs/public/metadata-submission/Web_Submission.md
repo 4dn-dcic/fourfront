@@ -9,7 +9,7 @@ Navigate to an item of the type for which you want to create metadata eg. [Hi-C 
 
 Currently you can find **Create** and **Edit** links near the top of a page for most items in our system.  You will not see one or both of these buttons if you lack permission to perform these operations, which may be due to the status of the item and/or your role in our system.
 
-When you click **Create** the first thing you will be asked is to create an alias for your item.  This is a lab specific unique identifier for this object taking the form of xxxx:xxxxx where the portion before the colon is a lab designation eg. 4dndcic and the portion after is an identifier that you choose that is unique within your lab group (see section on aliases here).
+When you click **Create** the first thing you will be asked is to create an alias for your item.  This is a lab specific unique identifier for this object taking the form of xxxx:xxxxx where the portion before the colon is a lab designation eg. 4dndcic and the portion after is an identifier that you choose that is unique within your lab group (see section on using aliases [here](/help/getting-started#referencing-existing-objects)).
 
 When you submit your alias you will be brought to a page where you can start entering metadata.  You will see two gray bars *Fields* and *Linked Objects* and selecting the *+* will expand those bars to show the fields and objects that can be entered.  Hovering your pointer over the **i** next to Navigation pops up an explanation for what the different colors of the objects displayed in the Navigation tree.
 
