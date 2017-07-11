@@ -4,6 +4,31 @@ In order to make your data accessible, searchable and assessable you should subm
 
 For an overview of the metadata structure and relationships between different items please see [the slides](/help#metadata-structure) available on the [introductory page](/help).
 
+We have three primary ways that you can submit data to the 4DN data portal.
+
+### Web Submission
+
+To submit one or a few experiments or for a hands on way to gain familiarity with the 4DN data model the online submission interface is a useful tool.
+Documentation on how to get started with this interface is [here](help/web-submission/).
+
+### Data Submission via Spreadsheet
+
+We provide data submission forms as excel workbooks that are flattened versions of the metadata schemas, but only
+containing fields that actually can and should be submitted.
+We also provide software tools that handle the interaction with our REST API to generate these forms and push the
+content of the forms to our database.
+Documentation of the data submission process using these forms can be found
+[here](help/spreadsheet).
+
+### REST API
+
+For both meta/data submission and retrival, you can also access our database directly via the REST-API.
+Data objects exchanged with the server conform to the standard JavaScript Object Notation (JSON) format.
+Our implementation is analagous to the one developed
+by the [ENCODE DCC](https://www.encodeproject.org/help/rest-api/).
+If you would like to directly interact with the REST API for data submission see the documentation [here](help/rest-api).
+
+
 ## A note on Experiments and Replicate Sets
 
 The 4DN Consortium is strongly encouraging that chromatin conformation capture genomic experiments be performed using at least two different preparations of the same source biomaterial - i.e. bioreplicates.  In terms of submitting metadata you would submit two Experiments that used the same Biosource, but have different Biosamples. In many cases the only difference between Biosamples may be the dates at which the cell culture or tissue was harvested.  The experimental techniques and parameters will be shared by all experiments of the same bioreplicate set.
