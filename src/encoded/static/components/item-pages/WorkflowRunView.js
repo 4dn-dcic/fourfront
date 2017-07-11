@@ -46,14 +46,24 @@ export function mapEmbeddedFilesToStepRunDataIDs(nodes, uuidFileMap){
 export function allFilesForWorkflowRunMappedByUUID(item){
     return _.object(
         _.map(
-            _.pluck(
-                (item.output_files || []).concat(item.input_files || []).concat(item.output_quality_metrics || []),
-                'value'
+            _.filter(
+                _.pluck(
+                    (item.output_files || []).concat(item.input_files || []).concat(item.output_quality_metrics || []),
+                    'value'
+                ),
+                function(file){
+                    if (!file || typeof file !== 'object') {
+                        console.error("No file ('value' property) embedded.");
+                        return false;
+                    }
+                    if (typeof file.uuid !== 'string') {
+                        console.error("We need to have Files' UUID embedded in WorkflowRun-> output_files, input_files, & output_quality_metric in order to have file info appear on workflow viz nodes.");
+                        return false;
+                    }
+                    return true;
+                }
             ),
             function(file){
-                if (typeof file.uuid !== 'string') {
-                    console.error("We need to have Files' UUID embedded in WorkflowRun-> output_files, input_files, & output_quality_metric in order to have file info appear on workflow viz nodes.");
-                }
                 return [
                     file.uuid,                                  // Key
                     _.extend({}, file, {                        // Value
