@@ -54,9 +54,9 @@
             "description": "Time of incubation with enzyme in minutes",
             "type": "number"
         },
-        "digestion_temperature": {
-            "title": "Digestion Temperature (°C)",
-            "description": "Temperature of digestion step in degrees Celsius",
+        "incubation_temperature": {
+            "title": "Incubation Temperature (°C)",
+            "description": "Temperature of transposase step in degrees Celsius",
             "type": "number"
         }
     },
