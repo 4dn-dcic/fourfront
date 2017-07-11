@@ -7,7 +7,7 @@ var Alerts = null; //require('./../alerts');
 var store = null;
 var object = require('./object');
 import * as Schemas from './Schemas';
-var navigate = require('./navigate').default;
+import { navigate } from './navigate';
 
 
 export let getSchemas = null;
