@@ -124,7 +124,7 @@ def get_term_name_from_rdf(class_, data):
     name = None
     try:
         name = data.rdfGraph.label(class_).__str__()
-    except:
+    except AttributeError:
         pass
     return name
 
@@ -374,11 +374,11 @@ def get_slim_terms(connection):
     for cat in slim_categories:
         terms = get_FDN(None, connection, None, search_suffix + cat)
         try:
-            # a notification indicates an issue eg. No results found
-            # so ignore
+            # a notification indicates a problem like a bad response so only
+            # add extend slim_terms if not present
             terms.get('notification')
             pass
-        except:
+        except AttributeError:
             slim_terms.extend(terms)
     return slim_terms
 
@@ -463,7 +463,7 @@ def _get_t_id(val):
         if linkid is None:
             linkid = val.get('term_id')
         return linkid
-    except:
+    except AttributeError:
         return val
 
 
