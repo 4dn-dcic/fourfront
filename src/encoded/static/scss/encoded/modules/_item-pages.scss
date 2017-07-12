@@ -464,6 +464,39 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				}
 			}
 		}
+		.detail-embedded-table-container {
+			overflow-x: auto;
+			table.detail-embedded-table {
+				min-width: 100%;
+				tr th {
+					white-space: normal;
+					word-break: normal;
+				}
+				tr td {
+					word-break: normal;
+					padding: 5px 8px;
+					&.child-list-row-container {
+						padding: 0;
+						border-left: 1px dotted #eee;
+						border-right: 1px dotted #eee;
+					}
+				}
+				tr:not(:last-child) {
+					border-bottom: 1px solid #eee;
+				}
+				.child-list-row {
+					> div {
+						padding: 5px 8px;
+					}
+					&:not(:last-child) {
+						border-bottom: 1px solid #f8f8f8;
+					}
+					div.child-list-row-number {
+						width: 36px;
+					}
+				}
+			}
+		}
 
 	}
 

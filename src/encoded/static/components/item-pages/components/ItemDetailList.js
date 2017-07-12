@@ -6,6 +6,7 @@ import _ from 'underscore';
 import { Collapse, Button } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { console, object, Schemas } from './../../util';
+import * as vizUtil from './../../viz/utilities';
 import { PartialList } from './PartialList';
 import { FilesInSetTable } from './FilesInSetTable';
 import { getTitleStringFromContext } from './../item';
@@ -95,13 +96,13 @@ class SubItem extends React.Component {
         return (
             <span>
                 { this.toggleLink(this.props.title, this.props.isOpen || this.state.isOpen) }
-                { this.state.isOpen ? <SubItemView {...this.props} isOpen /> : <div/> }
+                { this.state.isOpen ? <SubItemListView {...this.props} isOpen /> : <div/> }
             </span>
         );
     }
 }
 
-class SubItemView extends React.Component {
+class SubItemListView extends React.Component {
 
     static shouldRenderTable(content){
         var itemKeys = _.keys(content);
@@ -119,45 +120,308 @@ class SubItemView extends React.Component {
         var item = this.props.content;
         var popLink = this.props.popLink;
         var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap || {};
+        var props = {
+            'context' : item,
+            'schemas' : schemas,
+            'popLink' : popLink,
+            'alwaysCollapsibleKeys' : [],
+            'excludedKeys' : (this.props.excludedKeys || _.without(Detail.defaultProps.excludedKeys,
+                // Remove
+                    '@id', 'audit', 'lab', 'award', 'description'
+                ).concat([
+                // Add
+                    'link_id', 'schema_version', 'uuid'
+                ])
+            ),
+            'keyTitleDescriptionMap' : _.extend({}, keyTitleDescriptionMap, {
+                // Extend schema properties
+                '@id' : {
+                    'title' : 'Link',
+                    'description' : 'Link to Item'
+                }
+            }),
+            'showJSONButton' : false
+        };
         return (
             <div className="sub-panel data-display panel-body-with-header">
                 <div className="key-value sub-descriptions">
-                    <Detail
-                        context={item}
-                        schemas={schemas}
-                        popLink={popLink}
-                        alwaysCollapsibleKeys={[]}
-                        excludedKeys={this.props.excludedKeys ||
-                            _.without(Detail.defaultProps.excludedKeys,
-                            // Remove
-                                '@id', 'audit', 'lab', 'award', 'description'
-                            ).concat([
-                            // Add
-                                'link_id', 'schema_version', 'uuid'
-                            ])
-                        }
-
-                        keyTitleDescriptionMap={_.extend({}, keyTitleDescriptionMap, {
-                            // Extend schema properties
-                            '@id' : {
-                                'title' : 'Link',
-                                'description' : 'Link to Item'
-                            }
-                        })}
-                        />
+                    { React.createElement(typeof item.display_title === 'string' ? ItemDetailList : Detail, props) }
                 </div>
             </div>
         );
-    }
-
-    renderTableView(){
-
     }
 
     render(){
         if (!this.props.isOpen) return null;
         return this.renderListView();
     }
+}
+
+class SubItemTable extends React.Component {
+
+
+    static shouldUseTable(list){
+        if (!Array.isArray(list)) return false;
+        if (list.length < 1) return false;
+        var firstRowItem = list[0];
+
+        if (!firstRowItem) return false;
+        if (typeof firstRowItem === 'string') return false;
+        if (typeof firstRowItem === 'number') return false;
+        if (typeof firstRowItem.display_title === 'string') return false; // TEMP
+
+        var rootKeys = _.keys(firstRowItem);
+        var embeddedKeys, i, j, embeddedListItem, embeddedListItemKeys;
+        
+
+        for (i = 0; i < rootKeys.length; i++){
+            if (Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]].length > 0 && firstRowItem[rootKeys[i]][0] && typeof firstRowItem[rootKeys[i]][0] === 'object'){
+                // List of objects exist at least 1 level deep.
+                embeddedListItem = firstRowItem[rootKeys[i]][0];
+                embeddedListItemKeys = _.keys(embeddedListItem);
+                for (j = 0; j < embeddedListItemKeys.length; j++){
+                    if (
+                        Array.isArray(embeddedListItem[embeddedListItemKeys[j]]) &&
+                        embeddedListItem[embeddedListItemKeys[j]][0] &&
+                        typeof embeddedListItem[embeddedListItemKeys[j]][0] === 'object'
+                    ){
+                        // List of objects at least 2 levels deep.
+                        return false;
+                    }
+
+                }
+                //if (Array.isArray(embeddedListItem[0]) && embeddedList[0].length > 0 && embeddedList[0][0] && typeof embeddedList[0][0] === 'object') {
+                    // List of objects at least 2 levels deep.
+                //    return false;
+                //}
+                //if (embeddedList[0] && typeof embeddedList[0] === 'object'){
+                //    return false;
+                //}
+                //return true;
+            }
+            if (!Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object') {
+                // Embedded object.
+                embeddedKeys = _.keys(firstRowItem[rootKeys[i]]);
+                if (embeddedKeys.length > 5) return false; // Too long.
+                for (j = 0; j < embeddedKeys.length; j++){
+                    if ( Array.isArray(  firstRowItem[ rootKeys[i] ][ embeddedKeys[j] ]  ) ){
+                        if (
+                            firstRowItem[rootKeys[i]][embeddedKeys[j]].length < 4 &&
+                            (typeof firstRowItem[rootKeys[i]][embeddedKeys[j]][0] === 'string' || typeof firstRowItem[rootKeys[i]][embeddedKeys[j]][0] === 'number')
+                        ) { continue; } else { return false; }
+                    }
+                    
+                    if (
+                        !Array.isArray(firstRowItem[rootKeys[i]][embeddedKeys[j]]) &&
+                        firstRowItem[rootKeys[i]][embeddedKeys[j]] &&
+                        typeof firstRowItem[rootKeys[i]][embeddedKeys[j]] === 'object'
+                    ) { 
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.state = { mounted : false };
+    }
+
+    componentDidMount(){
+        vizUtil.requestAnimationFrame(()=>{
+            this.setState({ mounted : true });
+        });
+    }
+
+    getColumnKeys(){
+        var firstRowItem = this.props.items[0];
+        var objectWithAllItemKeys = _.reduce(this.props.items, function(m, v){
+            return _.extend(m, v);
+        }, {});
+        //var schemas = this.props.schemas || Schemas.get();
+        //var tips = schemas ? object.tipsFromSchema(schemas, context) : {};
+        //if (typeof this.props.keyTitleDescriptionMap === 'object' && this.props.keyTitleDescriptionMap){
+        //    _.extend(tips, this.props.keyTitleDescriptionMap);
+        //}
+        var rootKeys = _.keys(objectWithAllItemKeys).sort(function(a,b){
+            if (['title', 'display_title', 'accession'].indexOf(a)) return -1;
+            if (['title', 'display_title', 'accession'].indexOf(b)) return 1;
+            return 0;
+        });
+
+        var columnKeys = [];
+
+        for (var i = 0; i < rootKeys.length; i++){
+            if (typeof firstRowItem[rootKeys[i]] === 'string' || typeof firstRowItem[rootKeys[i]] === 'number' || Array.isArray(firstRowItem[rootKeys[i]])) {
+                if (  Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]][0] && typeof firstRowItem[rootKeys[i]][0] === 'object' && typeof firstRowItem[rootKeys[i]][0].display_title !== 'string' ) {
+                    columnKeys.push({
+                        'key' : rootKeys[i],
+                        'childKeys' : _.keys(
+                            _.reduce(this.props.items, function(m1,v1){ 
+                                return _.extend(
+                                    m1,
+                                    _.reduce(v1[rootKeys[i]], function(m2,v2) {
+                                        return _.extend(m2, v2);
+                                    }, {})
+                                );
+                            }, {})
+                        )
+                    });
+                } else {
+                    columnKeys.push({ 'key' : rootKeys[i] });
+                }
+            } else if (firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object'){
+                var itemAtID = typeof firstRowItem[rootKeys[i]].display_title === 'string' && object.atIdFromObject(firstRowItem[rootKeys[i]]);
+                if (itemAtID) {
+                    columnKeys.push({ 'key' : rootKeys[i] }); // Keep single key if is an Item, we'll make it into a link.
+                } else { // Flatten up, otherwise.
+                    columnKeys = columnKeys.concat(
+                        _.keys(firstRowItem[rootKeys[i]]).map(function(embeddedKey){
+                            return { 'key' : rootKeys[i] + '.' + embeddedKey };
+                        })
+                    );
+                }
+            }
+        }
+
+        return columnKeys.sort(function(a,b){
+            // Push columns with child/embedded object lists to the end.
+            if (Array.isArray(a.childKeys)) return 1;
+            if (Array.isArray(b.childKeys)) return -1;
+            return 0;
+        });
+    }
+
+    render(){
+        var columnKeys = this.getColumnKeys();
+
+        //console.log(columnKeys);
+        var subListKeyWidths = this.subListKeyWidths;
+        if (!subListKeyWidths){
+            subListKeyWidths = this.subListKeyWidths = !this.state.mounted || !this.subListKeyRefs ? null : (function(refObj){
+                var keys = _.keys(refObj);
+                var widthObj = {};
+                for (var i = 0; i < keys.length; i++){
+                    widthObj[keys[i]] = _.object(_.pairs(refObj[keys[i]]).map(function(refSet){
+                        //var colKey = refSet[1].getAttribute('data-key');
+                        var colRows = Array.from(document.getElementsByClassName('child-column-' + keys[i] + '.' + refSet[0]));
+                        var maxWidth = Math.max(
+                            _.reduce(colRows, function(m,v){ return Math.max(m,v.offsetWidth); }, 0),
+                            refSet[1].offsetWidth + 10
+                        );
+                        return [ refSet[0], maxWidth /*refSet[1].offsetWidth*/ ];
+                    }));
+                }
+                return widthObj;
+            })(this.subListKeyRefs);
+        }
+
+        var rowData = _.map(
+            this.props.items,
+            function(item){
+                return _.map(columnKeys, function(colKeyContainer){
+                    var colKey = colKeyContainer.key;
+                    var value = object.getNestedProperty(item, colKey);
+                    if (!value) return { 'value' : '-' };
+                    if (Array.isArray(value)){
+                        if (typeof value[0] === 'string') return { 'value' : value.join(', ') };
+                        if (value[0] && typeof value[0] === 'object'){ // Embedded list of objects.
+                            var allKeys = colKeyContainer.childKeys; //_.keys(  _.reduce(value, function(m,v){ return _.extend(m,v); }, {})   );
+                            return {
+                                'value' : value.map(function(embeddedRow, i){
+                                    return (
+                                        <div style={{ whiteSpace: "nowrap" }} className="text-left child-list-row">
+                                            <div className="inline-block child-list-row-number">{ i + 1 }.</div>
+                                            { allKeys.map(function(k){
+                                                return (
+                                                    <div
+                                                        className={"inline-block child-column-" + colKey + '.' + k}
+                                                        style={{ width : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[k] || null) }}
+                                                    >
+                                                        { embeddedRow[k] } &nbsp;
+                                                    </div>
+                                                );
+                                            }) }
+                                        </div>
+                                    );
+                                }),
+                                'className' : 'child-list-row-container'
+                            };
+                        }
+                    }
+                    if (value && typeof value === 'object' && typeof value.display_title === 'string') {
+                        return { 'value' : <a href={object.atIdFromObject(value)}>{ value.display_title }</a> };
+                    }
+                    return { 'value' : value };
+                });
+            }
+        );
+
+        var keyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
+
+        var subListKeyRefs = this.subListKeyRefs = {};
+
+        return (
+            <div className="detail-embedded-table-container">
+                <table className="detail-embedded-table">
+                    <thead>
+                        <tr>{
+                            [<th key="rowNumber" style={{ minWidth: 36, maxWidth : 36, width: 36 }}>#</th>].concat(columnKeys.map(function(colKeyContainer){
+                                //var tips = object.tipsFromSchema(Schemas.get(), context) || {};
+                                var colKey = colKeyContainer.key;
+                                var title = keyTitleDescriptionMap[colKey] ? (keyTitleDescriptionMap[colKey].title || colKey) : colKey;
+                                var tooltip = keyTitleDescriptionMap[colKey] ? (keyTitleDescriptionMap[colKey].description || null) : null;
+                                return (
+                                    <th key={"header-for-" + colKey}>
+                                        <TooltipInfoIconContainer title={title} tooltip={tooltip}/>
+                                        { 
+                                            Array.isArray(colKeyContainer.childKeys) && colKeyContainer.childKeys.length > 0 ? (function(){
+                                                //var subKeyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
+                                                var subKeyTitleDescriptionMap = (((keyTitleDescriptionMap || {})[colKey] || {}).items || {}).properties || {};
+                                                subListKeyRefs[colKey] = {};
+                                                return (
+                                                    <div style={{ whiteSpace: "nowrap" }} className="sub-list-keys-header">{
+                                                        colKeyContainer.childKeys.map(function(ck){
+                                                            
+                                                            return (
+                                                                <div className="inline-block" data-key={colKey + '.' + ck} ref={function(r){
+                                                                    if (r) subListKeyRefs[colKey][ck] = r;
+                                                                }} style={{ 'width' : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[ck] || null) }}>
+                                                                    <TooltipInfoIconContainer title={(subKeyTitleDescriptionMap[ck] || {}).title || ck} tooltip={(subKeyTitleDescriptionMap[ck] || {}).description || null} />
+                                                                </div>
+                                                            );
+                                                        })
+                                                    }</div>
+                                                );
+                                            })()
+                                            :
+                                            null
+                                        }
+                                    </th>
+                                );
+                            })) 
+                        }</tr>
+                    </thead>
+                    <tbody>{
+                        rowData.map(function(row,i){
+                            return (
+                                <tr key={"row-" + i}>{
+                                    [<td key="rowNumber">{ i + 1 }.</td>].concat(row.map(function(colVal, j){
+                                        return <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>{ colVal.value }</td>;
+                                    }))
+                                }</tr>
+                            );
+                        })
+                    }</tbody>
+                </table>
+            </div>
+        );
+    }
+
 }
 
 
@@ -208,7 +472,7 @@ class DetailRow extends React.Component {
             return (
                 <div>
                     <PartialList.Row label={label} children={value} className={(this.props.className || '') + (this.state.isOpen ? ' open' : '')} />
-                    <SubItemView
+                    <SubItemListView
                         popLink={this.props.popLink}
                         content={this.props.item}
                         schemas={this.props.schemas}
@@ -299,6 +563,12 @@ export class Detail extends React.Component {
                 return (
                     <FilesInSetTable.Small files={item}/>
                 );
+            }
+
+            console.log('SHOULD USE TABL:E?', SubItemTable.shouldUseTable(item), item);
+
+            if (SubItemTable.shouldUseTable(item)) {
+                return <SubItemTable items={item} popLink={popLink} keyTitleDescriptionMap={keyTitleDescriptionMap} parentKey={keyPrefix} />;
             }
 
             return (
@@ -530,6 +800,10 @@ export class ItemDetailList extends React.Component {
         };
     }
 
+    static defaultProps = {
+        'showJSONButton' : true
+    }
+
     constructor(props){
         super(props);
         this.seeMoreButton = this.seeMoreButton.bind(this);
@@ -575,6 +849,22 @@ export class ItemDetailList extends React.Component {
         );
     }
 
+    buttonsRow(){
+        if (!this.props.showJSONButton){
+            return (
+                <div className="row">
+                    <div className="col-xs-12">{ this.seeMoreButton() }</div>
+                </div>
+            ); 
+        }
+        return (
+            <div className="row">
+                <div className="col-xs-6">{ this.seeMoreButton() }</div>
+                <div className="col-xs-6">{ this.toggleJSONButton() }</div>
+            </div>
+        );
+    }
+
     render(){
         var collapsed;
         if (typeof this.props.collapsed === 'boolean') collapsed = this.props.collapsed;
@@ -591,10 +881,7 @@ export class ItemDetailList extends React.Component {
                             excludedKeys={this.props.excludedKeys || Detail.defaultProps.excludedKeys}
                             stickyKeys={this.props.stickyKeys || Detail.defaultProps.stickyKeys}
                         />
-                        <div className="row">
-                            <div className="col-xs-6">{ this.seeMoreButton() }</div>
-                            <div className="col-xs-6">{ this.toggleJSONButton() }</div>
-                        </div>
+                        { this.buttonsRow() }
                     </div>
                     :
                     <div className="overflow-hidden">
