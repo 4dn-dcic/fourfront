@@ -4,6 +4,31 @@ In order to make your data accessible, searchable and assessable you should subm
 
 For an overview of the metadata structure and relationships between different items please see [the slides](/help#metadata-structure) available on the [introductory page](/help).
 
+We have three primary ways that you can submit data to the 4DN data portal.
+
+### Web Submission
+
+To submit one or a few experiments or for a hands on way to gain familiarity with the 4DN data model the online submission interface is a useful tool.
+Documentation on how to get started with this interface is [here](/help/web-submission).
+
+### Data Submission via Spreadsheet
+
+We provide data submission forms as excel workbooks that are flattened versions of the metadata schemas, but only
+containing fields that actually can and should be submitted.
+We also provide software tools that handle the interaction with our REST API to generate these forms and push the
+content of the forms to our database.
+Documentation of the data submission process using these forms can be found
+[here](/help/spreadsheet).
+
+### REST API
+
+For both meta/data submission and retrival, you can also access our database directly via the REST-API.
+Data objects exchanged with the server conform to the standard JavaScript Object Notation (JSON) format.
+Our implementation is analagous to the one developed
+by the [ENCODE DCC](https://www.encodeproject.org/help/rest-api/).
+If you would like to directly interact with the REST API for data submission see the documentation [here](/help/rest-api).
+
+
 ## A note on Experiments and Replicate Sets
 
 The 4DN Consortium is strongly encouraging that chromatin conformation capture genomic experiments be performed using at least two different preparations of the same source biomaterial - i.e. bioreplicates.  In terms of submitting metadata you would submit two Experiments that used the same Biosource, but have different Biosamples. In many cases the only difference between Biosamples may be the dates at which the cell culture or tissue was harvested.  The experimental techniques and parameters will be shared by all experiments of the same bioreplicate set.
@@ -12,7 +37,35 @@ You may also have multiple sequencing runs performed at different times using a 
 
 The replicate information is stored and represented as a set of experiments that includes labels indicating the replicate type and replicate number of each experiment in the set.
 
-The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with, though in the database the information will always end up directly associated with ExperimentSetReplicate objects.  Specific details on formatting information regarding replicates is given in the [Excel Work Book Submission](/help/spreadsheet) page.  When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](/help/rest-api).
+The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with, though in the database the information will always end up directly associated with ExperimentSetReplicate objects.  Specific details on formatting information regarding replicates is given in the [Spreadsheet Submission](/help/spreadsheet) page.  When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](/help/rest-api).
+
+
+## Referencing existing objects
+
+### Using aliases
+**Aliases** are a convenient way for you to refer to other items that you are submitting or have submitted in the past.
+An **alias** is a lab specific identifier that you can assign to any item and take the form of *lab:id\_string* eg. ```parklab:myalias```. Note that an alias must be unique within all items. Generally it is good practice to assign an alias to any item that you submit and if you use the Online Submission Interface to create new items designating an alias is the first required step.  Once you submit an alias for an Item then that alias can be used as an identifier for that Item in the current submission as well as in any subsequent submission.
+
+You don't need to use an alias if you are referencing an item that already exists in the database.
+
+### Other ways to reference existing items
+Every item in our database is assigned a “uuid” upon its creation, e.g. “44d3cdd1-a842-408e-9a60-7afadca11575”. Items from some item types (Files, Experiments, Biosamples, Biosources, Individuals...) also get a shorter “accession” assigned, e.g. 4DNEX4723419. These two are the default identifying terms of any item. In some special cases object specific identifying terms are also available, eg. award number for awards, or lab name for labs.
+
+
+| Object | Field | Example | Example (simple)|
+|---|---|---|---|
+| Lab | name | /labs/peter-park-lab/ | peter-park-lab |
+| Award | number | /awards/ODO1234567-01/ | ODO1234567-01 |
+| User | email | /users/test@test.com/ | test@test.com |
+| Vendor | name | /vendors/fermentas/ | fermentas |
+| Enzyme | name | /enzymes/HindIII/ | HindIII |
+| Construct | name | /constructs/GFP-H1B/ | GFP-H1B
+
+
+These types of values can be used for referencing items in the excel sheets or when using the REST-API for items that already exist in the 4DN database.
+
+
+The DCIC has already created all the labs and awards that are part of the 4DN consortium. There will also be other items, for example vendors, enzymes and biosources that will already exist in the database and can be reused in your submissions.  If there is an existing biosource (e.g. accession 4DNSRV3SKQ8M forH1-hESC (Tier 1) ) for the new biosample you are creating, you should reference the existing one instead of creating a new one.
 
 ## Getting Added as a 4DN User or Submitter
 
@@ -23,13 +76,12 @@ Before you can view protected lab or project data or submit data to the 4DN syst
  For most metadata items the default permission will be that the data will only be viewable by the members of the submitting lab and will only be editable by users who have been designated as submitters for that lab. The metadata will also be accessible to data wranglers who can help you review the data and alert you to any issues as the submission is ongoing. Once the data and metadata are complete and quality controlled, they will be released according to the data release policy adopted by the 4DN network.
 
 
-**A note on the test deployment:** We are deploying the 4DN Data Portal at <https://data.4dnucleome.org>. But at the moment, please use the test portal accessible at <https://testportal.4dnucleome.org>. Data submitted to the test portal may be deleted when server redeployments are necessary; however the forms you prepare can be used for submission to our production portal later.
+**A note on the test deployment:** We are deploying the 4DN Data Portal at <https://data.4dnucleome.org>. We also have a test portal accessible at <https://testportal.4dnucleome.org>. Data submitted to the test portal may be deleted when server redeployments are necessary; however the forms you prepare can be used for submission to our production portal later.
 
 ## Getting Connection Keys for the 4DN-DCIC servers
 If you have been designated as a submitter for the project and plan to use either our spreadsheet-based submission system or the REST-API an access key and a secret key are required to establish a connection to the 4DN database and to fetch, upload (post), or change (patch) data. Please follow these steps to get your keys.
 
-1. Log in to the 4DN website with your username (email) and password.
-    - server: <https://testportal.4dnucleome.org>
+1. Log in to the 4DN [website](https://data.4dnucleome.org) with your username (email) and password.
 
     Note that we are using the [Oauth](https://oauth.net/) authentication system which will allow you to login with a google or github login.  _The email associated with the account you use for login must be the same as the one registered with the 4DN-DCIC._
 
@@ -45,7 +97,7 @@ If you have been designated as a submitter for the project and plan to use eithe
   "default": {
     "key": "ABCDEFG",
     "secret": "abcdefabcd1ab",
-    "server": "https://testportal.4dnucleome.org/"
+    "server": "https://data.4dnucleome.org/"
   }
 }
 ```

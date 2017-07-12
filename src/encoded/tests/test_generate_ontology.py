@@ -294,7 +294,7 @@ def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
 
 
 def test_add_slim_to_term(terms_w_closures, slim_term_list):
-    slim_ids = ['uuida1', 'uuidd1', 'uuida2']
+    slim_ids = ['a_term1', 'd_term1', 'a_term2']
     for i, term in enumerate(terms_w_closures):
         test_term = go.add_slim_to_term(term, slim_term_list)
         assert test_term['term_id'] == str(i + 1)
@@ -315,16 +315,16 @@ def test_add_slim_terms(terms, slim_term_list):
     for tid, term in terms.items():
         if tid == 'id6':
             assert len(term['slim_terms']) == 2
-            assert 'uuidd1' in term['slim_terms']
-            assert 'uuida1' in term['slim_terms']
+            assert 'd_term1' in term['slim_terms']
+            assert 'a_term1' in term['slim_terms']
         elif tid == 'id9':
             assert 'slim_terms' not in term
         else:
             assert len(term['slim_terms']) == 1
             if tid in ['a_term1', 'id2', 'id3', 'id4']:
-                assert term['slim_terms'][0] == 'uuida1'
+                assert term['slim_terms'][0] == 'a_term1'
             elif tid in ['d_term1', 'id7', 'id8']:
-                assert term['slim_terms'][0] == 'uuidd1'
+                assert term['slim_terms'][0] == 'd_term1'
 
 
 def test_remove_obsoletes_and_unnamed_obsoletes(terms):

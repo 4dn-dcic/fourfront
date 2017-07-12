@@ -7,7 +7,7 @@ Hi-C and Hi-C-variant experiments.  Further developments in the metadata models 
 
 If you would like submit data to the portal, please contact
 [the data wranglers](mailto:4DN.DCIC.support@hms-dbmi.atlassian.net) to get data submitter accounts.
-Also, please skim through the [metadata structure](#metadata-structure) and check out the links in the [data submission](#data-submission-via-spreadsheet) sections below for detailed information on the submission process.
+Also, please skim through the [metadata structure](#metadata-structure) and check out the other pages in the **Help** menu for detailed information on the submission process.
 We can set up a webex call to discuss the details and the most convenient approach for your existing system.
 
 ## Metadata Structure
