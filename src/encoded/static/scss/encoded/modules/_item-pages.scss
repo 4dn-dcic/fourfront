@@ -471,6 +471,18 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				tr th {
 					white-space: normal;
 					word-break: normal;
+					
+					.sub-list-keys-header {
+						margin-left: -3px;
+						margin-right: -3px;
+						> div.inline-block {
+							padding: 2px 3px;
+						}
+						div.child-list-row-number {
+							width: 36px;
+						}
+
+					}
 				}
 				tr td {
 					word-break: normal;
@@ -480,6 +492,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 						border-left: 1px dotted #eee;
 						border-right: 1px dotted #eee;
 					}
+					&.no-word-break {
+						white-space: nowrap;
+					}
 				}
 				tr:not(:last-child) {
 					border-bottom: 1px solid #eee;
@@ -487,6 +502,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				.child-list-row {
 					> div {
 						padding: 5px 8px;
+						text-align: center;
 					}
 					&:not(:last-child) {
 						border-bottom: 1px solid #f8f8f8;
