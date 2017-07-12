@@ -97,7 +97,7 @@ export function getSearchType(facets){
     }
 }
 
-class ResultTableHandlersContainer extends React.Component {
+export class ResultTableHandlersContainer extends React.Component {
 
     static defaultProps = {
         restrictions : {},

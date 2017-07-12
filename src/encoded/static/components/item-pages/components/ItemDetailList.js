@@ -157,9 +157,21 @@ class SubItemListView extends React.Component {
     }
 }
 
+/**
+ *  Messiness.
+ * 
+ * @class SubItemTable
+ * @extends {React.Component}
+ */
 class SubItemTable extends React.Component {
 
-
+    /**
+     * This code could look better.
+     * Essentially, checks each property in first object of param 'list' and if no values fail a rough validation wherein there must be no too-deeply nested objects or lists, returns true.
+     * 
+     * @param {Object[]} list - List of objects
+     * @returns {boolean} True if a table would be good for showing these items.
+     */
     static shouldUseTable(list){
         if (!Array.isArray(list)) return false;
         if (list.length < 1) return false;
@@ -185,19 +197,11 @@ class SubItemTable extends React.Component {
                         embeddedListItem[embeddedListItemKeys[j]][0] &&
                         typeof embeddedListItem[embeddedListItemKeys[j]][0] === 'object'
                     ){
-                        // List of objects at least 2 levels deep.
+                        // List of objects exists at least 2 levels deep.
                         return false;
                     }
 
                 }
-                //if (Array.isArray(embeddedListItem[0]) && embeddedList[0].length > 0 && embeddedList[0][0] && typeof embeddedList[0][0] === 'object') {
-                    // List of objects at least 2 levels deep.
-                //    return false;
-                //}
-                //if (embeddedList[0] && typeof embeddedList[0] === 'object'){
-                //    return false;
-                //}
-                //return true;
             }
             if (!Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object') {
                 // Embedded object.

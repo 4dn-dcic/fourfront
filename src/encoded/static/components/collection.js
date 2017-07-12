@@ -1,7 +1,7 @@
 'use strict';
 
 var React = require('react');
-var Search = require('./search').Search;
+var Search = require('./browse/SearchView').default;
 
 /**
  * The primary Collection view, renders the Search component.
