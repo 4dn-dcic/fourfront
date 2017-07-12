@@ -298,17 +298,12 @@ class Item(snovault.Item):
         "title": "External Reference URIs",
         "description": "External references to this item.",
         "type": "array",
-<<<<<<< d714e7e34e9ee4d87a9b78c3011eed9b08772178
-        "items": {"type": "object", "title": "External Reference", "properties":
-                  {"uri": {"type": "string"}, "ref": {"type": "string"}}}
-=======
         "items": {
             "type": "object", "title": "External Reference", "properties": {
                 "uri": {"type": "string"},
                 "ref": {"type": "string"}
             }
         }
->>>>>>> Tweaks to _terms_match to try to identify unchanged terms better; formatting in base.py; using lookup value in a biosource test
     })
     def external_references(self, request, dbxrefs=None):
         namespaces = request.registry.settings.get('snovault.jsonld.namespaces')
