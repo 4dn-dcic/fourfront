@@ -5,59 +5,105 @@
         "about" : true,
 
         "help"  : {
-            "title"     : "Getting Started",
-            "directory" : "/src/encoded/static/data/help",
+            "title": "Introduction to 4DN Metadata",
+            "directory" : "/docs/public/help",
             "sections"  : [
                 {
-                    "filename" : "gettingStarted.html",
-                    "toc-title" : "Getting Started"
-                },
-                {
-                    "title" : "Metadata Structure",
-                    "filename" : "metadataStructure1.html"
+                    "filename" : "introduction.md",
+                    "title": null
                 },
                 {
                     "filename" : "carousel-place-holder",
                     "content" : "placeholder: <SlideCarousel />"
                 },
-                {   "filename" : "metadataStructure2.html"  },
                 {
-                    "title" : "Data Submission via Spreadsheet",
-                    "filename" : "submissionXLS.html"
-                },
-                {   "title" : "REST API", "filename" : "restAPI.html" }
+                    "filename" : "introduction2.md",
+                    "title": null
+                }
             ],
             "table-of-contents" : {
-                "enabled" : true
+                "enabled" : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth": 1
             }
         },
 
-        "help/submitting" : {
-            "title"     : "Submitting Metadata and Data files to 4DN-DCIC",
+        "help/getting-started" : {
+            "title": "Getting Started with Submissions",
             "directory" : "/docs/public/metadata-submission",
             "sections"  : [
                 {
-                    "filename"  : "introduction.md",
-                    "toc-title" : "Introduction"
-                },
-                {
-                    "title"     : "Getting a Submitter Account",
-                    "filename"  : "getting_added_as_user.md"
-                },
-                {
-                    "title"     : "Metadata Submission by Excel Workbook",
-                    "filename"  : "submission_using_excel_as_template.md"
-                },
-                {
-                    "title"     : "Information About Schemas",
-                    "filename"  : "schema_info.md"
+                    "filename"  : "getting_started.md",
+                    "title" : null
                 }
             ],
             "table-of-contents" : {
                 "enabled"       : true,
                 "header-depth"  : 4,
                 "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
-                "include-top-link" : false
+                "include-top-link" : false,
+                "skip-depth": 1
+            }
+        },
+
+        "help/web-submission": {
+            "title": "Online Submissions",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "title" : null,
+                    "filename"  : "web_submission.md"
+                }
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth": 1
+            }
+        },
+
+
+        "help/spreadsheet": {
+            "title": "Spreadsheet Submissions",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "title"     : null,
+                    "filename"  : "excel_submission.md"
+                },
+                {
+                    "title"     : null,
+                    "filename"  : "schema_info.md"
+                }
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 3,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth": 1
+            }
+        },
+
+        "help/rest-api": {
+            "title": "The REST-API",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "title" : null,
+                    "filename"  : "rest_api_submission.md"
+                }
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth"    : 1
             }
         },
 
