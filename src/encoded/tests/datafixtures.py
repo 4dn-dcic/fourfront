@@ -144,11 +144,49 @@ def protocol(testapp, lab, award):
 
 
 @pytest.fixture
-def F123_biosource(testapp, lab, award):
+def cell_line_term(testapp, ontology):
+    item = {
+        "is_slim_for": "cell",
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "term_id": "EFO:0000322",
+        "term_name": "cell line",
+        "uuid": "111189bc-8535-4448-903e-854af460a233",
+        "source_ontology": ontology['@id'],
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def f123_oterm(testapp, ontology, cell_line_term):
+    item = {
+        "uuid": "530036bc-8535-4448-903e-854af460b254",
+        "term_name": "F123-CASTx129",
+        "term_id": "EFO:0000008",
+        "source_ontology": ontology['@id'],
+        "slim_terms": [cell_line_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def gm12878_oterm(testapp, ontology, cell_line_term):
+    item = {
+        "uuid": "530056bc-8535-4448-903e-854af460b111",
+        "term_name": "GM12878",
+        "term_id": "EFO:0000009",
+        "source_ontology": ontology['@id'],
+        "slim_terms": [cell_line_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def F123_biosource(testapp, lab, award, f123_oterm):
     item = {
         "accession": "4DNSR000AAQ2",
         "biosource_type": "stem cell",
-        "cell_line": "F123-CASTx129",
+        "cell_line": f123_oterm['@id'],
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -156,12 +194,38 @@ def F123_biosource(testapp, lab, award):
 
 
 @pytest.fixture
-def human_biosource(testapp, human_individual, worthington_biochemical, lab, award):
+def GM12878_biosource(testapp, lab, award, gm12878_oterm):
+    item = {
+        "accession": "4DNSR000AAQ1",
+        "biosource_type": "immortalized cell line",
+        "cell_line": gm12878_oterm['@id'],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def tier1_biosource(testapp, protocol, lab, award, gm12878_oterm):
+    item = {
+        'description': 'Tier 1 cell line Biosource',
+        'biosource_type': 'immortalized cell line',
+        'cell_line': gm12878_oterm['@id'],
+        'SOP_cell_line': protocol['@id'],
+        'cell_line_tier': 'Tier 1',
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def human_biosource(testapp, human_individual, worthington_biochemical, gm12878_oterm, lab, award):
     item = {
         "description": "GM12878 cells",
         "biosource_type": "immortalized cell line",
         "individual": human_individual['@id'],
-        "cell_line": "GM12878",
+        "cell_line": gm12878_oterm['@id'],
         "biosource_vendor": worthington_biochemical['@id'],
         "status": "current",
         'award': award['@id'],
@@ -173,11 +237,11 @@ def human_biosource(testapp, human_individual, worthington_biochemical, lab, awa
 @pytest.fixture
 def human_data():
     return {
-            'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
-            'name': 'human',
-            'scientific_name': 'Homo sapiens',
-            'taxon_id': '9606',
-           }
+        'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
+        'name': 'human',
+        'scientific_name': 'Homo sapiens',
+        'taxon_id': '9606',
+    }
 
 
 @pytest.fixture
@@ -558,7 +622,7 @@ def ontology(testapp):
 @pytest.fixture
 def oterm(uberon_ont):
     return {
-        "uuid": "530036bc-8535-4448-903e-854af460b254",
+        "uuid": "530036bc-8535-4448-903e-854af460b222",
         "preferred_name": "preferred lung name",
         "term_name": "lung",
         "term_id": "UBERON:0002048",
