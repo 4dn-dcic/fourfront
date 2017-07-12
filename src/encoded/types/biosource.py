@@ -187,7 +187,6 @@ def validate_biosource_cell_line(context, request):
 
     if slims is not None:
         for slim in slims:
-            slim_for = None
             slim_term = get_item_if_you_can(request, slim, 'ontology-terms')
             try:
                 slimfor = slim_term.get('is_slim_for')

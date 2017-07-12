@@ -1,6 +1,5 @@
 from snovault import (
     upgrade_step,
-    CONNECTION
 )
 
 
@@ -18,5 +17,5 @@ def biosource_1_2(value, system):
             # if we get something back see if it has a uuid - if not oh well
             try:
                 value['cell_line'] = str(oterm.uuid)
-            except:
+            except AttributeError:
                 pass
