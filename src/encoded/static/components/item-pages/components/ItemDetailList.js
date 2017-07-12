@@ -205,6 +205,10 @@ class SubItemTable extends React.Component {
             }
             if (!Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object') {
                 // Embedded object.
+                if (typeof firstRowItem[rootKeys[i]].display_title === 'string'){
+                    // Embedded.... ITEM!
+                    continue; // Skip rest of checks, we're ok with just drawing link to Item.
+                }
                 embeddedKeys = _.keys(firstRowItem[rootKeys[i]]);
                 if (embeddedKeys.length > 5) return false; // Too long.
                 for (j = 0; j < embeddedKeys.length; j++){
@@ -251,11 +255,8 @@ class SubItemTable extends React.Component {
         //if (typeof this.props.keyTitleDescriptionMap === 'object' && this.props.keyTitleDescriptionMap){
         //    _.extend(tips, this.props.keyTitleDescriptionMap);
         //}
-        var rootKeys = _.keys(objectWithAllItemKeys).sort(function(a,b){
-            if (['title', 'display_title', 'accession'].indexOf(a)) return -1;
-            if (['title', 'display_title', 'accession'].indexOf(b)) return 1;
-            return 0;
-        });
+        // Property columns to push to front (common across all objects)
+        var rootKeys = _.keys(objectWithAllItemKeys);
 
         var columnKeys = [];
 
@@ -293,6 +294,17 @@ class SubItemTable extends React.Component {
         }
 
         return columnKeys.sort(function(a,b){
+            console.log('SORT', a.key, b.key);
+            if (['title', 'display_title', 'accession'].indexOf(a.key) > -1) return -5;
+            if (['title', 'display_title', 'accession'].indexOf(b.key) > -1) return 5;
+            if (['name', 'workflow_argument_name'].indexOf(a.key) > -1) return -4;
+            if (['name', 'workflow_argument_name'].indexOf(b.key) > -1) return 4;
+            if (['step', 'step_argument_name'].indexOf(a.key) > -1) return -3;
+            if (['step', 'step_argument_name'].indexOf(b.key) > -1) return 3;
+            if (['value'].indexOf(a.key) > -1) return -2;
+            if (['value'].indexOf(b.key) > -1) return 2;
+            return 0;
+        }).sort(function(a,b){
             // Push columns with child/embedded object lists to the end.
             if (Array.isArray(a.childKeys)) return 1;
             if (Array.isArray(b.childKeys)) return -1;
@@ -340,9 +352,10 @@ class SubItemTable extends React.Component {
                                     return (
                                         <div style={{ whiteSpace: "nowrap" }} className="text-left child-list-row">
                                             <div className="inline-block child-list-row-number">{ i + 1 }.</div>
-                                            { allKeys.map(function(k){
+                                            { allKeys.map(function(k, j){
                                                 return (
                                                     <div
+                                                        key={colKey + '.' + k + '--row-' + i}
                                                         className={"inline-block child-column-" + colKey + '.' + k}
                                                         style={{ width : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[k] || null) }}
                                                     >
@@ -359,6 +372,9 @@ class SubItemTable extends React.Component {
                     }
                     if (value && typeof value === 'object' && typeof value.display_title === 'string') {
                         return { 'value' : <a href={object.atIdFromObject(value)}>{ value.display_title }</a> };
+                    }
+                    if (typeof value === 'string' && value.length < 25) {
+                        return { 'value' : value, 'className' : 'no-word-break' };
                     }
                     return { 'value' : value };
                 });
@@ -389,7 +405,7 @@ class SubItemTable extends React.Component {
                                                 subListKeyRefs[colKey] = {};
                                                 return (
                                                     <div style={{ whiteSpace: "nowrap" }} className="sub-list-keys-header">{
-                                                        colKeyContainer.childKeys.map(function(ck){
+                                                        [<div className="inline-block child-list-row-number">&nbsp;</div>].concat(colKeyContainer.childKeys.map(function(ck){
                                                             
                                                             return (
                                                                 <div className="inline-block" data-key={colKey + '.' + ck} ref={function(r){
@@ -398,7 +414,7 @@ class SubItemTable extends React.Component {
                                                                     <TooltipInfoIconContainer title={(subKeyTitleDescriptionMap[ck] || {}).title || ck} tooltip={(subKeyTitleDescriptionMap[ck] || {}).description || null} />
                                                                 </div>
                                                             );
-                                                        })
+                                                        }))
                                                     }</div>
                                                 );
                                             })()
