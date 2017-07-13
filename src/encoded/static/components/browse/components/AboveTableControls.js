@@ -39,7 +39,8 @@ class SelectedFilesOverview extends React.Component {
 export class AboveTableControls extends React.Component {
 
     static defaultProps = {
-        'showSelectedFileCount' : false
+        'showSelectedFileCount' : false,
+        'showTotalResults' : false
     }
 
     constructor(props){
@@ -174,12 +175,34 @@ export class AboveTableControls extends React.Component {
         );
     }
 
+    leftSection(){
+        if (this.props.showSelectedFileCount && this.props.selectedFiles){
+            return (
+                <ChartDataController.Provider>
+                    <SelectedFilesOverview selectedFiles={this.props.selectedFiles} />
+                </ChartDataController.Provider>
+            );
+        }
+        if (this.props.showTotalResults) {
+            var total;
+            if (typeof this.props.showTotalResults === 'number') total = this.props.showTotalResults;
+            if (this.props.context && this.props.context.total) total = this.props.context.total;
+            if (!total) return null;
+            return (
+                <div className="pull-left box results-count">
+                    <span className="text-500">{ total }</span> Results
+                </div>
+            );
+        }
+        return null;
+    }
+
     rightButtons(){
         var { open, layout } = this.state;
 
         function expandLayoutButton(){
             return (
-                <Button className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
+                <Button key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
                     <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'arrows-alt' : 'crop')}></i>
                 </Button>
             );
@@ -187,8 +210,8 @@ export class AboveTableControls extends React.Component {
 
         return open === false ? (
             <div className="pull-right right-buttons">
-                <Button onClick={this.handleOpenToggle.bind(this, (!open && 'customColumns') || false)} data-tip="Change visible columns" data-event-off="click">
-                    <i className="icon icon-eye-slash icon-fw"></i>
+                <Button key="toggle-visible-columns" onClick={this.handleOpenToggle.bind(this, (!open && 'customColumns') || false)} data-tip="Configure visible columns" data-event-off="click">
+                    <i className="icon icon-eye-slash icon-fw"/> Columns
                 </Button>
                 { expandLayoutButton.call(this) }
             </div>
@@ -197,7 +220,7 @@ export class AboveTableControls extends React.Component {
 
                 Close &nbsp;
                 
-                <Button onClick={this.handleOpenToggle.bind(this, false)}>
+                <Button key="toggle-visible-columns" onClick={this.handleOpenToggle.bind(this, false)}>
                     <i className="icon icon-angle-up icon-fw"></i>
                 </Button>
                 
@@ -211,7 +234,7 @@ export class AboveTableControls extends React.Component {
         return (
             <div className="above-results-table-row">
                 <div className="clearfix">
-                    { this.selectedFilesOverview() }
+                    { this.leftSection() }
                     { this.rightButtons() }
                 </div>
                 { this.renderPanel() }

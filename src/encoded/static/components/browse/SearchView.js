@@ -334,6 +334,7 @@ class ControlsAndResults extends React.Component {
                                 columnDefinitionOverrides,
                                 ['@type']
                             )}
+                            showTotalResults={context.total}
                         />
                         <SearchResultTable
                             results={results}
