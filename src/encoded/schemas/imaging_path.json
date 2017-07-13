@@ -27,22 +27,6 @@
             "description": "A short description of the labeling path",
             "type": "string"
         },
-        "channel_number": {
-            "title": "Label Channel Number",
-            "description": "imaging channel, ch0,ch1...",
-            "type": "string",
-            "enum":[
-                "ch0",
-                "ch1",
-                "ch2",
-                "ch3",
-                "ch4",
-                "ch5",
-                "ch6",
-                "ch7",
-                "ch8"
-            ]
-        },
         "target": {
             "title": "Targets of Labelling",
             "description": "Protein/RNA/DNA or cellular structure targeted for labeling",
