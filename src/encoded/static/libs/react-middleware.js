@@ -42,7 +42,8 @@ var render = function (Component, body, res) {
         (jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token.")
     ){
         sessionMayBeSet = false;
-        disp_dict.alerts = [Alerts.LoggedOut];
+        // TEMPORARY DISABLED (maybe not temporary eventually)
+        //disp_dict.alerts = [Alerts.LoggedOut];
     }
     // End JWT token grabbing
 

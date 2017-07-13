@@ -27,11 +27,11 @@ sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?
 @view_config(route_name='search', request_method='GET', permission='search')
 def search(context, request, search_type=None, return_generator=False, forced_type='Search'):
     """
-    Search view connects to ElasticSearch and returns the results
+    Search view connects to ElasticSearch and returns the results.
     """
     types = request.registry[TYPES]
     search_base = normalize_query(request, search_type)
-    ### INITIALIZE RESULT
+    ### INITIALIZE RESULT.
     result = {
         '@context': request.route_path('jsonld_context'),
         '@id': '/' + forced_type.lower() + '/' + search_base,
@@ -218,6 +218,7 @@ def get_date_range(request):
     """
     Get 'before' and 'after' params from the request.
     These determine the greater than and less than dates for the search
+    Date format is yyyy-MM-dd HH:mm.
     """
     before = request.params.get('before', None)
     after = request.params.get('after', None)
@@ -509,7 +510,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
     used_filters = {'must': {}, 'must_not': {}}
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
-        if field in ['limit', 'y.limit', 'x.limit', 'mode', 'annotation',
+        if field in ['limit', 'y.limit', 'x.limit', 'mode',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
                      'sort', 'from', 'referrer', 'q', 'before', 'after']:
             continue

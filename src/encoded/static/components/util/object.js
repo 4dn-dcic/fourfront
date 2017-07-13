@@ -127,6 +127,23 @@ export function isEqual(obj1, obj2){
     return true;
 }
 
+/**
+ * Assert that param passed in & returned is in UUID format.
+ * 
+ * @param {string} uuid - UUID string to be asserted.
+ * @returns {string} Original UUID string (uuid param) if in valid form.
+ * @throws Error if not in valid UUID format.
+ */
+export function assertUUID(uuid){
+    if (typeof uuid !== 'string') throw new Error('UUID is not a string!');
+    var parts = uuid.split('-');
+    if (parts.length !== 5) {
+        throw new Error("UUID string passed is in invalid format (should be 5 segments of characters delimited by dashes).");
+    }
+    if (parts[0].length !== 8 || parts[1].length !== 4 || parts[2].length !== 4 || parts[3].length !== 4 || parts[4].length !== 12) throw new Error('Incorrect UUID format.');
+    return uuid;
+}
+
 
 export function singleTreatment(treatment) {
     var treatmentText = '';

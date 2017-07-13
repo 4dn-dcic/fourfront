@@ -109,7 +109,7 @@
                         "title": "Link to quality metric object",
                         "description": "a specific quality metric object",
                         "type": "string",
-                        "LinkTo": "QualityMetric"
+                        "linkTo": "QualityMetric"
                     }
                 }
             }
@@ -172,6 +172,11 @@
             "type": "string",
             "description": "Url to AWS run info",
             "format": "uri"
+        }
+    },
+    "facets" : {
+        "workflow.title": {
+            "title": "Workflow"
         }
     }
 }

@@ -1,16 +1,17 @@
 'use strict';
 
 import _ from 'underscore';
+//import patchedConsoleInstance from './patched-console';
 
-/** 
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+/**
+ * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Object[]} - List of experiments without files.
  */
 export function listEmptyExperiments(experiments){
-    return _.filter(experiments, function(exp){
+    return _.filter(ensureArray(experiments), function(exp){
         if (Array.isArray(exp.files) && exp.files.length > 0) return false;
         else if (Array.isArray(exp.filesets) && exp.filesets.length > 0){
-            for (var i; i < exp.filesets.length; i++){
+            for (var i = 0; i < exp.filesets.length; i++){
                 if (Array.isArray(exp.filesets[i].files_in_set) && exp.filesets[i].files_in_set.length > 0){
                     return false;
                 }
@@ -22,8 +23,8 @@ export function listEmptyExperiments(experiments){
 }
 
 
-/** 
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+/**
+ * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {number} - Count of files from all experiments.
  */
 export function fileCountFromExperiments(experiments){
@@ -35,8 +36,8 @@ export function fileCountFromExperiments(experiments){
 
 /**
  * NOT SORTED
- * 
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+ *
+ * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Object[]} - All files from experiments without a pair.
  */
 export function listAllUnpairedFiles(experiments){
@@ -52,8 +53,8 @@ export function listAllUnpairedFiles(experiments){
 
 /**
  * NOT SORTED
- * 
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+ *
+ * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Object[][]} - All files with relations from experiments grouped into arrays of pairs (or other multiple).
  */
 export function listAllFilePairs(experiments){
@@ -72,24 +73,24 @@ export function listAllFilePairs(experiments){
 }
 
 
-/** 
+/**
  * Grab all experiments from experiment_sets, and save non-circular reference to parent experiment_set on experiment.
- * 
- * @param   {Object[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph']. 
+ *
+ * @param   {Object[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph'].
  * @returns {Object[]} - List of experiments from all experiments_sets, each with an updated 'experiment_sets' property
  */
 export function listAllExperimentsFromExperimentSets(experiment_sets){
     var uniqExpAccessions = {};
-    return _(experiment_sets).chain()
+    return _(ensureArray(experiment_sets)).chain()
         .map(function(set){
-            return (set.experiments_in_set || []).map(function(exp){
+            return ensureArray(set.experiments_in_set).map(function(exp){
                 // Make sure we return new exp & set objects instead of mutating existing ones.
                 var cExp = _.clone(exp);
                 var cSet = _.clone(set);
                 cSet.experiments_in_set = cSet.experiments_in_set.length;
                 cExp.experiment_sets = [cSet];
                 return cExp;
-            }); 
+            });
         })
         .flatten(true)
         .filter(function(exp){
@@ -110,7 +111,7 @@ export function listAllExperimentsFromExperimentSets(experiment_sets){
 /**
  * Groups experiments by experiment_set accession.
  * Almost inverse of listAllExperimentsFromExperimentSets, though returns an object.
- * 
+ *
  * @param {Array} experiments - Array of experiment objects. Each must have property 'experiment_sets', containing array of experiment_set objects with at least accession.
  * @returns {Object} Contains experiment_set accessions as keys and array of experiments in that set as value.
  */
@@ -146,7 +147,7 @@ export function groupExperimentsIntoExperimentSets(experiments){
 /** @return Object with experiment accessions as keys, from input array of experiments. */
 export function convertToObjectKeyedByAccession(experiments, keepExpObject = true){
     return _.object(
-        experiments.map(function(exp){
+        ensureArray(experiments).map(function(exp){
             return [exp.accession, keepExpObject ? exp : true];
         })
     );
@@ -155,7 +156,7 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
 
 
 
-/*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** * 
+/*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *
  * Partial Funcs (probably don't use these unless composing a function) *
  *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -163,7 +164,7 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
 export function combineWithReplicateNumbers(experimentsWithReplicateNums, experimentsInSet){
     if (!Array.isArray(experimentsWithReplicateNums)) return false;
     return _(experimentsWithReplicateNums).chain()
-        .map(function(r){ 
+        .map(function(r){
             return {
                 'tec_rep_no' : r.tec_rep_no || null,
                 'bio_rep_no' : r.bio_rep_no || null,
@@ -180,7 +181,7 @@ export function combineWithReplicateNumbers(experimentsWithReplicateNums, experi
 }
 
 export function findUnpairedFiles(files_in_experiment){
-    return _.reduce(files_in_experiment, function(unpairedFiles, file, files){
+    return _.reduce(ensureArray(files_in_experiment), function(unpairedFiles, file, files){
         if (!Array.isArray(file.related_files) || typeof file.paired_end == 'undefined') {
             unpairedFiles.push(file);
         }
@@ -188,13 +189,19 @@ export function findUnpairedFiles(files_in_experiment){
     }, []);
 }
 
+/**
+ * TODO: Add from filesets as well instead of only as fallback if no experiment.files?
+ *
+ * @param {Object[]} experiments - List of experiment objects with files properties.
+ * @returns {Object[]} List of unpaired files from all experiments.
+ */
 export function findUnpairedFilesPerExperiment(experiments){
-    return experiments.map(function(exp){
+    return ensureArray(experiments).map(function(exp){
         if (Array.isArray(exp.files)){
             return findUnpairedFiles(exp.files);
         } else if (
-            Array.isArray(exp.filesets) && 
-            exp.filesets.length > 0 && 
+            Array.isArray(exp.filesets) &&
+            exp.filesets.length > 0 &&
             Array.isArray(exp.filesets[0].files_in_set)
         ){
             return findUnpairedFiles(
@@ -227,14 +234,14 @@ export function allFilesFromFileSetsInExperiment(experiment){
 }
 
 export function allFilesFromExperiment(experiment){
-    return (experiment.files || []).concat(
+    return ensureArray(experiment.files).concat(
         allFilesFromFileSetsInExperiment(experiment)
     );
 }
 
 export function groupFilesByPairs(files_in_experiment){
     // Add 'file_pairs' property containing array of arrays of paired files to each experiment.
-    return _(files_in_experiment).chain()
+    return _(ensureArray(files_in_experiment)).chain()
         .map(function(file){
             return _.clone(file);
         })
@@ -268,19 +275,13 @@ export function groupFilesByPairs(files_in_experiment){
 }
 
 export function groupFilesByPairsForEachExperiment(experiments){
-    if (!Array.isArray(experiments)) {
-        // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
-        // entire list of experiment_sets to fail.
-        console.error("param 'experiments' is not an array! Perhaps this experiment_set is missing property experiments_in_set.");
-        return [];
-    }
-    return experiments.map(function(exp) {
+    return ensureArray(experiments).map(function(exp) {
         var file_pairs;
         if (Array.isArray(exp.files)){
             file_pairs = groupFilesByPairs(exp.files);
         } else if (
-            Array.isArray(exp.filesets) && 
-            exp.filesets.length > 0 && 
+            Array.isArray(exp.filesets) &&
+            exp.filesets.length > 0 &&
             Array.isArray(exp.filesets[0].files_in_set)
         ){
             file_pairs = groupFilesByPairs(
@@ -308,7 +309,7 @@ export function flattenFileSetsToFilesIfNoFilesForEachExperiment(experiments){
 }
 
 export function groupExperimentsByBiosampleRepNo(experiments){
-    return _(experiments).chain()
+    return _(ensureArray(experiments)).chain()
         .groupBy(function(exp){
             return exp.biosample.bio_rep_no;
         })          // Creates { '1' : [expObjWBiosample1-1, expObjWBiosample1-2, ...], '2' : [expObjWBiosample2-1, expObjWBiosample2-2, ...], ... }
@@ -321,7 +322,7 @@ export function groupExperimentsByBiosampleRepNo(experiments){
 }
 
 export function groupExperimentsByBiosample(experiments){
-    return _(experiments).chain()
+    return _(ensureArray(experiments)).chain()
         .groupBy(function(exp){
             return exp.biosample['@id'];
         })
@@ -329,4 +330,20 @@ export function groupExperimentsByBiosample(experiments){
         .sortBy(function(expSet){ return expSet[0]; }) // Sort outer list (biosamples) by biosample id
         .map(function(expSet){ return expSet[1]; }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
         .value();
+}
+
+/**
+ * Use this to fail gracefully but also inform that some data is missing.
+ *
+ * @param {Object[]} someArray - Any list that should be a list.
+ * @returns {Object[]} Array if valid array, or empty array if not.
+ */
+export function ensureArray(someArray){
+    if (!Array.isArray(someArray)) {
+        // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
+        // entire list of experiment_sets to fail.
+        console.error("Parameter is not an array! Most likely an experiment_set has undefined property experiments_in_set instead of an empty array. Or files for an experiment. etc.");
+        return [];
+    }
+    return someArray;
 }
