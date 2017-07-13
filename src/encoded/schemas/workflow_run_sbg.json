@@ -56,6 +56,10 @@
                "title": "SBG Export ID",
                "type": "string"
             }
-        }
+        },
+		"sbg_app_name": {
+				"title": "SBG App Name",
+				"type": "string"
+		}
     }
 }
