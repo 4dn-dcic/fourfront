@@ -31,7 +31,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     """
     types = request.registry[TYPES]
     search_base = normalize_query(request, search_type)
-    ### INITIALIZE RESULT
+    ### INITIALIZE RESULT.
     result = {
         '@context': request.route_path('jsonld_context'),
         '@id': '/' + forced_type.lower() + '/' + search_base,

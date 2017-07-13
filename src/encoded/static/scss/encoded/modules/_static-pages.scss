@@ -161,7 +161,7 @@ h5.fourDN-header {
 			}
 
 			&[data-depth="1"]:first-child {
-				margin-top: 8px;
+				//margin-top: 8px;
 				a { border-top: none; }
 			}
 
@@ -253,17 +253,21 @@ h5.fourDN-header {
 					cursor: pointer;
 					width: 15px;
 					height: 15px;
+					line-height: 16px;
 					vertical-align: middle;
 					text-align: center;
-					border: 1px solid transparent;
-					border-radius: 50%;
-					padding-top: 2px;
-					padding-left: 1px;
-					transition: border-color .3s;
+					//border: 1px solid transparent;
+					transform: scale3d(1,1,1);
+					transition: transform .3s, color .3s;
+
+					left: -70px;
+					margin-left: 14%;
 					
 					&:hover {
 						cursor: pointer;
-						border-color: initial;
+						//border-color: initial;
+						color: #000;
+						transform: scale3d(1.2, 1.2, 1.2);
 					}
 				}
 			}
@@ -283,6 +287,14 @@ h5.fourDN-header {
 				color: #000;
 				//text-shadow: 0 0 0;
 			}
+		}
+
+	}
+
+	> ol.inner {
+		> li:first-child {
+			margin-top: 8px;
+			a { border-top: none; }
 		}
 	}
 
