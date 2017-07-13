@@ -489,8 +489,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 					padding: 5px 8px;
 					&.child-list-row-container {
 						padding: 0;
-						border-left: 1px dotted #eee;
-						border-right: 1px dotted #eee;
+						border-left: 1px dotted #ccc;
+						border-right: 1px dotted #ccc;
+						border-bottom: 1px solid #ddd;
 					}
 					&.no-word-break {
 						white-space: nowrap;
@@ -505,7 +506,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 						text-align: center;
 					}
 					&:not(:last-child) {
-						border-bottom: 1px solid #f8f8f8;
+						border-bottom: 1px dotted #eee;
 					}
 					div.child-list-row-number {
 						width: 36px;
