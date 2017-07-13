@@ -34,6 +34,7 @@
         },
         "experiment_type": {
             "title" : "Experiment Type",
+            "default": "ATAC-seq",
             "enum": [
                 "ATAC-seq"
             ]
