@@ -76,7 +76,9 @@ export const defaultColumnDefinitionMap = {
                 <span>
                     <div className="inline-block toggle-detail-button-container">
                         <button className="toggle-detail-button" onClick={props.toggleDetailOpen}>
-                            <i className={"icon icon-fw icon-" + (props.detailOpen ? 'minus' : 'plus') }/>
+                            <div className="icon-container">
+                                <i className={"icon icon-fw icon-" + (props.detailOpen ? 'minus' : 'plus') }/>
+                            </div>
                         </button>
                     </div>
                     <div className="title-block text-ellipsis-container" data-tip={tooltip}>{ title }</div>
@@ -696,27 +698,111 @@ class LoadMoreAsYouScroll extends React.Component {
 
 class ShadowBorderLayer extends React.Component {
 
-    shouldComponentUpdate(nextProps){
-        if (this.shadowStateClass(nextProps) !== this.shadowStateClass(this.props)) return true;
-        return false;
-    }
-
-    shadowStateClass(props = this.props){
-        var { fullRowWidth, tableContainerScrollLeft, tableContainerWidth } = props;
+    static shadowStateClass(hiddenLeftEdgeContentWidth = 0, hiddenRightEdgeContentWidth = 0){
         var shadowBorderClassName = "";
-        if (fullRowWidth > tableContainerWidth){
-            if (tableContainerScrollLeft > 5){
-                shadowBorderClassName += ' shadow-left';
-            }
-            if (tableContainerScrollLeft + tableContainerWidth <= fullRowWidth - 5){
-                shadowBorderClassName += ' shadow-right';
-            }
-        }
+        if (hiddenLeftEdgeContentWidth > 0) shadowBorderClassName += ' shadow-left';
+        if (hiddenRightEdgeContentWidth > 0) shadowBorderClassName += ' shadow-right';
         return shadowBorderClassName;
     }
 
+    constructor(props){
+        super(props);
+        this.scrolling = false;
+        this.performScrollAction = this.performScrollAction.bind(this);
+        this.handleScrollButtonClick = this.handleScrollButtonClick.bind(this);
+        this.handleScrollButtonUp = this.handleScrollButtonUp.bind(this);
+    }
+
+    shouldComponentUpdate(nextProps){
+        var pastEdges = this.edgeHiddenContentWidths(this.props);
+        var newEdges = this.edgeHiddenContentWidths(nextProps);
+        if (newEdges.left !== pastEdges.left || newEdges.right !== pastEdges.right) return true;
+        return false;
+    }
+
+    edgeHiddenContentWidths(props = this.props){
+        var edges = { 'left' : 0, 'right' : 0 };
+        var { fullRowWidth, tableContainerScrollLeft, tableContainerWidth } = props;
+        if (fullRowWidth > tableContainerWidth){
+            if (tableContainerScrollLeft > 5){
+                //shadowBorderClassName += ' shadow-left';
+                edges.left = tableContainerScrollLeft;
+            }
+            if (tableContainerScrollLeft + tableContainerWidth <= fullRowWidth - 5){
+                edges.right = ((fullRowWidth - tableContainerWidth) - tableContainerScrollLeft);
+                //shadowBorderClassName += ' shadow-right';
+            }
+        }
+        return edges;
+    }
+
+    shadowStateClass(edges, props = this.props){
+        if (!edges) edges = this.edgeHiddenContentWidths();
+        return ShadowBorderLayer.shadowStateClass(edges.left, edges.right);
+    }
+
+    edgeScrollButtonLeft(leftEdgeContentWidth){
+        if (!this.props.innerContainerElem) return null;
+        var className = "edge-scroll-button left-edge";
+        if (typeof leftEdgeContentWidth !== 'number' || leftEdgeContentWidth === 0) {
+            className += ' faded-out';
+        }
+        return (
+            <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'left')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
+                <i className="icon icon-fw icon-angle-left"/>
+            </div>
+        );
+    }
+
+    edgeScrollButtonRight(rightEdgeContentWidth){
+        if (!this.props.innerContainerElem) return null;
+        var className = "edge-scroll-button right-edge";
+        if (typeof rightEdgeContentWidth !== 'number' || rightEdgeContentWidth === 0) {
+            className += ' faded-out';
+        }
+        return (
+            <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'right')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
+                <i className="icon icon-fw icon-angle-right"/>
+            </div>
+        );
+    }
+
+    performScrollAction(direction = "right", depth = 0){
+        vizUtil.requestAnimationFrame(()=>{
+            var change = direction === 'right' ? 5 : -5;
+            var maxScrollLeft = this.props.fullRowWidth - this.props.tableContainerWidth;
+            this.props.innerContainerElem.scrollLeft = Math.max(0, Math.min(maxScrollLeft, this.props.innerContainerElem.scrollLeft + change));
+            if (this.scrolling && depth < 50000) { // 50k is like, 5-10 seconds of processing. If someone is holding down the button this long... there are things to be figured out.
+                this.performScrollAction(direction, depth + 1);
+            }
+            if (depth >= 50000){
+                console.error("Reached depth 50k on a recursive function 'performScrollAction.'");
+                return;
+            }
+        });
+    }
+
+    handleScrollButtonClick(direction = "right", evt){
+        this.scrolling = true;
+        //setTimeout(()=>{
+        //    this.scrolling = false;
+        //}, 10000);
+        this.performScrollAction(direction);
+    }
+
+    handleScrollButtonUp(){
+        this.scrolling = false;
+    }
+
     render(){
-        return <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass()} />;
+        if (this.props.fullRowWidth <= this.props.tableContainerWidth) return null;
+        var edges = this.edgeHiddenContentWidths();
+        console.log(edges);
+        return (
+            <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass(edges)}>
+                { this.edgeScrollButtonLeft(edges.left) }{ this.edgeScrollButtonRight(edges.right) }
+            </div>    
+        );
     }
 }
 
@@ -990,7 +1076,7 @@ class DimensioningContainer extends React.Component {
                                 </LoadMoreAsYouScroll>
                             </div>
                         </div>
-                        <ShadowBorderLayer tableContainerScrollLeft={tableContainerScrollLeft} tableContainerWidth={tableContainerWidth} fullRowWidth={fullRowWidth} />
+                        <ShadowBorderLayer tableContainerScrollLeft={tableContainerScrollLeft} tableContainerWidth={tableContainerWidth} fullRowWidth={fullRowWidth} innerContainerElem={this.refs && this.refs.innerContainer} />
                     </div>
                 </StickyContainer>
                 { canLoadMore === false ?
