@@ -8,7 +8,6 @@
         "uuid": "40041e2f-3e43-4388-8bbb-e861f209d111",
         "submitted_by": "4dndcic@gmail.com",
         "target":["d1115d5e-40aa-43bc-b81c-32c70c9afb21"],
-        "channel_number":"ch0",
         "type_labeled_probe": "Antibody",
         "labeled_probe":"Some Antibody",
         "labels": ["GFP"]

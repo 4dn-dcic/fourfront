@@ -3,8 +3,8 @@
 import _ from 'underscore';
 //import patchedConsoleInstance from './patched-console';
 
-/** 
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+/**
+ * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Object[]} - List of experiments without files.
  */
 export function listEmptyExperiments(experiments){
@@ -23,8 +23,8 @@ export function listEmptyExperiments(experiments){
 }
 
 
-/** 
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+/**
+ * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {number} - Count of files from all experiments.
  */
 export function fileCountFromExperiments(experiments){
@@ -36,8 +36,8 @@ export function fileCountFromExperiments(experiments){
 
 /**
  * NOT SORTED
- * 
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+ *
+ * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Object[]} - All files from experiments without a pair.
  */
 export function listAllUnpairedFiles(experiments){
@@ -53,8 +53,8 @@ export function listAllUnpairedFiles(experiments){
 
 /**
  * NOT SORTED
- * 
- * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+ *
+ * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Object[][]} - All files with relations from experiments grouped into arrays of pairs (or other multiple).
  */
 export function listAllFilePairs(experiments){
@@ -73,10 +73,10 @@ export function listAllFilePairs(experiments){
 }
 
 
-/** 
+/**
  * Grab all experiments from experiment_sets, and save non-circular reference to parent experiment_set on experiment.
- * 
- * @param   {Object[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph']. 
+ *
+ * @param   {Object[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph'].
  * @returns {Object[]} - List of experiments from all experiments_sets, each with an updated 'experiment_sets' property
  */
 export function listAllExperimentsFromExperimentSets(experiment_sets){
@@ -90,7 +90,7 @@ export function listAllExperimentsFromExperimentSets(experiment_sets){
                 cSet.experiments_in_set = cSet.experiments_in_set.length;
                 cExp.experiment_sets = [cSet];
                 return cExp;
-            }); 
+            });
         })
         .flatten(true)
         .filter(function(exp){
@@ -111,7 +111,7 @@ export function listAllExperimentsFromExperimentSets(experiment_sets){
 /**
  * Groups experiments by experiment_set accession.
  * Almost inverse of listAllExperimentsFromExperimentSets, though returns an object.
- * 
+ *
  * @param {Array} experiments - Array of experiment objects. Each must have property 'experiment_sets', containing array of experiment_set objects with at least accession.
  * @returns {Object} Contains experiment_set accessions as keys and array of experiments in that set as value.
  */
@@ -156,7 +156,7 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
 
 
 
-/*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** * 
+/*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *
  * Partial Funcs (probably don't use these unless composing a function) *
  *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
@@ -164,7 +164,7 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
 export function combineWithReplicateNumbers(experimentsWithReplicateNums, experimentsInSet){
     if (!Array.isArray(experimentsWithReplicateNums)) return false;
     return _(experimentsWithReplicateNums).chain()
-        .map(function(r){ 
+        .map(function(r){
             return {
                 'tec_rep_no' : r.tec_rep_no || null,
                 'bio_rep_no' : r.bio_rep_no || null,
@@ -191,7 +191,7 @@ export function findUnpairedFiles(files_in_experiment){
 
 /**
  * TODO: Add from filesets as well instead of only as fallback if no experiment.files?
- * 
+ *
  * @param {Object[]} experiments - List of experiment objects with files properties.
  * @returns {Object[]} List of unpaired files from all experiments.
  */
@@ -200,8 +200,8 @@ export function findUnpairedFilesPerExperiment(experiments){
         if (Array.isArray(exp.files)){
             return findUnpairedFiles(exp.files);
         } else if (
-            Array.isArray(exp.filesets) && 
-            exp.filesets.length > 0 && 
+            Array.isArray(exp.filesets) &&
+            exp.filesets.length > 0 &&
             Array.isArray(exp.filesets[0].files_in_set)
         ){
             return findUnpairedFiles(
@@ -280,8 +280,8 @@ export function groupFilesByPairsForEachExperiment(experiments){
         if (Array.isArray(exp.files)){
             file_pairs = groupFilesByPairs(exp.files);
         } else if (
-            Array.isArray(exp.filesets) && 
-            exp.filesets.length > 0 && 
+            Array.isArray(exp.filesets) &&
+            exp.filesets.length > 0 &&
             Array.isArray(exp.filesets[0].files_in_set)
         ){
             file_pairs = groupFilesByPairs(
@@ -334,7 +334,7 @@ export function groupExperimentsByBiosample(experiments){
 
 /**
  * Use this to fail gracefully but also inform that some data is missing.
- * 
+ *
  * @param {Object[]} someArray - Any list that should be a list.
  * @returns {Object[]} Array if valid array, or empty array if not.
  */
@@ -343,7 +343,6 @@ export function ensureArray(someArray){
         // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
         // entire list of experiment_sets to fail.
         console.error("Parameter is not an array! Most likely an experiment_set has undefined property experiments_in_set instead of an empty array. Or files for an experiment. etc.");
-        //patchedConsoleInstance.trace();
         return [];
     }
     return someArray;

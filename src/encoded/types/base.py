@@ -109,7 +109,7 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
         ]
 
 
-def get_item_if_you_can(request, value):
+def get_item_if_you_can(request, value, itype=None):
     # import pdb; pdb.set_trace()
     try:
         value.get('uuid')
@@ -117,11 +117,18 @@ def get_item_if_you_can(request, value):
     except AttributeError:
         svalue = str(value)
         if not svalue.startswith('/'):
-            svalue = '/' + value
+            svalue = '/' + svalue
+        item = request.embed(svalue, '@@object')
         try:
-            return request.embed(svalue, '@@object')
-        except:
-            return value
+            item.get('uuid')
+            return item
+        except AttributeError:
+            if itype is not None:
+                svalue = '/' + itype + svalue + '/?datastore=database'
+                try:
+                    return request.embed(svalue, '@@object')
+                except:
+                    return value
 
 
 class AbstractCollection(snovault.AbstractCollection):
@@ -291,8 +298,12 @@ class Item(snovault.Item):
         "title": "External Reference URIs",
         "description": "External references to this item.",
         "type": "array",
-        "items": {"type": "object", "title": "External Reference", "properties":
-                  {"uri": {"type": "string"}, "ref": {"type": "string"}}}
+        "items": {
+            "type": "object", "title": "External Reference", "properties": {
+                "uri": {"type": "string"},
+                "ref": {"type": "string"}
+            }
+        }
     })
     def external_references(self, request, dbxrefs=None):
         namespaces = request.registry.settings.get('snovault.jsonld.namespaces')

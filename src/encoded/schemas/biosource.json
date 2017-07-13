@@ -20,7 +20,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "accession": {
             "accessionType": "SR"
@@ -69,57 +69,7 @@
               "title": "Cell Line Name",
               "description": "Ontology term for the cell line used.",
               "type":  "string",
-              "enum": [
-                  "H1-hESC",
-                  "GM12878",
-                  "IMR-90",
-                  "HFF-hTERT",
-                  "F121-9-CASTx129",
-                  "K562",
-                  "RPE-hTERT",
-                  "HEK293",
-                  "HAP-1",
-                  "U2OS",
-                  "WTC-11",
-                  "H9",
-                  "F123-CASTx129",
-                  "HCT116",
-                  "CC-2551",
-                  "CH12-LX",
-                  "KBM-7",
-                  "192627",
-                  "CC-2517",
-                  "HeLa-S3",
-                  "HFF",
-                  "HFFc6",
-                  "SK-N-DZ",
-                  "A549",
-                  "NCI-H460",
-                  "SK-N-MC",
-                  "T47D",
-                  "SK-MEL-5",
-                  "G401",
-                  "Panc1",
-                  "Caki2",
-                  "LNCaP clone FGC",
-                  "RPMI-7951",
-                  "SJCRH30",
-                  "GM19238",
-                  "GM19239",
-                  "GM19240",
-                  "HG00731",
-                  "HG00732",
-                  "HG00733",
-                  "HG00512",
-                  "HG00513",
-                  "HG00514"
-              ]
-          },
-          "cell_line_termid": {
-              "title": "Cell Line EFO ID",
-              "description": "DON'T SUBMIT - CALCULATED",
-              "type": "string",
-              "permission": "import_items"
+              "linkTo": "OntologyTerm"
           },
           "cell_line_tier": {
               "title": "Cell Line Tier",
