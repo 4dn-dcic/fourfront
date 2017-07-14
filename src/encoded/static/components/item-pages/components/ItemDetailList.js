@@ -128,10 +128,10 @@ class SubItemListView extends React.Component {
             'alwaysCollapsibleKeys' : [],
             'excludedKeys' : (this.props.excludedKeys || _.without(Detail.defaultProps.excludedKeys,
                 // Remove
-                    '@id', 'audit', 'lab', 'award', 'description'
+                    'audit', 'lab', 'award', 'description'
                 ).concat([
                 // Add
-                    'link_id', 'schema_version', 'uuid'
+                    'schema_version', 'uuid'
                 ])
             ),
             'keyTitleDescriptionMap' : _.extend({}, keyTitleDescriptionMap, {
@@ -176,7 +176,17 @@ class SubItemTable extends React.Component {
         if (!firstRowItem) return false;
         if (typeof firstRowItem === 'string') return false;
         if (typeof firstRowItem === 'number') return false;
-        if (typeof firstRowItem.display_title === 'string') return false; // TEMP
+
+        var schemaForType;
+
+        if (typeof firstRowItem.display_title === 'string'){
+            if (!Array.isArray(firstRowItem['@type'])){
+                return false; // No @type so we can't get 'columns' from schemas.
+            } else {
+                schemaForType = Schemas.getSchemaForItemType(firstRowItem['@type'][0]);
+                if (!schemaForType || !schemaForType.columns) return false; // No columns on this Item type's schema. Skip.
+            }
+        }
 
         var rootKeys = _.keys(firstRowItem);
         var embeddedKeys, i, j, embeddedListItem, embeddedListItemKeys;
@@ -261,37 +271,54 @@ class SubItemTable extends React.Component {
 
         var columnKeys = [];
 
-        for (var i = 0; i < rootKeys.length; i++){
-            if (typeof firstRowItem[rootKeys[i]] === 'string' || typeof firstRowItem[rootKeys[i]] === 'number' || Array.isArray(firstRowItem[rootKeys[i]])) {
-                if (  Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]][0] && typeof firstRowItem[rootKeys[i]][0] === 'object' && typeof firstRowItem[rootKeys[i]][0].display_title !== 'string' ) {
-                    columnKeys.push({
-                        'key' : rootKeys[i],
-                        'childKeys' : _.keys(
-                            _.reduce(this.props.items, function(m1,v1){ 
-                                return _.extend(
-                                    m1,
-                                    _.reduce(v1[rootKeys[i]], function(m2,v2) {
-                                        return _.extend(m2, v2);
-                                    }, {})
-                                );
-                            }, {})
-                        )
-                    });
-                } else {
-                    columnKeys.push({ 'key' : rootKeys[i] });
-                }
-            } else if (firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object'){
-                var itemAtID = typeof firstRowItem[rootKeys[i]].display_title === 'string' && object.atIdFromObject(firstRowItem[rootKeys[i]]);
-                if (itemAtID) {
-                    columnKeys.push({ 'key' : rootKeys[i] }); // Keep single key if is an Item, we'll make it into a link.
-                } else { // Flatten up, otherwise.
-                    columnKeys = columnKeys.concat(
-                        _.keys(firstRowItem[rootKeys[i]]).map(function(embeddedKey){
-                            return { 'key' : rootKeys[i] + '.' + embeddedKey };
-                        })
-                    );
+        // Use schema columns
+        if (typeof firstRowItem.display_title === 'string' && Array.isArray(firstRowItem['@type'])){
+
+            var columnKeysFromSchema = _.keys(Schemas.getSchemaForItemType(Schemas.getItemType(firstRowItem)).columns);
+
+            columnKeys = rootKeys.filter(function(k){
+                if (k === 'display_title' || k === 'link_id' || k === 'accession') return true;
+                if (columnKeysFromSchema.indexOf(k) > -1) return true;
+                return false;
+            }).map(function(k){
+                return { 'key' : k };
+            });
+
+        } else {
+            // Gather, flatten up from Object.
+            for (var i = 0; i < rootKeys.length; i++){
+                if (typeof firstRowItem[rootKeys[i]] === 'string' || typeof firstRowItem[rootKeys[i]] === 'number' || Array.isArray(firstRowItem[rootKeys[i]])) {
+                    if (  Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]][0] && typeof firstRowItem[rootKeys[i]][0] === 'object' && typeof firstRowItem[rootKeys[i]][0].display_title !== 'string' ) {
+                        columnKeys.push({
+                            'key' : rootKeys[i],
+                            'childKeys' : _.keys(
+                                _.reduce(this.props.items, function(m1,v1){ 
+                                    return _.extend(
+                                        m1,
+                                        _.reduce(v1[rootKeys[i]], function(m2,v2) {
+                                            return _.extend(m2, v2);
+                                        }, {})
+                                    );
+                                }, {})
+                            )
+                        });
+                    } else {
+                        columnKeys.push({ 'key' : rootKeys[i] });
+                    }
+                } else if (firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object'){
+                    var itemAtID = typeof firstRowItem[rootKeys[i]].display_title === 'string' && object.atIdFromObject(firstRowItem[rootKeys[i]]);
+                    if (itemAtID) {
+                        columnKeys.push({ 'key' : rootKeys[i] }); // Keep single key if is an Item, we'll make it into a link.
+                    } else { // Flatten up, otherwise.
+                        columnKeys = columnKeys.concat(
+                            _.keys(firstRowItem[rootKeys[i]]).map(function(embeddedKey){
+                                return { 'key' : rootKeys[i] + '.' + embeddedKey };
+                            })
+                        );
+                    }
                 }
             }
+
         }
 
         return columnKeys.sort(function(a,b){
@@ -314,6 +341,16 @@ class SubItemTable extends React.Component {
 
     render(){
         var columnKeys = this.getColumnKeys();
+
+        var tipsFromSchema = null;
+
+        if (this.props.items[0] && this.props.items[0].display_title){
+            tipsFromSchema = object.tipsFromSchema(Schemas.get(), this.props.items[0]);
+            columnKeys = columnKeys.filter(function(k){
+                if (['@id'].indexOf(k) > -1) return false;
+                return true;
+            });
+        }
 
         var subListKeyWidths = this.subListKeyWidths;
         if (!subListKeyWidths){
@@ -341,9 +378,9 @@ class SubItemTable extends React.Component {
                 return _.map(columnKeys, function(colKeyContainer){
                     var colKey = colKeyContainer.key;
                     var value = object.getNestedProperty(item, colKey);
-                    if (!value) return { 'value' : '-' };
+                    if (!value) return { 'value' : '-', 'key' : colKey };
                     if (Array.isArray(value)){
-                        if (typeof value[0] === 'string') return { 'value' : value.join(', ') };
+                        if (typeof value[0] === 'string') return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
                         if (value[0] && typeof value[0] === 'object'){ // Embedded list of objects.
                             var allKeys = colKeyContainer.childKeys; //_.keys(  _.reduce(value, function(m,v){ return _.extend(m,v); }, {})   );
                             return {
@@ -358,29 +395,40 @@ class SubItemTable extends React.Component {
                                                         className={"inline-block child-column-" + colKey + '.' + k}
                                                         style={{ width : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[k] || null) }}
                                                     >
-                                                        { embeddedRow[k] } &nbsp;
+                                                        { Schemas.Term.toName(k, embeddedRow[k]) } &nbsp;
                                                     </div>
                                                 );
                                             }) }
                                         </div>
                                     );
                                 }),
-                                'className' : 'child-list-row-container'
+                                'className' : 'child-list-row-container',
+                                'key' : colKey
                             };
                         }
                     }
                     if (value && typeof value === 'object' && typeof value.display_title === 'string') {
-                        return { 'value' : <a href={object.atIdFromObject(value)}>{ value.display_title }</a> };
+                        return { 'value' : <a href={object.atIdFromObject(value)}>{ value.display_title }</a>, 'key' : colKey };
                     }
                     if (typeof value === 'string' && value.length < 25) {
-                        return { 'value' : value, 'className' : 'no-word-break' };
+                        return { 'value' : Schemas.Term.toName(colKey, value), 'className' : 'no-word-break', 'key' : colKey };
                     }
-                    return { 'value' : value };
+                    return { 'value' : Schemas.Term.toName(colKey, value), 'key' : colKey };
                 });
             }
         );
 
-        var keyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
+        var parentKeySchemaProperty = Schemas.Field.getSchemaProperty(
+            this.props.parentKey, Schemas.get(), this.props.atType
+        );
+
+        var keyTitleDescriptionMap = _.extend(
+            {},
+            ((((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {}),
+            tipsFromSchema || parentKeySchemaProperty
+        );
+
+        //console.log(this.props.parentKey, keyTitleDescriptionMap, tipsFromSchema, parentKeySchemaProperty);
 
         var subListKeyRefs = this.subListKeyRefs = {};
 
@@ -430,7 +478,15 @@ class SubItemTable extends React.Component {
                             return (
                                 <tr key={"row-" + i}>{
                                     [<td key="rowNumber">{ i + 1 }.</td>].concat(row.map(function(colVal, j){
-                                        return <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>{ colVal.value }</td>;
+                                        var val = colVal.value;
+                                        if ((colVal.key === 'link_id' || colVal.key === '@id') && val.slice(0,1) === '/') {
+                                            val = <a href={val}>{ val }</a>;
+                                        }
+                                        return (
+                                            <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>
+                                                { val }
+                                            </td>
+                                        );
                                     }))
                                 }</tr>
                             );
@@ -585,7 +641,7 @@ export class Detail extends React.Component {
             }
 
             if (SubItemTable.shouldUseTable(item)) {
-                return <SubItemTable items={item} popLink={popLink} keyTitleDescriptionMap={keyTitleDescriptionMap} parentKey={keyPrefix} />;
+                return <SubItemTable items={item} popLink={popLink} keyTitleDescriptionMap={keyTitleDescriptionMap} parentKey={keyPrefix} atType={atType} />;
             }
 
             return (
@@ -631,21 +687,23 @@ export class Detail extends React.Component {
                 );
             }
         } else if (typeof item === 'string'){
-            if (keyPrefix === '@id'){
+            if (keyPrefix === '@id' || keyPrefix === 'link_id'){
+                var href = (keyPrefix === 'link_id' ? item.replace(/~/g, "/") : item); 
                 if(popLink){
                     return (
-                        <a key={item} href={item} target="_blank">
-                            {item}
+                        <a key={item} href={href} target="_blank">
+                            {href}
                         </a>
                     );
                 }else{
                     return (
-                        <a key={item} href={item}>
-                            {item}
+                        <a key={item} href={href}>
+                            {href}
                         </a>
                     );
                 }
             }
+
             if(item.indexOf('@@download') > -1/* || item.charAt(0) === '/'*/){
                 // this is a download link. Format appropriately
                 var split_item = item.split('/');
