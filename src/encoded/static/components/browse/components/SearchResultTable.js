@@ -651,15 +651,16 @@ class LoadMoreAsYouScroll extends React.Component {
     }
 
     handleScrollingStateChange(isScrolling){
-        vizUtil.requestAnimationFrame(()=>{
-            if (isScrolling && !this.lastIsScrolling){
-                this.props.innerContainerElem.style.pointerEvents = 'none';
-            } else if (this.lastIsScrolling) {
+        //vizUtil.requestAnimationFrame(()=>{
+            //if (isScrolling && !this.lastIsScrolling){
+            //    this.props.innerContainerElem.style.pointerEvents = 'none';
+            //} else if (this.lastIsScrolling) {
                 this.props.innerContainerElem.style.pointerEvents = '';
-                this.props.innerContainerElem.focus();
-            }
-            this.lastIsScrolling = !!(isScrolling);
-        });
+                this.props.innerContainerElem.childNodes[0].focus();
+                //console.log(this.props.innerContainerElem.childNodes[0]);
+            //}
+            //this.lastIsScrolling = !!(isScrolling);
+        //});
     }
 
     render(){
@@ -677,7 +678,7 @@ class LoadMoreAsYouScroll extends React.Component {
                 onInfiniteLoad={this.handleLoad}
                 isInfiniteLoading={this.state.isLoading}
                 timeScrollStateLastsForAfterUserScrolls={250}
-                onChangeScrollState={this.handleScrollingStateChange}
+                //onChangeScrollState={this.handleScrollingStateChange}
                 loadingSpinnerDelegate={(
                     <div className="search-result-row loading text-center" style={{
                         'maxWidth' : this.props.tableContainerWidth,
@@ -705,18 +706,28 @@ class ShadowBorderLayer extends React.Component {
         return shadowBorderClassName;
     }
 
+    static defaultProps = {
+        'horizontalScrollRateOnEdgeBUtton' : 10
+    }
+
     constructor(props){
         super(props);
         this.scrolling = false;
         this.performScrollAction = this.performScrollAction.bind(this);
         this.handleScrollButtonClick = this.handleScrollButtonClick.bind(this);
         this.handleScrollButtonUp = this.handleScrollButtonUp.bind(this);
+        this.lastDimClassName = null;
     }
 
     shouldComponentUpdate(nextProps){
         var pastEdges = this.edgeHiddenContentWidths(this.props);
         var newEdges = this.edgeHiddenContentWidths(nextProps);
         if (newEdges.left !== pastEdges.left || newEdges.right !== pastEdges.right) return true;
+        var dimClassName = this.tallDimensionClass(nextProps);
+        if (this.lastDimClassName !== dimClassName){
+            this.lastDimClassName = dimClassName;
+            return true;
+        }
         return false;
     }
 
@@ -741,6 +752,14 @@ class ShadowBorderLayer extends React.Component {
         return ShadowBorderLayer.shadowStateClass(edges.left, edges.right);
     }
 
+    tallDimensionClass(props = this.props){
+        if (props.innerContainerElem && props.innerContainerElem.offsetHeight > 800){
+            return ' tall';
+        }
+        return ' short';
+        //return this.lastDimClassName;
+    }
+
     edgeScrollButtonLeft(leftEdgeContentWidth){
         if (!this.props.innerContainerElem) return null;
         var className = "edge-scroll-button left-edge";
@@ -749,7 +768,7 @@ class ShadowBorderLayer extends React.Component {
         }
         return (
             <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'left')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
-                <i className="icon icon-fw icon-angle-left"/>
+                <i className="icon icon-caret-left"/>
             </div>
         );
     }
@@ -762,32 +781,33 @@ class ShadowBorderLayer extends React.Component {
         }
         return (
             <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'right')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
-                <i className="icon icon-fw icon-angle-right"/>
+                <i className="icon icon-caret-right"/>
             </div>
         );
     }
 
     performScrollAction(direction = "right", depth = 0){
         vizUtil.requestAnimationFrame(()=>{
-            var change = direction === 'right' ? 5 : -5;
+            var change = (direction === 'right' ? 1 : -1) * this.props.horizontalScrollRateOnEdgeBUtton;
             var maxScrollLeft = this.props.fullRowWidth - this.props.tableContainerWidth;
-            this.props.innerContainerElem.scrollLeft = Math.max(0, Math.min(maxScrollLeft, this.props.innerContainerElem.scrollLeft + change));
-            if (this.scrolling && depth < 50000) { // 50k is like, 5-10 seconds of processing. If someone is holding down the button this long... there are things to be figured out.
-                this.performScrollAction(direction, depth + 1);
-            }
-            if (depth >= 50000){
-                console.error("Reached depth 50k on a recursive function 'performScrollAction.'");
+            var leftOffset = this.props.innerContainerElem.scrollLeft = Math.max(0, Math.min(maxScrollLeft, this.props.innerContainerElem.scrollLeft + change));
+            var detailPanes = DimensioningContainer.findDetailPaneElements();
+            if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, leftOffset);
+            if (depth >= 10000){
+                console.error("Reached depth 10k on a recursive function 'performScrollAction.'");
                 return;
+            }
+            if (this.scrolling) {
+                this.performScrollAction(direction, depth + 1);
             }
         });
     }
 
     handleScrollButtonClick(direction = "right", evt){
-        this.scrolling = true;
-        //setTimeout(()=>{
-        //    this.scrolling = false;
-        //}, 10000);
-        this.performScrollAction(direction);
+        if (evt.button === 0) { // Left click
+            this.scrolling = true;
+            this.performScrollAction(direction);
+        }
     }
 
     handleScrollButtonUp(){
@@ -799,7 +819,7 @@ class ShadowBorderLayer extends React.Component {
         var edges = this.edgeHiddenContentWidths();
         console.log(edges);
         return (
-            <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass(edges)}>
+            <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass(edges) + this.tallDimensionClass()}>
                 { this.edgeScrollButtonLeft(edges.left) }{ this.edgeScrollButtonRight(edges.right) }
             </div>    
         );
@@ -845,6 +865,23 @@ class DimensioningContainer extends React.Component {
             if (w < colDef.widthMap.lg) return w + padding;
             return 0; 
         });
+    }
+
+    static setDetailPanesLeftOffset(detailPanes, leftOffset = 0, cb = null){
+        if (detailPanes && detailPanes.length > 0){
+            var transformStyle = vizUtil.style.translate3d(leftOffset);
+            detailPanes.forEach(function(d){
+                if (d.style.transform !== transformStyle) d.style.transform = transformStyle;
+            });
+        }
+        if (typeof cb === 'function') cb();
+    }
+
+    static findDetailPaneElements(){
+        if (document && document.querySelectorAll){
+            return Array.from(document.querySelectorAll('.result-table-detail'));
+        }
+        return null;
     }
 
     constructor(props){
@@ -946,17 +983,9 @@ class DimensioningContainer extends React.Component {
 
     onScroll(e){
         if (document && document.querySelectorAll && this.refs && this.refs.innerContainer && this.refs.innerContainer.childNodes[0]){
-            var detailPanes = document.querySelectorAll('.result-table-detail');
-            if (detailPanes && detailPanes.length > 0){
-                var transformStyle = vizUtil.style.translate3d(this.refs.innerContainer.scrollLeft);
-                vizUtil.requestAnimationFrame(function(){
-                    detailPanes.forEach(function(d){
-                        d.style.transform = transformStyle;
-                    });
-                });
-            }
+            var detailPanes = DimensioningContainer.findDetailPaneElements();
+            if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, this.refs.innerContainer.scrollLeft, this.throttledUpdate);
         }
-        this.throttledUpdate();
         return false;
     }
 

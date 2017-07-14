@@ -1142,7 +1142,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 			right : 0;
 			box-shadow: inset 10px 0 10px -10px transparent, inset -10px 0 10px -10px transparent;
 			transition: box-shadow .35s ease;
-			transform: translate3d(0,0,0);
+			//transform: translate3d(0,0,0);
 			&.shadow-right {
 				box-shadow: inset 10px 0 10px -10px transparent, inset -10px 0 10px -10px $search-results-edge-shadow-color;
 			}
@@ -1156,26 +1156,63 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 				position: absolute;
 				top: 0;
 				bottom: 0;
-				background: #f4f4f4;
-				width: 18px;
+				background: #f8f8f8;
+				width: 15px;
 				pointer-events: all;
 				opacity: 1;
 				transition: opacity .3s ease-out;
 				cursor: pointer;
 				text-align: center;
-				padding-top: 13px;
+				padding-top: 16px;
 				&.right-edge {
-					right: -18px;
+					right: -15px;
+					border-radius: 0 4px 4px 0;
+					box-shadow: inset -5px 0 10px #fff;
 				}
 				&.left-edge {
-					left: -18px;
+					left: -15px;
+					border-radius: 4px 0 0 4px;
+					box-shadow: inset 5px 0 10px #fff
 				}
 				&.faded-out {
 					opacity: 0;
 					transition: opacity .6s ease-out;
 					pointer-events: none;
 				}
+				&:hover {
+					background-color: #f4f4f4;
+					box-shadow: none;
+				}
+				> i.icon {
+					position: absolute;
+					display: block;
+					width: 15px;
+				}
 			}
+
+			&.short {
+				> .edge-scroll-button {
+					body.scrolled-past-top & {
+						> i.icon {
+							margin-top: -5px;
+							top: 50%;
+						}
+					}
+				}
+			}
+
+			&.tall {
+				> .edge-scroll-button {
+					body.scrolled-past-top & {
+						> i.icon {
+							position: fixed;
+							margin-top: -5px;
+							top: 50%;
+						}
+					}
+				}
+			}
+
 		}
 
 		.inner-container {
@@ -1324,6 +1361,27 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						}
 					}
 
+					&.open + .search-result-row.open {
+						> .columns {
+							> .search-result-column-block {
+								
+								&[data-field="display_title"]{
+									.toggle-detail-button-container {
+										//top: -3px;
+										> button {
+											> .icon-container {
+												//top: 23px;
+											}
+										}
+									}
+								}
+
+
+
+							}
+						}
+					}
+
 					&.loading { // Spinner/loader
 						height : 67px;
 						line-height: 46px;
@@ -1371,7 +1429,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							> .close-button-container {
 								position: absolute;
 								left: 8px;
-								top: 16px;
+								top: 10px;
 								width: 28px;
 								margin-left: 1px;
 								height: 28px;

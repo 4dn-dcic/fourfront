@@ -115,7 +115,8 @@ class SubItemListView extends React.Component {
         }
     }
 
-    renderListView(){
+    render(){
+        if (!this.props.isOpen) return null;
         var schemas = this.props.schemas;
         var item = this.props.content;
         var popLink = this.props.popLink;
@@ -149,11 +150,6 @@ class SubItemListView extends React.Component {
                 </div>
             </div>
         );
-    }
-
-    render(){
-        if (!this.props.isOpen) return null;
-        return this.renderListView();
     }
 }
 
@@ -204,14 +200,17 @@ class SubItemTable extends React.Component {
                 }
             }
             if (!Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object') {
-                // Embedded object.
+                // Embedded object 1 level deep. Will flatten upwards if passes checks:
+                // example: (sub-object) {..., 'stringProp' : 'stringVal', 'meta' : {'argument_name' : 'x', 'argument_type' : 'y'}, ...} ===> (columns) 'stringProp', 'meta.argument_name', 'meta.argument_type'
                 if (typeof firstRowItem[rootKeys[i]].display_title === 'string'){
-                    // Embedded.... ITEM!
-                    continue; // Skip rest of checks, we're ok with just drawing link to Item.
+                    // This embedded object is an.... ITEM! Skip rest of checks for this property, we're ok with just drawing link to Item.
+                    continue;
                 }
                 embeddedKeys = _.keys(firstRowItem[rootKeys[i]]);
-                if (embeddedKeys.length > 5) return false; // Too long.
+                if (embeddedKeys.length > 5) return false; // 5 properties to flatten up feels like a good limit. Lets render objects with more than that as lists or own table (not flattened up to another 1).
+                // Run some checks against the embedded object's properties. Ensure all nested lists contain plain strings or numbers, as will flatten to simple comma-delimited list.
                 for (j = 0; j < embeddedKeys.length; j++){
+                    // Ensure if property on embedded object's is an array, that is a simple array of strings or numbers - no objects. Will be converted to comma-delimited list.
                     if ( Array.isArray(  firstRowItem[ rootKeys[i] ][ embeddedKeys[j] ]  ) ){
                         if (
                             firstRowItem[rootKeys[i]][embeddedKeys[j]].length < 4 &&
@@ -219,11 +218,13 @@ class SubItemTable extends React.Component {
                         ) { continue; } else { return false; }
                     }
                     
+                    // Ensure that if is not an array, it is a simple string or number (not another embedded object).
                     if (
                         !Array.isArray(firstRowItem[rootKeys[i]][embeddedKeys[j]]) &&
                         firstRowItem[rootKeys[i]][embeddedKeys[j]] &&
                         typeof firstRowItem[rootKeys[i]][embeddedKeys[j]] === 'object'
-                    ) { 
+                    ) { // Embedded object 2 levels deep. No thx we don't want any 'meta.argument_mapping.argument_type' -length column names. Unless it's an Item for which we can just render link for.
+                        if (typeof firstRowItem[rootKeys[i]][embeddedKeys[j]].display_title === 'string') continue;
                         return false;
                     }
                 }
