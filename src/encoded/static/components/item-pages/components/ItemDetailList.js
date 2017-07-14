@@ -295,7 +295,6 @@ class SubItemTable extends React.Component {
         }
 
         return columnKeys.sort(function(a,b){
-            console.log('SORT', a.key, b.key);
             if (['title', 'display_title', 'accession'].indexOf(a.key) > -1) return -5;
             if (['title', 'display_title', 'accession'].indexOf(b.key) > -1) return 5;
             if (['name', 'workflow_argument_name'].indexOf(a.key) > -1) return -4;
@@ -316,7 +315,6 @@ class SubItemTable extends React.Component {
     render(){
         var columnKeys = this.getColumnKeys();
 
-        //console.log(columnKeys);
         var subListKeyWidths = this.subListKeyWidths;
         if (!subListKeyWidths){
             subListKeyWidths = this.subListKeyWidths = !this.state.mounted || !this.subListKeyRefs ? null : (function(refObj){
@@ -585,8 +583,6 @@ export class Detail extends React.Component {
                     <FilesInSetTable.Small files={item}/>
                 );
             }
-
-            console.log('SHOULD USE TABL:E?', SubItemTable.shouldUseTable(item), item);
 
             if (SubItemTable.shouldUseTable(item)) {
                 return <SubItemTable items={item} popLink={popLink} keyTitleDescriptionMap={keyTitleDescriptionMap} parentKey={keyPrefix} />;
