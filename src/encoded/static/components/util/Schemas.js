@@ -55,6 +55,18 @@ export const Term = {
             case 'biosample.biosource.biosource_type':
                 name = Term.capitalizeSentence(term);
                 break;
+            case 'file_size':
+                if (typeof term === 'number'){
+                    name = term;
+                } else if (!isNaN(parseInt(term))) {
+                    name = parseInt(term);
+                }
+                if (typeof name === 'number' && !isNaN(name)){
+                    name = Term.bytesToLargerUnit(name);
+                } else {
+                    name = null;
+                }
+                break;
             default:
                 name = null;
                 break;
@@ -72,6 +84,16 @@ export const Term = {
     capitalizeSentence : function(sen) {
         if (typeof sen !== 'string') return sen;
         return sen.split(' ').map(Term.capitalize).join(' ');
+    },
+
+    byteLevels : ['Bytes', 'kB', 'MB', 'GB', 'TB', 'Petabytes', 'Exabytes'],
+
+    bytesToLargerUnit : function(bytes, level = 0){
+        if (bytes > 1024 && level < Term.byteLevels.length) {
+            return Term.bytesToLargerUnit(bytes / 1024, level + 1);
+        } else {
+            return (Math.round(bytes * 100) / 100) + ' ' + Term.byteLevels[level];
+        }
     }
 
 };

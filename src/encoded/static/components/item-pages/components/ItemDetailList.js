@@ -683,7 +683,11 @@ export class Detail extends React.Component {
                         </a>
                     );
                 }
+            } else {
+                return <span>{ Schemas.Term.toName(keyPrefix, item) }</span>;
             }
+        } else if (typeof item === 'number'){
+            return <span>{ Schemas.Term.toName(keyPrefix, item) }</span>;
         }
         return(<span>{ item }</span>); // Fallback
     }
