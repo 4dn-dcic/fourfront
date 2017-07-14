@@ -57,7 +57,7 @@ export function listFromTips(tips){
 export function getNestedProperty(object, propertyName, suppressNotFoundError = false){
 
     if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
-    if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName in objectutils.getNestedProperty.');
+    if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName "' + propertyName + '" in objectutils.getNestedProperty.');
     try {
         return (function findNestedValue(currentNode, fieldHierarchyLevels, level = 0){
             if (level === fieldHierarchyLevels.length) return currentNode;

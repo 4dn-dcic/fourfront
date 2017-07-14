@@ -36,11 +36,6 @@
             "description": "The type of file based on the information in the file.",
             "type": "string"
         },
-        "file_size" : {
-            "title" : "File Size",
-            "type" : "number",
-            "description" : "Size of the file."
-        },
         "file_classification": {
             "title": "General Classification",
             "description": "General classification group for the File (raw, processed, ancillary (eg. index files))",
