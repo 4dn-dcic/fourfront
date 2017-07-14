@@ -56,12 +56,24 @@
         },
         "imaging_paths": {
             "title": "Imaging Paths",
-            "description": "Target to label connections used in microscopy",
+            "description": "Target to label connections in each channel",
             "type":  "array",
             "items": {
-                "title": "Imaging Path",
-                "type": "string",
-                "linkTo": "ImagingPath"
+                "title": "Imaging path",
+                "type": "object",
+                "properties":{
+                    "path":{
+                        "title": "Imaging Path",
+                        "type": "string",
+                        "linkTo": "ImagingPath"
+                    },
+                    "channel":{
+                        "title": "Imaging channnel",
+                        "description" : "channel info, ie. ch01, ch02...",
+                        "type": "string",
+                        "pattern": "^(ch\\d\\d)$"
+                    }
+                }
             }
         }
     },
