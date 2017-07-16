@@ -26,9 +26,7 @@ def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server)
 @pytest.yield_fixture(scope='session')
 def app(app_settings):
     from encoded import main
-    from snovault.elasticsearch import create_mapping
     app = main({}, **app_settings)
-    create_mapping.run(app)
 
     yield app
 
@@ -50,6 +48,8 @@ def DBSession(app):
 
 @pytest.fixture(autouse=True)
 def teardown(app, dbapi_conn):
+    from snovault.elasticsearch import create_mapping
+    create_mapping.run(app)
     cursor = dbapi_conn.cursor()
     cursor.execute("""TRUNCATE resources, transactions CASCADE;""")
     cursor.close()
