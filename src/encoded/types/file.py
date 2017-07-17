@@ -36,8 +36,11 @@ import os
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
 log = logging.getLogger(__name__)
+<<<<<<< HEAD
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
+=======
+>>>>>>> origin/upload_key_fix
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -91,8 +94,13 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
+<<<<<<< HEAD
         # boto.set_stream_logger('boto')
         conn = force_beanstalk_env(profile_name)
+=======
+        boto.set_stream_logger('boto')
+        conn = boto.connect_sts(profile_name=profile_name)
+>>>>>>> origin/upload_key_fix
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.credentials.to_dict()
