@@ -30,15 +30,42 @@ import boto
 import datetime
 import json
 import pytz
+import os
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
+
+BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 
 def show_upload_credentials(request=None, context=None, status=None):
     if request is None or status not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
         return False
     return request.has_permission('edit', context)
+
+
+def force_beanstalk_env(profile_name, config_file=None):
+    # set env variables if we are on elasticbeanstalk
+    if not config_file:
+        config_file = BEANSTALK_ENV_PATH
+    if os.path.exists(config_file):
+        if not os.environ.get("AWS_ACCESS_KEY_ID"):
+            import subprocess
+            command = ['bash', '-c', 'source ' + config_file + ' && env']
+            proc = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
+            for line in proc.stdout:
+                key, _, value = line.partition("=")
+                os.environ[key] = value[:-1]
+
+            proc.communicate()
+
+        conn = boto.connect_sts(aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+                                aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
+        print("on beanstalk so adding environment variables")
+    else:
+        conn = boto.connect_sts(profile_name=profile_name)
+
+    return conn
 
 
 def external_creds(bucket, key, name=None, profile_name=None):
@@ -63,7 +90,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
             ]
         }
         # boto.set_stream_logger('boto')
-        conn = boto.connect_sts(profile_name=profile_name)
+        conn = force_beanstalk_env(profile_name)
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.credentials.to_dict()
