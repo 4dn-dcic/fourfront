@@ -27,12 +27,15 @@ from urllib.parse import (
     urlparse,
 )
 import boto
+from boto.exception import BotoServerError
 import datetime
 import json
 import pytz
+import os
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
+log = logging.getLogger(__name__)
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -62,7 +65,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-        # boto.set_stream_logger('boto')
+        boto.set_stream_logger('boto')
         conn = boto.connect_sts(profile_name=profile_name)
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
@@ -310,7 +313,12 @@ class File(Item):
         properties = self.properties
         external = self.propsheets.get('external', {})
         if not external:
-            external = self.build_external_creds(self.registry, self.uuid, properties)
+            try:
+                external = self.build_external_creds(self.registry, self.uuid, properties)
+            except BotoServerError as e:
+                log.error(os.environ)
+                log.error(self.properties)
+                return 'UPLOAD KEY FAILED'
         return external['key']
 
     @calculated_property(condition=show_upload_credentials, schema={
