@@ -91,13 +91,8 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-<<<<<<< 887043ca53231be2530a1ba1c808d42a870c4f53
         # boto.set_stream_logger('boto')
         conn = force_beanstalk_env(profile_name)
-=======
-        boto.set_stream_logger('boto')
-        conn = boto.connect_sts(profile_name=profile_name)
->>>>>>> handle BotoServerError in upload_key calculated prop
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.credentials.to_dict()
