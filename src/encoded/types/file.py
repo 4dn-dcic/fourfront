@@ -91,13 +91,8 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-<<<<<<< 97c139d7a11ebcacd7b4fd1ea5eec3a0d617576e
-        boto.set_stream_logger('boto')
-        conn = boto.connect_sts(profile_name=profile_name)
-=======
         # boto.set_stream_logger('boto')
         conn = force_beanstalk_env(profile_name)
->>>>>>> auto pull credentials from beanstalk if they are present
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.credentials.to_dict()
