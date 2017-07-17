@@ -27,6 +27,7 @@ from urllib.parse import (
     urlparse,
 )
 import boto
+from boto.exception import BotoServerError
 import datetime
 import json
 import pytz
@@ -34,6 +35,7 @@ import os
 
 import logging
 logging.getLogger('boto').setLevel(logging.CRITICAL)
+log = logging.getLogger(__name__)
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
@@ -89,8 +91,13 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
+<<<<<<< 887043ca53231be2530a1ba1c808d42a870c4f53
         # boto.set_stream_logger('boto')
         conn = force_beanstalk_env(profile_name)
+=======
+        boto.set_stream_logger('boto')
+        conn = boto.connect_sts(profile_name=profile_name)
+>>>>>>> handle BotoServerError in upload_key calculated prop
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.credentials.to_dict()
@@ -337,7 +344,12 @@ class File(Item):
         properties = self.properties
         external = self.propsheets.get('external', {})
         if not external:
-            external = self.build_external_creds(self.registry, self.uuid, properties)
+            try:
+                external = self.build_external_creds(self.registry, self.uuid, properties)
+            except BotoServerError as e:
+                log.error(os.environ)
+                log.error(self.properties)
+                return 'UPLOAD KEY FAILED'
         return external['key']
 
     @calculated_property(condition=show_upload_credentials, schema={
