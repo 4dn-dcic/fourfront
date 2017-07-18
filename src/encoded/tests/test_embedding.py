@@ -1,6 +1,7 @@
 import pytest
 from ..loadxl import ORDER
 
+pytestmark = pytest.mark.working
 
 targets = [
     {'name': 'one', 'uuid': '775795d3-4410-4114-836b-8eeecf1d0c2f'},
@@ -67,14 +68,15 @@ def test_updated_target(content, testapp):
     assert set(res.headers['X-Updated'].split(',')) == {targets[0]['uuid']}
 
 
-def test_embedded_uuids_experiment(experiment, replicate, library, biosample, organism, dummy_request, threadlocals):
+def test_embedded_uuids_experiment(experiment, lab, award, human_biosample, human_biosource, mboI, dummy_request, threadlocals):
     dummy_request.embed(experiment['@id'], '@@embedded')
     embedded_uuids = dummy_request._embedded_uuids
     assert experiment['uuid'] in embedded_uuids
-    assert replicate['uuid'] in embedded_uuids
-    assert library['uuid'] in embedded_uuids
-    assert biosample['uuid'] in embedded_uuids
-    assert organism['uuid'] in embedded_uuids
+    assert lab['uuid'] in embedded_uuids
+    assert award['uuid'] in embedded_uuids
+    assert human_biosample['uuid'] in embedded_uuids
+    assert human_biosource['uuid'] in embedded_uuids
+    assert mboI['uuid'] in embedded_uuids
 
 
 @pytest.mark.parametrize('item_type', ORDER)
