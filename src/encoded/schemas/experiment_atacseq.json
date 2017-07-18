@@ -18,6 +18,7 @@
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/sop_mapping"},
+        { "$ref": "mixins.json#/documents" },
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [
