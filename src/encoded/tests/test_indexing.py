@@ -104,6 +104,7 @@ def test_indexing_workbook(testapp, indexer_testapp):
     assert res.json['total'] > 1
 
 
+@pytest.mark.slow
 def test_indexing_simple(app, testapp, indexer_testapp):
     import time
     # First post a single item so that subsequent indexing is incremental
@@ -140,6 +141,7 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert 'settings' in testing_ppp_source
 
 
+@pytest.mark.slow
 def test_listening(testapp, listening_conn):
     import time
     testapp.post_json('/testing-post-put-patch/', {'required': ''})
