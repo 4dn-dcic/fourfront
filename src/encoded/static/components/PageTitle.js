@@ -19,6 +19,7 @@ export default class PageTitle extends React.Component {
     static isStaticPage(context){
         if (Array.isArray(context['@type'])){
             if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
+                if (context['@type'].indexOf('HomePage') > -1) return false; // Exclude home page
                 return true;
             }
         }
@@ -87,7 +88,7 @@ export default class PageTitle extends React.Component {
 
         if (subtitle){
             subtitle = (
-                <div className="page-subtitle smaller" style={{ marginLeft : !this.props.showType ? 0 : null }}>
+                <div className="page-subtitle smaller">
                     { subtitle }
                 </div>
             );

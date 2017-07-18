@@ -139,6 +139,10 @@ class SubItemListView extends React.Component {
                 '@id' : {
                     'title' : 'Link',
                     'description' : 'Link to Item'
+                },
+                'link_id' : {
+                    'title' : 'Link',
+                    'description' : 'Link to Item'
                 }
             }),
             'showJSONButton' : false
@@ -455,7 +459,8 @@ class SubItemTable extends React.Component {
         var keyTitleDescriptionMap = _.extend(
             {},
             ((((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {}),
-            tipsFromSchema || parentKeySchemaProperty
+            tipsFromSchema || parentKeySchemaProperty,
+            { 'link_id' : { 'title' : "Link", 'description' : "Link to Item" } } // Overwrite link_id from schemas
         );
 
         //console.log(this.props.parentKey, keyTitleDescriptionMap, tipsFromSchema, parentKeySchemaProperty);
@@ -831,6 +836,18 @@ export class Detail extends React.Component {
         if (typeof this.props.keyTitleDescriptionMap === 'object' && this.props.keyTitleDescriptionMap){
             _.extend(tips, this.props.keyTitleDescriptionMap);
         }
+
+        _.extend(tips, {
+            // Extend schema properties
+            '@id' : {
+                'title' : 'Link',
+                'description' : 'Link to Item'
+            },
+            'link_id' : {
+                'title' : 'Link',
+                'description' : 'Link to Item'
+            }
+        });
 
         // Sort applicable persistent keys by original persistent keys sort order.
         var stickyKeysObj = _.object(
