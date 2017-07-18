@@ -147,8 +147,12 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
-    embedded = ['arguments.*',
-                'arguments.argument_mapping']
+    embedded = ['arguments.argument_type',
+                'arguments.argument_format',
+                'arguments.workflow_argument_name',
+                'arguments.argument_mapping.workflow_step',
+                'arguments.argument_mapping.step_argument_name',
+                'arguments.argument_mapping.step_argument_type']
 
     #rev = {
     #    'workflow_runs': ('WorkflowRun', 'workflow'),
@@ -167,8 +171,7 @@ class Workflow(Item):
     #def workflow_runs(self, request):
     #    return self.rev_link_atids(request, "workflow_runs")
 
-    @calculated_property(schema=workflow_analysis_steps_schema,
-                         category='page')
+    @calculated_property(schema=workflow_analysis_steps_schema)
     def analysis_steps(self, request):
         '''
         Uses this Workflow's linked Item list of AnalysisSteps in property 'workflow_steps', along with 'argument_mapping's of this Workflow's 'argument' property objects,

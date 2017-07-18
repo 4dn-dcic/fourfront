@@ -32,7 +32,15 @@ class SelectedFilesOverview extends React.Component {
 }
 
 
+/**
+ * This component must be fed props from CustomColumnController (for columns UI), SelectedFilesController (for selected files read-out).
+ * Some may need to be transformed to exclude certain non-user-controlled columns (e.g. @type) and such.
+ */
 export class AboveTableControls extends React.Component {
+
+    static defaultProps = {
+        'showSelectedFileCount' : false
+    }
 
     constructor(props){
         super(props);
@@ -158,6 +166,7 @@ export class AboveTableControls extends React.Component {
     }
 
     selectedFilesOverview(){
+        if (!this.props.showSelectedFileCount || !this.props.selectedFiles) return null;
         return (
             <ChartDataController.Provider>
                 <SelectedFilesOverview selectedFiles={this.props.selectedFiles} />
