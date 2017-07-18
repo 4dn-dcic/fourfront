@@ -1,6 +1,7 @@
 import pytest
-from encoded.types.file import File, FileFastq, FileFasta, post_upload
+from encoded.types.file import File, FileFastq, FileFasta, post_upload, force_beanstalk_env
 from pyramid.httpexceptions import HTTPForbidden
+import os
 pytestmark = pytest.mark.working
 
 
@@ -346,3 +347,31 @@ def test_workflowrun_input_rev_link(testapp, fastq_json, workflow_run_json):
 
     new_file = testapp.get(res['@id']).json
     assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
+
+
+
+def test_force_beanstalk_env(mocker):
+    secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    key = os.environ.get("AWS_ACCESS_KEY_ID")
+    os.environ.pop("AWS_SECRET_ACCESS_KEY")
+    os.environ.pop("AWS_ACCESS_KEY_ID")
+
+    import tempfile
+    test_cfg = tempfile.NamedTemporaryFile(mode='w', delete=False)
+    test_cfg.write('export AWS_SECRET_ACCESS_KEY="its a secret"\n')
+    test_cfg.write('export AWS_ACCESS_KEY_ID="its a secret id"\n')
+    test_cfg_name = test_cfg.name
+    test_cfg.close()
+
+    # mock_boto
+    mock_boto = mocker.patch('encoded.types.file.boto', autospec=True)
+
+    force_beanstalk_env(profile_name=None, config_file=test_cfg_name)
+    # reset
+    os.environ["AWS_SECRET_ACCESS_KEY"] = secret
+    os.environ["AWS_ACCESS_KEY_ID"] = key
+    # os.remove(test_cfg.delete)
+
+    # ensure boto called with correct arguments
+    mock_boto.connect_sts.assert_called_once_with(aws_access_key_id='its a secret id',
+                                                  aws_secret_access_key='its a secret')
