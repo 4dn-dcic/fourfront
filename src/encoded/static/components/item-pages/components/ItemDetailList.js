@@ -195,16 +195,6 @@ class SubItemTable extends React.Component {
         for (i = 0; i < rootKeys.length; i++){
 
             if (Array.isArray(firstRowItem[rootKeys[i]])) {
-                /*
-                if (
-                    _.filter(firstRowItem[rootKeys[i]], function(v){
-                        if (typeof v === 'string' || typeof v === 'number') return true;
-                        return false;
-                    }).length === 0
-                ){ // All items in array are strings or ints, we can use commas.
-                    continue;
-                }
-                */
                 var listObjects = _.filter(firstRowItem[rootKeys[i]], function(v){
                     if (v && typeof v === 'object') return true;
                     return false;
@@ -241,24 +231,7 @@ class SubItemTable extends React.Component {
                     }
                 }
             }
-            /*
-            if (Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]].length > 0 && firstRowItem[rootKeys[i]][0] && typeof firstRowItem[rootKeys[i]][0] === 'object'){
-                // List of objects exist at least 1 level deep.
-                embeddedListItem = firstRowItem[rootKeys[i]][0];
-                embeddedListItemKeys = _.keys(embeddedListItem);
-                for (j = 0; j < embeddedListItemKeys.length; j++){
-                    if (
-                        Array.isArray(embeddedListItem[embeddedListItemKeys[j]]) &&
-                        embeddedListItem[embeddedListItemKeys[j]][0] &&
-                        typeof embeddedListItem[embeddedListItemKeys[j]][0] === 'object'
-                    ){
-                        // List of objects exists at least 2 levels deep.
-                        return false;
-                    }
 
-                }
-            }
-            */
             if (!Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object') {
                 // Embedded object 1 level deep. Will flatten upwards if passes checks:
                 // example: (sub-object) {..., 'stringProp' : 'stringVal', 'meta' : {'argument_name' : 'x', 'argument_type' : 'y'}, ...} ===> (columns) 'stringProp', 'meta.argument_name', 'meta.argument_type'
@@ -438,13 +411,12 @@ class SubItemTable extends React.Component {
                     if (!value) return { 'value' : '-', 'key' : colKey };
                     if (Array.isArray(value)){
                         if (typeof value[0] === 'string') return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
-                        console.log('\n\n\n\nARRR', value);
                         if (value[0] && typeof value[0] === 'object' && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
                             var allKeys = colKeyContainer.childKeys; //_.keys(  _.reduce(value, function(m,v){ return _.extend(m,v); }, {})   );
                             return {
                                 'value' : value.map(function(embeddedRow, i){
                                     return (
-                                        <div style={{ whiteSpace: "nowrap" }} className="text-left child-list-row">
+                                        <div style={{ whiteSpace: "nowrap" }} className="text-left child-list-row" key={colKey + '--row-' + i}>
                                             <div className="inline-block child-list-row-number">{ i + 1 }.</div>
                                             { allKeys.map(function(k, j){
                                                 return (
@@ -495,7 +467,7 @@ class SubItemTable extends React.Component {
                 <table className="detail-embedded-table">
                     <thead>
                         <tr>{
-                            [<th key="rowNumber" style={{ minWidth: 36, maxWidth : 36, width: 36 }}>#</th>].concat(columnKeys.map(function(colKeyContainer){
+                            [<th key="rowNumber" style={{ minWidth: 36, maxWidth : 36, width: 36 }}>#</th>].concat(columnKeys.map(function(colKeyContainer, colIndex){
                                 //var tips = object.tipsFromSchema(Schemas.get(), context) || {};
                                 var colKey = colKeyContainer.key;
                                 var title = keyTitleDescriptionMap[colKey] ? (keyTitleDescriptionMap[colKey].title || colKey) : colKey;
@@ -510,10 +482,10 @@ class SubItemTable extends React.Component {
                                                 subListKeyRefs[colKey] = {};
                                                 return (
                                                     <div style={{ whiteSpace: "nowrap" }} className="sub-list-keys-header">{
-                                                        [<div className="inline-block child-list-row-number">&nbsp;</div>].concat(colKeyContainer.childKeys.map(function(ck){
+                                                        [<div key="sub-header-rowNumber" className="inline-block child-list-row-number">&nbsp;</div>].concat(colKeyContainer.childKeys.map(function(ck){
                                                             
                                                             return (
-                                                                <div className="inline-block" data-key={colKey + '.' + ck} ref={function(r){
+                                                                <div key={"sub-header-for-" + colKey + '.' + ck} className="inline-block" data-key={colKey + '.' + ck} ref={function(r){
                                                                     if (r) subListKeyRefs[colKey][ck] = r;
                                                                 }} style={{ 'width' : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[ck] || null) }}>
                                                                     <TooltipInfoIconContainer title={(subKeyTitleDescriptionMap[ck] || {}).title || ck} tooltip={(subKeyTitleDescriptionMap[ck] || {}).description || null} />
