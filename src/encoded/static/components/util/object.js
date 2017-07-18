@@ -99,6 +99,15 @@ export function isValidJSON(content) {
     return isJson;
 }
 
+export function isAnItem(content){
+    return (
+        content &&
+        typeof content === 'object' &&
+        typeof content.display_title === 'string' &&
+        typeof atIdFromObject(content) === 'string'
+    );
+}
+
 
 
 /**

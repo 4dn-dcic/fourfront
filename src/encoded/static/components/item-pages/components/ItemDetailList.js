@@ -189,10 +189,59 @@ class SubItemTable extends React.Component {
         }
 
         var rootKeys = _.keys(firstRowItem);
-        var embeddedKeys, i, j, embeddedListItem, embeddedListItemKeys;
+        var embeddedKeys, i, j, k, embeddedListItem, embeddedListItemKeys;
         
 
         for (i = 0; i < rootKeys.length; i++){
+
+            if (Array.isArray(firstRowItem[rootKeys[i]])) {
+                /*
+                if (
+                    _.filter(firstRowItem[rootKeys[i]], function(v){
+                        if (typeof v === 'string' || typeof v === 'number') return true;
+                        return false;
+                    }).length === 0
+                ){ // All items in array are strings or ints, we can use commas.
+                    continue;
+                }
+                */
+                var listObjects = _.filter(firstRowItem[rootKeys[i]], function(v){
+                    if (v && typeof v === 'object') return true;
+                    return false;
+                });
+                if (listObjects.length === 0) continue; // List of strings or values only. Continue.
+                var listNotItems = _.filter(listObjects, function(v){ return !object.isAnItem(v); });
+                if (listNotItems.length === 0) continue; // List of Items that can be rendered as links. Continue.
+
+                // Else, we have list of Objects. Assert that each sub-object has only strings, numbers, or Item (object with link), or list of such -- no other sub-objects. 
+
+                for (k = 0; k < listNotItems.length; k++){
+                    embeddedListItem = listNotItems[k];
+                    embeddedListItemKeys = _.keys(embeddedListItem);
+
+                    for (j = 0; j < embeddedListItemKeys.length; j++){
+                        if (typeof embeddedListItem[embeddedListItemKeys[j]] === 'string' || typeof embeddedListItem[embeddedListItemKeys[j]] === 'number'){
+                            continue;
+                        }
+                        if (object.isAnItem(embeddedListItem[embeddedListItemKeys[j]])) continue;
+                        if (embeddedListItem[embeddedListItemKeys[j]] && typeof embeddedListItem[embeddedListItemKeys[j]] === 'object'){
+                            return false;
+                        }
+                        if (
+                            Array.isArray(embeddedListItem[embeddedListItemKeys[j]]) &&
+                            _.filter(embeddedListItem[embeddedListItemKeys[j]], function(v){
+                                if (typeof v === 'string' || typeof v === 'number' || (v && object.isAnItem(v))) return false;
+                                return true;
+                            }).length !== 0
+                        ){
+                            // List of objects exists at least 2 levels deep.
+                            return false;
+                        }
+
+                    }
+                }
+            }
+            /*
             if (Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]].length > 0 && firstRowItem[rootKeys[i]][0] && typeof firstRowItem[rootKeys[i]][0] === 'object'){
                 // List of objects exist at least 1 level deep.
                 embeddedListItem = firstRowItem[rootKeys[i]][0];
@@ -209,10 +258,11 @@ class SubItemTable extends React.Component {
 
                 }
             }
+            */
             if (!Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object') {
                 // Embedded object 1 level deep. Will flatten upwards if passes checks:
                 // example: (sub-object) {..., 'stringProp' : 'stringVal', 'meta' : {'argument_name' : 'x', 'argument_type' : 'y'}, ...} ===> (columns) 'stringProp', 'meta.argument_name', 'meta.argument_type'
-                if (typeof firstRowItem[rootKeys[i]].display_title === 'string'){
+                if (object.isAnItem(firstRowItem[rootKeys[i]])){
                     // This embedded object is an.... ITEM! Skip rest of checks for this property, we're ok with just drawing link to Item.
                     continue;
                 }
@@ -220,11 +270,18 @@ class SubItemTable extends React.Component {
                 if (embeddedKeys.length > 5) return false; // 5 properties to flatten up feels like a good limit. Lets render objects with more than that as lists or own table (not flattened up to another 1).
                 // Run some checks against the embedded object's properties. Ensure all nested lists contain plain strings or numbers, as will flatten to simple comma-delimited list.
                 for (j = 0; j < embeddedKeys.length; j++){
+
+                    if (typeof firstRowItem[ rootKeys[i] ][ embeddedKeys[j] ] === 'string' || typeof firstRowItem[ rootKeys[i] ][ embeddedKeys[j] ] === 'number') continue;
+
                     // Ensure if property on embedded object's is an array, that is a simple array of strings or numbers - no objects. Will be converted to comma-delimited list.
                     if ( Array.isArray(  firstRowItem[ rootKeys[i] ][ embeddedKeys[j] ]  ) ){
                         if (
                             firstRowItem[rootKeys[i]][embeddedKeys[j]].length < 4 &&
-                            (typeof firstRowItem[rootKeys[i]][embeddedKeys[j]][0] === 'string' || typeof firstRowItem[rootKeys[i]][embeddedKeys[j]][0] === 'number')
+                            _.filter(firstRowItem[rootKeys[i]][embeddedKeys[j]][0], function(v){
+                                if (typeof v === 'string' || typeof v === 'number') { return false; }
+                                else { return true; }
+                            }).length === 0
+                            //(typeof firstRowItem[rootKeys[i]][embeddedKeys[j]][0] === 'string' || typeof firstRowItem[rootKeys[i]][embeddedKeys[j]][0] === 'number')
                         ) { continue; } else { return false; }
                     }
                     
@@ -234,7 +291,7 @@ class SubItemTable extends React.Component {
                         firstRowItem[rootKeys[i]][embeddedKeys[j]] &&
                         typeof firstRowItem[rootKeys[i]][embeddedKeys[j]] === 'object'
                     ) { // Embedded object 2 levels deep. No thx we don't want any 'meta.argument_mapping.argument_type' -length column names. Unless it's an Item for which we can just render link for.
-                        if (typeof firstRowItem[rootKeys[i]][embeddedKeys[j]].display_title === 'string') continue;
+                        if ( object.isAnItem(firstRowItem[rootKeys[i]][embeddedKeys[j]]) ) continue;
                         return false;
                     }
                 }
@@ -381,7 +438,8 @@ class SubItemTable extends React.Component {
                     if (!value) return { 'value' : '-', 'key' : colKey };
                     if (Array.isArray(value)){
                         if (typeof value[0] === 'string') return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
-                        if (value[0] && typeof value[0] === 'object'){ // Embedded list of objects.
+                        console.log('\n\n\n\nARRR', value);
+                        if (value[0] && typeof value[0] === 'object' && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
                             var allKeys = colKeyContainer.childKeys; //_.keys(  _.reduce(value, function(m,v){ return _.extend(m,v); }, {})   );
                             return {
                                 'value' : value.map(function(embeddedRow, i){
