@@ -89,7 +89,7 @@ def test_add_default_embeds(registry, item_type):
     embeds = add_default_embeds(item_type, registry[TYPES], type_info.embedded, schema)
     for embed in embeds:
         split_embed = embed.strip().split('.')
-        is_valid, error = confirm_embed_with_schemas(item_type, registry[TYPES], split_embed, schema['properties'])
+        is_valid, error, terminal_linkTo = confirm_embed_with_schemas(item_type, registry[TYPES], split_embed, schema['properties'])
         assert is_valid or error == None
 
 
@@ -105,5 +105,5 @@ def test_manual_embeds(registry, item_type):
     embeds = type_info.embedded
     for embed in embeds:
         split_embed = embed.strip().split('.')
-        is_valid, error = confirm_embed_with_schemas(item_type, registry[TYPES], split_embed, schema['properties'])
+        is_valid, error, terminal_linkTo = confirm_embed_with_schemas(item_type, registry[TYPES], split_embed, schema['properties'])
         assert is_valid or error == None
