@@ -1179,14 +1179,18 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 					transition: opacity .6s ease-out;
 					pointer-events: none;
 				}
-				&:hover {
-					background-color: #f4f4f4;
-					box-shadow: none;
-				}
 				> i.icon {
 					position: absolute;
 					display: block;
 					width: 15px;
+					opacity : 0.5;
+				}
+				&:hover {
+					background-color: #f4f4f4;
+					box-shadow: none;
+					> i.icon {
+						opacity: 0.8;
+					}
 				}
 			}
 
