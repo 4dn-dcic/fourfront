@@ -287,12 +287,13 @@ class ControlsAndResults extends React.Component {
 
         return (
             <div>
-
+            {/*
                 {this.props.submissionBase ?
                     <h1 className="page-title">{thisTypeTitle + ' Selection'}</h1>
                     : <h1 className="page-title">{thisTypeTitle + ' Search'}</h1>
                 }
                 <h4 className="page-subtitle">Filter & sort results</h4>
+            */}
 
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
@@ -386,7 +387,7 @@ export default class SearchView extends React.Component {
         }
         return (
             <div>
-                <div className="browse-page-container" ref="container">
+                <div className="browse-page-container search-page-container" ref="container">
                     <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
                 </div>
             </div>

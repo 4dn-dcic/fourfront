@@ -21,6 +21,7 @@ import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import { getTitleStringFromContext } from './item-pages/item';
+import PageTitle from './PageTitle';
 
 /**
  * The top-level component for this application.
@@ -1233,6 +1234,7 @@ export default class App extends React.Component {
                                     schemas={this.state.schemas}
                                 />
                                 <div id="content" className="container">
+                                    <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
                                     <FacetCharts
                                         href={this.props.href}
                                         context={this.props.context}

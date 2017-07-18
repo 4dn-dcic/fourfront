@@ -127,7 +127,6 @@ export default class DefaultItemView extends ItemBaseView {
         return (
             <div className={itemClassName}>
 
-                <ItemPageTitle context={context} schemas={schemas} />
                 <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
                     <ItemHeader.TopRow>{ this.topRightHeaderSection() || null }</ItemHeader.TopRow>
                     <ItemHeader.MiddleRow />

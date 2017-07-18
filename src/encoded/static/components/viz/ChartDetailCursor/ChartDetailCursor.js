@@ -210,7 +210,7 @@ class Crumbs extends React.Component {
                                 key={i}
                             >
                                 <div className="field col-xs-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
-                                    { Schemas.Field.toName(n.field, this.props.schemas) }
+                                    { Schemas.Field.toName(n.field, Schemas.get()) }
                                 </div>
                                 <div className="name col-xs-5">
                                     { n.name || Schemas.Term.toName(n.field, n.term) }

@@ -22,6 +22,19 @@ var ReactTooltip = require('react-tooltip');
 
 export default class QuickInfoBar extends React.Component {
 
+    static isInvisibleForHref(href){
+        // If have href, only show for /browse/, /search/, and / & /home
+        var urlParts = url.parse(href);
+        if (urlParts.hash && urlParts.hash.indexOf('!impersonate-user') > -1) return true;
+        // Doing replace twice should be faster than one time with /g regex flag (3 steps each or 15 steps combined w/ '/g')
+        var pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
+        if (pathParts[0] === 'browse') return false;
+        if (pathParts[0] === 'search') return true;
+        if (pathParts[0] === 'home') return false;
+        if (pathParts.length === 1 && pathParts[0] === "") return false;
+        return true;
+    }
+
     static defaultProps = {
         'offset' : {},
         'id' : 'stats',
@@ -172,17 +185,8 @@ export default class QuickInfoBar extends React.Component {
             )
         ) return true;
 
-        // If have href, only show for /browse/, /search/, and / & /home
         if (typeof props.href === 'string'){
-            var urlParts = url.parse(props.href);
-            if (urlParts.hash && urlParts.hash.indexOf('!impersonate-user') > -1) return true;
-            // Doing replace twice should be faster than one time with /g regex flag (3 steps each or 15 steps combined w/ '/g')
-            var pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
-            if (pathParts[0] === 'browse') return false;
-            if (pathParts[0] === 'search') return true;
-            if (pathParts[0] === 'home') return false;
-            if (pathParts.length === 1 && pathParts[0] === "") return false;
-            return true;
+            return QuickInfoBar.isInvisibleForHref(props.href);
         }
 
         return false;

@@ -31,7 +31,6 @@ export class HealthView extends React.Component {
         var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
         return (
             <div className="view-item">
-                <ItemPageTitle context={context} schemas={this.props.schemas} showType={false} />
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
                 <ItemDetailList context={context} schemas={this.props.schemas} keyTitleDescriptionMap={{
                     'blob_bucket' : {
