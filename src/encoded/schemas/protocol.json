@@ -23,19 +23,20 @@
         },
         "description": {
             "title": "Description",
-            "description": "A short description of the protocol",
+            "description": "A short description of the protocol or document",
             "type": "string",
             "default": ""
         },
         "protocol_type": {
             "title": "Protocol Type",
-            "description": "The category that best describes the protocol.",
+            "description": "The category that best describes the protocol or document.",
             "type": "string",
             "enum": [
                 "Cell culture protocol",
                 "Cell sorting protocol",
                 "Biosample preparation protocol",
                 "Experimental protocol",
+                "Authentication document",
                 "Other"
             ]
         }
