@@ -171,7 +171,8 @@ class Workflow(Item):
     #def workflow_runs(self, request):
     #    return self.rev_link_atids(request, "workflow_runs")
 
-    @calculated_property(schema=workflow_analysis_steps_schema)
+    @calculated_property(schema=workflow_analysis_steps_schema,
+                         category='page')
     def analysis_steps(self, request):
         '''
         Uses this Workflow's linked Item list of AnalysisSteps in property 'workflow_steps', along with 'argument_mapping's of this Workflow's 'argument' property objects,
