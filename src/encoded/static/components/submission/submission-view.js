@@ -6,7 +6,7 @@ var { ajax, console, JWT, object, isServerSide, layout, Schemas } = require('../
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
 import { getTitleStringFromContext } from '../item-pages/item';
-var Search = require('../search').Search;
+var Search = require('./../browse/SearchView').default;
 var getLargeMD5 = require('../util/file-utility').getLargeMD5;
 var ReactTooltip = require('react-tooltip');
 import SubmissionTree from './expandable-tree';

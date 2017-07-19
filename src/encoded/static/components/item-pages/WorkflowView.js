@@ -49,10 +49,11 @@ export function filterOutParametersFromGraphData(graphData){
  * @param {MouseEvent} evt - onClick MouseEvent.
  */
 export function onItemPageNodeClick(node, selectedNode, evt){
+    var navOpts = { 'inPlace' : true, 'skipRequest' : true, 'replace' : true };
     if (node !== selectedNode){
-        navigate('#' + (node.id || node.name), { inPlace: true, skipRequest : true });
+        navigate('#' + (node.id || node.name), navOpts);
     } else {
-        navigate('#', { inPlace: true, skipRequest : true });
+        navigate('#', navOpts);
     }
 }
 

@@ -28,7 +28,7 @@ describe('Testing search.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        Search = require('../search').Search;
+        Search = require('./../browse/SearchView').default;
         context = require('../testdata/expt_search');
 
         sinon = require('sinon');
