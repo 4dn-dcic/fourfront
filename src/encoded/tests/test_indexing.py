@@ -5,6 +5,9 @@ elasticsearch running as subprocesses.
 """
 
 import pytest
+from snovault import TYPES
+from snovault import COLLECTIONS
+
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
 
@@ -49,7 +52,9 @@ def DBSession(app):
 @pytest.fixture(autouse=True)
 def teardown(app, dbapi_conn):
     from snovault.elasticsearch import create_mapping
-    create_mapping.run(app, collections=['biosample', 'testing_post_put_patch'])
+    create_mapping.run(app, collections=['biosample',
+                                         'testing_post_put_patch',
+                                         'file_processed'])
     cursor = dbapi_conn.cursor()
     cursor.execute("""TRUNCATE resources, transactions CASCADE;""")
     cursor.close()
@@ -149,3 +154,51 @@ def test_listening(testapp, listening_conn):
     notify = listening_conn.notifies.pop()
     assert notify.channel == 'snovault.transaction'
     assert int(notify.payload) > 0
+
+
+@pytest.fixture
+def item_uuid(testapp, award, experiment, lab):
+    # this is a processed file
+    item = {
+        'accession': '4DNFI067APU2',
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': 'pairs',
+        'filename': 'test.pairs.gz',
+        'md5sum': '0123456789abcdef0123456789abcdef',
+        'status': 'uploading',
+    }
+    res = testapp.post_json('/file_processed', item)
+    return res.json['@graph'][0]['uuid']
+
+
+def verify_item(item_data, item_type, testapp, registry):
+    # ensure we have basic identifing properties
+    assert item_data['uuid']
+    assert item_data['@id']
+    assert item_type in item_data['@type']
+
+    # is this something we actually know about? 
+    profile = testapp.get("/profiles/" + item_type + ".json").json
+    assert(profile)
+
+    # get the type from the app
+    pyr_item_type = registry[TYPES].by_item_type[item_type]
+    pyr_item_coll = registry[COLLECTIONS][item_type]
+
+
+
+    import pdb; pdb.set_trace()
+
+
+def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
+    # Todo, input a list of accessions / uuids:
+    # get from database
+    es_item = indexer_testapp.get("/" + item_uuid).follow(status=200).json
+    assert(es_item)
+    verify_item(es_item, es_item['@type'][0], testapp, registry)
+    
+    # get from database
+    db_item = testapp.get("/" + item_uuid + "/?datastore=database").follow(status=200).json
+    assert(db_item)
+
