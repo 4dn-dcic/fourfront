@@ -118,6 +118,14 @@ def test_search_embedded_file_by_accession(workbook, testapp):
         assert 'fbd7e4ad-49e5-4c33-afab-9ec90d65faf3' in file_uuids
 
 
+def test_search_parameter_name_and_value(workbook, testapp):
+    # only workflow run sbgs with both ncores wf_argname and some value = 8 returned
+    res = testapp.get('/search/?type=WorkflowRunSbg&parameters.workflow_argument_name=ncores&parameters.value=8').json
+    assert len(res['@graph']) > 0  # mutiple wfr can be returned
+    wfr_uuids = [wfr['uuid'] for wfr in res['@graph'] if 'uuid' in wfr]
+    assert 'e5927906-cf80-46da-8a81-1093926865af' in wfr_uuids
+
+
 @pytest.fixture
 def mboI_dts(testapp, workbook):
     # returns a dictionary of strings of various date and datetimes
