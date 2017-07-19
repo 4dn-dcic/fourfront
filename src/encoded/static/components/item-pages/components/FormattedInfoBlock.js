@@ -328,7 +328,9 @@ export class FormattedInfoBlock extends React.Component {
             details_user,
             typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user" : null),
             includeLabel ? (typeof includeLabel === 'string' ? includeLabel : "Submitted By") : null,
-            details_user && includeDetail ? details_user.lab && details_user.lab.display_title : null,
+            details_user && includeDetail ? (
+                (details_user.lab && details_user.lab.display_title) || details_user.job_title || details_user.timezone
+            ) : null,
             'award',
             'project',
             key

@@ -62,7 +62,7 @@
             "type": "string"
         },
         "arguments": {
-            "title": "Workflow arguments",
+            "title": "Workflow Arguments",
             "description": "arguments of the workflow.",
             "type": "array",
             "items": {
@@ -72,24 +72,24 @@
                 "additionalProperties": false,
                 "properties": {
                     "workflow_argument_name": {
-                        "title": "Workflow argument name",
-                        "description": "the name of the argument of the workflow",
+                        "title": "Name",
+                        "description": "Name of the argument of the workflow.",
                         "type": "string"
                     },
                     "is_primaryfile": {
-                        "title": "Is primary file",
-                        "description": "a flag indicating whether the argument is a primary or secondary file. not applicable for types other than Input file and Output processed file",
+                        "title": "Is Primary File",
+                        "description": "Flag indicating whether the argument is a primary or secondary file. Not applicable for types other than Input file and Output processed file.",
                         "type": "boolean"
                     },
                     "linkto_primaryfile": {
-                        "title": "linkto primary file",
-                        "description": "a primary file that is related this argument. applicable only for Input file and Output processed file that is not a primary file",
+                        "title": "Primary File",
+                        "description": "Primary file that is related to this argument. Applicable only for Input file and Output processed file that is not a primary file.",
                         "type": "string",
                         "linkTo": "File"
                     },
                     "argument_type":{
-                        "title": "Workflow argument type",
-                        "description": "type of the argument",
+                        "title": "Type",
+                        "description": "Argument Type",
                         "type": "string",
                         "enum" : [
                             "Input file",
@@ -101,14 +101,14 @@
                         ]
                     },
 					"argument_cardinality":{
-						"title": "Workflow argument cardinality",
-						"description": "number of items in the argument or N for dynamic number",
+						"title": "Cardinality",
+						"description": "Number of items in the argument, or N for dynamic number.",
 						"type": "string",
 					    "default": "1"
 					},
                     "argument_format":{
-                        "title": "Workflow argument format",
-                        "description": "format of the argument",
+                        "title": "Format",
+                        "description": "Argument Format",
                         "type": "string",
                         "enum" : [
                             "fastq",
@@ -127,34 +127,34 @@
                         ]
                     },
                     "description": {
-                        "title": "description",
-                        "description": "description of the argument",
+                        "title": "Description",
+                        "description": "Argument Description",
                         "type": "string"
                     },
                     "argument_mapping": {
-                        "title": "Argument Mappings",
+                        "title": "Mappings",
                         "internal_comment": "same workflow argument can be passed to multiple steps",
-                        "description": "argument mapping between workflow and steps",
+                        "description": "Argument mapping between workflow and steps.",
                         "type": "array",
                         "items": {
-                            "title" : "Argument Mapping",
+                            "title" : "Mapping",
                             "type": "object",
                             "additionalProperties": false,
                             "properties": {
                                 "workflow_step": {
-                                    "title": "Corresponding workflow step",
-                                    "description": "the step of the workflow that takes the input file",
+                                    "title": "Workflow Step",
+                                    "description": "Step of the workflow which accepts or outputs the file.",
                                     "type": "string",
                                     "internal_comment": "the same analysis step may appear multiple times"
                                 },
                                 "step_argument_name": {
-                                    "title": "Step argument name",
-                                    "description": "the name of the argument of the step that corresponds to the workflow argument",
+                                    "title": "Step's Arg. Name",
+                                    "description": "Name of the argument of the step that corresponds to the workflow argument.",
                                     "type": "string"
                                 },
                                 "step_argument_type": {
-                                    "title": "Step argument type",
-                                    "description": "type of the argument of the step",
+                                    "title": "Step's Arg. Type",
+                                    "description": "Type of the argument of the step.",
                                     "type": "string",
                                     "enum": [
                                         "Input file",
@@ -181,14 +181,14 @@
                 "additionalProperties": false,
                 "properties": {
                     "step": {
-                        "title": "Workflow Step",
+                        "title": "Step",
                         "description": "A step in the workflow.",
                         "type": "string",
                         "linkTo": "AnalysisStep"
                     },
                     "step_name": {
-                        "title": "Workflow Step",
-                        "description": "A step in the workflow.",
+                        "title": "Workflow Step Name",
+                        "description": "Name of step within this workflow. Potentially overrides step's own internal name, if necessary.",
                         "type": "string"
                     }
                 }
