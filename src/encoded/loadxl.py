@@ -55,6 +55,7 @@ ORDER = [
     'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',
+    'experiment_atacseq',
     'experiment_mic',
     'experiment_set',
     'experiment_set_replicate',
@@ -574,6 +575,9 @@ PHASE1_PIPELINES = {
     'experiment_repliseq': [
         remove_keys('experiment_relation'),
     ],
+    'experiment_atacseq': [
+        remove_keys('experiment_relation'),
+    ],
     'publication': [
         remove_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
     ],
@@ -625,6 +629,9 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('experiment_relation'),
     ],
     'experiment_repliseq': [
+        skip_rows_missing_all_keys('experiment_relation'),
+    ],
+    'experiment_atacseq': [
         skip_rows_missing_all_keys('experiment_relation'),
     ],
     'publication': [
