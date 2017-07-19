@@ -129,6 +129,7 @@
     "notes": "sample dcic notes",
     "accession": "4DNFQ11MKX6K",
     "lab": "4dn-dcic-lab",
+    "file_size" : 2103974,
     "filename": "_13_HiC_project_object.hdf5"
 
 },{
@@ -140,6 +141,7 @@
     "notes": "sample dcic notes",
     "accession": "4DNFWHMGZVQB",
     "lab": "4dn-dcic-lab",
+    "file_size" : 210397423,
     "filename": "_6_HiCtool_observed_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
 
 },{
@@ -151,6 +153,7 @@
     "notes": "sample dcic notes",
     "accession": "4DNF1LW5YPK0",
     "lab": "4dn-dcic-lab",
+    "file_size" : 21074,
     "filename": "_5_HiCtool_observed_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
 
 },{

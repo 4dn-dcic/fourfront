@@ -2,7 +2,7 @@
 
 import _ from 'underscore';
 import url from 'url';
-
+import { atIdFromObject } from './object';
 
 let cachedSchemas = null;
 
@@ -20,6 +20,26 @@ export function set(schemas){
     return true;
 }
 
+export const itemTypeHierarchy = {
+    'Experiment': [
+        'Experiment', 'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq'
+    ],
+    'ExperimentSet': [
+        'ExperimentSet', 'ExperimentSetReplicate'
+    ],
+    'File': [
+        'File', 'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference'
+    ],
+    'FileSet': [
+        'FileSet', 'FileSetCalibration'
+    ],
+    'Individual': [
+        'Individual', 'IndividualHuman', 'IndividualMouse'
+    ],
+    'Treatment': [
+        'Treatment', 'TreatmentChemical', 'TreatmentRnai'
+    ]
+};
 
 export const Term = {
 
@@ -55,6 +75,21 @@ export const Term = {
             case 'biosample.biosource.biosource_type':
                 name = Term.capitalizeSentence(term);
                 break;
+            case 'file_size':
+                if (typeof term === 'number'){
+                    name = term;
+                } else if (!isNaN(parseInt(term))) {
+                    name = parseInt(term);
+                }
+                if (typeof name === 'number' && !isNaN(name)){
+                    name = Term.bytesToLargerUnit(name);
+                } else {
+                    name = null;
+                }
+                break;
+            case 'link_id':
+                name = term.replace(/~/g, "/");
+                break;
             default:
                 name = null;
                 break;
@@ -72,6 +107,16 @@ export const Term = {
     capitalizeSentence : function(sen) {
         if (typeof sen !== 'string') return sen;
         return sen.split(' ').map(Term.capitalize).join(' ');
+    },
+
+    byteLevels : ['Bytes', 'kB', 'MB', 'GB', 'TB', 'Petabytes', 'Exabytes'],
+
+    bytesToLargerUnit : function(bytes, level = 0){
+        if (bytes > 1024 && level < Term.byteLevels.length) {
+            return Term.bytesToLargerUnit(bytes / 1024, level + 1);
+        } else {
+            return (Math.round(bytes * 100) / 100) + ' ' + Term.byteLevels[level];
+        }
     }
 
 };
@@ -85,7 +130,9 @@ export const Field = {
         'experiments_in_set.digestion_enzyme.name' : 'Enzyme',
         'experiments_in_set.biosample.biosource_summary' : 'Biosource',
         'experiments_in_set.lab.title' : 'Lab',
-        'experimentset_type' : 'Set Type'
+        'experimentset_type' : 'Set Type',
+        'link_id' : "Link",
+        'display_title' : "Title"
     },
 
     toName : function(field, schemas, schemaOnly = false){
@@ -122,10 +169,8 @@ export const Field = {
                 }, {});
             }
 
-            if (linkToName === 'Experiment'){
-                return combineSchemaPropertiesFor(['Experiment', 'ExperimentRepliseq', 'ExperimentHiC', 'ExperimentCaptureC']);
-            } else if (linkToName === 'Individual'){
-                return combineSchemaPropertiesFor(['Individual', 'IndividualHuman', 'ExperimentHiC', 'IndividualMouse']);
+            if (typeof itemTypeHierarchy[linkToName] !== 'undefined') {
+                return combineSchemaPropertiesFor(itemTypeHierarchy[linkToName]);
             } else {
                 return schemas[linkToName].properties;
             }
@@ -139,8 +184,12 @@ export const Field = {
             //console.log(propertiesObj, fieldParts, fieldPartIndex);
             if (property.type === 'array' && property.items && property.items.linkTo){
                 nextSchemaProperties = getNextSchemaProperties(property.items.linkTo);
+            } else if (property.type === 'array' && property.items && property.items.linkFrom){
+                nextSchemaProperties = getNextSchemaProperties(property.items.linkFrom);
             } else if (property.linkTo) {
                 nextSchemaProperties = getNextSchemaProperties(property.linkTo);
+            } else if (property.linkFrom) {
+                nextSchemaProperties = getNextSchemaProperties(property.linkFrom);
             }
 
             if (nextSchemaProperties) return getProperty(nextSchemaProperties, fieldPartIndex + 1);
@@ -150,28 +199,6 @@ export const Field = {
 
     }
 
-};
-
-
-export const itemTypeHierarchy = {
-    'Experiment': [
-        'Experiment', 'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq'
-    ],
-    'ExperimentSet': [
-        'ExperimentSet', 'ExperimentSetReplicate'
-    ],
-    'File': [
-        'File', 'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference'
-    ],
-    'FileSet': [
-        'FileSet', 'FileSetCalibration'
-    ],
-    'Individual': [
-        'Individual', 'IndividualHuman', 'IndividualMouse'
-    ],
-    'Treatment': [
-        'Treatment', 'TreatmentChemical', 'TreatmentRnai'
-    ]
 };
 
 

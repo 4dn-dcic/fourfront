@@ -3,7 +3,7 @@
 import React from 'react';
 import createReactClass from 'create-react-class';
 import * as globals from './../globals';
-import { ResultTable } from './../search';
+import { ResultTableHandlersContainer } from './../browse/SearchView';
 
 
 var openLinksInNewWindow = function(e) {
@@ -26,7 +26,7 @@ var SearchBlockEdit = createReactClass({
         var styles = {maxHeight: 300, overflow: 'scroll', clear: 'both' };
         return (
             <div className="well" style={styles} onClick={openLinksInNewWindow}>
-                <ResultTable {...this.props} mode="picker" />
+                <ResultTableHandlersContainer {...this.props} mode="picker" />
             </div>
         );
     },

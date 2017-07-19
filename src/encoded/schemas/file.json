@@ -194,6 +194,9 @@
         },
         "experiments.biosample.biosource.display_title": {
             "title": "Biosource"
+        },
+        "file_size" : {
+            "title" : "File Size"
         }
     }
 }
