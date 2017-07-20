@@ -1,0 +1,27 @@
+[
+    {
+        "accession":"4DNEX067AAA1",
+        "biosample":"231111bc-8535-4448-903e-854af460b254",
+        "experiment_type": "ATAC-seq",
+        "enzyme_lot_number": "123456",
+        "enzyme_incubation_time": 30,
+        "incubation_temperature": 55,
+        "pcr_cycles": 4,
+        "library_preparation_date": "2017-07-17",
+        "primer_removal_method": "SPRI beads",
+        "notes": "sample dcic notes",
+        "lab": "test-4dn-lab",
+        "aliases": ["dcic:alias1"],
+        "files": ["4DNFI067APU1", "4DNFI067APA1"],
+        "description": "Test ATAC seq",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461224b",
+        "uuid": "66661e2f-3e43-4388-8bbb-e861f209c444",
+        "protocol": "131106bc-8535-4448-903e-854af460b244",
+        "submitted_by": "4dndcic@gmail.com",
+        "authentication_docs": ["dcic:test_auth"],
+        "biosample_quantity": 50000,
+        "biosample_quantity_units": "cells",
+        "follows_sop": "No",
+        "status": "in review by lab"
+    }
+]
