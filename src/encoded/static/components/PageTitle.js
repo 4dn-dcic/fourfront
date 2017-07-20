@@ -6,6 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import { getTitleStringFromContext, isDisplayTitleAccession } from './item-pages/item';
 import { object, Schemas, JWT } from './util';
+import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
 
 var TITLE_PATHNAME_MAP = {
@@ -57,16 +58,20 @@ export default class PageTitle extends React.Component {
         return false;
     }
 
-    static getTitleString(context, href, schemas = Schemas.get()){
+    static calculateTitles(context, href, schemas = Schemas.get(), isMounted = false){
         var currentPathName = null, currentPathRoot;
         var title;
         var atId = object.atIdFromObject(context);
+        var currentHref = isMounted ? windowHref(href) : href;
+        var currentHrefParts = url.parse(currentHref);
+
         if (typeof atId === 'string'){
             currentPathName = url.parse(atId).pathname;
         }
-        if (!currentPathName && typeof href === 'string'){
-            currentPathName = url.parse(href).pathname;
+        if (!currentPathName && typeof currentHref === 'string'){
+            currentPathName = currentHrefParts.pathname;
         }
+
         title = TITLE_PATHNAME_MAP[currentPathName] && TITLE_PATHNAME_MAP[currentPathName].title;
         if (!title) {
             
@@ -96,12 +101,29 @@ export default class PageTitle extends React.Component {
             return { 'title' : getTitleStringFromContext(context) };
         }
 
-        if (object.isAnItem(context)){
+        if (object.isAnItem(context)){ // If Item
 
-            // If Item
+            console.log('HHH',currentHrefParts.hash);
+            
+            if (currentHrefParts.hash === '#!edit'){
+                return {
+                    'title' : "Editing",
+                    'calloutTitle' : getTitleStringFromContext(context)
+                };
+            }
+
+            
             title = getTitleStringFromContext(context);
             var isItemTitleAnAccession = isDisplayTitleAccession(context, title);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
+
+            if (currentHrefParts.hash === '#!create') {
+                return {
+                    'title' : "Creating",
+                    'calloutTitle' : itemTypeTitle
+                };
+            }
+
             if (isDisplayTitleAccession(context, title)){ // Don't show Accessions as titles.
                 return { 'title' : itemTypeTitle };
                 // Re-Enable below if want Accessions as Page Subtitles.
@@ -126,8 +148,20 @@ export default class PageTitle extends React.Component {
         return style;
     }
 
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.state = {
+            'mounted' : false
+        };
+    }
+
+    componentDidMount(){
+        this.setState({ 'mounted' : true });
+    }
+
     render(){
-        var { title, subtitle, calloutTitle } = PageTitle.getTitleString(this.props.context, this.props.href);
+        var { title, subtitle, calloutTitle } = PageTitle.calculateTitles(this.props.context, this.props.href, (this.props.shemas || Schemas.get()), this.state.mounted);
 
         if (calloutTitle){
             calloutTitle = (
