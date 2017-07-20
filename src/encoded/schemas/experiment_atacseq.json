@@ -1,5 +1,5 @@
 {
-    "title": "Hi-C Experiment",
+    "title": "ATAC-seq Experiment",
     "description": "Genome-wide chromosome chromatin-accessibility experiments ATAC-seq",
     "id": "/profiles/experiment_atacseq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
