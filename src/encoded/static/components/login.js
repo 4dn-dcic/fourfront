@@ -101,25 +101,11 @@ export default class Login extends React.Component {
         }, error => {
             console.log("got an error: ", error.description);
             console.log(error);
-            navigate('/error/login-failed', { 'skipRequest' : true }, null, null, {
-                'context' : _.extend(error, {
-                    "description" : (
-                            'It appears you do not have an acccount at 4DN-DCIC. Please read about how to get an account <a href="/help/getting-started#getting-added-as-a-4dn-user-or-submitter">here</a>.'
-                    ),
-                    "code" : 403,
-                    "title" : "Login Failure"
-                })
-            });
-            /*
-            store.dispatch({
-                type: {'context' : _.extend(error, {
-                    "description" : (
-                            'It appears you do not have an acccount at 4DN-DCIC. Please read about how to get an account <a href="/help/getting-started#getting-added-as-a-4dn-user-or-submitter">here</a>.'
-                    ),
-                    "title" : "Login Failure"
-                }),'href' : '/error'}
-            });
-            */
+            var errorPageHref = '/';
+            if (error.code === 403) {
+                errorPageHref = '/error/login-failed';
+            }
+            navigate(errorPageHref);
             this.lock.hide.call(this.lock);
         });
     }
