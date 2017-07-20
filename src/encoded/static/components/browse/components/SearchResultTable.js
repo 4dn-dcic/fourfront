@@ -424,7 +424,13 @@ class ResultRow extends React.Component {
               tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href } = this.props;
         var detailOpen = this.isOpen();
         return (
-            <div className={"search-result-row " + (detailOpen ? 'open' : 'closed')} data-row-number={rowNumber}>
+            <div className={"search-result-row " + (detailOpen ? 'open' : 'closed')} data-row-number={rowNumber} /* ref={(r)=>{
+                // TODO POTENTIALLY: Use to set height on open/close icon & sticky title column.
+                var height = (r && r.offsetHeight) || null;
+                if (height && height !== this.rowFullHeight){
+                    this.rowFullHeight = height;
+                }
+            }}*/>
                 <div className="columns clearfix">
                 { columnDefinitions.map((colDef, i) =>
                     <ResultRowColumnBlock
@@ -439,6 +445,7 @@ class ResultRow extends React.Component {
                         headerColumnWidths={headerColumnWidths}
                         schemas={schemas}
                         href={href}
+                        // rowFullHeight={this.rowFullHeight}
                     />
                 ) }
                 </div>

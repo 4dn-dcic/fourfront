@@ -2,17 +2,48 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'underscore';
 import url from 'url';
 import { getTitleStringFromContext, isDisplayTitleAccession } from './item-pages/item';
-import { object, Schemas } from './util';
+import { object, Schemas, JWT } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
 
-const TITLE_PATHNAME_MAP = {
+var TITLE_PATHNAME_MAP = {
+    '/' : {
+        'title' : "Welcome"
+    },
     '/browse/' : {
         'title' : "Data Browser",
         'subtitle' : "Filter & browse experiments"
+    },
+    '/search/' : {
+        'title' : 'Search',
+        'calloutTitle' : function(pathName, context){
+            var thisType = _.pluck(_.filter(context.filters || [], function(o){
+                if (o.field === 'type' && o.term !== 'Item') return true;
+                return false;
+            }), 'term')[0] || null;
+            if (thisType){
+                var thisTypeTitle = Schemas.getTitleForType(thisType);
+                return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>for</small> { thisTypeTitle }</span>: 'Search';
+                //return thisTypeTitle || null;
+            }
+        }
+    },
+    '/users/\*' : {
+        'title' : function(pathName, context){
+            var myDetails = JWT.getUserDetails();
+            var myEmail = myDetails && myDetails.email;
+            if (myEmail && context && context.email && myEmail === context.email){
+                return "My Profile";
+            }
+            return getTitleStringFromContext(context);
+        }
     }
 };
+
+// Duplicates
+TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP['/'];
 
 export default class PageTitle extends React.Component {
 
@@ -27,7 +58,7 @@ export default class PageTitle extends React.Component {
     }
 
     static getTitleString(context, href, schemas = Schemas.get()){
-        var currentPathName = null;
+        var currentPathName = null, currentPathRoot;
         var title;
         var atId = object.atIdFromObject(context);
         if (typeof atId === 'string'){
@@ -37,8 +68,28 @@ export default class PageTitle extends React.Component {
             currentPathName = url.parse(href).pathname;
         }
         title = TITLE_PATHNAME_MAP[currentPathName] && TITLE_PATHNAME_MAP[currentPathName].title;
+        if (!title) {
+            
+            var pathRoot = currentPathName.split('/')[1] || null;
+            console.log(TITLE_PATHNAME_MAP, pathRoot);
+            if (typeof pathRoot === 'string' && pathRoot.length > 0){
+                currentPathName = '/' + pathRoot + '/*';
+                title = TITLE_PATHNAME_MAP[currentPathName] && TITLE_PATHNAME_MAP[currentPathName].title;
+            }
+        }
+
+        function getProp(prop){
+            if (typeof prop === 'string') return prop;
+            if (typeof prop === 'function') return prop(currentPathName, context, href);
+            return prop;
+        }
+
         if (title){
-            return { 'title' : title, 'subtitle' : TITLE_PATHNAME_MAP[currentPathName].subtitle, 'calloutTitle' : TITLE_PATHNAME_MAP[currentPathName].calloutTitle };
+            return {
+                'title' : getProp(title),
+                'subtitle' : getProp(TITLE_PATHNAME_MAP[currentPathName].subtitle),
+                'calloutTitle' : getProp(TITLE_PATHNAME_MAP[currentPathName].calloutTitle)
+            };
         }
 
         if (PageTitle.isStaticPage(context)){

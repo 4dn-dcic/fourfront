@@ -2,6 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'underscore';
 import * as store from '../store';
 import { JWT, ajax, navigate, isServerSide } from './util';
 import { MenuItem } from 'react-bootstrap';
@@ -100,10 +101,26 @@ export default class Login extends React.Component {
         }, error => {
             console.log("got an error: ", error.description);
             console.log(error);
-            store.dispatch({
-                type: {'context':error}
+            navigate('/error/login-failed', { 'skipRequest' : true }, null, null, {
+                'context' : _.extend(error, {
+                    "description" : (
+                            'It appears you do not have an acccount at 4DN-DCIC. Please read about how to get an account <a href="/help/getting-started#getting-added-as-a-4dn-user-or-submitter">here</a>.'
+                    ),
+                    "code" : 403,
+                    "title" : "Login Failure"
+                })
             });
-            this.lock.hide.bind(this.lock);
+            /*
+            store.dispatch({
+                type: {'context' : _.extend(error, {
+                    "description" : (
+                            'It appears you do not have an acccount at 4DN-DCIC. Please read about how to get an account <a href="/help/getting-started#getting-added-as-a-4dn-user-or-submitter">here</a>.'
+                    ),
+                    "title" : "Login Failure"
+                }),'href' : '/error'}
+            });
+            */
+            this.lock.hide.call(this.lock);
         });
     }
 
