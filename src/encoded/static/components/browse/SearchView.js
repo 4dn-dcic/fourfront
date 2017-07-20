@@ -262,7 +262,7 @@ class ControlsAndResults extends React.Component {
                             e.preventDefault();
                             this.props.selectCallback(object.atIdFromObject(result));
                         }}>
-                            <button className="select-button" onClick={props.toggleDetailOpen}>
+                            <button className="select-button btn-primary" onClick={props.toggleDetailOpen}>
                                 <i className="icon icon-fw icon-check"/>
                             </button>
                         </div>
