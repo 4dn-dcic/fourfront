@@ -824,7 +824,6 @@ class ShadowBorderLayer extends React.Component {
     render(){
         if (this.props.fullRowWidth <= this.props.tableContainerWidth) return null;
         var edges = this.edgeHiddenContentWidths();
-        console.log(edges);
         return (
             <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass(edges) + this.tallDimensionClass()}>
                 { this.edgeScrollButtonLeft(edges.left) }{ this.edgeScrollButtonRight(edges.right) }
