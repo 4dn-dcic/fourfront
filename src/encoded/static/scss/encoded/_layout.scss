@@ -33,13 +33,12 @@
 .static-page {
 	width: 75%;
 	margin: 0;
+	margin-top: 30px;
 	&.row {
 		width: auto;
-		> div > .page-title + .help-entry:first-of-type {
-			margin-top: 35px;
-		}
 		> div > .help-entry:first-child {
 			margin-top: 5px;
+			> .fourDN-content:first-child  > div:first-child > h2:first-child { margin-top: 20px; }
 		}
 	}
 
