@@ -436,7 +436,7 @@ class SubItemTable extends React.Component {
                                                         className={"inline-block child-column-" + colKey + '.' + k}
                                                         style={{ width : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[k] || null) }}
                                                     >
-                                                        { Schemas.Term.toName(k, embeddedRow[k]) } &nbsp;
+                                                        { Schemas.Term.toName(k, embeddedRow[k]) }
                                                     </div>
                                                 );
                                             }) }
@@ -498,11 +498,13 @@ class SubItemTable extends React.Component {
                                     null
                                 );
 
+                                var hasChildren = Array.isArray(colKeyContainer.childKeys) && colKeyContainer.childKeys.length > 0;
+
                                 return (
-                                    <th key={"header-for-" + colKey}>
+                                    <th key={"header-for-" + colKey} className={hasChildren ? 'has-children' : null}>
                                         <TooltipInfoIconContainer title={title} tooltip={tooltip}/>
                                         { 
-                                            Array.isArray(colKeyContainer.childKeys) && colKeyContainer.childKeys.length > 0 ? (()=>{
+                                            hasChildren ? (()=>{
                                                 //var subKeyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
                                                 //var subKeyTitleDescriptionMap = keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey] || {};
                                                 var subKeyTitleDescriptionMap = (( (keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey]) || {}).items || {}).properties || {};
