@@ -120,7 +120,7 @@ class SubItemListView extends React.Component {
         var schemas = this.props.schemas;
         var item = this.props.content;
         var popLink = this.props.popLink;
-        var keyTitleDescriptionMap = this.props.keyTitleDescriptionMap || {};
+        var columnDefinitions = this.props.columnDefinitions || {};
         var props = {
             'context' : item,
             'schemas' : schemas,
@@ -128,23 +128,13 @@ class SubItemListView extends React.Component {
             'alwaysCollapsibleKeys' : [],
             'excludedKeys' : (this.props.excludedKeys || _.without(Detail.defaultProps.excludedKeys,
                 // Remove
-                    'audit', 'lab', 'award', 'description'
+                    'audit', 'lab', 'award', 'description', 'link_id'
                 ).concat([
                 // Add
                     'schema_version', 'uuid'
                 ])
             ),
-            'keyTitleDescriptionMap' : _.extend({}, keyTitleDescriptionMap, {
-                // Extend schema properties
-                '@id' : {
-                    'title' : 'Link',
-                    'description' : 'Link to Item'
-                },
-                'link_id' : {
-                    'title' : 'Link',
-                    'description' : 'Link to Item'
-                }
-            }),
+            'columnDefinitions' : columnDefinitions,
             'showJSONButton' : false
         };
         return (
@@ -291,7 +281,6 @@ class SubItemTable extends React.Component {
     }
 
     getColumnKeys(){
-        var firstRowItem = this.props.items[0];
         var objectWithAllItemKeys = _.reduce(this.props.items, function(m, v){
             return _.extend(m, v);
         }, {});
@@ -306,9 +295,9 @@ class SubItemTable extends React.Component {
         var columnKeys = [];
 
         // Use schema columns
-        if (typeof firstRowItem.display_title === 'string' && Array.isArray(firstRowItem['@type'])){
+        if (typeof objectWithAllItemKeys.display_title === 'string' && Array.isArray(objectWithAllItemKeys['@type'])){
 
-            var columnKeysFromSchema = _.keys(Schemas.getSchemaForItemType(Schemas.getItemType(firstRowItem)).columns);
+            var columnKeysFromSchema = _.keys(Schemas.getSchemaForItemType(Schemas.getItemType(objectWithAllItemKeys)).columns);
 
             columnKeys = rootKeys.filter(function(k){
                 if (k === 'display_title' || k === 'link_id' || k === 'accession') return true;
@@ -321,8 +310,8 @@ class SubItemTable extends React.Component {
         } else {
             // Gather, flatten up from Object.
             for (var i = 0; i < rootKeys.length; i++){
-                if (typeof firstRowItem[rootKeys[i]] === 'string' || typeof firstRowItem[rootKeys[i]] === 'number' || Array.isArray(firstRowItem[rootKeys[i]])) {
-                    if (  Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]][0] && typeof firstRowItem[rootKeys[i]][0] === 'object' && typeof firstRowItem[rootKeys[i]][0].display_title !== 'string' ) {
+                if (typeof objectWithAllItemKeys[rootKeys[i]] === 'string' || typeof objectWithAllItemKeys[rootKeys[i]] === 'number' || Array.isArray(objectWithAllItemKeys[rootKeys[i]])) {
+                    if (  Array.isArray(objectWithAllItemKeys[rootKeys[i]]) && objectWithAllItemKeys[rootKeys[i]][0] && typeof objectWithAllItemKeys[rootKeys[i]][0] === 'object' && typeof objectWithAllItemKeys[rootKeys[i]][0].display_title !== 'string' ) {
                         columnKeys.push({
                             'key' : rootKeys[i],
                             'childKeys' : _.keys(
@@ -339,13 +328,13 @@ class SubItemTable extends React.Component {
                     } else {
                         columnKeys.push({ 'key' : rootKeys[i] });
                     }
-                } else if (firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object'){
-                    var itemAtID = typeof firstRowItem[rootKeys[i]].display_title === 'string' && object.atIdFromObject(firstRowItem[rootKeys[i]]);
+                } else if (objectWithAllItemKeys[rootKeys[i]] && typeof objectWithAllItemKeys[rootKeys[i]] === 'object'){
+                    var itemAtID = typeof objectWithAllItemKeys[rootKeys[i]].display_title === 'string' && object.atIdFromObject(objectWithAllItemKeys[rootKeys[i]]);
                     if (itemAtID) {
                         columnKeys.push({ 'key' : rootKeys[i] }); // Keep single key if is an Item, we'll make it into a link.
                     } else { // Flatten up, otherwise.
                         columnKeys = columnKeys.concat(
-                            _.keys(firstRowItem[rootKeys[i]]).map(function(embeddedKey){
+                            _.keys(objectWithAllItemKeys[rootKeys[i]]).map(function(embeddedKey){
                                 return { 'key' : rootKeys[i] + '.' + embeddedKey };
                             })
                         );
@@ -355,7 +344,17 @@ class SubItemTable extends React.Component {
 
         }
 
-        return columnKeys.sort(function(a,b){
+        return columnKeys.filter((k)=>{
+            if (this.props.columnDefinitions){
+                if (this.props.columnDefinitions[k.key]){
+                    if (typeof this.props.columnDefinitions[k.key].hide === 'boolean' && this.props.columnDefinitions[k.key].hide) return false;
+                    if (typeof this.props.columnDefinitions[k.key].hide === 'function'){
+                        return !(this.props.columnDefinitions[k.key].hide(objectWithAllItemKeys));
+                    }
+                }
+            }
+            return true;
+        }).sort(function(a,b){
             if (['title', 'display_title', 'accession'].indexOf(a.key) > -1) return -5;
             if (['title', 'display_title', 'accession'].indexOf(b.key) > -1) return 5;
             if (['name', 'workflow_argument_name'].indexOf(a.key) > -1) return -4;
@@ -376,8 +375,8 @@ class SubItemTable extends React.Component {
     render(){
         var columnKeys = this.getColumnKeys();
 
+        // If is an Item, grab properties for it.
         var tipsFromSchema = null;
-
         if (this.props.items[0] && this.props.items[0].display_title){
             tipsFromSchema = object.tipsFromSchema(Schemas.get(), this.props.items[0]);
             columnKeys = columnKeys.filter(function(k){
@@ -408,11 +407,19 @@ class SubItemTable extends React.Component {
 
         var rowData = _.map(
             this.props.items,
-            function(item){
-                return _.map(columnKeys, function(colKeyContainer){
+            (item)=>{
+                return _.map(columnKeys, (colKeyContainer, colKeyIndex)=>{
                     var colKey = colKeyContainer.key;
                     var value = object.getNestedProperty(item, colKey);
                     if (!value) return { 'value' : '-', 'key' : colKey };
+                    if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey] !== 'undefined'){
+                        if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey].render === 'function'){
+                            return {
+                                'value' : this.props.columnDefinitions[this.props.parentKey + '.' + colKey].render(value, item, colKeyIndex, this.props.items),
+                                'colKey' : colKey
+                            };
+                        }
+                    }
                     if (Array.isArray(value)){
                         if (typeof value[0] === 'string') return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
                         if (value[0] && typeof value[0] === 'object' && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
@@ -452,18 +459,19 @@ class SubItemTable extends React.Component {
             }
         );
 
+        // Get property of parent key which has items.properties : { ..these_keys.. }
         var parentKeySchemaProperty = Schemas.Field.getSchemaProperty(
             this.props.parentKey, Schemas.get(), this.props.atType
         );
 
         var keyTitleDescriptionMap = _.extend(
             {},
-            ((((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {}),
-            tipsFromSchema || parentKeySchemaProperty,
-            { 'link_id' : { 'title' : "Link", 'description' : "Link to Item" } } // Overwrite link_id from schemas
+            // We have list of sub-embedded Items or sub-embedded objects which have separate 'get properties from schema' funcs (== tipsFromSchema || parentKeySchemaProperty).
+            Schemas.flattenSchemaPropertyToColumnDefinition(tipsFromSchema || parentKeySchemaProperty),
+            this.props.columnDefinitions
         );
 
-        //console.log(this.props.parentKey, keyTitleDescriptionMap, tipsFromSchema, parentKeySchemaProperty);
+        console.log(keyTitleDescriptionMap);
 
         var subListKeyRefs = this.subListKeyRefs = {};
 
@@ -472,28 +480,44 @@ class SubItemTable extends React.Component {
                 <table className="detail-embedded-table">
                     <thead>
                         <tr>{
-                            [<th key="rowNumber" style={{ minWidth: 36, maxWidth : 36, width: 36 }}>#</th>].concat(columnKeys.map(function(colKeyContainer, colIndex){
+                            [<th key="rowNumber" style={{ minWidth: 36, maxWidth : 36, width: 36 }}>#</th>].concat(columnKeys.map((colKeyContainer, colIndex)=>{
                                 //var tips = object.tipsFromSchema(Schemas.get(), context) || {};
                                 var colKey = colKeyContainer.key;
-                                var title = keyTitleDescriptionMap[colKey] ? (keyTitleDescriptionMap[colKey].title || colKey) : colKey;
-                                var tooltip = keyTitleDescriptionMap[colKey] ? (keyTitleDescriptionMap[colKey].description || null) : null;
+
+                                //console.log(this.props.parentKey + '.' + colKey, keyTitleDescriptionMap[this.props.parentKey + '.' + colKey]);
+
+                                var title = (
+                                    (keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] && keyTitleDescriptionMap[this.props.parentKey + '.' + colKey].title) ||
+                                    (keyTitleDescriptionMap[colKey] && keyTitleDescriptionMap[colKey].title) ||
+                                    colKey
+                                );
+
+                                var tooltip = (
+                                    (keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] && keyTitleDescriptionMap[this.props.parentKey + '.' + colKey].description) ||
+                                    (keyTitleDescriptionMap[colKey] && keyTitleDescriptionMap[colKey].description) ||
+                                    null
+                                );
+
                                 return (
                                     <th key={"header-for-" + colKey}>
                                         <TooltipInfoIconContainer title={title} tooltip={tooltip}/>
                                         { 
-                                            Array.isArray(colKeyContainer.childKeys) && colKeyContainer.childKeys.length > 0 ? (function(){
+                                            Array.isArray(colKeyContainer.childKeys) && colKeyContainer.childKeys.length > 0 ? (()=>{
                                                 //var subKeyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
-                                                var subKeyTitleDescriptionMap = (((keyTitleDescriptionMap || {})[colKey] || {}).items || {}).properties || {};
+                                                //var subKeyTitleDescriptionMap = keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey] || {};
+                                                var subKeyTitleDescriptionMap = (( (keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey]) || {}).items || {}).properties || {};
                                                 subListKeyRefs[colKey] = {};
                                                 return (
                                                     <div style={{ whiteSpace: "nowrap" }} className="sub-list-keys-header">{
-                                                        [<div key="sub-header-rowNumber" className="inline-block child-list-row-number">&nbsp;</div>].concat(colKeyContainer.childKeys.map(function(ck){
-                                                            
+                                                        [<div key="sub-header-rowNumber" className="inline-block child-list-row-number">&nbsp;</div>].concat(colKeyContainer.childKeys.map((ck)=>{
                                                             return (
                                                                 <div key={"sub-header-for-" + colKey + '.' + ck} className="inline-block" data-key={colKey + '.' + ck} ref={function(r){
                                                                     if (r) subListKeyRefs[colKey][ck] = r;
                                                                 }} style={{ 'width' : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[ck] || null) }}>
-                                                                    <TooltipInfoIconContainer title={(subKeyTitleDescriptionMap[ck] || {}).title || ck} tooltip={(subKeyTitleDescriptionMap[ck] || {}).description || null} />
+                                                                    <TooltipInfoIconContainer
+                                                                        title={(keyTitleDescriptionMap[this.props.parentKey + '.' + colKey + '.' + ck] || subKeyTitleDescriptionMap[ck] || {}).title || ck}
+                                                                        tooltip={(keyTitleDescriptionMap[this.props.parentKey + '.' + colKey + '.' + ck] || subKeyTitleDescriptionMap[ck] || {}).description || null}
+                                                                    />
                                                                 </div>
                                                             );
                                                         }))
@@ -563,7 +587,7 @@ class DetailRow extends React.Component {
             this.props.popLink,
             this.props['data-key'],
             this.props.itemType,
-            this.props.keyTitleDescriptionMap
+            this.props.columnDefinitions
         );
         var label = this.props.label;
         if (this.props.labelNumber) {
@@ -586,7 +610,7 @@ class DetailRow extends React.Component {
                         popLink={this.props.popLink}
                         content={this.props.item}
                         schemas={this.props.schemas}
-                        keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                        columnDefinitions={this.props.columnDefinitions}
                         isOpen={this.state.isOpen}
                     />
                 </div>
@@ -663,7 +687,7 @@ export class Detail extends React.Component {
     * @param {Object} schemas - Object containing schemas for server's JSONized object output.
     * @param {Object|Array|string} item - Item(s) to render recursively.
     */
-    static formValue(item, popLink = false, keyPrefix = '', atType = 'ExperimentSet', keyTitleDescriptionMap, depth = 0) {
+    static formValue(item, popLink = false, keyPrefix = '', atType = 'ExperimentSet', columnDefinitions, depth = 0) {
         var schemas = Schemas.get();
         if (item === null){
             return <span>No Value</span>;
@@ -676,7 +700,7 @@ export class Detail extends React.Component {
             }
 
             if (SubItemTable.shouldUseTable(item)) {
-                return <SubItemTable items={item} popLink={popLink} keyTitleDescriptionMap={keyTitleDescriptionMap} parentKey={keyPrefix} atType={atType} />;
+                return <SubItemTable items={item} popLink={popLink} columnDefinitions={columnDefinitions} parentKey={keyPrefix} atType={atType} />;
             }
 
             return (
@@ -684,7 +708,7 @@ export class Detail extends React.Component {
                     {   item.length === 0 ? <li><em>None</em></li>
                         :
                         item.map(function(it, i){
-                            return <li key={i}>{ Detail.formValue(it, popLink, keyPrefix, atType, keyTitleDescriptionMap, depth + 1) }</li>;
+                            return <li key={i}>{ Detail.formValue(it, popLink, keyPrefix, atType, columnDefinitions, depth + 1) }</li>;
                         })
                     }
                 </ol>
@@ -717,7 +741,7 @@ export class Detail extends React.Component {
                         key={title}
                         title={title}
                         popLink={popLink}
-                        keyTitleDescriptionMap={keyTitleDescriptionMap}
+                        columnDefinitions={columnDefinitions}
                     />
                 );
             }
@@ -789,11 +813,55 @@ export class Detail extends React.Component {
 
     static propTypes = {
         'context' : PropTypes.object.isRequired,
-        'keyTitleDescriptionMap' : PropTypes.object
+        'columnDefinitions' : PropTypes.object
+    }
+
+    static defaultColumnDefinitions = {
+        '@id' : {
+            'title' : 'Link',
+            'description' : 'Link to Item'
+        },
+        'link_id' : {
+            'title' : 'Link',
+            'description' : 'Link to Item',
+        },
+        'subscriptions.url' : {
+            'render' : function(value){
+                var fullUrl = '/search/' + value;
+                return <a href={fullUrl}>View Results</a>;
+            },
+            'title' : "Link",
+            'description' : "Link to results matching subscription query."
+        },
+        'subscriptions.title' : {
+            'title' : "Subscription",
+            'description' : "Title of Subscription"
+        },
+        'experiment_sets.experimentset_type' : {
+            'title' : "Type",
+            'description' : "Experiment Set Type"
+        },
+        'display_title' : {
+            'title' : "Title",
+            'description' : "Title of Item",
+            'hide' : function(valueProbe){
+                if (valueProbe.accession && valueProbe.accession === valueProbe.display_title) return true;
+                return false;
+            }
+        },
+        'email' : {
+            'title' : "E-Mail",
+            'render' : function(value){
+                console.log(value);
+                if (typeof value === 'string' && value.indexOf('@') > -1) {
+                    return <a href={'mailto:' + value}>{ value }</a>;
+                }
+                return value;
+            }
+        }
     }
 
     static defaultProps = {
-        'keyTitleDescriptionMap' : null,
         'excludedKeys' : [
             '@context', 'actions', 'audit',
             // Visible elsewhere on page
@@ -801,6 +869,7 @@ export class Detail extends React.Component {
             '@id', 'link_id', 'display_title'
         ],
         'stickyKeys' : [
+            'display_title', 'title',
             // Experiment Set
             'experimentset_type', 'date_released',
             // Experiment
@@ -816,11 +885,12 @@ export class Detail extends React.Component {
             // Lab
             'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',
             // Award
-            'end_date', 'project', 'uri',
+            'end_date', 'project', 'uri', 'ID',
             // Document
             'attachment',
             // Things to go at bottom consistently
             'aliases',
+            'link_id', // In case is not excluded, should probably be near top (transformed to clickable link)
         ],
         'alwaysCollapsibleKeys' : [
             '@type', 'accession', 'schema_version', 'uuid', 'replicate_exps', 'dbxrefs', 'status', 'external_references', 'date_created'
@@ -832,22 +902,9 @@ export class Detail extends React.Component {
         var context = this.props.context;
         var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
         var schemas = this.props.schemas || Schemas.get();
-        var tips = schemas ? object.tipsFromSchema(schemas, context) : {};
-        if (typeof this.props.keyTitleDescriptionMap === 'object' && this.props.keyTitleDescriptionMap){
-            _.extend(tips, this.props.keyTitleDescriptionMap);
-        }
 
-        _.extend(tips, {
-            // Extend schema properties
-            '@id' : {
-                'title' : 'Link',
-                'description' : 'Link to Item'
-            },
-            'link_id' : {
-                'title' : 'Link',
-                'description' : 'Link to Item'
-            }
-        });
+        var colDefsFromSchema = Schemas.flattenSchemaPropertyToColumnDefinition(schemas ? object.tipsFromSchema(schemas, context) : {});
+        var columnDefinitions = _.extend(colDefsFromSchema, this.props.columnDefinitions || Detail.defaultColumnDefinitions || {});
 
         // Sort applicable persistent keys by original persistent keys sort order.
         var stickyKeysObj = _.object(
@@ -867,7 +924,7 @@ export class Detail extends React.Component {
         return (
             <PartialList
                 persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
-                    <DetailRow key={key} label={Detail.formKey(tips,key)} item={context[key]} popLink={popLink} data-key={key} itemType={context['@type'] && context['@type'][0]} keyTitleDescriptionMap={tips}/>
+                    <DetailRow key={key} label={Detail.formKey(columnDefinitions,key)} item={context[key]} popLink={popLink} data-key={key} itemType={context['@type'] && context['@type'][0]} columnDefinitions={columnDefinitions}/>
                     /*
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
                         { Detail.formValue(
@@ -875,19 +932,19 @@ export class Detail extends React.Component {
                             popLink,
                             key,
                             context['@type'] && context['@type'][0],
-                            tips
+                            columnDefinitions
                         ) }
                     </PartialList.Row>
                     */
                 )}
                 collapsible={ collapsibleKeys.map((key,i) =>
-                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
+                    <PartialList.Row key={key} label={Detail.formKey(columnDefinitions,key)}>
                         { Detail.formValue(
                             context[key],
                             popLink,
                             key,
                             context['@type'] && context['@type'][0],
-                            tips
+                            columnDefinitions
                         ) }
                     </PartialList.Row>
                 )}
@@ -927,7 +984,8 @@ export class ItemDetailList extends React.Component {
     }
 
     static defaultProps = {
-        'showJSONButton' : true
+        'showJSONButton' : true,
+        'columnDefinitions' : Detail.defaultColumnDefinitions
     }
 
     constructor(props){
@@ -995,6 +1053,9 @@ export class ItemDetailList extends React.Component {
         var collapsed;
         if (typeof this.props.collapsed === 'boolean') collapsed = this.props.collapsed;
         else collapsed = this.state.collapsed;
+
+        var columnDefinitions = _.extend({}, this.props.keyTitleDescriptionMap || {}, this.props.columnDefinitions || {});
+
         return (
             <div className="item-page-detail" style={typeof this.props.minHeight === 'number' ? { minHeight : this.props.minHeight } : null}>
                 { !this.state.showingJSON ?
@@ -1003,7 +1064,7 @@ export class ItemDetailList extends React.Component {
                             context={this.props.context}
                             schemas={this.props.schemas}
                             open={!collapsed}
-                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                            columnDefinitions={columnDefinitions}
                             excludedKeys={this.props.excludedKeys || Detail.defaultProps.excludedKeys}
                             stickyKeys={this.props.stickyKeys || Detail.defaultProps.stickyKeys}
                         />
