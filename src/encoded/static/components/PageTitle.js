@@ -165,7 +165,7 @@ export default class PageTitle extends React.Component {
 
         if (calloutTitle){
             calloutTitle = (
-                <span className="subtitle prominent" style={{ marginLeft : !this.props.showType ? 0 : null }}>
+                <span className="subtitle prominent">
                     { calloutTitle }
                 </span>
             );
@@ -181,7 +181,7 @@ export default class PageTitle extends React.Component {
 
         return ((title || subtitle) && (
             <h1 className="page-title top-of-page" style={PageTitle.getStyles(this.props.context, this.props.href)}>
-                { title } { calloutTitle } { subtitle }
+                { title }{ calloutTitle }{ subtitle }
             </h1>
         )) || <br/>;
     }
