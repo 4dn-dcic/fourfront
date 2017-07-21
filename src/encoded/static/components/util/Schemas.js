@@ -202,6 +202,45 @@ export const Field = {
 
 };
 
+/**
+ * Converts a nested object from this form: "key" : { ..., "items" : { ..., "properties" : { "property" : { ...details... } } } }
+ * To this form: "key" : { ... }, "key.property" : { ...details... }, ...
+ * 
+ * @param {Object} tips - Schema property object with a potentially nested 'items'->'properties' value(s).
+ * @returns {Object} Object with period-delimited keys instead of nested value to represent nested schema structure.
+ */
+export function flattenSchemaPropertyToColumnDefinition(tips, depth = 0){
+    var flattened = (
+        _.pairs(tips).filter(function(p){
+            if (p[1] && ((p[1].items && p[1].items.properties) || (p[1].properties))) return true;
+            return false;
+        }).reduce(function(m, p){
+            _.keys((p[1].items || p[1]).properties).forEach(function(childProperty){
+                if (typeof m[p[0] + '.' + childProperty] === 'undefined') {
+                    m[p[0] + '.' + childProperty] = (p[1].items || p[1]).properties[childProperty];
+                    m[p[0]] = _.omit(m[p[0]], 'items', 'properties');
+                }
+                if (!m[p[0] + '.' + childProperty].title && m[p[0] + '.' + childProperty].linkTo){ // If no Title, but yes linkTo, set Title to be Title of linkTo's Schema.
+                    m[p[0] + '.' + childProperty].title = getTitleForType(m[p[0] + '.' + childProperty].linkTo);
+                }
+                //if ( m[p[0] + '.' + childProperty].items && m[p[0] + '.' + childProperty].items.properties )
+            });
+            return m;
+        }, _.clone(tips))
+    );
+
+    // Recurse the result.
+    if ( // Any more nested levels?
+        depth < 4 &&
+        _.find(_.pairs(flattened), function(p){
+            if (p[1] && ((p[1].items && p[1].items.properties) || (p[1].properties))) return true;
+            return false;
+        })
+    ) flattened = flattenSchemaPropertyToColumnDefinition(flattened, depth + 1);
+
+    return flattened;
+}
+
 
 export function getAbstractTypeForType(type){
     var possibleParentTypes = _.keys(itemTypeHierarchy);
