@@ -160,7 +160,7 @@ def test_listening(testapp, listening_conn):
 def item_uuid(testapp, award, experiment, lab):
     # this is a processed file
     item = {
-        'accession': '4DNFI067APU2',
+        'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'pairs',
@@ -169,36 +169,62 @@ def item_uuid(testapp, award, experiment, lab):
         'status': 'uploading',
     }
     res = testapp.post_json('/file_processed', item)
-    return res.json['@graph'][0]['uuid']
+    return res.json['@graph'][0]['accession']
 
 
-def verify_item(item_data, item_type, testapp, registry):
+def verify_item(item_uuid, indexer_testapp, testapp, registry):
+
+    # get from elasticsearch
+    import pdb; pdb.set_trace()
+    es_item = testapp.get("/" + item_uuid + "/").follow(status=200).json
+    item_type = es_item['@type'][0]
+    ensure_basic_data(es_item, item_type)
+
+    # get by accession
+    accession = es_item.get('accession')
+    if accession: # some items don't have acessions
+        item_by_accession = indexer_testapp.get("/" + accession).follow(status=200).json
+        ensure_basic_data(item_by_accession, item_type)
+
+    # get from database
+    db_item = indexer_testapp.get("/" + item_uuid + "/?datastore=database").follow(status=200).json
+    ensure_basic_data(db_item, item_type)
+
+    # is this something we actually know about?
+    profile = indexer_testapp.get("/profiles/" + item_type + ".json").json
+    assert(profile)
+    item_type_camel = profile['id'].strip('.json').split('/')[-1]
+
+    # test schema
+    from encoded.tests.test_schemas import master_mixins, test_load_schema
+    test_load_schema(item_type_camel + ".json", master_mixins(), registry)
+
+    # get the embedds 
+    pyr_item_type = registry[TYPES].by_item_type[item_type_camel]
+    embeds = pyr_item_type.embedded
+
+    assert embeds == pyr_item_type.factory.embedded
+    got_embeds = indexer_testapp.get(item_data['@id'] + "@@embedded").json
+    assert(got_embeds)
+
+    # call carls embed tester
+
+    # test indexing this bad by
+    res = indexer_testapp.get("/" + item_uuid + "/@@index-data")
+    import pdb; pdb.set_trace
+    assert(res)
+
+
+def ensure_basic_data(item_data, item_type=None):
     # ensure we have basic identifing properties
+    assert item_data
+    if not item_type:
+        item_type = item_data['@type'][0]
     assert item_data['uuid']
     assert item_data['@id']
     assert item_type in item_data['@type']
 
-    # is this something we actually know about? 
-    profile = testapp.get("/profiles/" + item_type + ".json").json
-    assert(profile)
-
-    # get the type from the app
-    pyr_item_type = registry[TYPES].by_item_type[item_type]
-    pyr_item_coll = registry[COLLECTIONS][item_type]
-
-
-
-    import pdb; pdb.set_trace()
-
 
 def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
     # Todo, input a list of accessions / uuids:
-    # get from database
-    es_item = indexer_testapp.get("/" + item_uuid).follow(status=200).json
-    assert(es_item)
-    verify_item(es_item, es_item['@type'][0], testapp, registry)
-    
-    # get from database
-    db_item = testapp.get("/" + item_uuid + "/?datastore=database").follow(status=200).json
-    assert(db_item)
-
+    verify_item(item_uuid, indexer_testapp, testapp, registry)
