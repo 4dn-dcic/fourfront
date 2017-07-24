@@ -165,32 +165,50 @@ class SubItemTable extends React.Component {
     static shouldUseTable(list){
         if (!Array.isArray(list)) return false;
         if (list.length < 1) return false;
+
         var firstRowItem = list[0];
 
         if (!firstRowItem) return false;
         if (typeof firstRowItem === 'string') return false;
         if (typeof firstRowItem === 'number') return false;
 
+        var objectWithAllItemKeys = _.reduce(list, function(m, v){
+            var v2 = _.clone(v);
+            var valKeys = _.keys(v2);
+            // Exclude empty arrays from copied-from object, add them into memo property instead of overwrite.
+            for (var i = 0; i < valKeys.length; i++){
+                if (Array.isArray(v2[valKeys[i]])){
+                    m[valKeys[i]] = (m[valKeys[i]] || []).concat(v2[valKeys[i]]);
+                    delete v2[valKeys[i]];
+                } else if (v2[valKeys[i]] && typeof v2[valKeys[i]] === 'object'){
+                    m[valKeys[i]] = _.extend(m[valKeys[i]] || {}, v2[valKeys[i]]);
+                    delete v2[valKeys[i]];
+                }
+            }
+            return _.extend(m, v2);
+        }, {});
+
         var schemaForType;
 
-        if (typeof firstRowItem.display_title === 'string'){
-            if (!Array.isArray(firstRowItem['@type'])){
+        if (object.isAnItem(objectWithAllItemKeys)){
+            if (!Array.isArray(objectWithAllItemKeys['@type'])){
                 return false; // No @type so we can't get 'columns' from schemas.
             } else {
-                schemaForType = Schemas.getSchemaForItemType(firstRowItem['@type'][0]);
+                schemaForType = Schemas.getSchemaForItemType(objectWithAllItemKeys['@type'][0]);
                 if (!schemaForType || !schemaForType.columns) return false; // No columns on this Item type's schema. Skip.
             }
         }
 
-        var rootKeys = _.keys(firstRowItem);
+        var rootKeys = _.keys(objectWithAllItemKeys);
         var embeddedKeys, i, j, k, embeddedListItem, embeddedListItemKeys;
         
 
         for (i = 0; i < rootKeys.length; i++){
 
-            if (Array.isArray(firstRowItem[rootKeys[i]])) {
-                var listObjects = _.filter(firstRowItem[rootKeys[i]], function(v){
-                    if (v && typeof v === 'object') return true;
+            if (Array.isArray(objectWithAllItemKeys[rootKeys[i]])) {
+
+                var listObjects = _.filter(objectWithAllItemKeys[rootKeys[i]], function(v){
+                    if (!v || (v && typeof v === 'object')) return true;
                     return false;
                 });
                 if (listObjects.length === 0) continue; // List of strings or values only. Continue.
@@ -198,7 +216,6 @@ class SubItemTable extends React.Component {
                 if (listNotItems.length === 0) continue; // List of Items that can be rendered as links. Continue.
 
                 // Else, we have list of Objects. Assert that each sub-object has only strings, numbers, or Item (object with link), or list of such -- no other sub-objects. 
-
                 for (k = 0; k < listNotItems.length; k++){
                     embeddedListItem = listNotItems[k];
                     embeddedListItemKeys = _.keys(embeddedListItem);
@@ -207,58 +224,56 @@ class SubItemTable extends React.Component {
                         if (typeof embeddedListItem[embeddedListItemKeys[j]] === 'string' || typeof embeddedListItem[embeddedListItemKeys[j]] === 'number'){
                             continue;
                         }
-                        if (object.isAnItem(embeddedListItem[embeddedListItemKeys[j]])) continue;
-                        if (embeddedListItem[embeddedListItemKeys[j]] && typeof embeddedListItem[embeddedListItemKeys[j]] === 'object'){
-                            return false;
+                        if (object.isAnItem(embeddedListItem[embeddedListItemKeys[j]])){
+                            continue;
                         }
                         if (
                             Array.isArray(embeddedListItem[embeddedListItemKeys[j]]) &&
                             _.filter(embeddedListItem[embeddedListItemKeys[j]], function(v){
-                                if (typeof v === 'string' || typeof v === 'number' || (v && object.isAnItem(v))) return false;
+                                if (typeof v === 'string' || typeof v === 'number') return false;
                                 return true;
-                            }).length !== 0
+                            }).length === 0
                         ){
-                            // List of objects exists at least 2 levels deep.
-                            return false;
+                            continue;
                         }
-
+                        return false;
                     }
                 }
             }
 
-            if (!Array.isArray(firstRowItem[rootKeys[i]]) && firstRowItem[rootKeys[i]] && typeof firstRowItem[rootKeys[i]] === 'object') {
+            if (!Array.isArray(objectWithAllItemKeys[rootKeys[i]]) && objectWithAllItemKeys[rootKeys[i]] && typeof objectWithAllItemKeys[rootKeys[i]] === 'object') {
                 // Embedded object 1 level deep. Will flatten upwards if passes checks:
                 // example: (sub-object) {..., 'stringProp' : 'stringVal', 'meta' : {'argument_name' : 'x', 'argument_type' : 'y'}, ...} ===> (columns) 'stringProp', 'meta.argument_name', 'meta.argument_type'
-                if (object.isAnItem(firstRowItem[rootKeys[i]])){
+                if (object.isAnItem(objectWithAllItemKeys[rootKeys[i]])){
                     // This embedded object is an.... ITEM! Skip rest of checks for this property, we're ok with just drawing link to Item.
                     continue;
                 }
-                embeddedKeys = _.keys(firstRowItem[rootKeys[i]]);
+                embeddedKeys = _.keys(objectWithAllItemKeys[rootKeys[i]]);
                 if (embeddedKeys.length > 5) return false; // 5 properties to flatten up feels like a good limit. Lets render objects with more than that as lists or own table (not flattened up to another 1).
                 // Run some checks against the embedded object's properties. Ensure all nested lists contain plain strings or numbers, as will flatten to simple comma-delimited list.
                 for (j = 0; j < embeddedKeys.length; j++){
 
-                    if (typeof firstRowItem[ rootKeys[i] ][ embeddedKeys[j] ] === 'string' || typeof firstRowItem[ rootKeys[i] ][ embeddedKeys[j] ] === 'number') continue;
+                    if (typeof objectWithAllItemKeys[ rootKeys[i] ][ embeddedKeys[j] ] === 'string' || typeof objectWithAllItemKeys[ rootKeys[i] ][ embeddedKeys[j] ] === 'number') continue;
 
                     // Ensure if property on embedded object's is an array, that is a simple array of strings or numbers - no objects. Will be converted to comma-delimited list.
-                    if ( Array.isArray(  firstRowItem[ rootKeys[i] ][ embeddedKeys[j] ]  ) ){
+                    if ( Array.isArray(  objectWithAllItemKeys[ rootKeys[i] ][ embeddedKeys[j] ]  ) ){
                         if (
-                            firstRowItem[rootKeys[i]][embeddedKeys[j]].length < 4 &&
-                            _.filter(firstRowItem[rootKeys[i]][embeddedKeys[j]][0], function(v){
+                            objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]].length < 4 &&
+                            _.filter(objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]][0], function(v){
                                 if (typeof v === 'string' || typeof v === 'number') { return false; }
                                 else { return true; }
                             }).length === 0
-                            //(typeof firstRowItem[rootKeys[i]][embeddedKeys[j]][0] === 'string' || typeof firstRowItem[rootKeys[i]][embeddedKeys[j]][0] === 'number')
+                            //(typeof objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]][0] === 'string' || typeof objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]][0] === 'number')
                         ) { continue; } else { return false; }
                     }
                     
                     // Ensure that if is not an array, it is a simple string or number (not another embedded object).
                     if (
-                        !Array.isArray(firstRowItem[rootKeys[i]][embeddedKeys[j]]) &&
-                        firstRowItem[rootKeys[i]][embeddedKeys[j]] &&
-                        typeof firstRowItem[rootKeys[i]][embeddedKeys[j]] === 'object'
+                        !Array.isArray(objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]]) &&
+                        objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]] &&
+                        typeof objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]] === 'object'
                     ) { // Embedded object 2 levels deep. No thx we don't want any 'meta.argument_mapping.argument_type' -length column names. Unless it's an Item for which we can just render link for.
-                        if ( object.isAnItem(firstRowItem[rootKeys[i]][embeddedKeys[j]]) ) continue;
+                        if ( object.isAnItem(objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]]) ) continue;
                         return false;
                     }
                 }
@@ -425,18 +440,30 @@ class SubItemTable extends React.Component {
                         if (value[0] && typeof value[0] === 'object' && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
                             var allKeys = colKeyContainer.childKeys; //_.keys(  _.reduce(value, function(m,v){ return _.extend(m,v); }, {})   );
                             return {
-                                'value' : value.map(function(embeddedRow, i){
+                                'value' : value.map((embeddedRow, i)=>{
                                     return (
                                         <div style={{ whiteSpace: "nowrap" }} className="text-left child-list-row" key={colKey + '--row-' + i}>
                                             <div className="inline-block child-list-row-number">{ i + 1 }.</div>
-                                            { allKeys.map(function(k, j){
+                                            { allKeys.map((k, j)=>{
+                                                var renderedSubVal;// = Schemas.Term.toName(k, embeddedRow[k]);
+                                                if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k] !== 'undefined'){
+                                                    if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k].render === 'function'){
+                                                        renderedSubVal = this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k].render(embeddedRow[k], embeddedRow, colKeyIndex, value);
+                                                    }
+                                                }
+                                                if (!renderedSubVal) {
+                                                    renderedSubVal = object.isAnItem(embeddedRow[k]) ? 
+                                                        <a href={object.atIdFromObject(embeddedRow[k])}>{ getTitleStringFromContext(embeddedRow[k]) }</a>
+                                                        :
+                                                        Schemas.Term.toName(k, embeddedRow[k]);
+                                                }
                                                 return (
                                                     <div
                                                         key={colKey + '.' + k + '--row-' + i}
                                                         className={"inline-block child-column-" + colKey + '.' + k}
                                                         style={{ width : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[k] || null) }}
                                                     >
-                                                        { Schemas.Term.toName(k, embeddedRow[k]) }
+                                                        { renderedSubVal }
                                                     </div>
                                                 );
                                             }) }
@@ -448,7 +475,7 @@ class SubItemTable extends React.Component {
                             };
                         }
                     }
-                    if (value && typeof value === 'object' && typeof value.display_title === 'string') {
+                    if (object.isAnItem(value)) {
                         return { 'value' : <a href={object.atIdFromObject(value)}>{ value.display_title }</a>, 'key' : colKey };
                     }
                     if (typeof value === 'string' && value.length < 25) {
@@ -471,8 +498,6 @@ class SubItemTable extends React.Component {
             this.props.columnDefinitions
         );
 
-        console.log(keyTitleDescriptionMap);
-
         var subListKeyRefs = this.subListKeyRefs = {};
 
         return (
@@ -483,8 +508,6 @@ class SubItemTable extends React.Component {
                             [<th key="rowNumber" style={{ minWidth: 36, maxWidth : 36, width: 36 }}>#</th>].concat(columnKeys.map((colKeyContainer, colIndex)=>{
                                 //var tips = object.tipsFromSchema(Schemas.get(), context) || {};
                                 var colKey = colKeyContainer.key;
-
-                                //console.log(this.props.parentKey + '.' + colKey, keyTitleDescriptionMap[this.props.parentKey + '.' + colKey]);
 
                                 var title = (
                                     (keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] && keyTitleDescriptionMap[this.props.parentKey + '.' + colKey].title) ||
@@ -542,6 +565,11 @@ class SubItemTable extends React.Component {
                                         var val = colVal.value;
                                         if ((colVal.key === 'link_id' || colVal.key === '@id') && val.slice(0,1) === '/') {
                                             val = <a href={val}>{ val }</a>;
+                                        }
+                                        if (val && typeof val === 'object' && !React.isValidElement(val)) {
+                                            val = JSON.stringify(val);
+                                            console.error("ERROR: Value for table cell is not a string, number, or JSX element.\nKey: " + columnKeys[j].key + '; Value: ' + val);
+                                            val = <code>{ val.length <= 25 ? val : val.slice(0,25) + '...' }</code>;
                                         }
                                         return (
                                             <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>
@@ -847,6 +875,7 @@ export class Detail extends React.Component {
             'title' : "Title",
             'description' : "Title of Item",
             'hide' : function(valueProbe){
+                if (!valueProbe || !valueProbe.display_title) return true;
                 if (valueProbe.accession && valueProbe.accession === valueProbe.display_title) return true;
                 return false;
             }
@@ -854,7 +883,6 @@ export class Detail extends React.Component {
         'email' : {
             'title' : "E-Mail",
             'render' : function(value){
-                console.log(value);
                 if (typeof value === 'string' && value.indexOf('@') > -1) {
                     return <a href={'mailto:' + value}>{ value }</a>;
                 }
