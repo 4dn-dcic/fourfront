@@ -4,7 +4,6 @@ The fixtures in this module setup a full system with postgresql and
 elasticsearch running as subprocesses.
 """
 import pytest
-from snovault import TYPES
 from encoded.verifier import verify_item
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
