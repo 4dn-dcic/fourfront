@@ -21,6 +21,7 @@ import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import { getTitleStringFromContext } from './item-pages/item';
+import PageTitle from './PageTitle';
 
 /**
  * The top-level component for this application.
@@ -725,14 +726,14 @@ export default class App extends React.Component {
         if(href===this.props.href){
             return false;
         }
-
+        /*
         var partsNew = url.parse(href),
             partsOld = url.parse(this.props.href);
 
         if (partsNew.path === partsOld.path && !globals.isHashPartOfHref(null, partsNew)){
             return false;
         }
-
+        */
         return true;
     }
 
@@ -817,9 +818,13 @@ export default class App extends React.Component {
                 } else {
                     window.history.pushState(window.state, '', href + fragment);
                 }
+                var stuffToDispatch = _.clone(includeReduxDispatch);
                 if (!options.skipUpdateHref) {
+                    stuffToDispatch.href = href + fragment;
+                }
+                if (_.keys(stuffToDispatch).length > 0){
                     store.dispatch({
-                        type: {'href':href + fragment}
+                        'type': stuffToDispatch
                     });
                 }
                 return null;
@@ -1089,7 +1094,7 @@ export default class App extends React.Component {
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
-            if(context.title && (context.title == 'Login failure' || context.title == 'No Access')){
+            if(context.title && (context.title.toLowerCase() == 'login failure' || context.title == 'No Access')){
                 status = 'invalid_login';
             }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
@@ -1233,6 +1238,7 @@ export default class App extends React.Component {
                                     schemas={this.state.schemas}
                                 />
                                 <div id="content" className="container">
+                                    <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
                                     <FacetCharts
                                         href={this.props.href}
                                         context={this.props.context}
