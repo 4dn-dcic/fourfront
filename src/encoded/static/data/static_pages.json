@@ -107,6 +107,24 @@
             }
         },
 
+        "help/cell-culture": {
+            "title": "Cell Culture Metadata",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "title" : null,
+                    "filename"  : "cell_culture_metadata.md"
+                }
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth"    : 1
+            }
+        },
+
         "nofic-matrix"  : {
             "title"     : "NOFIC Matrix",
             "directory" : "/src/encoded/static/data",

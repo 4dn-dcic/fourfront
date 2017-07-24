@@ -67,6 +67,7 @@ const portal = {
             {id: 'web-submission-menu-item', title: 'Online Submission', url: '/help/web-submission'},
             {id: 'spreadsheet-menu-item', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
             {id: 'rest-api-menu-item', title: 'REST API', url: '/help/rest-api'},
+            {id: 'cell-culture-menu-item', title: 'Cell Culture Metadata', url: '/help/cell-culture'},
             {id: 'about-menu-item', title: 'About', url: '/about'}
         ]}
     ],
