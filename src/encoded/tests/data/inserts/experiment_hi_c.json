@@ -1,6 +1,6 @@
 [
     {
-        "accession":"4DNEX067APU1",
+        "accession":"4DNEXO67APU1",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
@@ -15,7 +15,7 @@
         "notes": "sample dcic notes",
         "lab": "test-4dn-lab",
         "aliases": ["labsample:alias"],
-        "files": ["4DNFI067APU1", "4DNFI067APA1"],
+        "files": ["4DNFIO67APU1", "4DNFIO67APA1"],
         "description": "Test Experiment HiC",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
@@ -32,7 +32,7 @@
         "status": "in review by lab"
     },
     {
-        "accession":"4DNEX067APT1",
+        "accession":"4DNEXO67APT1",
         "biosample":"231111bc-8535-4448-903e-854af460ba4d",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
@@ -47,7 +47,7 @@
         "notes": "sample dcic notes",
         "lab": "test-4dn-lab",
         "aliases": ["labsample:alias2"],
-        "files": ["4DNFI067APT1"],
+        "files": ["4DNFIO67APT1"],
         "description": "Test Experiment HiC 2",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
@@ -56,13 +56,13 @@
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fb",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
-        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
+        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEXO67APU1"}],
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "status": "in review by lab"
     },
     {
-        "accession":"4DNEX067APV1",
+        "accession":"4DNEXO67APV1",
         "biosample": "231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
@@ -74,7 +74,7 @@
         "notes": "dcic notes",
         "lab": "test-4dn-lab",
         "aliases": ["labsample:alias3"],
-        "files": ["4DNFI067APV1"],
+        "files": ["4DNFIO67APV1"],
         "description": "Test Experiment HiC 3",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
@@ -82,13 +82,13 @@
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209b3fb",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
-        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
+        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEXO67APU1"}],
         "submitted_by": "wrangler@wrangler.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "status": "in review by lab"
     },
     {
-        "accession":"4DNEX067APY1",
+        "accession":"4DNEXO67APY1",
         "biosample":"231111bc-8535-4448-903e-854af460ba4d",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
@@ -103,7 +103,7 @@
         "notes": "sample dcic notes",
         "lab": "test-4dn-lab",
         "aliases": ["labsample:alias4"],
-        "files": ["4DNFI067APY1"],
+        "files": ["4DNFIO67APY1"],
         "description": "Test Experiment HiC 4",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
@@ -112,13 +112,13 @@
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fc",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
-        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
+        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEXO67APU1"}],
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "status": "in review by lab"
     },
     {
-        "accession":"4DNEX067APZ1",
+        "accession":"4DNEXO67APZ1",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
@@ -142,13 +142,13 @@
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fd",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
-        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
+        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEXO67APU1"}],
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "status": "in review by lab"
     },
     {
-        "accession":"4DNEX067APZ7",
+        "accession":"4DNEXO67APZ7",
         "biosample":"111111bc-1111-4448-903e-854af460b123",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
@@ -173,7 +173,7 @@
         "status": "in review by lab"
     },
     {
-        "accession":"4DNEX067APZ8",
+        "accession":"4DNEXO67APZ8",
         "biosample":"111112bc-1111-4448-903e-854af460b123",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
