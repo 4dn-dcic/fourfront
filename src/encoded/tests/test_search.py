@@ -183,3 +183,53 @@ def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
     for dp in datepairs:
         search = '/search/?type=Enzyme&after=%s&before=%s' % dp
         assert testapp.get(search, status=404)
+
+
+def test_search_query_string_plus_minus_cancel_out(workbook, testapp):
+    # if you use + and - with same field you should get no result
+    search = '/search/?type=Biosource&q=+cell+-cell'
+    assert testapp.get(search, status=404)
+
+
+def test_search_query_string_cell_without_stem(workbook, testapp):
+    # ensure that + and - leading characters work correctly
+    positives = [
+        '331111bc-8535-4448-903e-854af460b666',
+        '331111bc-8535-4448-903e-854af460b254',
+        '331111bc-8535-2248-903e-854af460b254',
+        '331111bc-8535-4448-903e-854af460a254'
+    ]
+    negatives = [
+        '331111bc-8535-4448-903e-854af460bab5',
+        '331111bc-8535-4448-903e-854af460b89f',
+        '331111bc-8535-4448-903e-854ab460b254'
+    ]
+    search = '/search/?type=Biosource&q=+cell+-stem'
+    res = testapp.get(search).json
+    assert len(res['@graph']) > 0  # mutiple wfr can be returned
+    ruuids = [r['uuid'] for r in res['@graph'] if 'uuid' in r]
+    assert set(positives).issubset(set(ruuids))
+    for n in negatives:
+        assert n not in ruuids
+
+
+def test_search_query_string_cell_and_stem(workbook, testapp):
+    # ensure that + and - leading characters work correctly
+    negatives = [
+        '331111bc-8535-4448-903e-854af460b666',
+        '331111bc-8535-4448-903e-854af460b254',
+        '331111bc-8535-2248-903e-854af460b254',
+        '331111bc-8535-4448-903e-854af460a254'
+    ]
+    positives = [
+        '331111bc-8535-4448-903e-854af460bab5',
+        '331111bc-8535-4448-903e-854af460b89f',
+        '331111bc-8535-4448-903e-854ab460b254'
+    ]
+    search = '/search/?type=Biosource&q=cell+AND+stem'
+    res = testapp.get(search).json
+    assert len(res['@graph']) > 0  # mutiple wfr can be returned
+    ruuids = [r['uuid'] for r in res['@graph'] if 'uuid' in r]
+    assert set(positives).issubset(set(ruuids))
+    for n in negatives:
+        assert n not in ruuids
