@@ -13,32 +13,7 @@ import { SearchResultTable, defaultColumnBlockRenderFxn } from './SearchResultTa
 
 export class ExperimentSetDetailPane extends React.Component {
 
-    /**
-     * Combine file pairs and unpaired files into one array. 
-     * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
-     * Can always _.flatten() this or map out first file per pair.
-     * 
-     * @param {Object} expSet - Experiment Set
-     * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
-     */
-    static pairsAndFiles(expSet: Object){
-        return expFxn.listAllFilePairs(expSet.experiments_in_set).concat(
-            expFxn.listAllUnpairedFiles(expSet.experiments_in_set)
-        );
-    }
-
-    static allFiles(expSet: Object){
-        return _.reduce(ExperimentSetDetailPane.pairsAndFiles(expSet), function(m, f){
-            if (Array.isArray(f)){
-                return m.concat(f);
-            } else {
-                m.push(f);
-                return m;
-            }
-        }, []);
-    }
-
-    static allFileIDs(expSet: Object){ return _.pluck(ExperimentSetDetailPane.allFiles(expSet), 'uuid'); }
+    static allFileIDs(expSet: Object){ return _.pluck(  expFxn.allFilesFromExperimentSet(expSet)  , 'uuid'); }
 
     static propTypes = {
         'expSetFilters' : PropTypes.object.isRequired,

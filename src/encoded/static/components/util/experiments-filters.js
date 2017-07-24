@@ -208,6 +208,35 @@ export function unsetAllTermsForField(field, expSetFilters, save = true, href = 
 }
 
 
+export function transformExpSetFiltersToExpFilters(expSetFilters){
+    var expSetKeys = _.keys(expSetFilters);
+    var expFilters = {};
+    var i = 0;
+    for (i = 0; i < expSetKeys.length; i++){
+        if (expSetKeys[i].slice(0,19) === 'experiments_in_set.'){
+            expFilters[expSetKeys[i].slice(19)] = expSetFilters[expSetKeys[i]];
+        } else {
+            expFilters['experiment_sets.' + expSetKeys[i]] = expSetFilters[expSetKeys[i]];
+        }
+    }
+    return expFilters;
+}
+
+export function transformExpSetFiltersToFileFilters(expSetFilters){
+    var expSetKeys = _.keys(expSetFilters);
+    var expFilters = {};
+    var i = 0;
+    for (i = 0; i < expSetKeys.length; i++){
+        if (expSetKeys[i].slice(0,19) === 'experiments_in_set.'){
+            expFilters['experiments.' + expSetKeys[i].slice(19)] = expSetFilters[expSetKeys[i]];
+        } else {
+            expFilters['experiments.experiment_sets.' + expSetKeys[i]] = expSetFilters[expSetKeys[i]];
+        }
+    }
+    return expFilters;
+}
+
+
 /**
  * Convert expSetFilters to a URL, given a current URL whose path is used to append arguments
  * to (e.g. http://hostname.com/browse/  or http://hostname.com/search/).

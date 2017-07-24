@@ -6,7 +6,8 @@ var _ = require('underscore');
 var url = require('url');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide, layout, analytics } = require('../util');
+var { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } = require('../util');
+import * as store from './../../store';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
 var MosaicChart = require('./MosaicChart');
 import { ChartDataController } from './chart-data-controller';
@@ -246,6 +247,8 @@ export default class QuickInfoBar extends React.Component {
         if (this.state.show !== false) className += ' showing';
         if (this.state.show === 'activeFilters') className += ' showing-filters';
         if (this.state.show === 'mosaicCharts') className += ' showing-charts';
+        var expSetFilters = this.props.expSetFilters || store.getState().expSetFilters;
+        var expFiltersHrefChunk = Filters.expSetFiltersToURLQuery(store.getState().expSetFilters);
         return (
             <div className={className} onMouseLeave={()=>{
                 this.setState({ show : false });
@@ -259,6 +262,9 @@ export default class QuickInfoBar extends React.Component {
                         classNameID="expsets"
                         value={stats.experiment_sets}
                         key={0}
+                        expSetFilters={expSetFilters}
+                        expFiltersHrefChunk={expFiltersHrefChunk}
+                        href={this.props.href}
                     />
                     <Stat
                         shortLabel="Experiments"
@@ -267,6 +273,9 @@ export default class QuickInfoBar extends React.Component {
                         classNameID="experiments"
                         value={stats.experiments}
                         key={1}
+                        expSetFilters={expSetFilters}
+                        expFiltersHrefChunk={expFiltersHrefChunk}
+                        href={this.props.href}
                     />
                     <Stat
                         shortLabel="Files"
@@ -275,6 +284,9 @@ export default class QuickInfoBar extends React.Component {
                         classNameID="files"
                         value={stats.files}
                         key={2}
+                        expSetFilters={expSetFilters}
+                        expFiltersHrefChunk={expFiltersHrefChunk}
+                        href={this.props.href}
                     />
                     <div
                         className="any-filters glance-label"
@@ -360,6 +372,46 @@ class Stat extends React.Component {
         'id' : null
     }
 
+    /**
+     * { classNameID : @type }
+     */
+    static typesPathMap = {
+        'experiments' : "/search/?type=Experiment&experiment_sets.experimentset_type=replicate&experiment_sets.@type=ExperimentSetReplicate",
+        'expsets' : "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate",
+        'files' : "/search/?type=File&experiments.experiment_sets.@type=ExperimentSetReplicate&experiments.experiment_sets.experimentset_type=replicate"
+    }
+
+    filtersHrefChunk(){
+        if (this.props.classNameID === 'experiments'){
+            return Filters.expSetFiltersToURLQuery(Filters.transformExpSetFiltersToExpFilters(this.props.expSetFilters));
+        } else if (this.props.classNameID === 'expsets') {
+            return Filters.expSetFiltersToURLQuery(this.props.expSetFilters);
+        } else if (this.props.classNameID === 'files') {
+            return Filters.expSetFiltersToURLQuery(Filters.transformExpSetFiltersToFileFilters(this.props.expSetFilters));
+        }
+    }
+
+    label(){
+        if (!this.props.value) {
+            return this.props.shortLabel;
+        }
+
+        var filtersHrefChunk = this.filtersHrefChunk();
+
+        var sep = filtersHrefChunk && filtersHrefChunk.length > 0 ? '&' : '';
+
+        var href = Stat.typesPathMap[this.props.classNameID] + sep + (filtersHrefChunk || '');
+
+        if (typeof this.props.href === 'string'){
+            // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.
+            if (this.props.href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === href) return this.props.shortLabel;
+        }
+        
+        return (
+            <a href={href} data-tip={"View all currently-filtered " + this.props.label}>{ this.props.shortLabel }</a>
+        );
+    }
+
     render(){
         return (
             <div className={"stat stat-" + this.props.classNameID} title={this.props.longLabel}>
@@ -367,7 +419,7 @@ class Stat extends React.Component {
                     { this.props.value }
                 </div>
                 <div className="stat-label">
-                    { this.props.shortLabel }
+                    { this.label() }
                 </div>
             </div>
         );

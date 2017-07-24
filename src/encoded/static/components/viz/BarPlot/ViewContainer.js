@@ -368,7 +368,7 @@ export const barPlotCursorActions = [
         },
         'function' : function(showType = 'all', cursorProps, mouseEvt){
             var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
-            var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHref(cursorProps.href) || null;
+            var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHrefRoot(cursorProps.href) || null;
 
             // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
             var currentExpSetFilters = showType === 'all' ? {} : Filters.currentExpSetFilters();
