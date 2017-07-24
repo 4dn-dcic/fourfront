@@ -33,13 +33,12 @@
 .static-page {
 	width: 75%;
 	margin: 0;
+	margin-top: 30px;
 	&.row {
 		width: auto;
-		> div > .page-title + .help-entry:first-of-type {
-			margin-top: 35px;
-		}
 		> div > .help-entry:first-child {
 			margin-top: 5px;
+			> .fourDN-content:first-child  > div:first-child > h2:first-child { margin-top: 20px; }
 		}
 	}
 
@@ -57,7 +56,14 @@
 .browse-page-container,
 .static-page {
 	/* Consistent margin between top navbar & content among pages */
-	margin-top: 35px;
+	/* margin-top: 35px; */
+}
+
+.browse-page-container {
+	margin-top: 80px;
+	&.search-page-container {
+		margin-top: 40px;
+	}
 }
 
 /* top padding for small & large screens re: fixed nav */
@@ -83,12 +89,19 @@
 		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
 ************************************************************/
 
+
 h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
+	// Deprecated Margins
 	margin-top: 32px;
 	margin-bottom: 32px;
+
+	&.top-of-page {
+		margin-top: 36px;
+		margin-bottom: 3px;
+	}
 
 	.row > & {
 		margin-top: 0px; // Assuming 35px margin bottom on page sub-container
@@ -98,14 +111,20 @@ h1.page-title {
 		margin-top: 0px;
 	}
 
+	.page-subtitle {
+		margin-left: 2px;
+		margin-top: 0px;
+		font-size: 18px;
+	}
+
 	.subtitle {
 		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
-		display: inline-block;
-		font-size : 0.875em;
-		margin-left: 5px;
-
+		
 		&.prominent {
 			font-weight: 300;
+			font-size : 0.875em;
+			display: inline-block;
+			margin-left: 12px;
 		}
 
 	}

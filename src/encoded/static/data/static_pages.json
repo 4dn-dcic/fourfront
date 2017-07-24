@@ -4,6 +4,8 @@
         "home"  : true,
         "about" : true,
 
+
+
         "help"  : {
             "title": "Introduction to 4DN Metadata",
             "directory" : "/docs/public/help",
@@ -124,6 +126,22 @@
                 "skip-depth"    : 1
             }
         },
+
+        "error/login-failed"  : {
+            "title": "Login Failed",
+            "directory" : "/src/encoded/static/data",
+            "sections"  : [
+                {
+                    "filename" : "no-account",
+                    "content" : "It appears there is either no account registered with the provided email address or you provided incorrect credentials. Access is restricted to members of the 4DN consortium."
+                },
+                {
+                    "filename" : "new-account-registration",
+                    "content" : "<b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/getting-started#getting-added-as-a-4dn-user-or-submitter\">Getting Added as a 4DN User or Submitter</a></b>."
+                }
+            ]
+        },
+
 
         "nofic-matrix"  : {
             "title"     : "NOFIC Matrix",
