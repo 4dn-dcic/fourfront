@@ -27,8 +27,8 @@ export function listEmptyExperiments(experiments){
  * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {number} - Count of files from all experiments.
  */
-export function fileCountFromExperiments(experiments){
-    return _.reduce(experiments.map(fileCount), function(r,expFileCount,i){
+export function fileCountFromExperiments(experiments, includeFileSets = false){
+    return _.reduce(experiments.map(function(exp, i){ return fileCount(exp, includeFileSets); }), function(r,expFileCount,i){
         return r + expFileCount;
     }, 0);
 }
@@ -40,10 +40,10 @@ export function fileCountFromExperiments(experiments){
  * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Object[]} - All files from experiments without a pair.
  */
-export function listAllUnpairedFiles(experiments){
+export function listAllUnpairedFiles(experiments, includeFileSets = false){
     return _.filter(
         _.flatten(
-            findUnpairedFilesPerExperiment(experiments),
+            findUnpairedFilesPerExperiment(experiments, includeFileSets),
             true
         ),
         function(file){ return typeof file !== 'undefined'; }
@@ -57,12 +57,12 @@ export function listAllUnpairedFiles(experiments){
  * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Object[][]} - All files with relations from experiments grouped into arrays of pairs (or other multiple).
  */
-export function listAllFilePairs(experiments){
+export function listAllFilePairs(experiments, includeFileSets = false){
     return (
         _.flatten(
             _.filter(
                 _.pluck(
-                    groupFilesByPairsForEachExperiment(experiments),
+                    groupFilesByPairsForEachExperiment(experiments, includeFileSets),
                     'file_pairs'
                 ),
                 function(file){ return typeof file !== 'undefined'; }
@@ -195,11 +195,12 @@ export function findUnpairedFiles(files_in_experiment){
  * @param {Object[]} experiments - List of experiment objects with files properties.
  * @returns {Object[]} List of unpaired files from all experiments.
  */
-export function findUnpairedFilesPerExperiment(experiments){
+export function findUnpairedFilesPerExperiment(experiments, includeFileSets = false){
     return ensureArray(experiments).map(function(exp){
         if (Array.isArray(exp.files)){
             return findUnpairedFiles(exp.files);
         } else if (
+            includeFileSets &&
             Array.isArray(exp.filesets) &&
             exp.filesets.length > 0 &&
             Array.isArray(exp.filesets[0].files_in_set)
@@ -210,16 +211,23 @@ export function findUnpairedFilesPerExperiment(experiments){
                     true
                 )
             );
+        } else {
+            return [];
         }
     });
 }
 
-export function fileCount(experiment){
-    if (Array.isArray(experiment.files)) return experiment.files.length;
-    if (Array.isArray(experiment.filesets)) return _.reduce(experiment.filesets, function(r,fs){
-        return r + (fs.files_in_set || []).length;
-    }, 0);
-    return 0;
+export function fileCount(experiment, includeFileSets = false){
+    var count = 0;
+    if (Array.isArray(experiment.files)) {
+        count += experiment.files.length;
+    }
+    if (includeFileSets && Array.isArray(experiment.filesets)) {
+        count += _.reduce(experiment.filesets, function(r,fs){
+            return r + (fs.files_in_set || []).length;
+        }, 0);
+    }
+    return count;
 }
 
 export function allFilesFromFileSetsInExperiment(experiment){
@@ -236,6 +244,31 @@ export function allFilesFromFileSetsInExperiment(experiment){
 export function allFilesFromExperiment(experiment){
     return ensureArray(experiment.files).concat(
         allFilesFromFileSetsInExperiment(experiment)
+    );
+}
+
+export function allFilesFromExperimentSet(expSet){
+    return _.reduce(allPairsSetsAndFilesFromExperimentSet(expSet), function(m, f){
+        if (Array.isArray(f)){
+            return m.concat(f);
+        } else {
+            m.push(f);
+            return m;
+        }
+    }, []);
+}
+
+/**
+ * Combine file pairs and unpaired files into one array. 
+ * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
+ * Can always _.flatten() this or map out first file per pair.
+ * 
+ * @param {Object} expSet - Experiment Set
+ * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
+ */
+export function allPairsSetsAndFilesFromExperimentSet(expSet){
+    return listAllFilePairs(expSet.experiments_in_set).concat(
+        listAllUnpairedFiles(expSet.experiments_in_set)
     );
 }
 
@@ -274,12 +307,18 @@ export function groupFilesByPairs(files_in_experiment){
         .value(); // [[file1,file2,file3,...],[file1,file2,file3,file4,...],...]
 }
 
-export function groupFilesByPairsForEachExperiment(experiments){
+/**
+ * @param {any} experiments - List of Experiment Items in JSON format.
+ * @param {boolean} [includeFileSets=false] - Whether to include files from experiment.filesets.
+ * @returns Modified list 'experiments' objects.
+ */
+export function groupFilesByPairsForEachExperiment(experiments, includeFileSets = false){
     return ensureArray(experiments).map(function(exp) {
         var file_pairs;
         if (Array.isArray(exp.files)){
             file_pairs = groupFilesByPairs(exp.files);
         } else if (
+            includeFileSets &&
             Array.isArray(exp.filesets) &&
             exp.filesets.length > 0 &&
             Array.isArray(exp.filesets[0].files_in_set)
@@ -289,7 +328,9 @@ export function groupFilesByPairsForEachExperiment(experiments){
             );
         }
 
-        if (Array.isArray(file_pairs) && file_pairs.length > 0) exp.file_pairs = file_pairs;
+        if (Array.isArray(file_pairs) && file_pairs.length > 0) {
+            exp = _.extend({}, exp, { 'file_pairs' : file_pairs });
+        }
         return exp;
     });
 }

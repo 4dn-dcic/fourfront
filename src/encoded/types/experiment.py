@@ -109,12 +109,11 @@ class Experiment(Item):
         "items": {
             "title": "Experiment Set",
             "type": ["string", "object"],
-            "linkFrom": "ExperimentSet.experiments_in_set"
+            "linkTo": "ExperimentSet"
         }
     })
-    def experiment_sets(self, request, experiment_sets):
-        paths = paths_filtered_by_status(request, experiment_sets)
-        return paths
+    def experiment_sets(self, request):
+        return self.rev_link_atids(request, "experiment_sets")
 
     @calculated_property(schema={
         "title": "Produced in Publication",
@@ -124,8 +123,7 @@ class Experiment(Item):
     })
     def produced_in_pub(self, request):
         esets = [request.embed('/', str(uuid), '@@object') for uuid in
-                 self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
-
+                 self.experiment_sets(request)]
         # replicate experiment set is the boss
         reps = [eset for eset in esets if 'ExperimentSetReplicate' in eset['@type']]
         if reps:
@@ -143,7 +141,7 @@ class Experiment(Item):
     })
     def publications_of_exp(self, request):
         esets = [request.embed('/', str(uuid), '@@object') for uuid in
-                 self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
+                 self.experiment_sets(request)]
         import itertools
         pubs = list(set(itertools.chain.from_iterable([eset.get('publications_of_set', [])
                                                       for eset in esets])))

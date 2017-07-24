@@ -19,7 +19,7 @@ class SelectedFilesOverview extends React.Component {
         var experiments = this.props.filteredExperiments || this.props.experiments;
         var totalAppend;
         if (experiments){
-            var totalFilesCount = expFxn.fileCountFromExperiments(experiments);
+            var totalFilesCount = expFxn.fileCountFromExperiments(experiments, this.props.includeFileSets);
             totalAppend = ' / ' + totalFilesCount;
         }
         
@@ -53,7 +53,6 @@ export class AboveTableControls extends React.Component {
         this.handleLayoutToggle = _.throttle(this.handleLayoutToggle.bind(this), 350);
         this.renderPanel = this.renderPanel.bind(this);
         this.rightButtons = this.rightButtons.bind(this);
-        this.selectedFilesOverview = this.selectedFilesOverview.bind(this);
         this.state = {
             'open' : false,
             'reallyOpen' : false,
@@ -164,15 +163,6 @@ export class AboveTableControls extends React.Component {
             );
         }
         return null;
-    }
-
-    selectedFilesOverview(){
-        if (!this.props.showSelectedFileCount || !this.props.selectedFiles) return null;
-        return (
-            <ChartDataController.Provider>
-                <SelectedFilesOverview selectedFiles={this.props.selectedFiles} />
-            </ChartDataController.Provider>
-        );
     }
 
     leftSection(){

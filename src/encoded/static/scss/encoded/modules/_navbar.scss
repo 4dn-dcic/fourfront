@@ -286,6 +286,14 @@ $navbar-transition-easing: ease-out;
                     display: inline-block;
                     margin-left: 5px;
                     color : rgba(100, 100, 100, 0.5);
+                    > a {
+                        color : inherit;
+                        display: inline-block;
+                        &:hover {
+                            color: rgba(100, 100, 100, 1);
+                            text-decoration: none;
+                        }
+                    }
                 }
             }
         }
