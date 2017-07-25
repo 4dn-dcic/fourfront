@@ -47,6 +47,8 @@ requires = [
     'xlrd',
     'zope.sqlalchemy',
     'pyJWT',
+    # add it here for some command line tools
+    'pytest>=2.4.0',
 ]
 
 if sys.version_info.major == 2:
@@ -56,7 +58,6 @@ if sys.version_info.major == 2:
     ])
 
 tests_require = [
-    'pytest>=2.4.0',
     'pytest-bdd',
     'pytest-mock',
     'pytest-splinter',
@@ -107,6 +108,7 @@ setup(
         migrate-dataset-type = encoded.commands.migrate_dataset_type:main
         load-data = encoded.commands.load_data:main
         dropdb = encoded.commands.dropdb:main
+        verify-item = encoded.commands.verify_item:main
 
         [paste.app_factory]
         main = encoded:main

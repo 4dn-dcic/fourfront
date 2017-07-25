@@ -1,6 +1,6 @@
 [
     {
-        "accession":"4DNEX067AWU1",
+        "accession":"4DNEXO67AWU1",
         "status": "in review by lab",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
@@ -30,16 +30,16 @@
         "targeted_regions": [
           {
               "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
-              "oligo_file": "4DNFI067APA1"
+              "oligo_file": "4DNFIO67APA1"
           },
           {
               "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",
-              "oligo_file": "4DNFI067APB1"
+              "oligo_file": "4DNFIO67APB1"
           }
         ]
     },
     {
-        "accession":"4DNEX067AWT1",
+        "accession":"4DNEXO67AWT1",
         "status": "in review by lab",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
@@ -63,18 +63,18 @@
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c222",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
-        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
+        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEXO67APU1"}],
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "rna_tag": "biotin-dUTP",
         "targeted_regions": [
             {
                 "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
-                "oligo_file": "4DNFI067APA1"
+                "oligo_file": "4DNFIO67APA1"
             },
             {
                 "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",
-                "oligo_file": "4DNFI067APB1"
+                "oligo_file": "4DNFIO67APB1"
             }
         ]
     }

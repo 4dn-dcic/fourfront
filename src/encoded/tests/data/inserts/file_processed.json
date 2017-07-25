@@ -6,7 +6,7 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFHFYGN09R",
+    "accession": "4DNFHFYGNO9R",
     "lab": "4dn-dcic-lab",
     "filename": "_6_out_pair1.bam"
 },{
@@ -17,7 +17,7 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFOEOP3UA0",
+    "accession": "4DNFOEOP3UAO",
     "lab": "4dn-dcic-lab",
     "filename": "_6_HiC_norm_binning.hdf5"
 
@@ -39,7 +39,7 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFJ03QGVR4",
+    "accession": "4DNFJO3QGVR4",
     "lab": "4dn-dcic-lab",
     "filename": "_6_HiCtool_expected_enrich_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
 
@@ -151,7 +151,7 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNF1LW5YPK0",
+    "accession": "4DNF1LW5YPKO",
     "lab": "4dn-dcic-lab",
     "file_size" : 21074,
     "filename": "_5_HiCtool_observed_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
