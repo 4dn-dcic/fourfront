@@ -237,7 +237,7 @@ def metadata_tsv(context, request):
                 return repl_exp.get(rep_key)
         return None
 
-    def is_row_object_included(object):
+    def should_file_row_object_be_included(object):
         '''Ensure object's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
         if accession_triples is None:
             return True
@@ -282,16 +282,14 @@ def metadata_tsv(context, request):
             all_row_vals['Set Tec Rep No'] = get_correct_rep_no('Set Tec Rep No', all_row_vals, exp_set)
             all_row_vals['Set Bio Rep No'] = get_correct_rep_no('Set Bio Rep No', all_row_vals, exp_set)
 
-        if (is_row_object_included(all_row_vals)):
-            return all_row_vals
-        else:
-            return None
+        return all_row_vals
+
 
     data_rows = map(
         # Convert object to list of values in same order defined in tsvMapping & header.
         lambda file_row_object: [ file_row_object[column] for column in header ],
         filter(
-            lambda val: val is not None,
+            lambda file_row_object: should_file_row_object_be_included(file_row_object),
             # Chain to flatten result map up to self.
             chain.from_iterable(map(format_experiment_set, results['@graph']))
         )
