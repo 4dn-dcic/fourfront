@@ -25,7 +25,7 @@ def test_replaced_file_not_uniqued(testapp, file):
 @pytest.fixture
 def fastq_json(award, experiment, lab):
     return {
-        'accession': '4DNFI067APU2',
+        'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'fastq',
@@ -38,7 +38,7 @@ def fastq_json(award, experiment, lab):
 @pytest.fixture
 def proc_file_json(award, experiment, lab):
     return {
-        'accession': '4DNFI067APU2',
+        'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'pairs',
@@ -51,7 +51,7 @@ def proc_file_json(award, experiment, lab):
 @pytest.fixture
 def fasta_json(award, experiment, lab):
     return {
-        'accession': '4DNFI067APA2',
+        'accession': '4DNFIO67APA2',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'fasta',

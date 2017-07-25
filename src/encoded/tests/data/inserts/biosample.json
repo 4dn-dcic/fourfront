@@ -64,7 +64,7 @@
         "submitted_by": "wrangler@wrangler.com",
         "treatments": ["486b362f-4eb6-4a9c-8173-3ab267307e4b"],
         "status": "in review by lab",
-        "accession": "4DNBS1234890"
+        "accession": "4DNBS123489O"
     },
     {
         "uuid": "123111bc-8535-4448-903e-854af460b123",
@@ -74,7 +74,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "accession": "4DNBS1234110"
+        "accession": "4DNBS123411O"
     },
     {
         "uuid": "111111bc-1111-4448-903e-854af460b123",
