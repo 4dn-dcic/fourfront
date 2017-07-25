@@ -8,7 +8,8 @@ from snovault import (
 )
 from .base import (
     Item,
-    paths_filtered_by_status
+    paths_filtered_by_status,
+    secure_embed
 )
 
 
@@ -173,13 +174,15 @@ class ExperimentHiC(Experiment):
     def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
         sum_str = experiment_type
         if biosample:
-            biosamp_props = request.embed(biosample, '@@object')
-            biosource = biosamp_props['biosource_summary']
-            sum_str += (' on ' + biosource)
+            biosamp_props = secure_embed(request, biosample)
+            if biosamp_props:
+                biosource = biosamp_props['biosource_summary']
+                sum_str += (' on ' + biosource)
         if digestion_enzyme:
-            de_props = request.embed(digestion_enzyme, '@@object')
-            de_name = de_props['name']
-            sum_str += (' with ' + de_name)
+            de_props = secure_embed(request, digestion_enzyme)
+            if de_props:
+                de_name = de_props['name']
+                sum_str += (' with ' + de_name)
         return sum_str
 
     @calculated_property(schema={

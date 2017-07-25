@@ -11,6 +11,7 @@ from pyramid.security import (
     # DENY_ALL,
     Everyone,
 )
+from pyramid.httpexceptions import HTTPForbidden
 from pyramid.traversal import (
     find_root,
     traverse,
@@ -109,6 +110,14 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
         ]
 
 
+def secure_embed(request, item_path, addition='@@object'):
+    try:
+        return request.embed(item_path, addition, as_user=True)
+    except HTTPForbidden:
+        print("you don't have access to this object")
+        return None
+
+
 def get_item_if_you_can(request, value, itype=None):
     # import pdb; pdb.set_trace()
     try:
@@ -118,7 +127,7 @@ def get_item_if_you_can(request, value, itype=None):
         svalue = str(value)
         if not svalue.startswith('/'):
             svalue = '/' + svalue
-        item = request.embed(svalue, '@@object')
+        item = request.embed(svalue, '@@object', as_user=True)
         try:
             item.get('uuid')
             return item
@@ -126,7 +135,7 @@ def get_item_if_you_can(request, value, itype=None):
             if itype is not None:
                 svalue = '/' + itype + svalue + '/?datastore=database'
                 try:
-                    return request.embed(svalue, '@@object')
+                    return request.embed(svalue, '@@object', as_user=True)
                 except:
                     return value
 
