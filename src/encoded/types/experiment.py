@@ -28,6 +28,7 @@ class Experiment(Item):
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
     embedded = ["protocol.*", "protocol_variation.*", "lab.*", "award.*", "experiment_sets.*",
+                #"experiment_sets.replicate_exps.replicate_exp.accession", "experiment_sets.replicate_exps.bio_rep_no", "experiment_sets.replicate_exps.tec_rep_no",
                 "produced_in_pub.*", "publications_of_exp.*",
                 "biosample.*", "biosample.biosource.*", "biosample.modifications.*",
                 "biosample.treatments.*", "biosample.biosource.individual.organism.*"]

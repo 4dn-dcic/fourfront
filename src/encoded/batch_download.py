@@ -34,25 +34,24 @@ def includeme(config):
 
 # includes concatenated properties
 _tsv_mapping = OrderedDict([
-    ('File Accession', ['accession']),
-    ('File Format', ['file_type']),
+    ('File Accession', ['experiments_in_set.files.accession']),
+    ('File Format', ['experiments_in_set.files.file_type']),
     #('Output type', ['output_type']),
-    ('Experiment Title', ['experiments.display_title']),
-    ('Experiment Accession', ['experiments.accession']),
-    ('Experiment Set Accession', ['experiments.experiment_sets.accession',
-                                  'experiments.experiment_sets.replicate_exps.replicate_exp.accession']),
-    ('Set Bio Rep No', ['experiments.experiment_sets.replicate_exps.bio_rep_no']),
-    ('Set Tec Rep No', ['experiments.experiment_sets.replicate_exps.tec_rep_no']),
+    ('Experiment Title', ['experiments_in_set.display_title']),
+    ('Experiment Accession', ['experiments_in_set.accession']),
+    ('Experiment Set Accession', ['accession']),
+    ('Set Bio Rep No', ['replicate_exps.bio_rep_no']),
+    ('Set Tec Rep No', ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession']),
 
     #('Assay', ['assay_term_name']),
     #('Biosample term id', ['biosample_term_id']),
     #('Biosample term name', ['biosample_term_name']),
-    ('Biosource', ['experiments.biosample.biosource_summary']),
-    ('Biosource Type', ['experiments.biosample.biosource.biosource_type']),
-    ('Organism', ['experiments.biosample.biosource.individual.organism.name']),
-    ('Digestion Enzyme', ['experiments.digestion_enzyme.name']),
-    ('Related File Relationship', ['related_files.relationship_type']),
-    ('Related File', ['related_files.file.accession']),
+    ('Biosource', ['experiments_in_set.biosample.biosource_summary']),
+    ('Biosource Type', ['experiments_in_set.biosample.biosource.biosource_type']),
+    ('Organism', ['experiments_in_set.biosample.biosource.individual.organism.name']),
+    ('Digestion Enzyme', ['experiments_in_set.digestion_enzyme.name']),
+    ('Related File Relationship', ['experiments_in_set.files.related_files.relationship_type']),
+    ('Related File', ['experiments_in_set.files.related_files.file.accession']),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
     #('Biosample sex', ['replicates.library.biosample.sex']),
     #('Biosample organism', ['replicates.library.biosample.organism.scientific_name']),
@@ -70,7 +69,7 @@ _tsv_mapping = OrderedDict([
     #('Library extraction method', ['replicates.library.extraction_method']),
     #('Library lysis method', ['replicates.library.lysis_method']),
     #('Library crosslinking method', ['replicates.library.crosslinking_method']),
-    ('Date Created', ['date_created']),
+    ('Date Created', ['experiments_in_set.files.date_created']),
     #('Project', ['award.project']),
     #('RBNS protein concentration', ['files.replicate.rbns_protein_concentration', 'files.replicate.rbns_protein_concentration_units']),
     #('Library fragmentation method', ['files.replicate.library.fragmentation_method']),
@@ -80,13 +79,13 @@ _tsv_mapping = OrderedDict([
     #('Technical replicate', ['files.replicate.technical_replicate_number']),
     #('Read length', ['files.read_length']),
     #('Run type', ['files.run_type']),
-    ('Paired end', ['paired_end']),
-    ('Paired with', ['paired_with']),
+    ('Paired end', ['experiments_in_set.files.paired_end']),
+    ('Paired with', ['experiments_in_set.files.paired_with']),
     #('Derived from', ['files.derived_from.accession']),
-    ('Size', ['file_size']),
+    ('Size', ['experiments_in_set.files.file_size']),
     ('Lab', ['lab.title']),
-    ('md5sum', ['md5sum']),
-    ('File download URL', ['href']),
+    ('md5sum', ['experiments_in_set.files.md5sum']),
+    ('File download URL', ['experiments_in_set.files.href']),
     #('Assembly', ['files.assembly']),
     #('Platform', ['files.platform.title'])
 ])
@@ -184,46 +183,100 @@ def peak_metadata(context, request):
 
 @view_config(route_name='metadata', request_method='GET')
 def metadata_tsv(context, request):
+
     param_list = parse_qs(request.matchdict['search_params'])
+
+    accession_triples = None # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
+    if param_list.get('accession') is not None and \
+        param_list.get('experiments_in_set.accession') is not None and \
+        param_list.get('experiments_in_set.files.accession') is not None and \
+        len(param_list['accession']) == len(param_list['experiments_in_set.accession']) == len(param_list['experiments_in_set.files.accession']):
+        accession_triples = list(zip(param_list['accession'], param_list['experiments_in_set.accession'], param_list['experiments_in_set.files.accession']))
+
     if 'referrer' in param_list:
         search_path = '/{}/'.format(param_list.pop('referrer')[0])
     else:
         search_path = '/search/'
     param_list['field'] = []
     header = []
-    file_attributes = []
-    f_attributes = ['accession', 'file_type', 'output_type']
     for prop in _tsv_mapping:
         header.append(prop)
         param_list['field'] = param_list['field'] + _tsv_mapping[prop]
-        file_attributes.append(_tsv_mapping[prop][0])
     param_list['limit'] = ['all']
     path = '{}?{}'.format(search_path, urlencode(param_list, True))
     results = request.invoke_subrequest(make_subrequest(request, path)).json
 
+    def get_value_for_column(item, col, columnKeyStart = 0):
+        temp = []
+        for c in _tsv_mapping[col]:
+            c_value = []
+            for value in simple_path_ids(item, c[columnKeyStart:]):
+                if str(value) not in c_value:
+                    c_value.append(str(value))
+            if len(temp):
+                if len(c_value):
+                    temp = [x + ' ' + c_value[0] for x in temp]
+            else:
+                temp = c_value
+        return ', '.join(list(set(temp)))
+
+    def get_correct_rep_no(key, object, set):
+        if object is None or key is None or object.get(key) is None:
+            return None
+        rep_nos = object[key].split(', ')
+        experiment_accession = all_row_vals.get('Experiment Accession')
+        file_accession = all_row_vals.get('File Accession')
+        for repl_exp in set.get('replicate_exps'):
+            repl_exp_accession = repl_exp.get('replicate_exp', {}).get('accession', None)
+            if repl_exp_accession is not None and repl_exp_accession == experiment_accession:
+                rep_key = 'bio_rep_no' if key == 'Set Bio Rep No' else 'tec_rep_no'
+                return repl_exp.get(rep_key)
+        return None
+
+    def is_row_object_included(object):
+        if accession_triples is None:
+            return True
+        for triple in accession_triples:
+            if (
+                triple[0] == object['Experiment Set Accession'] and
+                triple[1] == object['Experiment Accession'] and
+                triple[2] == object['File Accession']
+            ):
+                return True
+        return False
+
+
     rows = []
-    for f in results['@graph']:
-        f['href'] = request.host_url + f['href']
-        f_row = []
-        for attr in f_attributes:
-            f_row.append(f.get(attr))
-        data_row = f_row
-        for prop in file_attributes:
-            if prop in f_attributes:
-                continue
-            path = prop
-            temp = []
-            for value in simple_path_ids(f, path):
-                temp.append(str(value))
-            if prop == 'paired_with':
-                # chopping of path to just accession
-                if len(temp):
-                    new_values = [t[7:-1] for t in temp]
-                    temp = new_values
-            data = list(set(temp))
-            data.sort()
-            data_row.append(', '.join(data))
-        rows.append(data_row)
+
+    for exp_set in results['@graph']:
+        exp_set_row_vals = {  }
+
+        for column in header:
+            if not _tsv_mapping[column][0].startswith('experiments_in_set'):
+                exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
+
+        for exp in exp_set.get('experiments_in_set', []):
+            exp_row_vals = {}
+            for column in header:
+                if not _tsv_mapping[column][0].startswith('experiments_in_set.files') and _tsv_mapping[column][0].startswith('experiments_in_set'):
+                    exp_row_vals[column] = get_value_for_column(exp, column, 19)
+
+            for f in exp.get('files', []):
+                f['href'] = request.host_url + f['href']
+                f_row_vals = {}
+                for column in header:
+                    if _tsv_mapping[column][0].startswith('experiments_in_set.files'):
+                        exp_row_vals[column] = get_value_for_column(f, column, 25)
+
+                all_row_vals = dict(exp_set_row_vals, **exp_row_vals, **f_row_vals)
+
+                if all_row_vals.get('Set Bio Rep No') is not None or all_row_vals.get('Set Tec Rep No') is not None:
+                    all_row_vals['Set Tec Rep No'] = get_correct_rep_no('Set Tec Rep No', all_row_vals, exp_set)
+                    all_row_vals['Set Bio Rep No'] = get_correct_rep_no('Set Bio Rep No', all_row_vals, exp_set)
+
+                if (is_row_object_included(all_row_vals)):
+                    rows.append([ all_row_vals[column] for column in header ])
+
     fout = io.StringIO()
     writer = csv.writer(fout, delimiter='\t')
     writer.writerow(header)
