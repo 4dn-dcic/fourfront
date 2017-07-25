@@ -6,6 +6,7 @@ from pyramid.response import Response
 from snovault import TYPES
 from snovault.util import simple_path_ids
 from snovault.embed import make_subrequest
+from itertools import chain
 
 from urllib.parse import (
     parse_qs,
@@ -221,11 +222,12 @@ def metadata_tsv(context, request):
         return ', '.join(list(set(temp)))
 
     def get_correct_rep_no(key, object, set):
+        '''Find which Replicate Exp our File Row Object belongs to, and return its replicate number.'''
         if object is None or key is None or object.get(key) is None:
             return None
         rep_nos = object[key].split(', ')
-        experiment_accession = all_row_vals.get('Experiment Accession')
-        file_accession = all_row_vals.get('File Accession')
+        experiment_accession = object.get('Experiment Accession')
+        file_accession = object.get('File Accession')
         for repl_exp in set.get('replicate_exps'):
             repl_exp_accession = repl_exp.get('replicate_exp', {}).get('accession', None)
             if repl_exp_accession is not None and repl_exp_accession == experiment_accession:
@@ -234,6 +236,7 @@ def metadata_tsv(context, request):
         return None
 
     def is_row_object_included(object):
+        '''Ensure object's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
         if accession_triples is None:
             return True
         for triple in accession_triples:
@@ -245,42 +248,57 @@ def metadata_tsv(context, request):
                 return True
         return False
 
-
-    rows = []
-
-    for exp_set in results['@graph']:
-        exp_set_row_vals = {  }
+    def format_experiment_set(exp_set):
+        exp_set_row_vals = {}
 
         for column in header:
             if not _tsv_mapping[column][0].startswith('experiments_in_set'):
                 exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
+        # Chain to flatten result map up to self.
+        return chain.from_iterable(map(lambda exp: format_experiment(exp, exp_set, exp_set_row_vals), exp_set.get('experiments_in_set', []) ))
 
-        for exp in exp_set.get('experiments_in_set', []):
-            exp_row_vals = {}
-            for column in header:
-                if not _tsv_mapping[column][0].startswith('experiments_in_set.files') and _tsv_mapping[column][0].startswith('experiments_in_set'):
-                    exp_row_vals[column] = get_value_for_column(exp, column, 19)
 
-            for f in exp.get('files', []):
-                f['href'] = request.host_url + f['href']
-                f_row_vals = {}
-                for column in header:
-                    if _tsv_mapping[column][0].startswith('experiments_in_set.files'):
-                        exp_row_vals[column] = get_value_for_column(f, column, 25)
+    def format_experiment(exp, exp_set, exp_set_row_vals):
+        exp_row_vals = {}
+        for column in header:
+            if not _tsv_mapping[column][0].startswith('experiments_in_set.files') and _tsv_mapping[column][0].startswith('experiments_in_set'):
+                exp_row_vals[column] = get_value_for_column(exp, column, 19)
 
-                all_row_vals = dict(exp_set_row_vals, **exp_row_vals, **f_row_vals)
+        return map(lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals), exp.get('files', []) )
 
-                if all_row_vals.get('Set Bio Rep No') is not None or all_row_vals.get('Set Tec Rep No') is not None:
-                    all_row_vals['Set Tec Rep No'] = get_correct_rep_no('Set Tec Rep No', all_row_vals, exp_set)
-                    all_row_vals['Set Bio Rep No'] = get_correct_rep_no('Set Bio Rep No', all_row_vals, exp_set)
 
-                if (is_row_object_included(all_row_vals)):
-                    rows.append([ all_row_vals[column] for column in header ])
+    def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):
+        f['href'] = request.host_url + f['href']
+        f_row_vals = {}
+        for column in header:
+            if _tsv_mapping[column][0].startswith('experiments_in_set.files'):
+                exp_row_vals[column] = get_value_for_column(f, column, 25)
+
+        all_row_vals = dict(exp_set_row_vals, **exp_row_vals, **f_row_vals)
+
+        # If our File object (all_row_vals) has Replicate Numbers, make sure they are corrected.
+        if all_row_vals.get('Set Bio Rep No') is not None or all_row_vals.get('Set Tec Rep No') is not None:
+            all_row_vals['Set Tec Rep No'] = get_correct_rep_no('Set Tec Rep No', all_row_vals, exp_set)
+            all_row_vals['Set Bio Rep No'] = get_correct_rep_no('Set Bio Rep No', all_row_vals, exp_set)
+
+        if (is_row_object_included(all_row_vals)):
+            return all_row_vals
+        else:
+            return None
+
+    data_rows = map(
+        lambda file_row_object: [ file_row_object[column] for column in header ],
+        filter(
+            lambda val: val is not None,
+            # Chain to flatten result map up to self.
+            chain.from_iterable(map(format_experiment_set, results['@graph']))
+        )
+    )
 
     fout = io.StringIO()
     writer = csv.writer(fout, delimiter='\t')
     writer.writerow(header)
-    writer.writerows(rows)
+    writer.writerows(data_rows)
     return Response(
         content_type='text/tsv',
         body=fout.getvalue(),
