@@ -85,7 +85,7 @@
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEXO67APU1"}],
         "submitted_by": "wrangler@wrangler.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "accession":"4DNEXO67APY1",

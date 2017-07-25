@@ -144,7 +144,6 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         login view... not sure why, but yeah..
         '''
 
-
         # we will cache it for the life of this request, cause pyramids does traversal
         cached = getattr(request, '_auth0_authenticated', _fake_user)
         if cached is not _fake_user:
