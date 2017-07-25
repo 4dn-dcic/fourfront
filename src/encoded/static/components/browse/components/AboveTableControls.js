@@ -14,22 +14,27 @@ import { ChartDataController } from './../../viz/chart-data-controller';
 
 
 class SelectedFilesOverview extends React.Component {
+
+    totalFiles(){
+        var exps = this.props.filteredExperiments || this.props.experiments;
+        if (!exps) return 0;
+        return expFxn.fileCountFromExperiments(exps, this.props.includeFileSets);
+    }
+
     render(){
         var selectedFilesCount = _.keys(this.props.selectedFiles).length;
-        var experiments = this.props.filteredExperiments || this.props.experiments;
-        var totalAppend;
-        if (experiments){
-            var totalFilesCount = expFxn.fileCountFromExperiments(experiments, this.props.includeFileSets);
-            totalAppend = ' / ' + totalFilesCount;
-        }
+        var totalFilesCount = this.totalFiles();
         
         return (
             <div className="pull-left box">
-                <span className="text-500">{ selectedFilesCount }</span>{ totalAppend } files selected.
+                <span className="text-500">{ selectedFilesCount }</span> / { totalFilesCount } files selected.
             </div>
         );
     }
 }
+
+
+
 
 
 /**
