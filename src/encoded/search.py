@@ -78,7 +78,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     build_type_filters(result, request, doc_types, types)
 
     # get the fields that will be used as source for the search
-    # currently, supports frame=raw/obnject but live faceting does not work
+    # currently, supports frame=raw/object but live faceting does not work
     # this is okay because the only non-embedded access will be programmatic
     source_fields = sorted(list_source_fields(request, doc_types, search_frame))
 
@@ -331,8 +331,8 @@ def prepare_search_term(request):
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
             prepared_terms['embedded.' + field].append(val)
-        if 'q' in prepared_terms:
-            prepared_terms['q'] = process_query_string(prepared_terms['q'])
+    if 'q' in prepared_terms:
+        prepared_terms['q'] = process_query_string(prepared_terms['q'])
     return prepared_terms
 
 
@@ -340,15 +340,14 @@ def process_query_string(search_query):
     from antlr4 import IllegalStateException
     from lucenequery.prefixfields import prefixfields
     from lucenequery import dialects
-
     if search_query == '*':
         return search_query
-
+    queries = []
     # avoid interpreting slashes as regular expressions
     search_query = search_query.replace('/', r'\/')
     try:
         query = prefixfields('embedded.', search_query, dialects.elasticsearch)
-    except IllegalStateException:
+    except (IllegalStateException):
         msg = "Invalid query: {}".format(search_query)
         raise HTTPBadRequest(explanation=msg)
     else:
@@ -424,7 +423,7 @@ def list_source_fields(request, doc_types, frame):
 
 def build_query(search, prepared_terms, source_fields):
     """
-    Prepare the query within the Search object
+    Prepare the query within the Search object.
     """
     query_info = {}
     string_query = None
@@ -434,6 +433,8 @@ def build_query(search, prepared_terms, source_fields):
     for field, value in prepared_terms.items():
         if field == 'q':
             query_info['query'] = value
+            query_info['use_dis_max'] = True
+            query_info['lenient'] = True
             break
     if query_info != {}:
         string_query = {'must': {'query_string': query_info}}
