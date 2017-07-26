@@ -1,7 +1,7 @@
 [
     {
         "uuid": "331111bc-8535-4448-903e-854af460b254",
-        "description": "other GM12878 cells",
+        "description": "GM12878 test cells 1",
         "biosource_type": "immortalized cell line",
         "individual":"4DNINOOOAAQ1",
         "cell_line": "530036bc-8535-4448-903e-854af460b24c",
@@ -13,7 +13,7 @@
     },
     {
         "uuid": "331111bc-8535-4448-903e-854af460a254",
-        "description": "test GM12878 cells",
+        "description": "GM12878 test cells 2",
         "biosource_type": "immortalized cell line",
         "individual":"4DNINOOOAAQ1",
         "cell_line": "530036bc-8535-4448-903e-854af460b24c",
@@ -28,7 +28,6 @@
         "description": "test H1 cells",
         "biosource_type": "stem cell",
         "individual":"4DNINOOOAAQ1",
-        "cell_line": "530036bc-8535-4448-903e-854af460b24c",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
@@ -50,7 +49,7 @@
     },
     {
         "uuid": "331111bc-8535-4448-903e-854af460b666",
-        "description": "Some cells",
+        "description": "Some differentiated cells",
         "biosource_type": "in vitro differentiated cells",
         "individual":"4DNINOOOAAQ1",
         "award": "1U01CA200059-01",
@@ -61,7 +60,7 @@
     },
     {
         "uuid": "111116bc-8535-4448-903e-854af460b254",
-        "description": "brain",
+        "description": "Brain Tissue",
         "biosource_type": "tissue",
         "individual":"4DNINOOOAAQ1",
         "award": "1U01CA200059-01",
@@ -71,23 +70,12 @@
     },
     {
         "uuid": "331111bc-8535-4448-903e-854af460b89f",
-        "description": "GM12878",
+        "description": "Some iPSC line",
         "biosource_type": "induced pluripotent stem cell line",
         "individual":"4DNINOOOAAQ1",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
-    },
-    {
-        "uuid": "331111bc-8535-4448-903e-854af460bab5",
-        "description": "GM12878 cells",
-        "biosource_type": "stem cell",
-        "individual":"4DNINOOOAAQ1",
-        "award": "1U01CA200059-01",
-        "lab": "4dn-dcic-lab",
-        "submitted_by": "wrangler@wrangler.com",
-        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     }
 ]
