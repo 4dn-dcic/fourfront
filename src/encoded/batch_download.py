@@ -212,7 +212,7 @@ def metadata_tsv(context, request):
         except Exception as e:
             print('Ignoring exception on parsing metadata request body - no file accession triples set. Details:', e)
             pass
-        if body.get('accession_triples'):
+        if body is not None and body.get('accession_triples'):
             accession_triples = [ (accDict.get('accession'), accDict.get('experiments_in_set.accession'), accDict.get('experiments_in_set.files.accession') ) for accDict in body['accession_triples'] ]
     
     if 'referrer' in param_list:
