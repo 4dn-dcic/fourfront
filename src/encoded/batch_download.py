@@ -128,6 +128,13 @@ def get_peak_metadata_links(request):
     return [peak_metadata_tsv_link, peak_metadata_json_link]
 
 
+class DummyFileInterfaceImplementation(object):
+    def __init__(self):
+        self._line = None
+    def write(self, line):
+        self._line = line
+    def read(self):
+        return self._line
 
 
 @view_config(route_name='peak_metadata', request_method='GET')
@@ -182,13 +189,15 @@ def peak_metadata(context, request):
     )
 
 
-@view_config(route_name='metadata', request_method='GET')
+
+@view_config(route_name='metadata', request_method=['GET', 'POST'])
 def metadata_tsv(context, request):
 
     param_list = parse_qs(request.matchdict['search_params'])
 
-    accession_triples = None # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
-    if (
+    # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
+    accession_triples = None
+    if ( # Check if triples are in URL.
         param_list.get('accession') is not None and
         param_list.get('experiments_in_set.accession') is not None and
         param_list.get('experiments_in_set.files.accession') is not None and
@@ -196,6 +205,16 @@ def metadata_tsv(context, request):
     ):
         accession_triples = list(zip(param_list['accession'], param_list['experiments_in_set.accession'], param_list['experiments_in_set.files.accession']))
 
+    if not accession_triples:
+        body = None
+        try:
+            body = request.json_body
+        except Exception as e:
+            print('Ignoring exception on parsing metadata request body - no file accession triples set. Details:', e)
+            pass
+        if body.get('accession_triples'):
+            accession_triples = [ (accDict.get('accession'), accDict.get('experiments_in_set.accession'), accDict.get('experiments_in_set.files.accession') ) for accDict in body['accession_triples'] ]
+    
     if 'referrer' in param_list:
         search_path = '/{}/'.format(param_list.pop('referrer')[0])
     else:
@@ -207,7 +226,6 @@ def metadata_tsv(context, request):
         param_list['field'] = param_list['field'] + _tsv_mapping[prop]
     param_list['limit'] = ['all']
     path = '{}?{}'.format(search_path, urlencode(param_list, True))
-    results = request.invoke_subrequest(make_subrequest(request, path)).json
 
     def get_value_for_column(item, col, columnKeyStart = 0):
         temp = []
@@ -230,12 +248,12 @@ def metadata_tsv(context, request):
         rep_nos = object[key].split(', ')
         experiment_accession = object.get('Experiment Accession')
         file_accession = object.get('File Accession')
-        for repl_exp in set.get('replicate_exps'):
+        for repl_exp in set.get('replicate_exps',[]):
             repl_exp_accession = repl_exp.get('replicate_exp', {}).get('accession', None)
             if repl_exp_accession is not None and repl_exp_accession == experiment_accession:
                 rep_key = 'bio_rep_no' if key == 'Set Bio Rep No' else 'tec_rep_no'
-                return repl_exp.get(rep_key)
-        return None
+                return str(repl_exp.get(rep_key))
+        return ''
 
     def should_file_row_object_be_included(object):
         '''Ensure object's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
@@ -255,7 +273,7 @@ def metadata_tsv(context, request):
         for column in header:
             if not _tsv_mapping[column][0].startswith('experiments_in_set'):
                 exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
-        # Chain to flatten result map up to self.
+        # Flatten map's child result maps up to self.
         return chain.from_iterable(map(lambda exp: format_experiment(exp, exp_set, exp_set_row_vals), exp_set.get('experiments_in_set', []) ))
 
 
@@ -284,24 +302,40 @@ def metadata_tsv(context, request):
 
         return all_row_vals
 
-
-    data_rows = map(
-        # Convert object to list of values in same order defined in tsvMapping & header.
-        lambda file_row_object: [ file_row_object[column] for column in header ],
-        filter(
-            lambda file_row_object: should_file_row_object_be_included(file_row_object),
-            # Chain to flatten result map up to self.
-            chain.from_iterable(map(format_experiment_set, results['@graph']))
+    def format_graph_of_experiment_sets(graph):
+        return map(
+            # Convert object to list of values in same order defined in tsvMapping & header.
+            lambda file_row_object: [ file_row_object[column] for column in header ],
+            filter(
+                lambda file_row_object: should_file_row_object_be_included(file_row_object),
+                # Flatten map's child result maps up to self.
+                chain.from_iterable(map(format_experiment_set, graph))
+            )
         )
-    )
 
-    fout = io.StringIO()
-    writer = csv.writer(fout, delimiter='\t')
-    writer.writerow(header)
-    writer.writerows(data_rows)
+    def stream_tsv_output(rows):
+        line = DummyFileInterfaceImplementation()
+        writer = csv.writer(line, delimiter='\t')
+        writer.writerow(header)
+        yield line.read().encode('utf-8')
+        for row in rows:
+            writer.writerow(row)
+            yield line.read().encode('utf-8')
+
+    # Non-streaming variant:
+    #fout = io.StringIO()
+    #writer = csv.writer(fout, delimiter='\t')
+    #writer.writerow(header)
+    #writer.writerows(data_rows)
+
     return Response(
         content_type='text/tsv',
-        body=fout.getvalue(),
+        # Non-streaming variant (comment out app_iter) : body=fout.getvalue(),
+        app_iter = stream_tsv_output(
+            format_graph_of_experiment_sets(
+                request.invoke_subrequest(make_subrequest(request, path)).json.get('@graph', []) # Replaces request.embed b/c request.embed didn't work for /search/
+            )
+        ),
         content_disposition='attachment;filename="%s"' % 'metadata.tsv'
     )
 

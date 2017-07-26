@@ -40,6 +40,11 @@ class SelectedFilesDownloadButton extends React.Component {
     constructor(props){
         super(props);
         this.handleClick = _.throttle(this.handleClick.bind(this), 1000);
+        this.renderModal = this.renderModal.bind(this);
+        this.state = {
+            'modalOpen' : false,
+            'urls' : null
+        };
     }
 
     generateMetadataTSVPath(){
@@ -57,8 +62,36 @@ class SelectedFilesDownloadButton extends React.Component {
         var urlParts = url.parse(windowHref(this.props.href));
         var prefix = urlParts.protocol + '//' + urlParts.host;
         var urls = [this.generateMetadataTSVPath()].concat(_.pluck(_.values(this.props.selectedFiles), 'href')).map(function(downloadPath){ return prefix + downloadPath; }).join('\n');
-        console.log(urls);
-        alert(urls);
+        //console.log(urls);
+        //alert(urls);
+        this.setState({ 'modalOpen' : true, 'urls' : urls });
+    }
+
+    renderModal(){
+        if (!this.state.modalOpen) return null;
+        var textAreaStyle = {
+            'minWidth' : '100%',
+            'minHeight' : 400,
+            'fontFamily' : 'monospace'
+        };
+        return (
+            <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }) }}>
+                <Modal.Header>
+                    <Modal.Title>Download Files</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Please copy and paste the text below into a cURL command to download these files, or click
+                    the "Download" button to save it as a file.</p>
+
+                    <p>If saving as a file, it can be ran from any server, for example with the following cURL command:</p>
+                    <pre>{ 'xargs -n 1 curl -O -L < files.txt' }</pre>
+                    <hr/>
+                    <div>
+                        <textarea style={textAreaStyle} value={this.state.urls}/>
+                    </div>
+                </Modal.Body>
+            </Modal>
+        );
     }
 
     render(){
@@ -69,6 +102,7 @@ class SelectedFilesDownloadButton extends React.Component {
                 <Button key="download" onClick={this.handleClick} disabled={disabled}>
                     <i className="icon icon-download icon-fw"/> Download { countSelectedFiles } Files
                 </Button>
+                { this.renderModal() }
             </div>
         );
     }
