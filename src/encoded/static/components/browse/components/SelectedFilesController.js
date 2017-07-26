@@ -76,6 +76,12 @@ export class SelectedFilesController extends React.Component {
         }
     }
 
+    componentDidUpdate(pastProps, pastState){
+        if (_.keys(pastState.selectedFiles).length !== _.keys(this.state.selectedFiles).length){
+            console.info("Changed selectedFiles:", pastState.selectedFiles, '==>', this.state.selectedFiles);
+        }
+    }
+
     selectFile(uuid: string, memo = null){
         
         var newSelectedFiles = _.clone(this.state.selectedFiles);

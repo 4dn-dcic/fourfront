@@ -48,7 +48,7 @@ def test_store_ontology_no_required_keys(testapp, oterm):
 
 def test_linkto_ontology_term_by_term_name(testapp, lab, award, oterm):
     item = {
-        "accession": "4DNSR000AAQ1",
+        "accession": "4DNSROOOAAQ1",
         "biosource_type": "immortalized cell line",
         'award': award['@id'],
         'lab': lab['@id'],

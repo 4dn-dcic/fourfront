@@ -471,12 +471,21 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				tr th {
 					white-space: normal;
 					word-break: normal;
+					padding: 7px 4px;
+
+					&.has-children {
+						> .tooltip-info-container {
+							padding-left: 36px;
+							border-bottom: 1px solid #ddd;
+							padding-bottom: 7px;
+						}
+					}
 					
 					.sub-list-keys-header {
-						margin-left: -3px;
-						margin-right: -3px;
+						margin-left: -4px;
+						margin-right: -4px;
 						> div.inline-block {
-							padding: 2px 3px;
+							padding: 5px 8px 0px;
 						}
 						div.child-list-row-number {
 							width: 36px;
@@ -486,7 +495,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				}
 				tr td {
 					word-break: normal;
-					padding: 5px 8px;
+					padding: 7px 8px;
 					&.child-list-row-container {
 						padding: 0;
 						border-left: 1px dotted #ccc;

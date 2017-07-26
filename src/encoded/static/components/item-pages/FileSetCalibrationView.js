@@ -25,8 +25,6 @@ export default class FileSetCalibrationView extends React.Component {
         return (
             <div className={itemClass}>
 
-                <ItemPageTitle context={context} schemas={schemas} />
-
                 <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={schemas}>
                     <ItemHeader.TopRow />
                     <ItemHeader.MiddleRow />

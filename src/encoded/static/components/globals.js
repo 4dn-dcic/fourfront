@@ -180,6 +180,8 @@ export function isHashPartOfHref(href, parts = null){
     if (!parts && typeof href !== 'string') throw Error("No href or parts passed.");
     if (!parts) parts = url.parse(href);
 
+    if (parts.hash === '#!edit' || parts.hash === '#!create') return true;
+
     // Custom Rules
     if (parts.path.slice(0,14) === '/workflow-runs' || parts.path.slice(0,11) === '/workflows/' ){
         return true;

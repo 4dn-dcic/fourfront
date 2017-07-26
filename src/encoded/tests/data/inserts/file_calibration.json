@@ -1,6 +1,6 @@
 [
     {
-        "accession":"4DNFI0TEST01",
+        "accession":"4DNFIOTESTO1",
         "description": "Template Calibration File01",
         "attachment": "photo.jpg",
         "lab": "4dn-dcic-lab",
@@ -11,7 +11,7 @@
         "status": "uploaded"
     },
     {
-        "accession":"4DNFI0TEST02",
+        "accession":"4DNFIOTESTO2",
         "description": "Template Calibration File02",
         "attachment": "photo.jpg",
         "lab": "4dn-dcic-lab",
@@ -22,7 +22,7 @@
         "status": "uploaded"
     },
     {
-        "accession":"4DNFI0TEST03",
+        "accession":"4DNFIOTESTO3",
         "description": "Template Calibration File03",
         "attachment": "photo.jpg",
         "lab": "4dn-dcic-lab",
@@ -33,7 +33,7 @@
         "status": "uploaded"
     },
     {
-        "accession":"4DNFI0TEST04",
+        "accession":"4DNFIOTESTO4",
         "description": "Template Calibration File04",
         "attachment": "photo.jpg",
         "lab": "4dn-dcic-lab",

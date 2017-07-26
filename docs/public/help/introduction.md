@@ -1,13 +1,13 @@
 ## Overview
 
 The 4DN Data Portal will be the primary access point to the omics and imaging data, analysis tools, and integrative models
-generated and utilized by the 4DN Network.
-As of September 2016, **the portal is currently only open to beta-testers within the network for data submission** for
-Hi-C and Hi-C-variant experiments.  Further developments in the metadata models and portal front-end are under way. The portal will be made accessible to the 4DN Network and scientific community at large over the next months.
+generated and utilized by the 4DN Network.  See [below](#metadata-structure) for an overview of our metadata model.
+As of September 2017, the portal is currently open to the network for data submission for
+Hi-C and Hi-C-variant experiments.  Continuing developments in the metadata models and portal front-end are ongoing.
 
-If you would like submit data to the portal, please contact
+*Note for prospective submitters* If you would like submit data to the portal, please contact
 [the data wranglers](mailto:4DN.DCIC.support@hms-dbmi.atlassian.net) to get data submitter accounts.
-Also, please skim through the [metadata structure](#metadata-structure) and check out the other pages in the **Help** menu for detailed information on the submission process.
+Also, please skim through the [metadata structure](#metadata-structure) and check out the other pages in the **Help** menu for detailed information on the submission process.  Of note are the required metadata for the biological samples used in experiments, which is specified [on this page](/help/cell-culture). 
 We can set up a webex call to discuss the details and the most convenient approach for your existing system.
 
 ## Metadata Structure

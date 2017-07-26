@@ -99,6 +99,7 @@ class ResultTableContainer extends React.Component {
         this.hiddenColumns = this.hiddenColumns.bind(this);
         this.render = this.render.bind(this);
     }
+    
     /*
     shouldComponentUpdate(nextProps, nextState){
         if (this.props.selectedFiles !== nextProps.selectedFiles) return true;
@@ -147,7 +148,7 @@ class ResultTableContainer extends React.Component {
                 'render' : (expSet, columnDefinition, props, width) => {
                     var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
                     var newChildren = origTitleBlock.props.children.slice(0);
-                    var allFiles = ExperimentSetDetailPane.allFiles(expSet);
+                    var allFiles = expFxn.allFilesFromExperimentSet(expSet); //ExperimentSetDetailPane.allFiles(expSet);
                     var allFileIDs = _.pluck(allFiles, 'uuid');
                     var allFilesKeyedByID = _.object(_.zip(allFileIDs, allFiles));
                     allFileIDs = allFileIDs.sort();
@@ -276,6 +277,20 @@ class ControlsAndResults extends React.Component {
     }
 
     render(){
+
+        var defaultHiddenColumns = ['lab.display_title', 'date_created', 'status'];
+        /*
+        var hiddenColumns = [];
+        // Hide columns by default which have same value for all items.
+        if (this.props.context && this.props.context.columns && this.props.context.facets){
+            hiddenColumns = _.pluck(_.filter(this.props.context.facets, (facet)=>{
+                return (facet.terms.length <= 1 && typeof this.props.context.columns[facet.field] !== 'undefined');
+            }), 'field');
+        }
+        */
+
+
+
         //var fileStats = this.state.fileStats;
         //var targetFiles = this.state.filesToFind;
         //var selectorButtons = this.props.fileFormats.map(function (format, idx) {
@@ -317,7 +332,7 @@ class ControlsAndResults extends React.Component {
                 </div>*/}
 
                 <SelectedFilesController href={this.props.href}>
-                    <CustomColumnController defaultHiddenColumns={['lab.display_title', 'date_created', 'status']}>
+                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
                         <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer
                                 expSetFilters={this.props.expSetFilters}
@@ -380,11 +395,11 @@ export default class BrowseView extends React.Component {
         }
 
         return (
-            <div className="browse-page-container">
-
+            <div className="browse-page-container" id="browsePageContainer">
+            {/*
                 <h1 className="page-title">Data Browser</h1>
                 <h4 className="page-subtitle">Filter & browse experiments</h4>
-
+            */}
                 <ControlsAndResults
                     {...this.props}
                     //fileFormats={fileFormats}

@@ -737,14 +737,20 @@ export default class FacetList extends React.Component {
         // Lets extend Browse version w/ more strictness (remove audits).
         var browseFilterResult = FacetList.filterFacetsForBrowse.apply(this, arguments);
         if (!browseFilterResult) return false;
-        if (facet.field.substring(0, 25) === 'experiments_in_set.audit.'){
-            return false; // Ignore audit facets temporarily, esp if logged out.
-        }
+        //if (facet.field.substring(0, 25) === 'experiments_in_set.audit.'){
+        //    return false; // Ignore audit facets temporarily, esp if logged out.
+        //}
         return true;
     }
 
     static filterFacetsForSearch(facet, props, state){
+        if (facet.field.indexOf('experiments.experiment_sets.') > -1) return false;
+        if (facet.field === 'experiment_sets.@type') return false;
+        if (facet.field === 'experiment_sets.experimentset_type') return false;
         if (facet.field.substring(0, 6) === 'audit.'){
+            if (props.session && JWT.getUserDetails().groups.indexOf('admin') > -1){
+                return true;
+            }
             return false; // Ignore audit facets temporarily, esp if logged out.
         }
         return true;

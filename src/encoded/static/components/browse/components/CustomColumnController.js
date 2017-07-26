@@ -24,7 +24,13 @@ export class CustomColumnController extends React.Component {
             'hiddenColumns' : Array.isArray(props.defaultHiddenColumns) ? props.defaultHiddenColumns : []
         };
     }
-
+    /*
+    componentWillReceiveProps(nextProps){
+        if (nextProps.defaultHiddenColumns !== this.props.defaultHiddenColumns){
+            this.setState({ hiddenColumns : _.uniq(this.state.hiddenColumns.concat(this.props.defaultHiddenColumns)) });
+        }
+    }
+    */
     getAllHiddenColumns(props = this.props){
         if (Array.isArray(props.hiddenColumns)) return props.hiddenColumns.concat(this.state.hiddenColumns);
         else return this.state.hiddenColumns;
@@ -49,11 +55,6 @@ export class CustomColumnController extends React.Component {
         });
         return React.cloneElement(this.props.children, propsToPass);
     }
-
-}
-
-
-class SelectorModalPane extends React.Component {
 
 }
 

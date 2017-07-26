@@ -242,9 +242,6 @@ export class Wrapper extends React.Component {
 
         return (
             <div className="static-page row">
-                <div className={mainColClassName}>
-                    <h1 className="page-title">{ title }</h1>
-                </div>
                 { this.renderToC() }
                 <div className={mainColClassName}>
                     { this.props.children }
