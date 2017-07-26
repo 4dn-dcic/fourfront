@@ -225,6 +225,12 @@ def metadata_tsv(context, request):
         header.append(prop)
         param_list['field'] = param_list['field'] + _tsv_mapping[prop]
     param_list['limit'] = ['all']
+    # Ensure we send accessions to ES to help narrow initial result down. 
+    # If too many accessions to include in /search/ URL (exceeds 2048 characters, aka accessions for roughly 20 files), we'll fetch search query as-is and then filter/narrow down.
+    if accession_triples and len(accession_triples) < 20:
+        param_list['accession'] = [ triple[0] for triple in accession_triples ]
+        param_list['experiments_in_set.accession'] = [ triple[1] for triple in accession_triples ]
+        param_list['experiments_in_set.files.accession'] = [ triple[2] for triple in accession_triples ]
     path = '{}?{}'.format(search_path, urlencode(param_list, True))
 
     def get_value_for_column(item, col, columnKeyStart = 0):
