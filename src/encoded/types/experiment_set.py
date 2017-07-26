@@ -87,7 +87,14 @@ class ExperimentSet(Item):
                 "experiments_in_set.filesets.files_in_set.*",
                 "experiments_in_set.filesets.files_in_set.related_files.relationship_type",
                 "experiments_in_set.filesets.files_in_set.related_files.file.uuid",
-                "experiments_in_set.digestion_enzyme.*"]
+                "experiments_in_set.digestion_enzyme.*",
+                "processed_files.href",
+                "processed_files.accession",
+                "processed_files.uuid",
+                "processed_files.file_size",
+                "processed_files.upload_key",
+                "processed_files.file_format",
+                "processed_files.file_classification"]
 
     def _update(self, properties, sheets=None):
         if 'date_released' not in properties:

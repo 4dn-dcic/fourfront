@@ -121,6 +121,17 @@
                 "linkTo": "File"
             }
         },
+        "processed_files": {
+            "title": "Processed Files",
+            "description": "Processed files that are derived from files in this experiment.",
+            "type": "array",
+            "items": {
+                "title": "Processed File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileProcessed"
+            }
+        },
         "filesets": {
             "title": "Sets of Data Files",
             "description": "Information about a set of data files associated with the experiment.",
