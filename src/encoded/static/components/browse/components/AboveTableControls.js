@@ -6,6 +6,7 @@ import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import { isServerSide, Filters, expFxn, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
+import { windowHref } from './../../globals';
 import * as vizUtil from './../../viz/utilities';
 import { SearchResultTable } from './SearchResultTable';
 import { CustomColumnSelector } from './CustomColumnController';
@@ -34,8 +35,54 @@ class SelectedFilesOverview extends React.Component {
 }
 
 
+class SelectedFilesDownloadButton extends React.Component {
 
+    constructor(props){
+        super(props);
+        this.handleClick = _.throttle(this.handleClick.bind(this), 1000);
+    }
 
+    generateMetadataTSVPath(){
+        return '/metadata/type=ExperimentSet&' + _.map(_.values(this.props.selectedFiles), function(fileObj){
+            var fileSelectionDetails = ((fileObj && fileObj.fileSelectionDetails) || {});
+            var fileSelectionDetailsKeys = _.keys(fileSelectionDetails);
+            return _.map(fileSelectionDetailsKeys, function(k){
+                return k + '=' + fileSelectionDetails[k];
+            }).join('&');
+        }).join('&') + '/metadata.tsv';
+    }
+
+    handleClick(e){
+        console.log(this, e);
+        var urlParts = url.parse(windowHref(this.props.href));
+        var prefix = urlParts.protocol + '//' + urlParts.host;
+        var urls = [this.generateMetadataTSVPath()].concat(_.pluck(_.values(this.props.selectedFiles), 'href')).map(function(downloadPath){ return prefix + downloadPath; }).join('\n');
+        console.log(urls);
+        alert(urls);
+    }
+
+    render(){
+        var countSelectedFiles = _.keys(this.props.selectedFiles).length;
+        var disabled = countSelectedFiles === 0;
+        return (
+            <div className="pull-left box">
+                <Button key="download" onClick={this.handleClick} disabled={disabled}>
+                    <i className="icon icon-download icon-fw"/> Download { countSelectedFiles } Files
+                </Button>
+            </div>
+        );
+    }
+}
+
+class SelectedFilesControls extends React.Component {
+    render(){
+        return (
+            <div>
+                <SelectedFilesOverview {...this.props}/> <SelectedFilesDownloadButton {...this.props}/>
+            </div>
+        );
+    }
+}
 
 /**
  * This component must be fed props from CustomColumnController (for columns UI), SelectedFilesController (for selected files read-out).
@@ -174,7 +221,7 @@ export class AboveTableControls extends React.Component {
         if (this.props.showSelectedFileCount && this.props.selectedFiles){
             return (
                 <ChartDataController.Provider>
-                    <SelectedFilesOverview selectedFiles={this.props.selectedFiles} />
+                    <SelectedFilesControls selectedFiles={this.props.selectedFiles} />
                 </ChartDataController.Provider>
             );
         }

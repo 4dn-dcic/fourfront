@@ -275,7 +275,7 @@ def metadata_tsv(context, request):
             if _tsv_mapping[column][0].startswith('experiments_in_set.files'):
                 exp_row_vals[column] = get_value_for_column(f, column, 25)
 
-        all_row_vals = dict(exp_set_row_vals, **exp_row_vals, **f_row_vals) # Combine data from ExpSet, Exp, and File
+        all_row_vals = dict(exp_set_row_vals, **dict(exp_row_vals, **f_row_vals)) # Combine data from ExpSet, Exp, and File
 
         # If our File object (all_row_vals) has Replicate Numbers, make sure they are corrected.
         if all_row_vals.get('Set Bio Rep No') is not None or all_row_vals.get('Set Tec Rep No') is not None:

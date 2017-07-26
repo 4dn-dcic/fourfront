@@ -72,6 +72,7 @@ export class ExperimentSetDetailPane extends React.Component {
                         { columnClass: 'file-detail', title : 'File Type'},
                         { columnClass: 'file-detail', title : 'File Info'}
                     ]}
+                    experimentSetAccession={expSet.accession || null}
                     experimentArray={expSet.experiments_in_set}
                     replicateExpsArray={expSet.replicate_exps}
                     experimentSetType={expSet.experimentset_type}
