@@ -58,6 +58,7 @@ def verify_schema(item_type_camel, registry):
 
 @verifier
 def verify_can_embed(item_type_camel, es_item, indexer_testapp, registry):
+    from snovault import TYPES
     # get the embedds
     pyr_item_type = registry[TYPES].by_item_type[item_type_camel]
     embeds = pyr_item_type.embedded
@@ -95,8 +96,8 @@ def verify_item(item_uuid, indexer_testapp, testapp, registry):
     verify_schema(item_type_camel, registry)
     verify_can_embed(item_type_camel, es_item, indexer_testapp, registry)
     verify_indexing(item_uuid, indexer_testapp)
-    verify_embeds(registry, item_type)
-    verify_mapping(registry, item_type)
+    verify_embeds(registry, item_type_camel)
+    verify_mapping(registry, item_type_camel)
 
 
 def ensure_basic_data(item_data, item_type=None):
