@@ -12,7 +12,7 @@
         "notes": "sample dcic notes",
         "lab": "test-4dn-lab",
         "aliases": ["dcic:alias1"],
-        "files": ["4DNFI067APU1", "4DNFI067APA1"],
+        "files": ["4DNFIN232JK7", "4DNFIN232JK8"],
         "description": "Test ATAC seq",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461224b",
         "uuid": "66661e2f-3e43-4388-8bbb-e861f209c444",
