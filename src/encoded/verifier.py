@@ -74,6 +74,19 @@ def verify_indexing(item_uuid, indexer_testapp):
     assert(res)
 
 
+@verifier
+def verify_embeds(registry, item_type):
+    from encoded.tests.test_embedding import test_add_default_embeds, test_manual_embeds
+    test_add_default_embeds(registry, item_type)
+    test_manual_embeds(registry, item_type)
+
+
+@verifier
+def verify_mapping(registry, item_type):
+    from encoded.tests.test_create_mapping import test_create_mapping
+    test_create_mapping(registry, item_type)
+
+
 def verify_item(item_uuid, indexer_testapp, testapp, registry):
     es_item, item_type = verify_get_from_es(item_uuid, indexer_testapp, registry)
     verify_get_by_accession(es_item, item_type, indexer_testapp)
@@ -82,7 +95,8 @@ def verify_item(item_uuid, indexer_testapp, testapp, registry):
     verify_schema(item_type_camel, registry)
     verify_can_embed(item_type_camel, es_item, indexer_testapp, registry)
     verify_indexing(item_uuid, indexer_testapp)
-    # call carls embed tester
+    verify_embeds(registry, item_type)
+    verify_mapping(registry, item_type)
 
 
 def ensure_basic_data(item_data, item_type=None):
