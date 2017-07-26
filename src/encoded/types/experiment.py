@@ -27,10 +27,25 @@ class Experiment(Item):
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
-    embedded = ["protocol.*", "protocol_variation.*", "lab.*", "award.*", "experiment_sets.*",
-                "produced_in_pub.*", "publications_of_exp.*",
-                "biosample.*", "biosample.biosource.*", "biosample.modifications.*",
-                "biosample.treatments.*", "biosample.biosource.individual.organism.*"]
+    embedded = ["protocol.*",
+                "protocol_variation.*",
+                "lab.*",
+                "award.*",
+                "experiment_sets.*",
+                "produced_in_pub.*",
+                "publications_of_exp.*",
+                "biosample.*",
+                "biosample.biosource.*",
+                "biosample.modifications.*",
+                "biosample.treatments.*",
+                "biosample.biosource.individual.organism.*",
+                "processed_files.href",
+                "processed_files.accession",
+                "processed_files.uuid",
+                "processed_files.file_size",
+                "processed_files.upload_key",
+                "processed_files.file_format",
+                "processed_files.file_classification"]
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
