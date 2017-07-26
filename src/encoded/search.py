@@ -342,7 +342,6 @@ def process_query_string(search_query):
     from lucenequery import dialects
     if search_query == '*':
         return search_query
-    queries = []
     # avoid interpreting slashes as regular expressions
     search_query = search_query.replace('/', r'\/')
     try:
