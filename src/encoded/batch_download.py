@@ -41,9 +41,10 @@ _tsv_mapping = OrderedDict([
     #('Output type', ['output_type']),
     ('Experiment Title', ['experiments_in_set.display_title']),
     ('Experiment Accession', ['experiments_in_set.accession']),
+    ('Experiment Type', ['experiments_in_set.experiment_type']),
     ('Experiment Set Accession', ['accession']),
-    ('Set Bio Rep No', ['replicate_exps.bio_rep_no']),
-    ('Set Tec Rep No', ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession']),
+    ('Bio Rep No', ['replicate_exps.bio_rep_no']),
+    ('Tech Rep No', ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession']),
 
     #('Assay', ['assay_term_name']),
     #('Biosample term id', ['biosample_term_id']),
@@ -71,7 +72,7 @@ _tsv_mapping = OrderedDict([
     #('Library extraction method', ['replicates.library.extraction_method']),
     #('Library lysis method', ['replicates.library.lysis_method']),
     #('Library crosslinking method', ['replicates.library.crosslinking_method']),
-    ('Date Created', ['experiments_in_set.files.date_created']),
+    #('Date Created', ['experiments_in_set.files.date_created']),
     #('Project', ['award.project']),
     #('RBNS protein concentration', ['files.replicate.rbns_protein_concentration', 'files.replicate.rbns_protein_concentration_units']),
     #('Library fragmentation method', ['files.replicate.library.fragmentation_method']),
@@ -262,7 +263,7 @@ def metadata_tsv(context, request):
         for repl_exp in set.get('replicate_exps',[]):
             repl_exp_accession = repl_exp.get('replicate_exp', {}).get('accession', None)
             if repl_exp_accession is not None and repl_exp_accession == experiment_accession:
-                rep_key = 'bio_rep_no' if key == 'Set Bio Rep No' else 'tec_rep_no'
+                rep_key = 'bio_rep_no' if key == 'Bio Rep No' else 'tec_rep_no'
                 return str(repl_exp.get(rep_key))
         return ''
 
@@ -307,9 +308,9 @@ def metadata_tsv(context, request):
         all_row_vals = dict(exp_set_row_vals, **dict(exp_row_vals, **f_row_vals)) # Combine data from ExpSet, Exp, and File
 
         # If our File object (all_row_vals) has Replicate Numbers, make sure they are corrected.
-        if all_row_vals.get('Set Bio Rep No') is not None or all_row_vals.get('Set Tec Rep No') is not None:
-            all_row_vals['Set Tec Rep No'] = get_correct_rep_no('Set Tec Rep No', all_row_vals, exp_set)
-            all_row_vals['Set Bio Rep No'] = get_correct_rep_no('Set Bio Rep No', all_row_vals, exp_set)
+        if all_row_vals.get('Bio Rep No') is not None or all_row_vals.get('Tech Rep No') is not None:
+            all_row_vals['Tech Rep No'] = get_correct_rep_no('Tech Rep No', all_row_vals, exp_set)
+            all_row_vals['Bio Rep No'] = get_correct_rep_no('Bio Rep No', all_row_vals, exp_set)
 
         return all_row_vals
 
