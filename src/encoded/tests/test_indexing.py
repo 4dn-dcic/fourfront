@@ -98,6 +98,7 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert res.json['indexed'] == 1
     assert res.json['txn_count'] == 1
     assert res.json['updated'] == [uuid]
+    time.sleep(3)
     # check es directly
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
     assert doc_count == 2
