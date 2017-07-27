@@ -786,6 +786,24 @@ def load_prod_data(app, access_key_loc=None):
     store_keys(app, access_key_loc, keys)
 
 
+def load_jin_data(app, access_key_loc=None):
+    """smth."""
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+
+    from pkg_resources import resource_filename
+    inserts = resource_filename('encoded', 'tests/data/jin_inserts/')
+    docsdir = []
+    load_all(testapp, inserts, docsdir)
+    keys = generate_access_key(testapp, access_key_loc,
+                               server="https://testportal.4dnucleome.org")
+    store_keys(app, access_key_loc, keys)
+
+
 def load_ontology_terms(app,
                         post_json='tests/data/ontology-term-inserts/ontology_post.json',
                         patch_json='tests/data/ontology-term-inserts/ontology_patch.json',):

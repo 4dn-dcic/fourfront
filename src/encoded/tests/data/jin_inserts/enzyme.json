@@ -1,22 +1,22 @@
 [
     {
-        "status": "released",
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
-        "documents": [],
-        "catalog_number": "R0104",
-        "url": "https://www.neb.com/products/r0104-hindiii",
-        "site_length": 6,
-        "uuid": "2ace2f00-c913-4bac-a6ef-0b316bc2108e",
-        "schema_version": "1",
-        "name": "HindIII",
-        "enzyme_source": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
-        "date_created": "2017-04-09T17:24:15.836360+00:00",
-        "cut_position": 1,
-        "recognition_sequence": "AAGCTT",
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "uuid": "2ace2f00-c913-4bac-a6ef-0b316bc2108e", 
+        "url": "https://www.neb.com/products/r0104-hindiii", 
+        "site_length": 6, 
+        "recognition_sequence": "AAGCTT", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "enzyme_source": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "date_created": "2017-04-09T17:24:15.836360+00:00", 
+        "cut_position": 1, 
         "aliases": [
             "dcic:hindIII_neb"
-        ]
+        ], 
+        "catalog_number": "R0104", 
+        "name": "HindIII"
     }
 ]
