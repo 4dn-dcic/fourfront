@@ -37,6 +37,10 @@ class SelectedFilesOverview extends React.Component {
 
 class SelectedFilesDownloadButton extends React.Component {
 
+    static encodePlainText(text){
+        return 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+    }
+
     constructor(props){
         super(props);
         this.handleClick = _.throttle(this.handleClick.bind(this), 1000);
@@ -57,14 +61,17 @@ class SelectedFilesDownloadButton extends React.Component {
         }).join('&') + '/metadata.tsv';
     }
 
+    getAccessionTriples(){
+        return _.pluck(_.values(this.props.selectedFiles), 'fileSelectionDetails');
+    }
+
     handleClick(e){
         console.log(this, e);
         var urlParts = url.parse(windowHref(this.props.href));
         var prefix = urlParts.protocol + '//' + urlParts.host;
-        var urls = [this.generateMetadataTSVPath()].concat(_.pluck(_.values(this.props.selectedFiles), 'href')).map(function(downloadPath){ return prefix + downloadPath; }).join('\n');
-        //console.log(urls);
-        //alert(urls);
-        this.setState({ 'modalOpen' : true, 'urls' : urls });
+        //var urls = [this.generateMetadataTSVPath()].concat(_.pluck(_.values(this.props.selectedFiles), 'href')).map(function(downloadPath){ return prefix + downloadPath; }).join('\n');
+        var urlsString = _.pluck(_.values(this.props.selectedFiles), 'href').map(function(downloadPath){ return prefix + downloadPath; }).join('\n');
+        this.setState({ 'modalOpen' : true, 'urls' : urlsString });
     }
 
     renderModal(){
@@ -75,7 +82,7 @@ class SelectedFilesDownloadButton extends React.Component {
             'fontFamily' : 'monospace'
         };
         return (
-            <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }) }}>
+            <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
                 <Modal.Header>
                     <Modal.Title>Download Files</Modal.Title>
                 </Modal.Header>
@@ -85,7 +92,18 @@ class SelectedFilesDownloadButton extends React.Component {
 
                     <p>If saving as a file, it can be ran from any server, for example with the following cURL command:</p>
                     <pre>{ 'xargs -n 1 curl -O -L < files.txt' }</pre>
+                    <form method="POST" action="/metadata/type=ExperimentSet/metadata.tsv">
+                        <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTriples())} />
+                        <Button type="submit" name="Download" bsStyle="info">
+                            Download Files' Metadata
+                        </Button>
+                        {' '}
+                        <Button href={SelectedFilesDownloadButton.encodePlainText(this.state.urls)} bsStyle="primary" onClick={(e)=>{ e.stopPropagation(); }} download target="_blank">
+                            Download List of File URIs
+                        </Button>
+                    </form>
                     <hr/>
+                    <h5>File URIs</h5>
                     <div>
                         <textarea style={textAreaStyle} value={this.state.urls}/>
                     </div>

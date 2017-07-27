@@ -391,7 +391,7 @@ export function groupExperimentsByBiosample(experiments){
  * @param {Object[]} someArray - Any list that should be a list.
  * @returns {Object[]} Array if valid array, or empty array if not.
  */
-export function ensureArray(someArray){
+export function ensureArray(someArray, label){
     if (!Array.isArray(someArray)) {
         // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
         // entire list of experiment_sets to fail.

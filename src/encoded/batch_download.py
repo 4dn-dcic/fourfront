@@ -18,6 +18,7 @@ from .search import list_visible_columns_for_schemas
 import csv
 import io
 import json
+from datetime import datetime
 
 import logging
 
@@ -207,11 +208,15 @@ def metadata_tsv(context, request):
 
     if not accession_triples:
         body = None
-        try:
+        try: # Was submitted as JSON.
             body = request.json_body
         except Exception as e:
-            print('Ignoring exception on parsing metadata request body - no file accession triples set. Details:', e)
             pass
+        if body is None and request.POST.get('accession_triples') is not None: # Was submitted as a POST form JSON variable. Workaround to not being able to download files through AJAX.
+            try:
+                body = { "accession_triples" : json.loads(request.POST['accession_triples']) }
+            except Exception as e:
+                pass
         if body is not None and body.get('accession_triples'):
             accession_triples = [ (accDict.get('accession'), accDict.get('experiments_in_set.accession'), accDict.get('experiments_in_set.files.accession') ) for accDict in body['accession_triples'] ]
     
@@ -334,6 +339,8 @@ def metadata_tsv(context, request):
     #writer.writerow(header)
     #writer.writerows(data_rows)
 
+    filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
+
     return Response(
         content_type='text/tsv',
         # Non-streaming variant (comment out app_iter) : body=fout.getvalue(),
@@ -342,7 +349,7 @@ def metadata_tsv(context, request):
                 request.invoke_subrequest(make_subrequest(request, path)).json.get('@graph', []) # Replaces request.embed b/c request.embed didn't work for /search/
             )
         ),
-        content_disposition='attachment;filename="%s"' % 'metadata.tsv'
+        content_disposition='attachment;filename="%s"' % filename_to_suggest
     )
 
 

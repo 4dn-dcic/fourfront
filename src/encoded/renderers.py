@@ -156,8 +156,9 @@ def security_tween_factory(handler, registry):
             #    print(e)
 
         if request.content_type != 'application/json':
-            detail = "%s is not 'application/json'" % request.content_type
-            raise HTTPUnsupportedMediaType(detail)
+            if request.content_type != 'application/x-www-form-urlencoded' and request.path[0:10] != '/metadata/':
+                detail = "%s is not 'application/json'" % request.content_type
+                raise HTTPUnsupportedMediaType(detail)
 
         #token = request.headers.get('X-CSRF-Token')
         #if token is not None:
