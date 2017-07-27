@@ -13,7 +13,8 @@ from snovault.calculated import calculate_properties
 
 from .base import (
     Item,
-    paths_filtered_by_status
+    paths_filtered_by_status,
+    secure_embed
 )
 
 import datetime
@@ -107,7 +108,7 @@ class ExperimentSet(Item):
     })
     def produced_in_pub(self, request):
         uuids = [str(pub) for pub in self.get_rev_links('publications_produced')]
-        pubs = [request.embed('/', uuid, '@@object')
+        pubs = [secure_embed(request, '/' + uuid)
                 for uuid in paths_filtered_by_status(request, uuids)]
         if pubs:
             return sorted(pubs, key=lambda pub: pub.get('date_released', pub['date_created']),
@@ -126,7 +127,7 @@ class ExperimentSet(Item):
     def publications_of_set(self, request):
         pubs = set([str(pub) for pub in self.get_rev_links('publications_produced') +
                    self.get_rev_links('publications_using')])
-        pubs = [request.embed('/', uuid, '@@object')
+        pubs = [secure_embed(request, '/' + uuid)
                 for uuid in paths_filtered_by_status(request, pubs)]
         return [pub['@id'] for pub in pubs]
 

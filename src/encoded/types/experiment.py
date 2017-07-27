@@ -124,7 +124,7 @@ class Experiment(Item):
         "linkTo": "Publication"
     })
     def produced_in_pub(self, request):
-        esets = [request.embed('/', str(uuid), '@@object') for uuid in
+        esets = [secure_embed(request, '/' + str(uuid)) for uuid in
                  self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
 
         # replicate experiment set is the boss
@@ -143,7 +143,7 @@ class Experiment(Item):
         }
     })
     def publications_of_exp(self, request):
-        esets = [request.embed('/', str(uuid), '@@object') for uuid in
+        esets = [secure_embed(request, '/' + str(uuid)) for uuid in
                  self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
         import itertools
         pubs = list(set(itertools.chain.from_iterable([eset.get('publications_of_set', [])
@@ -299,7 +299,7 @@ class ExperimentMic(Experiment):
     def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
         sum_str = experiment_type
         if biosample:
-            biosamp_props = request.embed(biosample, '@@object')
+            biosamp_props = secure_embed(request, biosample)
             biosource = biosamp_props['biosource_summary']
             sum_str += (' on ' + biosource)
         return sum_str

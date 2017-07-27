@@ -16,6 +16,7 @@ from .base import (
     collection_add,
     get_item_if_you_can,
     item_edit,
+    secure_embed
     # paths_filtered_by_status,
 )
 
@@ -47,21 +48,30 @@ class Biosource(Item):
                            'induced pluripotent stem cell line', 'stem cell']
         if biosource_type == "tissue":
             if tissue:
-                return request.embed(tissue, '@@object').get('term_name')
+                embedded_tissue = secure_embed(request, tissue)
+                if embedded_tissue:
+                    return embedded_tissue.get('term_name')
         elif biosource_type in cell_line_types:
             if cell_line:
-                cell_line_name = request.embed(cell_line, '@@object').get('term_name')
+                cl_embedded = secure_embed(request, cell_line)
+                if cl_embedded:
+                    cell_line_name = cl_embedded.get('term_name')
+                else:
+                    cell_line_name = ''
                 if cell_line_tier:
                     if cell_line_tier != 'Unclassified':
                         return cell_line_name + ' (' + cell_line_tier + ')'
                 return cell_line_name
         elif biosource_type == "whole organisms":
             if individual:
-                individual_props = request.embed(individual, '@@object')
-                organism = individual_props['organism']
-                organism_props = request.embed(organism, '@@object')
-                organism_name = organism_props['name']
-                return "whole " + organism_name
+                try:
+                    individual_props = secure_embed(request, individual)
+                    organism = individual_props['organism']
+                    organism_props = secure_embed(request, organism)
+                    organism_name = organism_props['name']
+                    return "whole " + organism_name
+                except:
+                    return "no permissions to embed objects"
         return biosource_type
 
     @calculated_property(schema={

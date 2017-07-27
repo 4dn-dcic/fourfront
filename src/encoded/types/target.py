@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    secure_embed
 )
 
 
@@ -52,7 +53,7 @@ class Target(Item):
             values = []
             # since targetted region is a list, go through each item and get summary elements
             for each_target in targeted_genome_regions:
-                genomic_region = request.embed(each_target, '@@object')
+                genomic_region = secure_embed(request, each_target)
                 value = ""
                 value += genomic_region['genome_assembly']
                 if genomic_region['chromosome']:

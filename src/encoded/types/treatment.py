@@ -7,7 +7,8 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
+    Item,
+    secure_embed
     # paths_filtered_by_status,
 )
 
@@ -31,7 +32,7 @@ class Treatment(Item):
     })
     def treatment_type(self, request, rnai_type=None, target=None, chemical=None):
         if rnai_type and target:
-            targetObj = request.embed(target, '@@object')
+            targetObj = secure_embed(request, target)
             rnai_value = rnai_type + " for " + targetObj['target_summary']
         else:
             rnai_value = rnai_type

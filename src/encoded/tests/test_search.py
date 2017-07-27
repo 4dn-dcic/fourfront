@@ -51,6 +51,7 @@ def test_collections_redirect_to_search(workbook, testapp):
 
 
 def test_search_with_embedding(workbook, testapp):
+    import pdb; pdb.set_trace()
     res = testapp.get('/search/?type=Biosample').json
     # Use a specific biosample, found by accession from test data
     # Check the embedding /types/biosample.py entry; test ensures

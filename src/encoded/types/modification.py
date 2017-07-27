@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    secure_embed
 )
 
 
@@ -36,7 +37,7 @@ class Modification(Item):
         if genomic_change:
             mod_name = mod_name + " " + genomic_change
         if target_of_mod:
-            target = request.embed(target_of_mod, '@@object')
+            target = secure_embed(request, target_of_mod)
             mod_name = mod_name + " for " + target['target_summary']
         return mod_name
 
@@ -54,7 +55,7 @@ class Modification(Item):
         if genomic_change:
             mod_name = mod_name + " " + genomic_change
         if target_of_mod:
-            target = request.embed(target_of_mod, '@@object')
+            target = secure_embed(request, target_of_mod)
             mod_name = mod_name + " for " + target['target_summary_short']
         return mod_name
 

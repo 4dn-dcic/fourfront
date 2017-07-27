@@ -202,6 +202,7 @@ def audit_replicate_sets_consistency_check(value, system):
                 # if i == 3:
                     # print(rep)
                 expt = value['replicate_exps'][i]['replicate_exp']
+                import pdb; pdb.set_trace()
                 expt['bio_rep_no'] = rep['bio_rep_no']
                 merged_expts = merge_items(merged_expts, expt)
             # print(merged_expts)
