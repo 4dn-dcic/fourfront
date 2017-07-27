@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    secure_embed
     # paths_filtered_by_status,
 )
 
@@ -53,8 +54,9 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         if modifications:
             ret_str = ''
             for i in range(len(modifications)):
-                mod_props = request.embed(modifications[i], '@@object')
-                ret_str += (mod_props['modification_name'] + ' and ') if mod_props['modification_name'] else ''
+                mod_props = secure_embed(request, modifications[i])
+                if mod_props:
+                    ret_str += (mod_props['modification_name'] + ' and ') if mod_props['modification_name'] else ''
             if len(ret_str) > 0:
                 return ret_str[:-5]
             else:
@@ -69,8 +71,11 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     def modifications_summary_short(self, request, modifications=None):
         if modifications:
             # use only the first modification
-            mod_props = request.embed(modifications[0], '@@object')
-            return mod_props['modification_name_short']
+            mod_props = secure_embed(request, modifications[0])
+            if mod_props:
+                return mod_props['modification_name_short']
+            else:
+                return 'None'
         return 'None'
 
     @calculated_property(schema={
