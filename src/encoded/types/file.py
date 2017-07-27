@@ -235,7 +235,6 @@ class File(Item):
             sheets['external'] = new_creds
             file_formats = [properties.get('file_format'), ]
 
-
             # handle extra files
             updated_extra_files = []
             for idx, xfile in enumerate(properties.get('extra_files', [])):
@@ -430,10 +429,11 @@ class FileFastq(File):
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
     name_key = 'accession'
-    rev=dict(File.rev, **{
+    rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
     })
+
     @calculated_property(schema={
         "title": "Input of Workflow Runs",
         "description": "All workflow runs that this file serves as an input to",
@@ -474,10 +474,11 @@ class FileFasta(File):
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
     name_key = 'accession'
-    rev=dict(File.rev, **{
+    rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
     })
+
     @calculated_property(schema={
         "title": "Input of Workflow Runs",
         "description": "All workflow runs that this file serves as an input to",
@@ -760,7 +761,7 @@ def validate_file_filename(context, request):
         file_extensions_msg = ["'"+ext+"'" for ext in file_extensions]
         file_extensions_msg = ', '.join(file_extensions_msg)
         request.errors.add('body', None, 'Filename extension does not '
-         'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
+                           'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
     else:
         request.validated.update({})
 
