@@ -5,8 +5,8 @@
         "description": "Sample replicate experiment set which is an experiment set of experiments testing user interface and other aspects of the 4DN Portal, including but not limited to a long text description (this) in order to test fit, resizing, and related with a long block of text that would likely vary from very short -- e.g. a few words -- to multiple paragraphs. Figured this description would be more descriptive than Lorem Ipsum text yet still has the potential to be quite long as it keeps rambling on. Normally this would be more of an interesting read.",
         "experimentset_type": "replicate",
         "replicate_exps": [
-           {"replicate_exp": "4DNEX067APY1", "bio_rep_no": 1, "tec_rep_no":1},
-           {"replicate_exp": "4DNEX067APT1", "bio_rep_no": 1, "tec_rep_no":2}
+           {"replicate_exp": "4DNEXO67APY1", "bio_rep_no": 1, "tec_rep_no":1},
+           {"replicate_exp": "4DNEXO67APT1", "bio_rep_no": 1, "tec_rep_no":2}
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
@@ -18,9 +18,9 @@
         "description": "Test replicate experiment set 2",
         "experimentset_type": "replicate",
         "replicate_exps": [
-           {"replicate_exp": "4DNEX067APV1", "bio_rep_no": 1, "tec_rep_no":1},
-           {"replicate_exp": "4DNEX067APZ1", "bio_rep_no": 1, "tec_rep_no":2},
-           {"replicate_exp": "4DNEX067APU1", "bio_rep_no": 1, "tec_rep_no":3}
+           {"replicate_exp": "4DNEXO67APV1", "bio_rep_no": 1, "tec_rep_no":1},
+           {"replicate_exp": "4DNEXO67APZ1", "bio_rep_no": 1, "tec_rep_no":2},
+           {"replicate_exp": "4DNEXO67APU1", "bio_rep_no": 1, "tec_rep_no":3}
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
@@ -32,7 +32,7 @@
         "description": "Test replicate experiment set for Repliseq experiments",
         "experimentset_type": "replicate",
         "replicate_exps": [
-           {"replicate_exp": "4DNEX067AXE1", "bio_rep_no": 1, "tec_rep_no":1},
+           {"replicate_exp": "4DNEXO67AXE1", "bio_rep_no": 1, "tec_rep_no":1},
            {"replicate_exp": "4DNEX34DAX2S", "bio_rep_no": 1, "tec_rep_no":2},
            {"replicate_exp": "4DNEX42CAX15", "bio_rep_no": 2, "tec_rep_no":1}
         ],
@@ -46,8 +46,8 @@
         "description": "Test replicate experiment set for Capture Hi-C experiments",
         "experimentset_type": "replicate",
         "replicate_exps": [
-           {"replicate_exp": "4DNEX067AWU1", "bio_rep_no": 1, "tec_rep_no":1},
-           {"replicate_exp": "4DNEX067AWT1", "bio_rep_no": 1, "tec_rep_no":2}
+           {"replicate_exp": "4DNEXO67AWU1", "bio_rep_no": 1, "tec_rep_no":1},
+           {"replicate_exp": "4DNEXO67AWT1", "bio_rep_no": 1, "tec_rep_no":2}
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",

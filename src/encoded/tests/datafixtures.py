@@ -68,7 +68,7 @@ def award(testapp):
 @pytest.fixture
 def human_individual(testapp, award, lab, human):
     item = {
-        "accession": "4DNIN000AAQ1",
+        "accession": "4DNINOOOAAQ1",
         "age": 53,
         "age_units": "year",
         'award': award['@id'],
@@ -184,7 +184,7 @@ def gm12878_oterm(testapp, ontology, cell_line_term):
 @pytest.fixture
 def F123_biosource(testapp, lab, award, f123_oterm):
     item = {
-        "accession": "4DNSR000AAQ2",
+        "accession": "4DNSROOOAAQ2",
         "biosource_type": "stem cell",
         "cell_line": f123_oterm['@id'],
         'award': award['@id'],
@@ -196,7 +196,7 @@ def F123_biosource(testapp, lab, award, f123_oterm):
 @pytest.fixture
 def GM12878_biosource(testapp, lab, award, gm12878_oterm):
     item = {
-        "accession": "4DNSR000AAQ1",
+        "accession": "4DNSROOOAAQ1",
         "biosource_type": "immortalized cell line",
         "cell_line": gm12878_oterm['@id'],
         'award': award['@id'],

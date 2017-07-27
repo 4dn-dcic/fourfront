@@ -1289,17 +1289,15 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 									float: left;
 									margin-top: -10px;
 									margin-left: -7px;
-									margin-right: 10px;
+									margin-right: 15px;
 									> button {
 										padding-left: 0;
 										padding-right: 0;
 										height: 36px;
 										width: 36px;
 										border: 1px solid transparent;
-										background: transparent;
 										border-radius: 3px;
 										outline: none;
-										color: #fff;
 										box-shadow: 0 1px 1px rgba(0,0,0,0.3);
 										> i.icon {
 											position: relative;
@@ -1409,7 +1407,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						}
 						.result-table-detail {
 							padding-left: 47px;
-							padding-right: 15px;
+							padding-right: 0px;
 
 							border-bottom: 1px solid;
 							transition: border-bottom .3s ease-out;

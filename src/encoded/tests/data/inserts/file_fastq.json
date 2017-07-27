@@ -1,6 +1,6 @@
 [
     {
-        "accession":"4DNFI067APU1",
+        "accession":"4DNFIO67APU1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
@@ -12,7 +12,7 @@
         "filename": "test_file1.fastq.gz"
     },
     {
-        "accession":"4DNFI067APT1",
+        "accession":"4DNFIO67APT1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
@@ -24,7 +24,7 @@
         "filename": "test_file1.fastq.gz"
     },
     {
-        "accession":"4DNFI067APV1",
+        "accession":"4DNFIO67APV1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
@@ -36,7 +36,7 @@
         "filename": "test_file1.fastq.gz"
     },
     {
-        "accession":"4DNFI067APY1",
+        "accession":"4DNFIO67APY1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
@@ -48,7 +48,7 @@
         "filename": "test_file1.fastq.gz"
     },
     {
-        "accession":"4DNFI067APZ1",
+        "accession":"4DNFIO67APZ1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
@@ -60,7 +60,7 @@
         "filename": "test_file1.fastq.gz"
     },
     {
-        "accession":"4DNFI067APW1",
+        "accession":"4DNFIO67APW1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
@@ -71,7 +71,7 @@
         "filename": "test_file2.fastq.gz"
     },
     {
-        "accession":"4DNFI067APX1",
+        "accession":"4DNFIO67APX1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
@@ -82,7 +82,7 @@
         "filename": "test_file3.fastq.gz"
     },
     {
-        "accession":"4DNFI067AFHV",
+        "accession":"4DNFIO67AFHV",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
@@ -93,7 +93,7 @@
         "filename": "GM12878_SRR1658581_1pc_1_R1.fastq.gz"
     },
     {
-        "accession":"4DNFI067AFHX",
+        "accession":"4DNFIO67AFHX",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",

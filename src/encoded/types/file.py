@@ -176,7 +176,16 @@ class File(Item):
     embedded = ['lab.*',
                 'award.project',
                 'experiments.display_title',
+                'experiments.experiment_type',
+                'experiments.experiment_sets.experimentset_type',
+                'experiments.experiment_sets.@type',
                 'experiments.biosample.biosource.display_title',
+                'experiments.biosample.biosource.biosource_type',
+                'experiments.biosample.biosource_summary',
+                'experiments.biosample.modifications_summary',
+                'experiments.biosample.treatments_summary',
+                'experiments.biosample.biosource.individual.organism.name',
+                'experiments.digestion_enzyme.name',
                 'related_files.relationship_type',
                 'related_files.file.*']
     name_key = 'accession'
@@ -222,7 +231,6 @@ class File(Item):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
             file_formats = [properties.get('file_format'), ]
-
 
             # handle extra files
             updated_extra_files = []
@@ -418,10 +426,11 @@ class FileFastq(File):
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
     name_key = 'accession'
-    rev=dict(File.rev, **{
+    rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
     })
+
     @calculated_property(schema={
         "title": "Input of Workflow Runs",
         "description": "All workflow runs that this file serves as an input to",
@@ -462,10 +471,11 @@ class FileFasta(File):
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
     name_key = 'accession'
-    rev=dict(File.rev, **{
+    rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
     })
+
     @calculated_property(schema={
         "title": "Input of Workflow Runs",
         "description": "All workflow runs that this file serves as an input to",
@@ -748,7 +758,7 @@ def validate_file_filename(context, request):
         file_extensions_msg = ["'"+ext+"'" for ext in file_extensions]
         file_extensions_msg = ', '.join(file_extensions_msg)
         request.errors.add('body', None, 'Filename extension does not '
-         'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
+                           'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
     else:
         request.validated.update({})
 

@@ -138,7 +138,6 @@ export default class ExperimentSetView extends React.Component {
         return (
             <div className={itemClass}>
 
-                <ItemPageTitle context={this.props.context} schemas={this.props.schemas} />
                 <ExperimentSetHeader {...this.props} />
 
                 <div className="row">
