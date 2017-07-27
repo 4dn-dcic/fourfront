@@ -60,7 +60,6 @@ class SelectedFilesDownloadButton extends React.Component {
     }
 
     handleClick(e){
-        console.log(this, e);
         var urlParts = url.parse(windowHref(this.props.href));
         var prefix = urlParts.protocol + '//' + urlParts.host;
         //var urls = [this.generateMetadataTSVPath()].concat(_.pluck(_.values(this.props.selectedFiles), 'href')).map(function(downloadPath){ return prefix + downloadPath; }).join('\n');

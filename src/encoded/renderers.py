@@ -157,6 +157,8 @@ def security_tween_factory(handler, registry):
 
         if request.content_type != 'application/json':
             if request.content_type != 'application/x-www-form-urlencoded' and request.path[0:10] != '/metadata/':
+                pass
+            else:
                 detail = "%s is not 'application/json'" % request.content_type
                 raise HTTPUnsupportedMediaType(detail)
 
