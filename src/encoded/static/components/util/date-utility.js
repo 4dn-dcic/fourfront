@@ -28,6 +28,8 @@ var DateUtility = module.exports = (function(){
 
         function date(ft){
             switch(ft){
+                case 'date-file':
+                    return "YYYY-MM-DD";
                 case 'date-xs':
                     // 11/03/2016
                     return "MM/DD/YYYY";
@@ -45,6 +47,8 @@ var DateUtility = module.exports = (function(){
 
         function time(ft){
             switch(ft){
+                case 'time-file':
+                    return "HH[h]-mm[m]";
                 case 'time-xs':
                     // 12pm
                     return "ha";

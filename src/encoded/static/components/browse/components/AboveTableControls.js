@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
+import moment from 'moment';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import { isServerSide, Filters, expFxn, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import { windowHref } from './../../globals';
@@ -16,19 +17,12 @@ import { ChartDataController } from './../../viz/chart-data-controller';
 
 class SelectedFilesOverview extends React.Component {
 
-    totalFiles(){
-        var exps = this.props.filteredExperiments || this.props.experiments;
-        if (!exps) return 0;
-        return expFxn.fileCountFromExperiments(exps, this.props.includeFileSets);
-    }
-
     render(){
         var selectedFilesCount = _.keys(this.props.selectedFiles).length;
-        var totalFilesCount = this.totalFiles();
         
         return (
             <div className="pull-left box">
-                <span className="text-500">{ selectedFilesCount }</span> / { totalFilesCount } files selected.
+                <span className="text-500">{ selectedFilesCount }</span> / { this.props.totalFilesCount } files selected.
             </div>
         );
     }
@@ -81,6 +75,7 @@ class SelectedFilesDownloadButton extends React.Component {
             'minHeight' : 400,
             'fontFamily' : 'monospace'
         };
+        var files_download_filename = 'files_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.txt';
         return (
             <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
                 <Modal.Header>
@@ -98,7 +93,7 @@ class SelectedFilesDownloadButton extends React.Component {
                             Download Files' Metadata
                         </Button>
                         {' '}
-                        <Button href={SelectedFilesDownloadButton.encodePlainText(this.state.urls)} bsStyle="primary" onClick={(e)=>{ e.stopPropagation(); }} download target="_blank">
+                        <Button href={SelectedFilesDownloadButton.encodePlainText(this.state.urls)} bsStyle="primary" onClick={(e)=>{ e.stopPropagation(); }} download={files_download_filename} target="_blank">
                             Download List of File URIs
                         </Button>
                     </form>
@@ -118,7 +113,7 @@ class SelectedFilesDownloadButton extends React.Component {
         return (
             <div className="pull-left box">
                 <Button key="download" onClick={this.handleClick} disabled={disabled}>
-                    <i className="icon icon-download icon-fw"/> Download { countSelectedFiles } Files
+                    <i className="icon icon-download icon-fw"/> Download { countSelectedFiles } / { this.props.totalFilesCount } Selected Files
                 </Button>
                 { this.renderModal() }
             </div>
@@ -127,10 +122,17 @@ class SelectedFilesDownloadButton extends React.Component {
 }
 
 class SelectedFilesControls extends React.Component {
+
+    totalFiles(){
+        var exps = this.props.filteredExperiments || this.props.experiments;
+        if (!exps) return 0;
+        return expFxn.fileCountFromExperiments(exps, this.props.includeFileSets);
+    }
+
     render(){
         return (
             <div>
-                <SelectedFilesOverview {...this.props}/> <SelectedFilesDownloadButton {...this.props}/>
+                {/*<SelectedFilesOverview {...this.props}/> */}<SelectedFilesDownloadButton {...this.props} totalFilesCount={this.totalFiles()} />
             </div>
         );
     }
