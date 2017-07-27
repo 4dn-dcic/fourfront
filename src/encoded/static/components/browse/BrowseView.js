@@ -11,113 +11,12 @@ import * as globals from './../globals';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import * as store from './../../store';
 import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
-import ExperimentsTable from './../experiments-table';
 import { isServerSide, expFxn, Filters, navigate, object, layout } from './../util';
-import * as vizUtil from './../viz/utilities';
-import { FlexibleDescriptionBox } from './../item-pages/components';
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
-    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls
+    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane
 } from './components';
 
-
-
-export class ExperimentSetDetailPane extends React.Component {
-
-    /**
-     * Combine file pairs and unpaired files into one array. 
-     * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
-     * Can always _.flatten() this or map out first file per pair.
-     * 
-     * @param {Object} expSet - Experiment Set
-     * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
-     */
-    static pairsAndFiles(expSet: Object){
-        return expFxn.listAllFilePairs(expSet.experiments_in_set).concat(
-            expFxn.listAllUnpairedFiles(expSet.experiments_in_set)
-        );
-    }
-
-    static allFiles(expSet: Object){
-        return _.reduce(ExperimentSetDetailPane.pairsAndFiles(expSet), function(m, f){
-            if (Array.isArray(f)){
-                return m.concat(f);
-            } else {
-                m.push(f);
-                return m;
-            }
-        }, []);
-    }
-
-    static allFileIDs(expSet: Object){ return _.pluck(ExperimentSetDetailPane.allFiles(expSet), 'uuid'); }
-
-    static propTypes = {
-        'expSetFilters' : PropTypes.object.isRequired,
-        'selectAllFilesInitially' : PropTypes.bool,
-        'result' : PropTypes.object.isRequired,
-        'containerWidth' : PropTypes.number.isRequired,
-        'additionalDetailFields' : PropTypes.object.isRequired
-    }
-
-    static defaultProps = {
-        'selectAllFilesInitially' : false,
-        'additionalDetailFields' : {
-            'Lab': 'lab.title',
-            'Treatments':'biosample.treatments_summary',
-            'Modifications':'biosample.modifications_summary'
-        }
-    }
-
-    render(){
-        var expSet = this.props.result;
-        var addInfo = this.props.additionalDetailFields;
-
-        return (
-            <div className="experiment-set-info-wrapper">
-                <div className="expset-addinfo">
-                    <div className="row">
-                        <div className="col-sm-6 addinfo-description-section">
-                            <label className="text-500 description-label">Description</label>
-                            <FlexibleDescriptionBox
-                                description={ expSet.description }
-                                fitTo="self"
-                                textClassName="text-medium"
-                                dimensions={null}
-                            />
-                        </div>
-                        <div className="col-sm-6 addinfo-properties-section">
-                        { _.keys(addInfo).map(function(title){
-                            var value = SearchResultTable.sanitizeOutputValue(defaultColumnBlockRenderFxn(expSet, { 'field' : addInfo[title] })); // Uses object.getNestedProperty, pretty prints JSX. Replaces value probe stuff.
-                            return (
-                                <div key={title}>
-                                    <span className="expset-addinfo-key">{ title }:</span>
-                                    <span className="expset-addinfo-val">{ value || <small><em>N/A</em></small> }</span>
-                                </div>
-                            );
-                        })}
-                        </div>
-                    </div>
-                </div>
-                <ExperimentsTable
-                    key='experiments-table'
-                    columnHeaders={[
-                        { columnClass: 'file-detail', title : 'File Type'},
-                        { columnClass: 'file-detail', title : 'File Info'}
-                    ]}
-                    experimentArray={expSet.experiments_in_set}
-                    replicateExpsArray={expSet.replicate_exps}
-                    experimentSetType={expSet.experimentset_type}
-                    width={this.props.containerWidth - 47 /* account for left padding of pane */}
-                    fadeIn={false}
-                    selectedFiles={this.props.selectedFiles}
-                    selectFile={this.props.selectFile}
-                    unselectFile={this.props.unselectFile}
-                />
-            </div>
-        );
-    }
-
-}
 
 
 
@@ -126,7 +25,8 @@ const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'experiments_in_set.experiment_type', },
     { 'field' : 'number_of_experiments', },
     { 'field' : 'lab.display_title', },
-    { 'field' : 'date_created',  }
+    { 'field' : 'date_created',  },
+    { 'field' : 'status',  }
 ], defaultColumnDefinitionMap);
 
 
@@ -199,6 +99,7 @@ class ResultTableContainer extends React.Component {
         this.hiddenColumns = this.hiddenColumns.bind(this);
         this.render = this.render.bind(this);
     }
+    
     /*
     shouldComponentUpdate(nextProps, nextState){
         if (this.props.selectedFiles !== nextProps.selectedFiles) return true;
@@ -247,7 +148,7 @@ class ResultTableContainer extends React.Component {
                 'render' : (expSet, columnDefinition, props, width) => {
                     var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
                     var newChildren = origTitleBlock.props.children.slice(0);
-                    var allFiles = ExperimentSetDetailPane.allFiles(expSet);
+                    var allFiles = expFxn.allFilesFromExperimentSet(expSet); //ExperimentSetDetailPane.allFiles(expSet);
                     var allFileIDs = _.pluck(allFiles, 'uuid');
                     var allFilesKeyedByID = _.object(_.zip(allFileIDs, allFiles));
                     allFileIDs = allFileIDs.sort();
@@ -333,6 +234,7 @@ class ResultTableContainer extends React.Component {
                             {},
                             this.props.constantHiddenColumns
                         )}
+                        showSelectedFileCount
                     />
                     <SearchResultTable
                         results={results}
@@ -375,6 +277,20 @@ class ControlsAndResults extends React.Component {
     }
 
     render(){
+
+        var defaultHiddenColumns = ['lab.display_title', 'date_created', 'status'];
+        /*
+        var hiddenColumns = [];
+        // Hide columns by default which have same value for all items.
+        if (this.props.context && this.props.context.columns && this.props.context.facets){
+            hiddenColumns = _.pluck(_.filter(this.props.context.facets, (facet)=>{
+                return (facet.terms.length <= 1 && typeof this.props.context.columns[facet.field] !== 'undefined');
+            }), 'field');
+        }
+        */
+
+
+
         //var fileStats = this.state.fileStats;
         //var targetFiles = this.state.filesToFind;
         //var selectorButtons = this.props.fileFormats.map(function (format, idx) {
@@ -416,7 +332,7 @@ class ControlsAndResults extends React.Component {
                 </div>*/}
 
                 <SelectedFilesController href={this.props.href}>
-                    <CustomColumnController defaultHiddenColumns={['lab.display_title', 'date_created']}>
+                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
                         <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer
                                 expSetFilters={this.props.expSetFilters}
@@ -479,11 +395,11 @@ export default class BrowseView extends React.Component {
         }
 
         return (
-            <div className="browse-page-container">
-
+            <div className="browse-page-container" id="browsePageContainer">
+            {/*
                 <h1 className="page-title">Data Browser</h1>
                 <h4 className="page-subtitle">Filter & browse experiments</h4>
-
+            */}
                 <ControlsAndResults
                     {...this.props}
                     //fileFormats={fileFormats}

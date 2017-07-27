@@ -368,7 +368,7 @@ export const barPlotCursorActions = [
         },
         'function' : function(showType = 'all', cursorProps, mouseEvt){
             var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
-            var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHref(cursorProps.href) || null;
+            var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHrefRoot(cursorProps.href) || null;
 
             // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
             var currentExpSetFilters = showType === 'all' ? {} : Filters.currentExpSetFilters();
@@ -402,8 +402,8 @@ export const barPlotCursorActions = [
                 true,
                 href,
                 function(){
-                    // Scroll to top of page after navigation is complete.
-                    setTimeout(layout.animateScrollTo, 100, 360, Math.abs(document.body.scrollTop - 360) * 2, 0);
+                    // Scroll to top of browse page container after navigation is complete.
+                    setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(document.body.scrollTop - 510) * 2, 125);
                 }
             );
 

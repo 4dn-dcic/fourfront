@@ -168,9 +168,24 @@
     "facets": {
         "file_type" : {
             "title" : "File Type"
-          },
+        },
         "file_format": {
             "title" : "File Format"
+        },
+        "experiments.experiment_type" : {
+            "title" : "Experiment Type"
+        },
+        "experiments.biosample.biosource.individual.organism.name" : {
+            "title" : "Organism"
+        },
+        "experiments.biosample.biosource.biosource_type" : {
+            "title" : "Biosource Type"
+        },
+        "experiments.biosample.biosource_summary" : {
+            "title" : "Biosource"
+        },
+        "experiments.digestion_enzyme.name" : {
+            "title" : "Enzyme"
         },
         "award.project": {
             "title": "Project"
@@ -194,6 +209,9 @@
         },
         "experiments.biosample.biosource.display_title": {
             "title": "Biosource"
+        },
+        "file_size" : {
+            "title" : "File Size"
         }
     }
 }

@@ -105,7 +105,7 @@ export default class Alerts extends React.Component {
      * @memberof module:alerts
      * @private
      * @instance
-     * @returns {Element} A <div> element.
+     * @returns {JSX.Element} A <div> element.
      */
     render(){
         if (this.props.alerts.length === 0) return null;

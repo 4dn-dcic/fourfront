@@ -1,5 +1,6 @@
 import pytest
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
+from time import sleep
 
 
 def _type_length():
@@ -182,9 +183,15 @@ def test_abstract_collection(testapp, experiment):
 def test_load_workbook(workbook, testapp, item_type, length):
     # testdata must come before testapp in the funcargs list for their
     # savepoints to be correctly ordered.
-    res = testapp.get('/%s/?limit=all' % item_type).maybe_follow(status=200)
-    # TODO ASK_BEN about inherited collections i.e. protocol
-    assert len(res.json['@graph']) == length
+    # sometimes this is slow
+    for i in range(5):
+        res = testapp.get('/%s/?limit=all' % item_type).maybe_follow(status=200)
+        # TODO ASK_BEN about inherited collections i.e. protocol
+        if len(res.json['@graph']) != length:
+            sleep(1)
+            continue
+        assert len(res.json['@graph']) == length
+        return
 
 
 @pytest.mark.slow

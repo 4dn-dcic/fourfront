@@ -2,7 +2,7 @@
 .facet-charts {
     transition: opacity 0.75s;
     opacity : 1;
-    margin-top: 64px;
+    margin-top: 45px;
     &.loading {
         opacity : 0.125;
         text-align: center;
@@ -705,6 +705,9 @@
             > button {
                 width: 100%;
                 text-align: left;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding-right: 20px;
                 span.caret {
                     position: absolute;
                     right: 12px;

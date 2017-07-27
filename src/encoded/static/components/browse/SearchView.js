@@ -1,100 +1,18 @@
 'use strict';
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
 import url from 'url';
 import _ from 'underscore';
-import * as globals from './globals';
+import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './util';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import { Detail } from './item-pages/components';
-import FacetList from './facetlist';
-import { SortController, LimitAndPageControls, SearchResultTable } from './browse/components';
+import FacetList from './../facetlist';
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController } from './components';
 
 
-var Listing = function (result, schemas, selectCallback) {
-    var props;
-    if (result['@id']) {
-        props = {'context': result,  'key': result['@id'], 'schemas': schemas, 'selectCallback': selectCallback};
-    }
-    if(props){
-        return(<ResultTableEntry {...props} />);
-    }else{
-        return null;
-    }
-
-};
-
-class ResultTableEntry extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            'open': false
-        };
-    }
-
-    handleToggle = (e) => {
-        e.preventDefault();
-        this.setState({'open': !this.state.open});
-    }
-
-    handleSelect = (e) => {
-        e.preventDefault();
-        if(!this.props.selectCallback){
-            return;
-        }
-        var processed_link = object.atIdFromObject(this.props.context);
-        this.props.selectCallback(processed_link);
-    }
-
-    render() {
-        var result = this.props.context || null;
-        var item_type = result['@type'][0];
-        var processed_link = object.atIdFromObject(result);
-        var detailPop = false;
-        if(this.props.selectCallback){
-            detailPop = true;
-        }
-        return (
-            <div className="result-table-result">
-                <div className="row">
-                    <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
-                        <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
-                            <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
-                        </Button>
-                        {this.props.selectCallback ?
-                            <Button bsSize="xsmall" bsStyle="success" className="icon-container pull-left" onClick={this.handleSelect}>
-                                <i className={"icon icon-check"}></i>
-                            </Button>
-                            : null
-                        }
-                        {detailPop ?
-                            <a href={processed_link} target="_blank">{result.display_title}</a>
-                            : <a href={processed_link}>{result.display_title}</a>
-                        }
-                    </div>
-                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                        {result.lab ? result.lab.display_title : ""}
-                    </div>
-                    <div className="col-xs-12 col-md-2 col-lg-2 result-table-entry-div">
-                        {result.submitted_by ? result.submitted_by.display_title : ""}
-                    </div>
-                    <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                        {result.date_created ?
-                            <DateUtility.LocalizedTime timestamp={result.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
-                        : null}
-                    </div>
-                </div>
-                <Collapse in={this.state.open}>
-                    <div>
-                        <ResultDetail result={result} schemas={this.props.schemas} popLink={detailPop}/>
-                    </div>
-                </Collapse>
-            </div>
-        );
-    }
-}
 
 // If the given term is selected, return the href for the term
 export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
@@ -141,7 +59,7 @@ function countSelectedTerms(terms, field, filters) {
     return count;
 }
 
-
+/*
 class TypeTerm extends React.Component {
     render() {
         var term = this.props.term['key'];
@@ -150,75 +68,13 @@ class TypeTerm extends React.Component {
         return <Term {...this.props} title={term} filters={filters} total={total} />;
     }
 }
+*/
 
 class InfoIcon extends React.Component{
     render() {
         if (!this.props.children) return null;
         return (
             <i className="icon icon-info-circle" data-tip={this.props.children}/>
-        );
-    }
-}
-
-
-// the old Search tabular-style result display
-class TabularTableResults extends React.Component{
-
-    static propTypes = {
-        results: PropTypes.array.isRequired,
-        schemas: PropTypes.object,
-    }
-
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        var results = this.props.results;
-        var schemas = this.props.schemas || {};
-        // Buttons are included in title bar for correct spacing
-        return(
-            <div>
-                <div className="result-table-header-row-container">
-                    <div className="row hidden-xs hidden-sm result-table-header-row">
-                        <div className="col-xs-9 col-md-4 col-lg-4 result-table-entry-div">
-                            <Button style={{'visibility':'hidden','marginRight':'4px'}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
-                                <i className="icon icon-plus"></i>
-                            </Button>
-                            {this.props.selectCallback ?
-                                <Button style={{'visibility':'hidden','marginRight':'4px'}} bsSize="xsmall" className="icon-container pull-left" disabled={true}>
-                                    <i className={"icon icon-check"}></i>
-                                </Button>
-                                : null
-                            }
-                            <div>Title</div>
-                        </div>
-                        <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                            <div>Lab</div>
-                        </div>
-                        <div className="col-xs-12 col-md-2 col-lg-2 result-table-entry-div">
-                            <div>Submitter</div>
-                        </div>
-                        <div className="col-xs-12 col-md-3 col-lg-3 result-table-entry-div">
-                            <div>Date Created</div>
-                        </div>
-                        <div className="col-xs-12 col-md-12 divider-column">
-                            <div className="divider"/>
-                        </div>
-                    </div>
-                </div>
-                <div className="nav result-table row" id="result-table">
-                    {results.length ?
-                        results.map(function (result) {
-                            if(this.props.selectCallback){
-                                return Listing(result, schemas, this.props.selectCallback);
-                            }else{
-                                return Listing(result, schemas, null);
-                            }
-                        }.bind(this))
-                    : null}
-                </div>
-            </div>
         );
     }
 }
@@ -241,7 +97,7 @@ export function getSearchType(facets){
     }
 }
 
-class ResultTableHandlersContainer extends React.Component {
+export class ResultTableHandlersContainer extends React.Component {
 
     static defaultProps = {
         restrictions : {},
@@ -330,46 +186,22 @@ class ResultTableHandlersContainer extends React.Component {
         });
 
         return (
-            <SortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
-                <ControlsAndResults
-                    {...this.props}
-                    isTermSelected={this.isTermSelected}
-                    onFilter={this.onFilter}
-                    facets={facets}
-                />
-            </SortController>
+            <CustomColumnController defaultHiddenColumns={['status']}>
+                <SortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
+                    <ControlsAndResults
+                        {...this.props}
+                        isTermSelected={this.isTermSelected}
+                        onFilter={this.onFilter}
+                        facets={facets}
+                    />
+                </SortController>
+            </CustomColumnController>
         );
     }
 
 }
 
-class ResultDetailPane extends React.Component {
 
-    componentDidMount(){
-        ReactTooltip.rebuild();
-    }
-
-    componentDidUpdate(pastProps, pastState){
-        if (this.props.open && !pastProps.open) ReactTooltip.rebuild();
-    }
-
-    render (){
-        var { result, popLink } = this.props;
-        return (
-            <div>
-                {result.description ?
-                        <div className="data-row flexible-description-box result-table-result-heading">
-                            {result.description}
-                        </div>
-                        : null}
-                    { <div className="item-page-detail">
-                        <h4 className="text-300">Details</h4>
-                        <Detail context={result} open={false} popLink={popLink}/>
-                    </div> }
-            </div>
-        );
-    }
-}
 
 class ControlsAndResults extends React.Component {
 
@@ -411,9 +243,9 @@ class ControlsAndResults extends React.Component {
 
         var thisTypeTitle = Schemas.getTitleForType(thisType);
         var abstractType = Schemas.getAbstractTypeForType(thisType);
-        var hiddenColumns = null;
+        var hiddenColumns = (this.props.hiddenColumns || []).slice(0);
         if ((abstractType && abstractType !== thisType) || (!abstractType && thisType !== 'Item')) {
-            hiddenColumns = ['@type'];
+            hiddenColumns.push('@type');
         }
 
         var columnDefinitionOverrides = {};
@@ -430,7 +262,7 @@ class ControlsAndResults extends React.Component {
                             e.preventDefault();
                             this.props.selectCallback(object.atIdFromObject(result));
                         }}>
-                            <button className="select-button" onClick={props.toggleDetailOpen}>
+                            <button className="select-button btn-primary" onClick={props.toggleDetailOpen}>
                                 <i className="icon icon-fw icon-check"/>
                             </button>
                         </div>
@@ -455,12 +287,13 @@ class ControlsAndResults extends React.Component {
 
         return (
             <div>
-
+            {/*
                 {this.props.submissionBase ?
                     <h1 className="page-title">{thisTypeTitle + ' Selection'}</h1>
                     : <h1 className="page-title">{thisTypeTitle + ' Search'}</h1>
                 }
                 <h4 className="page-subtitle">Filter & sort results</h4>
+            */}
 
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
@@ -473,10 +306,9 @@ class ControlsAndResults extends React.Component {
                             isTermSelected={this.props.isTermSelected}
                             itemTypeForSchemas={itemTypeForSchemas}
                             showClearFiltersButton={(()=>{
-                                // N.B. Search considers 'type' to not be a clearable filter. It will not clear current type.
                                 var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
                                 var clearParts = url.parse(clearFiltersURL, true);
-                                return !object.isEqual(clearParts.query, urlParts.query) && _.keys(urlParts.query).length !== 0;
+                                return !object.isEqual(clearParts.query, urlParts.query);
                             })()}
                             onClearFilters={(evt)=>{
                                 evt.preventDefault();
@@ -491,28 +323,25 @@ class ControlsAndResults extends React.Component {
                         />
                 </div> : null}
                     <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
-                        {/*
-                        <div className="row above-chart-row clearfix">
-                            <div className="col-sm-5 col-xs-12">
-                                <h5 className='browse-title'>{results.length} of {total} results</h5>
-                            </div>
-                            <div className="col-sm-7 col-xs-12">
-                                <LimitAndPageControls
-                                    limit={this.props.limit}
-                                    page={this.props.page}
-                                    maxPage={this.props.maxPage}
-                                    changingPage={this.props.changingPage}
-                                    changePage={this.props.changePage}
-                                    changeLimit={this.props.changeLimit}
-                                />
-                            </div>
-                        </div>
-                        */}
+                        <AboveTableControls
+                            {..._.pick(this.props,
+                                'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
+                                'columns', 'selectedFiles', 'constantHiddenColumns'
+                            )}
+                            parentForceUpdate={this.forceUpdate.bind(this)}
+                            columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
+                                SearchResultTable.defaultProps.constantColumnDefinitions,
+                                context.columns || {},
+                                columnDefinitionOverrides,
+                                ['@type']
+                            )}
+                            showTotalResults={context.total}
+                        />
                         <SearchResultTable
                             results={results}
                             columns={context.columns || {}}
                             renderDetailPane={(result, rowNumber, containerWidth)=>
-                                <ResultDetailPane popLink={this.props.selectCallback ? true : false} result={result} />
+                                <SearchResultDetailPane popLink={this.props.selectCallback ? true : false} result={result} />
                             }
                             hiddenColumns={hiddenColumns}
                             columnDefinitionOverrideMap={columnDefinitionOverrides}
@@ -531,7 +360,7 @@ class ControlsAndResults extends React.Component {
 
 }
 
-export class Search extends React.Component {
+export default class SearchView extends React.Component {
 
     fullWidthStyle(){
         if (!this.refs || !this.refs.container) return null;
@@ -558,7 +387,7 @@ export class Search extends React.Component {
         }
         return (
             <div>
-                <div className="browse-page-container" ref="container">
+                <div className="browse-page-container search-page-container" ref="container">
                     <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
                 </div>
             </div>
@@ -566,4 +395,4 @@ export class Search extends React.Component {
     }
 }
 
-globals.content_views.register(Search, 'Search');
+globals.content_views.register(SearchView, 'Search');

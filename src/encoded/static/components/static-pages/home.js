@@ -77,7 +77,7 @@ export default class HomePage extends React.Component {
                 <div className="row">
 
                     <div className="col-md-6 col-xs-12">
-                        <h2 className="fourDN-header">Welcome</h2>
+                        <h2 className="fourDN-header">Introduction</h2>
                         <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}/>
                     </div>
 

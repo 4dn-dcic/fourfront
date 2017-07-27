@@ -76,15 +76,22 @@ export class SelectedFilesController extends React.Component {
         }
     }
 
+    componentDidUpdate(pastProps, pastState){
+        if (_.keys(pastState.selectedFiles).length !== _.keys(this.state.selectedFiles).length){
+            console.info("Changed selectedFiles:", pastState.selectedFiles, '==>', this.state.selectedFiles);
+        }
+    }
+
     selectFile(uuid: string, memo = null){
         
         var newSelectedFiles = _.clone(this.state.selectedFiles);
 
         function add(id, memo = null){
             if (typeof newSelectedFiles[id] !== 'undefined'){
-                throw new Error("File already selected!");
+                console.error("File already selected!", id);
+            } else {
+                newSelectedFiles[id] = memo || true;
             }
-            newSelectedFiles[id] = memo || true;
         }
 
         if (Array.isArray(uuid)){
@@ -108,9 +115,10 @@ export class SelectedFilesController extends React.Component {
         function remove(id) {
             if (typeof newSelectedFiles[id] === 'undefined'){
                 console.log(id, newSelectedFiles);
-                throw new Error("File not in set!");
+                console.error("File not in set!", id);
+            } else {
+                delete newSelectedFiles[id];
             }
-            delete newSelectedFiles[id];
         }
 
         if (Array.isArray(uuid)){

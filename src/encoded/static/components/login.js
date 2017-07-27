@@ -2,6 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'underscore';
 import * as store from '../store';
 import { JWT, ajax, navigate, isServerSide } from './util';
 import { MenuItem } from 'react-bootstrap';
@@ -100,10 +101,12 @@ export default class Login extends React.Component {
         }, error => {
             console.log("got an error: ", error.description);
             console.log(error);
-            store.dispatch({
-                type: {'context':error}
-            });
-            this.lock.hide.bind(this.lock);
+            var errorPageHref = '/';
+            if (error.code === 403) {
+                errorPageHref = '/error/login-failed';
+            }
+            navigate(errorPageHref);
+            this.lock.hide.call(this.lock);
         });
     }
 

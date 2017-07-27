@@ -28,7 +28,7 @@ describe('Testing search.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        Search = require('../search').Search;
+        Search = require('./../browse/SearchView').default;
         context = require('../testdata/expt_search');
 
         sinon = require('sinon');
@@ -59,11 +59,6 @@ describe('Testing search.js', function() {
         console.log("Facets shown for:", facetFields.join(', '));
         expect(facets.length).toBeGreaterThan(7);
         expect(results.length).toEqual(5);
-    });
-
-    it('has a good title', function() {
-        var titleLine = TestUtils.findRenderedDOMComponentWithTag(testSearch, 'h1');
-        expect(titleLine.textContent).toEqual('ExperimentHiC Search');
     });
 
     it('facets properly (digestion_enzyme=hindIII)', function() {

@@ -28,10 +28,25 @@ class Experiment(Item):
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
-    embedded = ["protocol.*", "protocol_variation.*", "lab.*", "award.*", "experiment_sets.*",
-                "produced_in_pub.*", "publications_of_exp.*",
-                "biosample.*", "biosample.biosource.*", "biosample.modifications.*",
-                "biosample.treatments.*", "biosample.biosource.individual.organism.*"]
+    embedded = ["protocol.*",
+                "protocol_variation.*",
+                "lab.*",
+                "award.*",
+                "experiment_sets.*",
+                "produced_in_pub.*",
+                "publications_of_exp.*",
+                "biosample.*",
+                "biosample.biosource.*",
+                "biosample.modifications.*",
+                "biosample.treatments.*",
+                "biosample.biosource.individual.organism.*",
+                "processed_files.href",
+                "processed_files.accession",
+                "processed_files.uuid",
+                "processed_files.file_size",
+                "processed_files.upload_key",
+                "processed_files.file_format",
+                "processed_files.file_classification"]
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
@@ -110,12 +125,11 @@ class Experiment(Item):
         "items": {
             "title": "Experiment Set",
             "type": ["string", "object"],
-            "linkFrom": "ExperimentSet.experiments_in_set"
+            "linkTo": "ExperimentSet"
         }
     })
-    def experiment_sets(self, request, experiment_sets):
-        paths = paths_filtered_by_status(request, experiment_sets)
-        return paths
+    def experiment_sets(self, request):
+        return self.rev_link_atids(request, "experiment_sets")
 
     @calculated_property(schema={
         "title": "Produced in Publication",
@@ -275,6 +289,43 @@ class ExperimentRepliseq(Experiment):
     })
     def display_title(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
         return self.experiment_summary(request, experiment_type, cell_cycle_stage, biosample)
+
+
+@collection(
+    name='experiments-atacseq',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments ATAC-seq',
+        'description': 'Listing ATAC-seq Experiments',
+    })
+class ExperimentAtacseq(Experiment):
+    """The experiment class for ATAC-seq experiments."""
+
+    item_type = 'experiment_atacseq'
+    schema = load_schema('encoded:schemas/experiment_atacseq.json')
+    embedded = Experiment.embedded + ["submitted_by.*"]
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
+        sum_str = experiment_type
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', biosample=None):
+        return self.experiment_summary(request, experiment_type, biosample)
 
 
 @collection(

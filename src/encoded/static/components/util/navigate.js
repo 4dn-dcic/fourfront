@@ -2,6 +2,8 @@
 
 import url from 'url';
 import _ from 'underscore';
+import { filtersToHref } from './experiments-filters';
+let store = null;
 
 
 let cachedNavFunction = null;
@@ -44,13 +46,24 @@ navigate.setNavigateFunction = function(navFxn){
 };
 
 /** Utility function to get root path of browse page. */
-navigate.getBrowseHref = function(href){
+navigate.getBrowseHrefRoot = function(href){
     var hrefParts = url.parse(href);
     if (!navigate.isBrowseHref(hrefParts)){
         return hrefParts.protocol + '//' + (hrefParts.auth || '') + hrefParts.host + '/browse/';
     }
     return href;
 };
+
+navigate.getBrowseHref = function(currentUrlParts){
+    if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate'; // Default/fallback
+    if (!store) store = require('./../../store');
+    return filtersToHref(
+        store.getState().expSetFilters,
+        currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
+    );
+};
+
+
 
 /** Utility function to check if we are on a browse page. */
 navigate.isBrowseHref = function(href){

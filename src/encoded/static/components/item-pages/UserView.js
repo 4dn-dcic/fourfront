@@ -358,8 +358,6 @@ export default class UserView extends React.Component {
 
                 <div className={"page-container data-display" + ifCurrentlyEditingClass}>
 
-                    <h1 className="page-title">Profile</h1>
-
                     <div className="row first-row row-eq-height-md">
 
                         <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-7">
