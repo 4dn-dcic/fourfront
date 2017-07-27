@@ -93,7 +93,7 @@ def test_indexing_workbook(testapp, indexer_testapp):
     from pkg_resources import resource_filename
     inserts = resource_filename('encoded', 'tests/data/inserts/')
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
-    load_all(testapp, inserts, docsdir)
+    load_all(testapp, inserts, docsdir, itype=TEST_COLLECTIONS)
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['updated']
     assert res.json['indexed']
