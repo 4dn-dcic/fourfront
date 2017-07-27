@@ -21,5 +21,31 @@
         "Per base N content": "PASS",
         "overall_quality_status": "PASS",
         "url" : "https://s3.amazonaws.com/elasticbeanstalk-encoded-4dn-wfoutput-files/4DNFIW7Q5UDL/fastqc_report.html"
+},
+{
+    "Kmer Content": "FAIL",
+    "url": "https://s3.amazonaws.com/elasticbeanstalk-fourfront-webdev-wfoutput/4DNFIZ7G79A9/fastqc_report.html",
+    "Per sequence quality scores": "PASS",
+    "%GC": 39,
+    "date_created": "2017-06-30T16:23:44.152809+00:00",
+    "Per base sequence content": "WARN",
+    "Sequence Length Distribution": "PASS",
+    "Adapter Content": "PASS",
+    "Total Sequences": 32563157,
+    "Sequence Duplication Levels": "PASS",
+    "schema_version": "1",
+    "Overrepresented sequences": "PASS",
+    "submitted_by": "4dndcic@gmail.com",
+    "Per sequence GC content": "PASS",
+    "Per tile sequence quality": "PASS",
+    "Sequence length": "100",
+    "Basic Statistics": "PASS",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "Per base sequence quality": "PASS",
+    "status": "in review by lab",
+    "overall_quality_status": "PASS",
+    "uuid": "4c9dabc6-61d6-4054-a951-c4fdd0023800",
+    "Per base N content": "PASS"
 }
 ]
