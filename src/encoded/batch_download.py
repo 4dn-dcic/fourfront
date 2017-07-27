@@ -83,7 +83,7 @@ _tsv_mapping = OrderedDict([
     #('Read length', ['files.read_length']),
     #('Run type', ['files.run_type']),
     ('Paired end', ['experiments_in_set.files.paired_end']),
-    ('Paired with', ['experiments_in_set.files.paired_with']),
+    #('Paired with', ['experiments_in_set.files.paired_with']),
     #('Derived from', ['files.derived_from.accession']),
     ('Size', ['experiments_in_set.files.file_size']),
     ('Lab', ['lab.title']),
