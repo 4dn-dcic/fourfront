@@ -1,6 +1,6 @@
 [
     {
-        "accession":"4DNFI067APA1",
+        "accession":"4DNFIO67APA1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
@@ -11,7 +11,7 @@
         "filename": "test_fasta1.fasta.gz"
     },
     {
-        "accession":"4DNFI067APB1",
+        "accession":"4DNFIO67APB1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",

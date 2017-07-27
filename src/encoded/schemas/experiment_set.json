@@ -65,6 +65,17 @@
             "description": "A description of why experiments are part of the set.",
             "type": "string",
             "default": ""
+        },
+        "processed_files": {
+            "title": "Processed Files",
+            "description": "Processed files that are derived from files in this experiment set.",
+            "type": "array",
+            "items": {
+                "title": "Processed File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileProcessed"
+            }
         }
     },
     "facets": {

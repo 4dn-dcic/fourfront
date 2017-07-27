@@ -3,12 +3,13 @@
 The fixtures in this module setup a full system with postgresql and
 elasticsearch running as subprocesses.
 """
-
 import pytest
+from encoded.verifier import verify_item
+
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
 # subset of collections to run test on
-TEST_COLLECTIONS = ['biosample', 'testing_post_put_patch']
+TEST_COLLECTIONS = ['biosample', 'testing_post_put_patch', 'file_processed']
 
 
 @pytest.fixture(scope='session')
@@ -188,3 +189,23 @@ def test_listening(testapp, listening_conn):
     notify = listening_conn.notifies.pop()
     assert notify.channel == 'snovault.transaction'
     assert int(notify.payload) > 0
+
+
+@pytest.fixture
+def item_uuid(testapp, award, experiment, lab):
+    # this is a processed file
+    item = {
+        'accession': '4DNFIO67APU2',
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': 'pairs',
+        'filename': 'test.pairs.gz',
+        'md5sum': '0123456789abcdef0123456789abcdef',
+        'status': 'uploading',
+    }
+    res = testapp.post_json('/file_processed', item)
+    return res.json['@graph'][0]['uuid']
+
+def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
+    # Todo, input a list of accessions / uuids:
+    verify_item(item_uuid, indexer_testapp, testapp, registry)

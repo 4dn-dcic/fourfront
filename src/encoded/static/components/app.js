@@ -64,7 +64,8 @@ const portal = {
 
         {id: 'help-menu-item', sid:'sHelp', title: 'Help', children: [
             {id: 'introduction-menu-item', title: 'Introduction to 4DN Metadata', url: '/help'},
-            {id: 'getting-started-menu-item', title: 'Getting Started', url: '/help/getting-started'},
+            {id: 'getting-started-menu-item', title: 'Data Submission - Getting Started', url: '/help/getting-started'},
+            {id: 'cell-culture-menu-item', title: 'Cell Culture Metadata', url: '/help/cell-culture'},
             {id: 'web-submission-menu-item', title: 'Online Submission', url: '/help/web-submission'},
             {id: 'spreadsheet-menu-item', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
             {id: 'rest-api-menu-item', title: 'REST API', url: '/help/rest-api'},
