@@ -347,7 +347,7 @@ def metadata_tsv(context, request):
         # Non-streaming variant (comment out app_iter) : body=fout.getvalue(),
         app_iter = stream_tsv_output(
             format_graph_of_experiment_sets(
-                request.invoke_subrequest(make_subrequest(request, path)).json.get('@graph', []) # Replaces request.embed b/c request.embed didn't work for /search/
+                request.invoke_subrequest(make_subrequest(request, path), False).json.get('@graph', []) # Replaces request.embed b/c request.embed didn't work for /search/
             )
         ),
         content_disposition='attachment;filename="%s"' % filename_to_suggest

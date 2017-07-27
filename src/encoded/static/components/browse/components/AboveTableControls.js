@@ -112,7 +112,7 @@ class SelectedFilesDownloadButton extends React.Component {
         return (
             <div className="pull-left box">
                 <Button key="download" onClick={this.handleClick} disabled={disabled}>
-                    <i className="icon icon-download icon-fw"/> Download { countSelectedFiles } / { this.props.totalFilesCount } Selected Files
+                    <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
                 </Button>
                 { this.renderModal() }
             </div>
