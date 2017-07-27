@@ -1,0 +1,197 @@
+[
+    {
+        "status": "in review by lab",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "0786554a-49e5-4c33-afab-9ec90d657777",
+        "title": "md5",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "version": "4",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "schema_version": "1",
+        "date_created": "2017-06-23T18:22:28.995284+00:00",
+        "aliases": [],
+        "analysis_step_types": [
+            "QC calculation"
+        ],
+        "name": "md5"
+    },
+    {
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a13131",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3",
+        "cwl_pointer": "",
+        "description": "FastQC QC for fastq files",
+        "title": "FastQC",
+        "schema_version": "1",
+        "name": "FastQC",
+        "status": "in review by lab",
+        "input_file_info": [
+            {
+                "input_file_format": "fastq",
+                "input_file_type": "reads"
+            }
+        ],
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "version": "1",
+        "date_created": "2017-05-09T07:21:36.805385+00:00",
+        "output_file_info": [
+            {
+                "output_file_format": "zip",
+                "output_file_type": "QC report"
+            }
+        ],
+        "analysis_step_types": [
+            "QC calculation"
+        ],
+        "aliases": []
+    },
+    {
+        "software_used": "c91a2c9d-079c-4647-9951-da95f2c9baf1",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "53e7b46f-1d3b-4a16-812f-c79456614bda",
+        "title": "extract-mcool-normvector-for-juicebox",
+        "schema_version": "1",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "version": "2",
+        "status": "in review by lab",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "date_created": "2017-07-10T15:03:47.200650+00:00",
+        "aliases": [],
+        "analysis_step_types": [
+            "file format conversion"
+        ],
+        "name": "extract-mcool-normvector-for-juicebox"
+    },
+    {
+        "software_used": "02d636b9-d8dd-4da9-950c-2ca994b23555",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "ede9938e-49e5-4c33-afab-9ec90d65faf3",
+        "title": "coolerbalance",
+        "schema_version": "1",
+        "name": "coolerbalance",
+        "status": "in review by lab",
+        "version": "1",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "date_created": "2017-05-30T23:12:07.452254+00:00",
+        "analysis_step_types": [
+            "normalization"
+        ],
+        "aliases": []
+    },
+    {
+        "software_used": "02d636b9-d8dd-4da9-950c-2ca994b23555",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "25e911b4-49e5-4c33-afab-9ec90d65faf3",
+        "title": "cool2mcool",
+        "schema_version": "1",
+        "name": "cool2mcool",
+        "status": "in review by lab",
+        "version": "1",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "date_created": "2017-05-30T23:12:14.554128+00:00",
+        "analysis_step_types": [
+            "file format conversion"
+        ],
+        "aliases": []
+    },
+    {
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "e4068c7a-49e5-4c33-afab-9ec90d65faf3",
+        "title": "merge_pairs",
+        "schema_version": "1",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "version": "13",
+        "status": "in review by lab",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "date_created": "2017-05-30T21:43:41.867053+00:00",
+        "aliases": [],
+        "analysis_step_types": [
+            "file merging"
+        ],
+        "name": "merge_pairs"
+    },
+    {
+        "software_used": "02d636b9-d8dd-4da9-950c-2ca994b23576",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "a9d0e56c-49e5-4c33-afab-9ec90d65faf3",
+        "title": "pairs2hic",
+        "schema_version": "1",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "version": "12",
+        "status": "in review by lab",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "date_created": "2017-05-30T23:02:21.808340+00:00",
+        "aliases": [],
+        "analysis_step_types": [
+            "aggregation",
+            "normalization"
+        ],
+        "name": "pairs2hic"
+    },
+    {
+        "software_used": "02d636b9-d8dd-4da9-950c-2ca994b23555",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "302366fb-49e5-4c33-afab-9ec90d65faf3",
+        "title": "cooler",
+        "schema_version": "1",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "version": "12",
+        "status": "in review by lab",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "date_created": "2017-05-30T23:02:20.633282+00:00",
+        "aliases": [],
+        "analysis_step_types": [
+            "aggregation"
+        ],
+        "name": "cooler"
+    },
+    {
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23599",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "98a6e081-49e5-4c33-afab-9ec90d65dddd",
+        "title": "juicer",
+        "schema_version": "1",
+        "name": "juicer",
+        "status": "in review by lab",
+        "version": "17",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "date_created": "2017-06-23T18:22:28.818343+00:00",
+        "analysis_step_types": [
+            "alignment",
+            "filtering"
+        ],
+        "aliases": []
+    },
+    {
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "documents": [],
+        "uuid": "b1fe75f9-49e5-4c33-afab-9ec90d65faf3",
+        "title": "juicer2pairs",
+        "schema_version": "1",
+        "name": "juicer2pairs",
+        "status": "in review by lab",
+        "version": "1",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "date_created": "2017-05-30T21:43:41.976430+00:00",
+        "analysis_step_types": [
+            "file format conversion"
+        ],
+        "aliases": []
+    }
+]

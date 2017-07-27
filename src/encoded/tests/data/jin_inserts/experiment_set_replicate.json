@@ -1,0 +1,60 @@
+[
+    {
+        "status": "released",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "uuid": "e58e2141-9253-4c91-85c3-d67ce06db28f",
+        "documents": [],
+        "experimentset_type": "replicate",
+        "description": "Imr90 dilution Hi-C experiments from Jin et al (GSE43070)",
+        "replicate_exps": [
+            {
+                "replicate_exp": "2d16d443-2afd-47d6-a9e5-52b94188cedc",
+                "bio_rep_no": 1,
+                "tec_rep_no": 1
+            },
+            {
+                "replicate_exp": "8a9f82c9-5e5d-4089-ad4c-8283d5c7fc7a",
+                "bio_rep_no": 2,
+                "tec_rep_no": 1
+            },
+            {
+                "replicate_exp": "01881613-8ee8-4f61-aea1-88bc2ffd4615",
+                "bio_rep_no": 3,
+                "tec_rep_no": 1
+            },
+            {
+                "replicate_exp": "897014f7-c1e3-422f-82bb-9344ff831a2b",
+                "bio_rep_no": 4,
+                "tec_rep_no": 1
+            },
+            {
+                "replicate_exp": "1fb13026-362d-4d3a-8a8e-7664770a853f",
+                "bio_rep_no": 5,
+                "tec_rep_no": 1
+            },
+            {
+                "replicate_exp": "780a9959-bd71-49c8-86cc-f68cda0c9ec6",
+                "bio_rep_no": 6,
+                "tec_rep_no": 1
+            }
+        ],
+        "accession": "4DNES4296C5Q",
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf",
+        "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd",
+        "schema_version": "1",
+        "alternate_accessions": [],
+        "experiments_in_set": [
+            "2d16d443-2afd-47d6-a9e5-52b94188cedc",
+            "8a9f82c9-5e5d-4089-ad4c-8283d5c7fc7a",
+            "01881613-8ee8-4f61-aea1-88bc2ffd4615",
+            "897014f7-c1e3-422f-82bb-9344ff831a2b",
+            "1fb13026-362d-4d3a-8a8e-7664770a853f",
+            "780a9959-bd71-49c8-86cc-f68cda0c9ec6"
+        ],
+        "date_created": "2017-05-12T16:31:01.885249+00:00",
+        "date_released": "2017-07-20",
+        "aliases": [
+            "dcic:Jin_imr90_hic"
+        ]
+    }
+]
