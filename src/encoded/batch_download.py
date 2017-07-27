@@ -211,16 +211,16 @@ def metadata_tsv(context, request):
         body = None
         try: # Was submitted as JSON.
             body = request.json_body
-        except Exception as e:
+        except Exception:
             pass
         if body is None and request.POST.get('accession_triples') is not None: # Was submitted as a POST form JSON variable. Workaround to not being able to download files through AJAX.
             try:
                 body = { "accession_triples" : json.loads(request.POST['accession_triples']) }
-            except Exception as e:
+            except Exception:
                 pass
         if body is not None and body.get('accession_triples'):
             accession_triples = [ (accDict.get('accession'), accDict.get('experiments_in_set.accession'), accDict.get('experiments_in_set.files.accession') ) for accDict in body['accession_triples'] ]
-    
+
     if 'referrer' in param_list:
         search_path = '/{}/'.format(param_list.pop('referrer')[0])
     else:
@@ -231,7 +231,7 @@ def metadata_tsv(context, request):
         header.append(prop)
         param_list['field'] = param_list['field'] + _tsv_mapping[prop]
     param_list['limit'] = ['all']
-    # Ensure we send accessions to ES to help narrow initial result down. 
+    # Ensure we send accessions to ES to help narrow initial result down.
     # If too many accessions to include in /search/ URL (exceeds 2048 characters, aka accessions for roughly 20 files), we'll fetch search query as-is and then filter/narrow down.
     if accession_triples and len(accession_triples) < 20:
         param_list['accession'] = [ triple[0] for triple in accession_triples ]
@@ -253,13 +253,11 @@ def metadata_tsv(context, request):
                 temp = c_value
         return ', '.join(list(set(temp)))
 
-    def get_correct_rep_no(key, object, set):
+    def get_correct_rep_no(key, item, set):
         '''Find which Replicate Exp our File Row Object belongs to, and return its replicate number.'''
-        if object is None or key is None or object.get(key) is None:
+        if item is None or key is None or item.get(key) is None:
             return None
-        rep_nos = object[key].split(', ')
-        experiment_accession = object.get('Experiment Accession')
-        file_accession = object.get('File Accession')
+        experiment_accession = item.get('Experiment Accession')
         for repl_exp in set.get('replicate_exps',[]):
             repl_exp_accession = repl_exp.get('replicate_exp', {}).get('accession', None)
             if repl_exp_accession is not None and repl_exp_accession == experiment_accession:
@@ -267,15 +265,15 @@ def metadata_tsv(context, request):
                 return str(repl_exp.get(rep_key))
         return ''
 
-    def should_file_row_object_be_included(object):
-        '''Ensure object's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
+    def should_file_row_object_be_included(item):
+        '''Ensure item's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
         if accession_triples is None:
             return True
         for triple in accession_triples:
             if (
-                triple[0] == object['Experiment Set Accession'] and
-                triple[1] == object['Experiment Accession'] and
-                triple[2] == object['File Accession']
+                triple[0] == item['Experiment Set Accession'] and
+                triple[1] == item['Experiment Accession'] and
+                triple[2] == item['File Accession']
             ):
                 return True
         return False
@@ -319,7 +317,7 @@ def metadata_tsv(context, request):
             # Convert object to list of values in same order defined in tsvMapping & header.
             lambda file_row_object: [ file_row_object[column] for column in header ],
             filter(
-                lambda file_row_object: should_file_row_object_be_included(file_row_object),
+                should_file_row_object_be_included,
                 # Flatten map's child result maps up to self.
                 chain.from_iterable(map(format_experiment_set, graph))
             )
