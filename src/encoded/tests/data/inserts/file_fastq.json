@@ -1,31 +1,38 @@
 [
     {
+        "aliases": ["dcic:testfq1"],
         "accession":"4DNFIO67APU1",
-        "notes": "sample dcic notes",
-        "lab": "4dn-dcic-lab",
+        "notes": "Fastq 1 - paired with fastq 2",
         "submitted_by": "4dndcic@gmail.com",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa0",
         "status": "uploaded",
-        "filename": "test_file1.fastq.gz"
+        "filename": "test_file1.fastq.gz",
+        "paired_end": "1",
+        "content_md5sum": "4012ee7a157cd60a9969dcf68d4a5732",
+        "md5sum": "bc80aabb3ad8264da7307185dfe9fab1",
+        "quality_metric": "4c9dabc6-61d6-4054-a951-c4fdd0023800"
     },
     {
+        "aliases": ["dcic:testfq2"],
         "accession":"4DNFIO67APT1",
-        "notes": "sample dcic notes",
-        "lab": "4dn-dcic-lab",
+        "notes": "Fastq 2 - paired with fastq1",
         "submitted_by": "4dndcic@gmail.com",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa1",
         "status": "uploaded",
-        "filename": "test_file1.fastq.gz"
+        "filename": "test_file2.fastq.gz",
+        "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq1"}],
+        "paired_end": "2"
     },
     {
+        "aliases": ["dcic:testfq3"],
         "accession":"4DNFIO67APV1",
-        "notes": "sample dcic notes",
+        "notes": "Fastq 3 - paired with fastq 4",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
         "lab": "4dn-dcic-lab",
@@ -33,11 +40,13 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa2",
         "status": "uploaded",
-        "filename": "test_file1.fastq.gz"
+        "filename": "test_file3.fastq.gz",
+        "paired_end": "1"
     },
     {
+        "aliases": ["dcic:testfq4"],
         "accession":"4DNFIO67APY1",
-        "notes": "sample dcic notes",
+        "notes": "Fastq 4 - paired with fastq 3",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
         "lab": "4dn-dcic-lab",
@@ -45,11 +54,14 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa3",
         "status": "uploaded",
-        "filename": "test_file1.fastq.gz"
+        "filename": "test_file4.fastq.gz",
+        "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq3"}],
+        "paired_end": "2"
     },
     {
+        "aliases": ["dcic:testfq5"],
         "accession":"4DNFIO67APZ1",
-        "notes": "sample dcic notes",
+        "notes": "Fastq 5 - paired with fastq 6",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
         "lab": "4dn-dcic-lab",
@@ -57,7 +69,50 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa4",
         "status": "uploaded",
-        "filename": "test_file1.fastq.gz"
+        "filename": "test_file5.fastq.gz",
+        "paired_end": "1"
+    },
+    {
+        "aliases": ["dcic:testfq6"],
+        "accession":"4DNFIO67AZZ1",
+        "notes": "Fastq 6 - paired with fastq 5",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "file_format":"fastq",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fbb4",
+        "status": "uploaded",
+        "filename": "test_file6.fastq.gz",
+        "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq5"}],
+        "paired_end": "2"
+    },
+    {
+        "aliases": ["dcic:testfq7"],
+        "accession":"4DNFIO67AHH1",
+        "notes": "Fastq 7 - paired with fastq 8 - microC sequencing replicates",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "file_format":"fastq",
+        "uuid": "47e82a90-49e5-4c33-afab-9ec90d65faa0",
+        "status": "uploaded",
+        "filename": "test_file7.fastq.gz",
+        "paired_end": "1"
+    },
+    {
+        "aliases": ["dcic:testfq8"],
+        "accession":"4DNFIO67AHI1",
+        "notes": "Fastq 8 - paired with fastq7 used for Miseq sequencing replicates",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "file_format":"fastq",
+        "uuid": "47e72a90-49e5-4c33-afab-9ec90d65faa1",
+        "status": "uploaded",
+        "filename": "test_file8.fastq.gz",
+        "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq7"}],
+        "paired_end": "2"
     },
     {
         "accession":"4DNFIO67APW1",
@@ -68,7 +123,8 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa5",
         "status": "released",
-        "filename": "test_file2.fastq.gz"
+        "filename": "test_file2.fastq.gz",
+        "paired_end": "1"
     },
     {
         "accession":"4DNFIO67APX1",
@@ -79,7 +135,8 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa6",
         "status": "upload failed",
-        "filename": "test_file3.fastq.gz"
+        "filename": "test_file3.fastq.gz",
+        "paired_end": "2"
     },
     {
         "accession":"4DNFIO67AFHV",
@@ -134,7 +191,8 @@
         "file_format": "fastq",
         "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688c",
         "status": "uploaded",
-        "filename": "4DNFIN232JJ4.fastq.gz"
+        "filename": "4DNFIN232JJ4.fastq.gz",
+        "paired_end": "1"
     },
     {
         "accession":"4DNFIN232JJ5",
@@ -145,6 +203,133 @@
         "file_format": "fastq",
         "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688d",
         "status": "uploaded",
-        "filename": "4DNFIN232JJ5.fastq.gz"
+        "filename": "4DNFIN232JJ5.fastq.gz",
+        "paired_end": "2",
+        "related_files": [{"relationship_type": "paired with", "file": "4DNFIN232JJ4"}]
+    },
+    {
+        "accession":"4DNFIN232JJ6",
+        "notes": "repliseq b1 t1 f1",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f651c",
+        "status": "uploaded",
+        "filename": "4DNFIN232JJ6.fastq.gz",
+        "paired_end": "1"
+    },
+    {
+        "accession":"4DNFIN232JJ7",
+        "notes": "repliseq b1 t1 f2",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f652d",
+        "status": "uploaded",
+        "filename": "4DNFIN232JJ7.fastq.gz",
+        "paired_end": "2",
+        "related_files": [{"relationship_type": "paired with", "file": "4DNFIN232JJ6"}]
+    },
+    {
+        "accession":"4DNFIN232JK1",
+        "notes": "repliseq b1 t2 f1",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f653c",
+        "status": "uploaded",
+        "filename": "4DNFIN232JK1.fastq.gz",
+        "paired_end": "1"
+    },
+    {
+        "accession":"4DNFIN232JK2",
+        "notes": "repliseq b1 t2 f2",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f654d",
+        "status": "uploaded",
+        "filename": "4DNFIN232JK2.fastq.gz",
+        "paired_end": "2",
+        "related_files": [{"relationship_type": "paired with", "file": "4DNFIN232JK1"}]
+    },
+    {
+        "accession":"4DNFIN232JK3",
+        "notes": "repliseq b2 t1 f1",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f655c",
+        "status": "uploaded",
+        "filename": "4DNFIN232JK3.fastq.gz",
+        "paired_end": "1"
+    },
+    {
+        "accession":"4DNFIN232JK4",
+        "notes": "repliseq b2 t1 f2",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f656d",
+        "status": "uploaded",
+        "filename": "4DNFIN232JK4.fastq.gz",
+        "paired_end": "2",
+        "related_files": [{"relationship_type": "paired with", "file": "4DNFIN232JK3"}]
+    },
+    {
+        "accession":"4DNFIN232JK5",
+        "notes": "repliseq 2 b1 t1 f1",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0044955c-7cb6-4e56-a4d8-56fad52f655c",
+        "status": "uploaded",
+        "filename": "4DNFIN232JK5.fastq.gz",
+        "paired_end": "1"
+    },
+    {
+        "accession":"4DNFIN232JK6",
+        "notes": "repliseq 2 b1 t1 f2",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0033955c-7cb6-4e56-a4d8-56fad52f656d",
+        "status": "uploaded",
+        "filename": "4DNFIN232JK6.fastq.gz",
+        "paired_end": "2",
+        "related_files": [{"relationship_type": "paired with", "file": "4DNFIN232JK5"}]
+    },
+    {
+        "accession":"4DNFIN232JK7",
+        "notes": "atacseq b1 t1 f1",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0444955c-7cb6-4e56-a4d8-56fad52f655c",
+        "status": "uploaded",
+        "filename": "4DNFIN232JK7.fastq.gz",
+        "paired_end": "1"
+    },
+    {
+        "accession":"4DNFIN232JK8",
+        "notes": "repliseq 2 b1 t1 f2",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0133955c-7cb6-4e56-a4d8-56fad52f656d",
+        "status": "uploaded",
+        "filename": "4DNFIN232JK8.fastq.gz",
+        "paired_end": "2",
+        "related_files": [{"relationship_type": "paired with", "file": "4DNFIN232JK7"}]
     }
 ]
