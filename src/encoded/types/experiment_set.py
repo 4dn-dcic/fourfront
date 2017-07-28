@@ -161,7 +161,6 @@ class ExperimentSetReplicate(ExperimentSet):
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
     embedded = ExperimentSet.embedded + [
-        "replicate_exps",
         "replicate_exps.replicate_exp.accession",
         "replicate_exps.replicate_exp.uuid"
     ]
