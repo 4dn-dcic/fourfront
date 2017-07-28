@@ -79,7 +79,7 @@
                 "linkTo": "Protocol"
             }
         },
-        "authentication_protocols": {
+        "authentications": {
             "title": "Authentications",
             "description": "One or more Protocol objects that are linked to authentication images or documents",
             "type": "array",

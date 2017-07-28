@@ -13,10 +13,9 @@ Many 4DN experiments are performed using cell lines.  The consortium has designa
 
 ```morphology_image``` - **Required**
 
-* Phase Contrast Image of Cell Morphology at the time of collection
+* Phase Contrast Image of at least 50 cells showing morphology at the time of collection
 * This is an authentication standard particularly relevant to Tiered cell lines.
 * The value of this field is a reference to an _Image_ object that needs to be submitted separately.
-
 
 ```culture_start_date``` - **Required**
 
@@ -48,33 +47,42 @@ Many 4DN experiments are performed using cell lines.  The consortium has designa
 * The average time from thaw (culture start date) until harvest it takes for the population to double.
 * Researchers can record the number of times they split the cells and by what ratio as a simple approximation of doubling time. This is especially important for some cell lines eg. IMR90 (a mortal line) and HI and H9 human stem cells.
 
-
 ```protocols_additional``` - Optional
 
 * Additional Protocols used in Cell Culture
 * Protocols describing non-4DN protocols or deviations from 4DN SOPs, including additional culture manipulations eg. stem cell differentiation or cell cycle synchronization if they do not follow recommended 4DN SOPs
 *  The value of this field is a list of references to a _Protocol_ object - an alias or uuid.  The _Protocol_ object will include an attachment to the pdf document.
 
+```authentications``` - Optional
+
+* References to one or more *Protocol* objects can be submitted in this field.  The *Protocol* objects should be of the type 'Authentication document' and can be further classified by indicating a specific classification eg. 'Karyotyping authentication' or 'Differentiation authentication'.
+* The value of this field is a list of references to a _Protocol_ object - an alias or uuid.  The _Protocol_ object will include an attachment to the pdf or image document.
+
 ```karyotype``` - Optional
 
-* Karyotype Description
-* Important for potentially genomically unstable lines and an authentication requirement if the passage number of an unstable line is greater than 10.
+* Karyotype Description - a textual description of the population karyotype
+* Important for potentially genomically unstable lines and strongly encouraged if the passage number of an unstable line is greater than 10.
 * A textual description of chromosome count and any noted rearrangements or copy number variations.
-* An image may be submitted in place or in addition to this.
+* Using this field allows this information to be queried in searches.
+* **NOTE** An image or authentication document (see above) may be submitted in place or in addition to this.
 
 ```karyotype_image``` - Optional
 
 * Image of the karyotype
-* A description can be submitted in place or in addition to this.
 * The value of this field is a reference to an _Image_ object that needs to be submitted separately.
+* **NOTE** A description or authentication document (see above) can be submitted in place or in addition to this.
 
 ```differentiation_state``` - Optional
 
 * For cells that have undergone differentiation a description of the differention state and markers used to determine the state.
+* Using this field allows this information to be queried in searches.
+* **NOTE** An authentication document (see above) can be submitted in place or in addition to this.
 
 ```synchronization_stage``` - Optional
 
 * If a culture is synchronized the cell cycle stage or description of the point from which the biosample used in an experiment is prepared.
+* Using this field allows this information to be queried in searches.
+* **NOTE** An authentication document (see above) can be submitted in place or in addition to this.
 
 ```cell_line_lot_number``` - Strongly Suggested for non-Tier 1 cells
 
