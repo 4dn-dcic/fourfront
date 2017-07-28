@@ -39,6 +39,18 @@
                 "Authentication document",
                 "Other"
             ]
+        },
+        "protocol_classification": {
+            "title": "Document Classification",
+            "description": "A classification for a protocol or document that is more specific than it's type.  For example, an Authentication document can be classified as a 'Cell Cycle Authentication' or a Biosample preparation protocol can be classified as 'Tissue Preparation Methods'",
+            "type": "string",
+            "suggested_enum": [
+               "Karyotyping Authentication",
+               "Differentiation Authentication",
+               "Cell cycle Authentication",
+               "Instrument Authentication",
+               "Tissue Preparation Methods"
+            ]
         }
     }
 }
