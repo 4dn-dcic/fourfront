@@ -735,7 +735,7 @@ export const ChartDataController = {
     fetchAndSetFilteredExperiments : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
         ajax.load(
-            ChartDataController.getFilteredContextHref() + ChartDataController.getFieldsRequiredURLQueryPart(),
+            ChartDataController.getFilteredContextHref() + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(filteredContext){
                 ChartDataController.setState({
                     'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
