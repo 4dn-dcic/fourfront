@@ -68,9 +68,9 @@ def test_search_with_embedding(workbook, testapp):
     assert isinstance(test_json['biosource'][0]['biosource_vendor'], dict)
     # this specific field was not embedded and should not be present
     assert 'description' not in test_json['biosource'][0]
-    # since lab.awards was not specifically embedded, the field should not exist
+    # since lab.awards.uuid was not specifically embedded, the field should not exist
     # (removed @id-like field)
-    assert 'awards' not in test_json['lab']
+    assert 'uuid' not in test_json['lab'].get('awards')
     # @id-like field that should still be embedded (not a valid @id)
     assert test_json['lab']['city'] == 'Boston'
 
