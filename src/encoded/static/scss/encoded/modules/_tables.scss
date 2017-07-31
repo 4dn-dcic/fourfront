@@ -1205,15 +1205,24 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 				}
 			}
 
-			&.tall {
+			&.tall.fixed-position-arrows {
 				> .edge-scroll-button {
-					body.scrolled-past-top & {
+					body.scrolled-past-80 & {
 						> i.icon {
 							position: fixed;
 							margin-top: -5px;
 							top: 50%;
 						}
 					}
+					/*
+					body.scrolled-past-80 & {
+						> i.icon {
+							position: fixed;
+							margin-top: -5px;
+							top: 50%;
+						}
+					}
+					*/
 				}
 			}
 

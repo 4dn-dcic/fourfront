@@ -88,7 +88,7 @@ _tsv_mapping = OrderedDict([
     ('Size', ['experiments_in_set.files.file_size']),
     ('Lab', ['lab.title']),
     ('md5sum', ['experiments_in_set.files.md5sum']),
-    ('File download URL', ['experiments_in_set.files.href']),
+    ('File Download URL', ['experiments_in_set.files.href']),
     #('Assembly', ['files.assembly']),
     #('Platform', ['files.platform.title'])
 ])
@@ -242,24 +242,24 @@ def metadata_tsv(context, request):
 
     initial_path = '{}?{}'.format(search_path, urlencode(param_list, True))
 
+    def do_subreq(path):
+        nonlocal request
+        subreq = make_subrequest(request, path)
+        subreq._stats = request._stats
+        subreq.headers['Accept'] = 'application/json'
+        return request.invoke_subrequest(subreq, False).json # invoke_subrequest.. replaces request.embed b/c request.embed didn't work for /search/
+
     def get_search_results():
         '''Loops through search results, 100 (search_results_chunk_row_size) at a time.'''
         nonlocal request
         nonlocal initial_path
-        subreq = make_subrequest(request, initial_path)
-        subreq._stats = request._stats
-        subreq.headers['Accept'] = 'application/json'
-        initial_result = request.invoke_subrequest(subreq, False).json # invoke_subrequest.. replaces request.embed b/c request.embed didn't work for /search/
+        initial_result = do_subreq(initial_path)
         search_result_rows_count_remaining = initial_result.get('total', 0) - search_results_chunk_row_size
         yield initial_result.get('@graph', [])
         while search_result_rows_count_remaining > 0:
             param_list['from'] = [param_list.get('from', 0) + search_results_chunk_row_size]
-            path = '{}?{}'.format(search_path, urlencode(param_list, True))
             search_result_rows_count_remaining = search_result_rows_count_remaining - search_results_chunk_row_size
-            subreq = make_subrequest(request, path)
-            subreq._stats = request._stats
-            subreq.headers['Accept'] = 'application/json'
-            yield request.invoke_subrequest(subreq, False).json.get('@graph', [])
+            yield do_subreq('{}?{}'.format(search_path, urlencode(param_list, True))).get('@graph', [])
 
 
     def get_value_for_column(item, col, columnKeyStart = 0):

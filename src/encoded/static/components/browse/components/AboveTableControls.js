@@ -67,7 +67,7 @@ class SelectedFilesDownloadButton extends React.Component {
         this.setState({ 'modalOpen' : true, 'urls' : urlsString });
     }
 
-    renderModal(){
+    renderModal(countSelectedFiles){
         if (!this.state.modalOpen) return null;
         var textAreaStyle = {
             'minWidth' : '100%',
@@ -78,7 +78,7 @@ class SelectedFilesDownloadButton extends React.Component {
         return (
             <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
                 <Modal.Header>
-                    <Modal.Title>Download Files</Modal.Title>
+                    <Modal.Title>Download { countSelectedFiles } Files</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <p>Please copy and paste the text below into a cURL command to download these files, or click
@@ -114,7 +114,7 @@ class SelectedFilesDownloadButton extends React.Component {
                 <Button key="download" onClick={this.handleClick} disabled={disabled}>
                     <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
                 </Button>
-                { this.renderModal() }
+                { this.renderModal(countSelectedFiles) }
             </div>
         );
     }

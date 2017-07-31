@@ -625,7 +625,6 @@ export const ChartDataController = {
      * Used internally to fetch both all & filtered experiments then calls ChartDataController.setState({ experiments, filteredExperiments }, callback).
      * Called by ChartDataController.sync() internally.
      * 
-     * @memberof module:viz/chart-data-controller
      * @private
      * @static
      * @param {Object} [reduxStoreState] - Current Redux store state to get expSetFilters and current href from. If not provided, gets it from store.getState().
@@ -658,8 +657,6 @@ export const ChartDataController = {
         var filteredExpsHref = ChartDataController.getFilteredContextHref(
             reduxStoreState.expSetFilters, reduxStoreState.href
         ) + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart();
-
-        console.log(allExpsHref, filteredExpsHref);
 
         notifyLoadStartCallbacks();
 
@@ -709,7 +706,7 @@ export const ChartDataController = {
      * @private
      * @static
      * @param {function} [callback] - Optional callback function.
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     fetchAndSetUnfilteredExperiments : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
@@ -730,7 +727,7 @@ export const ChartDataController = {
      * @private
      * @static
      * @param {function} [callback] - Optional callback function.
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     fetchAndSetFilteredExperiments : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
