@@ -75,19 +75,22 @@ export default class Alerts extends React.Component {
     static LoggedOut = {
         "title"     : "Logged Out",
         "message"   : "You have been logged out due to an expired session.",
-        "style"     : 'danger'
+        "style"     : 'danger',
+        'navigateDisappearThreshold' : 1
     }
 
     static NoFilterResults = {
         'title'     : "No Results",
         'message'   : "Selecting this filter returned no results so it was deselected.",
-        'style'     : "warning"
+        'style'     : "warning",
+        'navigateDisappearThreshold' : 3
     }
 
     static ConnectionError = {
         "title" : "Connection Error",
         "message" : "Check your internet connection",
-        "style" : "danger"
+        "style" : "danger",
+        'navigateDisappearThreshold' : 1
     }
 
 
