@@ -1,7 +1,7 @@
 [
     {
         "accession":"4DNEXO67AWU1",
-        "status": "in review by lab",
+        "status": "released",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
         "experiment_type": "capture Hi-C",
@@ -41,7 +41,7 @@
     },
     {
         "accession":"4DNEXO67AWT1",
-        "status": "in review by lab",
+        "status": "released",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
         "experiment_type": "capture Hi-C",

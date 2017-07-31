@@ -139,7 +139,7 @@ class Experiment(Item):
     })
     def produced_in_pub(self, request):
         esets = [secure_embed(request, '/' + str(uuid)) for uuid in
-                 self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
+                 self.experiment_sets(request)]
 
         # replicate experiment set is the boss
         reps = [eset for eset in esets if 'ExperimentSetReplicate' in eset['@type']]
@@ -158,7 +158,7 @@ class Experiment(Item):
     })
     def publications_of_exp(self, request):
         esets = [secure_embed(request, '/' + str(uuid)) for uuid in
-                 self.experiment_sets(request, self.get_rev_links("experiment_sets"))]
+                 self.experiment_sets(request)]
         import itertools
         pubs = list(set(itertools.chain.from_iterable([eset.get('publications_of_set', [])
                                                       for eset in esets])))
