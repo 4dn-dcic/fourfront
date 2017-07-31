@@ -195,6 +195,7 @@ def peak_metadata(context, request):
 @view_config(route_name='metadata', request_method=['GET', 'POST'])
 def metadata_tsv(context, request):
 
+    search_results_chunk_row_size = 100
     param_list = parse_qs(request.matchdict['search_params'])
 
     # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
@@ -211,12 +212,12 @@ def metadata_tsv(context, request):
         body = None
         try: # Was submitted as JSON.
             body = request.json_body
-        except Exception:
+        except:
             pass
         if body is None and request.POST.get('accession_triples') is not None: # Was submitted as a POST form JSON variable. Workaround to not being able to download files through AJAX.
             try:
                 body = { "accession_triples" : json.loads(request.POST['accession_triples']) }
-            except Exception:
+            except:
                 pass
         if body is not None and body.get('accession_triples'):
             accession_triples = [ (accDict.get('accession'), accDict.get('experiments_in_set.accession'), accDict.get('experiments_in_set.files.accession') ) for accDict in body['accession_triples'] ]
@@ -230,14 +231,36 @@ def metadata_tsv(context, request):
     for prop in _tsv_mapping:
         header.append(prop)
         param_list['field'] = param_list['field'] + _tsv_mapping[prop]
-    param_list['limit'] = ['all']
+    param_list['limit'] = [search_results_chunk_row_size]
+
     # Ensure we send accessions to ES to help narrow initial result down.
     # If too many accessions to include in /search/ URL (exceeds 2048 characters, aka accessions for roughly 20 files), we'll fetch search query as-is and then filter/narrow down.
     if accession_triples and len(accession_triples) < 20:
         param_list['accession'] = [ triple[0] for triple in accession_triples ]
         param_list['experiments_in_set.accession'] = [ triple[1] for triple in accession_triples ]
         param_list['experiments_in_set.files.accession'] = [ triple[2] for triple in accession_triples ]
-    path = '{}?{}'.format(search_path, urlencode(param_list, True))
+
+    initial_path = '{}?{}'.format(search_path, urlencode(param_list, True))
+
+    def get_search_results():
+        '''Loops through search results, 100 (search_results_chunk_row_size) at a time.'''
+        nonlocal request
+        nonlocal initial_path
+        subreq = make_subrequest(request, initial_path)
+        subreq._stats = request._stats
+        subreq.headers['Accept'] = 'application/json'
+        initial_result = request.invoke_subrequest(subreq, False).json # invoke_subrequest.. replaces request.embed b/c request.embed didn't work for /search/
+        search_result_rows_count_remaining = initial_result.get('total', 0) - search_results_chunk_row_size
+        yield initial_result.get('@graph', [])
+        while search_result_rows_count_remaining > 0:
+            param_list['from'] = [param_list.get('from', 0) + search_results_chunk_row_size]
+            path = '{}?{}'.format(search_path, urlencode(param_list, True))
+            search_result_rows_count_remaining = search_result_rows_count_remaining - search_results_chunk_row_size
+            subreq = make_subrequest(request, path)
+            subreq._stats = request._stats
+            subreq.headers['Accept'] = 'application/json'
+            yield request.invoke_subrequest(subreq, False).json.get('@graph', [])
+
 
     def get_value_for_column(item, col, columnKeyStart = 0):
         temp = []
@@ -253,27 +276,27 @@ def metadata_tsv(context, request):
                 temp = c_value
         return ', '.join(list(set(temp)))
 
-    def get_correct_rep_no(key, item, set):
+    def get_correct_rep_no(key, column_vals_dict, experiment_set):
         '''Find which Replicate Exp our File Row Object belongs to, and return its replicate number.'''
-        if item is None or key is None or item.get(key) is None:
+        if column_vals_dict is None or key is None or column_vals_dict.get(key) is None:
             return None
-        experiment_accession = item.get('Experiment Accession')
-        for repl_exp in set.get('replicate_exps',[]):
+        experiment_accession = column_vals_dict.get('Experiment Accession')
+        for repl_exp in experiment_set.get('replicate_exps',[]):
             repl_exp_accession = repl_exp.get('replicate_exp', {}).get('accession', None)
             if repl_exp_accession is not None and repl_exp_accession == experiment_accession:
                 rep_key = 'bio_rep_no' if key == 'Bio Rep No' else 'tec_rep_no'
                 return str(repl_exp.get(rep_key))
         return ''
 
-    def should_file_row_object_be_included(item):
-        '''Ensure item's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
+    def should_file_row_object_be_included(column_vals_dict):
+        '''Ensure row's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
         if accession_triples is None:
             return True
         for triple in accession_triples:
             if (
-                triple[0] == item['Experiment Set Accession'] and
-                triple[1] == item['Experiment Accession'] and
-                triple[2] == item['File Accession']
+                triple[0] == column_vals_dict['Experiment Set Accession'] and
+                triple[1] == column_vals_dict['Experiment Accession'] and
+                triple[2] == column_vals_dict['File Accession']
             ):
                 return True
         return False
@@ -314,12 +337,10 @@ def metadata_tsv(context, request):
 
     def format_graph_of_experiment_sets(graph):
         return map(
-            # Convert object to list of values in same order defined in tsvMapping & header.
-            lambda file_row_object: [ file_row_object[column] for column in header ],
+            lambda file_row_object: [ file_row_object[column] for column in header ], # Convert object to list of values in same order defined in tsvMapping & header.
             filter(
                 should_file_row_object_be_included,
-                # Flatten map's child result maps up to self.
-                chain.from_iterable(map(format_experiment_set, graph))
+                chain.from_iterable(map(format_experiment_set, graph)) # chain.from_itertable = Flatten own map's child result maps up to self.
             )
         )
 
@@ -332,20 +353,13 @@ def metadata_tsv(context, request):
             writer.writerow(row)
             yield line.read().encode('utf-8')
 
-    # Non-streaming variant:
-    #fout = io.StringIO()
-    #writer = csv.writer(fout, delimiter='\t')
-    #writer.writerow(header)
-    #writer.writerows(data_rows)
-
     filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
 
     return Response(
         content_type='text/tsv',
-        # Non-streaming variant (comment out app_iter) : body=fout.getvalue(),
         app_iter = stream_tsv_output(
             format_graph_of_experiment_sets(
-                request.invoke_subrequest(make_subrequest(request, path), False).json.get('@graph', []) # Replaces request.embed b/c request.embed didn't work for /search/
+                chain.from_iterable(get_search_results())
             )
         ),
         content_disposition='attachment;filename="%s"' % filename_to_suggest
