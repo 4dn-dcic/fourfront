@@ -92,7 +92,7 @@ The consortium has designated 4 cell lines as [Tier 1](https://data.4dnucleome.o
 * Protocols describing non-4DN protocols or deviations from 4DN SOPs, including additional culture manipulations eg. stem cell differentiation or cell cycle synchronization if they do not follow recommended 4DN SOPs
 *  The value of this field is a list of references to a _Protocol_ object - an alias or uuid.  The _Protocol_ object will include an attachment to the pdf document.
 
-```authentications``` - Optional
+```authentication_protocols``` - Optional
 
 * References to one or more *Protocol* objects can be submitted in this field.  The *Protocol* objects should be of the type 'Authentication document' and can be further classified by indicating a specific classification eg. 'Karyotyping authentication' or 'Differentiation authentication'.
 * The value of this field is a list of references to a _Protocol_ object - an alias or uuid.  The _Protocol_ object will include an attachment to the pdf or image document.
