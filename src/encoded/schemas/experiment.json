@@ -161,6 +161,16 @@
             "description": "Flag to indicate if the 4DN SOP for the selected type of experiment was followed - Yes or No",
             "type": "string",
             "enum": ["Yes", "No"]
+        },
+        "authentication_protocols": {
+            "title": "Authentications",
+            "description": "One or more Protocol objects that are linked to authentication images or documents",
+            "type": "array",
+            "items": {
+                "title": "Authentication",
+                "type": "string",
+                "linkTo": "Protocol"
+            }
         }
     },
     "facets": {
