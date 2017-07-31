@@ -1,10 +1,49 @@
 ## Overview
 
-Many 4DN experiments are performed using cell lines.  The consortium has designated 4 cell lines as [Tier 1](https://data.4dnucleome.org/search/?type=Biosource&cell_line_tier=Tier+1), which will be a primary focus of 4DN research and integrated analysis.  A number of other lines that are expected to be used by multiple labs and have approved SOPs for maintaining them have been designated [Tier 2](https://data.4dnucleome.org/search/?type=Biosource&cell_line_tier=Tier+2).  In addition, some labs may wish to submit datasets produced using other cell lines.  To maintain consistent data standards and in order to facilitate integrated analysis the samples working group has designated what metadata regarding cell line biosample preparation is required.  Other metadata is strongly encouraged.  The exact requirements may vary somewhat depending on the cell type and when the data was produced (i.e. some older experiments can be 'grandfathered' in even if they do not 'pass' all the requirements.  The biosample metadata fields that can be submitted are described below.
+The 4DN consortium will collect metadate on the preparation of a biological sample (biosample) in order to make the data FAIR, Findable, Accessible, Interoperable and Reusable, to the extent that such a service benefits the network and scientific community at large.  Many 4DN experiments are performed using cell lines.  Other experiments may be performed on isolated primary cells or tissues.  Experimenters may also perform assays where cells are transiently treated, for example by addition of a drug or introduction of a silencing construct, or stably genomically modified through Crispr technologies.  This page outlines and describes the types of metadata that is requested for biological samples.  The first part of the document outlines the few fields shared by all biosamples.  The samples working group has focused on developing requirements for cell line metadata and this is the primary focus of the [remainder of this document](#cc_meta).
 
 *Note that the sample working group is still discussing some of the metadata and requirements are evolving.  If you have any questions or concerns please feel free to [contact us](mailto:4DN.DCIC.support@hms-dbmi.atlassian.net).*
 
-## Biosample cell culture fields
+## Basic Biosample Metadata
+
+```description```  - Highly recommended
+
+* A brief description of the biosample
+* example "K562 cells prepared for in situ Hi-C experiments"
+
+```biosource``` - **Required**
+
+* The value of this field is a reference to usually one _Biosouce_ object whose metadata is submitted separately.
+* This biosource can be a cell line or a tissue that has it's own associated metadata.  **NOTE** The tiered cell lines all have an existing biosource in the database that can be re-used and referenced by it's accession, alias or uuid - while other biosources may require you to submit metadata for them.
+* It is possible, though rare, for a single biosample to consist of more than one biosource - eg. pooling of two different cell lines - in these cases you can reference multiple biosources in this field.
+
+```cell_culture_details``` - **Required only for cultured cell lines**
+
+* The value of this field is a reference to a _BiosampleCellCulture_ object whose metadata is submitted separately and is detailed in the Cell Culture Metadata section below.
+
+```modifications``` - Optional
+
+* The value of this field is a reference to a _Modification_ object whose metadata is submitted separately.
+* List of Stable Genomic Modifications engineered into the biosample
+* Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification.
+
+```treaments``` - Optional
+
+* The value of this field is a reference to a _Treatment_ object whose metadata is submitted separately.
+* There are currently two general types of treatments - 1) Addition of a drug or chemical and 2) transient or inducible RNA interference - more may be added if necessary
+
+```biosample_protocols``` - Optional
+
+<span id="cc_meta"></span>
+
+* Protocols used in Biosample Preparation
+*  The value of this field is a list of references to a _Protocol_ object - an alias or uuid.  The _Protocol_ object will include an attachment to the pdf document.
+
+## Cell Culture Metadata
+
+The consortium has designated 4 cell lines as [Tier 1](https://data.4dnucleome.org/search/?type=Biosource&cell_line_tier=Tier+1), which will be a primary focus of 4DN research and integrated analysis.  A number of other lines that are expected to be used by multiple labs and have approved SOPs for maintaining them have been designated [Tier 2](https://data.4dnucleome.org/search/?type=Biosource&cell_line_tier=Tier+2).  In addition, some labs may wish to submit datasets produced using other cell lines.  To maintain consistent data standards and in order to facilitate integrated analysis the samples working group has designated what metadata regarding cell line biosample preparation is required.  Other metadata is strongly encouraged.  The exact requirements may vary somewhat depending on the cell type and when the data was produced (i.e. some older experiments can be 'grandfathered' in even if they do not 'pass' all the requirements.  The biosample metadata fields that can be submitted are described below.
+
+### BiosampleCellCulture fields
 
 ```description``` - Highly Recommended
 
