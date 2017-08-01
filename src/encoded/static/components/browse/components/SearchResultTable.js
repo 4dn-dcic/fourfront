@@ -1206,9 +1206,7 @@ export class SearchResultTable extends React.Component {
      * Else, let exception bubble up.
      * 
      * @static
-     * @param {any} value 
-     * 
-     * @memberof ResultRowColumnBlock
+     * @param {any} value
      */
     static sanitizeOutputValue(value){
         if (typeof value !== 'string' && !React.isValidElement(value)){
