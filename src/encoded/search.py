@@ -543,7 +543,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
 
         # Add filter to query
         if field.startswith('audit'):
-            query_field = field
+            query_field = field + '.raw'
         elif field == 'type':
             query_field = 'embedded.@type.raw'
         else:
