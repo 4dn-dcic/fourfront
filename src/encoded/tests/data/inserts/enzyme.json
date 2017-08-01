@@ -102,5 +102,14 @@
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0106-mspi",
         "uuid": "1ff66969-52bc-4226-a056-53b9b0541fe2"
+    },
+    {
+        "name": "Tn5 Transposase",
+        "aliases":["dcic:tn5transposase"],
+        "enzyme_source": "dcic:illumina",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "uuid": "1ff66969-52bc-4226-a056-111110541fe2"
     }
 ]

@@ -652,7 +652,10 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
     exclude_list = []
     order = list(ORDER)
     if itype is not None:
-        order = [itype]
+        if isinstance(itype, list):
+            order = itype
+        else:
+            order = [itype]
     for item_type in order:
         try:
             source = read_single_sheet(filename, item_type)
