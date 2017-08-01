@@ -58,7 +58,7 @@ export class ExperimentSetDetailPane extends React.Component {
                                         { title }:
                                     </div>
                                     <div className="col-xs-8 col-sm-9 expset-addinfo-val">
-                                        { value || <small><em>N/A</em></small> }
+                                        { value || <small><em>None</em></small> }
                                     </div>
                                 </div>
                             );
