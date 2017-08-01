@@ -893,7 +893,7 @@ export class Detail extends React.Component {
 
     static defaultProps = {
         'excludedKeys' : [
-            '@context', 'actions', 'audit',
+            '@context', 'actions', 'audit', 'principals_allowed',
             // Visible elsewhere on page
             'lab', 'award', 'description',
             '@id', 'link_id', 'display_title'
