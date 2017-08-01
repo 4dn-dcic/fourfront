@@ -614,7 +614,7 @@ def initialize_facets(types, doc_types, search_audit, principals, prepared_terms
     used_facets.append('status')
 
     # add facets for any non-schema fields that are requested in the search
-    for field, value in prepared_terms.items():
+    for field in prepared_terms:
         if field.startswith('embedded'):
             split_field = field.strip().split('.')
             use_field = '.'.join(split_field[1:])
