@@ -69,26 +69,22 @@
             "comment": "Researchers can record the number of times they split the cells and by what ratio as a simple approximation of doubling time. This is important for some cell lines eg. IMR90 (a mortal line) and HI and H9 human stem cells.",
             "type": "string"
         },
-        "protocol_SOP_deviations": {
-            "title": "Additional Protocol Describing Deviations from SOP",
-            "description": "Protocol with deviations from SOP",
-            "type": "string",
-            "linkTo": "Protocol",
-            "comment": "DELETE/DEPRECATE use array"
-        },
-        "protocol_addtional": {
-            "title": "Additional Protocol Describing Other culture manipulations",
-            "description": "Protocol with other protocol information",
-            "type": "string",
-            "linkTo": "Protocol",
-            "comment": "DELETE/DEPRECATE use array of protocols"
-        },
         "protocols_additional": {
             "title": "Additional Protocols used in Cell Culture",
             "description": "Protocols describing deviations from 4DN SOPs, including additional culture manipulations eg. stem cell differentiation or cell cycle synchronization if they do not follow recommended 4DN SOPs",
             "type": "array",
             "items": {
                 "title": "Culture Protocol",
+                "type": "string",
+                "linkTo": "Protocol"
+            }
+        },
+        "authentication_protocols": {
+            "title": "Authentications",
+            "description": "One or more Protocol objects that are linked to authentication images or documents",
+            "type": "array",
+            "items": {
+                "title": "Authentication",
                 "type": "string",
                 "linkTo": "Protocol"
             }

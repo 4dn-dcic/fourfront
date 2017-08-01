@@ -147,7 +147,7 @@ class TestingLinkTarget(Item):
         'reverse': ('TestingLinkSource', 'target'),
     }
     embedded = [
-        'reverse',
+        'reverse.*',
     ]
 
     @calculated_property(schema={
