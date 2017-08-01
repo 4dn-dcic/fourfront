@@ -373,7 +373,7 @@ class Item(snovault.Item):
         return path_str
 
     @snovault.calculated_property(schema={
-        "title": "_principals",
+        "title": "principals_allowed",
         "description": "calced perms for ES filtering",
         "type": "object",
         'properties': {
