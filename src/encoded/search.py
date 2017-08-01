@@ -614,7 +614,11 @@ def initialize_facets(types, doc_types, search_audit, principals, prepared_terms
     used_facets.append('status')
 
     # add facets for any non-schema fields that are requested in the search
+<<<<<<< eb662d94dbedaffd8bef8ddccfac6625cecad620
     for field in prepared_terms:
+=======
+    for field, value in prepared_terms.items():
+>>>>>>> Added automatically generated facets with titles if they're outside of the schema facets. Also added a facets test in test_search
         if field.startswith('embedded'):
             split_field = field.strip().split('.')
             use_field = '.'.join(split_field[1:])
