@@ -585,6 +585,7 @@ class LoadMoreAsYouScroll extends React.Component {
         this.rebuiltHref = this.rebuiltHref.bind(this);
         this.handleLoad = this.handleLoad.bind(this);
         this.handleScrollingStateChange = this.handleScrollingStateChange.bind(this);
+        this.handleScrollExt = this.handleScrollExt.bind(this);
         var state = {
             'isLoading' : false,
             'canLoad' : true
@@ -603,6 +604,12 @@ class LoadMoreAsYouScroll extends React.Component {
 
     componentWillUnmount(){
         window.removeEventListener('scroll', this.handleScrollExt);
+    }
+
+    handleScrollExt(){
+        if (typeof this.props.onVerticalScroll === 'function'){
+            return this.props.onVerticalScroll.apply(this.props.onVerticalScroll, arguments);
+        }
     }
 
     componentWillReceiveProps(nextProps){
@@ -717,6 +724,17 @@ class ShadowBorderLayer extends React.Component {
         'horizontalScrollRateOnEdgeBUtton' : 10
     }
 
+    static isWindowPastTableTop(tableContainerElement){
+        if (isServerSide()) return false;
+        var windowHeight = window.innerHeight;
+        var scrollTop = document && document.body && document.body.scrollTop;
+        var tableTopOffset = layout.getElementOffset(tableContainerElement).top;
+        if (windowHeight / 2 + scrollTop > tableTopOffset){
+            return true;
+        }
+        return false;
+    }
+
     constructor(props){
         super(props);
         this.scrolling = false;
@@ -727,6 +745,7 @@ class ShadowBorderLayer extends React.Component {
     }
 
     shouldComponentUpdate(nextProps){
+        if (this.props.isWindowPastTableTop !== nextProps.isWindowPastTableTop) return true;
         var pastEdges = this.edgeHiddenContentWidths(this.props);
         var newEdges = this.edgeHiddenContentWidths(nextProps);
         if (newEdges.left !== pastEdges.left || newEdges.right !== pastEdges.right) return true;
@@ -760,10 +779,24 @@ class ShadowBorderLayer extends React.Component {
     }
 
     tallDimensionClass(props = this.props){
-        if (props.innerContainerElem && props.innerContainerElem.offsetHeight > 800){
-            return ' tall';
+        var cls;
+        var tableHeight = (props.innerContainerElem && props.innerContainerElem.offsetHeight) || 0;
+        if (tableHeight > 800){
+            cls = ' tall';
+            /*
+            if (!isServerSide()){
+                var windowHeight = window.innerHeight;
+                var scrollTop = document && document.body && document.body.scrollTop;
+                var tableTopOffset = layout.getElementOffset(props.innerContainerElem).top;
+                if (windowHeight / 2 + scrollTop > tableTopOffset){
+                    cls += ' fixed-position-arrows';
+                }
+            }
+            */
+        } else {
+            cls = ' short';
         }
-        return ' short';
+        return cls;
         //return this.lastDimClassName;
     }
 
@@ -825,7 +858,7 @@ class ShadowBorderLayer extends React.Component {
         if (this.props.fullRowWidth <= this.props.tableContainerWidth) return null;
         var edges = this.edgeHiddenContentWidths();
         return (
-            <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass(edges) + this.tallDimensionClass()}>
+            <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass(edges) + this.tallDimensionClass() + (this.props.isWindowPastTableTop ? ' fixed-position-arrows' : '')}>
                 { this.edgeScrollButtonLeft(edges.left) }{ this.edgeScrollButtonRight(edges.right) }
             </div>    
         );
@@ -898,7 +931,8 @@ class DimensioningContainer extends React.Component {
         this.throttledUpdate = _.debounce(this.forceUpdate.bind(this), 500);
         this.toggleDetailPaneOpen = _.throttle(this.toggleDetailPaneOpen.bind(this), 500);
         this.setDetailHeight = this.setDetailHeight.bind(this);
-        this.onScroll = this.onScroll.bind(this);
+        this.onHorizontalScroll = this.onHorizontalScroll.bind(this);
+        this.onVerticalScroll = _.throttle(this.onVerticalScroll.bind(this), 350);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
         this.setResults = this.setResults.bind(this);
         this.render = this.render.bind(this);
@@ -908,6 +942,7 @@ class DimensioningContainer extends React.Component {
                             props.columnDefinitions.length
                         ),
             'results'   : props.results,
+            'isWindowPastTableTop' : false,
             'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview.
         };
         
@@ -920,6 +955,7 @@ class DimensioningContainer extends React.Component {
                 var fullRowWidth = ResultRow.fullRowWidth(this.props.columnDefinitions, this.state.mounted, []);
                 if (this.refs.innerContainer.offsetWidth < fullRowWidth){
                     state.widths = DimensioningContainer.findAndDecreaseColumnWidths(this.props.columnDefinitions);
+                    state.isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer);
                 }
             } else {
                 state.widths = DimensioningContainer.findAndDecreaseColumnWidths(this.props.columnDefinitions);
@@ -987,12 +1023,23 @@ class DimensioningContainer extends React.Component {
         this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
     }
 
-    onScroll(e){
+    onHorizontalScroll(e){
         if (document && document.querySelectorAll && this.refs && this.refs.innerContainer && this.refs.innerContainer.childNodes[0]){
             var detailPanes = DimensioningContainer.findDetailPaneElements();
             if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, this.refs.innerContainer.scrollLeft, this.throttledUpdate);
         }
         return false;
+    }
+
+    onVerticalScroll(e){
+        if (!document || !window || !this.refs.innerContainer) return null;
+
+        var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer);
+        if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
+            vizUtil.requestAnimationFrame(()=>{
+                this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
+            });
+        }
     }
 
     getTableLeftOffset(){
@@ -1067,7 +1114,7 @@ class DimensioningContainer extends React.Component {
             <div className="search-results-outer-container">
                 <StickyContainer>
                     <div className="search-results-container">
-                        <div className="inner-container" ref="innerContainer" onScroll={this.onScroll}>
+                        <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
                                 
                                 { !responsiveGridSize || responsiveGridSize !== 'xs' ? 
@@ -1106,12 +1153,13 @@ class DimensioningContainer extends React.Component {
                                     openDetailPanes={this.state.openDetailPanes}
                                     rowHeight={this.props.rowHeight}
                                     innerContainerElem={this.refs && this.refs.innerContainer}
+                                    onVerticalScroll={this.onVerticalScroll}
                                 >
                                 { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, headerColumnWidthsFilled) }
                                 </LoadMoreAsYouScroll>
                             </div>
                         </div>
-                        <ShadowBorderLayer tableContainerScrollLeft={tableContainerScrollLeft} tableContainerWidth={tableContainerWidth} fullRowWidth={fullRowWidth} innerContainerElem={this.refs && this.refs.innerContainer} />
+                        <ShadowBorderLayer tableContainerScrollLeft={tableContainerScrollLeft} tableContainerWidth={tableContainerWidth} fullRowWidth={fullRowWidth} innerContainerElem={this.refs && this.refs.innerContainer} isWindowPastTableTop={this.state.isWindowPastTableTop} />
                     </div>
                 </StickyContainer>
                 { canLoadMore === false ?
@@ -1158,9 +1206,7 @@ export class SearchResultTable extends React.Component {
      * Else, let exception bubble up.
      * 
      * @static
-     * @param {any} value 
-     * 
-     * @memberof ResultRowColumnBlock
+     * @param {any} value
      */
     static sanitizeOutputValue(value){
         if (typeof value !== 'string' && !React.isValidElement(value)){

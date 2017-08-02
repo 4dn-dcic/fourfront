@@ -737,9 +737,9 @@ export default class FacetList extends React.Component {
         // Lets extend Browse version w/ more strictness (remove audits).
         var browseFilterResult = FacetList.filterFacetsForBrowse.apply(this, arguments);
         if (!browseFilterResult) return false;
-        //if (facet.field.substring(0, 25) === 'experiments_in_set.audit.'){
-        //    return false; // Ignore audit facets temporarily, esp if logged out.
-        //}
+        if (facet.field.substring(0, 25) === 'experiments_in_set.audit.'){
+            return false; // Ignore audit facets, we have a different view for them.
+        }
         return true;
     }
 

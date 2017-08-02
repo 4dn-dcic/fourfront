@@ -566,10 +566,15 @@ class SubItemTable extends React.Component {
                                         if ((colVal.key === 'link_id' || colVal.key === '@id') && val.slice(0,1) === '/') {
                                             val = <a href={val}>{ val }</a>;
                                         }
-                                        if (val && typeof val === 'object' && !React.isValidElement(val)) {
-                                            val = JSON.stringify(val);
-                                            console.error("ERROR: Value for table cell is not a string, number, or JSX element.\nKey: " + columnKeys[j].key + '; Value: ' + val);
-                                            val = <code>{ val.length <= 25 ? val : val.slice(0,25) + '...' }</code>;
+                                        if (val && typeof val === 'object' && !React.isValidElement(val) && !Array.isArray(val)) {
+                                            try {
+                                                val = JSON.stringify(val);
+                                                console.error("ERROR: Value for table cell is not a string, number, or JSX element.\nKey: " + columnKeys[j].key + '; Value: ' + val);
+                                                val = <code>{ val.length <= 25 ? val : val.slice(0,25) + '...' }</code>;
+                                            } catch (e){
+                                                console.error(e, val);
+                                                val = <em>{'{obj}'}</em>;
+                                            }
                                         }
                                         return (
                                             <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>

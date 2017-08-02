@@ -221,6 +221,18 @@ export function findUnpairedFilesPerExperiment(experiments, includeFileSets = fa
     });
 }
 
+export function findExperimentInSetWithFileAccession(experiments_in_set, file_accession){
+    return _.find(ensureArray(experiments_in_set), function(exp){
+        var expFiles = ensureArray(exp.files);
+        for (var i = 0; i < expFiles.length; i++){
+            if (expFiles[i] && expFiles[i].accession && expFiles[i].accession === file_accession){
+                return true;
+            }
+        }
+        return false;
+    });
+}
+
 export function fileCount(experiment, includeFileSets = false){
     var count = 0;
     if (Array.isArray(experiment.files)) {
@@ -383,7 +395,7 @@ export function groupExperimentsByBiosample(experiments){
  * @param {Object[]} someArray - Any list that should be a list.
  * @returns {Object[]} Array if valid array, or empty array if not.
  */
-export function ensureArray(someArray){
+export function ensureArray(someArray, label){
     if (!Array.isArray(someArray)) {
         // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
         // entire list of experiment_sets to fail.
