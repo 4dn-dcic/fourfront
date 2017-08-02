@@ -821,7 +821,7 @@ export default class ExperimentsTable extends React.Component {
 
         return (
             <ExperimentsTable.StackedBlock
-                key={exp['@id']}
+                key={exp['@id'] || exp.tec_rep_no || i}
                 hideNameOnHover={false}
                 columnClass="experiment"
                 label={{
@@ -841,9 +841,9 @@ export default class ExperimentsTable extends React.Component {
                     title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
                 >
                     { contentsClassName === 'file-pairs' ? /* File Pairs Exist */
-                        exp.file_pairs.map((filePair,i) =>
+                        exp.file_pairs.map((filePair,j) =>
                             <FilePairBlock
-                                key={i}
+                                key={j}
                                 selectedFiles={this.props.selectedFiles}
                                 files={filePair}
                                 columnHeaders={columnHeaders}
@@ -851,7 +851,7 @@ export default class ExperimentsTable extends React.Component {
                                 experiment={exp}
                                 experimentSetAccession={this.props.experimentSetAccession}
                                 label={ exp.file_pairs.length > 1 ?
-                                    { title : "Pair " + (i + 1) } : { title : "Pair" }
+                                    { title : "Pair " + (j + 1) } : { title : "Pair" }
                                 }
                             />
                         )
@@ -866,7 +866,7 @@ export default class ExperimentsTable extends React.Component {
                             : null }
                             <ExperimentsTable.StackedBlock.List title="Files" className="files">
                                 { Array.isArray(exp.files) ?
-                                    exp.files.map((file,i) =>
+                                    exp.files.map((file) =>
                                         <FileEntryBlock
                                             key={file['@id']}
                                             file={file}

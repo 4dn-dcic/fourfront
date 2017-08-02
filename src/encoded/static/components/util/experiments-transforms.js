@@ -174,6 +174,7 @@ export function combineWithReplicateNumbers(experimentsWithReplicateNums, experi
         .zip(experimentsInSet) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
         .map(function(r){
             r[1].biosample = _.clone(r[1].biosample);
+            if (!r[1].biosample) r[1].biosample = { 'bio_rep_no' : '?' };
             r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
             return _.extend(r[0], r[1]);
         })
@@ -362,6 +363,7 @@ export function flattenFileSetsToFilesIfNoFilesForEachExperiment(experiments){
 }
 
 export function groupExperimentsByBiosampleRepNo(experiments){
+    console.log('EE',experiments);
     return _(ensureArray(experiments)).chain()
         .groupBy(function(exp){
             return exp.biosample.bio_rep_no;
@@ -377,7 +379,7 @@ export function groupExperimentsByBiosampleRepNo(experiments){
 export function groupExperimentsByBiosample(experiments){
     return _(ensureArray(experiments)).chain()
         .groupBy(function(exp){
-            return exp.biosample['@id'];
+            return exp.biosample['@id'] || exp.biosample.bio_rep_no;
         })
         .pairs()
         .sortBy(function(expSet){ return expSet[0]; }) // Sort outer list (biosamples) by biosample id
@@ -391,7 +393,7 @@ export function groupExperimentsByBiosample(experiments){
  * @param {Object[]} someArray - Any list that should be a list.
  * @returns {Object[]} Array if valid array, or empty array if not.
  */
-export function ensureArray(someArray, label){
+export function ensureArray(someArray){
     if (!Array.isArray(someArray)) {
         // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
         // entire list of experiment_sets to fail.
