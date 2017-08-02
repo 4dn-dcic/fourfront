@@ -1,19 +1,19 @@
 ## Overview
 
-The 4DN consortium will collect metadate on the preparation of a biological sample (biosample) in order to make the data FAIR, Findable, Accessible, Interoperable and Reusable, to the extent that such a service benefits the network and scientific community at large.  Many 4DN experiments are performed using cell lines.  Other experiments may be performed on isolated primary cells or tissues.  Experimenters may also perform assays where cells are transiently treated, for example by addition of a drug or introduction of a silencing construct, or stably genomically modified through Crispr technologies.  This page outlines and describes the types of metadata that is requested for biological samples.  The first part of the document outlines the few fields shared by all biosamples.  The samples working group has focused on developing requirements for cell line metadata and this is the primary focus of the [remainder of this document](#cc_meta).
+The 4DN consortium will collect metadata on the preparation of a biological sample (biosample) in order to make the data FAIR, Findable, Accessible, Interoperable and Reusable, to the extent that such a service benefits the network and scientific community at large.  Many 4DN experiments are performed using cell lines.  Other experiments may be performed on isolated primary cells or tissues.  Experimenters may also perform assays where cells are transiently treated, for example by addition of a drug or introduction of a silencing construct, or stably genomically modified through Crispr technologies.  This page outlines and describes the types of metadata that is requested for biological samples.  The first part of the document outlines the few fields shared by all biosamples.  The Cell Lines and Samples Working Group has focused on developing requirements for cell line metadata and this is the primary focus of the [remainder of this document](#cc_meta).
 
-*Note that the sample working group is still discussing some of the metadata and requirements are evolving.  If you have any questions or concerns please feel free to [contact us](mailto:4DN.DCIC.support@hms-dbmi.atlassian.net).*
+*Note that the working group is still discussing some of the metadata and requirements are evolving.  If you have any questions or concerns please feel free to [contact us](mailto:4DN.DCIC.support@hms-dbmi.atlassian.net).*
 
 ## Basic Biosample Metadata
 
-```description```  - Highly recommended
+```description```  - **Required**
 
 * A brief description of the biosample
 * example "K562 cells prepared for in situ Hi-C experiments"
 
 ```biosource``` - **Required**
 
-* The value of this field is a reference to usually one _Biosouce_ object whose metadata is submitted separately.
+* The value of this field is a reference to usually one _Biosource_ object whose metadata is submitted separately.
 * This biosource can be a cell line or a tissue that has it's own associated metadata.  **NOTE** The tiered cell lines all have an existing biosource in the database that can be re-used and referenced by it's accession, alias or uuid - while other biosources may require you to submit metadata for them.
 * It is possible, though rare, for a single biosample to consist of more than one biosource - eg. pooling of two different cell lines - in these cases you can reference multiple biosources in this field.
 
@@ -23,14 +23,15 @@ The 4DN consortium will collect metadate on the preparation of a biological samp
 
 ```modifications``` - Optional
 
-* The value of this field is a reference to a _Modification_ object whose metadata is submitted separately.
-* List of Stable Genomic Modifications engineered into the biosample
-* Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification.
+* **Genetic modifications** - this field is used when a Biosample has been genomically modified eg. Crispr modification of a cell line.
+* The value of this field is a list of one or more references to a _Modification_ object whose metadata is submitted separately.
+* Modifications include information on expression or targeting vectors stably transfected to generate Crispr'ed or other genomically modified samples.
 
-```treaments``` - Optional
+```treatments``` - Optional
 
+* This field is used when a Biosample has been treated with a chemical/drug or transiently altered using RNA interference techniques.
 * The value of this field is a reference to a _Treatment_ object whose metadata is submitted separately.
-* There are currently two general types of treatments - 1) Addition of a drug or chemical and 2) transient or inducible RNA interference - more may be added if necessary
+* There are currently two general types of treatments - 1) Addition of a drug or chemical and 2) transient or inducible RNA interference - more may be added as necessary
 
 ```biosample_protocols``` - Optional
 
@@ -45,14 +46,14 @@ The consortium has designated 4 cell lines as [Tier 1](https://data.4dnucleome.o
 
 ### BiosampleCellCulture fields
 
-```description``` - Highly Recommended
+```description``` - Strongly Encouraged
 
 * A short description of the cell culture procedure
 * example "Details on culturing a preparation of K562 cells"
 
 ```morphology_image``` - **Required**
 
-* Phase Contrast Image of at least 50 cells showing morphology at the time of collection
+* Phase Contrast or DIC Image of at least 50 cells showing morphology at the time of collection
 * This is an authentication standard particularly relevant to Tiered cell lines.
 * The value of this field is a reference to an _Image_ object that needs to be submitted separately.
 
