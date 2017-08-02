@@ -190,7 +190,10 @@ def peak_metadata(context, request):
         content_disposition='attachment;filename="%s"' % 'peak_metadata.tsv'
     )
 
-
+# Local flag. TODO: Just perform some request to this endpoint after bin/pserve as part of deploy script.
+endpoints_initialized = {
+    "metadata" : False
+}
 
 @view_config(route_name='metadata', request_method=['GET', 'POST'])
 def metadata_tsv(context, request):
@@ -244,6 +247,9 @@ def metadata_tsv(context, request):
 
     def do_subreq(path):
         nonlocal request
+        if not endpoints_initialized['metadata']:
+            endpoints_initialized['metadata'] = True
+            do_subreq(path) # Do an extra time because for some reason (we get incomplete results from /search/ on first request after bootup/deploy).
         subreq = make_subrequest(request, path)
         subreq._stats = request._stats
         subreq.headers['Accept'] = 'application/json'
