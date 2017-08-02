@@ -34,7 +34,7 @@ var refs = {
         //'experiments_in_set.status',
         //'experiments_in_set.files.file_type',
         'experiments_in_set.files.accession',
-        'experiments_in_set.files.file_format',
+        'experiments_in_set.files.file_type_detailed',
         'experiments_in_set.filesets.files_in_set.accession',
         //'experiments_in_set.biosample.description',
         //'experiments_in_set.biosample.modifications_summary_short',
