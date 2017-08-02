@@ -22,7 +22,6 @@ from time import sleep
 
 def snapshot_db(db_identifier, snapshot_name):
     client = boto3.client('rds')
-    '''
     try:
         response = client.create_db_snapshot(
              DBSnapshotIdentifier=snapshot_name,
@@ -44,7 +43,6 @@ def snapshot_db(db_identifier, snapshot_name):
             DBInstanceClass='db.t2.medium')
     print("Response from restore db from snapshot", response)
     waiter = client.get_waiter('db_instance_available')
-    '''
     print("waiting for db to be restore... this might take some time")
     # waiter.wait(DBInstanceIdentifier=snapshot_name)
     # This doesn't mean the database is done creating, but
@@ -100,7 +98,11 @@ def add_to_auth0_client(new):
     # first get the url of the newly created beanstalk environment
     eb = boto3.client('elasticbeanstalk')
     env = eb.describe_environments(EnvironmentNames=[new])
-    url = env['Environments'][0]['CNAME']
+    url = None
+    while url is None:
+        url = env['Environments'][0].get('CNAME')
+        if url is None:
+            sleep(10)
     auth0_client_update(url)
 
 
@@ -144,7 +146,7 @@ def add_es(new):
             'InstanceCount': 3,
             'DedicatedMasterEnabled': False,
         },
-        AccessPlicies=json.dumps({
+        AccessPolicies=json.dumps({
             "Version": "2012-10-17",
             "Statement": [
                 {
@@ -165,8 +167,6 @@ def add_es(new):
                             ]
                         }
                     },
-                    "Resource":
-                    "arn:aws:es:us-east-1:643366669028:domain/new/*"
                 }
             ]
         })
@@ -190,23 +190,30 @@ def get_es_build_status(new):
     return endpoint
 
 
-
-
 def main():
     parser = argparse.ArgumentParser(
-    description="Clone a beanstalk env into a new one",
-    )
+        description="Clone a beanstalk env into a new one",
+        )
     parser.add_argument('--old')
     parser.add_argument('--new')
-    parser.add_argument('--prod', action='store_true', help='load prod data on new env?'
+    parser.add_argument('--prod', action='store_true', help='load prod data on new env?')
 
     args = parser.parse_args()
-    es_arn = add_es(args.new)
+    print("### start build ES service")
+    add_es(args.new)
+    print("### copy database")
     db_endpoint = snapshot_db(args.old, args.new)
+    print("### waiting for ES service")
     es_endpoint = get_es_build_status(args.new)
+    print("### clone elasticbeanstalk envrionment")
+    # TODO, can we pass in github commit id here?
     clone_bs_env(args.old, args.new, args.prod, db_endpoint, es_endpoint)
-    copy_s3_buckets(args.new, args.old)
+    print("### allow auth-0 requests")
     add_to_auth0_client(args.new)
+    print("### copy contents of s3")
+    copy_s3_buckets(args.new, args.old)
+    print("all set, it may take some time for the beanstalk env to finish starting up")
+
 
 if __name__ == "__main__":
     main()
