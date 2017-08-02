@@ -218,10 +218,10 @@ def main():
     print("### copy contents of s3")
     copy_s3_buckets(args.new, args.old)
     if args.deploy_current:
+        print("### deploying local code to new eb environment")
         eb_deploy(args.new)
 
     print("all set, it may take some time for the beanstalk env to finish starting up")
-    
 
 
 if __name__ == "__main__":
