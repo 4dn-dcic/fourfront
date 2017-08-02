@@ -60,8 +60,10 @@ def snapshot_db(db_identifier, snapshot_name):
         sleep(10)
 
 
-def clone_bs_env(old, new, db_endpoint, es_url):
+def clone_bs_env(old, new, load_prod, db_endpoint, es_url):
     env = 'RDS_HOSTNAME=%s,ENV_NAME=%s,ES_URL=%s' % (db_endpoint, new, es_url)
+    if load_prod:
+        env += ",LOAD_FUNCTION=load_prod_data"
     subprocess.check_call(['eb', 'clone', old, '-n', new,
                            '--envvars', env,
                            '--exact', '--nohang'])
@@ -196,14 +198,15 @@ def main():
     )
     parser.add_argument('--old')
     parser.add_argument('--new')
+    parser.add_argument('--prod', action='store_true', help='load prod data on new env?'
 
     args = parser.parse_args()
     es_arn = add_es(args.new)
     db_endpoint = snapshot_db(args.old, args.new)
     es_endpoint = get_es_build_status(args.new)
-    # clone_bs_env(args.old, args.new, db_endpoint, es_endpoint)
-    # copy_s3_buckets(args.new, args.old)
-    # add_to_auth0_client(args.new)
+    clone_bs_env(args.old, args.new, args.prod, db_endpoint, es_endpoint)
+    copy_s3_buckets(args.new, args.old)
+    add_to_auth0_client(args.new)
 
 if __name__ == "__main__":
     main()
