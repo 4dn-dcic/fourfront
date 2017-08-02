@@ -35,6 +35,10 @@ class SelectedFilesDownloadButton extends React.Component {
         return 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
     }
 
+    static generateListOfURIsFromFiles(files, hostPrefix = ''){
+        return _.pluck(_.values(files), 'href').map(function(downloadPath){ return hostPrefix + downloadPath; });
+    }
+
     constructor(props){
         super(props);
         this.handleClick = _.throttle(this.handleClick.bind(this), 1000);
@@ -55,15 +59,24 @@ class SelectedFilesDownloadButton extends React.Component {
         }).join('&') + '/metadata.tsv';
     }
 
-    getAccessionTriples(){
-        return _.pluck(_.values(this.props.selectedFiles), 'fileSelectionDetails');
+    getAccessionTripleObjects(){
+        return _.map(
+            _.keys(this.props.selectedFiles),
+            function(accessionTripleString){
+                var accessions = accessionTripleString.split('~');
+                return {
+                    'accession' : accessions[0],
+                    'experiments_in_set.accession' : accessions[1],
+                    'experiments_in_set.files.accession' : accessions[2]
+                };
+            }
+        );
+        //return _.pluck(_.values(this.props.selectedFiles), 'fileSelectionDetails');
     }
 
     handleClick(e){
         var urlParts = url.parse(windowHref(this.props.href));
-        var prefix = urlParts.protocol + '//' + urlParts.host;
-        //var urls = [this.generateMetadataTSVPath()].concat(_.pluck(_.values(this.props.selectedFiles), 'href')).map(function(downloadPath){ return prefix + downloadPath; }).join('\n');
-        var urlsString = _.pluck(_.values(this.props.selectedFiles), 'href').map(function(downloadPath){ return prefix + downloadPath; }).join('\n');
+        var urlsString = SelectedFilesDownloadButton.generateListOfURIsFromFiles(this.props.selectedFiles, urlParts.protocol + '//' + urlParts.host).join('\n');
         this.setState({ 'modalOpen' : true, 'urls' : urlsString });
     }
 
@@ -87,7 +100,7 @@ class SelectedFilesDownloadButton extends React.Component {
                     <p>If saving as a file, it can be ran from any server, for example with the following cURL command:</p>
                     <pre>{ 'xargs -n 1 curl -O -L < files.txt' }</pre>
                     <form method="POST" action="/metadata/type=ExperimentSet/metadata.tsv">
-                        <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTriples())} />
+                        <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleObjects())} />
                         <Button type="submit" name="Download" bsStyle="info" data-tip="Details for each individual file in the 'files.txt' download list below.">
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
                         </Button>
@@ -123,27 +136,54 @@ class SelectedFilesDownloadButton extends React.Component {
 
 class SelectedFilesSelector extends React.Component {
 
+    handleSelect(formatType){
+        if (typeof this.props.selectFile !== 'function'){
+            throw new Error("No 'selectFiles' function prop passed to SelectedFilesController.");
+        }
+        if (formatType === 'all'){
+            //this.props.selectFile();
+        }
+    }
+
+    renderFileFormatButtons(){
+        if (!this.props.files) return null;
+        var format_buckets = _.groupBy(this.props.files, 'file_format');
+        return _.keys(format_buckets).map(function(k){
+            var title;
+            if (typeof k === 'undefined' || k === 'other'){
+                title = "Other";
+            } else {
+                title = Schemas.Term.toName('files.file_format', k);
+            }
+            return (
+                <div key={'button-to-select-files-for' + k}>
+                    <Button>{ title } files ({ format_buckets[k].length })</Button>
+                </div>
+            );
+        });
+    }
+
     renderOverlay(){
         return (
             <Popover title="Select..." id="select-files-type">
-                <Button>All</Button>
-                <Button>MCool</Button>
+                <div><Button>All files ({ this.props.totalFilesCount })</Button></div>
+                { this.renderFileFormatButtons() }
             </Popover>
         );
     }
 
     render(){
         return (
-            <div className="pull-left box">
+            <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                <Button key="download" className="text-400">
-                    <i className="icon icon-check-square-o icon-fw"/> Select <span className="500">{ 'All' }</span> Files
-                </Button>
-                <OverlayTrigger trigger="click" rootClose overlay={this.renderOverlay()} placement="bottom">
-                    <Button key="download2">
-                        <i className="icon icon-angle-down icon-fw"/>
+                    <Button key="download" bsStyle="primary">
+                        <i className="icon icon-check-square-o icon-fw"/> <span className="text-400">Select</span> <span className="text-600">All</span>
                     </Button>
-                </OverlayTrigger>
+                    <OverlayTrigger trigger="click" rootClose overlay={this.renderOverlay()} placement="bottom">
+                        <Button key="download2" bsStyle="primary">
+                            <i className="icon icon-angle-down icon-fw"/>
+                        </Button>
+                    </OverlayTrigger>
                 </ButtonGroup>
             </div>
         );
@@ -152,18 +192,25 @@ class SelectedFilesSelector extends React.Component {
 
 class SelectedFilesControls extends React.Component {
 
-    totalFiles(){
-        var exps = this.props.filteredExperiments || this.props.experiments;
-        if (!exps) return 0;
-        return expFxn.fileCountFromExperiments(exps, this.props.includeFileSets);
-    }
-
     render(){
+        var exps = this.props.filteredExperiments || this.props.experiments;
+        var totalFilesCount = exps ? expFxn.fileCountFromExperiments(exps, this.props.includeFileSets) : 0;
+        var allFiles = [];
+        if (exps){
+            allFiles =  expFxn.allFilesFromExperiments(exps);
+        }
         return (
             <div>
-                <SelectedFilesSelector />
+                <SelectedFilesSelector
+                    files={allFiles}
+                    totalFilesCount={totalFilesCount}
+                    selectedFiles={this.props.selectedFiles}
+                    selectFile={this.props.selectFile}
+                    unselectFile={this.props.unselectFile}
+                    resetSelectedFiles={this.props.resetSelectedFiles}
+                />
                 {' '}
-                <SelectedFilesDownloadButton {...this.props} totalFilesCount={this.totalFiles()} />
+                <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
             </div>
         );
     }

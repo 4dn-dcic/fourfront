@@ -784,28 +784,28 @@ export default class ExperimentsTable extends React.Component {
      * @param {string|string[]} uuid - String or list of strings (File Item UUID)
      * @param {Object|Object[]} fileObj - File Item JSON
      */
-    handleFileCheckboxChange(uuid, fileObj){
+    handleFileCheckboxChange(accessionTripleString, fileObj){
         if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
 
         var willSelect;
         var isMultiples;
 
-        if (Array.isArray(uuid)){
+        if (Array.isArray(accessionTripleString)){
             isMultiples = true;
-            willSelect = (typeof this.props.selectedFiles[uuid[0]] === 'undefined');
+            willSelect = (typeof this.props.selectedFiles[accessionTripleString[0]] === 'undefined');
         } else {
             isMultiples = false;
-            willSelect = (typeof this.props.selectedFiles[uuid] === 'undefined');
+            willSelect = (typeof this.props.selectedFiles[accessionTripleString] === 'undefined');
         }
 
         if (willSelect){
             if (isMultiples){
-                this.props.selectFile(_.zip(uuid, fileObj));
+                this.props.selectFile(_.zip(accessionTripleString, fileObj));
             } else {
-                this.props.selectFile(uuid, fileObj);
+                this.props.selectFile(accessionTripleString, fileObj);
             }
         } else {
-            this.props.unselectFile(uuid);
+            this.props.unselectFile(accessionTripleString);
         }
     }
 
@@ -1059,6 +1059,18 @@ export default class ExperimentsTable extends React.Component {
 
 class FilePairBlock extends React.Component {
 
+    static accessionTriplesFromProps(props){
+        var accessionTriples;
+        try {
+            accessionTriples = expFxn.filesToAccessionTriples(props.files, true);
+        } catch (e){
+            accessionTriples = _.map(props.files, (fileObj)=>{
+                return [ props.experimentSetAccession || null, (props.experiment || {}).accession || null, fileObj.accession || null ].join('~');
+            });
+        }
+        return accessionTriples;
+    }
+
     static propTypes = {
         selectedFiles : PropTypes.object,
         handleFileCheckboxChange : PropTypes.func,
@@ -1073,9 +1085,16 @@ class FilePairBlock extends React.Component {
         this.render = this.render.bind(this);
     }
 
-    isChecked(){
-        if (!Array.isArray(this.props.files) || !this.props.selectedFiles || !this.props.files[0].uuid) return null;
-        return !!(this.props.selectedFiles[this.props.files[0].uuid]);
+    isChecked(accessionTriples){
+        if (!accessionTriples){
+            accessionTriples = FilePairBlock.accessionTriplesFromProps(this.props);
+        }
+        if (!Array.isArray(this.props.files) || !this.props.selectedFiles || !this.props.files[0].accession) return null;
+        if (this.props.files.length === 0) return false;
+        for (var i = 0; i < this.props.files.length; i++){
+            if (typeof this.props.selectedFiles[accessionTriples[i]] === 'undefined') return false;
+        }
+        return true;
     }
 
     renderFileEntryBlock(file,i){
@@ -1084,6 +1103,7 @@ class FilePairBlock extends React.Component {
                 key={file['@id']}
                 file={file}
                 columnHeaders={ this.props.columnHeaders }
+                handleFileCheckboxChange={this.props.handleFileCheckboxChange}
                 className={null}
                 isSingleItem={this.props.files.length < 2 ? true : false}
                 pairParent={this}
@@ -1096,8 +1116,10 @@ class FilePairBlock extends React.Component {
     }
 
     renderCheckBox(){
+        var accessionTriples = FilePairBlock.accessionTriplesFromProps(this.props);
         var checked = this.isChecked();
         if (checked === null) return null;
+
         return (
             <Checkbox
                 validationState='warning'
@@ -1108,16 +1130,8 @@ class FilePairBlock extends React.Component {
                 data-select-files={_.pluck(this.props.files, 'uuid')}
                 onChange={this.props.handleFileCheckboxChange.bind(
                     this.props.handleFileCheckboxChange,
-                    _.pluck(this.props.files, 'uuid'),
-                    _.map(this.props.files, (fileObj)=>{
-                        return _.extend({}, fileObj, {
-                            'fileSelectionDetails' : {
-                                'accession' : this.props.experimentSetAccession || null,
-                                'experiments_in_set.accession' : (this.props.experiment || {}).accession || null,
-                                'experiments_in_set.files.accession' : fileObj.accession || null
-                            }
-                        });
-                    })
+                    accessionTriples,
+                    this.props.files
                 )}
             />
         );
@@ -1172,6 +1186,16 @@ class FilePairBlock extends React.Component {
 
 class FileEntryBlock extends React.Component {
 
+    static accessionTripleFromProps(props){
+        var accessionTriple;
+        try {
+            accessionTriple = expFxn.fileToAccessionTriple(props.file, true);
+        } catch (e){
+            accessionTriple =  [ props.experimentSetAccession || null, (props.experiment || {}).accession || null, (props.file || {}).accession || null ].join('~');
+        }
+        return accessionTriple;
+    }
+
     static propTypes = {
         selectedFiles : PropTypes.object,
         handleFileCheckboxChange : PropTypes.func
@@ -1187,8 +1211,9 @@ class FileEntryBlock extends React.Component {
     }
 
     isChecked(){
-        if (!this.props.file || !this.props.file.uuid || !this.props.selectedFiles) return null;
-        return this.props.selectedFiles[this.props.file.uuid];
+        if (!this.props.file || !this.props.file.accession || !this.props.selectedFiles) return null;
+        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
+        return this.props.selectedFiles[accessionTriple];
     }
 
     filledFileRow (file = this.props.file){
@@ -1235,6 +1260,8 @@ class FileEntryBlock extends React.Component {
         if (!this.props.file) return null; // No file to select.
         if (this.props.pairParent) return null; // Part of pair -- FilePairBlock has own checkbox.
 
+        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
+
         var checked = this.isChecked();
         if (checked === null) return null; // No checked state.
         return (
@@ -1247,14 +1274,8 @@ class FileEntryBlock extends React.Component {
                 data-select-files={[this.props.file.uuid]}
                 onChange={this.props.handleFileCheckboxChange.bind(
                     this.props.handleFileCheckboxChange,
-                    this.props.file.uuid,
-                    _.extend({}, this.props.file, {
-                        'fileSelectionDetails' : {
-                            'accession' : this.props.experimentSetAccession || null,
-                            'experiments_in_set.accession' : (this.props.experiment || {}).accession || null,
-                            'experiments_in_set.files.accession' : (this.props.file || {}).accession || null
-                        }
-                    })
+                    accessionTriple,
+                    this.props.file
                 )}
             />
         );

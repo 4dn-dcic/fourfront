@@ -50,6 +50,51 @@ export function listAllUnpairedFiles(experiments, includeFileSets = false){
     );
 }
 
+/**
+ * Sorted by accession. Does not need to be all from one Experiment Set.
+ * For usage especially by ChartDataController-using components.
+ * 
+ * @export
+ * @param {Object[]} List of experiments with at least a 'files' property.
+ * @returns {Object[]} List of all files gathered from experiments list.
+ */
+export function allFilesFromExperiments(experiments){
+    return _.uniq(
+        _.sortBy(
+            _.flatten(
+                _.map(ensureArray(experiments), allFilesFromExperiment),
+                true
+            ),
+            'accession'
+        ),
+        function(file){ return file.accession; }
+    );
+}
+
+export function fileToAccessionTriple(file, toString = false){
+    if (typeof file.from_experiment === 'undefined') throw new Error("No 'from_experiment' property set on this file.");
+    if (typeof file.from_experiment.accession !== 'string') throw new Error("No 'from_experiment.accession' property set on this file.");
+    if (typeof file.from_experiment.from_experiment_set === 'undefined') throw new Error("No 'from_experiment.from_experiment_set' property set on this file.");
+    if (typeof file.from_experiment.from_experiment_set.accession !== 'string') throw new Error("No 'from_experiment.accession' property set on this file.");
+    if (typeof file.accession !== 'string') throw new Error("No 'accession' property set on this file.");
+
+    var triple = [ file.from_experiment.from_experiment_set.accession, file.from_experiment.accession, file.accession ];
+
+    if (toString === true){
+        return triple.join('~');
+    } else if (toString && typeof toString === 'string'){
+        return triple.join(toString);
+    } else {
+        return triple;
+    }
+}
+
+export function filesToAccessionTriples(files, toString = false){
+    return _.map(ensureArray(files), function(file){
+        return fileToAccessionTriple(file, toString);
+    });
+}
+
 
 /**
  * NOT SORTED
@@ -89,6 +134,7 @@ export function listAllExperimentsFromExperimentSets(experiment_sets){
                 var cSet = _.clone(set);
                 cSet.experiments_in_set = cSet.experiments_in_set.length;
                 cExp.experiment_sets = [cSet];
+                cExp.from_experiment_set = cSet;
                 return cExp;
             });
         })
@@ -183,7 +229,7 @@ export function combineWithReplicateNumbers(experimentsWithReplicateNums, experi
 
 export function findUnpairedFiles(files_in_experiment){
     return _.reduce(ensureArray(files_in_experiment), function(unpairedFiles, file, files){
-        if (!Array.isArray(file.related_files) || typeof file.paired_end == 'undefined') {
+        if (/*!Array.isArray(file.related_files) || */typeof file.paired_end === 'undefined') {
             unpairedFiles.push(file);
         }
         return unpairedFiles;
@@ -198,23 +244,27 @@ export function findUnpairedFiles(files_in_experiment){
  */
 export function findUnpairedFilesPerExperiment(experiments, includeFileSets = false){
     return ensureArray(experiments).map(function(exp){
+        var files;
         if (Array.isArray(exp.files)){
-            return findUnpairedFiles(exp.files);
+            files = findUnpairedFiles(exp.files);
         } else if (
             includeFileSets &&
             Array.isArray(exp.filesets) &&
             exp.filesets.length > 0 &&
             Array.isArray(exp.filesets[0].files_in_set)
         ){
-            return findUnpairedFiles(
+            files = findUnpairedFiles(
                 _.flatten(
                     _.pluck(exp.filesets, 'files_in_set'),
                     true
                 )
             );
         } else {
-            return [];
+            files = [];
         }
+        return _.map(files, function(file){
+            return _.extend({}, file, { 'from_experiment' : exp });
+        });
     });
 }
 
@@ -255,19 +305,31 @@ export function allFilesFromFileSetsInExperiment(experiment){
 }
 
 export function allFilesFromExperiment(experiment){
-    return ensureArray(experiment.files).concat(
+    return _.map(ensureArray(experiment.files).concat(
         allFilesFromFileSetsInExperiment(experiment)
-    );
+    ), function(origFile){
+        var file = _.clone(origFile);
+        if (typeof file.from_experiment === 'undefined') file.from_experiment = experiment;
+        return file;
+        //return _.extend({}, file, 'experiment')
+    });
 }
 
 export function allFilesFromExperimentSet(expSet){
+
+    function add(memo, file){
+        if (typeof file.accession === 'undefined' || _.pluck(memo, 'accession').indexOf(file.accession) === -1){
+            memo.push(file);
+        }
+    }
+
     return _.reduce(allPairsSetsAndFilesFromExperimentSet(expSet), function(m, f){
         if (Array.isArray(f)){
-            return m.concat(f);
+            _.forEach(f, add.bind(add, m));
         } else {
-            m.push(f);
-            return m;
+            add(m, f);
         }
+        return m;
     }, []);
 }
 
@@ -280,9 +342,12 @@ export function allFilesFromExperimentSet(expSet){
  * @returns {Array.<Array>} e.g. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
  */
 export function allPairsSetsAndFilesFromExperimentSet(expSet){
-    return listAllFilePairs(expSet.experiments_in_set).concat(
-        listAllUnpairedFiles(expSet.experiments_in_set)
-    );
+    var exps_in_set_with_from_set_property = _.map(ensureArray(expSet.experiments_in_set), function(exp){
+        return _.extend({}, exp, { 'from_experiment_set' : expSet });
+    });
+    var pairs = listAllFilePairs(exps_in_set_with_from_set_property);
+    var unpairedFiles = listAllUnpairedFiles(exps_in_set_with_from_set_property);
+    return pairs.concat(unpairedFiles);
 }
 
 export function groupFilesByPairs(files_in_experiment){
@@ -342,6 +407,11 @@ export function groupFilesByPairsForEachExperiment(experiments, includeFileSets 
         }
 
         if (Array.isArray(file_pairs) && file_pairs.length > 0) {
+            _.forEach(file_pairs, function(pair){
+                _.forEach(pair, function(file_in_pair){
+                    file_in_pair.from_experiment = exp;
+                });
+            });
             exp = _.extend({}, exp, { 'file_pairs' : file_pairs });
         }
         return exp;
@@ -363,7 +433,6 @@ export function flattenFileSetsToFilesIfNoFilesForEachExperiment(experiments){
 }
 
 export function groupExperimentsByBiosampleRepNo(experiments){
-    console.log('EE',experiments);
     return _(ensureArray(experiments)).chain()
         .groupBy(function(exp){
             return exp.biosample.bio_rep_no;

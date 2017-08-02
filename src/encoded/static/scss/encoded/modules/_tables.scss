@@ -1530,6 +1530,9 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	.box {
 		min-height: 33px;
 		line-height: 33px;
+		&.selection-buttons {
+			margin-right: 7px;
+		}
 	}
 
 	.right-buttons {
