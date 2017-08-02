@@ -307,7 +307,7 @@ def metadata_tsv(context, request):
             if not _tsv_mapping[column][0].startswith('experiments_in_set'):
                 exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
         # Flatten map's child result maps up to self.
-        return chain.from_iterable(map(lambda exp: format_experiment(exp, exp_set, exp_set_row_vals), exp_set.get('experiments_in_set', []) ))
+        return chain.from_iterable(map(lambda exp: format_experiment(exp, exp_set, exp_set_row_vals), sorted(exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") ) ))
 
 
     def format_experiment(exp, exp_set, exp_set_row_vals):
@@ -316,7 +316,7 @@ def metadata_tsv(context, request):
             if not _tsv_mapping[column][0].startswith('experiments_in_set.files') and _tsv_mapping[column][0].startswith('experiments_in_set'):
                 exp_row_vals[column] = get_value_for_column(exp, column, 19)
 
-        return map(lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals), exp.get('files', []) )
+        return map(lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals), sorted(exp.get('files', []), key=lambda d: d.get("accession") ) )
 
 
     def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):
