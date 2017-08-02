@@ -5,6 +5,9 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from snovault import TYPES
 from snovault.util import simple_path_ids
+from snovault.embed import make_subrequest
+from itertools import chain
+
 from urllib.parse import (
     parse_qs,
     urlencode,
@@ -15,6 +18,7 @@ from .search import list_visible_columns_for_schemas
 import csv
 import io
 import json
+from datetime import datetime
 
 import logging
 
@@ -32,50 +36,61 @@ def includeme(config):
 
 # includes concatenated properties
 _tsv_mapping = OrderedDict([
-    ('File accession', ['files.title']),
-    ('File format', ['files.file_type']),
-    ('Output type', ['files.output_type']),
-    ('Experiment accession', ['accession']),
-    ('Assay', ['assay_term_name']),
-    ('Biosample term id', ['biosample_term_id']),
-    ('Biosample term name', ['biosample_term_name']),
-    ('Biosample type', ['biosample_type']),
-    ('Biosample life stage', ['replicates.library.biosample.life_stage']),
-    ('Biosample sex', ['replicates.library.biosample.sex']),
-    ('Biosample organism', ['replicates.library.biosample.organism.scientific_name']),
-    ('Biosample treatments', ['replicates.library.biosample.treatments.treatment_term_name']),
-    ('Biosample subcellular fraction term name', ['replicates.library.biosample.subcellular_fraction_term_name']),
-    ('Biosample phase', ['replicates.library.biosample.phase']),
-    ('Biosample synchronization stage', ['replicates.library.biosample.fly_synchronization_stage',
-                                         'replicates.library.biosample.worm_synchronization_stage',
-                                         'replicates.library.biosample.post_synchronization_time',
-                                         'replicates.library.biosample.post_synchronization_time_units']),
-    ('Experiment target', ['target.name']),
-    ('Antibody accession', ['replicates.antibody.accession']),
-    ('Library made from', ['replicates.library.nucleic_acid_term_name']),
-    ('Library depleted in', ['replicates.library.depleted_in_term_name']),
-    ('Library extraction method', ['replicates.library.extraction_method']),
-    ('Library lysis method', ['replicates.library.lysis_method']),
-    ('Library crosslinking method', ['replicates.library.crosslinking_method']),
-    ('Experiment date released', ['date_released']),
-    ('Project', ['award.project']),
-    ('RBNS protein concentration', ['files.replicate.rbns_protein_concentration', 'files.replicate.rbns_protein_concentration_units']),
-    ('Library fragmentation method', ['files.replicate.library.fragmentation_method']),
-    ('Library size range', ['files.replicate.library.size_range']),
-    ('Biosample Age', ['files.replicate.library.biosample.age_display']),
-    ('Biological replicate(s)', ['files.biological_replicates']),
-    ('Technical replicate', ['files.replicate.technical_replicate_number']),
-    ('Read length', ['files.read_length']),
-    ('Run type', ['files.run_type']),
-    ('Paired end', ['files.paired_end']),
-    ('Paired with', ['files.paired_with']),
-    ('Derived from', ['files.derived_from.accession']),
-    ('Size', ['files.file_size']),
-    ('Lab', ['files.lab.title']),
-    ('md5sum', ['files.md5sum']),
-    ('File download URL', ['files.href']),
-    ('Assembly', ['files.assembly']),
-    ('Platform', ['files.platform.title'])
+    ('File Accession', ['experiments_in_set.files.accession']),
+    ('File Format', ['experiments_in_set.files.file_type']),
+    #('Output type', ['output_type']),
+    ('Experiment Title', ['experiments_in_set.display_title']),
+    ('Experiment Accession', ['experiments_in_set.accession']),
+    ('Experiment Type', ['experiments_in_set.experiment_type']),
+    ('Experiment Set Accession', ['accession']),
+    ('Bio Rep No', ['replicate_exps.bio_rep_no']),
+    ('Tech Rep No', ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession']),
+
+    #('Assay', ['assay_term_name']),
+    #('Biosample term id', ['biosample_term_id']),
+    #('Biosample term name', ['biosample_term_name']),
+    ('Biosource', ['experiments_in_set.biosample.biosource_summary']),
+    ('Biosource Type', ['experiments_in_set.biosample.biosource.biosource_type']),
+    ('Organism', ['experiments_in_set.biosample.biosource.individual.organism.name']),
+    ('Digestion Enzyme', ['experiments_in_set.digestion_enzyme.name']),
+    ('Related File Relationship', ['experiments_in_set.files.related_files.relationship_type']),
+    ('Related File', ['experiments_in_set.files.related_files.file.accession']),
+    #('Biosample life stage', ['replicates.library.biosample.life_stage']),
+    #('Biosample sex', ['replicates.library.biosample.sex']),
+    #('Biosample organism', ['replicates.library.biosample.organism.scientific_name']),
+    #('Biosample treatments', ['replicates.library.biosample.treatments.treatment_term_name']),
+    #('Biosample subcellular fraction term name', ['replicates.library.biosample.subcellular_fraction_term_name']),
+    #('Biosample phase', ['replicates.library.biosample.phase']),
+    #('Biosample synchronization stage', ['replicates.library.biosample.fly_synchronization_stage',
+    #                                     'replicates.library.biosample.worm_synchronization_stage',
+    #                                     'replicates.library.biosample.post_synchronization_time',
+    #                                     'replicates.library.biosample.post_synchronization_time_units']),
+    #('Experiment target', ['target.name']),
+    #('Antibody accession', ['replicates.antibody.accession']),
+    #('Library made from', ['replicates.library.nucleic_acid_term_name']),
+    #('Library depleted in', ['replicates.library.depleted_in_term_name']),
+    #('Library extraction method', ['replicates.library.extraction_method']),
+    #('Library lysis method', ['replicates.library.lysis_method']),
+    #('Library crosslinking method', ['replicates.library.crosslinking_method']),
+    #('Date Created', ['experiments_in_set.files.date_created']),
+    #('Project', ['award.project']),
+    #('RBNS protein concentration', ['files.replicate.rbns_protein_concentration', 'files.replicate.rbns_protein_concentration_units']),
+    #('Library fragmentation method', ['files.replicate.library.fragmentation_method']),
+    #('Library size range', ['files.replicate.library.size_range']),
+    #('Biosample Age', ['files.replicate.library.biosample.age_display']),
+    #('Biological replicate(s)', ['files.biological_replicates']),
+    #('Technical replicate', ['files.replicate.technical_replicate_number']),
+    #('Read length', ['files.read_length']),
+    #('Run type', ['files.run_type']),
+    ('Paired end', ['experiments_in_set.files.paired_end']),
+    #('Paired with', ['experiments_in_set.files.paired_with']),
+    #('Derived from', ['files.derived_from.accession']),
+    ('Size', ['experiments_in_set.files.file_size']),
+    ('Lab', ['lab.title']),
+    ('md5sum', ['experiments_in_set.files.md5sum']),
+    ('File Download URL', ['experiments_in_set.files.href']),
+    #('Assembly', ['files.assembly']),
+    #('Platform', ['files.platform.title'])
 ])
 
 
@@ -115,6 +130,13 @@ def get_peak_metadata_links(request):
     return [peak_metadata_tsv_link, peak_metadata_json_link]
 
 
+class DummyFileInterfaceImplementation(object):
+    def __init__(self):
+        self._line = None
+    def write(self, line):
+        self._line = line
+    def read(self):
+        return self._line
 
 
 @view_config(route_name='peak_metadata', request_method='GET')
@@ -169,83 +191,178 @@ def peak_metadata(context, request):
     )
 
 
-@view_config(route_name='metadata', request_method='GET')
+
+@view_config(route_name='metadata', request_method=['GET', 'POST'])
 def metadata_tsv(context, request):
+
+    search_results_chunk_row_size = 100
     param_list = parse_qs(request.matchdict['search_params'])
+
+    # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
+    accession_triples = None
+    if ( # Check if triples are in URL.
+        param_list.get('accession') is not None and
+        param_list.get('experiments_in_set.accession') is not None and
+        param_list.get('experiments_in_set.files.accession') is not None and
+        len(param_list['accession']) == len(param_list['experiments_in_set.accession']) == len(param_list['experiments_in_set.files.accession'])
+    ):
+        accession_triples = list(zip(param_list['accession'], param_list['experiments_in_set.accession'], param_list['experiments_in_set.files.accession']))
+
+    if not accession_triples:
+        body = None
+        try: # Was submitted as JSON.
+            body = request.json_body
+        except:
+            pass
+        if body is None and request.POST.get('accession_triples') is not None: # Was submitted as a POST form JSON variable. Workaround to not being able to download files through AJAX.
+            try:
+                body = { "accession_triples" : json.loads(request.POST['accession_triples']) }
+            except:
+                pass
+        if body is not None and body.get('accession_triples'):
+            accession_triples = [ (accDict.get('accession'), accDict.get('experiments_in_set.accession'), accDict.get('experiments_in_set.files.accession') ) for accDict in body['accession_triples'] ]
+
     if 'referrer' in param_list:
         search_path = '/{}/'.format(param_list.pop('referrer')[0])
     else:
         search_path = '/search/'
     param_list['field'] = []
     header = []
-    file_attributes = []
     for prop in _tsv_mapping:
         header.append(prop)
         param_list['field'] = param_list['field'] + _tsv_mapping[prop]
-        if _tsv_mapping[prop][0].startswith('files'):
-            file_attributes = file_attributes + [_tsv_mapping[prop][0]]
-    param_list['limit'] = ['all']
-    path = '{}?{}'.format(search_path, urlencode(param_list, True))
-    results = request.embed(path, as_user=True)
-    rows = []
-    for row in results['@graph']:
-        if row['files']:
-            exp_data_row = []
-            for column in header:
-                if not _tsv_mapping[column][0].startswith('files'):
-                    temp = []
-                    for c in _tsv_mapping[column]:
-                        c_value = []
-                        for value in simple_path_ids(row, c):
-                            if str(value) not in c_value:
-                                c_value.append(str(value))
-                        if c == 'replicates.library.biosample.post_synchronization_time' and len(temp):
-                            if len(c_value):
-                                temp[0] = temp[0] + ' + ' + c_value[0]
-                        elif len(temp):
-                            if len(c_value):
-                                temp = [x + ' ' + c_value[0] for x in temp]
-                        else:
-                            temp = c_value
-                    exp_data_row.append(', '.join(list(set(temp))))
-            f_attributes = ['files.title', 'files.file_type',
-                            'files.output_type']
-            for f in row['files']:
-                if 'files.file_type' in param_list:
-                    if f['file_type'] not in param_list['files.file_type']:
-                        continue
-                f['href'] = request.host_url + f['href']
-                f_row = []
-                for attr in f_attributes:
-                    f_row.append(f[attr[6:]])
-                data_row = f_row + exp_data_row
-                for prop in file_attributes:
-                    if prop in f_attributes:
-                        continue
-                    path = prop[6:]
-                    temp = []
-                    for value in simple_path_ids(f, path):
-                        temp.append(str(value))
-                    if prop == 'files.replicate.rbns_protein_concentration':
-                        if 'replicate' in f and 'rbns_protein_concentration_units' in f['replicate']:
-                            temp[0] = temp[0] + ' ' + f['replicate']['rbns_protein_concentration_units']
-                    if prop == 'files.paired_with':
-                        # chopping of path to just accession
-                        if len(temp):
-                            new_values = [t[7:-1] for t in temp]
-                            temp = new_values
-                    data = list(set(temp))
-                    data.sort()
-                    data_row.append(', '.join(data))
-                rows.append(data_row)
-    fout = io.StringIO()
-    writer = csv.writer(fout, delimiter='\t')
-    writer.writerow(header)
-    writer.writerows(rows)
+    param_list['limit'] = [search_results_chunk_row_size]
+
+    # Ensure we send accessions to ES to help narrow initial result down.
+    # If too many accessions to include in /search/ URL (exceeds 2048 characters, aka accessions for roughly 20 files), we'll fetch search query as-is and then filter/narrow down.
+    if accession_triples and len(accession_triples) < 20:
+        param_list['accession'] = [ triple[0] for triple in accession_triples ]
+        param_list['experiments_in_set.accession'] = [ triple[1] for triple in accession_triples ]
+        param_list['experiments_in_set.files.accession'] = [ triple[2] for triple in accession_triples ]
+
+    initial_path = '{}?{}'.format(search_path, urlencode(param_list, True))
+
+    def do_subreq(path):
+        nonlocal request
+        subreq = make_subrequest(request, path)
+        subreq._stats = request._stats
+        subreq.headers['Accept'] = 'application/json'
+        return request.invoke_subrequest(subreq, False).json # invoke_subrequest.. replaces request.embed b/c request.embed didn't work for /search/
+
+    def get_search_results():
+        '''Loops through search results, 100 (search_results_chunk_row_size) at a time.'''
+        nonlocal request
+        nonlocal initial_path
+        initial_result = do_subreq(initial_path)
+        search_result_rows_count_remaining = initial_result.get('total', 0) - search_results_chunk_row_size
+        yield initial_result.get('@graph', [])
+        while search_result_rows_count_remaining > 0:
+            param_list['from'] = [param_list.get('from', 0) + search_results_chunk_row_size]
+            search_result_rows_count_remaining = search_result_rows_count_remaining - search_results_chunk_row_size
+            yield do_subreq('{}?{}'.format(search_path, urlencode(param_list, True))).get('@graph', [])
+
+
+    def get_value_for_column(item, col, columnKeyStart = 0):
+        temp = []
+        for c in _tsv_mapping[col]:
+            c_value = []
+            for value in simple_path_ids(item, c[columnKeyStart:]):
+                if str(value) not in c_value:
+                    c_value.append(str(value))
+            if len(temp):
+                if len(c_value):
+                    temp = [x + ' ' + c_value[0] for x in temp]
+            else:
+                temp = c_value
+        return ', '.join(list(set(temp)))
+
+    def get_correct_rep_no(key, column_vals_dict, experiment_set):
+        '''Find which Replicate Exp our File Row Object belongs to, and return its replicate number.'''
+        if column_vals_dict is None or key is None or column_vals_dict.get(key) is None:
+            return None
+        experiment_accession = column_vals_dict.get('Experiment Accession')
+        for repl_exp in experiment_set.get('replicate_exps',[]):
+            repl_exp_accession = repl_exp.get('replicate_exp', {}).get('accession', None)
+            if repl_exp_accession is not None and repl_exp_accession == experiment_accession:
+                rep_key = 'bio_rep_no' if key == 'Bio Rep No' else 'tec_rep_no'
+                return str(repl_exp.get(rep_key))
+        return ''
+
+    def should_file_row_object_be_included(column_vals_dict):
+        '''Ensure row's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
+        if accession_triples is None:
+            return True
+        for triple in accession_triples:
+            if (
+                triple[0] == column_vals_dict['Experiment Set Accession'] and
+                triple[1] == column_vals_dict['Experiment Accession'] and
+                triple[2] == column_vals_dict['File Accession']
+            ):
+                return True
+        return False
+
+    def format_experiment_set(exp_set):
+        exp_set_row_vals = {}
+        for column in header:
+            if not _tsv_mapping[column][0].startswith('experiments_in_set'):
+                exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
+        # Flatten map's child result maps up to self.
+        return chain.from_iterable(map(lambda exp: format_experiment(exp, exp_set, exp_set_row_vals), exp_set.get('experiments_in_set', []) ))
+
+
+    def format_experiment(exp, exp_set, exp_set_row_vals):
+        exp_row_vals = {}
+        for column in header:
+            if not _tsv_mapping[column][0].startswith('experiments_in_set.files') and _tsv_mapping[column][0].startswith('experiments_in_set'):
+                exp_row_vals[column] = get_value_for_column(exp, column, 19)
+
+        return map(lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals), exp.get('files', []) )
+
+
+    def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):
+        f['href'] = request.host_url + f['href']
+        f_row_vals = {}
+        for column in header:
+            if _tsv_mapping[column][0].startswith('experiments_in_set.files'):
+                exp_row_vals[column] = get_value_for_column(f, column, 25)
+
+        all_row_vals = dict(exp_set_row_vals, **dict(exp_row_vals, **f_row_vals)) # Combine data from ExpSet, Exp, and File
+
+        # If our File object (all_row_vals) has Replicate Numbers, make sure they are corrected.
+        if all_row_vals.get('Bio Rep No') is not None or all_row_vals.get('Tech Rep No') is not None:
+            all_row_vals['Tech Rep No'] = get_correct_rep_no('Tech Rep No', all_row_vals, exp_set)
+            all_row_vals['Bio Rep No'] = get_correct_rep_no('Bio Rep No', all_row_vals, exp_set)
+
+        return all_row_vals
+
+    def format_graph_of_experiment_sets(graph):
+        return map(
+            lambda file_row_object: [ file_row_object[column] for column in header ], # Convert object to list of values in same order defined in tsvMapping & header.
+            filter(
+                should_file_row_object_be_included,
+                chain.from_iterable(map(format_experiment_set, graph)) # chain.from_itertable = Flatten own map's child result maps up to self.
+            )
+        )
+
+    def stream_tsv_output(rows):
+        line = DummyFileInterfaceImplementation()
+        writer = csv.writer(line, delimiter='\t')
+        writer.writerow(header)
+        yield line.read().encode('utf-8')
+        for row in rows:
+            writer.writerow(row)
+            yield line.read().encode('utf-8')
+
+    filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
+
     return Response(
         content_type='text/tsv',
-        body=fout.getvalue(),
-        content_disposition='attachment;filename="%s"' % 'metadata.tsv'
+        app_iter = stream_tsv_output(
+            format_graph_of_experiment_sets(
+                chain.from_iterable(get_search_results())
+            )
+        ),
+        content_disposition='attachment;filename="%s"' % filename_to_suggest
     )
 
 

@@ -244,11 +244,10 @@ export function transformExpSetFiltersToFileFilters(expSetFilters){
  * @param {Object}  expSetFilters    Filters as stored in Redux, keyed by facet field containing Set of term keys.
  * @param {string}  currentHref      String with at least current host & path which to use as base for resulting URL, e.g. http://localhost:8000/browse/[?type=ExperimentSetReplicate&experimentset_type=...].
  * @param {number}  [page=1]         Current page if using pagification.
- * @param {number|string} [limit]    Number of results to get par page; if not set, will get default from getLimit().
  * @param {string}  [hrefPath]       Override the /path/ in URL returned, e.g. to /browse/.
  * @returns {string} URL which can be used to request filtered results from back-end, e.g. http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&from=0&limit=50&field.name=term1&field2.something=term2[...]
  */
-export function filtersToHref(expSetFilters, currentHref, page = null, limit = null, sortColumn = null, sortReverse = false, hrefPath = null){
+export function filtersToHref(expSetFilters, currentHref, page = null, sortColumn = null, sortReverse = false, hrefPath = null){
     var baseHref = getBaseHref(currentHref, hrefPath);
 
     // Include a '?' or '&' if needed.
@@ -261,7 +260,6 @@ export function filtersToHref(expSetFilters, currentHref, page = null, limit = n
     var filterQuery = expSetFiltersToURLQuery(expSetFilters);
 
     if (!page)   page = getPage();
-    if (!limit) limit = getLimit();
 
     var urlString = (
         baseHref +

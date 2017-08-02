@@ -176,7 +176,9 @@ class File(Item):
     embedded = ['lab.*',
                 'award.project',
                 'experiments.display_title',
+                'experiments.accession',
                 'experiments.experiment_type',
+                'experiments.experiment_sets.accession',
                 'experiments.experiment_sets.experimentset_type',
                 'experiments.experiment_sets.@type',
                 'experiments.biosample.biosource.display_title',
@@ -187,6 +189,7 @@ class File(Item):
                 'experiments.biosample.biosource.individual.organism.name',
                 'experiments.digestion_enzyme.name',
                 'related_files.relationship_type',
+                'related_files.file.accession',
                 'related_files.file.*']
     name_key = 'accession'
     rev = {
