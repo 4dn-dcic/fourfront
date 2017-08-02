@@ -216,7 +216,7 @@ var lastTimeSyncCalled = 0;
 /**
  * @private
  * @ignore
- * @type {null|string}
+ * @type {?string}
  */
 var resyncInterval = null;
 
@@ -263,7 +263,7 @@ class Provider extends React.Component {
      * @private
      * @instance
      * @this module:viz/chart-data-controller.Provider
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     componentWillMount(){
         ChartDataController.registerUpdateCallback(()=>{
@@ -278,7 +278,7 @@ class Provider extends React.Component {
      * @private
      * @instance
      * @this module:viz/chart-data-controller.Provider
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     componentWillUnmount(){
         ChartDataController.unregisterUpdateCallback(this.id);
@@ -287,7 +287,7 @@ class Provider extends React.Component {
     /**
      * Sets 'experiments' and 'filteredExperiments' props on props.children.
      * 
-     * @returns {Component} Cloned & adjusted props.children.
+     * @returns {JSX.Element} Cloned & adjusted props.children.
      * @memberof module:viz/chart-data-controller.Provider
      * @private
      * @instance
@@ -322,7 +322,7 @@ export const ChartDataController = {
      * @param {function} [updateStats] - Callback for updating QuickInfoBar, for example, with current experiments, experiment_sets, and files counts.
      * @param {function} [callback] - Optional callback for after initializing.
      * @param {number|boolean} [resync=false] - How often to resync data, in ms, if window is active, for e.g. if submitters submitted new data while user is browsing.
-     * @returns {undefined}
+     * @returns {void} Undefined
      */
     initialize : function(
         requestURLBase = null,
@@ -626,12 +626,11 @@ export const ChartDataController = {
      * Used internally to fetch both all & filtered experiments then calls ChartDataController.setState({ experiments, filteredExperiments }, callback).
      * Called by ChartDataController.sync() internally.
      * 
-     * @memberof module:viz/chart-data-controller
      * @private
      * @static
      * @param {Object} [reduxStoreState] - Current Redux store state to get expSetFilters and current href from. If not provided, gets it from store.getState().
      * @param {function} [callback] - Optional callback function to call after setting updated state.
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null, opts = {}){
         if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
@@ -658,7 +657,7 @@ export const ChartDataController = {
         var allExpsHref = refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart();
         var filteredExpsHref = ChartDataController.getFilteredContextHref(
             reduxStoreState.expSetFilters, reduxStoreState.href
-        ) + ChartDataController.getFieldsRequiredURLQueryPart();
+        ) + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart();
 
         notifyLoadStartCallbacks();
 
@@ -708,7 +707,7 @@ export const ChartDataController = {
      * @private
      * @static
      * @param {function} [callback] - Optional callback function.
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     fetchAndSetUnfilteredExperiments : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
@@ -729,12 +728,12 @@ export const ChartDataController = {
      * @private
      * @static
      * @param {function} [callback] - Optional callback function.
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     fetchAndSetFilteredExperiments : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
         ajax.load(
-            ChartDataController.getFilteredContextHref() + ChartDataController.getFieldsRequiredURLQueryPart(),
+            ChartDataController.getFilteredContextHref() + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(filteredContext){
                 ChartDataController.setState({
                     'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
@@ -777,7 +776,7 @@ export const ChartDataController = {
             if (!expSetFilters) expSetFilters = storeState.expSetFilters;
             if (!href)          href = storeState.href;
         }
-        return Filters.filtersToHref(expSetFilters, href, 0, 'all', 'experiments_in_set.accession', false, '/browse/');
+        return Filters.filtersToHref(expSetFilters, href, 0, 'experiments_in_set.accession', false, '/browse/');
     },
 
     getRefs : function(){

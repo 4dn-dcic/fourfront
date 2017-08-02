@@ -848,6 +848,8 @@ export default class ExperimentsTable extends React.Component {
                                 files={filePair}
                                 columnHeaders={columnHeaders}
                                 handleFileCheckboxChange={this.handleFileCheckboxChange}
+                                experiment={exp}
+                                experimentSetAccession={this.props.experimentSetAccession}
                                 label={ exp.file_pairs.length > 1 ?
                                     { title : "Pair " + (i + 1) } : { title : "Pair" }
                                 }
@@ -872,6 +874,8 @@ export default class ExperimentsTable extends React.Component {
                                             handleFileCheckboxChange={this.handleFileCheckboxChange}
                                             selectedFiles={this.props.selectedFiles}
                                             hideNameOnHover={false}
+                                            experiment={exp}
+                                            experimentSetAccession={this.props.experimentSetAccession}
                                             isSingleItem={exp.files.length < 2 ? true : false}
                                         />
                                     )
@@ -1057,7 +1061,8 @@ class FilePairBlock extends React.Component {
 
     static propTypes = {
         selectedFiles : PropTypes.object,
-        handleFileCheckboxChange : PropTypes.func
+        handleFileCheckboxChange : PropTypes.func,
+        files : PropTypes.array
     }
 
     constructor(props){
@@ -1084,6 +1089,8 @@ class FilePairBlock extends React.Component {
                 pairParent={this}
                 type="paired-end"
                 colWidthStyles={this.props.colWidthStyles}
+                experiment={this.props.experiment}
+                experimentSetAccession={this.props.experimentSetAccession}
             />
         );
     }
@@ -1099,7 +1106,19 @@ class FilePairBlock extends React.Component {
                 id={checked + "~" + true + "~" + this.props.files[0].file_format + "~" + this.props.files[0].uuid}
                 className='exp-table-checkbox'
                 data-select-files={_.pluck(this.props.files, 'uuid')}
-                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, _.pluck(this.props.files, 'uuid'), this.props.files)}
+                onChange={this.props.handleFileCheckboxChange.bind(
+                    this.props.handleFileCheckboxChange,
+                    _.pluck(this.props.files, 'uuid'),
+                    _.map(this.props.files, (fileObj)=>{
+                        return _.extend({}, fileObj, {
+                            'fileSelectionDetails' : {
+                                'accession' : this.props.experimentSetAccession || null,
+                                'experiments_in_set.accession' : (this.props.experiment || {}).accession || null,
+                                'experiments_in_set.files.accession' : fileObj.accession || null
+                            }
+                        });
+                    })
+                )}
             />
         );
     }
@@ -1134,7 +1153,13 @@ class FilePairBlock extends React.Component {
                     { Array.isArray(this.props.files) ?
                         this.props.files.map(this.renderFileEntryBlock)
                         :
-                        <FileEntryBlock file={null} columnHeaders={ this.props.columnHeaders } colWidthStyles={this.props.colWidthStyles} />
+                        <FileEntryBlock
+                            file={null}
+                            columnHeaders={ this.props.columnHeaders }
+                            colWidthStyles={this.props.colWidthStyles}
+                            experiment={this.props.experiment}
+                            experimentSetAccession={this.props.experimentSetAccession}
+                        />
                     }
                 </div>
             </div>
@@ -1220,7 +1245,17 @@ class FileEntryBlock extends React.Component {
                 id={checked + "~" + true + "~" + this.props.file.file_format + "~" + this.props.file.uuid}
                 className='exp-table-checkbox'
                 data-select-files={[this.props.file.uuid]}
-                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, this.props.file.uuid, this.props.file)}
+                onChange={this.props.handleFileCheckboxChange.bind(
+                    this.props.handleFileCheckboxChange,
+                    this.props.file.uuid,
+                    _.extend({}, this.props.file, {
+                        'fileSelectionDetails' : {
+                            'accession' : this.props.experimentSetAccession || null,
+                            'experiments_in_set.accession' : (this.props.experiment || {}).accession || null,
+                            'experiments_in_set.files.accession' : (this.props.file || {}).accession || null
+                        }
+                    })
+                )}
             />
         );
     }

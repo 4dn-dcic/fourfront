@@ -165,7 +165,21 @@ class ResultTableContainer extends React.Component {
                                 if (!isAllFilesChecked){
                                     var fileIDsToSelect = _.difference(allFileIDs, selectedFilesForSet);
                                     this.props.selectFile(fileIDsToSelect.map(function(fid){
-                                        return [fid, allFilesKeyedByID[fid] || true];
+                                        var fileAccession = (allFilesKeyedByID[fid] || {}).accession || null;
+                                        var experiment = null;
+                                        if (fileAccession){
+                                            experiment = expFxn.findExperimentInSetWithFileAccession(expSet.experiments_in_set, fileAccession);
+                                        }
+                                        return [ // [file uuid, meta]
+                                            fid,
+                                            _.extend({}, allFilesKeyedByID[fid] || {}, {
+                                                'fileSelectionDetails' : {
+                                                    'accession' : expSet.accession || null,
+                                                    'experiments_in_set.accession' : (experiment && experiment.accession) || null,
+                                                    'experiments_in_set.files.accession' : fileAccession
+                                                }
+                                            })
+                                        ];
                                     }));
                                 } else if (isAllFilesChecked) {
                                     this.props.unselectFile(allFileIDs);
