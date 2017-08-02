@@ -190,6 +190,10 @@ def get_es_build_status(new):
     return endpoint
 
 
+def eb_deploy(new):
+    subprocess.check_call(['eb', 'deploy', new])
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Clone a beanstalk env into a new one",
@@ -197,6 +201,7 @@ def main():
     parser.add_argument('--old')
     parser.add_argument('--new')
     parser.add_argument('--prod', action='store_true', help='load prod data on new env?')
+    parser.add_argument('--deploy_current', action='store_true', help='deploy current branch')
 
     args = parser.parse_args()
     print("### start build ES service")
@@ -212,7 +217,11 @@ def main():
     add_to_auth0_client(args.new)
     print("### copy contents of s3")
     copy_s3_buckets(args.new, args.old)
+    if args.deploy_current:
+        eb_deploy(args.new)
+
     print("all set, it may take some time for the beanstalk env to finish starting up")
+    
 
 
 if __name__ == "__main__":
