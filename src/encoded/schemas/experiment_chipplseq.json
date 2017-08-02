@@ -1,0 +1,94 @@
+{
+    "title": "Proximity Ligation with ChIP Experiment",
+    "description": "Proximity Ligation and Sequencing with Targeted Chromatin Immunoprecipitation.",
+    "id": "/profiles/experiment_chipplseq.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["experiment_type", "award", "lab", "biosample"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/library"},
+        { "$ref": "mixins.json#/sop_mapping"},
+        { "$ref": "experiment.json#/properties" },
+        { "$ref": "experiment_hi_c.json#/properties" }
+    ],
+    "mixinColumns": [
+        { "$ref": "experiment.json#/columns"}
+    ],
+    "dependencies": {
+      "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
+      "crosslinking_time": ["crosslinking_method", "crosslinking_temperature"],
+      "digestion_temperature": ["digestion_enzyme", "digestion_time"],
+      "digestion_time": ["digestion_enzyme", "digestion_temperature"]
+    },
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "experiment_type": {
+            "enum": [
+            "CHIA-pet",
+            "PLAC-seq"
+          ]
+        },
+        "targeted_factor": {
+            "title": "Target",
+            "description": "Information about the target of the Antibody in the IP",
+            "type": "string",
+            "linkTo": "Target"
+        },
+        "antibody": {
+            "title": "Antibody",
+            "description": "The encode accession of the antibody used for the IP",
+            "type": "string"
+        },
+        "amplification_cycles": {
+            "title": "PCR amplification cycles",
+            "description": "The number of PCR cycles used for final library amplification",
+            "type": "integer"
+        }
+    },
+    "facets": {
+        "award.project": {
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource Type"
+        },
+        "biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "biosample.modifications_summary": {
+            "title": "Modifications"
+        },
+        "biosample.treatments_summary": {
+            "title": "Treatments"
+        },
+        "lab.title": {
+            "title": "Lab"
+        }
+    },
+    "columns": {
+        "experiment_summary":{
+            "title": "Experiment summary"
+        }
+    }
+
+}
