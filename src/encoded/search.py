@@ -623,7 +623,7 @@ def set_facets(search, facets, final_filters, string_query):
 
     :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
     :param final_filters: Dict of filters which are set for the ES query in set_filters
-    :param string_query: Dict holding the query_string used in the search.
+    :param string_query: Dict holding the query_string used in the search
     """
     aggs = {}
     facet_fields = dict(facets).keys() # List of first entry of tuples in facets list.
