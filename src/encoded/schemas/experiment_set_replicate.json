@@ -21,7 +21,7 @@
         { "$ref": "experiment_set.json#/properties" }
     ],
     "mixinColumns": [
-        { "$ref": "experiment.json#/columns"}
+        { "$ref": "experiment_set.json#/columns"}
     ],
     "properties": {
         "schema_version": {
