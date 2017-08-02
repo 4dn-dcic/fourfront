@@ -36,7 +36,7 @@ class SelectedFilesDownloadButton extends React.Component {
     }
 
     static generateListOfURIsFromFiles(files, hostPrefix = ''){
-        return _.pluck(_.values(files), 'href').map(function(downloadPath){ return hostPrefix + downloadPath; });
+        return _.pluck(files, 'href').map(function(downloadPath){ return hostPrefix + downloadPath; });
     }
 
     constructor(props){
@@ -49,8 +49,12 @@ class SelectedFilesDownloadButton extends React.Component {
         };
     }
 
+    /**
+     * @deprecated
+     * @returns {string} URL to metadata.csv
+     */
     generateMetadataTSVPath(){
-        return '/metadata/type=ExperimentSet&' + _.map(_.values(this.props.selectedFiles), function(fileObj){
+        return '/metadata/type=ExperimentSet&sort=accession&' + _.map(_.values(this.props.selectedFiles), function(fileObj){
             var fileSelectionDetails = ((fileObj && fileObj.fileSelectionDetails) || {});
             var fileSelectionDetailsKeys = _.keys(fileSelectionDetails);
             return _.map(fileSelectionDetailsKeys, function(k){
@@ -71,12 +75,16 @@ class SelectedFilesDownloadButton extends React.Component {
                 };
             }
         );
-        //return _.pluck(_.values(this.props.selectedFiles), 'fileSelectionDetails');
     }
 
     handleClick(e){
         var urlParts = url.parse(windowHref(this.props.href));
-        var urlsString = SelectedFilesDownloadButton.generateListOfURIsFromFiles(this.props.selectedFiles, urlParts.protocol + '//' + urlParts.host).join('\n');
+        var urlsString = SelectedFilesDownloadButton.generateListOfURIsFromFiles(
+            _.pluck(_.sortBy(_.pairs(this.props.selectedFiles), function(pair){
+                var accessions = pair[0].split('~');
+            }), 1),
+            urlParts.protocol + '//' + urlParts.host
+        ).join('\n');
         this.setState({ 'modalOpen' : true, 'urls' : urlsString });
     }
 
@@ -99,7 +107,7 @@ class SelectedFilesDownloadButton extends React.Component {
 
                     <p>If saving as a file, it can be ran from any server, for example with the following cURL command:</p>
                     <pre>{ 'xargs -n 1 curl -O -L < files.txt' }</pre>
-                    <form method="POST" action="/metadata/type=ExperimentSet/metadata.tsv">
+                    <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleObjects())} />
                         <Button type="submit" name="Download" bsStyle="info" data-tip="Details for each individual file in the 'files.txt' download list below.">
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
@@ -125,7 +133,7 @@ class SelectedFilesDownloadButton extends React.Component {
         var disabled = countSelectedFiles === 0;
         return (
             <div className="pull-left box">
-                <Button key="download" onClick={this.handleClick} disabled={disabled}>
+                <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "primary" : "success"}>
                     <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
                 </Button>
                 { this.renderModal(countSelectedFiles) }
@@ -135,6 +143,11 @@ class SelectedFilesDownloadButton extends React.Component {
 }
 
 class SelectedFilesSelector extends React.Component {
+
+    static fileFormatButtonProps = {
+        'bsStyle' : "primary",
+        'bsSize' : 'small'
+    };
 
     handleSelect(formatType){
         if (typeof this.props.selectFile !== 'function'){
@@ -157,7 +170,7 @@ class SelectedFilesSelector extends React.Component {
             }
             return (
                 <div key={'button-to-select-files-for' + k}>
-                    <Button>{ title } files ({ format_buckets[k].length })</Button>
+                    <Button {...SelectedFilesSelector.fileFormatButtonProps}>{ title } files ({ format_buckets[k].length })</Button>
                 </div>
             );
         });
@@ -165,8 +178,8 @@ class SelectedFilesSelector extends React.Component {
 
     renderOverlay(){
         return (
-            <Popover title="Select..." id="select-files-type">
-                <div><Button>All files ({ this.props.totalFilesCount })</Button></div>
+            <Popover title="Select..." id="select-files-type" className="file-format-selection-popover">
+                <div><Button {...SelectedFilesSelector.fileFormatButtonProps}>All files ({ this.props.totalFilesCount })</Button></div>
                 { this.renderFileFormatButtons() }
             </Popover>
         );
