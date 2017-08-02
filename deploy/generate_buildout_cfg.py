@@ -47,6 +47,8 @@ def build_cfg_file():
         data['load_function'] = 'load_prod_data'
     elif data['env_name'].lower() == 'fourfront-webprod':
         data['es_server'] = '172.31.16.84:9872'
+    else: # this will soon be base case
+        data['es_server'] = os.environ.get("ES_URL")
 
     file_dir, _ = os.path.split(os.path.abspath(__file__))
     filename = os.path.join(file_dir, '..', 'beanstalk.cfg')
