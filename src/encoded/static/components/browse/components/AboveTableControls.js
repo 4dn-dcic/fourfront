@@ -5,7 +5,7 @@ import url from 'url';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
-import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
+import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse, Popover, OverlayTrigger } from 'react-bootstrap';
 import { isServerSide, Filters, expFxn, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import { windowHref } from './../../globals';
 import * as vizUtil from './../../viz/utilities';
@@ -77,7 +77,7 @@ class SelectedFilesDownloadButton extends React.Component {
         var files_download_filename = 'files_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.txt';
         return (
             <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
-                <Modal.Header>
+                <Modal.Header closeButton>
                     <Modal.Title>Download { countSelectedFiles } Files</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -88,18 +88,19 @@ class SelectedFilesDownloadButton extends React.Component {
                     <pre>{ 'xargs -n 1 curl -O -L < files.txt' }</pre>
                     <form method="POST" action="/metadata/type=ExperimentSet/metadata.tsv">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTriples())} />
-                        <Button type="submit" name="Download" bsStyle="info">
-                            Download Files' Metadata
+                        <Button type="submit" name="Download" bsStyle="info" data-tip="Details for each individual file in the 'files.txt' download list below.">
+                            <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
                         </Button>
                         {' '}
-                        <Button href={SelectedFilesDownloadButton.encodePlainText(this.state.urls)} bsStyle="primary" onClick={(e)=>{ e.stopPropagation(); }} download={files_download_filename} target="_blank">
-                            Download List of File URIs
-                        </Button>
+                        
                     </form>
                     <hr/>
-                    <h5>File URIs</h5>
+                    <h5 className="text-500">File URIs</h5>
                     <div>
                         <textarea style={textAreaStyle} value={this.state.urls}/>
+                        <Button href={SelectedFilesDownloadButton.encodePlainText(this.state.urls)} bsStyle="primary" onClick={(e)=>{ e.stopPropagation(); }} download={files_download_filename} target="_blank">
+                            <i className="icon icon-fw icon-file-text"/>&nbsp; Save/download this list as 'files.txt'
+                        </Button>
                     </div>
                 </Modal.Body>
             </Modal>
@@ -120,6 +121,35 @@ class SelectedFilesDownloadButton extends React.Component {
     }
 }
 
+class SelectedFilesSelector extends React.Component {
+
+    renderOverlay(){
+        return (
+            <Popover title="Select..." id="select-files-type">
+                <Button>All</Button>
+                <Button>MCool</Button>
+            </Popover>
+        );
+    }
+
+    render(){
+        return (
+            <div className="pull-left box">
+                <ButtonGroup>
+                <Button key="download" className="text-400">
+                    <i className="icon icon-check-square-o icon-fw"/> Select <span className="500">{ 'All' }</span> Files
+                </Button>
+                <OverlayTrigger trigger="click" rootClose overlay={this.renderOverlay()} placement="bottom">
+                    <Button key="download2">
+                        <i className="icon icon-angle-down icon-fw"/>
+                    </Button>
+                </OverlayTrigger>
+                </ButtonGroup>
+            </div>
+        );
+    }
+}
+
 class SelectedFilesControls extends React.Component {
 
     totalFiles(){
@@ -131,7 +161,9 @@ class SelectedFilesControls extends React.Component {
     render(){
         return (
             <div>
-                {/*<SelectedFilesOverview {...this.props}/> */}<SelectedFilesDownloadButton {...this.props} totalFilesCount={this.totalFiles()} />
+                <SelectedFilesSelector />
+                {' '}
+                <SelectedFilesDownloadButton {...this.props} totalFilesCount={this.totalFiles()} />
             </div>
         );
     }
