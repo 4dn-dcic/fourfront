@@ -60,7 +60,7 @@ def snapshot_db(db_identifier, snapshot_name):
 
 def clone_bs_env(old, new, load_prod, db_endpoint, es_url):
     env = 'RDS_HOSTNAME=%s,ENV_NAME=%s,ES_URL=%s' % (db_endpoint, new, es_url)
-    if load_prod:
+    if load_prod is True:
         env += ",LOAD_FUNCTION=load_prod_data"
     subprocess.check_call(['eb', 'clone', old, '-n', new,
                            '--envvars', env,
@@ -94,6 +94,7 @@ def copy_s3_buckets(new, old):
         print("copying data from old %s to new %s" % (oldb, newb))
         subprocess.call(['aws', 's3', 'sync', oldb, newb])
 
+
 def add_to_auth0_client(new):
     # first get the url of the newly created beanstalk environment
     eb = boto3.client('elasticbeanstalk')
@@ -104,6 +105,9 @@ def add_to_auth0_client(new):
         if url is None:
             sleep(10)
     auth0_client_update(url)
+
+    # TODO: need to also update ES permissions policy with ip addresses of elasticbeanstalk
+    # or configure application to use AWS IAM stuff
 
 
 def auth0_client_update(url):
@@ -187,7 +191,9 @@ def get_es_build_status(new):
             sleep(10)
 
     print(endpoint)
-    return endpoint
+
+    # aws uses port 80 for es connection, lets be specific
+    return endpoint + ":80"
 
 
 def eb_deploy(new):
@@ -200,7 +206,7 @@ def main():
         )
     parser.add_argument('--old')
     parser.add_argument('--new')
-    parser.add_argument('--prod', action='store_true', help='load prod data on new env?')
+    parser.add_argument('--prod', action='store_true', default=False, help='load prod data on new env?')
     parser.add_argument('--deploy_current', action='store_true', help='deploy current branch')
 
     args = parser.parse_args()

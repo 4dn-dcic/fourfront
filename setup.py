@@ -95,7 +95,7 @@ setup(
         add-date-created = encoded.commands.add_date_created:main
         check-rendering = encoded.commands.check_rendering:main
         deploy = encoded.commands.deploy:main
-        extract_test_data = encoded.commands.extract_test_data:main
+        extract-test-data = encoded.commands.extract_test_data:main
         es-index-data = encoded.commands.es_index_data:main
         generate-ontology = encoded.commands.generate_ontology:main
         load-ontology = encoded.commands.load_ontology_terms:main
@@ -109,6 +109,7 @@ setup(
         load-data = encoded.commands.load_data:main
         dropdb = encoded.commands.dropdb:main
         verify-item = encoded.commands.verify_item:main
+        clone-beanstalk = encoded.commands.clone_beanstalk_env:main
 
         [paste.app_factory]
         main = encoded:main
