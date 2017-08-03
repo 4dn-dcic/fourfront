@@ -258,7 +258,6 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
     # TODO: More testing, maybe get some File Accession ordering in (?), form POST query, (maybe) URL uuid query, (maybe) JSON POST query
 
-
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     from snovault import TYPES
     from snovault.fourfront_utils import add_default_embeds

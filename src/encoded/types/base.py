@@ -373,18 +373,18 @@ class Item(snovault.Item):
         return path_str
 
     @snovault.calculated_property(schema={
-        "title": "_principals",
+        "title": "principals_allowed",
         "description": "calced perms for ES filtering",
         "type": "object",
         'properties': {
             'view': {
-                'type': 'keyword'
+                'type': 'string'
             },
             'edit': {
-                'type': 'keyword'
+                'type': 'string'
             },
             'audit': {
-                'type': 'keyword'
+                'type': 'string'
             }
         }
     },)

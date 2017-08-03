@@ -763,7 +763,6 @@ def load_test_data(app, access_key_loc=None):
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
     inserts = resource_filename('encoded', 'tests/data/inserts/')
-    print(inserts)
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
