@@ -108,7 +108,7 @@ def test_search_with_simple_query(workbook, testapp):
 
 
 def test_search_embedded_file_by_accession(workbook, testapp):
-    res = testapp.get('/search/?type=WorkflowRunSbg&output_files.value.accession=4DNFSYWQ59JI').json
+    res = testapp.get('/search/?type=WorkflowRunSbg&output_files.value.accession=4DNFIYWQ59JI').json
     assert len(res['@graph']) > 0  # mutiple wfr can be returned
     wfr_uuids = [wfr['uuid'] for wfr in res['@graph'] if 'uuid' in wfr]
     for wfruuid in wfr_uuids:
@@ -185,54 +185,32 @@ def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
         assert testapp.get(search, status=404)
 
 
-def test_search_query_string_plus_minus_cancel_out(workbook, testapp):
+def test_search_query_string_AND_NOT_cancel_out(workbook, testapp):
     # if you use + and - with same field you should get no result
-    search = '/search/?type=Biosource&q=+cell+-cell'
+    search = '/search/?q=cell%20AND%20NOT%20cell&type=Biosource'
     assert testapp.get(search, status=404)
 
 
-def test_search_query_string_cell_without_stem(workbook, testapp):
-    # ensure that + and - leading characters work correctly
-    positives = [
-        '331111bc-8535-4448-903e-854af460b666',
-        '331111bc-8535-4448-903e-854af460b254',
-        '331111bc-8535-2248-903e-854af460b254',
-        '331111bc-8535-4448-903e-854af460a254'
-    ]
-    negatives = [
-        '331111bc-8535-4448-903e-854af460bab5',
-        '331111bc-8535-4448-903e-854af460b89f',
-        '331111bc-8535-4448-903e-854ab460b254'
-    ]
-    search = '/search/?type=Biosource&q=+cell+-stem'
-    res = testapp.get(search).json
-    assert len(res['@graph']) > 0  # mutiple wfr can be returned
-    ruuids = [r['uuid'] for r in res['@graph'] if 'uuid' in r]
-    assert set(positives).issubset(set(ruuids))
-    for n in negatives:
-        assert n not in ruuids
-
-
-def test_search_query_string_cell_and_stem(workbook, testapp):
-    # ensure that + and - leading characters work correctly
-    negatives = [
-        '331111bc-8535-4448-903e-854af460b666',
-        '331111bc-8535-4448-903e-854af460b254',
-        '331111bc-8535-2248-903e-854af460b254',
-        '331111bc-8535-4448-903e-854af460a254'
-    ]
-    positives = [
-        '331111bc-8535-4448-903e-854af460bab5',
-        '331111bc-8535-4448-903e-854af460b89f',
-        '331111bc-8535-4448-903e-854ab460b254'
-    ]
-    search = '/search/?type=Biosource&q=cell+AND+stem'
-    res = testapp.get(search).json
-    assert len(res['@graph']) > 0  # mutiple wfr can be returned
-    ruuids = [r['uuid'] for r in res['@graph'] if 'uuid' in r]
-    assert set(positives).issubset(set(ruuids))
-    for n in negatives:
-        assert n not in ruuids
+def test_search_query_string_with_booleans(workbook, testapp):
+    search = '/search/?q=stem%20AND%20NOT%20induced&type=Biosource'
+    res_not_induced = testapp.get(search).json
+    search = '/search/?q=stem&type=Biosource'
+    res_stem = testapp.get(search).json
+    assert len(res_stem['@graph']) > 0
+    assert len(res_not_induced['@graph']) > 0
+    not_induced_uuids = [r['uuid'] for r in res_not_induced['@graph'] if 'uuid' in r]
+    stem_uuids = [r['uuid'] for r in res_stem['@graph'] if 'uuid' in r]
+    assert set(not_induced_uuids).issubset(set(stem_uuids))
+    # uuid of induced stem cell = 331111bc-8535-4448-903e-854af460b89f
+    induced_stem_uuid = '331111bc-8535-4448-903e-854af460b89f'
+    assert induced_stem_uuid in stem_uuids
+    assert induced_stem_uuid not in not_induced_uuids
+    # now search for stem AND induced
+    search = '/search/?q=stem%20AND%20induced&type=Biosource'
+    res_both = testapp.get(search).json
+    both_uuids = [r['uuid'] for r in res_both['@graph'] if 'uuid' in r]
+    assert len(both_uuids) == 1
+    assert induced_stem_uuid in both_uuids
 
 
 def test_metadata_tsv_view(workbook, htmltestapp):
