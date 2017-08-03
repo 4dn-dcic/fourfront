@@ -39,9 +39,10 @@ export default class Login extends React.Component {
         this.lock = new lock_('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
             'hms-dbmi.auth0.com', {
                 auth: {
+                    sso: false,
                     redirect: false,
                     responseType: 'token',
-                    params: {scope: 'openid email'}
+                    params: {scope: 'openid email', prompt: 'select_account'}
                 },
                 socialButtonStyle: 'big',
                 languageDictionary: {
@@ -50,7 +51,6 @@ export default class Login extends React.Component {
                 theme: {
                     logo: '/static/img/4dn_logo.svg'
                 },
-                rememberLastLogin: false,
                 allowedConnections: ['github', 'google-oauth2']
             });
         this.lock.on("authenticated", this.handleAuth0Login);
