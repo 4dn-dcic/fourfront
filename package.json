@@ -93,6 +93,7 @@
     "marked": "^0.3.6",
     "moment": "^2.18.1",
     "prop-types": "^15.5.10",
+    "qs": "^6.5.0",
     "query-string": "^4.3.4",
     "radium": "^0.18.4",
     "rc-progress": "^2.1.2",
