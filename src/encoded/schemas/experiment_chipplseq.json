@@ -53,8 +53,8 @@
             "description": "The encode accession of the antibody used for the IP",
             "type": "string"
         },
-        "amplification_cycles": {
-            "title": "PCR amplification cycles",
+        "pcr_cycles": {
+            "title": "PCR cycles for final amplification",
             "description": "The number of PCR cycles used for final library amplification",
             "type": "integer"
         }
