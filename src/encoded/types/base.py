@@ -378,10 +378,13 @@ class Item(snovault.Item):
         "type": "object",
         'properties': {
             'view': {
+                'type': 'string'
             },
             'edit': {
+                'type': 'string'
             },
             'audit': {
+                'type': 'string'
             }
         }
     },)
