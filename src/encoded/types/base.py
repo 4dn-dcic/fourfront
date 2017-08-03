@@ -21,6 +21,7 @@ import snovault
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.crud_views import item_edit as sno_item_edit
 from snovault.fourfront_utils import add_default_embeds
+from snovault.authentication import calc_principals
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
@@ -370,6 +371,26 @@ class Item(snovault.Item):
         path_split = path_str.split('/')
         path_str = '~'.join(path_split) + '~'
         return path_str
+
+    @snovault.calculated_property(schema={
+        "title": "principals_allowed",
+        "description": "calced perms for ES filtering",
+        "type": "object",
+        'properties': {
+            'view': {
+                'type': 'string'
+            },
+            'edit': {
+                'type': 'string'
+            },
+            'audit': {
+                'type': 'string'
+            }
+        }
+    },)
+    def principals_allowed(self, request):
+        principals = calc_principals(self)
+        return principals
 
     def update_embeds(self, types):
         """

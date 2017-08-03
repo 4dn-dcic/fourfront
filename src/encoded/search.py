@@ -59,6 +59,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     prepared_terms = prepare_search_term(request)
 
     doc_types = set_doc_types(request, types, search_type)
+    schemas = (types[item_type].schema for item_type in doc_types)
 
     # set ES index based on doc_type (one type per index)
     # if doc_type is item, search all indexes by setting es_index to None
@@ -94,7 +95,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search, query_filters, used_filters = set_filters(request, search, result, principals, doc_types, before_date, after_date)
 
     ### Set starting facets
-    facets = initialize_facets(types, doc_types, search_audit, principals)
+    facets = initialize_facets(types, doc_types, search_audit, principals, prepared_terms, schemas)
 
     ### Adding facets to the query
     search = set_facets(search, facets, query_filters, string_query)
@@ -112,8 +113,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
-
-    schemas = (types[item_type].schema for item_type in doc_types)
     result['facets'] = format_facets(es_results, facets, used_filters, schemas, total, search_frame)
 
     # Add batch actions
@@ -180,8 +179,10 @@ def get_available_facets(context, request, search_type=None):
 
     types = request.registry[TYPES]
     doc_types = set_doc_types(request, types, search_type)
+    schemas = (types[item_type].schema for item_type in doc_types)
     principals = effective_principals(request)
-    facets = initialize_facets(types, doc_types, request.has_permission('search_audit'), principals)
+    prepared_terms = prepare_search_term(request)
+    facets = initialize_facets(types, doc_types, request.has_permission('search_audit'), principals, prepared_terms, schemas)
 
     ### Mini version of format_facets
     result = []
@@ -550,7 +551,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
 
         # Add filter to query
         if field.startswith('audit'):
-            query_field = field
+            query_field = field + '.raw'
         elif field == 'type':
             query_field = 'embedded.@type.raw'
         else:
@@ -597,10 +598,11 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
     return search, final_filters, used_filters
 
 
-def initialize_facets(types, doc_types, search_audit, principals):
+def initialize_facets(types, doc_types, search_audit, principals, prepared_terms, schemas):
     """
     Initialize the facets used for the search. If searching across multiple
-    doc_types, only use the swfault 'Data Type' and 'Status' facets.
+    doc_types, only use the default 'Data Type' and 'Status' facets.
+    Add facets for custom url filters whether or not they're in the schema
     """
     facets = [
         ('type', {'title': 'Data Type'})
@@ -614,12 +616,30 @@ def initialize_facets(types, doc_types, search_audit, principals):
     if len(doc_types) == 1 and doc_types[0] != 'Item' and 'facets' in types[doc_types[0]].schema:
         facets.extend(types[doc_types[0]].schema['facets'].items())
 
-    facets.append(('status', {'title': 'Status'}))
+    used_facets = [facet[0] for facet in facets]
+    # add status to used_facets, which will be added to facets later
+    used_facets.append('status')
 
-    # Display all audits if logged in, or all but INTERNAL_ACTION if logged out
+    # add facets for any non-schema fields that are requested in the search
+    for field in prepared_terms:
+        if field.startswith('embedded'):
+            split_field = field.strip().split('.')
+            use_field = '.'.join(split_field[1:])
+            # use the last part of the split field to get the title
+            title_field = split_field[-1]
+            if title_field in used_facets:
+                continue
+            for schema in schemas:
+                if title_field in schema['properties']:
+                    title_field = schema['properties'][title_field].get('title', title_field)
+                    break
+            facets.append((use_field, {'title': title_field}))
+
+    # append status and audit facets automatically
+    facets.append(('status', {'title': 'Status'}))
     for audit_facet in audit_facets:
-        if search_audit and 'group.submitter' in principals or 'INTERNAL_ACTION' not in audit_facet[0]:
-            facets.append(audit_facet)
+        facets.append(audit_facet)
+
     return facets
 
 
@@ -630,7 +650,7 @@ def set_facets(search, facets, final_filters, string_query):
 
     :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
     :param final_filters: Dict of filters which are set for the ES query in set_filters
-    :param string_query: Dict holding the query_string used in the search.
+    :param string_query: Dict holding the query_string used in the search
     """
     aggs = {}
     facet_fields = dict(facets).keys() # List of first entry of tuples in facets list.
@@ -753,23 +773,6 @@ def format_facets(es_results, facets, used_filters, schemas, total, search_frame
             continue
 
         result.append(resultFacet)
-
-    # Show any filters that aren't facets as a fake facet with one entry,
-    # so that the filter can be viewed and removed
-    # ignore must_not filters for now
-    for field, values in used_filters['must'].items():
-        if field not in used_facets:
-            title = field
-            for schema in schemas:
-                if field in schema['properties']:
-                    title = schema['properties'][field].get('title', field)
-                    break
-            result.append({
-                'field': field,
-                'title': title,
-                'terms': [{'key': v} for v in values],
-                'total': total,
-                })
 
     return result
 
