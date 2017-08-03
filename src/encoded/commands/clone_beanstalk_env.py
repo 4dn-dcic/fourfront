@@ -100,9 +100,11 @@ def add_to_auth0_client(new):
     eb = boto3.client('elasticbeanstalk')
     env = eb.describe_environments(EnvironmentNames=[new])
     url = None
+    print("waiting for beanstalk to be up, this make take some time...")
     while url is None:
         url = env['Environments'][0].get('CNAME')
         if url is None:
+            print(".")
             sleep(10)
     auth0_client_update(url)
 

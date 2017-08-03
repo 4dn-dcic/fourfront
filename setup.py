@@ -110,6 +110,7 @@ setup(
         dropdb = encoded.commands.dropdb:main
         verify-item = encoded.commands.verify_item:main
         clone-beanstalk = encoded.commands.clone_beanstalk_env:main
+        rm-beanstalk = encoded.commands.rm_beanstalk_env:main
 
         [paste.app_factory]
         main = encoded:main
