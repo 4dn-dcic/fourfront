@@ -174,6 +174,10 @@ export function combineWithReplicateNumbers(experimentsWithReplicateNums, experi
         .zip(experimentsInSet) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
         .map(function(r){
             r[1].biosample = _.clone(r[1].biosample);
+            if (typeof r[1].biosample === 'undefined'){
+                r[1].biosample = { 'bio_rep_no' : '?' };
+                return _.extend(r[0], r[1]);
+            }
             r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
             return _.extend(r[0], r[1]);
         })
