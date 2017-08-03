@@ -1545,8 +1545,21 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 			}
 		}
 	}
-
 	
+}
+
+.popover.file-format-selection-popover {
+	.popover-content {
+		min-width: 240px;
+		div {
+			&:not(:last-child) {
+				margin-bottom: 2px;
+			}
+			> button {
+				width: 100%;
+			}
+		}
+	}
 }
 
 .result-table {

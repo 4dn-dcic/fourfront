@@ -161,16 +161,20 @@ class SelectedFilesSelector extends React.Component {
     renderFileFormatButtons(){
         if (!this.props.files) return null;
         var format_buckets = _.groupBy(this.props.files, 'file_type_detailed');
-        return _.keys(format_buckets).map(function(k){
-            var title;
-            if (typeof k === 'undefined' || k === 'other'){
+        return _.sortBy(_.pairs(format_buckets), function(p){ return -p[1].length; }).map(function(pairs){
+            var fileTypeDetail = pairs[0],
+                files = pairs[1],
+                title;
+
+            if (typeof fileTypeDetail === 'undefined' || fileTypeDetail === 'other' || fileTypeDetail === 'undefined'){
                 title = "Other";
+                console.log(fileTypeDetail, files);
             } else {
-                title = Schemas.Term.toName('files.file_type_detailed', k);
+                title = Schemas.Term.toName('files.file_type_detailed', fileTypeDetail);
             }
             return (
-                <div key={'button-to-select-files-for' + k}>
-                    <Button {...SelectedFilesSelector.fileFormatButtonProps}>{ title } files ({ format_buckets[k].length })</Button>
+                <div key={'button-to-select-files-for' + fileTypeDetail}>
+                    <Button {...SelectedFilesSelector.fileFormatButtonProps}>All { title } files ({ files.length })</Button>
                 </div>
             );
         });
@@ -210,7 +214,7 @@ class SelectedFilesControls extends React.Component {
         var totalFilesCount = exps ? expFxn.fileCountFromExperiments(exps, this.props.includeFileSets) : 0;
         var allFiles = [];
         if (exps){
-            allFiles =  expFxn.allFilesFromExperiments(exps);
+            allFiles =  expFxn.allFilesFromExperiments(exps, this.props.includeFileSets);
         }
         return (
             <div>

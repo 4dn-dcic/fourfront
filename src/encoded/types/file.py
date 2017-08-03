@@ -228,7 +228,7 @@ class File(Item):
         "type": "string"
     })
     def file_type_detailed(self, request, file_format, file_type=None):
-        outString = (file_type or '--')
+        outString = (file_type or 'other')
         if file_format is not None:
             outString = outString + ' (' + file_format + ')'
 

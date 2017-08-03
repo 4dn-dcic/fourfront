@@ -58,17 +58,19 @@ export function listAllUnpairedFiles(experiments, includeFileSets = false){
  * @param {Object[]} List of experiments with at least a 'files' property.
  * @returns {Object[]} List of all files gathered from experiments list.
  */
-export function allFilesFromExperiments(experiments){
-    return _.uniq(
-        _.sortBy(
-            _.flatten(
-                _.map(ensureArray(experiments), allFilesFromExperiment),
-                true
-            ),
-            'accession'
+export function allFilesFromExperiments(experiments, includeFileSets = false, uniqify = false){
+    var files = _.sortBy(
+        _.flatten(
+            _.map(ensureArray(experiments), function(exp){ return allFilesFromExperiment(exp, includeFileSets); }),
+            true
         ),
-        function(file){ return file.accession; }
+        'accession'
     );
+
+    if (uniqify){
+        return _.uniq(files, true, function(file){ return file.accession; });
+    }
+    return files;
 }
 
 export function fileToAccessionTriple(file, toString = false){
@@ -304,14 +306,15 @@ export function allFilesFromFileSetsInExperiment(experiment){
     return [];
 }
 
-export function allFilesFromExperiment(experiment){
-    return _.map(ensureArray(experiment.files).concat(
-        allFilesFromFileSetsInExperiment(experiment)
-    ), function(origFile){
+export function allFilesFromExperiment(experiment, includeFileSets = false){
+    var allFiles = ensureArray(experiment.files);
+    if (includeFileSets){
+        allFiles = allFiles.concat(allFilesFromFileSetsInExperiment(experiment));
+    }
+    return _.map(allFiles, function(origFile){
         var file = _.clone(origFile);
         if (typeof file.from_experiment === 'undefined') file.from_experiment = experiment;
         return file;
-        //return _.extend({}, file, 'experiment')
     });
 }
 
