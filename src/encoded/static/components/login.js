@@ -98,7 +98,7 @@ export default class Login extends React.Component {
             JWT.saveUserInfoLocalStorage(response);
             this.props.updateUserInfo();
             Alerts.deQueue(Alerts.LoggedOut);
-            if(this.props.href.indexOf('/error/login-failed') !== -1){
+            if(this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
                 navigate('/', {'inPlace':true}, this.lock.hide.bind(this.lock));
             }else{
                 navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
