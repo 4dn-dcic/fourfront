@@ -433,7 +433,6 @@ def build_query(search, prepared_terms, source_fields):
     for field, value in prepared_terms.items():
         if field == 'q':
             query_info['query'] = value
-            query_info['use_dis_max'] = True
             query_info['lenient'] = True
             break
     if query_info != {}:
