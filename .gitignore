@@ -16,6 +16,7 @@ coverage.xml
 /extends/
 /jsconfig.json
 /node_modules/
+package-lock.json
 /documentation/
 /ontology.json
 /parts/
