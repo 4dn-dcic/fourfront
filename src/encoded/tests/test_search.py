@@ -191,22 +191,20 @@ def test_search_query_string_AND_NOT_cancel_out(workbook, testapp):
     assert testapp.get(search, status=404)
 
 
-def test_search_query_string_with_booleans(workbook, testapp):
-
+def test_search_query_string_with_booleans(workbook, testapp, anontestapp, authenticated_testapp):
     def safe_search_execute(testapp, search):
         import time
         res = testapp.get(search, status=[200,404])
         if res.status == '404 Not Found':
-            time.wait(3)
+            time.sleep(3)
             res = testapp.get(search, status=[200,404])
         if res.status == '404 Not Found':
             return {}
         else:
             return res.json
-            
-    search = '/search/?q=stem+AND+NOT+induced&type=Biosource'
+    search = '/search/?type=Biosource&q=stem+AND+NOT+induced'
     res_not_induced = safe_search_execute(testapp, search)
-    search = '/search/?q=stem&type=Biosource'
+    search = '/search/?type=Biosource&q=stem'
     res_stem = safe_search_execute(testapp, search)
     assert len(res_stem['@graph']) > 0
     assert len(res_not_induced['@graph']) > 0
@@ -218,7 +216,7 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert induced_stem_uuid in stem_uuids
     assert induced_stem_uuid not in not_induced_uuids
     # now search for stem AND induced
-    search = '/search/?q=stem+AND+induced&type=Biosource'
+    search = '/search/?type=Biosource&q=stem+AND+induced'
     res_both = safe_search_execute(testapp, search)
     both_uuids = [r['uuid'] for r in res_both['@graph'] if 'uuid' in r]
     assert len(both_uuids) == 1
