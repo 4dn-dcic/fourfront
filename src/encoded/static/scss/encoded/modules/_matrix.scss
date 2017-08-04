@@ -14,6 +14,11 @@
 
     .matrix-title {
         font-weight: 500;
+        &.no-x-axis-title {
+            position: absolute;
+            bottom: 42px;
+            font-weight: 700;
+        }
     }
 
     .matrix-view-container {
