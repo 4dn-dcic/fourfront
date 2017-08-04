@@ -133,11 +133,11 @@ class XAxis extends React.Component {
                     { this.props.prefixContent }
                     { this.props.yAxisTitle ?
                         <div className="matrix-y-axis-title">
-                            <div><small className="text-300">Row<i className="icon icon-arrow-down"/></small></div>
+                            {/*<div><small className="text-300">Row<i className="icon icon-arrow-down"/></small></div>*/}
                             { this.props.yAxisTitle }
                         </div>
                     : null }
-                    { this.props.xAxisTitle ?
+                    { this.props.showXAxisTitle && this.props.xAxisTitle ?
                         <div className="matrix-x-axis-title text-right">
                             <div><small className="text-300">Column<i className="icon icon-arrow-right"/></small></div>
                             { this.props.xAxisTitle }
@@ -274,12 +274,16 @@ export class MatrixContainer extends React.Component {
                     height={this.props.xLabelsHeight}
                     cellSize={this.cellSize()}
                     leftOffset={this.props.yLabelsWidth}
-                    prefixContent={this.props.title ? <h4 className="matrix-title">{ this.props.title }</h4> : null}
+                    prefixContent={this.props.title ?
+                        <h4 className={"matrix-title" + (!this.props.showXAxisTitle ? " no-x-axis-title" : "")}>{ this.props.title }</h4>
+                        : null
+                    }
                     yAxisTitle={this.props.yAxisTitle}
                     xAxisTitle={this.props.xAxisTitle}
                     gridWidth={gridWidth}
                     maxGridWidth={maxGridWidth}
                     registerPostUpdateFxn={this.registerPostUpdateFxn}
+                    showXAxisTitle={this.props.showXAxisTitle}
                 />
                 <MatrixContainer.YAxis labels={this.props.yAxisLabels} width={this.props.yLabelsWidth} cellSize={this.cellSize()} registerPostUpdateFxn={this.registerPostUpdateFxn} />
                 <div className="matrix-grid-container" style={{ width : Math.min(maxGridWidth, gridWidth) }}>
@@ -366,7 +370,7 @@ export default class MatrixView extends React.Component {
         }
     }
 
-    render(grid, xAxisLabels, yAxisLabels, xAxisTitle, yAxisTitle, title, styleFxn = genDefaultStyle, maxValue = null) {
+    render(grid, xAxisLabels, yAxisLabels, xAxisTitle, yAxisTitle, title, styleFxn = genDefaultStyle, maxValue = null, showXAxisTitle = true) {
         return (
             <div ref="matrixWrapper">
                 <MatrixContainer
@@ -380,6 +384,7 @@ export default class MatrixView extends React.Component {
                     mounted={this.state.mounted}
                     width={this.props.width || this.state.containerWidth}
                     maxValue={this.props.maxValue || maxValue || MatrixView.findGreatestValueInGrid(grid)}
+                    showXAxisTitle={showXAxisTitle}
                 />
             </div>
         );

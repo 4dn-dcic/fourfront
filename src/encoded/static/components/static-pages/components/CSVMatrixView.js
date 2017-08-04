@@ -125,7 +125,8 @@ export const CSVParsingUtilities = {
                     'column'        : columnIndex,
                     'columnLabel'   : xAxisLabels[columnIndex],
                     'rowLabel'      : yAxisLabels[rowIndex],
-                    'tooltip'       : CSVParsingUtilities.generateCellTooltipContent(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options)
+                    'tooltip'       : CSVParsingUtilities.generateCellTooltipContent(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options),
+                    'className'     : 'cellType-' + cellType
                 };
 
             });
@@ -291,16 +292,16 @@ export class CSVMatrixView extends MatrixView {
 
         var { grid, title, xAxisLabels, yAxisLabels } = CSVParsingUtilities.CSVStringTo2DArraySet(this.props.csv, options);
 
-        console.log(grid);
-
         return MatrixView.prototype.render.call(this, 
             grid,
             xAxisLabels,
             yAxisLabels,
-            options.xaxisTitle,
-            options.yaxisTitle,
+            options.xaxisTitle || null,
+            options.yaxisTitle || null,
             title,
-            CSVParsingUtilities.matrixCellStyle
+            CSVParsingUtilities.matrixCellStyle,
+            this.props.maxValue,
+            false
         );
 
     }
