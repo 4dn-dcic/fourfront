@@ -225,8 +225,18 @@ def main():
     parser.add_argument('--new')
     parser.add_argument('--prod', action='store_true', default=False, help='load prod data on new env?')
     parser.add_argument('--deploy_current', action='store_true', help='deploy current branch')
+    parser.add_argument('--skips3', action='store_true', default=False,
+                        help='skip copying files from s3')
+
+    parser.add_argument('--onlys3', action='store_true', default=False,
+                        help='skip copying files from s3')
 
     args = parser.parse_args()
+    if args.onlys3:
+        print("### only copy contents of s3")
+        copy_s3_buckets(args.new, args.old)
+        return
+
     print("### start build ES service")
     add_es(args.new)
     print("### create the s3 buckets")
@@ -240,8 +250,9 @@ def main():
     clone_bs_env(args.old, args.new, args.prod, db_endpoint, es_endpoint)
     print("### allow auth-0 requests")
     add_to_auth0_client(args.new)
-    print("### copy contents of s3")
-    copy_s3_buckets(args.new, args.old)
+    if not args.skips3:
+        print("### copy contents of s3")
+        copy_s3_buckets(args.new, args.old)
     if args.deploy_current:
         print("### deploying local code to new eb environment")
         eb_deploy(args.new)
