@@ -566,7 +566,9 @@ h5.fourDN-header {
 @media screen and (min-width: $screen-lg-min){
 
 	#content.container > .static-page.row #nofic-matrix-1,
-	#content.container > .static-page.row #nofic-matrix-2 {
+	#content.container > .static-page.row #nofic-matrix-2,
+	#content.container > .static-page.row #nofic-matrix-3,
+	#content.container > .static-page.row #nofic-matrix-4 {
 		position: relative;
 		float: left;
 		width: 50%;
@@ -577,7 +579,9 @@ h5.fourDN-header {
 		padding-right: 15px;
 	}
 
-	#content.container > .static-page.row #nofic-matrix-2 {
+	#content.container > .static-page.row #nofic-matrix-2,
+	#content.container > .static-page.row #nofic-matrix-3,
+	#content.container > .static-page.row #nofic-matrix-4 {
 		padding-left: 15px;
 	}
 

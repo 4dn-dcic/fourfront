@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 from re import escape
 from pyramid.decorator import reify
 from snovault import (
@@ -27,7 +28,7 @@ def includeme(config):
 cachedFileContents = {} # Should we cache in RAM like this (?), let perform file I/O, or something else?
 pageLocations = None
 
-def getStaticFileContent(filename, directory, contentFilesLocation):
+def get_local_file_contents(filename, directory, contentFilesLocation):
     cachedName = directory + '/' + filename.split('.')[0]
     output = cachedFileContents.get(cachedName)
     if output:
@@ -39,6 +40,13 @@ def getStaticFileContent(filename, directory, contentFilesLocation):
     cachedFileContents[cachedName] = output
     return output
 
+def get_remote_file_contents(uri, cached_remote_files):
+    if cached_remote_files.get(uri) is not None:
+        return cached_remote_files[uri]
+    resp = requests.get(uri)
+    cached_remote_files[uri] = resp.text
+    return resp.text
+
 def listFilesInInDirectory(dirLocation):
     return [ fn for fn in os.listdir(dirLocation) if os.path.isfile(dirLocation + '/' + fn) ]
 
@@ -47,7 +55,7 @@ def static_pages(config):
 
     try:
         contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-        pageLocations = json.loads(getStaticFileContent("static_pages.json", "/static/data", contentFilesLocation + "/static/data")).get('pages', {})
+        pageLocations = json.loads(get_local_file_contents("static_pages.json", "/static/data", contentFilesLocation + "/static/data")).get('pages', {})
     except Exception as e:
         print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
 
@@ -62,6 +70,8 @@ def static_pages(config):
         page = request.matchdict.get('page','none')
         content = None
         contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
+
+        cached_remote_files = {}
 
         pageMeta = pageLocations.get(page, None)
 
@@ -86,7 +96,7 @@ def static_pages(config):
                     sectionID = s.get('id') # use section 'id', or 'filename' minus extension ('.*')
                     if sectionID is None:
                         sectionID = s['filename'].split('.')[0]
-                    if s.get('content', None) is not None:
+                    if s.get('content', None) is not None: # We have content defined in JSON definition file already, skip any fetching.
                         content[sectionID] = {
                             'content' : s['content'],
                             'title'   : s.get('title', None),
@@ -94,13 +104,15 @@ def static_pages(config):
                             'filetype': 'txt'
                         }
                     else:
+                        content_for_section = None
+                        if s['filename'][0:4] == 'http' and '://' in s['filename'][4:8]:
+                            # Remote File
+                            content_for_section = get_remote_file_contents(s['filename'], cached_remote_files)
+                        else:
+                            content_for_section = get_local_file_contents(s['filename'], pageMeta['directory'], contentFilesLocation)
                         filenameParts = s['filename'].split('.')
                         content[sectionID] = {
-                            'content' : getStaticFileContent(
-                                s['filename'],
-                                pageMeta['directory'],
-                                contentFilesLocation
-                            ),
+                            'content' : content_for_section,
                             'title'   : s.get('title', None),
                             'order'   : s['order'],
                             'filetype': filenameParts[len(filenameParts) - 1]
@@ -123,7 +135,7 @@ def static_pages(config):
             try:
                 contentFilesLocation += "/static/data/"     # Where the static files be stored by default.
                 contentFilesLocation += page
-                content = { fn.split('.')[0] : getStaticFileContent(fn, page, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
+                content = { fn.split('.')[0] : get_local_file_contents(fn, page, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
             except FileNotFoundError as e:
                 print("No files found for static page: \"" + page + "\"")
 
@@ -313,7 +325,7 @@ class EncodedRoot(Root):
         try:
             contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
             contentFilesLocation += "/static/data/home" # Where the static files be stored. TODO: Put in .ini file
-            return { fn.split('.')[0] : getStaticFileContent(fn, 'home', contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
+            return { fn.split('.')[0] : get_local_file_contents(fn, 'home', contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
         except FileNotFoundError as e:
             print("No content files found for Root object (aka Home, '/').")
             return {}

@@ -143,7 +143,7 @@
         },
 
 
-        "nofic-matrix"  : {
+        "nofic-matrix/2017-05"  : {
             "title"     : "NOFIC Matrix",
             "directory" : "/src/encoded/static/data",
             "sections"  : [
@@ -178,6 +178,74 @@
                         "skipRows"  : [22,23,24],
                         "startCell" : [3,25],
                         "endCell"   : [8,32],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                }
+            ]
+        },
+
+        "joint-analysis-data-plans"  : {
+            "title"     : "Joint Analysis Data Plans",
+            "directory" : "/src/encoded/static/data",
+            "sections"  : [
+                {
+                    "id" : "introduction",
+                    "title" : "Introduction",
+                    "content" : "These matrices show a cross-section of experiment methods (& groups) compared against cell lines. Lighter-colored blocks are planned, while darker-colored blocks have been submitted."
+                },
+                {
+                    "id" : "nofic-matrix-1",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [4],
+                        "titleCell" : [2,3],
+                        "skipRows"  : [],
+                        "startCell" : [4,5],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-2",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [58],
+                        "titleCell" : [2,57],
+                        "skipRows"  : [],
+                        "startCell" : [4,59],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-3",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [77],
+                        "titleCell" : [2,76],
+                        "skipRows"  : [],
+                        "startCell" : [4,78],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-4",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [95],
+                        "titleCell" : [2,94],
+                        "skipRows"  : [],
+                        "startCell" : [4,96],
                         "yaxisTitle" : "Method",
                         "xaxisTitle" : "Cell Line"
                     }
