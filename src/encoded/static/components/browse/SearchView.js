@@ -305,6 +305,7 @@ class ControlsAndResults extends React.Component {
                             filterFacetsFxn={FacetList.filterFacetsForSearch}
                             isTermSelected={this.props.isTermSelected}
                             itemTypeForSchemas={itemTypeForSchemas}
+                            session={this.props.session}
                             showClearFiltersButton={(()=>{
                                 var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
                                 var clearParts = url.parse(clearFiltersURL, true);

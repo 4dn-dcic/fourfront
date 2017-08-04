@@ -58,7 +58,7 @@ export class ExperimentSetDetailPane extends React.Component {
                                         { title }:
                                     </div>
                                     <div className="col-xs-8 col-sm-9 expset-addinfo-val">
-                                        { value || <small><em>N/A</em></small> }
+                                        { value || <small><em>None</em></small> }
                                     </div>
                                 </div>
                             );
@@ -72,6 +72,7 @@ export class ExperimentSetDetailPane extends React.Component {
                         { columnClass: 'file-detail', title : 'File Type'},
                         { columnClass: 'file-detail', title : 'File Info'}
                     ]}
+                    experimentSetAccession={expSet.accession || null}
                     experimentArray={expSet.experiments_in_set}
                     replicateExpsArray={expSet.replicate_exps}
                     experimentSetType={expSet.experimentset_type}

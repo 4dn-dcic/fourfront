@@ -13,7 +13,6 @@ import { layout, console } from './../util';
  * These are a set of 'mixin' functions which can be used directly on Static Page components.
  * Simply reference the component method to the relevant method below in React.createClass(..)
  */
-
 export const defaultProps = {
     "context" : {
         "title" : "Page Title",
