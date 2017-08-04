@@ -22,11 +22,19 @@ from time import sleep
 
 def delete_db(db_identifier):
     client = boto3.client('rds')
-    resp = client.delete_db_instance(
-        DBInstanceIdentifier=db_identifier,
-        SkipFinalSnaphot=False,
-        FinalDBSnapshotIdentifier=db_identifier + "_final"
-    )
+    try:
+        resp = client.delete_db_instance(
+            DBInstanceIdentifier=db_identifier,
+            SkipFinalSnapshot=False,
+            FinalDBSnapshotIdentifier=db_identifier + "-final"
+        )
+    except:
+        # try without the snapshot
+        resp = client.delete_db_instance(
+            DBInstanceIdentifier=db_identifier,
+            SkipFinalSnapshot=True,
+        )
+
     print(resp)
 
 

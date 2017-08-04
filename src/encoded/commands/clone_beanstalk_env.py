@@ -67,6 +67,18 @@ def clone_bs_env(old, new, load_prod, db_endpoint, es_url):
                            '--exact', '--nohang'])
 
 
+def create_s3_buckets(new):
+    new_buckets = [
+        'elasticbeanstalk-%s-blobs' % new,
+        'elasticbeanstalk-%s-files' % new,
+        'elasticbeanstalk-%s-wfoutput' % new,
+        'elasticbeanstalk-%s-system' % new,
+    ]
+    s3 = boto3.client('s3')
+    for bucket in new_buckets:
+        s3.create_bucket(Bucket=bucket)
+
+
 def copy_s3_buckets(new, old):
     # each env needs the following buckets
     new_buckets = [
@@ -82,7 +94,10 @@ def copy_s3_buckets(new, old):
     ]
     s3 = boto3.client('s3')
     for bucket in new_buckets:
-        s3.create_bucket(Bucket=bucket)
+        try:
+            s3.create_bucket(Bucket=bucket)
+        except:
+            print("bucket already created....")
 
     # now copy them
     #aws s3 sync s3://mybucket s3://backup-mybucket
@@ -139,7 +154,7 @@ def auth0_client_update(url):
     client_data = {'callbacks': callbacks}
 
     update_res = requests.patch(client_url, data=json.dumps(client_data), headers=headers)
-    print(update_res.json()['callbacks'])
+    print(update_res.json().get('callbacks'))
 
 
 def add_es(new):
@@ -214,6 +229,8 @@ def main():
     args = parser.parse_args()
     print("### start build ES service")
     add_es(args.new)
+    print("### create the s3 buckets")
+    create_s3_buckets(args.new)
     print("### copy database")
     db_endpoint = snapshot_db(args.old, args.new)
     print("### waiting for ES service")
