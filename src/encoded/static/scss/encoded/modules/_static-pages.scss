@@ -566,19 +566,59 @@ h5.fourDN-header {
 @media screen and (min-width: $screen-lg-min){
 
 	#content.container > .static-page.row #nofic-matrix-1,
-	#content.container > .static-page.row #nofic-matrix-2 {
+	#content.container > .static-page.row #nofic-matrix-2,
+	#content.container > .static-page.row #nofic-matrix-3,
+	#content.container > .static-page.row #nofic-matrix-4 {
 		position: relative;
 		float: left;
 		width: 50%;
-		margin-top: -20px;
+		margin-top: 0px;
+		margin-bottom: 20px;
 	}
 
 	#content.container > .static-page.row #nofic-matrix-1 {
 		padding-right: 15px;
 	}
 
-	#content.container > .static-page.row #nofic-matrix-2 {
+	#content.container > .static-page.row #nofic-matrix-2,
+	#content.container > .static-page.row #nofic-matrix-3,
+	#content.container > .static-page.row #nofic-matrix-4 {
 		padding-left: 15px;
 	}
 
+	body[data-path="/joint-analysis-data-plans"]{
+		#content.container > .static-page.row #nofic-matrix-2,
+		#content.container > .static-page.row #nofic-matrix-3,
+		#content.container > .static-page.row #nofic-matrix-4 {
+			float: right;
+		}
+
+		#content.container > .static-page.row #nofic-matrix-2,
+		#content.container > .static-page.row #nofic-matrix-3 {
+			> div:first-child {
+				border-bottom: 1px solid #bbb;
+			}
+		}
+	}
+
 }
+
+#legend.static-section-entry {
+	margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+	.section-joint-anlysis-data-legend {
+		font-family: "Work Sans",Helvetica,Arial,sans-serif;
+		font-size: 1rem;
+		> .col-sm-3 {
+			text-align: center;
+		}
+		.color-patch {
+			height: 10px;
+			width: 10px;
+			display: inline-block;
+			margin-right: 5px;
+		}
+	}
+}
+
