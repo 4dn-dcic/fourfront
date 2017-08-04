@@ -105,3 +105,46 @@ def test_search_with_simple_query(workbook, testapp):
     mauxz_uuids = [item['uuid'] for item in res['@graph'] if 'uuid' in item]
     # make sure all uuids found in the first search are present in the second
     assert not set(mouse_uuids).issubset(set(mauxz_uuids))
+
+
+def test_metadata_tsv_view(workbook, htmltestapp):
+    # run a simple query with type=ExperimentSet
+    res = htmltestapp.get('/metadata/type=ExperimentSet/metadata.tsv')
+    assert 'text/tsv' in res.content_type
+    result_rows = [ row.rstrip(' \r').split('\t') for row in res.body.decode('utf-8').split('\n') ] # Strip out carriage returns and whatnot. Make a plain multi-dim array.
+    header_row = result_rows.pop(0)
+
+    assert header_row[0] == 'File Accession'
+
+    col_index_of_download_url = header_row.index('File Download URL')
+
+    assert col_index_of_download_url > 0 # Ensure we have this column
+
+    assert len(result_rows) > 3 # We at least have some rows.
+
+    assert len(result_rows[0][0]) > 4 # We have a value for File Accession
+    assert 'http' in result_rows[0][col_index_of_download_url] # Make sure it seems like a valid URL.
+    assert '/@@download/' in result_rows[0][col_index_of_download_url]
+    assert result_rows[0][0] in result_rows[0][col_index_of_download_url] # That File Accession is also in File Download URL of same row.
+    assert len(result_rows[0][0]) < len(result_rows[0][col_index_of_download_url])
+
+    # TODO: More testing, maybe get some File Accession ordering in (?), form POST query, (maybe) URL uuid query, (maybe) JSON POST query
+
+def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
+    from snovault import TYPES
+    from snovault.fourfront_utils import add_default_embeds
+    test_type = 'biosample'
+    type_info = registry[TYPES].by_item_type[test_type]
+    schema = type_info.schema
+    embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded, schema)
+    # we're looking for this specific facet, which is not in the schema
+    assert 'treatments.rnai_vendor.display_title' in embeds
+    res = testapp.get('/search/?type=Biosample&treatments.rnai_vendor.display_title=Worthington+Biochemical').json
+    assert 'facets' in res
+    facet_fields = [facet['field'] for facet in res['facets']]
+    assert 'type' in facet_fields
+    assert 'status' in facet_fields
+    for facet in schema['facets'].keys():
+        assert facet in facet_fields
+    # now ensure that facets can also be created outside of the schema
+    assert 'treatments.rnai_vendor.display_title' in facet_fields

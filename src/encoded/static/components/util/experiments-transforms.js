@@ -174,6 +174,10 @@ export function combineWithReplicateNumbers(experimentsWithReplicateNums, experi
         .zip(experimentsInSet) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
         .map(function(r){
             r[1].biosample = _.clone(r[1].biosample);
+            if (typeof r[1].biosample === 'undefined'){
+                r[1].biosample = { 'bio_rep_no' : '?' };
+                return _.extend(r[0], r[1]);
+            }
             r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
             return _.extend(r[0], r[1]);
         })
@@ -214,6 +218,18 @@ export function findUnpairedFilesPerExperiment(experiments, includeFileSets = fa
         } else {
             return [];
         }
+    });
+}
+
+export function findExperimentInSetWithFileAccession(experiments_in_set, file_accession){
+    return _.find(ensureArray(experiments_in_set), function(exp){
+        var expFiles = ensureArray(exp.files);
+        for (var i = 0; i < expFiles.length; i++){
+            if (expFiles[i] && expFiles[i].accession && expFiles[i].accession === file_accession){
+                return true;
+            }
+        }
+        return false;
     });
 }
 
@@ -379,7 +395,7 @@ export function groupExperimentsByBiosample(experiments){
  * @param {Object[]} someArray - Any list that should be a list.
  * @returns {Object[]} Array if valid array, or empty array if not.
  */
-export function ensureArray(someArray){
+export function ensureArray(someArray, label){
     if (!Array.isArray(someArray)) {
         // Fail gracefully but inform -- because likely that only one of many experiment_sets may be missing experiments_in_set and we don't want
         // entire list of experiment_sets to fail.

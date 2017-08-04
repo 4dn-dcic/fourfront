@@ -4,8 +4,10 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
+import moment from 'moment';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import { isServerSide, Filters, expFxn, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
+import { windowHref } from './../../globals';
 import * as vizUtil from './../../viz/utilities';
 import { SearchResultTable } from './SearchResultTable';
 import { CustomColumnSelector } from './CustomColumnController';
@@ -14,23 +16,126 @@ import { ChartDataController } from './../../viz/chart-data-controller';
 
 
 class SelectedFilesOverview extends React.Component {
+
     render(){
         var selectedFilesCount = _.keys(this.props.selectedFiles).length;
-        var experiments = this.props.filteredExperiments || this.props.experiments;
-        var totalAppend;
-        if (experiments){
-            var totalFilesCount = expFxn.fileCountFromExperiments(experiments, this.props.includeFileSets);
-            totalAppend = ' / ' + totalFilesCount;
-        }
         
         return (
             <div className="pull-left box">
-                <span className="text-500">{ selectedFilesCount }</span>{ totalAppend } files selected.
+                <span className="text-500">{ selectedFilesCount }</span> / { this.props.totalFilesCount } files selected.
             </div>
         );
     }
 }
 
+
+class SelectedFilesDownloadButton extends React.Component {
+
+    static encodePlainText(text){
+        return 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+    }
+
+    constructor(props){
+        super(props);
+        this.handleClick = _.throttle(this.handleClick.bind(this), 1000);
+        this.renderModal = this.renderModal.bind(this);
+        this.state = {
+            'modalOpen' : false,
+            'urls' : null
+        };
+    }
+
+    generateMetadataTSVPath(){
+        return '/metadata/type=ExperimentSet&' + _.map(_.values(this.props.selectedFiles), function(fileObj){
+            var fileSelectionDetails = ((fileObj && fileObj.fileSelectionDetails) || {});
+            var fileSelectionDetailsKeys = _.keys(fileSelectionDetails);
+            return _.map(fileSelectionDetailsKeys, function(k){
+                return k + '=' + fileSelectionDetails[k];
+            }).join('&');
+        }).join('&') + '/metadata.tsv';
+    }
+
+    getAccessionTriples(){
+        return _.pluck(_.values(this.props.selectedFiles), 'fileSelectionDetails');
+    }
+
+    handleClick(e){
+        var urlParts = url.parse(windowHref(this.props.href));
+        var prefix = urlParts.protocol + '//' + urlParts.host;
+        //var urls = [this.generateMetadataTSVPath()].concat(_.pluck(_.values(this.props.selectedFiles), 'href')).map(function(downloadPath){ return prefix + downloadPath; }).join('\n');
+        var urlsString = _.pluck(_.values(this.props.selectedFiles), 'href').map(function(downloadPath){ return prefix + downloadPath; }).join('\n');
+        this.setState({ 'modalOpen' : true, 'urls' : urlsString });
+    }
+
+    renderModal(countSelectedFiles){
+        if (!this.state.modalOpen) return null;
+        var textAreaStyle = {
+            'minWidth' : '100%',
+            'minHeight' : 400,
+            'fontFamily' : 'monospace'
+        };
+        var files_download_filename = 'files_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.txt';
+        return (
+            <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
+                <Modal.Header>
+                    <Modal.Title>Download { countSelectedFiles } Files</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Please copy and paste the text below into a cURL command to download these files, or click
+                    the "Download" button to save it as a file.</p>
+
+                    <p>If saving as a file, it can be ran from any server, for example with the following cURL command:</p>
+                    <pre>{ 'xargs -n 1 curl -O -L < files.txt' }</pre>
+                    <form method="POST" action="/metadata/type=ExperimentSet/metadata.tsv">
+                        <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTriples())} />
+                        <Button type="submit" name="Download" bsStyle="info">
+                            Download Files' Metadata
+                        </Button>
+                        {' '}
+                        <Button href={SelectedFilesDownloadButton.encodePlainText(this.state.urls)} bsStyle="primary" onClick={(e)=>{ e.stopPropagation(); }} download={files_download_filename} target="_blank">
+                            Download List of File URIs
+                        </Button>
+                    </form>
+                    <hr/>
+                    <h5>File URIs</h5>
+                    <div>
+                        <textarea style={textAreaStyle} value={this.state.urls}/>
+                    </div>
+                </Modal.Body>
+            </Modal>
+        );
+    }
+
+    render(){
+        var countSelectedFiles = _.keys(this.props.selectedFiles).length;
+        var disabled = countSelectedFiles === 0;
+        return (
+            <div className="pull-left box">
+                <Button key="download" onClick={this.handleClick} disabled={disabled}>
+                    <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
+                </Button>
+                { this.renderModal(countSelectedFiles) }
+            </div>
+        );
+    }
+}
+
+class SelectedFilesControls extends React.Component {
+
+    totalFiles(){
+        var exps = this.props.filteredExperiments || this.props.experiments;
+        if (!exps) return 0;
+        return expFxn.fileCountFromExperiments(exps, this.props.includeFileSets);
+    }
+
+    render(){
+        return (
+            <div>
+                {/*<SelectedFilesOverview {...this.props}/> */}<SelectedFilesDownloadButton {...this.props} totalFilesCount={this.totalFiles()} />
+            </div>
+        );
+    }
+}
 
 /**
  * This component must be fed props from CustomColumnController (for columns UI), SelectedFilesController (for selected files read-out).
@@ -169,7 +274,7 @@ export class AboveTableControls extends React.Component {
         if (this.props.showSelectedFileCount && this.props.selectedFiles){
             return (
                 <ChartDataController.Provider>
-                    <SelectedFilesOverview selectedFiles={this.props.selectedFiles} />
+                    <SelectedFilesControls selectedFiles={this.props.selectedFiles} />
                 </ChartDataController.Provider>
             );
         }

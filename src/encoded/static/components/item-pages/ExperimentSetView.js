@@ -109,6 +109,7 @@ export default class ExperimentSetView extends React.Component {
                                 experimentSetType={this.props.context.experimentset_type}
                                 expSetFilters={this.props.expSetFilters}
                                 facets={ this.props.facets }
+                                experimentSetAccession={this.props.context.accession || null}
                                 experimentArray={this.props.context.experiments_in_set}
                                 replicateExpsArray={this.props.context.replicate_exps}
                                 keepCounts={false}
