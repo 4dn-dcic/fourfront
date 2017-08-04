@@ -187,12 +187,12 @@ def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
 
 def test_search_query_string_AND_NOT_cancel_out(workbook, testapp):
     # if you use + and - with same field you should get no result
-    search = '/search/?q=cell%20AND%20NOT%20cell&type=Biosource'
+    search = '/search/?q=cell+AND+NOT+cell&type=Biosource'
     assert testapp.get(search, status=404)
 
 
 def test_search_query_string_with_booleans(workbook, testapp):
-    search = '/search/?q=stem%20AND%20NOT%20induced&type=Biosource'
+    search = '/search/?q=stem+AND+NOT+induced&type=Biosource'
     res_not_induced = testapp.get(search).json
     search = '/search/?q=stem&type=Biosource'
     res_stem = testapp.get(search).json
@@ -206,7 +206,7 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert induced_stem_uuid in stem_uuids
     assert induced_stem_uuid not in not_induced_uuids
     # now search for stem AND induced
-    search = '/search/?q=stem%20AND%20induced&type=Biosource'
+    search = '/search/?q=stem+AND+induced&type=Biosource'
     res_both = testapp.get(search).json
     both_uuids = [r['uuid'] for r in res_both['@graph'] if 'uuid' in r]
     assert len(both_uuids) == 1
