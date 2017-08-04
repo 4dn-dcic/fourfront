@@ -32,6 +32,17 @@
             }
         },
 
+        "help/account-creation" : {
+            "title": "Creating an Account",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "filename"  : "account_creation.md",
+                    "title" : null
+                }
+            ]
+        },
+
         "help/getting-started" : {
             "title": "Getting Started with Submissions",
             "directory" : "/docs/public/metadata-submission",
@@ -133,11 +144,11 @@
             "sections"  : [
                 {
                     "filename" : "no-account",
-                    "content" : "It appears there is either no account registered with the provided email address or you provided incorrect credentials. Access is restricted to members of the 4DN consortium."
+                    "content" : "There is no account registered with the provided email. Access is restricted to members of the 4DN consortium."
                 },
                 {
                     "filename" : "new-account-registration",
-                    "content" : "<b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/getting-started#getting-added-as-a-4dn-user-or-submitter\">Getting Added as a 4DN User or Submitter</a></b>."
+                    "content" : "<b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/account-creation\">creating an account</a></b>."
                 }
             ]
         },
