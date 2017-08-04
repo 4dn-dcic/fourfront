@@ -45,6 +45,9 @@ class Cell extends Component {
 			'onMouseEnter' 	: this.getMouseEnterHandler(data),
 			'onMouseLeave' 	: this.getMouseLeaveHandler(data)
 		};
+		if (typeof data.className === 'string'){
+			divProps.className = (divProps.className || '') + ' ' + data.className;
+		}
 		if (typeof data.tooltip !== 'undefined'){
 			divProps['data-tip'] = data.tooltip;
 			divProps['data-html'] = true;
