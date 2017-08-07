@@ -126,7 +126,7 @@ export const CSVParsingUtilities = {
                     'columnLabel'   : xAxisLabels[columnIndex],
                     'rowLabel'      : yAxisLabels[rowIndex],
                     'tooltip'       : CSVParsingUtilities.generateCellTooltipContent(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options),
-                    'className'     : 'cellType-' + cellType
+                    'className'     : 'cellType-' + cellType.split(' ').join('-')
                 };
 
             });

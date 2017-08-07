@@ -599,8 +599,34 @@ h5.fourDN-header {
 				border-bottom: 1px solid #bbb;
 			}
 		}
+
 	}
 
+}
+
+#content.container,
+#legend.static-section-entry {
+	div.rm-cell.cellType-submitted, div.color-patch.cellType-submitted {
+		background-color: #53a74e !important;
+	}
+	div.rm-cell.cellType-planned, div.color-patch.cellType-planned {
+		background-color: rgba(143, 143, 169, 0.5) !important;
+	}
+	div.rm-cell.cellType-in-submission, div.color-patch.cellType-in-submission {
+		background-color: rgba(143, 143, 169, 0.5) !important;
+		overflow: hidden;
+		&:before {
+			content: '';
+			display: block;
+			width: 150%;
+			height: 150%;
+			background-color: #53a74e;
+			transform: rotate3d(0,0,1, 45deg) translate3d(-74%, 0px, 0px);
+		}
+	}
+	div.rm-cell.cellType-none, div.color-patch.cellType-none {
+		background-color: transparent !important;
+	}
 }
 
 #legend.static-section-entry {
