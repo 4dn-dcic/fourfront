@@ -372,7 +372,7 @@ export const ChartDataController = {
                 if (lastTimeSyncCalled + resync < Date.now()){
                     ChartDataController.sync(function(){
                         isWindowActive = true;
-                    });
+                    }, { 'fromSync' : true, 'fromInterval' : true });
                 } else {
                     isWindowActive = true;
                 }
@@ -521,13 +521,13 @@ export const ChartDataController = {
      * @public
      * @static
      * @param {function} [callback] - Function to be called after sync complete.
-     * @returns {undefined}
+     * @returns {void} Nothing
      */
     sync : function(callback, syncOpts = {}){
         if (!isInitialized) throw Error("Not initialized.");
         lastTimeSyncCalled = Date.now();
         if (!syncOpts.fromSync) syncOpts.fromSync = true;
-        ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
+        ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback, syncOpts);
     },
 
     /**
@@ -538,7 +538,7 @@ export const ChartDataController = {
      * @memberof module:viz/chart-data-controller
      * @param {Object} expSetFilters - (Newly-updated) Experiment Set Filters in Redux store.
      * @param {function} callback - Callback function to call after updating state.
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     handleUpdatedFilters : function(expSetFilters, callback){
         if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiments)){
@@ -557,16 +557,20 @@ export const ChartDataController = {
         ) {
             return true;
         }
-        if (exps1.length !== exps2.length) return true;
-        var len = exps1.length;
+        var lenExps1 = exps1.length;
+        if (lenExps1!== exps2.length) return true;
 
 
-        for (var i = 0; i < exps1.length; i++){
+        for (var i = 0; i < lenExps1; i++){
 
-            if (!_.isEqual(exps1[i], exps2[i])){
-                console.log(exps1[i], exps2[i]);
+            if ( exps1[i].accession !== exps2[i].accession ){
                 return true;
             }
+            /*
+            if (!_.isEqual(exps1[i], exps2[i])){
+                return true;
+            }
+            */
             
         }
 
@@ -578,7 +582,7 @@ export const ChartDataController = {
      * 
      * @static
      * @ignore
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     updateStats : function(){
         if (typeof refs.updateStats !== 'function'){

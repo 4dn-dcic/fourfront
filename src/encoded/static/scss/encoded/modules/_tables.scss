@@ -1533,6 +1533,9 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 		&.selection-buttons {
 			margin-right: 7px;
 		}
+		button {
+			transition: opacity .5s, background-color .5s;
+		}
 	}
 
 	.right-buttons {
@@ -1540,7 +1543,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 			margin-left: 5px;
 		}
 		.expand-layout-button:not(.expanded) {
-			@media screen and (max-width: 1200px){
+			@media screen and (max-width: 1220px){
 				display: none;
 			}
 		}

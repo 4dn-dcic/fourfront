@@ -265,6 +265,7 @@ class ResultTableContainer extends React.Component {
                         hiddenColumns={this.hiddenColumns()}
                         columnDefinitionOverrideMap={this.colDefOverrides()}
                         href={this.props.href}
+                        totalExpected={this.props.context.total}
 
                         sortBy={this.props.sortBy}
                         sortColumn={this.props.sortColumn}

@@ -158,9 +158,22 @@ class SelectedFilesSelector extends React.Component {
         }
     }
 
-    renderFileFormatButtons(){
-        if (!this.props.files) return null;
-        var format_buckets = _.groupBy(this.props.files, 'file_type_detailed');
+    render(){
+        return (
+            <div className="pull-left box selection-buttons">
+                <ButtonGroup>
+                    <Button key="download" bsStyle="primary">
+                        <i className="icon icon-check-square-o icon-fw"/> <span className="text-400">Select</span> <span className="text-600">All</span>
+                    </Button>
+                </ButtonGroup>
+            </div>
+        );
+    }
+}
+
+class SelectedFilesFilterByButton extends React.Component {
+
+    static renderFileFormatButtonsFromBuckets(format_buckets, button_text_prefix = ''){
         return _.sortBy(_.pairs(format_buckets), function(p){ return -p[1].length; }).map(function(pairs){
             var fileTypeDetail = pairs[0],
                 files = pairs[1],
@@ -174,31 +187,61 @@ class SelectedFilesSelector extends React.Component {
             }
             return (
                 <div key={'button-to-select-files-for' + fileTypeDetail}>
-                    <Button {...SelectedFilesSelector.fileFormatButtonProps}>All { title } files ({ files.length })</Button>
+                    <Button {...SelectedFilesSelector.fileFormatButtonProps}>{button_text_prefix}{ title } files <small>({ files.length })</small></Button>
                 </div>
             );
         });
     }
 
+    static fileFormatButtonProps = {
+        'bsStyle' : "primary",
+        'bsSize' : 'small'
+    }
+
+    handleSelect(formatType){
+        if (typeof this.props.selectFile !== 'function'){
+            throw new Error("No 'selectFiles' function prop passed to SelectedFilesController.");
+        }
+        if (formatType === 'all'){
+            //this.props.selectFile();
+        }
+    }
+
+    renderFileFormatButtonsSelected(){
+        if (!this.props.selectedFiles) return null;
+        var format_buckets = _.groupBy(
+            _.pairs(this.props.selectedFiles).map(function(f){
+                f[1].selection_id = f[0];
+                return f[1];
+            }),
+            'file_type_detailed'
+        );
+        return SelectedFilesFilterByButton.renderFileFormatButtonsFromBuckets(format_buckets);
+    }
+
+    renderFileFormatButtons(){
+        if (!this.props.files) return null;
+        var format_buckets = _.groupBy(this.props.files, 'file_type_detailed');
+        return SelectedFilesFilterByButton.renderFileFormatButtonsFromBuckets(format_buckets, 'All ');
+    }
+
     renderOverlay(){
         return (
-            <Popover title="Select..." id="select-files-type" className="file-format-selection-popover">
-                <div><Button {...SelectedFilesSelector.fileFormatButtonProps}>All files ({ this.props.totalFilesCount })</Button></div>
-                { this.renderFileFormatButtons() }
+            <Popover title="Filter Selection By..." id="select-files-type" className="file-format-selection-popover">
+                {/* <div><Button {...SelectedFilesSelector.fileFormatButtonProps}>All files ({ this.props.totalFilesCount })</Button></div> */}
+                { this.renderFileFormatButtonsSelected() }
             </Popover>
         );
     }
 
     render(){
+        var isDisabled = !this.props.selectedFiles || _.keys(this.props.selectedFiles).length === 0;
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button key="download" bsStyle="primary">
-                        <i className="icon icon-check-square-o icon-fw"/> <span className="text-400">Select</span> <span className="text-600">All</span>
-                    </Button>
                     <OverlayTrigger trigger="click" rootClose overlay={this.renderOverlay()} placement="bottom">
-                        <Button key="download2" bsStyle="primary">
-                            <i className="icon icon-angle-down icon-fw"/>
+                        <Button key="download2" bsStyle="primary" disabled={isDisabled}>
+                            <i className="icon icon-filter icon-fw"/> Filter By&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
                         </Button>
                     </OverlayTrigger>
                 </ButtonGroup>
@@ -219,6 +262,14 @@ class SelectedFilesControls extends React.Component {
         return (
             <div>
                 <SelectedFilesSelector
+                    files={allFiles}
+                    totalFilesCount={totalFilesCount}
+                    selectedFiles={this.props.selectedFiles}
+                    selectFile={this.props.selectFile}
+                    unselectFile={this.props.unselectFile}
+                    resetSelectedFiles={this.props.resetSelectedFiles}
+                />
+                <SelectedFilesFilterByButton
                     files={allFiles}
                     totalFilesCount={totalFilesCount}
                     selectedFiles={this.props.selectedFiles}
