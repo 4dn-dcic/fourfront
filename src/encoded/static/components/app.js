@@ -1186,6 +1186,10 @@ export default class App extends React.Component {
             this.historyEnabled = false;
 
         }
+
+        // Set current path for per-page CSS rule targeting.
+        var hrefParts = url.parse(canonical || base);
+
         return (
             <html lang="en">
                 <head>
@@ -1208,7 +1212,7 @@ export default class App extends React.Component {
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit}>
+                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={hrefParts.path} data-pathname={hrefParts.pathname}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>

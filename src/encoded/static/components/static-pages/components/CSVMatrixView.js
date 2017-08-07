@@ -2,8 +2,8 @@
 
 var React = require('react');
 var _ = require('underscore');
-import MatrixView from './../../viz/MatrixView';
-var d3 = require('d3');
+import MatrixView, {  } from './../../viz/MatrixView';
+import * as d3 from 'd3';
 var { console } = require('./../../util');
 
 
@@ -19,8 +19,11 @@ export const CSVParsingUtilities = {
      */
     CSVStringTo2DArraySet : function(csvString, options = {}){
         if (typeof csvString  !== 'string') throw new Error("csvString must be a string.");
-        options = _.extend(CSVParsingUtilities.defaultCSVParseOptions(), options);
         var data = d3.csvParseRows(csvString);
+
+        options = _.extend(CSVParsingUtilities.defaultCSVParseOptions(), options, { 
+            'endCell' : options.endCell || CSVParsingUtilities.findEndCellCoordsFromGrid(data, options)
+        });
 
         // Grab title from CSV, if set.
         var title = null;
@@ -44,6 +47,54 @@ export const CSVParsingUtilities = {
         };
     },
 
+    findEndCellCoordsFromGrid : function(grid, options){
+        var startCol = (options.startCell && options.startCell[0]) || 1;
+        var endCol;
+        var rowNumsToCheck;
+        if (Array.isArray(options.xaxisRows) && options.xaxisRows.length > 0){
+            rowNumsToCheck = options.xaxisRows;
+        } else if (Array.isArray(options.startCell) && options.startCell.length > 1){
+            rowNumsToCheck = [options.startCell[1]];
+        }
+
+        for (endCol = startCol; (endCol - 1) < grid[0].length; endCol++){
+            if (_.every(rowNumsToCheck, function(rowNum){
+                var cellToCheck = grid[rowNum - 1][endCol - 1];
+                if (!cellToCheck || (typeof cellToCheck === 'string' && cellToCheck.trim().length === 0)) {
+                    return true;
+                }
+                return false;
+            })){
+                // Break when endCol:allRowNums === blank
+                break;
+            }
+        }
+        endCol--;
+
+        var startRow = (options.startCell && options.startCell[1]) || (options.xaxisRows && Math.max.apply(Math.max, options.xaxisRows) + 1) || 1;
+        var endRow;
+        var colNumsToCheck = d3.range(startCol, endCol + 1, 1);
+        if (Array.isArray(options.yaxisCols) && options.yaxisCols.length > 0){
+            colNumsToCheck = options.yaxisCols.concat(colNumsToCheck);
+        }
+
+        for (endRow = startRow; (endRow - 1) < grid.length; endRow++){
+            if (_.every(colNumsToCheck, function(colNum){
+                var cellToCheck = grid[endRow - 1][colNum - 1];
+                if (!cellToCheck || (typeof cellToCheck === 'string' && cellToCheck.trim().length === 0)) {
+                    return true;
+                }
+                return false;
+            })){
+                // Break when endCol:allRowNums === blank
+                break;
+            }
+        }
+        endRow--;
+
+        return [endCol, endRow];
+    },
+
     /**
      * @static
      * @memberof CSVParsingUtilities
@@ -52,46 +103,97 @@ export const CSVParsingUtilities = {
     stringValuesToObjectsGrid : function(stringGrid, xAxisLabels, yAxisLabels, options){
         return stringGrid.map(function(row, rowIndex){
             return row.map(function(cellValue, columnIndex){
+
+                var cellType;
                 var numVal;
+
                 if (typeof cellValue === 'number'){
                     numVal = cellValue;
                 } else if (typeof cellValue === 'string'){
-                    if (cellValue.length === 0) numVal = 0;
-                    else {
-                        numVal = parseFloat(cellValue);
-                        if (isNaN(numVal)) numVal = 1;
-                    }
+                    cellType = CSVParsingUtilities.determineCellType(cellValue);
+
+                    if (!cellType || cellType === 'none') numVal = 0;
+                    else if (cellType === 'planned') numVal = 2;
+                    else if (cellType === 'in submission') numVal = 3;
+                    else if (cellType === 'submitted') numVal = 4;
                 }
                 
                 return {
                     'originalValue' : cellValue,
-                    'value'         : numVal,
+                    'numericValue'  : numVal,
                     'row'           : rowIndex,
                     'column'        : columnIndex,
                     'columnLabel'   : xAxisLabels[columnIndex],
                     'rowLabel'      : yAxisLabels[rowIndex],
-                    'tooltip'       : CSVParsingUtilities.generateCellTooltipContent(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options)
+                    'tooltip'       : CSVParsingUtilities.generateCellTooltipContent(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options),
+                    'className'     : 'cellType-' + cellType.split(' ').join('-')
                 };
 
             });
         });
     },
 
-    generateCellTooltipContent : function(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options){
-        var displayCellValue = cellValue;
-        if (displayCellValue.charAt(0).toLowerCase() === 'x'){
-            displayCellValue = displayCellValue.slice(1).trim();
+    determineCellType : function(origCellValue){
+        var firstCharacter = origCellValue.charAt(0);
+
+        if (firstCharacter === 'X' && origCellValue.charAt(1) === 'S') return 'in submission';
+        if (firstCharacter === 'X') return 'planned';
+        if (firstCharacter === 'S') return 'submitted';
+        return 'none';
+    },
+
+    matrixCellStyle : function(data, maxValue = 10) {
+        var numVal = (data && data.numericValue) || data;
+        return {
+            backgroundColor: 'rgba(65, 65, 138, '+ numVal/maxValue + ')',
+            border: numVal >= 1 ? 'none' : '1px dotted #eee'
+        };
+    },
+
+    // TODO: Use Bootstrap Popovers instead.
+    generateCellTooltipContent : function(origCellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options){
+        var extraStringShown = origCellValue;
+        var optionalTitle = null;
+
+        var cellType = CSVParsingUtilities.determineCellType(extraStringShown);
+        if (cellType === 'planned'){
+            extraStringShown = extraStringShown.slice(1).trim();
+            optionalTitle = "Planned";
+        } else if (cellType === 'submitted'){
+            extraStringShown = extraStringShown.slice(1).trim();
+            optionalTitle = "Submitted";
+        } else if (cellType === 'in submission'){
+            extraStringShown = extraStringShown.slice(2).trim();
+            optionalTitle = "In Submission";
+        } else if (cellType === 'none'){
+            optionalTitle = "Not Yet Planned";
         }
-        if (displayCellValue.length === 0) displayCellValue = null;
+
+        var plannedEstimate;
+        if (extraStringShown){
+            plannedEstimate = extraStringShown.match(/(Est: .+;)/g); // Grab substring that fits "Est: ...;"
+            if (plannedEstimate){
+                plannedEstimate = plannedEstimate[0];
+                plannedEstimate = plannedEstimate.replace('Est:', '').replace(';', '').trim();
+                extraStringShown = extraStringShown.replace(/(Est: .+;)/g, '').trim();
+            }
+        }
+
+        if (extraStringShown.length === 0) extraStringShown = null;
+
         var tooltipContent = (
-            '<div><small style="opacity: 0.5">' +(options.yaxisTitle || 'X') +' :</small> ' +
+            '<div>' +
+            (optionalTitle ? '<h4>' + optionalTitle + '</h4>' : '') +
+            '<small style="opacity: 0.5">' +(options.yaxisTitle || 'X') +' :</small> ' +
             yAxisLabels[rowIndex].join(' - ') +
             '</div><div><small style="opacity: 0.5">' +
-            (options.xaxisTitle || 'Y') + ' :</small> ' + xAxisLabels[columnIndex].join(' - ') +
-            '</div>'
+            (options.xaxisTitle || 'Y') + ' :</small> ' + (xAxisLabels[columnIndex]).join(' - ') +
+            '</div>' +
+            (plannedEstimate ? '<div><hr style="margin: 4px 0; opacity: 0.33;"/><small style="opacity: 0.5">Estimate :</small> ' + plannedEstimate + '</div>' : '' )
         );
-        if (displayCellValue){
-            tooltipContent += '<hr style="margin: 4px 0; opacity: 0.33;"/><div>' + displayCellValue + '</div>';
+
+        if (extraStringShown){
+            tooltipContent += '<hr style="margin: 4px 0; opacity: 0.33;"/><div>' + extraStringShown + '</div>';
         }
         return tooltipContent;
     },
@@ -172,6 +274,10 @@ export const CSVParsingUtilities = {
  */
 export class CSVMatrixView extends MatrixView {
 
+    static defaultProps = {
+        'maxValue' : 4
+    }
+
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
@@ -190,9 +296,12 @@ export class CSVMatrixView extends MatrixView {
             grid,
             xAxisLabels,
             yAxisLabels,
-            options.xaxisTitle,
-            options.yaxisTitle,
-            title
+            options.xaxisTitle || null,
+            options.yaxisTitle || null,
+            title,
+            CSVParsingUtilities.matrixCellStyle,
+            this.props.maxValue,
+            false
         );
 
     }
