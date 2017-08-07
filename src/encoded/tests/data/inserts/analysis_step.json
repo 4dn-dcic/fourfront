@@ -208,5 +208,15 @@
         "analysis_step_types":["file format conversion"],
         "award":"1U01CA200059-01",
         "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"addnormtohic",
+        "uuid":"12ad1dbe-cc44-4968-8a21-d1e5a12d3222",
+        "version":"7",
+        "software_used":"02d636b9-d8dd-4da9-950c-2ca994b23576",
+        "name":"addnormtohic",
+        "analysis_step_types":["normalization"],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
     }
 ]
