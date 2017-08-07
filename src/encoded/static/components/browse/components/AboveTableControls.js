@@ -147,23 +147,52 @@ class SelectedFilesSelector extends React.Component {
     static fileFormatButtonProps = {
         'bsStyle' : "primary",
         'bsSize' : 'small'
-    };
+    }
 
-    handleSelect(formatType){
+    constructor(props){
+        super(props);
+        this.handleSelect = this.handleSelect.bind(this);
+        this.state = {
+            'selecting' : false
+        };
+    }
+
+    isAllSelected(){
+        if (!this.props.totalFilesCount) return false;
+        if (this.props.totalFilesCount === _.keys(this.props.selectedFiles).length){
+            return true;
+        }
+        return false;
+    }
+
+    handleSelect(isAllSelected = false){
         if (typeof this.props.selectFile !== 'function'){
             throw new Error("No 'selectFiles' function prop passed to SelectedFilesController.");
         }
-        if (formatType === 'all'){
-            //this.props.selectFile();
-        }
+        var funcToUse = isAllSelected ? this.props.selectFile : this.props.unselectFile;
+        this.setState({ 'selecting' : true }, () => vizUtil.requestAnimationFrame(()=>{
+            if (!isAllSelected){
+                this.props.selectFile(_.zip(expFxn.filesToAccessionTriples(this.props.allFiles, true), this.props.allFiles));
+            } else {
+                this.props.unselectFile(expFxn.filesToAccessionTriples(this.props.allFiles, true));
+            }
+            
+            this.setState({ 'selecting' : false });
+        }));
     }
 
     render(){
+        console.log('ALLHMMM', this.props.allFiles);
+        var isAllSelected = this.isAllSelected();
+        var buttonContent = (
+            this.state.selecting ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> :
+            <span><i className="icon icon-check-square-o icon-fw"/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span></span>
+        );
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button key="download" bsStyle="primary">
-                        <i className="icon icon-check-square-o icon-fw"/> <span className="text-400">Select</span> <span className="text-600">All</span>
+                    <Button key="download" bsStyle="primary" onClick={this.handleSelect.bind(this, isAllSelected)}>
+                        { buttonContent }
                     </Button>
                 </ButtonGroup>
             </div>
@@ -208,6 +237,7 @@ class SelectedFilesFilterByButton extends React.Component {
     }
 
     renderFileFormatButtonsSelected(){
+        console.log('SEL', this.props.selectedFiles);
         if (!this.props.selectedFiles) return null;
         var format_buckets = _.groupBy(
             _.pairs(this.props.selectedFiles).map(function(f){
@@ -262,7 +292,7 @@ class SelectedFilesControls extends React.Component {
         return (
             <div>
                 <SelectedFilesSelector
-                    files={allFiles}
+                    allFiles={allFiles}
                     totalFilesCount={totalFilesCount}
                     selectedFiles={this.props.selectedFiles}
                     selectFile={this.props.selectFile}
@@ -421,7 +451,7 @@ export class AboveTableControls extends React.Component {
         if (this.props.showSelectedFileCount && this.props.selectedFiles){
             return (
                 <ChartDataController.Provider>
-                    <SelectedFilesControls selectedFiles={this.props.selectedFiles} />
+                    <SelectedFilesControls selectedFiles={this.props.selectedFiles} selectFile={this.props.selectFile} unselectFile={this.props.unselectFile} />
                 </ChartDataController.Provider>
             );
         }

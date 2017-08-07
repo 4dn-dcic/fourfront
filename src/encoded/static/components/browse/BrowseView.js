@@ -204,7 +204,6 @@ class ResultTableContainer extends React.Component {
     render() {
         var facets = this.props.context.facets;
         var results = this.props.context['@graph'];
-
         
         return (
             <div className="row">
@@ -236,7 +235,7 @@ class ResultTableContainer extends React.Component {
                     <AboveTableControls
                         {..._.pick(this.props,
                             'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
-                            'columns', 'selectedFiles', 'constantHiddenColumns'
+                            'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile'
                         )}
                         parentForceUpdate={this.forceUpdate.bind(this)}
                         columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
