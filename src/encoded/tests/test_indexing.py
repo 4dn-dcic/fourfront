@@ -11,6 +11,39 @@ pytestmark = [pytest.mark.working, pytest.mark.indexing]
 # subset of collections to run test on
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
+
+@pytest.fixture(scope='session')
+def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
+    from .conftest import _app_settings
+    settings = _app_settings.copy()
+    settings['create_tables'] = True
+    settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
+    settings['elasticsearch.server'] = elasticsearch_server
+    settings['sqlalchemy.url'] = postgresql_server
+    settings['collection_datastore'] = 'elasticsearch'
+    settings['item_datastore'] = 'elasticsearch'
+    settings['indexer'] = True
+    settings['indexer.processes'] = 2
+    return settings
+
+
+@pytest.yield_fixture(scope='session')
+def app(app_settings):
+    from encoded import main
+    app = main({}, **app_settings)
+
+    yield app
+
+    # Shutdown multiprocessing pool to close db conns.
+    from snovault.elasticsearch import INDEXER
+    app.registry[INDEXER].shutdown()
+
+    from snovault import DBSESSION
+    DBSession = app.registry[DBSESSION]
+    # Dispose connections so postgres can tear down.
+    DBSession.bind.pool.dispose()
+
+
 @pytest.fixture(scope='session')
 def DBSession(app):
     from snovault import DBSESSION
