@@ -11,8 +11,8 @@ var ReactTooltip = require('react-tooltip');
 
 
 
-function defaultStyle(data, maxValue = 10) {
-    var val = (data && data.value) || data;
+export function genDefaultStyle(data, maxValue = 10) {
+    var val = (data && data.numericValue) || data;
     return {
         backgroundColor: 'rgba(65, 65, 138, '+ val/maxValue + ')',
         border: val >= 1 ? 'none' : '1px dotted #eee'
@@ -133,11 +133,11 @@ class XAxis extends React.Component {
                     { this.props.prefixContent }
                     { this.props.yAxisTitle ?
                         <div className="matrix-y-axis-title">
-                            <div><small className="text-300">Row<i className="icon icon-arrow-down"/></small></div>
+                            {/*<div><small className="text-300">Row<i className="icon icon-arrow-down"/></small></div>*/}
                             { this.props.yAxisTitle }
                         </div>
                     : null }
-                    { this.props.xAxisTitle ?
+                    { this.props.showXAxisTitle && this.props.xAxisTitle ?
                         <div className="matrix-x-axis-title text-right">
                             <div><small className="text-300">Column<i className="icon icon-arrow-right"/></small></div>
                             { this.props.xAxisTitle }
@@ -175,7 +175,7 @@ export class MatrixContainer extends React.Component {
         'grid' : [
             [0,0,0], [1,2,1], [1,2,3], [3,3,3], [3,2,1]
         ],
-        'defaultStyleFxn' : defaultStyle,
+        'styleFxn' : genDefaultStyle,
         'fitTilesToWidth' : true,
         'cellSize' : null,
         'yLabelsWidth' : 240,
@@ -259,7 +259,7 @@ export class MatrixContainer extends React.Component {
                 width: cellSize,
                 height: cellSize
             },
-            this.props.defaultStyleFxn(data, this.props.maxValue)
+            this.props.styleFxn(data, this.props.maxValue)
         );
     }
 
@@ -274,12 +274,16 @@ export class MatrixContainer extends React.Component {
                     height={this.props.xLabelsHeight}
                     cellSize={this.cellSize()}
                     leftOffset={this.props.yLabelsWidth}
-                    prefixContent={this.props.title ? <h4 className="matrix-title">{ this.props.title }</h4> : null}
+                    prefixContent={this.props.title ?
+                        <h4 className={"matrix-title" + (!this.props.showXAxisTitle ? " no-x-axis-title" : "")}>{ this.props.title }</h4>
+                        : null
+                    }
                     yAxisTitle={this.props.yAxisTitle}
                     xAxisTitle={this.props.xAxisTitle}
                     gridWidth={gridWidth}
                     maxGridWidth={maxGridWidth}
                     registerPostUpdateFxn={this.registerPostUpdateFxn}
+                    showXAxisTitle={this.props.showXAxisTitle}
                 />
                 <MatrixContainer.YAxis labels={this.props.yAxisLabels} width={this.props.yLabelsWidth} cellSize={this.cellSize()} registerPostUpdateFxn={this.registerPostUpdateFxn} />
                 <div className="matrix-grid-container" style={{ width : Math.min(maxGridWidth, gridWidth) }}>
@@ -309,7 +313,7 @@ export class MatrixContainer extends React.Component {
 
 export default class MatrixView extends React.Component {
 
-    static findGreatestValueInGrid(grid, valueKey = 'value'){
+    static findGreatestValueInGrid(grid, valueKey = 'numericValue'){
         return _.reduce(grid, function(mOuter, row){
             return Math.max(
                 _.reduce(row, function(mInner, cell){
@@ -366,12 +370,12 @@ export default class MatrixView extends React.Component {
         }
     }
 
-    render(grid, xAxisLabels, yAxisLabels, xAxisTitle, yAxisTitle, title, defaultStyle = defaultStyle) {
+    render(grid, xAxisLabels, yAxisLabels, xAxisTitle, yAxisTitle, title, styleFxn = genDefaultStyle, maxValue = null, showXAxisTitle = true) {
         return (
             <div ref="matrixWrapper">
                 <MatrixContainer
                     grid={grid}
-                    defaultStyleFxn={defaultStyle}
+                    styleFxn={styleFxn}
                     xAxisLabels={xAxisLabels}
                     xAxisTitle={xAxisTitle}
                     yAxisLabels={yAxisLabels}
@@ -379,7 +383,8 @@ export default class MatrixView extends React.Component {
                     title={title}
                     mounted={this.state.mounted}
                     width={this.props.width || this.state.containerWidth}
-                    maxValue={MatrixView.findGreatestValueInGrid(grid)}
+                    maxValue={this.props.maxValue || maxValue || MatrixView.findGreatestValueInGrid(grid)}
+                    showXAxisTitle={showXAxisTitle}
                 />
             </div>
         );

@@ -7,7 +7,7 @@ import _ from 'underscore';
 
 /**
  * IN PROGRESS -- TODO: Decide if we should store "selectedFiles" or "unselectedFiles" (re: 'All files in facet selection are selected by default')
- * 
+ *
  * @export
  * @class SelectedFilesController
  * @extends {React.Component}
@@ -16,7 +16,7 @@ export class SelectedFilesController extends React.Component {
 
     /**
      * Includes related files that might be saved in memo values.
-     * 
+     *
      * @static
      * @returns {string[]} List of file UUIDs.
      */
@@ -76,14 +76,8 @@ export class SelectedFilesController extends React.Component {
         }
     }
 
-    componentDidUpdate(pastProps, pastState){
-        if (_.keys(pastState.selectedFiles).length !== _.keys(this.state.selectedFiles).length){
-            console.info("Changed selectedFiles:", pastState.selectedFiles, '==>', this.state.selectedFiles);
-        }
-    }
-
     selectFile(uuid: string, memo = null){
-        
+
         var newSelectedFiles = _.clone(this.state.selectedFiles);
 
         function add(id, memo = null){

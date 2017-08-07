@@ -561,8 +561,10 @@ export default class TableOfContents extends React.Component {
 
         var marginTop = 0; // Account for test warning
         if (this.state.mounted && !isServerSide()){
-            var testWarningElem = document.getElementsByClassName('navbar-container test-warning-visible');
-            marginTop = (testWarningElem[0] && testWarningElem[0].offsetHeight) || marginTop;
+            if (typeof this.state.scrollTop === 'number' && this.state.scrollTop < 80){
+                var testWarningElem = document.getElementsByClassName('navbar-container test-warning-visible');
+                marginTop = (testWarningElem[0] && testWarningElem[0].offsetHeight) || marginTop;
+            }
         }
 
 
