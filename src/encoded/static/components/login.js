@@ -10,7 +10,7 @@ import Alerts from './alerts';
 
 /** Component that contains auth0 functions */
 export default class Login extends React.Component {
-    
+
     static propTypes = {
         updateUserInfo      : PropTypes.func.isRequired,
         session             : PropTypes.bool.isRequired,
@@ -39,9 +39,10 @@ export default class Login extends React.Component {
         this.lock = new lock_('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
             'hms-dbmi.auth0.com', {
                 auth: {
+                    sso: false,
                     redirect: false,
                     responseType: 'token',
-                    params: {scope: 'openid email'}
+                    params: {scope: 'openid email', prompt: 'select_account'}
                 },
                 socialButtonStyle: 'big',
                 languageDictionary: {
@@ -97,7 +98,11 @@ export default class Login extends React.Component {
             JWT.saveUserInfoLocalStorage(response);
             this.props.updateUserInfo();
             Alerts.deQueue(Alerts.LoggedOut);
-            navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
+            if(this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
+                navigate('/', {'inPlace':true}, this.lock.hide.bind(this.lock));
+            }else{
+                navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
+            }
         }, error => {
             console.log("got an error: ", error.description);
             console.log(error);
@@ -125,4 +130,3 @@ export default class Login extends React.Component {
     }
 
 }
-

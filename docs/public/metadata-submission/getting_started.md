@@ -69,7 +69,9 @@ The DCIC has already created all the labs and awards that are part of the 4DN co
 
 ## Getting Added as a 4DN User or Submitter
 
-Before you can view protected lab or project data or submit data to the 4DN system you must be a registered user of the site and have the appropriate access credentials. To view lab data that is still in the review phase you must be registered as a member of the lab that produced the data.  You must be designated as a submitter for the lab for which you want to submit files and metadata.  Most current 4DN lab members should already be registered in our system.  If you are a lab submitter or new to the project to get set up with an account with the correct access contact the data wranglers at [support@4dnucleome.org](mailto:support@4dnucleome.org).  To validate your credentials, please also cc your PI.
+Before you can view protected lab or project data or submit data to the 4DN system you must be a registered user of the site and have the appropriate access credentials. To view lab data that is still in the review phase you must be registered as a member of the lab that produced the data.  You must be designated as a submitter for the lab for which you want to submit files and metadata.  Most current 4DN lab members should already be registered in our system.
+
+For instructions on creating an account, please see [this page](/help/account-creation).
 
 
 **A note on metadata and data accessibility.**
@@ -81,9 +83,8 @@ Before you can view protected lab or project data or submit data to the 4DN syst
 ## Getting Connection Keys for the 4DN-DCIC servers
 If you have been designated as a submitter for the project and plan to use either our spreadsheet-based submission system or the REST-API an access key and a secret key are required to establish a connection to the 4DN database and to fetch, upload (post), or change (patch) data. Please follow these steps to get your keys.
 
-1. Log in to the 4DN [website](https://data.4dnucleome.org) with your username (email) and password.
+1. Log in to the 4DN [website](https://data.4dnucleome.org) with your username (email) and password. If you have not yet created an account, see [this page](/help/account-creation) for instructions.
 
-    Note that we are using the [Oauth](https://oauth.net/) authentication system which will allow you to login with a google or github login.  _The email associated with the account you use for login must be the same as the one registered with the 4DN-DCIC._
 
 2. Once logged in, go to your ”Profile” page by clicking **Account** on the upper right side of the page.  In your profile page, click the green “Add Access Key” button, and copy the “access key ID” and “secret access key” values from the pop-up page. _Note that once the pop-up page disappears you will not be able to see the secret access key value._ However, if you forget or lose your secret key you can always delete and add new access keys from your profile page at any time.
 
