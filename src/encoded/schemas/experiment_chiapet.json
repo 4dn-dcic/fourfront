@@ -1,7 +1,7 @@
 {
     "title": "Proximity Ligation with ChIP Experiment",
     "description": "Proximity Ligation and Sequencing with Targeted Chromatin Immunoprecipitation.",
-    "id": "/profiles/experiment_chipplseq.json",
+    "id": "/profiles/experiment_chiapet.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["experiment_type", "award", "lab", "biosample"],

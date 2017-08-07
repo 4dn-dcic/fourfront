@@ -325,17 +325,17 @@ class ExperimentAtacseq(Experiment):
 
 
 @collection(
-    name='experiments-chipplseq',
+    name='experiments-chiapet',
     unique_key='accession',
     properties={
-        'title': 'Experiments Proximity ligation with ChIP seq',
+        'title': 'Experiments CHIA-pet',
         'description': 'Listing CHIA-pet and PLAC-seq Experiments',
     })
-class ExperimentChipplseq(Experiment):
+class ExperimentChiapet(Experiment):
     """The experiment class for CHIA-pet and PLAC-seq experiments."""
 
-    item_type = 'experiment_chipplseq'
-    schema = load_schema('encoded:schemas/experiment_chipplseq.json')
+    item_type = 'experiment_chiapet'
+    schema = load_schema('encoded:schemas/experiment_chiapet.json')
     embedded = Experiment.embedded + ["submitted_by.*"]
     name_key = 'accession'
 
