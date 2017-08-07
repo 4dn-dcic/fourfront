@@ -18,7 +18,7 @@ def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server)
 
 @pytest.fixture(scope='session')
 def indexing_app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
-    from .conftest import _app_settings
+    from ..conftest import _app_settings
     settings = _app_settings.copy()
     settings['create_tables'] = True
     settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
