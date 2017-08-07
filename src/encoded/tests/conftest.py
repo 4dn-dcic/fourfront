@@ -54,6 +54,10 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):
     from snovault import DBSESSION
     settings = _app_settings.copy()
     settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
+    ### TEST FF-890
+    settings['indexer'] = True
+    settings['indexer.processes'] = 2
+    ###
     # add some here for file testing
     settings[DBSESSION] = DBSession
     return settings
@@ -177,6 +181,14 @@ def workbook(conn, app, app_settings):
         yield
     finally:
         tx.rollback()
+
+
+@pytest.yield_fixture(scope='session')
+def app(app_settings):
+    from encoded import main
+    app = main({}, **app_settings)
+
+    yield app
 
 
 @fixture

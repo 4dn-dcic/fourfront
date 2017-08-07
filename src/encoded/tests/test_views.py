@@ -95,7 +95,7 @@ def test_html_collections(workbook, htmltestapp, item_type):
 @pytest.mark.slow
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
 def test_html_pages(workbook, testapp, htmltestapp, item_type):
-    res = testapp.get('/%s?limit=all' % item_type).follow(status=200)
+    res = testapp.get('/%s?limit=1' % item_type).follow(status=200)
     for item in res.json['@graph']:
         res = htmltestapp.get(item['@id'])
         assert res.body.startswith(b'<!DOCTYPE html>')
@@ -107,7 +107,7 @@ def test_html_server_pages(workbook, item_type, wsgi_server):
     from webtest import TestApp
     testapp = TestApp(wsgi_server)
     res = testapp.get(
-        '/%s?limit=all' % item_type,
+        '/%s?limit=1' % item_type,
         headers={'Accept': 'application/json'},
     ).follow(
         status=200,
