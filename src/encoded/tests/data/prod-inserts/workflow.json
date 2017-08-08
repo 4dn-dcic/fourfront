@@ -1458,6 +1458,20 @@
         {
             "argument_mapping":[
                 {
+                    "step_argument_name":"pairs",
+                    "step_argument_type":"Input file or parameter",
+                    "workflow_step":"cooler"
+                },
+                {
+                    "step_argument_name":"output_pairs",
+                    "step_argument_type":"Output file or parameter",
+                    "workflow_step":"merge_pairs"
+                }
+            ]
+        },
+        {
+            "argument_mapping":[
+                {
                     "step_argument_name":"pairs_index",
                     "step_argument_type":"Input file or parameter",
                     "workflow_step":"cooler"
@@ -1618,5 +1632,72 @@
         }
     ],
     "description": "extract-mcool-normvector-for-juicebox"
+},
+{
+    "title": "addnormtohic",
+    "accession": "4DNWFG6J82TH",
+    "uuid": "e554d10d-d1e7-4055-aef6-4226ff1bcdb2",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "name": "addnormtohic/7",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "arguments": [
+        {
+            "workflow_argument_name": "input_hic",
+            "argument_type": "Input file",
+            "argument_format": "hic",
+            "argument_mapping": [
+                {
+                    "workflow_step": "addnormtohic",
+                    "step_argument_name": "input_hic",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "description": ""
+        },
+        {
+            "argument_type": "parameter",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "min_res",
+                    "workflow_step": "addnormtohic",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "min_res"
+        },
+        {
+            "argument_type": "parameter",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "max_mem",
+                    "workflow_step": "addnormtohic",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "max_mem"
+        },
+        {
+            "workflow_argument_name": "output_hic",
+            "argument_type": "Output processed file",
+            "argument_format": "hic",
+            "argument_mapping": [
+                {
+                    "workflow_step": "addnormtohic",
+                    "step_argument_name": "output_hic",
+                    "step_argument_type": "Output file"
+                }
+            ],
+            "description": ""
+        }
+    ],
+    "workflow_steps": [
+        {
+            "step_name":"addnormtohic",
+            "step":"12ad1dbe-cc44-4968-8a21-d1e5a12d3222"
+        }
+    ],
+    "description": "addnormtohic"
 }
 ]
