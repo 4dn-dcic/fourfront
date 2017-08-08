@@ -274,9 +274,7 @@ def test_jsonld_term(testapp):
 
 @pytest.mark.slow
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, wsgi_server, item_type):
-    from webtest import TestApp
-    wsgiapp = TestApp(wsgi_server)
+def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, wsgi_app, item_type):
     res = testapp.get('/%s?limit=all' % item_type).follow(status=200)
     # previously test_load_workbook
     assert len(res.json['@graph']) == TYPE_LENGTH[item_type]
@@ -286,9 +284,10 @@ def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, ws
         res = htmltestapp.get(item['@id'])
         assert res.body.startswith(b'<!DOCTYPE html>')
         # previously test_html_server_pages
-        res = wsgiapp.get(item['@id'], status=[200, 403, 415])
-        assert res.body.startswith(b'<!DOCTYPE html>')
-        assert b'Internal Server Error' not in res.body
+        if item_type not in ['user', 'enzyme']:
+            res = wsgi_app.get(item['@id'], status=[200, 403])
+            assert res.body.startswith(b'<!DOCTYPE html>')
+            assert b'Internal Server Error' not in res.body
 
 
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
