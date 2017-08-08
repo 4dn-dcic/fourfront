@@ -200,7 +200,7 @@ class SelectedFilesSelector extends React.Component {
     }
 }
 
-class SelectedFilesFilterByButton extends React.Component {
+class SelectedFilesFilterByContent extends React.Component {
 
     static renderFileFormatButtonsFromBuckets(format_buckets, button_text_prefix = ''){
         return _.sortBy(_.pairs(format_buckets), function(p){ return -p[1].length; }).map(function(pairs){
@@ -222,18 +222,13 @@ class SelectedFilesFilterByButton extends React.Component {
         });
     }
 
+    static propTypes = {
+        selectedFiles : PropTypes.object.isRequired
+    }
+
     static fileFormatButtonProps = {
         'bsStyle' : "primary",
         'bsSize' : 'small'
-    }
-
-    handleSelect(formatType){
-        if (typeof this.props.selectFile !== 'function'){
-            throw new Error("No 'selectFiles' function prop passed to SelectedFilesController.");
-        }
-        if (formatType === 'all'){
-            //this.props.selectFile();
-        }
     }
 
     renderFileFormatButtonsSelected(){
@@ -246,13 +241,45 @@ class SelectedFilesFilterByButton extends React.Component {
             }),
             'file_type_detailed'
         );
-        return SelectedFilesFilterByButton.renderFileFormatButtonsFromBuckets(format_buckets);
+        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets);
+    }
+
+    render(){
+        return (
+            <div>
+                { this.renderFileFormatButtonsSelected() }
+            </div>
+        );
+    }
+
+}
+
+class SelectedFilesFilterByButton extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.state = {
+            'filerByPanelOpen' : false
+        };
+    }
+
+    renderFileFormatButtonsSelected(){
+        console.log('SEL', this.props.selectedFiles);
+        if (!this.props.selectedFiles) return null;
+        var format_buckets = _.groupBy(
+            _.pairs(this.props.selectedFiles).map(function(f){
+                f[1].selection_id = f[0];
+                return f[1];
+            }),
+            'file_type_detailed'
+        );
+        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets);
     }
 
     renderFileFormatButtons(){
         if (!this.props.files) return null;
         var format_buckets = _.groupBy(this.props.files, 'file_type_detailed');
-        return SelectedFilesFilterByButton.renderFileFormatButtonsFromBuckets(format_buckets, 'All ');
+        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets, 'All ');
     }
 
     renderOverlay(){
@@ -274,6 +301,9 @@ class SelectedFilesFilterByButton extends React.Component {
                             <i className="icon icon-filter icon-fw"/> Filter By&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
                         </Button>
                     </OverlayTrigger>
+                    <Button key="download3" bsStyle="primary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick}>
+                        <i className="icon icon-filter icon-fw"/> Filter By&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
+                    </Button>
                 </ButtonGroup>
             </div>
         );
@@ -306,6 +336,7 @@ class SelectedFilesControls extends React.Component {
                     selectFile={this.props.selectFile}
                     unselectFile={this.props.unselectFile}
                     resetSelectedFiles={this.props.resetSelectedFiles}
+                    onFilterFilesByClick={this.props.onFilterFilesByClick}
                 />
                 {' '}
                 <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
@@ -334,6 +365,7 @@ export class AboveTableControls extends React.Component {
         this.handleOpenToggle = _.throttle(this.handleOpenToggle.bind(this), 350);
         this.handleLayoutToggle = _.throttle(this.handleLayoutToggle.bind(this), 350);
         this.renderPanel = this.renderPanel.bind(this);
+        this.renderOverlay = this.renderOverlay.bind(this);
         this.rightButtons = this.rightButtons.bind(this);
         this.state = {
             'open' : false,
@@ -398,10 +430,12 @@ export class AboveTableControls extends React.Component {
     }
 
     handleOpenToggle(value){
+        console.log('HANDLEOPENTOGGLE', value);
         if (this.timeout){
             clearTimeout(this.timeout);
             delete this.timeout;
         }
+        if (typeof value === 'string' && this.state.open === value) value = false;
         var state = { 'open' : value };
         if (state.open){
             state.reallyOpen = state.open;
@@ -424,6 +458,26 @@ export class AboveTableControls extends React.Component {
         this.setState(state);
     }
 
+    renderOverlay(){
+        return (
+            <Popover title="Configure Visible Columns" id="toggle-visible-columns" className="toggle-visible-columns-selector">
+                {/* <div><Button {...SelectedFilesSelector.fileFormatButtonProps}>All files ({ this.props.totalFilesCount })</Button></div> */}
+                <CustomColumnSelector
+                    hiddenColumns={this.props.hiddenColumns}
+                    addHiddenColumn={this.props.addHiddenColumn}
+                    removeHiddenColumn={this.props.removeHiddenColumn}
+                    columnDefinitions={this.props.columnDefinitions}
+                    //columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
+                    //    browseTableConstantColumnDefinitions,
+                    //    this.props.context.columns || {},
+                    //    {}, //this.props.columnDefinitionOverrides,
+                    //    this.props.constantHiddenColumns
+                    //)}
+                />
+            </Popover>
+        );
+    }
+
     renderPanel(){
         var { open, reallyOpen } = this.state;
         if (open === 'customColumns' || reallyOpen === 'customColumns') {
@@ -434,12 +488,21 @@ export class AboveTableControls extends React.Component {
                         addHiddenColumn={this.props.addHiddenColumn}
                         removeHiddenColumn={this.props.removeHiddenColumn}
                         columnDefinitions={this.props.columnDefinitions}
+                        showTitle
                         //columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
                         //    browseTableConstantColumnDefinitions,
                         //    this.props.context.columns || {},
                         //    {}, //this.props.columnDefinitionOverrides,
                         //    this.props.constantHiddenColumns
                         //)}
+                    />
+                </Collapse>
+            );
+        } else if (open === 'filterFilesBy' || reallyOpen === 'filterFilesBy') {
+            return (
+                <Collapse in={!!(open)} transitionAppear>
+                    <SelectedFilesFilterByContent
+                        selectedFiles={this.props.selectedFiles}
                     />
                 </Collapse>
             );
@@ -451,7 +514,12 @@ export class AboveTableControls extends React.Component {
         if (this.props.showSelectedFileCount && this.props.selectedFiles){
             return (
                 <ChartDataController.Provider>
-                    <SelectedFilesControls selectedFiles={this.props.selectedFiles} selectFile={this.props.selectFile} unselectFile={this.props.unselectFile} />
+                    <SelectedFilesControls
+                        selectedFiles={this.props.selectedFiles}
+                        selectFile={this.props.selectFile}
+                        unselectFile={this.props.unselectFile}
+                        onFilterFilesByClick={this.handleOpenToggle.bind(this, 'filterFilesBy')}
+                    />
                 </ChartDataController.Provider>
             );
         }
@@ -482,9 +550,11 @@ export class AboveTableControls extends React.Component {
 
         return open === false ? (
             <div className="pull-right right-buttons">
-                <Button key="toggle-visible-columns" onClick={this.handleOpenToggle.bind(this, (!open && 'customColumns') || false)} data-tip="Configure visible columns" data-event-off="click">
-                    <i className="icon icon-eye-slash icon-fw"/> Columns
-                </Button>
+                {/* <OverlayTrigger trigger="click" rootClose overlay={this.renderOverlay()} placement="bottom"> */}
+                    <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
+                        <i className="icon icon-eye-slash icon-fw"/> Columns
+                    </Button>
+                {/* </OverlayTrigger> */}
                 { expandLayoutButton.call(this) }
             </div>
         ) : (

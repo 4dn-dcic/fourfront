@@ -118,13 +118,21 @@ export class CustomColumnSelector extends React.Component {
     }
 
     render(){
+
+        var innerRowContents = (
+            <div className="row clearfix">
+                { this.columnDefinitionsWithHiddenState().map(this.renderHiddenColumnOption) }
+            </div>
+        );
+
+        if (!this.props.showTitle){
+            return innerRowContents;
+        }
         return (
             <div className={"visible-columns-selector-panel" + (this.props.className ? ' ' + this.props.className : '')}>
                 <div className="inner">
                     <h5 className="text-400 panel-title">Visible Columns</h5>
-                    <div className="row clearfix">
-                        { this.columnDefinitionsWithHiddenState().map(this.renderHiddenColumnOption) }
-                    </div>
+                    { innerRowContents }
                 </div>
             </div>
         );
