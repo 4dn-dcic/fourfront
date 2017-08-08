@@ -352,25 +352,26 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
     function findNextStepsFromIONode(ioNodes){
 
         var targetPropertyName = parsingMethod === 'output' ? 'target' : 'source';
-        
+        /*
         var remainingSteps = analysis_steps.filter(function(step){
             if (typeof processedSteps[stepNodeID(step) || stepNodeName(step)] !== 'undefined'){
                 return false;
             }
             return true;
         });
-
+        */
         var nextSteps = new Set();
 
         ioNodes.forEach(function(n){
             if (n.meta && Array.isArray(n.meta[targetPropertyName])){
-                var target = n.meta[targetPropertyName][1] || n.meta[targetPropertyName][0]; // Optimization. If input of another step, it'll be second item in array if a Workflow Output target also present.
-                if (typeof target.step === 'string'){
-                    var matchedStep = _.findWhere(analysis_steps, { 'name' : target.step });
-                    if (matchedStep) {
-                        nextSteps.add(matchedStep);
+                n.meta[targetPropertyName].forEach(function(t){
+                    if (typeof t.step === 'string'){
+                        var matchedStep = _.findWhere(analysis_steps, { 'name' : t.step });
+                        if (matchedStep) {
+                            nextSteps.add(matchedStep);
+                        }
                     }
-                }
+                });
             }
         });
 
