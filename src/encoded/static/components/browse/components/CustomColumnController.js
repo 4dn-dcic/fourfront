@@ -129,7 +129,7 @@ export class CustomColumnSelector extends React.Component {
             return innerRowContents;
         }
         return (
-            <div className={"visible-columns-selector-panel" + (this.props.className ? ' ' + this.props.className : '')}>
+            <div className={"visible-columns-selector-panel search-result-config-panel" + (this.props.className ? ' ' + this.props.className : '')}>
                 <div className="inner">
                     <h5 className="text-400 panel-title">Visible Columns</h5>
                     { innerRowContents }

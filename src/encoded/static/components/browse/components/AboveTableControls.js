@@ -80,7 +80,7 @@ class SelectedFilesDownloadButton extends React.Component {
     handleClick(e){
         var urlParts = url.parse(windowHref(this.props.href));
         var urlsString = SelectedFilesDownloadButton.generateListOfURIsFromFiles(
-            _.pluck(_.sortBy(_.pairs(this.props.selectedFiles), function(pair){
+            _.pluck(_.sortBy(_.pairs(this.props.subSelectedFiles || this.props.selectedFiles), function(pair){
                 var accessions = pair[0].split('~');
             }), 1),
             urlParts.protocol + '//' + urlParts.host
@@ -131,6 +131,11 @@ class SelectedFilesDownloadButton extends React.Component {
     render(){
         var countSelectedFiles = _.keys(this.props.selectedFiles).length;
         var disabled = countSelectedFiles === 0;
+        var countSubSelectedFiles = _.keys(this.props.subSelectedFiles).length;
+        if (countSubSelectedFiles && countSubSelectedFiles !== countSelectedFiles){
+            countSelectedFiles = countSubSelectedFiles;
+            //extString = <span>
+        }
         return (
             <div className="pull-left box">
                 <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "primary" : "success"}>
@@ -182,7 +187,6 @@ class SelectedFilesSelector extends React.Component {
     }
 
     render(){
-        console.log('ALLHMMM', this.props.allFiles);
         var isAllSelected = this.isAllSelected();
         var buttonContent = (
             this.state.selecting ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> :
@@ -202,7 +206,13 @@ class SelectedFilesSelector extends React.Component {
 
 class SelectedFilesFilterByContent extends React.Component {
 
-    static renderFileFormatButtonsFromBuckets(format_buckets, button_text_prefix = ''){
+    /**
+     * @param {Object} format_buckets - File Type Details (keys) + lists of files (values)
+     * @param {string} [button_text_prefix=''] - Title to pre-pend to buttons.
+     * @param {function} clickHandler - Function to handle button click. Accepts fileTypeDetail as first param before MouseEvt.
+     * @returns {JSX.Element[]} List of JSX Button elements.
+     */
+    static renderFileFormatButtonsFromBuckets(format_buckets, button_text_prefix = '', clickHandler, renderer, fileTypeFilters){
         return _.sortBy(_.pairs(format_buckets), function(p){ return -p[1].length; }).map(function(pairs){
             var fileTypeDetail = pairs[0],
                 files = pairs[1],
@@ -214,12 +224,39 @@ class SelectedFilesFilterByContent extends React.Component {
             } else {
                 title = Schemas.Term.toName('files.file_type_detailed', fileTypeDetail);
             }
-            return (
-                <div key={'button-to-select-files-for' + fileTypeDetail}>
-                    <Button {...SelectedFilesSelector.fileFormatButtonProps}>{button_text_prefix}{ title } files <small>({ files.length })</small></Button>
-                </div>
-            );
+            return renderer(fileTypeDetail, title, clickHandler, files, button_text_prefix, fileTypeFilters);
         });
+    }
+
+    static renderBucketButton(fileType, title, clickHandler, files, button_text_prefix = '', fileTypeFilters){
+        return (
+            <Button
+                key={'button-to-select-files-for' + fileType} {...SelectedFilesFilterByContent.fileFormatButtonProps}
+                onClick={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}
+            >
+                {button_text_prefix}{ title } files <small>({ files.length })</small>
+            </Button>
+        );
+    }
+
+    static renderBucketCheckbox(fileType, title, clickHandler, files, button_text_prefix, fileTypeFilters){
+        var selected = Array.isArray(fileTypeFilters) && fileTypeFilters.indexOf(fileType) > -1;
+        return (
+            <Checkbox checked={selected} onChange={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}>
+                { button_text_prefix }{ title } <sub>({ files.length })</sub>
+            </Checkbox>
+        );
+    }
+
+    static wrapInPanel(inner, title, className){
+        return (
+            <div className={"search-result-config-panel" + (className ? ' ' + className : '')}>
+                <div className="inner">
+                    <h5 className="text-400 panel-title">{ title }</h5>
+                    { inner }
+                </div>
+            </div>
+        );
     }
 
     static propTypes = {
@@ -231,8 +268,12 @@ class SelectedFilesFilterByContent extends React.Component {
         'bsSize' : 'small'
     }
 
+    constructor(props){
+        super(props);
+        this.onClick = this.onClick.bind(this);
+    }
+
     renderFileFormatButtonsSelected(){
-        console.log('SEL', this.props.selectedFiles);
         if (!this.props.selectedFiles) return null;
         var format_buckets = _.groupBy(
             _.pairs(this.props.selectedFiles).map(function(f){
@@ -241,14 +282,33 @@ class SelectedFilesFilterByContent extends React.Component {
             }),
             'file_type_detailed'
         );
-        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets);
+        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets, '', this.onClick, SelectedFilesFilterByContent.renderBucketCheckbox, this.props.currentFileTypeFilters);
     }
 
+    onClick(filterString, evt){
+        var fileTypeFilters = this.props.currentFileTypeFilters.slice(0);
+        var indexOfNewFilter = fileTypeFilters.indexOf(filterString);
+        if (indexOfNewFilter < 0){
+            fileTypeFilters.push(filterString);
+        } else {
+            fileTypeFilters = fileTypeFilters.slice(0, indexOfNewFilter).concat(fileTypeFilters.slice(indexOfNewFilter + 1));
+        }
+        console.log(fileTypeFilters);
+        this.props.setFileTypeFilters(fileTypeFilters);
+    }
+
+    
+
     render(){
-        return (
-            <div>
-                { this.renderFileFormatButtonsSelected() }
-            </div>
+        return SelectedFilesFilterByContent.wrapInPanel(
+            <div className="row">
+            {
+                _.map(this.renderFileFormatButtonsSelected(), function(jsxButton, i){
+                    return <div className="col-sm-6 col-lg-3 file-type-checkbox">{ jsxButton }</div>;
+                })
+            }
+            </div>,
+            'Filter Selection by File Type'
         );
     }
 
@@ -264,7 +324,6 @@ class SelectedFilesFilterByButton extends React.Component {
     }
 
     renderFileFormatButtonsSelected(){
-        console.log('SEL', this.props.selectedFiles);
         if (!this.props.selectedFiles) return null;
         var format_buckets = _.groupBy(
             _.pairs(this.props.selectedFiles).map(function(f){
@@ -273,13 +332,13 @@ class SelectedFilesFilterByButton extends React.Component {
             }),
             'file_type_detailed'
         );
-        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets);
+        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets, 'All ', null, SelectedFilesFilterByContent.renderBucketButton);
     }
 
     renderFileFormatButtons(){
         if (!this.props.files) return null;
         var format_buckets = _.groupBy(this.props.files, 'file_type_detailed');
-        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets, 'All ');
+        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets, 'All ', null, SelectedFilesFilterByContent.renderBucketButton);
     }
 
     renderOverlay(){
@@ -296,11 +355,13 @@ class SelectedFilesFilterByButton extends React.Component {
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
+                    {/*
                     <OverlayTrigger trigger="click" rootClose overlay={this.renderOverlay()} placement="bottom">
                         <Button key="download2" bsStyle="primary" disabled={isDisabled}>
                             <i className="icon icon-filter icon-fw"/> Filter By&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
                         </Button>
                     </OverlayTrigger>
+                    */}
                     <Button key="download3" bsStyle="primary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick}>
                         <i className="icon icon-filter icon-fw"/> Filter By&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
                     </Button>
@@ -312,6 +373,19 @@ class SelectedFilesFilterByButton extends React.Component {
 
 class SelectedFilesControls extends React.Component {
 
+    static filterSelectedFilesByFileTypeFilters(selectedFiles, fileTypeFilters){
+        if (Array.isArray(fileTypeFilters) && fileTypeFilters.length === 0) return selectedFiles;
+        return _.object(
+            _.filter(
+                _.pairs(selectedFiles),
+                function(p, i){
+                    if (fileTypeFilters.indexOf(p[1].file_type_detailed) > -1) return true;
+                    return false;
+                }
+            )
+        );
+    }    
+
     render(){
         var exps = this.props.filteredExperiments || this.props.experiments;
         var totalFilesCount = exps ? expFxn.fileCountFromExperiments(exps, this.props.includeFileSets) : 0;
@@ -319,6 +393,10 @@ class SelectedFilesControls extends React.Component {
         if (exps){
             allFiles =  expFxn.allFilesFromExperiments(exps, this.props.includeFileSets);
         }
+
+        // TODO:
+        // var subSelectedFiles = SelectedFilesControls.filterSelectedFilesByFileTypeFilters(this.props.selectedFiles, this.state.fileTypeFilters);
+
         return (
             <div>
                 <SelectedFilesSelector
@@ -331,6 +409,8 @@ class SelectedFilesControls extends React.Component {
                 />
                 <SelectedFilesFilterByButton
                     files={allFiles}
+                    setFileTypeFilters={this.props.setFileTypeFilters}
+                    currentFileTypeFilters={this.props.fileTypeFilters}
                     totalFilesCount={totalFilesCount}
                     selectedFiles={this.props.selectedFiles}
                     selectFile={this.props.selectFile}
@@ -367,10 +447,12 @@ export class AboveTableControls extends React.Component {
         this.renderPanel = this.renderPanel.bind(this);
         this.renderOverlay = this.renderOverlay.bind(this);
         this.rightButtons = this.rightButtons.bind(this);
+        this.setFileTypeFilters = this.setFileTypeFilters.bind(this);
         this.state = {
             'open' : false,
             'reallyOpen' : false,
-            'layout' : 'normal'
+            'layout' : 'normal',
+            'fileTypeFilters' : []
         };
     }
 
@@ -429,6 +511,10 @@ export class AboveTableControls extends React.Component {
         });
     }
 
+    setFileTypeFilters(filters){
+        this.setState({ 'fileTypeFilters' : filters });
+    }
+
     handleOpenToggle(value){
         console.log('HANDLEOPENTOGGLE', value);
         if (this.timeout){
@@ -458,6 +544,10 @@ export class AboveTableControls extends React.Component {
         this.setState(state);
     }
 
+    filteredSelectedFiles(){
+        return SelectedFilesControls.filterSelectedFilesByFileTypeFilters(this.props.selectedFiles, this.state.fileTypeFilters);
+    }
+
     renderOverlay(){
         return (
             <Popover title="Configure Visible Columns" id="toggle-visible-columns" className="toggle-visible-columns-selector">
@@ -478,7 +568,7 @@ export class AboveTableControls extends React.Component {
         );
     }
 
-    renderPanel(){
+    renderPanel(selectedFiles){
         var { open, reallyOpen } = this.state;
         if (open === 'customColumns' || reallyOpen === 'customColumns') {
             return (
@@ -501,24 +591,33 @@ export class AboveTableControls extends React.Component {
         } else if (open === 'filterFilesBy' || reallyOpen === 'filterFilesBy') {
             return (
                 <Collapse in={!!(open)} transitionAppear>
-                    <SelectedFilesFilterByContent
-                        selectedFiles={this.props.selectedFiles}
-                    />
+                    <div>
+                        <SelectedFilesFilterByContent
+                            selectedFiles={this.props.selectedFiles}
+                            subSelectedFiles={selectedFiles}
+                            currentFileTypeFilters={this.state.fileTypeFilters}
+                            setFileTypeFilters={this.setFileTypeFilters}
+                        />
+                    </div>
                 </Collapse>
             );
         }
         return null;
     }
 
-    leftSection(){
+    leftSection(selectedFiles){
         if (this.props.showSelectedFileCount && this.props.selectedFiles){
             return (
                 <ChartDataController.Provider>
                     <SelectedFilesControls
                         selectedFiles={this.props.selectedFiles}
+                        subSelectedFiles={selectedFiles}
                         selectFile={this.props.selectFile}
                         unselectFile={this.props.unselectFile}
                         onFilterFilesByClick={this.handleOpenToggle.bind(this, 'filterFilesBy')}
+                        currentFileTypeFilters={this.state.fileTypeFilters}
+                        setFileTypeFilters={this.setFileTypeFilters}
+                        currentOpenPanel={this.state.open}
                     />
                 </ChartDataController.Provider>
             );
@@ -572,14 +671,14 @@ export class AboveTableControls extends React.Component {
 
 
     render(){
-
+        var selectedFiles = this.filteredSelectedFiles();
         return (
             <div className="above-results-table-row">
                 <div className="clearfix">
-                    { this.leftSection() }
+                    { this.leftSection(selectedFiles) }
                     { this.rightButtons() }
                 </div>
-                { this.renderPanel() }
+                { this.renderPanel(selectedFiles) }
             </div>
         );
     }
