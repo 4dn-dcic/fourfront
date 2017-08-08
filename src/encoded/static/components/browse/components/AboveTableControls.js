@@ -375,7 +375,7 @@ class SelectedFilesFilterByButton extends React.Component {
                     </OverlayTrigger>
                     */}
                     <Button key="filter-selected-files-by" bsStyle="primary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} className={this.props.currentOpenPanel === 'filterFilesBy' ? 'panel-active' : ''}>
-                        <i className="icon icon-filter icon-fw"/> Filter By&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
+                        <i className="icon icon-filter icon-fw"/> <span className="text-400">File Types</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
                     </Button>
                 </ButtonGroup>
             </div>
