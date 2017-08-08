@@ -79,9 +79,9 @@ before_script:
 - sudo service elasticsearch stop
 script:
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --cov
+- if test -n "$NPM"; then bin/test -v -v -m "not bdd and setone" --durations=40 --cov
   src/encoded; fi
-- if test -n "$UNIT"; then bin/test -v -v -m "working and not setone"
+- if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40
   --cov src/encoded; fi
 - |
   if test -n "$BROWSER"; then

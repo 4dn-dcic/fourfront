@@ -75,21 +75,37 @@ def test_vary_json(anontestapp):
 
 
 @pytest.mark.parametrize('item_type', [k for k in TYPE_LENGTH if k != 'user'])
-def test_collections_anon(workbook, anontestapp, item_type):
+def test_collections_anon(anontestapp, item_type):
     res = anontestapp.get('/' + item_type).follow(status=200)
     assert '@graph' in res.json
 
 
 @pytest.mark.parametrize('item_type', [k for k in TYPE_LENGTH if k != 'user'])
-def test_html_collections_anon(workbook, anonhtmltestapp, item_type):
+def test_html_collections_anon(anonhtmltestapp, item_type):
     res = anonhtmltestapp.get('/' + item_type).follow(status=200)
     assert res.body.startswith(b'<!DOCTYPE html>')
 
 
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_html_collections(workbook, htmltestapp, item_type):
+def test_html_collections(htmltestapp, item_type):
     res = htmltestapp.get('/' + item_type).follow(status=200)
     assert res.body.startswith(b'<!DOCTYPE html>')
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize('item_type', [k for k in TYPE_LENGTH if k != 'user'])
+def test_html_server_pages(item_type, wsgi_app):
+    res = wsgi_app.get(
+        '/%s?limit=1' % item_type,
+        headers={'Accept': 'application/json'},
+    ).follow(
+        status=200,
+        headers={'Accept': 'application/json'},
+    )
+    for item in res.json['@graph']:
+        res = wsgi_app.get(item['@id'], status=200)
+        assert res.body.startswith(b'<!DOCTYPE html>')
+        assert b'Internal Server Error' not in res.body
 
 
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
@@ -274,7 +290,7 @@ def test_jsonld_term(testapp):
 
 @pytest.mark.slow
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, wsgi_app, item_type):
+def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, item_type):
     res = testapp.get('/%s?limit=all' % item_type).follow(status=200)
     # previously test_load_workbook
     assert len(res.json['@graph']) == TYPE_LENGTH[item_type]
@@ -283,11 +299,6 @@ def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, ws
         # previously test_html_pages
         res = htmltestapp.get(item['@id'])
         assert res.body.startswith(b'<!DOCTYPE html>')
-        # previously test_html_server_pages
-        if item_type not in ['user', 'enzyme']:
-            res = wsgi_app.get(item['@id'], status=[200, 403])
-            assert res.body.startswith(b'<!DOCTYPE html>')
-            assert b'Internal Server Error' not in res.body
 
 
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)

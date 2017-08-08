@@ -54,10 +54,6 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):
     from snovault import DBSESSION
     settings = _app_settings.copy()
     settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
-    ### TEST FF-890
-    settings['indexer'] = True
-    settings['indexer.processes'] = 2
-    ###
     # add some here for file testing
     settings[DBSESSION] = DBSession
     return settings
