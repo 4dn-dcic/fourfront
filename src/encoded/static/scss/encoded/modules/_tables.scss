@@ -1510,7 +1510,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	.search-result-config-panel {
 		margin-top: 7px;
 		> .inner {
-			padding: 7px 0;
+			padding: 0 0 7px;
 			border-top: 1px solid #ddd;
 			> div.row {
 				margin: 0;
@@ -1520,11 +1520,32 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 				padding-right: 10px;
 			}
 			.panel-title {
-				padding-bottom: 17px;
-				padding-top: 10px;
+				padding-bottom: 13px;
+				padding-top: 12px;
+				padding-left: 10px;
+    			padding-right: 10px;
+				font-weight: 500;
+				background-color: #f8f8f8;
+				.close-button {
+					font-weight: 400;
+					display: block;
+					cursor: pointer;
+					float: right;
+					font-size: 1rem;
+					&:hover {
+						text-decoration: none;
+					}
+				}
+				.icon-fw {
+					margin-right: 5px;
+				}
 			}
 		}
 		
+	}
+
+	button.panel-active {
+		box-shadow: inset 0 0 18px rgba(0,0,0,0.6);
 	}
 
 	.box {

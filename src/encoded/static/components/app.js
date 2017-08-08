@@ -1208,7 +1208,8 @@ export default class App extends React.Component {
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}></script>
                     <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
-                    <link rel="stylesheet" href="/static/css/style.css" />
+                    <script data-prop-name="lastCSSBuildTime" type="application/ld+json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}></script>
+                    <link rel="stylesheet" href={'/static/css/style.css?build=' + (this.props.lastCSSBuildTime || 0)} />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>

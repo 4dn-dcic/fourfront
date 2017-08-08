@@ -15,6 +15,27 @@ import { ChartDataController } from './../../viz/chart-data-controller';
 
 
 
+
+export function wrapInAboveTablePanel(inner, title, className, closeButtonClickHandler){
+    var closeButton = null;
+    if (typeof closeButtonClickHandler === 'function'){
+        closeButton = (
+            <a className="close-button" onClick={closeButtonClickHandler}>
+                <i className="icon icon-fw icon-angle-up"/>
+            </a>
+        );
+    }
+    return (
+        <div className={"search-result-config-panel" + (className ? ' ' + className : '')}>
+            <div className="inner">
+                <h5 className="panel-title">{ title }{ closeButton }</h5>
+                { inner }
+            </div>
+        </div>
+    );
+}
+
+
 class SelectedFilesOverview extends React.Component {
 
     render(){
@@ -147,7 +168,7 @@ class SelectedFilesDownloadButton extends React.Component {
     }
 }
 
-class SelectedFilesSelector extends React.Component {
+class SelectAllFilesButton extends React.Component {
 
     static fileFormatButtonProps = {
         'bsStyle' : "primary",
@@ -248,17 +269,6 @@ class SelectedFilesFilterByContent extends React.Component {
         );
     }
 
-    static wrapInPanel(inner, title, className){
-        return (
-            <div className={"search-result-config-panel" + (className ? ' ' + className : '')}>
-                <div className="inner">
-                    <h5 className="text-400 panel-title">{ title }</h5>
-                    { inner }
-                </div>
-            </div>
-        );
-    }
-
     static propTypes = {
         selectedFiles : PropTypes.object.isRequired
     }
@@ -300,7 +310,7 @@ class SelectedFilesFilterByContent extends React.Component {
     
 
     render(){
-        return SelectedFilesFilterByContent.wrapInPanel(
+        return wrapInAboveTablePanel(
             <div className="row">
             {
                 _.map(this.renderFileFormatButtonsSelected(), function(jsxButton, i){
@@ -308,7 +318,9 @@ class SelectedFilesFilterByContent extends React.Component {
                 })
             }
             </div>,
-            'Filter Selection by File Type'
+            <span><i className="icon icon-fw icon-filter"/> Filter Selection by File Type</span>,
+            'file-type-selector-panel',
+            this.props.closeButtonClickHandler
         );
     }
 
@@ -362,7 +374,7 @@ class SelectedFilesFilterByButton extends React.Component {
                         </Button>
                     </OverlayTrigger>
                     */}
-                    <Button key="download3" bsStyle="primary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick}>
+                    <Button key="filter-selected-files-by" bsStyle="primary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} className={this.props.currentOpenPanel === 'filterFilesBy' ? 'panel-active' : ''}>
                         <i className="icon icon-filter icon-fw"/> Filter By&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
                     </Button>
                 </ButtonGroup>
@@ -399,7 +411,7 @@ class SelectedFilesControls extends React.Component {
 
         return (
             <div>
-                <SelectedFilesSelector
+                <SelectAllFilesButton
                     allFiles={allFiles}
                     totalFilesCount={totalFilesCount}
                     selectedFiles={this.props.selectedFiles}
@@ -417,6 +429,7 @@ class SelectedFilesControls extends React.Component {
                     unselectFile={this.props.unselectFile}
                     resetSelectedFiles={this.props.resetSelectedFiles}
                     onFilterFilesByClick={this.props.onFilterFilesByClick}
+                    currentOpenPanel={this.props.currentOpenPanel}
                 />
                 {' '}
                 <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
@@ -573,19 +586,24 @@ export class AboveTableControls extends React.Component {
         if (open === 'customColumns' || reallyOpen === 'customColumns') {
             return (
                 <Collapse in={!!(open)} transitionAppear>
-                    <CustomColumnSelector
-                        hiddenColumns={this.props.hiddenColumns}
-                        addHiddenColumn={this.props.addHiddenColumn}
-                        removeHiddenColumn={this.props.removeHiddenColumn}
-                        columnDefinitions={this.props.columnDefinitions}
-                        showTitle
-                        //columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
-                        //    browseTableConstantColumnDefinitions,
-                        //    this.props.context.columns || {},
-                        //    {}, //this.props.columnDefinitionOverrides,
-                        //    this.props.constantHiddenColumns
-                        //)}
-                    />
+                    { wrapInAboveTablePanel(
+                        <CustomColumnSelector
+                            hiddenColumns={this.props.hiddenColumns}
+                            addHiddenColumn={this.props.addHiddenColumn}
+                            removeHiddenColumn={this.props.removeHiddenColumn}
+                            columnDefinitions={this.props.columnDefinitions}
+                            //showTitle
+                            //columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
+                            //    browseTableConstantColumnDefinitions,
+                            //    this.props.context.columns || {},
+                            //    {}, //this.props.columnDefinitionOverrides,
+                            //    this.props.constantHiddenColumns
+                            //)}
+                        />,
+                        <span><i className="icon icon-fw icon-gear"/> Configure Visible Columns</span>,
+                        'visible-columns-selector-panel',
+                        this.handleOpenToggle.bind(this, false)
+                    ) }
                 </Collapse>
             );
         } else if (open === 'filterFilesBy' || reallyOpen === 'filterFilesBy') {
@@ -597,6 +615,7 @@ export class AboveTableControls extends React.Component {
                             subSelectedFiles={selectedFiles}
                             currentFileTypeFilters={this.state.fileTypeFilters}
                             setFileTypeFilters={this.setFileTypeFilters}
+                            closeButtonClickHandler={this.handleOpenToggle.bind(this, false)}
                         />
                     </div>
                 </Collapse>
@@ -647,26 +666,22 @@ export class AboveTableControls extends React.Component {
             );
         }
 
-        return open === false ? (
+        function configureColumnsButton(){
+            return (
+                <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" onClick={this.handleOpenToggle.bind(this, 'customColumns')} className={this.state.open === 'customColumns' ? 'panel-active' : ''}>
+                    <i className="icon icon-gear icon-fw"/> Columns &nbsp;<i className="icon icon-fw icon-angle-down"/>
+                </Button>
+            );
+        }
+
+
+        return (
             <div className="pull-right right-buttons">
-                {/* <OverlayTrigger trigger="click" rootClose overlay={this.renderOverlay()} placement="bottom"> */}
-                    <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
-                        <i className="icon icon-eye-slash icon-fw"/> Columns
-                    </Button>
-                {/* </OverlayTrigger> */}
+                { configureColumnsButton.call(this) }
                 { expandLayoutButton.call(this) }
             </div>
-        ) : (
-            <div className="pull-right right-buttons" data-tip="">
-
-                Close &nbsp;
-                
-                <Button key="toggle-visible-columns" onClick={this.handleOpenToggle.bind(this, false)}>
-                    <i className="icon icon-angle-up icon-fw"></i>
-                </Button>
-                
-            </div>
         );
+
     }
 
 
