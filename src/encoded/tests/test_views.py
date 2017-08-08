@@ -92,33 +92,6 @@ def test_html_collections(workbook, htmltestapp, item_type):
     assert res.body.startswith(b'<!DOCTYPE html>')
 
 
-@pytest.mark.slow
-@pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_html_pages(workbook, testapp, htmltestapp, item_type):
-    res = testapp.get('/%s?limit=1' % item_type).follow(status=200)
-    for item in res.json['@graph']:
-        res = htmltestapp.get(item['@id'])
-        assert res.body.startswith(b'<!DOCTYPE html>')
-
-
-@pytest.mark.slow
-@pytest.mark.parametrize('item_type', [k for k in TYPE_LENGTH if k != 'user'])
-def test_html_server_pages(workbook, item_type, wsgi_server):
-    from webtest import TestApp
-    testapp = TestApp(wsgi_server)
-    res = testapp.get(
-        '/%s?limit=1' % item_type,
-        headers={'Accept': 'application/json'},
-    ).follow(
-        status=200,
-        headers={'Accept': 'application/json'},
-    )
-    for item in res.json['@graph']:
-        res = testapp.get(item['@id'], status=200)
-        assert res.body.startswith(b'<!DOCTYPE html>')
-        assert b'Internal Server Error' not in res.body
-
-
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
 def test_json(testapp, item_type):
     res = testapp.get('/' + item_type).follow(status=200)
@@ -176,22 +149,6 @@ def test_abstract_collection(testapp, experiment):
     pass
     # testapp.get('/experiment/{accession}'.format(**experiment))
     # testapp.get('/expermient/{accession}'.format(**experiment))
-
-
-@pytest.mark.slow
-@pytest.mark.parametrize(('item_type', 'length'), TYPE_LENGTH.items())
-def test_load_workbook(workbook, testapp, item_type, length):
-    # testdata must come before testapp in the funcargs list for their
-    # savepoints to be correctly ordered.
-    # sometimes this is slow
-    for i in range(5):
-        res = testapp.get('/%s/?limit=all' % item_type).maybe_follow(status=200)
-        # TODO ASK_BEN about inherited collections i.e. protocol
-        if len(res.json['@graph']) != length:
-            sleep(1)
-            continue
-        assert len(res.json['@graph']) == length
-        return
 
 
 @pytest.mark.slow
@@ -317,10 +274,21 @@ def test_jsonld_term(testapp):
 
 @pytest.mark.slow
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_index_data_workbook(workbook, testapp, indexer_testapp, item_type):
+def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, wsgi_server, item_type):
+    from webtest import TestApp
+    wsgiapp = TestApp(wsgi_server)
     res = testapp.get('/%s?limit=all' % item_type).follow(status=200)
+    # previously test_load_workbook
+    assert len(res.json['@graph']) == TYPE_LENGTH[item_type]
     for item in res.json['@graph']:
-        indexer_testapp.get(item['@id'] + '@@index-data')
+        indexer_testapp.get(item['@id'] + '@@index-data', status=200)
+        # previously test_html_pages
+        res = htmltestapp.get(item['@id'])
+        assert res.body.startswith(b'<!DOCTYPE html>')
+        # previously test_html_server_pages
+        res = wsgiapp.get(item['@id'], status=[200, 403, 415])
+        assert res.body.startswith(b'<!DOCTYPE html>')
+        assert b'Internal Server Error' not in res.body
 
 
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
