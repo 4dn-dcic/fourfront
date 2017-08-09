@@ -13,7 +13,7 @@ import Alerts from './../components/alerts';
 
 
 var cssFileStats = fs.statSync(__dirname + '/../css/style.css');
-var lastCSSBuildTime = '' + Date.parse(cssFileStats.mtime.toUTCString());
+var lastCSSBuildTime = Date.parse(cssFileStats.mtime.toUTCString());
 
 var render = function (Component, body, res) {
     //var start = process.hrtime();

@@ -835,7 +835,7 @@ export default class FacetList extends React.Component {
 
     renderFacets(facets, maxTermsToShow = 12){
 
-        facets = facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state));
+        facets = _.uniq(facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state)), false, function(f){ return f.field });
 
         var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
             if (m.end) return m;

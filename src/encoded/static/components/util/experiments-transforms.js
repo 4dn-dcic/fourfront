@@ -354,7 +354,6 @@ export function allPairsSetsAndFilesFromExperimentSet(expSet){
 }
 
 export function groupFilesByPairs(files_in_experiment){
-    // Add 'file_pairs' property containing array of arrays of paired files to each experiment.
     return _(ensureArray(files_in_experiment)).chain()
         .map(function(file){
             return _.clone(file);
