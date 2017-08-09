@@ -80,16 +80,6 @@
               "minelute column",
               "SPRI beads"
           ]
-        },
-        "authentication_docs": {
-            "title": "Authentication Documents",
-            "description": "Images or Documents that authenticate the experiment - eg. gel picture",
-            "type": "array",
-            "items": {
-                "title": "Document or Image",
-                "type": "string",
-                "linkTo": "Protocol"
-            }
         }
     },
     "columns": {
