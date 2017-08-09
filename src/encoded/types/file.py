@@ -189,8 +189,7 @@ class File(Item):
                 'experiments.biosample.biosource.individual.organism.name',
                 'experiments.digestion_enzyme.name',
                 'related_files.relationship_type',
-                'related_files.file.accession',
-                'related_files.file.*']
+                'related_files.file.accession']
     name_key = 'accession'
     rev = {
         'experiments': ('Experiment', 'files')
