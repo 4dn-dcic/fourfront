@@ -218,10 +218,10 @@ class Publication(Item):
         minipub = ''
 
         if authors is not None:
-            minipub = authors.pop(0)
-            if len(authors) > 1:
+            minipub = authors[0]
+            if len(authors) > 2:
                 minipub = minipub + ' et al.'
-            elif len(authors) == 1:
+            elif len(authors) == 2:
                 minipub = minipub + ' and ' + authors[0]
         if date_published is not None:
             minipub = minipub + ' (' + date_published[0:4] + ')'
