@@ -1125,9 +1125,9 @@ class FilePairBlock extends React.Component {
                 validationState='warning'
                 checked={checked}
                 name="file-checkbox"
-                id={checked + "~" + true + "~" + this.props.files[0].file_format + "~" + this.props.files[0].uuid}
+                id={'checkbox-for-' + accessionTriples.join('_')}
                 className='exp-table-checkbox'
-                data-select-files={_.pluck(this.props.files, 'uuid')}
+                data-select-files={accessionTriples}
                 onChange={this.props.handleFileCheckboxChange.bind(
                     this.props.handleFileCheckboxChange,
                     accessionTriples,
@@ -1269,9 +1269,9 @@ class FileEntryBlock extends React.Component {
                 validationState='warning'
                 checked={checked}
                 name="file-checkbox"
-                id={checked + "~" + true + "~" + this.props.file.file_format + "~" + this.props.file.uuid}
+                id={'checkbox-for-' + accessionTriple}
                 className='exp-table-checkbox'
-                data-select-files={[this.props.file.uuid]}
+                data-select-files={[accessionTriple]}
                 onChange={this.props.handleFileCheckboxChange.bind(
                     this.props.handleFileCheckboxChange,
                     accessionTriple,

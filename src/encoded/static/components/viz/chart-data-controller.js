@@ -243,7 +243,7 @@ var isWindowActive = false;
 class Provider extends React.Component {
 
     static propTypes = {
-        'id' : PropTypes.string.isRequired,
+        'id' : PropTypes.string,
         'children' : PropTypes.object.isRequired
     }
 

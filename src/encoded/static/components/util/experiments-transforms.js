@@ -77,7 +77,7 @@ export function fileToAccessionTriple(file, toString = false){
     if (typeof file.from_experiment === 'undefined') throw new Error("No 'from_experiment' property set on this file.");
     if (typeof file.from_experiment.accession !== 'string') throw new Error("No 'from_experiment.accession' property set on this file.");
     if (typeof file.from_experiment.from_experiment_set === 'undefined') throw new Error("No 'from_experiment.from_experiment_set' property set on this file.");
-    if (typeof file.from_experiment.from_experiment_set.accession !== 'string') throw new Error("No 'from_experiment.accession' property set on this file.");
+    if (typeof file.from_experiment.from_experiment_set.accession !== 'string') throw new Error("No 'from_experiment.from_experiment_set.accession' property set on this file.");
     if (typeof file.accession !== 'string') throw new Error("No 'accession' property set on this file.");
 
     var triple = [ file.from_experiment.from_experiment_set.accession, file.from_experiment.accession, file.accession ];

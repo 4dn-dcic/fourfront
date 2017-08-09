@@ -148,8 +148,7 @@ class ResultTableContainer extends React.Component {
                 'render' : (expSet, columnDefinition, props, width) => {
                     var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
                     var newChildren = origTitleBlock.props.children.slice(0);
-                    var allFiles = expFxn.allFilesFromExperimentSet(expSet); //ExperimentSetDetailPane.allFiles(expSet);
-                    
+                    var allFiles = expFxn.allFilesFromExperimentSet(expSet);
                     var allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true);
 
                     var allFilesKeyedByTriples = _.object(_.zip(allFileAccessionTriples, allFiles));
