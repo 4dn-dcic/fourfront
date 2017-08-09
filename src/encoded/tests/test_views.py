@@ -36,7 +36,7 @@ def _type_length():
 
 TYPE_LENGTH = _type_length()
 
-INDEX_DATA_TYPES = ['file_fastq', 'experiment_hi_c', 'biosample', 'experiment_set']
+INDEX_DATA_TYPES = ['file_fastq', 'workflow_run', 'biosample', 'experiment_set']
 
 PUBLIC_COLLECTIONS = [
     'source',
