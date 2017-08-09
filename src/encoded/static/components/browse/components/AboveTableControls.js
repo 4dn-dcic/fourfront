@@ -152,19 +152,11 @@ class SelectedFilesDownloadButton extends React.Component {
             countSelectedFiles = countSubSelectedFiles;
         }
 
-        var button = (
+        return (
             <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "primary" : "success"}>
                 <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
                 { this.renderModal(countSelectedFiles) }
             </Button>
-        );
-
-        if (this.props.buttonOnly) return button;
-
-        return (
-            <div className="pull-left box">
-                { button }
-            </div>
         );
     }
 }
@@ -250,6 +242,16 @@ class SelectedFilesFilterByContent extends React.Component {
         });
     }
 
+    static filesToFileTypeBuckets(files){
+        return _.groupBy(
+            _.pairs(files).map(function(f){
+                f[1].selection_id = f[0];
+                return f[1];
+            }),
+            'file_type_detailed'
+        )
+    }
+
     static renderBucketButton(fileType, title, clickHandler, files, button_text_prefix = '', fileTypeFilters){
         return (
             <Button
@@ -286,14 +288,13 @@ class SelectedFilesFilterByContent extends React.Component {
 
     renderFileFormatButtonsSelected(){
         if (!this.props.selectedFiles) return null;
-        var format_buckets = _.groupBy(
-            _.pairs(this.props.selectedFiles).map(function(f){
-                f[1].selection_id = f[0];
-                return f[1];
-            }),
-            'file_type_detailed'
+        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(
+            SelectedFilesFilterByContent.filesToFileTypeBuckets(this.props.selectedFiles),
+            '',
+            this.onClick,
+            SelectedFilesFilterByContent.renderBucketCheckbox,
+            this.props.currentFileTypeFilters
         );
-        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets, '', this.onClick, SelectedFilesFilterByContent.renderBucketCheckbox, this.props.currentFileTypeFilters);
     }
 
     onClick(filterString, evt){
@@ -336,57 +337,15 @@ class SelectedFilesFilterByButton extends React.Component {
         };
     }
 
-    renderFileFormatButtonsSelected(){
-        if (!this.props.selectedFiles) return null;
-        var format_buckets = _.groupBy(
-            _.pairs(this.props.selectedFiles).map(function(f){
-                f[1].selection_id = f[0];
-                return f[1];
-            }),
-            'file_type_detailed'
-        );
-        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets, 'All ', null, SelectedFilesFilterByContent.renderBucketButton);
-    }
-
-    renderFileFormatButtons(){
-        if (!this.props.files) return null;
-        var format_buckets = _.groupBy(this.props.files, 'file_type_detailed');
-        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(format_buckets, 'All ', null, SelectedFilesFilterByContent.renderBucketButton);
-    }
-
-    renderOverlay(){
-        return (
-            <Popover title="Filter Selection By..." id="select-files-type" className="file-format-selection-popover">
-                {/* <div><Button {...SelectedFilesSelector.fileFormatButtonProps}>All files ({ this.props.totalFilesCount })</Button></div> */}
-                { this.renderFileFormatButtonsSelected() }
-            </Popover>
-        );
-    }
-
     render(){
         var isDisabled = !this.props.selectedFiles || _.keys(this.props.selectedFiles).length === 0;
 
-        var button = (
-            <Button key="filter-selected-files-by" bsStyle="primary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} className={this.props.currentOpenPanel === 'filterFilesBy' ? 'panel-active' : ''}>
-                <i className="icon icon-filter icon-fw"/> <span className="text-400">File Types</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
-            </Button>
-        );
-
-        if (this.props.buttonOnly) return button;
+        var currentFiltersLength = this.props.currentFileTypeFilters.length;
 
         return (
-            <div className="pull-left box selection-buttons">
-                <ButtonGroup>
-                    {/*
-                    <OverlayTrigger trigger="click" rootClose overlay={this.renderOverlay()} placement="bottom">
-                        <Button key="download2" bsStyle="primary" disabled={isDisabled}>
-                            <i className="icon icon-filter icon-fw"/> Filter By&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
-                        </Button>
-                    </OverlayTrigger>
-                    */}
-                    { button }
-                </ButtonGroup>
-            </div>
+            <Button key="filter-selected-files-by" bsStyle={currentFiltersLength > 0 ? "success" : "primary"} disabled={isDisabled} onClick={this.props.onFilterFilesByClick} className={this.props.currentOpenPanel === 'filterFilesBy' ? 'panel-active' : ''}>
+                <i className="icon icon-filter icon-fw"/> { currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : 'All ' }<span className="text-400">File Types</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
+            </Button>
         );
     }
 }
@@ -427,20 +386,24 @@ class SelectedFilesControls extends React.Component {
                     unselectFile={this.props.unselectFile}
                     resetSelectedFiles={this.props.resetSelectedFiles}
                 />
-                <SelectedFilesFilterByButton
-                    files={allFiles}
-                    setFileTypeFilters={this.props.setFileTypeFilters}
-                    currentFileTypeFilters={this.props.fileTypeFilters}
-                    totalFilesCount={totalFilesCount}
-                    selectedFiles={this.props.selectedFiles}
-                    selectFile={this.props.selectFile}
-                    unselectFile={this.props.unselectFile}
-                    resetSelectedFiles={this.props.resetSelectedFiles}
-                    onFilterFilesByClick={this.props.onFilterFilesByClick}
-                    currentOpenPanel={this.props.currentOpenPanel}
-                />
-                {' '}
-                <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
+
+                <div className="pull-left box selection-buttons">
+                    <ButtonGroup>
+                        <SelectedFilesFilterByButton
+                            files={allFiles}
+                            setFileTypeFilters={this.props.setFileTypeFilters}
+                            currentFileTypeFilters={this.props.currentFileTypeFilters}
+                            totalFilesCount={totalFilesCount}
+                            selectedFiles={this.props.selectedFiles}
+                            selectFile={this.props.selectFile}
+                            unselectFile={this.props.unselectFile}
+                            resetSelectedFiles={this.props.resetSelectedFiles}
+                            onFilterFilesByClick={this.props.onFilterFilesByClick}
+                            currentOpenPanel={this.props.currentOpenPanel}
+                        />
+                        <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
+                    </ButtonGroup>
+                </div>
             </div>
         );
     }
@@ -485,6 +448,33 @@ export class AboveTableControls extends React.Component {
 
     componentWillUnmount(){
         window.removeEventListener('resize', this.handleWindowResize);
+    }
+
+    componentWillReceiveProps(nextProps){
+        var newState = {};
+
+        // Remove from fileTypeFilters if no newly selected files don't have filtered-in fileType.
+
+        var fileTypeBucketsNew = SelectedFilesFilterByContent.filesToFileTypeBuckets(nextProps.selectedFiles);
+        var newTypes = _.keys(fileTypeBucketsNew);
+
+        var typesToRemove = [];
+        for (var i = 0; i < this.state.fileTypeFilters.length ; i++){
+            if (newTypes.indexOf(this.state.fileTypeFilters[i]) === -1){
+                typesToRemove.push(this.state.fileTypeFilters[i]);
+            }
+        }
+        if (typesToRemove.length > 0){
+            newState.fileTypeFilters = _.difference(this.state.fileTypeFilters, typesToRemove);
+        }
+
+        // Set open=false if currently is 'filterFilesBy' && no selected files.
+
+        if (this.state.open === 'filterFilesBy' && _.keys(nextProps.selectedFiles).length === 0){
+            newState.open = false;
+        }
+
+        this.setState(newState);
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -572,18 +562,11 @@ export class AboveTableControls extends React.Component {
     renderOverlay(){
         return (
             <Popover title="Configure Visible Columns" id="toggle-visible-columns" className="toggle-visible-columns-selector">
-                {/* <div><Button {...SelectedFilesSelector.fileFormatButtonProps}>All files ({ this.props.totalFilesCount })</Button></div> */}
                 <CustomColumnSelector
                     hiddenColumns={this.props.hiddenColumns}
                     addHiddenColumn={this.props.addHiddenColumn}
                     removeHiddenColumn={this.props.removeHiddenColumn}
                     columnDefinitions={this.props.columnDefinitions}
-                    //columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
-                    //    browseTableConstantColumnDefinitions,
-                    //    this.props.context.columns || {},
-                    //    {}, //this.props.columnDefinitionOverrides,
-                    //    this.props.constantHiddenColumns
-                    //)}
                 />
             </Popover>
         );
@@ -600,13 +583,6 @@ export class AboveTableControls extends React.Component {
                             addHiddenColumn={this.props.addHiddenColumn}
                             removeHiddenColumn={this.props.removeHiddenColumn}
                             columnDefinitions={this.props.columnDefinitions}
-                            //showTitle
-                            //columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
-                            //    browseTableConstantColumnDefinitions,
-                            //    this.props.context.columns || {},
-                            //    {}, //this.props.columnDefinitionOverrides,
-                            //    this.props.constantHiddenColumns
-                            //)}
                         />,
                         <span><i className="icon icon-fw icon-gear"/> Configure Visible Columns</span>,
                         'visible-columns-selector-panel',
