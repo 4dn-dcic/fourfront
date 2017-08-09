@@ -179,14 +179,6 @@ def workbook(conn, app, app_settings):
         tx.rollback()
 
 
-@pytest.yield_fixture(scope='session')
-def app(app_settings):
-    from encoded import main
-    app = main({}, **app_settings)
-
-    yield app
-
-
 @fixture
 def anonhtmltestapp(app):
     from webtest import TestApp
