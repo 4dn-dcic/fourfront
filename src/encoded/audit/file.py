@@ -4,20 +4,31 @@ from snovault import (
 )
 
 
-@audit_checker('biosource')
-def audit_biosource_type_cell_lines_have_cell_line_value(value, system):
+@audit_checker('file_fastq')
+def audit_file_with_pair_info_has_paired_with_related_file(value, system):
     '''
-    biosource types that correspond to cell lines or primary cells should have
-    a value in the cell_line field - if it is filled the validator ensures it's
-    a valid cellish ontology term so don't need to check that here
+    fastq files can be paired and if they are they should have both the 'paired_end'
+    field and a 'paired_with' related file - if one is missing it should be flagged
     '''
-    cell_types = ["primary cell", "immortalized cell line", "in vitro differentiated cells",
-                  "induced pluripotent stem cell line", "stem cell"]
-    bstype = value.get('biosource_type')  # required
-    if bstype in cell_types:
-        if not value.get('cell_line'):
-            detail = 'In Biosource {}'.format(value['@id']) + \
-                     ' - Missing Required cell_line field value for biosource type  ' + \
-                     '{}'.format(bstype)
-            yield AuditFailure('missing mandatory metadata', detail, level='ERROR')
+    detail = None
+    found = False
+
+    relatedfiles = value.get('related_files')
+    if relatedfiles is not None:
+        for rfile in relatedfiles:
+            # see if there are any 'paired_with' related files
+            if rfile.get('relationship_type') and rfile['relationship_type'] == 'paired with':
+                found = True
+                break
+
+    if value.get('paired_end') is not None:
+        if not found:
+            detail = 'In File {}'.format(value['@id']) + \
+                     ' - there is paired end info but related file with relationship type paired with is missing'
+    elif found:
+        detail = 'In File {}'.format(value['@id']) + \
+                 ' - there is a related file with relationship type paired with but no paired end info'
+
+    if detail is not None:
+        yield AuditFailure('missing mandatory metadata', detail, level='WARNING')
     return
