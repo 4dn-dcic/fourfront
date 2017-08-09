@@ -48,7 +48,7 @@ notifications:
 before_install:
 - SNO_PATH="snovault = git https://github.com/$USER/$SNO_REPO.git branch="
 - SNO_BRANCH=$(grep "${SNO_PATH}" buildout.cfg | sed "s@$SNO_PATH@@")
-- SNO_STATUS=$(curl -s 'https://api.travis-ci.org/$USER/$SNO_REPO.svg?branch=$SNO_BRANCH' | grep pass)
+- SNO_STATUS=$(curl -s "https://api.travis-ci.org/$USER/$SNO_REPO.svg?branch=$SNO_BRANCH" | grep pass)
 - |
     if [ -z "$SNO_STATUS" ]; then
         echo "Snovault branch build for $SNO_BRANCH is failing; exiting build"
