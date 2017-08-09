@@ -1536,6 +1536,10 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						margin: 0;
 						padding-top: 10px;
 						padding-bottom: 10px;
+						width: 100%;
+					}
+					&:hover {
+						background-color: #f5f5f5;
 					}
 				}
 			}

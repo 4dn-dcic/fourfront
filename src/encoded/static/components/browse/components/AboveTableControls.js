@@ -110,14 +110,12 @@ class SelectedFilesDownloadButton extends React.Component {
                     <Modal.Title>Download { countSelectedFiles } Files</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>Please copy and paste the text below into a cURL command to download these files, or click
-                    the "Download" button to save it as a file.</p>
 
                     <p>Please press the "Download" button below to save the metadata TSV file containing download URLs and other information for the selected files to your hard-drive.</p>
 
                     <p>Once you have saved the metadata TSV, you will be able to download the files on any machine or server with the following cURL command:</p>
 
-                    <pre>cut -f 1 <b><em>my_metadata_file.tsv</em></b> | tail -n +2 | xargs -n 1 curl -O -L</pre>
+                    <pre>cut -f 1 <b>my_metadata_file.tsv</b> | tail -n +2 | xargs -n 1 curl -O -L</pre>
 
                     <p><small><strong>N.B.:</strong> Files which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.</small></p>
 
