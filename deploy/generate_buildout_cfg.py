@@ -45,7 +45,7 @@ def build_cfg_file():
     if data['env_name'].lower() in ['4dn-web-dev', 'fourfront-webdev']:
         data['es_server'] = '172.31.49.128:9872'
         data['load_function'] = 'load_prod_data'
-    else: # this will soon be base case
+    else:  # this will soon be base case
         data['es_server'] = os.environ.get("ES_URL")
         if os.environ.get("LOAD_FUNCTION"):
             data['load_function'] = os.environ.get("LOAD_FUNCTION")

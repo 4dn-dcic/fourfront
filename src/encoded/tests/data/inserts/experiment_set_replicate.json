@@ -79,5 +79,31 @@
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
         "status": "in review by lab"
+    },
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460b114",
+        "submitted_by": "wrangler@wrangler.com",
+        "description": "Test replicate experiment set for PLAC-seq",
+        "experimentset_type": "replicate",
+        "replicate_exps": [
+           {"replicate_exp": "4DNEXO6777U1", "bio_rep_no": 1, "tec_rep_no":1},
+           {"replicate_exp": "4DNEXO6777T1", "bio_rep_no": 2, "tec_rep_no":1}
+        ],
+        "lab": "test-4dn-lab",
+        "award": "1U01CA200059-01",
+        "status": "in review by lab"
+    },
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460b115",
+        "submitted_by": "wrangler@wrangler.com",
+        "description": "Test replicate experiment set for CHIA-pet",
+        "experimentset_type": "replicate",
+        "replicate_exps": [
+           {"replicate_exp": "4DNEXO6777X1", "bio_rep_no": 1, "tec_rep_no":1},
+           {"replicate_exp": "4DNEXO6777Z1", "bio_rep_no": 2, "tec_rep_no":1}
+        ],
+        "lab": "test-4dn-lab",
+        "award": "1U01CA200059-01",
+        "status": "in review by lab"
     }
 ]

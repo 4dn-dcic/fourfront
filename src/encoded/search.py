@@ -7,6 +7,7 @@ from snovault import (
 )
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.resource_views import collection_view_listing_db
+from snovault.fourfront_utils import get_jsonld_types_from_collection_type
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import Search
 from pyramid.httpexceptions import HTTPBadRequest
@@ -820,29 +821,6 @@ def find_index_by_doc_types(request, doc_types, ignore):
     indexes = list(set(indexes))
     index_string = ','.join(indexes)
     return index_string
-
-
-def get_jsonld_types_from_collection_type(request, doc_type, types_covered=[]):
-    """
-    Recursively find item types using a given type registry
-    """
-    types_found = []
-    try:
-        registry_type = request.registry['types'][doc_type]
-    except KeyError:
-        return [] # no types found
-    # add the item_type of this collection if applicable
-    if hasattr(registry_type, 'item_type'):
-        if registry_type.name not in types_covered:
-            types_found.append(registry_type.item_type)
-        types_covered.append(registry_type.name)
-    # see if we're dealing with an abstract type
-    if hasattr(registry_type, 'subtypes'):
-        subtypes = registry_type.subtypes
-        for subtype in subtypes:
-            if subtype not in types_covered:
-                types_found.extend(get_jsonld_types_from_collection_type(request, subtype, types_covered))
-    return types_found
 
 
 ### stupid things to remove; had to add because of other fxns importing
