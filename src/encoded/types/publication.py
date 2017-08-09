@@ -222,7 +222,7 @@ class Publication(Item):
             if len(authors) > 2:
                 minipub = minipub + ' et al.'
             elif len(authors) == 2:
-                minipub = minipub + ' and ' + authors[0]
+                minipub = minipub + ' and ' + authors[1]
         if date_published is not None:
             minipub = minipub + ' (' + date_published[0:4] + ')'
         if title is not None:
