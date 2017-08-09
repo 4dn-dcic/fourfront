@@ -70,23 +70,9 @@ class SelectedFilesDownloadButton extends React.Component {
         };
     }
 
-    /**
-     * @deprecated
-     * @returns {string} URL to metadata.csv
-     */
-    generateMetadataTSVPath(){
-        return '/metadata/type=ExperimentSet&sort=accession&' + _.map(_.values(this.props.selectedFiles), function(fileObj){
-            var fileSelectionDetails = ((fileObj && fileObj.fileSelectionDetails) || {});
-            var fileSelectionDetailsKeys = _.keys(fileSelectionDetails);
-            return _.map(fileSelectionDetailsKeys, function(k){
-                return k + '=' + fileSelectionDetails[k];
-            }).join('&');
-        }).join('&') + '/metadata.tsv';
-    }
-
     getAccessionTripleObjects(){
         return _.map(
-            _.keys(this.props.selectedFiles),
+            _.keys(this.props.subSelectedFiles || this.props.selectedFiles),
             function(accessionTripleString){
                 var accessions = accessionTripleString.split('~');
                 return {
@@ -116,7 +102,8 @@ class SelectedFilesDownloadButton extends React.Component {
             'minHeight' : 400,
             'fontFamily' : 'monospace'
         };
-        var files_download_filename = 'files_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.txt';
+        //var files_download_filename = 'files_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.txt';
+        var unreleasedFilesNotice = <p><strong>Note:</strong> Files which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.</p>;
         return (
             <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
                 <Modal.Header closeButton>
@@ -126,8 +113,14 @@ class SelectedFilesDownloadButton extends React.Component {
                     <p>Please copy and paste the text below into a cURL command to download these files, or click
                     the "Download" button to save it as a file.</p>
 
-                    <p>If saving as a file, it can be ran from any server, for example with the following cURL command:</p>
-                    <pre>{ 'xargs -n 1 curl -O -L < files.txt' }</pre>
+                    <p>Please press the "Download" button below to save the metadata TSV file containing download URLs and other information for the selected files to your hard-drive.</p>
+
+                    <p>Once you have saved the metadata TSV, you will be able to download the files on any machine or server with the following cURL command:</p>
+
+                    <pre>cut -f 1 <b><em>my_metadata_file.tsv</em></b> | tail -n +2 | xargs -n 1 curl -O -L</pre>
+
+                    <p><small><strong>N.B.:</strong> Files which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.</small></p>
+
                     <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleObjects())} />
                         <Button type="submit" name="Download" bsStyle="info" data-tip="Details for each individual file in the 'files.txt' download list below.">
@@ -136,6 +129,7 @@ class SelectedFilesDownloadButton extends React.Component {
                         {' '}
                         
                     </form>
+                    {/*
                     <hr/>
                     <h5 className="text-500">File URIs</h5>
                     <div>
@@ -144,6 +138,7 @@ class SelectedFilesDownloadButton extends React.Component {
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Save/download this list as 'files.txt'
                         </Button>
                     </div>
+                    */}
                 </Modal.Body>
             </Modal>
         );
@@ -155,14 +150,20 @@ class SelectedFilesDownloadButton extends React.Component {
         var countSubSelectedFiles = _.keys(this.props.subSelectedFiles).length;
         if (countSubSelectedFiles && countSubSelectedFiles !== countSelectedFiles){
             countSelectedFiles = countSubSelectedFiles;
-            //extString = <span>
         }
+
+        var button = (
+            <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "primary" : "success"}>
+                <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
+                { this.renderModal(countSelectedFiles) }
+            </Button>
+        );
+
+        if (this.props.buttonOnly) return button;
+
         return (
             <div className="pull-left box">
-                <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "primary" : "success"}>
-                    <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
-                </Button>
-                { this.renderModal(countSelectedFiles) }
+                { button }
             </div>
         );
     }
@@ -364,6 +365,15 @@ class SelectedFilesFilterByButton extends React.Component {
 
     render(){
         var isDisabled = !this.props.selectedFiles || _.keys(this.props.selectedFiles).length === 0;
+
+        var button = (
+            <Button key="filter-selected-files-by" bsStyle="primary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} className={this.props.currentOpenPanel === 'filterFilesBy' ? 'panel-active' : ''}>
+                <i className="icon icon-filter icon-fw"/> <span className="text-400">File Types</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
+            </Button>
+        );
+
+        if (this.props.buttonOnly) return button;
+
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
@@ -374,9 +384,7 @@ class SelectedFilesFilterByButton extends React.Component {
                         </Button>
                     </OverlayTrigger>
                     */}
-                    <Button key="filter-selected-files-by" bsStyle="primary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} className={this.props.currentOpenPanel === 'filterFilesBy' ? 'panel-active' : ''}>
-                        <i className="icon icon-filter icon-fw"/> <span className="text-400">File Types</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
-                    </Button>
+                    { button }
                 </ButtonGroup>
             </div>
         );
