@@ -1572,7 +1572,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	button {
 		transition: opacity .5s, background-color .5s, box-shadow .25s, color .5s;
 		box-shadow: none;
-		&:focus, &:active, &:active:focus {
+		&:focus, &:active, &.active, &.active:focus, &:active:focus {
 			outline: none;
 		}
 		i.icon {

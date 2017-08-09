@@ -341,7 +341,7 @@ class SelectedFilesFilterByButton extends React.Component {
         var currentFiltersLength = this.props.currentFileTypeFilters.length;
 
         return (
-            <Button key="filter-selected-files-by" bsStyle="secondary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} className={this.props.currentOpenPanel === 'filterFilesBy' ? 'panel-active' : ''}>
+            <Button key="filter-selected-files-by" bsStyle="secondary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} active={this.props.currentOpenPanel === 'filterFilesBy'}>
                 <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.5 }}/> { currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : 'All ' }<span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
             </Button>
         );
@@ -650,7 +650,7 @@ export class AboveTableControls extends React.Component {
 
         function configureColumnsButton(){
             return (
-                <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" onClick={this.handleOpenToggle.bind(this, 'customColumns')} className={this.state.open === 'customColumns' ? 'panel-active' : ''}>
+                <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" active={this.state.open === 'customColumns'} onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
                     <i className="icon icon-gear icon-fw"/> Columns &nbsp;<i className="icon icon-fw icon-angle-down"/>
                 </Button>
             );
