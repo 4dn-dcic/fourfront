@@ -86,6 +86,7 @@
             "type": "string",
             "enum": [
                 "4DN",
+                "ENCODE",
                 "External"
             ]
         },

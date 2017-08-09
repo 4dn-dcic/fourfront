@@ -108,6 +108,9 @@
         },
         "experiments_in_set.lab.title": {
             "title": "Lab"
+        },
+        "publications_of_set.display_title": {
+            "title": "Publication"
         }
     },
     "columns": {

@@ -197,6 +197,9 @@
         },
         "lab.title": {
             "title": "Lab"
+        },
+        "publications_of_exp.display_title": {
+            "title": "Publications"
         }
     },
     "columns": {
