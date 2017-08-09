@@ -36,6 +36,8 @@ def _type_length():
 
 TYPE_LENGTH = _type_length()
 
+INDEX_DATA_TYPES = ['file_fastq', 'experiment_hi_c', 'biosample', 'experiment_set']
+
 PUBLIC_COLLECTIONS = [
     'source',
     'platform',
@@ -288,16 +290,20 @@ def test_jsonld_term(testapp):
     assert res.json
 
 
-@pytest.mark.slow
-@pytest.mark.parametrize('item_type', TYPE_LENGTH)
+@pytest.mark.parametrize('item_type', INDEX_DATA_TYPES)
 def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, item_type):
+    import random
+    # randomly sample all items and take 2
     res = testapp.get('/%s?limit=all' % item_type).follow(status=200)
     # previously test_load_workbook
-    assert len(res.json['@graph']) == TYPE_LENGTH[item_type]
-    for item in res.json['@graph']:
-        indexer_testapp.get(item['@id'] + '@@index-data', status=200)
+    item_len = len(res.json['@graph'])
+    assert item_len == TYPE_LENGTH[item_type]
+    random_id_idxs = random.sample(range(item_len), 2)
+    random_ids = [res.json['@graph'][idx]['@id'] for idx in random_id_idxs]
+    for item_id in random_ids:
+        indexer_testapp.get(item_id + '@@index-data', status=200)
         # previously test_html_pages
-        res = htmltestapp.get(item['@id'])
+        res = htmltestapp.get(item_id)
         assert res.body.startswith(b'<!DOCTYPE html>')
 
 
