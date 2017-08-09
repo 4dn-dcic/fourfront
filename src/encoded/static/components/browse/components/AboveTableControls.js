@@ -153,7 +153,7 @@ class SelectedFilesDownloadButton extends React.Component {
         }
 
         return (
-            <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "primary" : "success"}>
+            <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "secondary" : "primary"}>
                 <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
                 { this.renderModal(countSelectedFiles) }
             </Button>
@@ -204,7 +204,7 @@ class SelectAllFilesButton extends React.Component {
         var isAllSelected = this.isAllSelected();
         var buttonContent = (
             this.state.selecting ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> :
-            <span><i className="icon icon-check-square-o icon-fw"/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span></span>
+            <span><i className={"icon icon-fw icon-" + (isAllSelected ? 'square-o' : 'check-square-o')}/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span></span>
         );
         return (
             <div className="pull-left box selection-buttons">
@@ -343,8 +343,8 @@ class SelectedFilesFilterByButton extends React.Component {
         var currentFiltersLength = this.props.currentFileTypeFilters.length;
 
         return (
-            <Button key="filter-selected-files-by" bsStyle={currentFiltersLength > 0 ? "success" : "primary"} disabled={isDisabled} onClick={this.props.onFilterFilesByClick} className={this.props.currentOpenPanel === 'filterFilesBy' ? 'panel-active' : ''}>
-                <i className="icon icon-filter icon-fw"/> { currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : 'All ' }<span className="text-400">File Types</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
+            <Button key="filter-selected-files-by" bsStyle="secondary" disabled={isDisabled} onClick={this.props.onFilterFilesByClick} className={this.props.currentOpenPanel === 'filterFilesBy' ? 'panel-active' : ''}>
+                <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.5 }}/> { currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : 'All ' }<span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>&nbsp;&nbsp;<i className="icon icon-angle-down icon-fw"/>
             </Button>
         );
     }

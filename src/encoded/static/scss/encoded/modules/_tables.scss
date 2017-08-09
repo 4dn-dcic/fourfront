@@ -1566,10 +1566,14 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	}
 
 	button {
-		transition: opacity .5s, background-color .5s, box-shadow .25s;
+		transition: opacity .5s, background-color .5s, box-shadow .25s, color .5s;
 		box-shadow: none;
 		&:focus, &:active, &:active:focus {
 			outline: none;
+		}
+		i.icon {
+			position: relative;
+			top: 1px;
 		}
 	}
 

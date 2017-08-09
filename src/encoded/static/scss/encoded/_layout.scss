@@ -426,7 +426,12 @@ h3.submission-subtitle {
 
 }
 
+/************** MORE BUTTON STYLES ***********/
 
+// Light gray BG, more prominent button style than btn-default
+.btn.btn-secondary {
+  @include button-variant(#000, #e4e4e4, rgba(0,0,0,0.125));
+}
 
 
 /**************** React Tooltips (NPM: react-tooltip) overwrite of styling *********************/
