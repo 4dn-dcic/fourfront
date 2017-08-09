@@ -67,6 +67,26 @@
         "accession": "4DNBS1234898"
     },
     {
+        "uuid": "234411bc-8535-4448-903e-854af460b255",
+        "description": "GM12878 prepared for CHIA-pet and PLAC-seq Batch1",
+        "biosource": ["331111bc-8535-4448-903e-854af460b254"],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
+        "accession": "4DNBS1234444"
+    },
+    {
+        "uuid": "234511bc-8535-4448-903e-854af460b255",
+        "description": "GM12878 prepared for CHIA-pet and PLAC-seq Batch2",
+        "biosource": ["331111bc-8535-4448-903e-854af460b254"],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
+        "accession": "4DNBS1234445"
+    },
+    {
         "uuid": "123111bc-8535-4448-903e-854af460b123",
         "description": "GM12878 prepared for Microscopy",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
