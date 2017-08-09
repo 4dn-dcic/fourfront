@@ -207,7 +207,7 @@ class SelectAllFilesButton extends React.Component {
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button key="download" bsStyle="primary" onClick={this.handleSelect.bind(this, isAllSelected)}>
+                    <Button bsStyle="secondary" onClick={this.handleSelect.bind(this, isAllSelected)}>
                         { buttonContent }
                     </Button>
                 </ButtonGroup>
