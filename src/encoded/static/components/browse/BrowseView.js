@@ -148,41 +148,37 @@ class ResultTableContainer extends React.Component {
                 'render' : (expSet, columnDefinition, props, width) => {
                     var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
                     var newChildren = origTitleBlock.props.children.slice(0);
-                    var allFiles = expFxn.allFilesFromExperimentSet(expSet); //ExperimentSetDetailPane.allFiles(expSet);
-                    var allFileIDs = _.pluck(allFiles, 'uuid');
-                    var allFilesKeyedByID = _.object(_.zip(allFileIDs, allFiles));
-                    allFileIDs = allFileIDs.sort();
-                    var selectedFilesForSet = getSelectedFileForSet(allFileIDs);
+                    var allFiles = expFxn.allFilesFromExperimentSet(expSet);
+                    var allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true);
+
+                    var allFilesKeyedByTriples = _.object(_.zip(allFileAccessionTriples, allFiles));
+                    allFileAccessionTriples = allFileAccessionTriples.sort();
+
+                    var selectedFilesForSet = getSelectedFileForSet(allFileAccessionTriples); //getSelectedFileForSet(allFileIDs);
                     newChildren[2] = newChildren[1];
                     newChildren[2] = React.cloneElement(newChildren[2], { 'className' : newChildren[2].props.className + ' mono-text' });
-                    var isAllFilesChecked = ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFileIDs);
+                    var isAllFilesChecked = ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFileAccessionTriples);
                     newChildren[1] = (
                         <ExperimentSetCheckBox
                             checked={isAllFilesChecked}
-                            indeterminate={ExperimentSetCheckBox.isIndeterminate(selectedFilesForSet, allFileIDs)}
-                            disabled={ExperimentSetCheckBox.isDisabled(allFileIDs)}
+                            indeterminate={ExperimentSetCheckBox.isIndeterminate(selectedFilesForSet, allFileAccessionTriples)}
+                            disabled={ExperimentSetCheckBox.isDisabled(allFileAccessionTriples)}
                             onChange={(evt)=>{
                                 if (!isAllFilesChecked){
-                                    var fileIDsToSelect = _.difference(allFileIDs, selectedFilesForSet);
-                                    this.props.selectFile(fileIDsToSelect.map(function(fid){
-                                        var fileAccession = (allFilesKeyedByID[fid] || {}).accession || null;
-                                        var experiment = null;
-                                        if (fileAccession){
-                                            experiment = expFxn.findExperimentInSetWithFileAccession(expSet.experiments_in_set, fileAccession);
-                                        }
-                                        return [ // [file uuid, meta]
-                                            fid,
-                                            _.extend({}, allFilesKeyedByID[fid] || {}, {
-                                                'fileSelectionDetails' : {
-                                                    'accession' : expSet.accession || null,
-                                                    'experiments_in_set.accession' : (experiment && experiment.accession) || null,
-                                                    'experiments_in_set.files.accession' : fileAccession
-                                                }
-                                            })
+                                    var fileTriplesToSelect = _.difference(allFileAccessionTriples, selectedFilesForSet);
+                                    this.props.selectFile(fileTriplesToSelect.map(function(triple){
+                                        var fileAccession = (allFileAccessionTriples[triple] || {}).accession || null;
+                                        //var experiment = null;
+                                        //if (fileAccession){
+                                        //    experiment = expFxn.findExperimentInSetWithFileAccession(expSet.experiments_in_set, fileAccession);
+                                        //}
+                                        return [ // [file accessionTriple, meta]
+                                            triple,
+                                            allFilesKeyedByTriples[triple]
                                         ];
                                     }));
                                 } else if (isAllFilesChecked) {
-                                    this.props.unselectFile(allFileIDs);
+                                    this.props.unselectFile(allFileAccessionTriples);
                                 }
                             }}
                         />
@@ -207,7 +203,6 @@ class ResultTableContainer extends React.Component {
     render() {
         var facets = this.props.context.facets;
         var results = this.props.context['@graph'];
-
         
         return (
             <div className="row">
@@ -239,7 +234,7 @@ class ResultTableContainer extends React.Component {
                     <AboveTableControls
                         {..._.pick(this.props,
                             'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
-                            'columns', 'selectedFiles', 'constantHiddenColumns'
+                            'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile'
                         )}
                         parentForceUpdate={this.forceUpdate.bind(this)}
                         columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
@@ -268,6 +263,7 @@ class ResultTableContainer extends React.Component {
                         hiddenColumns={this.hiddenColumns()}
                         columnDefinitionOverrideMap={this.colDefOverrides()}
                         href={this.props.href}
+                        totalExpected={this.props.context.total}
 
                         sortBy={this.props.sortBy}
                         sortColumn={this.props.sortColumn}
