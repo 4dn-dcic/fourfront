@@ -852,9 +852,11 @@ $small-label-accession-font-size : 0.75rem;
 		}
 
 		.s-block > .item {
-			padding: 6px 8px;
+			padding: 7px 8px;
+			line-height: 20px;
 			display: inline-block;
 			text-align: center;
+			vertical-align: middle;
 		}
 
 		> .biosamples.s-block-list {
@@ -898,7 +900,10 @@ $small-label-accession-font-size : 0.75rem;
 
 				> .name {
 					text-align: center;
-					line-height: 55px;
+					line-height: 20px;
+					padding-top: 25px;
+					padding-bottom: 25px;
+					min-height: 70px;
 					&:after {
 						//top: -15px;
 					}
@@ -952,7 +957,10 @@ $small-label-accession-font-size : 0.75rem;
 
 						> .name {
 							font-weight: 500;
-							line-height: 55px;
+							line-height: 20px;
+							padding-top: 25px;
+							padding-bottom: 25px;
+							min-height: 70px;
 						}
 
 
@@ -966,6 +974,10 @@ $small-label-accession-font-size : 0.75rem;
 
 								> .s-block-list.files > .s-block.file:not(:last-child) {
 									border-bottom-style: dotted;
+								}
+
+								> .s-block-list.files > .s-block.file:last-child {
+									border-top: 1px solid transparent;
 								}
 
 								.name.col-file-pair {

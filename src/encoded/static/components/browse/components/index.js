@@ -8,3 +8,4 @@ export { SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions
 export { AboveTableControls } from './AboveTableControls';
 export { ExperimentSetDetailPane } from './ExperimentSetDetailPane';
 export { SearchResultDetailPane } from './SearchResultDetailPane';
+export { FacetList, ReduxExpSetFiltersInterface } from './FacetList';

@@ -18,7 +18,6 @@ require('./static-pages/home');
 require('./static-pages/help');
 require('./static-pages/about');
 require('./submissions');
-require('./facetlist');
 require('./item-pages/item');
 require('./item-pages/DefaultItemView');
 require('./item-pages/ExperimentSetView');

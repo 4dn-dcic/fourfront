@@ -5,11 +5,11 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
-import * as store from '../store';
+import * as store from './../../../store';
 import { Collapse, Fade } from 'react-bootstrap';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, analytics, JWT } from './util';
-import * as vizUtil from './viz/utilities';
-import { PartialList } from './item-pages/components';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, analytics, JWT } from './../../util';
+import * as vizUtil from './../../viz/utilities';
+import { PartialList } from './../../item-pages/components';
 import ReactTooltip from 'react-tooltip';
 
 /**
@@ -657,7 +657,7 @@ export class ReduxExpSetFiltersInterface extends React.Component {
 
 }
 
-export default class FacetList extends React.Component {
+export class FacetList extends React.Component {
 
     /**
      * @deprecated

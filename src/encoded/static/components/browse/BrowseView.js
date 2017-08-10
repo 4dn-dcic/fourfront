@@ -10,11 +10,11 @@ import ReactTooltip from 'react-tooltip';
 import * as globals from './../globals';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import * as store from './../../store';
-import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 import { isServerSide, expFxn, Filters, navigate, object, layout } from './../util';
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
-    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane
+    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
+    FacetList, ReduxExpSetFiltersInterface
 } from './components';
 
 

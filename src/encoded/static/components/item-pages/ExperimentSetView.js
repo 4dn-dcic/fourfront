@@ -8,7 +8,7 @@ import { ajax, console, DateUtility, object, isServerSide, Filters } from './../
 import * as globals from './../globals';
 import ExperimentsTable from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView } from './components';
-import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
+import { FacetList, ReduxExpSetFiltersInterface } from './../browse/components';
 
 /**
  * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
