@@ -472,7 +472,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
             'unmapped_type': 'keyword',
             'missing': '_last'
         }
-    
+
     # Prefer sort order specified in request, if any
     requested_sorts = request.params.getall('sort')
     if requested_sorts:
