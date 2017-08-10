@@ -36,14 +36,29 @@ def snapshot_db(db_identifier, snapshot_name):
              DBSnapshotIdentifier=snapshot_name,
              DBInstanceIdentifier=db_identifier)
     print("Response from create db snapshot", response)
+
+    # while waiting check and see if target database needs to be deleted
+    try:
+        client.describe_db_instances(DBInstanceIdentifier=snapshot_name)
+        client.delete_db_instance(DBInstanceIdentifier=snapshot_name,
+                                  SkipFinalSnapshot=True)
+        print("waiting for target database to delete")
+        waiter = client.get_watier('db_instance_deleted')
+        waiter.wait(DBInstanceIdentifier=snapshot_name)
+    except ClientError as e:
+        print("looks like target db doesn't exists no need to drop it")
+
     print("waiting for snapshot to create")
     waiter = client.get_waiter('db_snapshot_completed')
     waiter.wait(DBSnapshotIdentifier=snapshot_name)
     print("done waiting, let's create a new database")
+
+    # restore from snapshot
     response = client.restore_db_instance_from_db_snapshot(
             DBInstanceIdentifier=snapshot_name,
             DBSnapshotIdentifier=snapshot_name,
             DBInstanceClass='db.t2.medium')
+
     print("Response from restore db from snapshot", response)
     waiter = client.get_waiter('db_instance_available')
     print("waiting for db to be restore... this might take some time")
@@ -262,14 +277,20 @@ def main():
     parser.add_argument('--deploy_current', action='store_true', help='deploy current branch')
     parser.add_argument('--skips3', action='store_true', default=False,
                         help='skip copying files from s3')
-
     parser.add_argument('--onlys3', action='store_true', default=False,
-                        help='skip copying files from s3')
+                        help='copying files from s3 and then quit')
+    parser.add_argument('--onlydb', action='store_true', default=False,
+                        help='clone database and then quit')
 
     args = parser.parse_args()
     if args.onlys3:
         print("### only copy contents of s3")
         copy_s3_buckets(args.new, args.old)
+        return
+    if args.onlydb:
+        print("### only copy contents of s3")
+        db_endpoint = snapshot_db(args.old, args.new)
+        print(db_endpoint)
         return
 
     print("### start build ES service")
