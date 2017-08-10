@@ -66,7 +66,6 @@ def _read_env():
     config_file = "/opt/python/current/env"
     if os.path.exists(config_file):
         if not os.environ.get("AWS_ACCESS_KEY_ID"):
-            import subprocess
             command = ['bash', '-c', 'source ' + config_file + ' && env']
             proc = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
             for line in proc.stdout:
