@@ -293,7 +293,7 @@
 
             > a {
                 border-radius: 3px;
-                padding: 4px 3px 1px 24px;
+                padding: 4px 3px 1px 21px;
                 text-decoration: none;
                 display: block;
                 position: relative;
@@ -334,6 +334,9 @@
                 display:inline-block;
                 overflow: hidden;
                 margin-right: 30px;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                max-width: 85%;
             }
 
         }
@@ -372,6 +375,10 @@
     &[data-field="experiments_in_set.biosample.biosource_summary"] .term {
         text-transform: capitalize;
     }
+}
+
+.facet-selector{
+    margin-left: -18px;
 }
 
 .facet-entry {
@@ -576,6 +583,3 @@ div.meta-status {
     }
 }
 
-.facet-selector{
-    margin-left: -20px;
-}
