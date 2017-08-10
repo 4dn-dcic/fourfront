@@ -411,8 +411,26 @@ h3.submission-subtitle {
 	}
 }
 
-.modal-body p {
-	font-family: inherit;
+/** Modal Stuff **/
+
+.modal-dialog {
+
+	.modal-header > button.close {
+		margin-top: 2px;
+    	margin-right: 5px;
+	}
+
+	.modal-body p {
+		font-family: inherit;
+	}
+
+}
+
+/************** MORE BUTTON STYLES ***********/
+
+// Light gray BG, more prominent button style than btn-default
+.btn.btn-secondary {
+  @include button-variant(#000, #e4e4e4, rgba(0,0,0,0.125));
 }
 
 

@@ -189,12 +189,12 @@ class File(Item):
                 'experiments.biosample.biosource.individual.organism.name',
                 'experiments.digestion_enzyme.name',
                 'related_files.relationship_type',
-                'related_files.file.accession',
-                'related_files.file.*']
+                'related_files.file.accession']
     name_key = 'accession'
     rev = {
         'experiments': ('Experiment', 'files')
     }
+
 
     @calculated_property(schema={
         "title": "Experiments",
@@ -209,15 +209,33 @@ class File(Item):
     def experiments(self, request):
         return self.rev_link_atids(request, "experiments")
 
+
     @calculated_property(schema={
         "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
+        "description": "Name of this File",
         "type": "string"
     })
     def display_title(self, request, file_format, accession=None, external_accession=None):
         accession = accession or external_accession
         file_extension = self.schema['file_format_file_extension'][file_format]
         return '{}{}'.format(accession, file_extension)
+
+
+    @calculated_property(schema={
+        "title": "File Type",
+        "description": "Type of File",
+        "type": "string"
+    })
+    def file_type_detailed(self, request, file_format, file_type=None):
+        outString = (file_type or 'other')
+        if file_format is not None:
+            outString = outString + ' (' + file_format + ')'
+
+        #accession = accession or external_accession
+        #file_extension = self.schema['file_format_file_extension'][file_format]
+        #return '{}{}'.format(accession, file_extension)
+        return outString
+
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -316,6 +334,7 @@ class File(Item):
             return self.uuid
         return properties.get(self.name_key, None) or self.uuid
 
+
     def unique_keys(self, properties):
         keys = super(File, self).unique_keys(properties)
         if properties.get('status') != 'replaced':
@@ -324,6 +343,7 @@ class File(Item):
                 keys.setdefault('alias', []).append(value)
         return keys
 
+
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
@@ -331,6 +351,7 @@ class File(Item):
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
+
 
     @calculated_property(schema={
         "title": "Download URL",
@@ -341,6 +362,7 @@ class File(Item):
         file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
+
 
     @calculated_property(schema={
         "title": "Upload Key",
@@ -358,6 +380,7 @@ class File(Item):
                 return 'UPLOAD KEY FAILED'
         return external['key']
 
+
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
     })
@@ -365,6 +388,7 @@ class File(Item):
         external = self.propsheets.get('external', None)
         if external is not None:
             return external['upload_credentials']
+
 
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
@@ -379,9 +403,11 @@ class File(Item):
                 extras.append(extra)
             return extras
 
+
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
+
 
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
@@ -404,6 +430,7 @@ class File(Item):
 
         profile_name = registry.settings.get('file_upload_profile_name')
         return external_creds(bucket, key, name, profile_name)
+
 
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):

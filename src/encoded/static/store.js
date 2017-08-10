@@ -44,6 +44,15 @@ var reducers = {
         }
     },
 
+    lastCSSBuildTime : function(state='', action) {
+        if (action.type && _.contains(Object.keys(action.type), 'lastCSSBuildTime')){
+            var val = action.type.lastCSSBuildTime ? action.type.lastCSSBuildTime : state;
+            return val
+        }else{
+            return state
+        }
+    },
+
     contextRequest : function(state={}, action) {
         if (action.type && _.contains(Object.keys(action.type), 'contextRequest')){
             var val = action.type.contextRequest ? action.type.contextRequest : state;

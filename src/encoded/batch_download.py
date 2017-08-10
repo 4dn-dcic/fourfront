@@ -36,13 +36,17 @@ def includeme(config):
 
 # includes concatenated properties
 _tsv_mapping = OrderedDict([
+    ('File Download URL', ['experiments_in_set.files.href']),
+    ('Experiment Set Accession', ['accession']),
+    ('Experiment Accession', ['experiments_in_set.accession']),
     ('File Accession', ['experiments_in_set.files.accession']),
+    ('Size', ['experiments_in_set.files.file_size']),
+    ('md5sum', ['experiments_in_set.files.md5sum']),
+
     ('File Format', ['experiments_in_set.files.file_type']),
     #('Output type', ['output_type']),
     ('Experiment Title', ['experiments_in_set.display_title']),
-    ('Experiment Accession', ['experiments_in_set.accession']),
     ('Experiment Type', ['experiments_in_set.experiment_type']),
-    ('Experiment Set Accession', ['accession']),
     ('Bio Rep No', ['replicate_exps.bio_rep_no']),
     ('Tech Rep No', ['replicate_exps.tec_rep_no', 'replicate_exps.replicate_exp.accession']),
 
@@ -55,6 +59,10 @@ _tsv_mapping = OrderedDict([
     ('Digestion Enzyme', ['experiments_in_set.digestion_enzyme.name']),
     ('Related File Relationship', ['experiments_in_set.files.related_files.relationship_type']),
     ('Related File', ['experiments_in_set.files.related_files.file.accession']),
+    ('Paired end', ['experiments_in_set.files.paired_end']),
+    ('Lab', ['lab.title']),
+    ('Project', ['award.project']),
+    ('Status', ['status']),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
     #('Biosample sex', ['replicates.library.biosample.sex']),
     #('Biosample organism', ['replicates.library.biosample.organism.scientific_name']),
@@ -82,13 +90,8 @@ _tsv_mapping = OrderedDict([
     #('Technical replicate', ['files.replicate.technical_replicate_number']),
     #('Read length', ['files.read_length']),
     #('Run type', ['files.run_type']),
-    ('Paired end', ['experiments_in_set.files.paired_end']),
     #('Paired with', ['experiments_in_set.files.paired_with']),
     #('Derived from', ['files.derived_from.accession']),
-    ('Size', ['experiments_in_set.files.file_size']),
-    ('Lab', ['lab.title']),
-    ('md5sum', ['experiments_in_set.files.md5sum']),
-    ('File Download URL', ['experiments_in_set.files.href']),
     #('Assembly', ['files.assembly']),
     #('Platform', ['files.platform.title'])
 ])
@@ -190,7 +193,10 @@ def peak_metadata(context, request):
         content_disposition='attachment;filename="%s"' % 'peak_metadata.tsv'
     )
 
-
+# Local flag. TODO: Just perform some request to this endpoint after bin/pserve as part of deploy script.
+endpoints_initialized = {
+    "metadata" : False
+}
 
 @view_config(route_name='metadata', request_method=['GET', 'POST'])
 def metadata_tsv(context, request):
@@ -244,6 +250,9 @@ def metadata_tsv(context, request):
 
     def do_subreq(path):
         nonlocal request
+        if not endpoints_initialized['metadata']:
+            endpoints_initialized['metadata'] = True
+            do_subreq(path) # Do an extra time because for some reason (we get incomplete results from /search/ on first request after bootup/deploy).
         subreq = make_subrequest(request, path)
         subreq._stats = request._stats
         subreq.headers['Accept'] = 'application/json'
@@ -307,7 +316,7 @@ def metadata_tsv(context, request):
             if not _tsv_mapping[column][0].startswith('experiments_in_set'):
                 exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
         # Flatten map's child result maps up to self.
-        return chain.from_iterable(map(lambda exp: format_experiment(exp, exp_set, exp_set_row_vals), exp_set.get('experiments_in_set', []) ))
+        return chain.from_iterable(map(lambda exp: format_experiment(exp, exp_set, exp_set_row_vals), sorted(exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") ) ))
 
 
     def format_experiment(exp, exp_set, exp_set_row_vals):
@@ -316,7 +325,7 @@ def metadata_tsv(context, request):
             if not _tsv_mapping[column][0].startswith('experiments_in_set.files') and _tsv_mapping[column][0].startswith('experiments_in_set'):
                 exp_row_vals[column] = get_value_for_column(exp, column, 19)
 
-        return map(lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals), exp.get('files', []) )
+        return map(lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals), sorted(exp.get('files', []), key=lambda d: d.get("accession") ) )
 
 
     def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):

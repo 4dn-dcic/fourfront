@@ -458,20 +458,27 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     """
     sort = OrderedDict()
     result_sort = OrderedDict()
-    # Prefer sort order specified in request, if any
-    requested_sort = request.params.get('sort')
-    if requested_sort:
+
+    def add_to_sort_dict(requested_sort):
         if requested_sort.startswith('-'):
             name = requested_sort[1:]
             order = 'desc'
         else:
             name = requested_sort
             order = 'asc'
+
         sort['embedded.' + name + '.lower_case_sort.keyword'] = result_sort[name] = {
             'order': order,
             'unmapped_type': 'keyword',
             'missing': '_last'
         }
+
+    # Prefer sort order specified in request, if any
+    requested_sorts = request.params.getall('sort')
+    if requested_sorts:
+        for rs in requested_sorts:
+            add_to_sort_dict(rs)
+
     # Otherwise we use a default sort only when there's no text search to be ranked
     if not sort and search_term == '*':
         # If searching for a single type, look for sort options in its schema
