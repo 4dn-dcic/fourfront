@@ -780,7 +780,7 @@ def load_test_data(app, access_key_loc=None):
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
-                               server="https://data.4dnucleome.org")
+                               server="https://mastertest.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
 
 
@@ -798,7 +798,7 @@ def load_prod_data(app, access_key_loc=None):
     docsdir = []
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
-                               server="https://testportal.4dnucleome.org")
+                               server="https://data.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
 
 
