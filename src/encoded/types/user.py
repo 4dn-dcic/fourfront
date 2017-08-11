@@ -11,8 +11,8 @@ from pyramid.security import (
     Everyone,
 )
 from .base import (
-    Item
-    # paths_filtered_by_status,
+    Item,
+    paths_filtered_by_status
 )
 from snovault import (
     CONNECTION,
@@ -68,6 +68,9 @@ class User(Item):
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
     embedded = ['lab.awards.*']
+    rev = {
+        'access_keys': ('AccessKey', 'user')
+    }
 
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
@@ -98,16 +101,18 @@ class User(Item):
         "type": "array",
         "items": {
             "type": ['string', 'object'],
-            "linkFrom": "AccessKey.user",
-        },
+            "linkTo": "AccessKey"
+        }
     }, category='page')
     def access_keys(self, request):
-        """smth."""
         if not request.has_permission('view_details'):
             return
-        uuids = self.registry[CONNECTION].get_rev_links(self.model, 'user', 'AccessKey')
-        objects = (request.embed('/', str(uuid), '@@object') for uuid in uuids)
-        return [obj for obj in objects if obj['status'] not in ('deleted', 'replaced')]
+        atids = self.rev_link_atids(request, "access_keys")
+        acc_keys = [request.embed('/', atid, '@@object')
+                for atid in paths_filtered_by_status(request, atids)]
+        if acc_keys:
+            return [key for key in acc_keys if key['status'] not in ('deleted', 'replaced')]
+
 
     def _update(self, properties, sheets=None):
         # fill default submission entries. There are two possible:
