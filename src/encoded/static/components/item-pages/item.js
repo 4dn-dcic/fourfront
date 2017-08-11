@@ -167,10 +167,11 @@ export function getTitleStringFromContext(context){
  * @public
  * @param {Object} context - JSON representation of an Item object.
  * @param {string} [displayTitle] - Display title of Item object. Gets it from context if not provided.
- * @returns {string} The title.
+ * @returns {boolean} If title is an accession (or contains it).
  */
-export function isDisplayTitleAccession(context, displayTitle = null){
+export function isDisplayTitleAccession(context, displayTitle = null, checkContains = false){
     if (!displayTitle) displayTitle = getTitleStringFromContext(context);
     if (context.accession && context.accession === displayTitle) return true;
+    if (checkContains && displayTitle.indexOf(context.accession) > -1) return true;
     return false;
 }

@@ -105,7 +105,6 @@ export default class ExperimentSetView extends React.Component {
                         <div className="exp-table-container">
                             <ExperimentsTable
                                 ref="experimentsTable"
-                                parentController={this}
                                 experimentSetType={this.props.context.experimentset_type}
                                 expSetFilters={this.props.expSetFilters}
                                 facets={ this.props.facets }
@@ -141,18 +140,7 @@ export default class ExperimentSetView extends React.Component {
 
                 <ExperimentSetHeader {...this.props} />
 
-                <div className="row">
-                    <div className="col-sm-12">
-                    { this.props.context.produced_in_pub ?
-                        <Publications.DetailBlock publication={this.props.context.produced_in_pub} singularTitle="Source Publication" >
-                            <div className="more-details">
-                                <Publications.ShortAttribution publication={this.props.context.produced_in_pub} />
-                            </div>
-                            <br/>
-                        </Publications.DetailBlock>
-                        : <br/> }
-                    </div>
-                </div>
+                <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />
 
                 <div className="row">
 

@@ -73,6 +73,7 @@ export default class PageTitle extends React.Component {
         }
 
         title = TITLE_PATHNAME_MAP[currentPathName] && TITLE_PATHNAME_MAP[currentPathName].title;
+
         if (!title) {
             
             var pathRoot = currentPathName.split('/')[1] || null;
@@ -103,7 +104,7 @@ export default class PageTitle extends React.Component {
 
         if (object.isAnItem(context)){ // If Item
 
-            console.log('HHH',currentHrefParts.hash);
+            
             
             if (currentHrefParts.hash === '#!edit'){
                 return {
@@ -114,7 +115,6 @@ export default class PageTitle extends React.Component {
 
             
             title = getTitleStringFromContext(context);
-            var isItemTitleAnAccession = isDisplayTitleAccession(context, title);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
 
             if (currentHrefParts.hash === '#!create') {
@@ -124,11 +124,15 @@ export default class PageTitle extends React.Component {
                 };
             }
 
-            if (isDisplayTitleAccession(context, title)){ // Don't show Accessions as titles.
+            if (isDisplayTitleAccession(context, title, true)){ // Don't show Accessions in titles.
                 return { 'title' : itemTypeTitle };
                 // Re-Enable below if want Accessions as Page Subtitles.
                 // return { 'title' : itemTypeTitle, 'subtitle' : title };
+            } else {
+                return { 'title' : itemTypeTitle, 'calloutTitle' : title };
             }
+
+            
 
         }
         return { 'title' : getTitleStringFromContext(context) };

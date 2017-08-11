@@ -281,6 +281,32 @@ class ShortAttribution extends React.Component {
 }
 
 
+class ProducedInPublicationBelowHeaderRow extends React.Component {
+    render(){
+        var inner = null;
+        if (!this.props.produced_in_pub){
+            inner = <br/>;
+        } else {
+            inner = (
+                <Publications.DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
+                    <div className="more-details">
+                        <Publications.ShortAttribution publication={this.props.produced_in_pub} />
+                    </div>
+                    <br/>
+                </Publications.DetailBlock>
+            );
+        }
+
+        return (
+            <div className="row">
+                <div className="col-sm-12">
+                    { inner }
+                </div>
+            </div>
+        );
+    }
+}
+
 /**
  * Shows publications for current Item.
  * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView .
@@ -295,6 +321,7 @@ export class Publications extends React.Component {
     static DetailBlock = DetailBlock;
     static FormattedInfoWrapper = FormattedInfoWrapper;
     static ShortAttribution = ShortAttribution;
+    static ProducedInPublicationBelowHeaderRow = ProducedInPublicationBelowHeaderRow
 
     constructor(props){
         super(props);

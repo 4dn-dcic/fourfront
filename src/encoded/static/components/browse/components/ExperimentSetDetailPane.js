@@ -76,7 +76,7 @@ export class ExperimentSetDetailPane extends React.Component {
                     experimentArray={expSet.experiments_in_set}
                     replicateExpsArray={expSet.replicate_exps}
                     experimentSetType={expSet.experimentset_type}
-                    width={this.props.containerWidth - (47 + 0) /* account for padding of pane */}
+                    width={this.props.containerWidth ? (this.props.containerWidth - (47 + 0) /* account for padding of pane */) : null}
                     fadeIn={false}
                     selectedFiles={this.props.selectedFiles}
                     selectFile={this.props.selectFile}

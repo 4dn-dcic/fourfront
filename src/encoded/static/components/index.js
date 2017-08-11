@@ -28,6 +28,7 @@ require('./item-pages/WorkflowRunView');
 require('./item-pages/WorkflowView');
 require('./item-pages/SchemaView');
 require('./item-pages/FallbackView');
+require('./item-pages/FileView');
 require('./statuslabel');
 require('./navigation');
 require('./submission/submission-view');

@@ -250,6 +250,9 @@ export class FormattedInfoBlock extends React.Component {
             return true;
         } 
         if (contextProperty && typeof contextProperty === 'object'){
+
+            if (typeof contextProperty.error === 'string' && contextProperty.error.toLowerCase() === 'no view permissions') return false;
+
             if (
                 _.keys(contextProperty).length <= 3 &&
                 typeof contextProperty.link_id === 'string' &&

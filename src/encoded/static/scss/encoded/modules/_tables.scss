@@ -585,7 +585,7 @@ $small-label-accession-font-size : 0.75rem;
 
 	.headers { display: none; /* Mobile */ }
 
-	@media screen and (min-width: $screen-md-min){
+	//@media screen and (min-width: $screen-md-min){
 
 		min-width: $expset-full-width;
 		transition: opacity .35s;
@@ -639,7 +639,7 @@ $small-label-accession-font-size : 0.75rem;
 				}
 			}
 		}
-	}
+	//}
 
 	.col-file-detail:not(.heading-block) {
 		text-align: center;
@@ -652,10 +652,10 @@ $small-label-accession-font-size : 0.75rem;
 		transform: translate3d(0,0,0);
 
 		.s-block-list {
-			@media screen and (min-width: $screen-md-min){
+			//@media screen and (min-width: $screen-md-min){
 				display: inline-block;
 				vertical-align: middle;
-			}
+			//}
 
 			.collapsible-s-block-ext {
 				transform: translate3d(0,0,0);
@@ -691,10 +691,10 @@ $small-label-accession-font-size : 0.75rem;
 			overflow-y: hidden;
 
 			> .name {
-				@media screen and (min-width: $screen-md-min){
+				//@media screen and (min-width: $screen-md-min){
 					display: inline-block;
 					vertical-align: middle;
-				}
+				//}
 				position: relative;
 				padding: 7px 12px;
 				text-align: center;
@@ -753,7 +753,7 @@ $small-label-accession-font-size : 0.75rem;
 
 		}
 
-		@media screen and (min-width: $screen-md-min){
+		//@media screen and (min-width: $screen-md-min){
 			.s-block > .name:after,
 			.s-block > .name > .label-ext-info {
 				opacity: 0.4;
@@ -849,7 +849,7 @@ $small-label-accession-font-size : 0.75rem;
 				opacity: 0;
 			}
 
-		}
+		//}
 
 		.s-block > .item {
 			padding: 7px 8px;
@@ -860,10 +860,10 @@ $small-label-accession-font-size : 0.75rem;
 		}
 
 		> .biosamples.s-block-list {
-			@media screen and (min-width: $screen-md-min){
+			//@media screen and (min-width: $screen-md-min){
 				float: right;
 				display: block;
-			}
+			//}
 
 			> .s-block.biosample:first-child {
 				border-top: 1px solid #b5b5b5;
@@ -1517,7 +1517,10 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 .above-results-table-row {
 	min-height: 40px;
 	padding-bottom: 5px;
-	margin-top: -40px;
+	margin-top: 7px;
+	@media screen and (min-width: $screen-sm-min){
+		margin-top: -40px;
+	}
 
 	.search-result-config-panel {
 		margin-top: 7px;

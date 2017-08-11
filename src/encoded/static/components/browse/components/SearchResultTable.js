@@ -155,7 +155,6 @@ export function searchResultTableColumnWidth(widthMap, mounted=true){
     if (!mounted || isServerSide()) responsiveGridSize = 'lg';
     else responsiveGridSize = layout.responsiveGridState();
     
-    if (responsiveGridSize === 'xs') return '100%'; // Mobile, stacking
     return widthMap[responsiveGridSize || 'lg'] || 250;
 }
 
@@ -233,9 +232,7 @@ class ResultRowColumnBlock extends React.Component {
         var isDesktopClientside = SearchResultTable.isDesktopClientside();
         var blockWidth;
 
-        if (mounted &&!isDesktopClientside){
-            blockWidth = '100%';
-        } else if (mounted && isDesktopClientside){
+        if (mounted && isDesktopClientside){
             blockWidth = this.props.headerColumnWidths[this.props.columnNumber] || searchResultTableColumnWidth(columnDefinition.widthMap, mounted);
         } else {
             blockWidth = searchResultTableColumnWidth(columnDefinition.widthMap, mounted);
@@ -524,7 +521,7 @@ class HeadersRow extends React.Component {
     render(){
         var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset } = this.props;
         return (
-            <div className={"search-headers-row hidden-xs" + (isSticky ? ' stickied' : '')} style={
+            <div className={"search-headers-row " + (isSticky ? ' stickied' : '')} style={
                 isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
                 : null}
             >
@@ -1102,7 +1099,7 @@ class DimensioningContainer extends React.Component {
     }
 
     render(){
-        var { columnDefinitions, results, sortBy, sortColumn, sortReverse, href, limit, defaultMinColumnWidth } = this.props;
+        var { columnDefinitions, results, sortBy, sortColumn, sortReverse, href, limit, defaultMinColumnWidth, stickyHeaderTopOffset } = this.props;
         var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, this.state.mounted, this.state.widths);
         var responsiveGridSize = !isServerSide() && this.state.mounted && layout.responsiveGridState();
 
@@ -1116,6 +1113,8 @@ class DimensioningContainer extends React.Component {
             return searchResultTableColumnWidth(columnDefinitions[i].widthMap, this.state.mounted);
         });
 
+        if (responsiveGridSize === 'xs' || responsiveGridSize === 'sm') stickyHeaderTopOffset = 0;
+
         return (
             <div className="search-results-outer-container">
                 <StickyContainer>
@@ -1123,8 +1122,8 @@ class DimensioningContainer extends React.Component {
                         <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
                                 
-                                { !responsiveGridSize || responsiveGridSize !== 'xs' ? 
-                                    <Sticky topOffset={this.props.stickyHeaderTopOffset} >{
+                                {
+                                    <Sticky topOffset={stickyHeaderTopOffset} >{
                                         ({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}) =>
                                         <HeadersRow
                                             columnDefinitions={columnDefinitions}
@@ -1139,14 +1138,14 @@ class DimensioningContainer extends React.Component {
                                             tableContainerWidth={tableContainerWidth}
                                             rowHeight={this.props.rowHeight}
                                             results={this.state.results}
-                                            stickyHeaderTopOffset={this.props.stickyHeaderTopOffset}
+                                            stickyHeaderTopOffset={stickyHeaderTopOffset}
 
                                             stickyStyle={style}
                                             isSticky={isSticky}
                                         />
                                     }</Sticky>
                                 
-                                : null }
+                                }
                                 <LoadMoreAsYouScroll
                                     results={this.state.results}
                                     mounted={this.state.mounted}
@@ -1276,6 +1275,13 @@ export class SearchResultTable extends React.Component {
     render(){
         var { columns, constantColumnDefinitions, defaultWidthMap, hiddenColumns, columnDefinitionOverrideMap } = this.props;
         var columnDefinitions = columnsToColumnDefinitions(columns, constantColumnDefinitions, defaultWidthMap);
+
+        columnDefinitions.forEach(function(colDef){
+            if (colDef.widthMap && colDef.widthMap.sm && typeof colDef.widthMap.xs !== 'number'){
+                colDef.widthMap.xs = colDef.widthMap.sm;
+            }
+        });
+
         if (Array.isArray(hiddenColumns)){ // Remove hidden columns, if any defined
             columnDefinitions = columnDefinitions.filter(function(colDef){
                 if (hiddenColumns.indexOf(colDef.field) > -1) return false;

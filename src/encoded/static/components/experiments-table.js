@@ -615,12 +615,22 @@ export default class ExperimentsTable extends React.Component {
     }
 
     static propTypes = {
-        columnHeaders : PropTypes.array,
-        experimentArray : PropTypes.array,
-        passExperiments : PropTypes.instanceOf(Set),
-        expSetFilters : PropTypes.object,
-        selectedFiles : PropTypes.object.isRequired,
-        keepCounts : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
+        columnHeaders               : PropTypes.array,
+        experimentArray             : PropTypes.array,
+        passExperiments             : PropTypes.instanceOf(Set),
+        expSetFilters               : PropTypes.object,
+        'selectedFiles'               : PropTypes.object,
+        'experimentSetAccession'    : PropTypes.string.isRequired,
+        'replicateExpsArray'        : PropTypes.arrayOf(PropTypes.shape({
+            'bio_rep_no'                : PropTypes.number.isRequired,
+            'tec_rep_no'                : PropTypes.number.isRequired,
+            'replicate_exp'             : PropTypes.shape({
+                'accession'                 : PropTypes.string,
+                'uuid'                      : PropTypes.string,
+                'link_id'                   : PropTypes.string
+            }).isRequired
+        })).isRequired,
+        keepCounts              : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
     }
 
     static defaultProps = {
