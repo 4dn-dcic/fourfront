@@ -1797,6 +1797,7 @@
         }
     ], 
     "title": "hi-c-processing-partc/6", 
+    "name": "hi-c-processing-partc/6", 
     "workflow_steps": [
         {
             "step": "25e911b4-49e5-4c33-afab-9ec90d65faf3",

@@ -1775,9 +1775,7 @@
                     "step_argument_name": "output_mcool", 
                     "step_argument_type": "Output file or parameter"
                 }
-            ], 
-            "workflow_argument_name": "", 
-            "argument_type": ""
+            ] 
         }, 
         {
             "argument_mapping": [
@@ -1791,12 +1789,11 @@
                     "step_argument_name": "output_mcool", 
                     "step_argument_type": "Output file or parameter"
                 }
-            ], 
-            "workflow_argument_name": "", 
-            "argument_type": ""
+            ] 
         }
     ], 
     "title": "hi-c-processing-partc/6", 
+    "name": "hi-c-processing-partc/6", 
     "workflow_steps": [
         {
             "step": "25e911b4-49e5-4c33-afab-9ec90d65faf3",
@@ -1804,7 +1801,7 @@
         }, 
         {
             "step": "53e7b46f-1d3b-4a16-812f-c79456614bda", 
-            "step_name": "extract_mcool_normvector_for_juicebox_1"
+            "step_name": "extract_mcool_normvector_for_juicebox"
         }, 
         {
             "step": "11775554-5f85-4d0c-93e4-fa9d7f20d47a", 
