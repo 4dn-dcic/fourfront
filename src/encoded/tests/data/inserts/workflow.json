@@ -1807,12 +1807,15 @@
             "step_name": "extract_mcool_normvector_for_juicebox_1"
         }, 
         {
-            "step": "11775554-5f85-4d0c-93e4-fa9d7f20d47a"", 
+            "step": "11775554-5f85-4d0c-93e4-fa9d7f20d47a", 
             "step_name": "add_hic_normvector_to_mcool"
         }
     ], 
     "workflow_type": "Hi-C data analysis", 
     "workflow_diagram": "", 
-    "description": "Hi-C processing partC Revision 6"
+    "description": "Hi-C processing partC Revision 6",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "accession": "4DNWF06BPEF2"
 }
 ]
