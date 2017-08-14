@@ -50,7 +50,7 @@ def DBSession(app):
     return app.registry[DBSESSION]
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=False)
 def teardown(app, dbapi_conn):
     from snovault.elasticsearch import create_mapping
     create_mapping.run(app, collections=TEST_COLLECTIONS)
@@ -83,7 +83,7 @@ def listening_conn(dbapi_conn):
 
 
 @pytest.mark.slow
-def test_indexing_simple(app, testapp, indexer_testapp):
+def test_indexing_simple(app, testapp, indexer_testapp, teardown):
     import time
     es = app.registry['elasticsearch']
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
@@ -126,7 +126,7 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert 'settings' in testing_ppp_source
 
 
-def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
+def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch, teardown):
     """
     Test overall create_mapping functionality using app.
     Do this by checking es directly before and after running mapping.

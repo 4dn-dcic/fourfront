@@ -11,6 +11,10 @@ var { Provider, connect } = require('react-redux');
 var { JWT, Filters } = require('../components/util');
 import Alerts from './../components/alerts';
 
+
+var cssFileStats = fs.statSync(__dirname + '/../css/style.css');
+var lastCSSBuildTime = Date.parse(cssFileStats.mtime.toUTCString());
+
 var render = function (Component, body, res) {
     //var start = process.hrtime();
     var context = JSON.parse(body);
@@ -18,7 +22,8 @@ var render = function (Component, body, res) {
         'context': context,
         'href': res.getHeader('X-Request-URL') || context['@id'],
         'inline': inline,
-        'expSetFilters' : Filters.hrefToFilters(res.getHeader('X-Request-URL') || context['@id'])
+        'expSetFilters' : Filters.hrefToFilters(res.getHeader('X-Request-URL') || context['@id']),
+        'lastCSSBuildTime' : lastCSSBuildTime
     };
 
     // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request. 

@@ -265,7 +265,7 @@ class Workflow(Item):
 
             # Input nodes have a 'source', output nodes have a 'target'
             argTargetsPropertyName = 'target' if argumentType == 'output' else 'source'
-            
+
             io = {
                 "name" : currentArgument.get("workflow_argument_name",
                     currentArgumentMap.get('step_argument_name')
@@ -402,7 +402,7 @@ class WorkflowRun(Item):
             '''
             Add file metadata in form of 'run_data' : { 'file' : { '@id', 'display_title', etc. } } to AnalysisStep dict's 'input' or 'output' list item dict
             if one of own input or output files' workflow_argument_name matches the AnalysisStep dict's input or output's sourceOrTarget.workflow_argument_name.
-            
+
             :param stepOutput: Reference to an 'input' or 'output' dict passed in from a Workflow-derived analysis_step.
             :param stepTarget: Reference to an 'source' or 'target' array item belonging to the 'input' or 'output' above.
             :param runParams: List Step inputs or outputs, such as 'input_files', 'output_files', 'quality_metric', or 'parameters'.

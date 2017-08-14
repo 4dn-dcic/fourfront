@@ -4,6 +4,7 @@ import json
 from snovault import (
     collection,
     load_schema,
+    calculated_property
 )
 from .base import (
     Item
@@ -207,3 +208,23 @@ class Publication(Item):
 
         super(Publication, self)._update(properties, sheets)
         return
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, authors=None, date_published=None, title=None):
+        minipub = ''
+
+        if authors is not None:
+            minipub = authors[0]
+            if len(authors) > 2:
+                minipub = minipub + ' et al.'
+            elif len(authors) == 2:
+                minipub = minipub + ' and ' + authors[1]
+        if date_published is not None:
+            minipub = minipub + ' (' + date_published[0:4] + ')'
+        if title is not None:
+            minipub = minipub + ' ' + title[0:100]
+        return minipub

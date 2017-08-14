@@ -50,7 +50,7 @@ class Body extends React.Component {
      * 
      * @private
      * @instance
-     * @returns {Element} React DIV element with .row class.
+     * @returns {JSX.Element} React DIV element with .row class.
      */
     renderActions(){
         if (!this.props.sticky) return null;
@@ -82,7 +82,7 @@ class Body extends React.Component {
      * Renders out a row containing 2 counts out of [Exp Sets, Exps, Files], minus whatever is the primary count.
      * 
      * @param {Object} props - Props of this component.
-     * @returns {Element} - A DIV React element with a 'row' className.
+     * @returns {JSX.Element} - A DIV React element with a 'row' className.
      */
     renderDetailSection(props = this.props){
         if (props.path.length === 0) return null;
@@ -117,7 +117,7 @@ class Body extends React.Component {
 
     primaryCount(node){
         return (
-            <div className={"primary-count count pull-right count-" + (this.props.primaryCount || "unknown")}>
+            <div className={"primary-count count text-400 pull-right count-" + (this.props.primaryCount || "unknown")}>
                 { node[this.props.primaryCount] }
             </div>
         );

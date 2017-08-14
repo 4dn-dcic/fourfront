@@ -1,7 +1,7 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
 import pytest
-pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 def test_search_view(workbook, testapp):
@@ -51,7 +51,7 @@ def test_collections_redirect_to_search(workbook, testapp):
 
 
 def test_search_with_embedding(workbook, testapp):
-    res = testapp.get('/search/?type=Biosample').json
+    res = testapp.get('/search/?type=Biosample&limit=all').json
     # Use a specific biosample, found by accession from test data
     # Check the embedding /types/biosample.py entry; test ensures
     # that the actual embedding matches that
@@ -220,27 +220,30 @@ def test_search_query_string_AND_NOT_cancel_out(workbook, testapp):
 
 
 def test_metadata_tsv_view(workbook, htmltestapp):
-    # run a simple query with type=ExperimentSet
+
+    FILE_ACCESSION_COL_INDEX = 3
+    FILE_DOWNLOAD_URL_COL_INDEX = 0
+
+    # run a simple GET query with type=ExperimentSet
     res = htmltestapp.get('/metadata/type=ExperimentSet/metadata.tsv')
     assert 'text/tsv' in res.content_type
     result_rows = [ row.rstrip(' \r').split('\t') for row in res.body.decode('utf-8').split('\n') ] # Strip out carriage returns and whatnot. Make a plain multi-dim array.
     header_row = result_rows.pop(0)
 
-    assert header_row[0] == 'File Accession'
+    assert header_row[FILE_ACCESSION_COL_INDEX] == 'File Accession'
 
-    col_index_of_download_url = header_row.index('File Download URL')
-
-    assert col_index_of_download_url > 0 # Ensure we have this column
+    assert header_row.index('File Download URL') == FILE_DOWNLOAD_URL_COL_INDEX # Ensure we have this column
 
     assert len(result_rows) > 3 # We at least have some rows.
 
-    assert len(result_rows[0][0]) > 4 # We have a value for File Accession
-    assert 'http' in result_rows[0][col_index_of_download_url] # Make sure it seems like a valid URL.
-    assert '/@@download/' in result_rows[0][col_index_of_download_url]
-    assert result_rows[0][0] in result_rows[0][col_index_of_download_url] # That File Accession is also in File Download URL of same row.
-    assert len(result_rows[0][0]) < len(result_rows[0][col_index_of_download_url])
+    for row_index in range(4):
+        assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) > 4 # We have a value for File Accession
+        assert 'http' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX] # Make sure it seems like a valid URL.
+        assert '/@@download/' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX]
+        assert result_rows[row_index][FILE_ACCESSION_COL_INDEX] in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX] # That File Accession is also in File Download URL of same row.
+        assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) < len(result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX])
 
-    # TODO: More testing, maybe get some File Accession ordering in (?), form POST query, (maybe) URL uuid query, (maybe) JSON POST query
+    # TODO: More testing: form POST query
 
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     from snovault import TYPES

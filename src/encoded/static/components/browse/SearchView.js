@@ -347,6 +347,7 @@ class ControlsAndResults extends React.Component {
                             hiddenColumns={hiddenColumns}
                             columnDefinitionOverrideMap={columnDefinitionOverrides}
                             href={this.props.href}
+                            totalExpected={context.total}
 
                             sortBy={this.props.sortBy}
                             sortColumn={this.props.sortColumn}

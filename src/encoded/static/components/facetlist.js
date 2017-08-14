@@ -134,6 +134,7 @@ class Term extends React.Component {
     render() {
         //var selected = this.isSelectedExpItem();
         var selected = this.props.isTermSelected(this.props.term.key, (this.state.facet || this.props.facet || {field:null}).field, this.props.expsOrSets || 'sets');
+        var title = this.props.title || Schemas.Term.toName(this.props.facet.field, this.props.term.key);
         return (
             <li className={"facet-list-element" + (selected ? " selected" : '')} key={this.props.term.key} data-key={this.props.term.key}>
                 <a className="term" data-selected={selected} href="#" onClick={this.handleClick} data-term={this.props.term.key}>
@@ -144,9 +145,7 @@ class Term extends React.Component {
                                 <i className="icon icon-times-circle icon-fw"></i>
                                 : '' }
                     </span>
-                    <span className="facet-item">
-                        { this.props.title || Schemas.Term.toName(this.props.facet.field, this.props.term.key) }
-                    </span>
+                    <span className="facet-item" data-tip={title.length > 30 ? title : null}>{ title }</span>
                     <span className="facet-count">{this.experimentSetsCount()}</span>
                 </a>
             </li>
@@ -835,7 +834,7 @@ export default class FacetList extends React.Component {
 
     renderFacets(facets, maxTermsToShow = 12){
 
-        facets = facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state));
+        facets = _.uniq(facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state)), false, function(f){ return f.field });
 
         var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
             if (m.end) return m;

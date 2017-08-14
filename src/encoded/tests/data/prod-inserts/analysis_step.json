@@ -218,5 +218,15 @@
         "analysis_step_types":["normalization"],
         "award":"1U01CA200059-01",
         "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"cool2mcool",
+        "uuid":"25e911b4-49e5-4c33-afab-9ec90d65faf3",
+        "version":"2",
+        "software_used":"02d636b9-d8dd-4da9-950c-2ca994b23555",
+        "name":"cooler",
+        "analysis_step_types":[ "aggregation", "normalization", "file format conversion" ],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
     }
 ]

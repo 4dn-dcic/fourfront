@@ -1507,29 +1507,91 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	padding-bottom: 5px;
 	margin-top: -40px;
 
-	.visible-columns-selector-panel {
+	.search-result-config-panel {
 		margin-top: 7px;
 		> .inner {
-			padding: 7px 0;
+			padding: 0 0;
 			border-top: 1px solid #ddd;
+			border-bottom: 1px solid #ddd;
 			> div.row {
-				margin: 0;
-				border-top: 1px solid #eee;
-				padding-top: 10px;
-				padding-left: 10px;
-				padding-right: 10px;
+				//margin: 0;
+				padding-top: 5px;
+				padding-left: 5px;
+				padding-right: 5px;
+				padding-bottom: 5px;
+				//padding-left: 10px;
+				//padding-right: 10px;
+				> div > .checkbox {
+					margin: 0;
+					margin-bottom: 10px;
+					margin-top: 5px;
+    				margin-bottom: 5px;
+					margin-left: -5px;
+    				margin-right: -5px;
+					padding-left: 32px;
+					background: #f9f9f9;
+					border-radius: 2px;
+					label {
+						display: inline-block;
+						margin: 0;
+						padding-top: 10px;
+						padding-bottom: 10px;
+						width: 100%;
+					}
+					&:hover {
+						background-color: #f5f5f5;
+					}
+				}
 			}
 			.panel-title {
-				padding-bottom: 17px;
-				padding-top: 10px;
+				padding-bottom: 13px;
+				padding-top: 12px;
+				padding-left: 10px;
+    			padding-right: 10px;
+				font-weight: 500;
+				background-color: #f8f8f8;
+				border-bottom: 1px solid #eee;
+				.close-button {
+					font-weight: 400;
+					display: block;
+					cursor: pointer;
+					float: right;
+					font-size: 1rem;
+					&:hover {
+						text-decoration: none;
+					}
+				}
+				.icon-fw {
+					margin-right: 5px;
+				}
 			}
 		}
 		
 	}
 
+	button {
+		transition: opacity .5s, background-color .5s, box-shadow .25s, color .5s;
+		box-shadow: none;
+		&:focus, &:active, &.active, &.active:focus, &:active:focus {
+			outline: none;
+		}
+		i.icon {
+			position: relative;
+			top: 1px;
+		}
+	}
+
+	button.panel-active {
+		box-shadow: inset 0 2px 18px rgba(0,0,0,0.6);
+		border-color: rgba(0,0,0,0.5);
+	}
+
 	.box {
 		min-height: 33px;
 		line-height: 33px;
+		&.selection-buttons {
+			margin-right: 7px;
+		}
 	}
 
 	.right-buttons {
@@ -1537,13 +1599,26 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 			margin-left: 5px;
 		}
 		.expand-layout-button:not(.expanded) {
-			@media screen and (max-width: 1200px){
+			@media screen and (max-width: 1220px){
 				display: none;
 			}
 		}
 	}
-
 	
+}
+
+.popover.file-format-selection-popover {
+	.popover-content {
+		min-width: 240px;
+		div {
+			&:not(:last-child) {
+				margin-bottom: 2px;
+			}
+			> button {
+				width: 100%;
+			}
+		}
+	}
 }
 
 .result-table {

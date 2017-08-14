@@ -613,7 +613,7 @@ class LoadMoreAsYouScroll extends React.Component {
     }
 
     componentWillReceiveProps(nextProps){
-        if (nextProps.href !== this.props.href && !this.state.canLoad){
+        if (!this.state.canLoad && (nextProps.href !== this.props.href || (typeof nextProps.totalExpected === 'number' && this.props.totalExpected !== nextProps.totalExpected))){
             this.setState({ 'canLoad' : true });
         }
     }
@@ -647,7 +647,7 @@ class LoadMoreAsYouScroll extends React.Component {
         var nextHref = this.rebuiltHref();
         var loadCallback = (function(resp){
             if (resp && resp['@graph'] && resp['@graph'].length > 0){
-                this.props.setResults(this.props.results.concat(resp['@graph']));
+                this.props.setResults(this.props.results.slice(0).concat(resp['@graph']));
                 this.setState({ 'isLoading' : false });
             } else {
                 if (this.state.canLoad){
@@ -923,6 +923,10 @@ class DimensioningContainer extends React.Component {
         return null;
     }
 
+    static getKeyForGraphResult(graphItem, rowNumber = 0){
+        return graphItem['@id'] || graphItem.link_id || rowNumber;
+    }
+
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
@@ -941,7 +945,7 @@ class DimensioningContainer extends React.Component {
             'widths'    : DimensioningContainer.resetHeaderColumnWidths(
                             props.columnDefinitions.length
                         ),
-            'results'   : props.results,
+            'results'   : props.results.slice(0),
             'isWindowPastTableTop' : false,
             'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview.
         };
@@ -973,7 +977,7 @@ class DimensioningContainer extends React.Component {
             !compareResultsByID(nextProps.results, this.props.results)
         ){
             this.setState({
-                'results' : nextProps.results,
+                'results' : nextProps.results.slice(0),
                 'openDetailPanes' : {},
                 'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions.length)
             }, ()=>{
@@ -1066,7 +1070,9 @@ class DimensioningContainer extends React.Component {
     }
 
     setResults(results, cb){
-        this.setState({ 'results' : results }, cb);
+        this.setState({
+            'results' : _.uniq(results, false, DimensioningContainer.getKeyForGraphResult)
+        }, cb);
     }
 
     renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, headerColumnWidthsFilled, props = this.props){
@@ -1075,8 +1081,8 @@ class DimensioningContainer extends React.Component {
             <ResultRow
                 result={r}
                 rowNumber={rowNumber}
-                data-key={r['@id'] || r.link_id || rowNumber}
-                key={r['@id'] || r.link_id || rowNumber}
+                data-key={DimensioningContainer.getKeyForGraphResult(r, rowNumber)}
+                key={DimensioningContainer.getKeyForGraphResult(r, rowNumber)}
                 columnDefinitions={columnDefinitions}
                 rowWidth={fullRowWidth}
                 mounted={this.state.mounted || false}
@@ -1154,6 +1160,7 @@ class DimensioningContainer extends React.Component {
                                     rowHeight={this.props.rowHeight}
                                     innerContainerElem={this.refs && this.refs.innerContainer}
                                     onVerticalScroll={this.onVerticalScroll}
+                                    totalExpected={this.props.totalExpected}
                                 >
                                 { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, headerColumnWidthsFilled) }
                                 </LoadMoreAsYouScroll>
@@ -1233,7 +1240,8 @@ export class SearchResultTable extends React.Component {
         'defaultWidthMap' : PropTypes.shape({ 'lg' : PropTypes.number.isRequired, 'md' : PropTypes.number.isRequired, 'sm' : PropTypes.number.isRequired }).isRequired,
         'hiddenColumns' : PropTypes.arrayOf(PropTypes.string),
         'renderDetailPane' : PropTypes.func,
-        'columnDefinitionOverrideMap' : PropTypes.object
+        'columnDefinitionOverrideMap' : PropTypes.object,
+        'totalExpected' : PropTypes.number
     }
 
     static defaultProps = {
