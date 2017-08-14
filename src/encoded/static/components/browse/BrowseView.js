@@ -20,7 +20,7 @@ import {
 
 
 
-const browseTableConstantColumnDefinitions = extendColumnDefinitions([
+export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'display_title', },
     { 'field' : 'experiments_in_set.experiment_type', },
     { 'field' : 'number_of_experiments', },

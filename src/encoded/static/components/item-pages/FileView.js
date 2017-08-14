@@ -8,7 +8,9 @@ import { object, expFxn, ajax, Schemas, layout } from './../util';
 import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FormattedInfoBlock, ItemFooterRow, TabbedView, Publications } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import ExperimentsTable from './../experiments-table';
-import { ExperimentSetDetailPane } from './../browse/components';
+import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
+import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
+
 
 
 
@@ -125,10 +127,12 @@ class FileViewOverview extends React.Component {
         var expSetsTable;
         if (this.state.loading || this.state.experiment_sets){
             expSetsTable = (
-                <FileViewExperimentSetTables
-                    loading={this.state.loading}
-                    experiment_sets={this.state.experiment_sets}
-                />
+                <layout.WindowResizeUpdateTrigger>
+                    <FileViewExperimentSetTables
+                        loading={this.state.loading}
+                        experiment_sets={this.state.experiment_sets}
+                    />
+                </layout.WindowResizeUpdateTrigger>
             );
         }
 
@@ -161,53 +165,28 @@ class FileViewExperimentSetTables extends React.Component {
         }
 
         
+
+        
         return (
-            <div className="file-part-of-experiment-sets-container">
+            <div className="file-part-of-experiment-sets-container" ref="experimentSetsContainer">
                 <h3 className="tab-section-title">
                     <span>In Experiment Sets</span>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                <div className="clearfix">
-                    
-                    { experiment_sets.map(function(es){return <ExperimentSetTableRow experiment_set={es} />; }) }
-                </div>
+                <ItemPageTable
+                    results={experiment_sets}
+                    renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidth={30} />}
+                    columns={{
+                        "number_of_experiments" : "Exps",
+                        "experiments_in_set.experiment_type": "Experiment Type",
+                        "experiments_in_set.biosample.biosource.individual.organism.name": "Organism",
+                        "experiments_in_set.biosample.biosource_summary": "Biosource Summary",
+                        "experiments_in_set.digestion_enzyme.name": "Enzyme",
+                        "experiments_in_set.biosample.modifications_summary": "Modifications",
+                        "experiments_in_set.biosample.treatments_summary": "Treatments"
+                    }}
+                />
             </div>
         );
     }
-}
-
-class ExperimentSetTableRow extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.toggleOpen = this.toggleOpen.bind(this);
-        this.state = { 'open' : false };
-    }
-
-    toggleOpen(){
-        this.setState({ open : !this.state.open });
-    }
-
-    render(){
-        var experiment_set = this.props.experiment_set;
-        return (
-            <div className="exp-table-row-container">
-                <h5 className="text-400">
-                    <i className={"icon icon-fw icon-" + ( this.state.open ? 'minus' : 'plus' )} onClick={this.toggleOpen} />
-                    {' '}
-                    { Schemas.getItemTypeTitle(experiment_set) }
-                    {' '}
-                    <a href={object.atIdFromObject(experiment_set)} className="mono-text text-400">{ experiment_set.accession }</a>
-                </h5>
-                { this.state.open ?
-                <layout.WindowResizeUpdateTrigger>
-                <ExperimentSetDetailPane
-                                result={experiment_set}
-                            />
-                </layout.WindowResizeUpdateTrigger>
-                : null }
-            </div>
-        );
-    }
-
 }

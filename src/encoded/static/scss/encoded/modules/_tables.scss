@@ -492,10 +492,13 @@ $open-expset-table-side-border-color : #e4e4e4;
 			position: static;
 		}
 
+		.expset-addinfo-row {
+			margin-bottom: 5px;
+		}
+
 		@media screen and (min-width: $screen-sm-min){
 
 			.addinfo-properties-section.col-sm-6 {
-			//border-left: 1px solid #eee;
 				padding-left : 18px;
 			}
 
@@ -1043,104 +1046,17 @@ $small-label-accession-font-size : 0.75rem;
 			text-align: left;
 		}
 	}
+	&[data-field="lab.display_title"]{
+		i.user-icon {
+			margin-right: 5px;
+		}
+	}
 }
 
 $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 .search-results-outer-container {
 	margin-bottom: -20px;
-
-	.search-headers-row {
-		background-color: #22656d;
-		z-index: 10;
-		transform: translate3d(0,0,0) !important;
-		overflow-x: hidden;
-		&.stickied {
-			top : 40px;
-			.browse-page-container & {
-				top: 80px;
-			}
-		}
-		> .columns {
-			display: -webkit-box;
-			display: flex;
-			position: relative;
-			transition: left .025s linear;
-
-			> .search-headers-column-block {
-				@include search-result-column-block;
-				flex-shrink: 0;
-				position: relative;
-				transform: translate3d(0,0,0);
-
-				&.no-sort {
-					> .inner {
-						padding-right: 8px;
-					}
-				}
-
-				> .inner {
-					color: #fff;
-					font-weight: 500;
-					padding-right: 32px;
-
-					.column-sort-icon {
-						color: rgba(255,255,255,0.5);
-						text-decoration: none !important;
-						margin-left: 10px;
-						margin-right: 5px;
-						display: inline-block;
-						/* float: right; */
-						position: absolute;
-						cursor: pointer;
-						right: 9px;
-						&:hover, &:active, &:focus {
-							color: #fff;
-						}
-						&.active {
-							color: #fff;
-							text-shadow: 0 0 0 #fff;
-						}
-					}
-
-				}
-				&:hover{
-					z-index: 10;
-				}
-				&[data-field="display_title"]{
-					padding-left: 40px;
-				}
-				> .width-adjuster {
-					position: absolute;
-					color: #fff;
-					padding-left: 10px;
-					padding-right: 15px;
-					left: 0;
-					top : 0;
-					margin-left: -12px;
-					z-index: 10;
-					cursor: col-resize;
-					width: 28px;
-					height: 100%;
-					
-					&:after{
-						content: ' ';
-						border-left: 1px dotted rgba(255,255,255,0.6);
-						border-right: 1px dotted rgba(255,255,255,0.6);
-						width: 3px;
-						left: 10px;
-
-						top: 9.5px;
-						bottom: 9.5px;
-						position: absolute;
-					}
-					&:hover:after {
-						border-color: #fff;
-					}
-				}
-			}
-		}
-	} // .search-headers-row
 
 	.search-results-container {
 		position: relative;
@@ -1340,11 +1256,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 									letter-spacing: 0.5px;
 								}
 							}
-							&[data-field="lab.display_title"]{
-								i.user-icon {
-									margin-right: 5px;
-								}
-							}
+							
 						}
 					}
 
@@ -1514,6 +1426,105 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 } // .search-results-outer-container
 
+.search-headers-row {
+	background-color: #22656d;
+	z-index: 10;
+	transform: translate3d(0,0,0) !important;
+	overflow-x: hidden;
+	&.stickied {
+		top : 40px;
+		.browse-page-container & {
+			top: 80px;
+		}
+	}
+	> .columns {
+		display: -webkit-box;
+		display: flex;
+		position: relative;
+		transition: left .025s linear;
+
+		> .search-headers-column-block {
+			@include search-result-column-block;
+			flex-shrink: 0;
+			position: relative;
+			transform: translate3d(0,0,0);
+
+			&.no-sort {
+				> .inner {
+					padding-right: 8px;
+				}
+			}
+
+			> .inner {
+				color: #fff;
+				font-weight: 500;
+				padding-right: 32px;
+
+				.column-sort-icon {
+					color: rgba(255,255,255,0.5);
+					text-decoration: none !important;
+					margin-left: 10px;
+					margin-right: 5px;
+					display: inline-block;
+					/* float: right; */
+					position: absolute;
+					cursor: pointer;
+					right: 9px;
+					&:hover, &:active, &:focus {
+						color: #fff;
+					}
+					&.active {
+						color: #fff;
+						text-shadow: 0 0 0 #fff;
+					}
+				}
+
+			}
+			&:hover{
+				z-index: 10;
+			}
+			&[data-field="display_title"]{
+				padding-left: 40px;
+			}
+			> .width-adjuster {
+				position: absolute;
+				color: #fff;
+				padding-left: 10px;
+				padding-right: 15px;
+				left: 0;
+				top : 0;
+				margin-left: -12px;
+				z-index: 10;
+				cursor: col-resize;
+				width: 28px;
+				height: 100%;
+				
+				&:after{
+					content: ' ';
+					border-left: 1px dotted rgba(255,255,255,0.6);
+					border-right: 1px dotted rgba(255,255,255,0.6);
+					width: 3px;
+					left: 10px;
+
+					top: 9.5px;
+					bottom: 9.5px;
+					position: absolute;
+				}
+				&:hover:after {
+					border-color: #fff;
+				}
+			}
+		}
+	}
+
+	&.non-adjustable {
+		> .columns > .search-headers-column-block > .inner {
+			padding-right: 8px;
+		}
+	}
+
+} // .search-headers-row
+
 .above-results-table-row {
 	min-height: 40px;
 	padding-bottom: 5px;
@@ -1635,6 +1646,71 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 		}
 	}
 }
+
+.item-page-table-container {
+	.item-page-table-row-container {
+
+		border-bottom: 1px solid #eee;
+
+		> .inner-wrapper {
+			padding-left: 30px;
+			border-top: 1px solid #eee;
+		}
+
+		.table-row {
+			.column {
+				@include search-result-column-block;
+				float: none;
+				display: inline-block;
+				vertical-align: middle;
+				&[data-field="display_title"]{
+					> .inner {
+						height: auto;
+						white-space: normal;
+						.icon-container {
+							padding-top: 8px;
+							padding-bottom: 8px;
+							cursor: pointer;
+							font-size: 1.25rem;
+						}
+						.title-container {
+							padding-right: 0;
+						}
+					}
+				}
+
+				&.block {
+					// Mobile
+					padding: 0;
+					margin: 0;
+					.label-for-field {
+						padding-left: 8px;
+						padding-right: 8px;
+						padding-top: 8px;
+						margin-bottom: -8px;
+					}
+					> .inner {
+						height: auto;
+						padding: 8px 8px;
+						border-bottom: 1px solid #f4f4f4;
+						text-align: left;
+						.icon-container {
+							padding-top: 0;
+							padding-bottom: 0;
+							font-size: 1rem;
+							width: auto;
+							padding-right: 0;
+						}
+					}
+				}
+
+			}
+		}
+
+	}
+}
+
+// IS the below still used???
 
 .result-table {
     position: relative;

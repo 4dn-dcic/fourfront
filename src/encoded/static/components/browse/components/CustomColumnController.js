@@ -5,7 +5,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { ButtonToolbar, ButtonGroup, DropdownButton, MenuItem, Button, Modal, Checkbox, Collapse } from 'react-bootstrap';
-import { extendColumnDefinitions, columnsToColumnDefinitions } from './SearchResultTable';
+import { extendColumnDefinitions, columnsToColumnDefinitions } from './table-commons';
 
 /**
  * 

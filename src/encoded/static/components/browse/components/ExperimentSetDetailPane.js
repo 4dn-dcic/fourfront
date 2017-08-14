@@ -8,7 +8,7 @@ import ReactTooltip from 'react-tooltip';
 import ExperimentsTable from './../../experiments-table';
 import { FlexibleDescriptionBox } from './../../item-pages/components';
 import { expFxn } from './../../util';
-import { SearchResultTable, defaultColumnBlockRenderFxn } from './SearchResultTable';
+import { defaultColumnBlockRenderFxn, sanitizeOutputValue } from './table-commons';
 
 
 export class ExperimentSetDetailPane extends React.Component {
@@ -16,15 +16,17 @@ export class ExperimentSetDetailPane extends React.Component {
     static allFileIDs(expSet: Object){ return _.pluck(  expFxn.allFilesFromExperimentSet(expSet)  , 'uuid'); }
 
     static propTypes = {
-        'expSetFilters' : PropTypes.object.isRequired,
+        'expSetFilters' : PropTypes.object,
         'selectAllFilesInitially' : PropTypes.bool,
         'result' : PropTypes.object.isRequired,
-        'containerWidth' : PropTypes.number.isRequired,
-        'additionalDetailFields' : PropTypes.object.isRequired
+        'containerWidth' : PropTypes.number,
+        'additionalDetailFields' : PropTypes.object,
+        'paddingWidth' : PropTypes.number
     }
 
     static defaultProps = {
         'selectAllFilesInitially' : false,
+        'paddingWidth' : 47,
         'additionalDetailFields' : {
             'Lab': 'lab.title',
             'Treatments':'experiments_in_set.biosample.treatments_summary',
@@ -40,7 +42,7 @@ export class ExperimentSetDetailPane extends React.Component {
             <div className="experiment-set-info-wrapper">
                 <div className="expset-addinfo">
                     <div className="row">
-                        <div className="col-sm-6 addinfo-description-section">
+                        <div className="col-md-6 addinfo-description-section">
                             <label className="text-500 description-label">Description</label>
                             <FlexibleDescriptionBox
                                 description={ expSet.description }
@@ -49,9 +51,9 @@ export class ExperimentSetDetailPane extends React.Component {
                                 dimensions={null}
                             />
                         </div>
-                        <div className="col-sm-6 addinfo-properties-section">
+                        <div className="col-md-6 addinfo-properties-section">
                         { _.keys(addInfo).map(function(title){
-                            var value = SearchResultTable.sanitizeOutputValue(defaultColumnBlockRenderFxn(expSet, { 'field' : addInfo[title] }, null, 0)); // Uses object.getNestedProperty, pretty prints JSX. Replaces value probe stuff.
+                            var value = sanitizeOutputValue(defaultColumnBlockRenderFxn(expSet, { 'field' : addInfo[title] }, null, 0)); // Uses object.getNestedProperty, pretty prints JSX. Replaces value probe stuff.
                             return (
                                 <div className="row expset-addinfo-row clearfix" key={title}>
                                     <div className="col-xs-4 col-sm-3 expset-addinfo-key">
@@ -66,6 +68,7 @@ export class ExperimentSetDetailPane extends React.Component {
                         </div>
                     </div>
                 </div>
+                <div style={{ overflowX : 'auto', width: this.props.containerWidth ? (this.props.containerWidth - this.props.paddingWidth) : null }}>
                 <ExperimentsTable
                     key='experiments-table'
                     columnHeaders={[
@@ -76,12 +79,13 @@ export class ExperimentSetDetailPane extends React.Component {
                     experimentArray={expSet.experiments_in_set}
                     replicateExpsArray={expSet.replicate_exps}
                     experimentSetType={expSet.experimentset_type}
-                    width={this.props.containerWidth ? (this.props.containerWidth - (47 + 0) /* account for padding of pane */) : null}
+                    width={this.props.containerWidth ? (Math.max(this.props.containerWidth - this.props.paddingWidth, 500) /* account for padding of pane */) : null}
                     fadeIn={false}
                     selectedFiles={this.props.selectedFiles}
                     selectFile={this.props.selectFile}
                     unselectFile={this.props.unselectFile}
                 />
+                </div>
             </div>
         );
     }
