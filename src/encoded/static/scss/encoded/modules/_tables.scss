@@ -1716,6 +1716,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						}
 					}
 					&[data-field="display_title"]{
+						margin-bottom: 10px;
 						> .inner {
 							background-color: #f4f4f4;
 							padding-top: 12px;
@@ -1735,7 +1736,8 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 		}
 
 		@media screen and (max-width: $screen-sm-max){
-			margin-bottom: 25px;
+			margin-bottom: 20px;
+			margin-top: 10px;
 			border-bottom: none;
 		}
 

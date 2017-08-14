@@ -19,9 +19,9 @@ export default class FileView extends ItemBaseView {
 
         var initTabs = [];
 
-        if (Array.isArray(this.props.context.experiments)){
-            initTabs.push(FileViewOverview.getTabObject(this.props.context));
-        }
+        //if (Array.isArray(this.props.context.experiments)){
+        initTabs.push(FileViewOverview.getTabObject(this.props.context, this.props.schemas));
+        //}
 
         return initTabs.concat(this.getCommonTabs());
     }
@@ -33,18 +33,18 @@ globals.panel_views.register(FileView, 'File');
 
 class FileViewOverview extends React.Component {
 
-    static getTabObject(context){
+    static getTabObject(context, schemas){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'experiments-info',
-            'disabled' : !Array.isArray(context.experiments),
+            //'disabled' : !Array.isArray(context.experiments),
             'content' : (
                 <div className="overflow-hidden">
                     <h3 className="tab-section-title">
                         <span>Overview</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview context={context} />
+                    <FileViewOverview context={context} schemas={schemas} />
                 </div>
             )
         };
@@ -136,13 +136,7 @@ class FileViewOverview extends React.Component {
 
         return (
             <div>
-                -- OTHER STUFF GOES HERE, LIKE DOWNLOAD BUTTON AND FILE SIZE --
-
-                <OverViewBody result={context} />
-
-
-                <br/>
-                <br/>
+                <OverViewBody result={context} schemas={this.props.schemas} />
                 { expSetsTable }
             </div>
         );
@@ -152,16 +146,90 @@ class FileViewOverview extends React.Component {
 }
 
 class OverViewBody extends React.Component {
+
+    relatedFiles(){
+        var file = this.props.result;
+        if (!Array.isArray(file.related_files) || file.related_files.length === 0){
+            return null;
+        }
+
+        return _.map(file.related_files, function(rf){
+
+            return (
+                <li className="related-file">
+                    { rf.relationship_type } { object.linkFromItem(rf.file) }
+                </li>
+            );
+        });
+
+    }
+
     render(){
         var file = this.props.result;
+        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), file);
+        console.log(tips);
         return (
             <div className="row">
-                <div className="col-md-8 col-xs-12">
-                    DEETS
+                <div className="col-md-9 col-xs-12">
+                    <div className="row overview-blocks">
+
+                        <div className="col-sm-4 col-lg-3">
+                            <div className="inner">
+                                <object.TooltipInfoIconContainerAuto result={file} property={'file_format'} tips={tips} elementType="h5" fallbackTitle="File Format" />
+                                <div>
+                                    { Schemas.Term.toName('file_format', file.file_format) || 'Unknown/Other' }
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-sm-4 col-lg-3">
+                            <div className="inner">
+                                <object.TooltipInfoIconContainerAuto result={file} property={'file_type'} tips={tips} elementType="h5" fallbackTitle="File Type" />
+                                <div>
+                                    { Schemas.Term.toName('file_type', file.file_type) || 'Unknown/Other'}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-sm-4 col-lg-3">
+                            <div className="inner">
+                                <object.TooltipInfoIconContainerAuto result={file} property={'file_classification'} tips={tips} elementType="h5" fallbackTitle="General Classification" />
+                                <div>
+                                    { Schemas.Term.toName('file_classification', file.file_classification) }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="col-sm-12 col-lg-3">
+                            <div className="inner">
+                                <object.TooltipInfoIconContainerAuto result={file} property={'notes'} tips={tips} elementType="h5" fallbackTitle="Notes" />
+                                <div>
+                                    { file.notes }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="col-sm-12">
+                            <div className="inner">
+                                <object.TooltipInfoIconContainerAuto result={file} property={'related_files'} tips={tips} elementType="h5" fallbackTitle="Related Files" />
+                                <ul>
+                                    { this.relatedFiles() }
+                                </ul>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
                 </div>
-                <div className="col-md-4 col-xs-12">
-                    <FileDownloadButtonAuto result={file} className="pull-right" />
-                    { Schemas.Term.toName('file_size', file.file_size) }
+                <div className="col-md-3 col-xs-12">
+                    <div className="file-download-container">
+                        <FileDownloadButtonAuto result={file} />
+                        { file.file_size && typeof file.file_size === 'number' ?
+                        <h6 className="text-400">
+                            <i className="icon icon-fw icon-hdd-o" /> { Schemas.Term.toName('file_size', file.file_size) }
+                        </h6>
+                        : null }
+                    </div>
                 </div>
             </div>
         );

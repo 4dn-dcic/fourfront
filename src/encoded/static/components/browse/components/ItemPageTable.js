@@ -43,6 +43,15 @@ export class ItemPageTable extends React.Component {
         }
     }
 
+    constructor(props){
+        super(props);
+        this.state = { 'mounted' : false };
+    }
+
+    componentDidMount(){
+        this.setState({ 'mounted' : true });
+    }
+
     render(){
         var results = this.props.results;
         var loading = this.props.loading;

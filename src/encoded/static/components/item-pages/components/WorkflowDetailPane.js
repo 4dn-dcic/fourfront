@@ -71,11 +71,39 @@ export class FileDownloadButtonAuto extends React.Component {
         })
     }
 
+    static defaultProps = {
+        'canDownloadStatuses' : [
+            'uploaded',
+            'released',
+            'replaced',
+            'in review by project',
+            'released to project'
+        ]
+    }
+
+    canDownload(){
+        var file = this.props.result;
+        if (!file || typeof file !== 'object'){
+            console.error("Incorrect data type");
+            return false;
+        }
+        if (typeof file.status !== 'string'){
+            console.error("No 'status' property on file:", file);
+            return false;
+        }
+
+        if (this.props.canDownloadStatuses.indexOf(file.status) > -1){
+            return true;
+        }
+        return false;
+    }
+
     render(){
         var file = this.props.result;
         var props = {
             'href' : file.href,
-            'filename' : file.filename
+            'filename' : file.filename,
+            'disabled' : !this.canDownload()
         };
         return <FileDownloadButton {...props} {...this.props} />;
     }
@@ -158,13 +186,7 @@ class FileDetailBody extends React.Component {
     }
 
     static defaultProps = {
-        'canDownloadStatuses' : [
-            'uploaded',
-            'released',
-            'replaced',
-            'in review by project',
-            'released to project'
-        ]
+        'canDownloadStatuses' : FileDownloadButtonAuto.defaultProps.canDownloadStatuses
     }
 
     constructor(props){

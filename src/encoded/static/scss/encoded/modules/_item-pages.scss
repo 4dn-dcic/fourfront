@@ -1073,3 +1073,41 @@ $download-button-width : 100px;
 	}
 
 }
+
+/**** File VIew ****/
+
+.item-page-container.type-File {
+
+	.rc-tabs-content {
+
+		.overview-blocks {
+			> div {
+				> .inner {
+					padding: 7px 0;
+					h5 {
+						margin-bottom: 5px;
+						font-weight: 500;
+					}
+				}
+			}
+		}
+
+		 .file-download-container {
+
+			border-top: 1px solid #eee;
+			margin-top: 20px;
+			padding-top: 20px;
+
+			@media screen and (min-width: $screen-md-min){
+				float: right;
+				padding-top: 16px;
+				margin-top: 0;
+				border-top: none;
+			}
+
+		}
+
+	}
+
+}
+
