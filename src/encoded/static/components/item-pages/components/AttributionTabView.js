@@ -214,19 +214,22 @@ export class AttributionTabView extends React.Component {
                             </div>
                         : null }
 
-                        { typeof attrInfo.userInfo !== 'undefined' ?
-                        <div className="col-sm-12 col-md-12 col-sm-float-right">
-                            { FormattedInfoBlock.User(attrInfo.userInfo) }
-                        </div>
-                        : null }
+                        
                         { typeof attrInfo.labInfo !== 'undefined' ?
                         <div className="col-sm-12 col-md-12 col-sm-float-right">
                             { FormattedInfoBlock.Lab(attrInfo.labInfo) }
                         </div>
                         : null}
+
                         { typeof attrInfo.awardInfo !== 'undefined' ?
                         <div className="col-sm-12 col-md-12 col-sm-float-right">
                             { FormattedInfoBlock.Award(attrInfo.awardInfo) }
+                        </div>
+                        : null }
+
+                        { typeof attrInfo.userInfo !== 'undefined' ?
+                        <div className="col-sm-12 col-md-12 col-sm-float-right">
+                            { FormattedInfoBlock.User(attrInfo.userInfo) }
                         </div>
                         : null }
 
