@@ -60,7 +60,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     prepared_terms = prepare_search_term(request)
 
     doc_types = set_doc_types(request, types, search_type)
-    schemas = (types[item_type].schema for item_type in doc_types)
+    schemas = [types[item_type].schema for item_type in doc_types]
 
     # set ES index based on doc_type (one type per index)
     # if doc_type is item, search all indexes by setting es_index to None
@@ -114,7 +114,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
-    result['facets'] = format_facets(es_results, facets, used_filters, schemas, total, search_frame)
+    result['facets'] = format_facets(es_results, facets, used_filters, total, search_frame)
 
     # Add batch actions
     # TODO: figure out exactly what this does. Provide download URLs?
@@ -737,7 +737,7 @@ def execute_search(search):
     return es_results
 
 
-def format_facets(es_results, facets, used_filters, schemas, total, search_frame='embedded'):
+def format_facets(es_results, facets, used_filters, total, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results
     These are stored within 'aggregations' of the result.
