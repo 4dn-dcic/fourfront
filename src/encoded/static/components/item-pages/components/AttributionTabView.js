@@ -13,6 +13,7 @@ export class AttributionTabView extends React.Component {
         return {
             tab : <span><i className="icon icon-users icon-fw"/> Attribution</span>,
             key : "attribution",
+            disabled : (!context.lab && !context.award && !context.submitted_by),
             content : (
                 <div className="overflow-hidden">
                     <h3 className="tab-section-title">
