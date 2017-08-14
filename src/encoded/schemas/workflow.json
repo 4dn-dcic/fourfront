@@ -123,6 +123,7 @@
                             "chromsizes",
                             "reference_fasta",
                             "juicer_format_restriction_site_file",
+                            "normvector_juicerformat",
                             "other"
                         ]
                     },
