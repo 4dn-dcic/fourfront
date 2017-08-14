@@ -40,3 +40,6 @@ module.exports.DateUtility  = require('./date-utility');
 module.exports.expFxn       = require('./experiments-transforms');
 module.exports.Filters      = require('./experiments-filters');
 module.exports.Schemas      = require('./Schemas');
+
+/** Transforms, manipulations, parsers, etc. re: objects. **/
+module.exports.fileUtil     = require('./file');

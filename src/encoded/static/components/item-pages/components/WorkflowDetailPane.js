@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { ItemDetailList, TooltipInfoIconContainer } from './ItemDetailList';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
-import { console, object, layout, ajax } from './../../util';
+import { console, object, layout, ajax, fileUtil } from './../../util';
 
 
 export class ViewMetricButton extends React.Component {
@@ -46,6 +46,12 @@ export class ViewMetricButton extends React.Component {
 
 
 export class FileDownloadButton extends React.Component {
+
+    static defaultProps = {
+        'title' : 'Download',
+        'disabled' : false
+    }
+
     render(){
         var { href, className, disabled, title, filename } = this.props;
         return (
@@ -53,6 +59,25 @@ export class FileDownloadButton extends React.Component {
                 <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
+    }
+}
+
+export class FileDownloadButtonAuto extends React.Component {
+
+    static propTypes = {
+        'result' : PropTypes.shape({
+            'href' : PropTypes.string.isRequired,
+            'filename' : PropTypes.string.isRequired,
+        })
+    }
+
+    render(){
+        var file = this.props.result;
+        var props = {
+            'href' : file.href,
+            'filename' : file.filename
+        };
+        return <FileDownloadButton {...props} {...this.props} />;
     }
 }
 
@@ -124,22 +149,6 @@ class FileDetailBody extends React.Component {
         if (node.meta && node.meta.run_data && node.meta.run_data.type === 'quality_metric') return true;
     }
 
-    /**
-     * Use presence of 'status' property to determine if File object/Item we have
-     * is complete in its properties or not.
-     * 
-     * @param {Object} file - Object representing an embedded file. Should have display_title, at minimum.
-     * @returns {boolean} True if complete, false if not.
-     * @throws Error if file is not an object.
-     */
-    static isFileDataComplete(file){
-        if (!file || typeof file !== 'object') throw new Error('File param is not an object.');
-        if (typeof file.display_title === 'string' && typeof file.status !== 'string') {
-            return false;
-        }
-        return true;
-    }
-
     static propTypes = {
         'node' : PropTypes.object.isRequired,
         'file' : PropTypes.object.isRequired,
@@ -183,7 +192,7 @@ class FileDetailBody extends React.Component {
         if (typeof file === 'string') {
             hrefToRequest = '/files/' + file + '/';
         } else if (file && typeof file === 'object'){
-            if (!FileDetailBody.isFileDataComplete(file)) hrefToRequest = object.atIdFromObject(file);
+            if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.atIdFromObject(file);
         }
 
         if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.
@@ -215,7 +224,7 @@ class FileDetailBody extends React.Component {
         var fileTitle;
         var fileTitleFormatted;
         var colClassName = "col-sm-6 col-lg-4";
-        if (typeof file === 'string' || !FileDetailBody.isFileDataComplete(file)) {
+        if (typeof file === 'string' || !fileUtil.isFileDataComplete(file)) {
             fileTitle = null;
             fileTitleFormatted = <small><i className="icon icon-circle-o-notch icon-spin icon-fw"/></small>;
         } else {
@@ -309,7 +318,7 @@ class FileDetailBody extends React.Component {
 
         var node = this.props.node;
         var body;
-        if (typeof this.state.file === 'string'/* || !FileDetailBody.isFileDataComplete(this.state.file)*/){
+        if (typeof this.state.file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
             body = null;
         } else if (FileDetailBody.isNodeQCMetric(node)){
             var metrics = object.listFromTips(object.tipsFromSchema(this.props.schemas, this.state.file))

@@ -1,5 +1,33 @@
 var CryptoJS = require('crypto-js');
+import React from 'react';
 
+
+/**
+ * Use presence of 'status' property to determine if File object/Item we have
+ * is complete in its properties or not.
+ * 
+ * @param {Object} file - Object representing an embedded file. Should have display_title, at minimum.
+ * @returns {boolean} True if complete, false if not.
+ * @throws Error if file is not an object.
+ */
+export function isFileDataComplete(file){
+    if (!file || typeof file !== 'object') throw new Error('File param is not an object.');
+    if (typeof file.display_title === 'string' && typeof file.status !== 'string') {
+        return false;
+    }
+    return true;
+}
+
+
+
+
+
+/*** Common React Classes ***/
+
+
+
+
+/*** MD5 Related ***/
 
 /*
 Return a cryptojs WordArray given an arrayBuffer (elemtent 0). Also return
@@ -50,11 +78,16 @@ function readChunked(file, chunkCallback, endCallback) {
     readNext();
 }
 
-/*
-Adapted from http://stackoverflow.com/questions/39112096
-Takes a file object and optional callback progress function
-*/
-var getLargeMD5 = module.exports.getLargeMD5 = function(file, cbProgress) {
+/**
+ * Adapted from http://stackoverflow.com/questions/39112096
+ * Takes a file object and optional callback progress function
+ * 
+ * @param {File} file - Instance of a File class (subclass of Blob).
+ * @param {function} cbProgress - Callback function on progress change. Accepts a 0-1 float value.
+ * @returns {Promise} AJAX Promise object.
+ */
+
+export function getLargeMD5(file, cbProgress) {
     return new Promise((resolve, reject) => {
         // create algorithm for progressive hashing
         var md5 = CryptoJS.algo.MD5.create();

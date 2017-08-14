@@ -213,8 +213,6 @@ class ItemPageTableRow extends React.Component {
     }
 
     render(){
-        console.log('col', this.props.columnDefinitions);
-
         return (
             <div className="item-page-table-row-container">
                 { this.props.responsiveGridState === 'xs' || this.props.responsiveGridState === 'sm' ? this.renderRowOfBlocks() : this.renderRowOfColumns() }

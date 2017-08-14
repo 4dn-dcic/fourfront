@@ -5,12 +5,11 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as globals from './../globals';
 import { object, expFxn, ajax, Schemas, layout } from './../util';
-import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FormattedInfoBlock, ItemFooterRow, TabbedView, Publications } from './components';
+import { FormattedInfoBlock, TabbedView, FileDownloadButton, FileDownloadButtonAuto } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import ExperimentsTable from './../experiments-table';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
-
 
 
 
@@ -122,8 +121,6 @@ class FileViewOverview extends React.Component {
     render(){
         var { context } = this.props;
 
-        console.log(this.state, this.experiment_set_uris);
-
         var expSetsTable;
         if (this.state.loading || this.state.experiment_sets){
             expSetsTable = (
@@ -140,6 +137,10 @@ class FileViewOverview extends React.Component {
         return (
             <div>
                 -- OTHER STUFF GOES HERE, LIKE DOWNLOAD BUTTON AND FILE SIZE --
+
+                <OverViewBody result={context} />
+
+
                 <br/>
                 <br/>
                 { expSetsTable }
@@ -149,6 +150,27 @@ class FileViewOverview extends React.Component {
     }
 
 }
+
+class OverViewBody extends React.Component {
+    render(){
+        var file = this.props.result;
+        return (
+            <div className="row">
+                <div className="col-md-8 col-xs-12">
+                    DEETS
+                </div>
+                <div className="col-md-4 col-xs-12">
+                    <FileDownloadButtonAuto result={file} className="pull-right" />
+                    { Schemas.Term.toName('file_size', file.file_size) }
+                </div>
+            </div>
+        );
+
+    }
+}
+
+
+
 
 class FileViewExperimentSetTables extends React.Component {
 
