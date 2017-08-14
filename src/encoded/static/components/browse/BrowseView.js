@@ -256,6 +256,7 @@ class ResultTableContainer extends React.Component {
                                 selectedFiles={this.props.selectedFiles}
                                 selectFile={this.props.selectFile}
                                 unselectFile={this.props.unselectFile}
+                                paddingWidth={47}
                             />
                         }
                         stickyHeaderTopOffset={-78}

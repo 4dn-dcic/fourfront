@@ -175,7 +175,9 @@ class FileViewExperimentSetTables extends React.Component {
                 <hr className="tab-section-title-horiz-divider"/>
                 <ItemPageTable
                     results={experiment_sets}
-                    renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidth={30} />}
+                    renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
+                        'xs' : 0, 'sm' : 10, 'md' : 30, 'lg' : 47
+                    }} />}
                     columns={{
                         "number_of_experiments" : "Exps",
                         "experiments_in_set.experiment_type": "Experiment Type",

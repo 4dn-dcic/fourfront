@@ -6,7 +6,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import Draggable from 'react-draggable';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
@@ -16,8 +15,11 @@ import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
 import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
-import { ColumnSorterIcon } from './LimitAndPageControls';
-import { defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions, ResultRowColumnBlockValue, DEFAULT_WIDTH_MAP, getColumnWidthFromDefinition } from './table-commons';
+import {
+    defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap,
+    columnsToColumnDefinitions, ResultRowColumnBlockValue, DEFAULT_WIDTH_MAP,
+    getColumnWidthFromDefinition, HeadersRow
+} from './table-commons';
 
 
 
@@ -269,7 +271,7 @@ class ResultRow extends React.Component {
     }
 }
 
-
+/*
 class HeadersRow extends React.Component {
 
     static propTypes = {
@@ -293,20 +295,7 @@ class HeadersRow extends React.Component {
             this.setState({ 'widths' : nextProps.headerColumnWidths });
         }
     }
-    /*
-    shouldComponentUpdate(nextProps, nextState){
-        if (
-            this.props.mounted !== nextProps.mounted ||
-            this.state !== nextState ||
-            this.props.columnDefinitions !== nextProps.columnDefinitions ||
-            this.props.isSticky !== nextProps.isSticky ||
-            this.props.stickyStyle.width !== nextProps.stickyStyle.width ||
-            this.props.stickyStyle.left !== nextProps.stickyStyle.left
-        ) return true;
-        return false;
-    }
-    */
-
+    
     setHeaderWidths(idx, evt, r){
         if (typeof this.props.setHeaderWidths !== 'function') throw new Error('props.setHeaderWidths not a function');
         setTimeout(()=> this.props.setHeaderWidths(this.state.widths.slice(0)), 0);
@@ -368,6 +357,7 @@ class HeadersRow extends React.Component {
         );
     }
 }
+*/
 
 class LoadMoreAsYouScroll extends React.Component {
 

@@ -76,7 +76,9 @@ export class ItemPageTable extends React.Component {
         
         return (
             <div className="item-page-table-container clearfix" ref="tableContainer">
-                <HeadersRow mounted columnDefinitions={columnDefinitions} />
+                { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ? 
+                    <HeadersRow mounted columnDefinitions={columnDefinitions} />
+                : null }
                 { results.map((result, rowIndex)=>{
                     return (
                         <ItemPageTableRow
@@ -145,6 +147,7 @@ class ItemPageTableRow extends React.Component {
                     key={colDefinition.field}
                     schemas={this.props.schemas || null}
                     result={result}
+                    tooltip={true}
                 />
             );
         }
@@ -177,26 +180,33 @@ class ItemPageTableRow extends React.Component {
             return null;
         }
         var result = this.props.result;
-        
         return (
-            <div className="table-row clearfix">
+            <div className="table-row row clearfix">
                 {
-                    _.map(this.props.columnDefinitions, (col, index)=>{
-                        var label;
-                        if (col.field !== 'display_title'){
-                            label = (
-                                <div className="text-500 label-for-field">
-                                    { col.title || Schemas.Field.toName(col.field) }
+                    _.map(
+                        _.filter(this.props.columnDefinitions, (col, index)=>{
+                            if (!this.state.open && col.field !== 'display_title'){
+                                return false;
+                            }
+                            return true;
+                        }),
+                        (col, index)=>{
+                            var label;
+                            if (col.field !== 'display_title'){
+                                label = (
+                                    <div className="text-500 label-for-field">
+                                        { col.title || Schemas.Field.toName(col.field) }
+                                    </div>
+                                );
+                            }
+                            return (
+                                <div className={"column block column-for-" + col.field + (col.field === 'display_title' ? ' col-xs-12' : ' col-xs-6')} data-field={col.field}>
+                                    { label }
+                                    { this.renderValue(col, result) }
                                 </div>
                             );
                         }
-                        return (
-                            <div className={"column block column-for-" + col.field + (col.field === 'display_title' ? ' col-xs-12' : ' col-xs-6')} data-field={col.field}>
-                                { label }
-                                { this.renderValue(col, result) }
-                            </div>
-                        );
-                    })
+                    )
                 }
             </div>
         );

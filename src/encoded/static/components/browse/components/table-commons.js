@@ -9,12 +9,14 @@ import _ from 'underscore';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
+import Draggable from 'react-draggable';
 import Infinite from './../../lib/react-infinite/src/react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
 import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
+import { ColumnSorterIcon } from './LimitAndPageControls';
 
 
 export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
@@ -239,6 +241,10 @@ export function getColumnWidthFromDefinition(columnDefinition, mounted=true){
 
 export class ResultRowColumnBlockValue extends React.Component {
 
+    static defaultProps = {
+        'mounted' : false,
+    }
+
     shouldComponentUpdate(nextProps, nextState){
         if (
             nextProps.columnNumber === 0 ||
@@ -257,10 +263,16 @@ export class ResultRowColumnBlockValue extends React.Component {
         var value = sanitizeOutputValue(
             renderFxn(result, columnDefinition, _.omit(this.props, 'columnDefinition', 'result'))
         );
-        if (typeof value === 'string') value = <span className="value">{ value }</span>;
-        else if   (value === null)     value = <small className="text-300">-</small>;
+
+        var tooltip;
+        if (typeof value === 'string') {
+            if (this.props.tooltip === true && value.length > 25) tooltip = value;
+            value = <span className="value">{ value }</span>;
+        } else if (value === null){
+            value = <small className="text-300">-</small>;
+        }
         return (
-            <div className="inner">{ value }</div>
+            <div className="inner" data-tip={tooltip}>{ value }</div>
         );
     }
 }
@@ -312,8 +324,9 @@ export class HeadersRow extends React.Component {
 
     render(){
         var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset } = this.props;
+        var isAdjustable = this.props.headerColumnWidths && this.state.widths;
         return (
-            <div className={"search-headers-row non-adjustable " + (isSticky ? ' stickied' : '')} style={
+            <div className={"search-headers-row" + (isAdjustable ? '' : ' non-adjustable') + (isSticky ? ' stickied' : '')} style={
                 isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
                 : null}
             >
