@@ -1083,8 +1083,9 @@ $download-button-width : 100px;
 		.overview-blocks {
 			> div {
 				> .inner {
-					padding: 7px 0;
+					padding: 10px 0;
 					h5 {
+						margin-top: 0;
 						margin-bottom: 5px;
 						font-weight: 500;
 					}

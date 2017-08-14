@@ -173,7 +173,7 @@ class OverViewBody extends React.Component {
                 <div className="col-md-9 col-xs-12">
                     <div className="row overview-blocks">
 
-                        <div className="col-sm-4 col-lg-3">
+                        <div className="col-sm-4 col-lg-4">
                             <div className="inner">
                                 <object.TooltipInfoIconContainerAuto result={file} property={'file_format'} tips={tips} elementType="h5" fallbackTitle="File Format" />
                                 <div>
@@ -181,7 +181,7 @@ class OverViewBody extends React.Component {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-sm-4 col-lg-3">
+                        <div className="col-sm-4 col-lg-4">
                             <div className="inner">
                                 <object.TooltipInfoIconContainerAuto result={file} property={'file_type'} tips={tips} elementType="h5" fallbackTitle="File Type" />
                                 <div>
@@ -189,7 +189,7 @@ class OverViewBody extends React.Component {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-sm-4 col-lg-3">
+                        <div className="col-sm-4 col-lg-4">
                             <div className="inner">
                                 <object.TooltipInfoIconContainerAuto result={file} property={'file_classification'} tips={tips} elementType="h5" fallbackTitle="General Classification" />
                                 <div>
@@ -198,7 +198,8 @@ class OverViewBody extends React.Component {
                             </div>
                         </div>
 
-                        <div className="col-sm-12 col-lg-3">
+                        { file.notes ?
+                        <div className="col-sm-12">
                             <div className="inner">
                                 <object.TooltipInfoIconContainerAuto result={file} property={'notes'} tips={tips} elementType="h5" fallbackTitle="Notes" />
                                 <div>
@@ -206,7 +207,9 @@ class OverViewBody extends React.Component {
                                 </div>
                             </div>
                         </div>
+                        : null }
 
+                        { Array.isArray(file.related_files) && file.related_files.length > 0 ?
                         <div className="col-sm-12">
                             <div className="inner">
                                 <object.TooltipInfoIconContainerAuto result={file} property={'related_files'} tips={tips} elementType="h5" fallbackTitle="Related Files" />
@@ -215,7 +218,7 @@ class OverViewBody extends React.Component {
                                 </ul>
                             </div>
                         </div>
-
+                        : null }
 
 
                     </div>
