@@ -55,6 +55,7 @@ export class ExperimentSetDetailPane extends React.Component {
                                 fitTo="self"
                                 textClassName="text-medium"
                                 dimensions={null}
+                                linesOfText={3}
                             />
                         </div>
                         <div className="col-md-6 addinfo-properties-section">
