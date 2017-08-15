@@ -1053,6 +1053,63 @@ $small-label-accession-font-size : 0.75rem;
 	}
 }
 
+@mixin search-result-toggle-open-button-container {
+	padding-left: 40px;
+	.toggle-detail-button-container {
+		position: absolute;
+		top: 5px;
+		bottom: 5px;
+		left: 0;
+		z-index: 10;
+
+		> button {
+			padding-left: 0;
+			padding-right: 0;
+			position: relative;
+			height: 100%;
+			width: 36px;
+			border: 1px solid transparent;
+			background: transparent;
+			border-radius: 3px;
+			outline: none;
+			> .icon-container {
+				position: absolute;
+				top: 10px;
+				width: 100%;
+				text-align: middle;
+				> i.icon {
+					position: relative;
+					display: block;
+					margin: 0 auto;
+				}
+			}
+			
+			&:hover {
+				background-color: #eee;
+			}
+		}
+	}
+}
+
+@mixin search-result-toggle-open-button-container-open {
+	.toggle-detail-button-container {
+		top: 0px;
+		bottom: 1px;
+		> button {
+			border-radius: 0px;
+			background-color: #f8f8f8;
+			border-left-color: rgba(0,0,0,0.125);
+			border-right-color: #fdfdfd;
+			> .icon-container {
+				top: 20px;
+			}
+			&:hover {
+				background-color: #eee;
+			}
+		}
+	}
+}
+
 $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 .search-results-outer-container {
@@ -1187,41 +1244,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 								}
 							}
 							&[data-field="display_title"]{
-								padding-left: 40px;
-								.toggle-detail-button-container {
-									position: absolute;
-									top: 5px;
-									bottom: 5px;
-									left: 0;
-									z-index: 10;
-
-									> button {
-										padding-left: 0;
-										padding-right: 0;
-										position: relative;
-										height: 100%;
-										width: 36px;
-										border: 1px solid transparent;
-										background: transparent;
-										border-radius: 3px;
-										outline: none;
-										> .icon-container {
-											position: absolute;
-											top: 10px;
-											width: 100%;
-											text-align: middle;
-											> i.icon {
-												position: relative;
-												display: block;
-												margin: 0 auto;
-											}
-										}
-										
-										&:hover {
-											background-color: #eee;
-										}
-									}
-								}
+								@include search-result-toggle-open-button-container;
 								.select-button-container {
 									float: left;
 									margin-top: -10px;
@@ -1272,22 +1295,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 								}
 								
 								&[data-field="display_title"]{
-									.toggle-detail-button-container {
-										top: 0px;
-										bottom: 1px;
-										> button {
-											border-radius: 0px;
-											background-color: #f8f8f8;
-											border-left-color: rgba(0,0,0,0.125);
-											border-right-color: #fdfdfd;
-											> .icon-container {
-												top: 20px;
-											}
-											&:hover {
-												background-color: #eee;
-											}
-										}
-									}
+									@include search-result-toggle-open-button-container-open;
 								}
 
 
@@ -1653,7 +1661,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 .item-page-table-container {
 	.item-page-table-row-container {
-
+		position: relative;
 		border-bottom: 1px solid #eee;
 
 		> .inner-wrapper {
@@ -1689,6 +1697,16 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						.title-container {
 							padding-right: 0;
 						}
+						@include search-result-toggle-open-button-container;
+						&.open {
+							@include search-result-toggle-open-button-container-open;
+							.toggle-detail-button-container {
+								bottom: 0px;
+							}
+							.icon-container {
+								top: 15px !important;
+							}
+						}
 					}
 				}
 
@@ -1721,12 +1739,36 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							background-color: #f4f4f4;
 							padding-top: 12px;
 							padding-bottom: 11px;
-							padding-left: 5px;
+							padding-left: 40px;
 							.title-container {
 								font-size: 1.1rem;
 							}
 							.icon-container {
 								padding-left: 20px;
+							}
+							.toggle-detail-button-container {
+								
+								.toggle-detail-button {
+									width: 45px;
+									padding-right: 5px;
+									.icon-container {
+										position: relative;
+										top: 1px !important;
+									}
+								}
+							}
+							&.open {
+								.toggle-detail-button-container {
+								
+									.toggle-detail-button {
+										border-color: transparent;
+										background-color: transparent;
+										.icon-container {
+											position: relative;
+											top: 1px !important;
+										}
+									}
+								}
 							}
 						}
 					}

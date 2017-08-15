@@ -87,6 +87,21 @@ export function extendColumnDefinitions(columnDefinitions: Array<Object>, column
 }
 
 
+export class TableRowToggleOpenButton extends React.Component {
+    render(){
+        return (
+            <div className="inline-block toggle-detail-button-container">
+                <button className="toggle-detail-button" onClick={this.props.onClick}>
+                    <div className="icon-container">
+                        <i className={"icon icon-fw icon-" + (this.props.open ? 'minus' : 'plus') }/>
+                    </div>
+                </button>
+            </div>
+        );
+    }
+}
+
+
 
 export const defaultColumnDefinitionMap = {
     'display_title' : {
@@ -104,13 +119,7 @@ export const defaultColumnDefinitionMap = {
             
             return (
                 <span>
-                    <div className="inline-block toggle-detail-button-container">
-                        <button className="toggle-detail-button" onClick={props.toggleDetailOpen}>
-                            <div className="icon-container">
-                                <i className={"icon icon-fw icon-" + (props.detailOpen ? 'minus' : 'plus') }/>
-                            </div>
-                        </button>
-                    </div>
+                    <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
                     <div className="title-block text-ellipsis-container" data-tip={tooltip}>{ title }</div>
                 </span>
             );

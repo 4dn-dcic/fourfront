@@ -10,7 +10,7 @@ import ExperimentsTable from './../../experiments-table';
 import {
     ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
     defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
-    getColumnWidthFromDefinition, HeadersRow } from './table-commons';
+    getColumnWidthFromDefinition, HeadersRow, TableRowToggleOpenButton } from './table-commons';
 import { ExperimentSetDetailPane } from './ExperimentSetDetailPane';
 import { browseTableConstantColumnDefinitions } from './../BrowseView';
 
@@ -135,18 +135,20 @@ class ItemPageTableRow extends React.Component {
     renderValue(colDefinition, result){
         if (colDefinition.field === 'display_title'){
             return (
-                <div className="inner">
-                    <div className="row">
+                <div className={"inner" + (this.state.open ? ' open' : '')}>
+                    <TableRowToggleOpenButton open={this.state.open} onClick={this.toggleOpen} />
+                    {/*<div className="row">
                         <div className="col-xs-2 col-sm-3 col-md-2 icon-container">
                             <i className={"icon icon-fw icon-" + ( this.state.open ? 'minus' : 'plus' )} onClick={this.toggleOpen} />
                         </div>
-                        <div className="col-xs-10 col-sm-9 col-md-10 title-container">
+                        */}
+                        {/*<div className="col-xs-10 col-sm-9 col-md-10 title-container">*/}
                             { Schemas.getItemTypeTitle(result) }
                             { ' ' }
                             <a href={object.atIdFromObject(result)} className="mono-text text-400">{ result.accession }</a>
-                        </div>
+                        {/*</div>*/}
 
-                    </div>
+                    {/*</div>*/}
                 </div>
             );
         } else {

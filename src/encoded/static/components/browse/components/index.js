@@ -2,7 +2,7 @@
 
 export { 
     defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
-    ResultRowColumnBlockValue, sanitizeOutputValue, getColumnWidthFromDefinition
+    ResultRowColumnBlockValue, sanitizeOutputValue, getColumnWidthFromDefinition, TableRowToggleOpenButton
 } from './table-commons';
 export { LimitAndPageControls, ColumnSorterIcon } from './LimitAndPageControls';
 export { SortController } from './SortController';

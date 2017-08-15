@@ -92,21 +92,10 @@ class ResultDetail extends React.Component{
 
     constructor(props){
         super(props);
-        //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'closing' : false };
     }
-    /*
-    componentWillReceiveProps(nextProps){
-        if (nextProps.open !== this.props.open){
-            if (!nextProps.open){
-                this.setState({ 'closing' : true }, ()=> {
-                    setTimeout( () => this.setState({ 'closing' : false }), 400 );
-                });
-            }
-        }
-    }
-    */
+
     componentDidUpdate(pastProps, pastState){
         if (pastProps.open !== this.props.open){
             if (this.props.open && typeof this.props.setDetailHeight === 'function'){
@@ -271,93 +260,6 @@ class ResultRow extends React.Component {
     }
 }
 
-/*
-class HeadersRow extends React.Component {
-
-    static propTypes = {
-        'columnDefinitions' : ResultRow.propTypes.columnDefinitions,
-        'mounted' : PropTypes.bool.isRequired
-    }
-
-    constructor(props){
-        super(props);
-        this.throttledSetHeaderWidths = _.debounce(_.throttle(this.setHeaderWidths.bind(this), 1000), 350);
-        this.setHeaderWidths = this.setHeaderWidths.bind(this);
-        this.onAdjusterDrag = this.onAdjusterDrag.bind(this);
-        this.render = this.render.bind(this);
-        this.state = {
-            widths : props.headerColumnWidths.slice(0)
-        };
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (nextProps.headerColumnWidths !== this.props.headerColumnWidths){
-            this.setState({ 'widths' : nextProps.headerColumnWidths });
-        }
-    }
-    
-    setHeaderWidths(idx, evt, r){
-        if (typeof this.props.setHeaderWidths !== 'function') throw new Error('props.setHeaderWidths not a function');
-        setTimeout(()=> this.props.setHeaderWidths(this.state.widths.slice(0)), 0);
-    }
-
-    getWidthFor(idx){
-        return (
-            this.state.widths[idx] ||
-            this.props.headerColumnWidths[idx] ||
-            getColumnWidthFromDefinition(this.props.columnDefinitions[idx], this.props.mounted)
-        );
-    }
-
-    onAdjusterDrag(idx, evt, r){
-        var widths = this.state.widths.slice(0);
-        widths[idx] = Math.max(this.props.columnDefinitions[idx].minColumnWidth || this.props.defaultMinColumnWidth || 55, r.x );
-        this.setState({ 'widths' : widths });
-    }
-
-    render(){
-        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset } = this.props;
-        return (
-            <div className={"search-headers-row " + (isSticky ? ' stickied' : '')} style={
-                isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
-                : null}
-            >
-                <div className="columns clearfix" style={{ 
-                    'left'  : isSticky ? stickyStyle.left - tableLeftOffset : null,
-                    'width' : stickyStyle.width
-                }}>
-                {
-                    columnDefinitions.map((colDef, i)=>{
-                        var w = this.getWidthFor(i);
-                        var sorterIcon;
-                        if (!colDef.noSort && typeof this.props.sortBy === 'function' && w >= 50){
-                            var { sortColumn, sortBy, sortReverse } = this.props;
-                            sorterIcon = <ColumnSorterIcon sortByFxn={sortBy} currentSortColumn={sortColumn} descend={sortReverse} value={colDef.field} />;
-                        }
-                        return (
-                            <div
-                                data-field={colDef.field}
-                                key={colDef.field}
-                                className={"search-headers-column-block" + (colDef.noSort ? " no-sort" : '')}
-                                style={{ width : w }}
-                            >
-                                <div className="inner">
-                                    <span className="column-title">{ colDef.title }</span>
-                                    { sorterIcon }
-                                </div>
-                                <Draggable position={{x:w,y:0}} axis="x" onDrag={this.onAdjusterDrag.bind(this, i)} onStop={this.setHeaderWidths.bind(this, i)}>
-                                    <div className="width-adjuster"/>
-                                </Draggable>
-                            </div>
-                        );
-                    })
-                }
-                </div>
-            </div>
-        );
-    }
-}
-*/
 
 class LoadMoreAsYouScroll extends React.Component {
 
