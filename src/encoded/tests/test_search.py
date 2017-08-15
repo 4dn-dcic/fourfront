@@ -115,7 +115,6 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
     schema_facets = [('type', {'title': 'Data Type'})]
     schema_facets.extend(schema['facets'].items())
     schema_columns = [(name, obj.get('title')) for name,obj in schema['columns'].items()]
-    res
     res = testapp.get('/search/?type=ExperimentSet&limit=all').json
     for i,val in enumerate(schema_facets):
         assert res['facets'][i]['field'] == val[0]
