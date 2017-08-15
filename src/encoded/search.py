@@ -614,7 +614,8 @@ def initialize_facets(types, doc_types, search_audit, principals, prepared_terms
         ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION'})
     ]
     if len(doc_types) == 1 and doc_types[0] != 'Item' and 'facets' in types[doc_types[0]].schema:
-        facets.extend(types[doc_types[0]].schema['facets'].items())
+        schema_facets = OrderedDict(types[doc_types[0]].schema['facets'])
+        facets.extend(schema_facets.items())
 
     used_facets = [facet[0] for facet in facets]
     # add status to used_facets, which will be added to facets later
@@ -834,10 +835,9 @@ def list_visible_columns_for_schemas(request, schemas):
     columns = OrderedDict()
     for schema in schemas:
         if 'columns' in schema:
-            columns.update(OrderedDict(
-                (name, obj.get('title'))
-                for name,obj in schema['columns'].items() #if name in schema['properties']
-            ))
+            schema_columns = OrderedDict(schema['columns'])
+            for name,obj in schema['columns'].items():
+                columns[name] = obj.get('title')
     return columns
 
 _ASSEMBLY_MAPPER = {
