@@ -107,6 +107,21 @@ def test_search_with_simple_query(workbook, testapp):
     assert not set(mouse_uuids).issubset(set(mauxz_uuids))
 
 
+def test_search_facets_and_columns_order(workbook, testapp, registry):
+    from snovault import TYPES
+    test_type = 'experiment_set'
+    type_info = registry[TYPES].by_item_type[test_type]
+    schema = type_info.schema
+    schema_facets = [('type', {'title': 'Data Type'})]
+    schema_facets.extend(schema['facets'].items())
+    schema_columns = [(name, obj.get('title')) for name,obj in schema['columns'].items()]
+    res = testapp.get('/search/?type=ExperimentSet&limit=all').json
+    for i,val in enumerate(schema_facets):
+        assert res['facets'][i]['field'] == val[0]
+    for i,val in enumerate(schema_columns):
+        assert res['columns'][val[0]] == val[1]
+
+
 def test_search_embedded_file_by_accession(workbook, testapp):
     res = testapp.get('/search/?type=WorkflowRunSbg&output_files.value.accession=4DNFIYWQ59JI').json
     assert len(res['@graph']) > 0  # mutiple wfr can be returned
