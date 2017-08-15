@@ -10,7 +10,7 @@ branch-defaults:
   master:
     environment: fourfront-webprod
   production:
-    environment: fourfront-webdev
+    environment: fourfront-webprod
 global:
   application_name: 4dn-web
   default_ec2_keyname: 4dn-encode
