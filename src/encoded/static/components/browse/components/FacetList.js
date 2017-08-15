@@ -719,15 +719,27 @@ export class FacetList extends React.Component {
         'onChange' : PropTypes.func         // Unused
     }
 
+    static isLoggedInAsAdmin(){
+        var details = JWT.getUserDetails();
+        if (details && Array.isArray(details.groups) && details.groups.indexOf('admin') > -1){
+            return true;
+        }
+        return false;
+    }
+
 
     static filterFacetsForBrowse(facet, props, state){
         if (facet.field.substring(0, 6) === 'audit.'){
+<<<<<<< HEAD:src/encoded/static/components/browse/components/FacetList.js
             if (props.session){
                 var details = JWT.getUserDetails();
                 if (details && details.groups && details.groups.indexOf('admin') > -1){
                     return true;
                 }
             }
+=======
+            if (props.session && FacetList.isLoggedInAsAdmin()) return true;
+>>>>>>> 26398abbc21c6a1f847965988485b87ff082aa0c:src/encoded/static/components/facetlist.js
             return false; // Ignore audit facets temporarily, if not logged in as admin.
         }
         if (facet.field === 'experimentset_type') return false;
@@ -750,12 +762,16 @@ export class FacetList extends React.Component {
         if (facet.field === 'experiment_sets.@type') return false;
         if (facet.field === 'experiment_sets.experimentset_type') return false;
         if (facet.field.substring(0, 6) === 'audit.'){
+<<<<<<< HEAD:src/encoded/static/components/browse/components/FacetList.js
             if (props.session){
                 var details = JWT.getUserDetails();
                 if (details && details.groups && details.groups.indexOf('admin') > -1){
                     return true;
                 }
             }
+=======
+            if (props.session && FacetList.isLoggedInAsAdmin()) return true;
+>>>>>>> 26398abbc21c6a1f847965988485b87ff082aa0c:src/encoded/static/components/facetlist.js
             return false; // Ignore audit facets temporarily, esp if logged out.
         }
         return true;
