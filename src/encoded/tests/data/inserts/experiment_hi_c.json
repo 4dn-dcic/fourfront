@@ -30,7 +30,7 @@
         "biosample_quantity_units": "cells",
         "follows_sop": "Yes",
         "status": "in review by lab",
-        "processed_files": ["4DNFIAAAAAA1", "4DNFIAAAAAA4", "4DNFIAAAAAA5"]
+        "processed_files": ["4DNFIAAAAAA1"]
     },
     {
         "accession":"4DNEXO67APT1",
@@ -60,7 +60,7 @@
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "status": "in review by lab",
-        "processed_files": ["4DNFIAAAAAA2", "4DNFIAAAAAA4", "4DNFIAAAAAA5"]
+        "processed_files": ["4DNFIAAAAAA2"]
     },
     {
         "accession":"4DNEXO67APV1",
@@ -86,7 +86,7 @@
         "submitted_by": "wrangler@wrangler.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "status": "released",
-        "processed_files": ["4DNFIAAAAAA3", "4DNFIAAAAAA4", "4DNFIAAAAAA5"]
+        "processed_files": ["4DNFIAAAAAA3"]
     },
     {
         "accession":"4DNEXO67APY1",
