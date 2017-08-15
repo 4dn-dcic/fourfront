@@ -722,8 +722,11 @@ export class FacetList extends React.Component {
 
     static filterFacetsForBrowse(facet, props, state){
         if (facet.field.substring(0, 6) === 'audit.'){
-            if (props.session && JWT.getUserDetails().groups.indexOf('admin') > -1){
-                return true;
+            if (props.session){
+                var details = JWT.getUserDetails();
+                if (details && details.groups && details.groups.indexOf('admin') > -1){
+                    return true;
+                }
             }
             return false; // Ignore audit facets temporarily, if not logged in as admin.
         }
@@ -747,8 +750,11 @@ export class FacetList extends React.Component {
         if (facet.field === 'experiment_sets.@type') return false;
         if (facet.field === 'experiment_sets.experimentset_type') return false;
         if (facet.field.substring(0, 6) === 'audit.'){
-            if (props.session && JWT.getUserDetails().groups.indexOf('admin') > -1){
-                return true;
+            if (props.session){
+                var details = JWT.getUserDetails();
+                if (details && details.groups && details.groups.indexOf('admin') > -1){
+                    return true;
+                }
             }
             return false; // Ignore audit facets temporarily, esp if logged out.
         }

@@ -800,16 +800,84 @@ export default class ExperimentsTable extends React.Component {
 
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-
-        var contentsClassName = Array.isArray(exp.file_pairs) ? 'file-pairs' : 'files';
         var columnHeaders = this.columnHeaders();
+
+        var contentsClassName = 'files';
+        var contents = [];
+        if (Array.isArray(exp.file_pairs)){
+            contentsClassName = 'file-pairs';
+            contents = contents.concat(exp.file_pairs.map((filePair,j) =>
+                <FilePairBlock
+                    key={j}
+                    selectedFiles={this.props.selectedFiles}
+                    files={filePair}
+                    columnHeaders={columnHeaders}
+                    handleFileCheckboxChange={this.handleFileCheckboxChange}
+                    experiment={exp}
+                    experimentSetAccession={this.props.experimentSetAccession}
+                    label={ exp.file_pairs.length > 1 ?
+                        { title : "Pair " + (j + 1) } : { title : "Pair" }
+                    }
+                />
+            ));
+        }
+        // Add in remaining unpaired files, if any.
+        if (Array.isArray(exp.files) && exp.files.length > 0){
+            contents.push(
+                <StackedBlock
+                    key={exp['@id']}
+                    hideNameOnHover={false}
+                    columnClass="file-pair"
+                >
+                    { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ?
+                        <StackedBlockName/>
+                    : null }
+                    <StackedBlockList title="Files" className="files">
+                        { exp.files.map((file) =>
+                            <FileEntryBlock
+                                key={file['@id']}
+                                file={file}
+                                columnHeaders={columnHeaders}
+                                handleFileCheckboxChange={this.handleFileCheckboxChange}
+                                selectedFiles={this.props.selectedFiles}
+                                hideNameOnHover={false}
+                                experiment={exp}
+                                experimentSetAccession={this.props.experimentSetAccession}
+                                isSingleItem={exp.files.length + contents.length < 2 ? true : false}
+                            />
+                        )}
+                    </StackedBlockList>
+                </StackedBlock>
+            );
+        }
+        if (contents.length === 0){
+            /* No Files Exist */
+            contents.push(
+                <StackedBlock
+                    key={exp['@id']}
+                    hideNameOnHover={false}
+                    columnClass="file-pair"
+                >
+                    { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ?
+                        <StackedBlockName/>
+                    : null }
+                    <StackedBlockList title="Files" className="files">
+                        <FileEntryBlock
+                            file={null}
+                            columnHeaders={columnHeaders}
+                        />
+                    </StackedBlockList>
+                </StackedBlock>
+            );
+        }
+
         var experimentVisibleName = (
             exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
                 exp.experiment_type ? exp.experiment_type : exp.accession
         );
 
         return (
-            <ExperimentsTable.StackedBlock
+            <StackedBlock
                 key={exp['@id'] || exp.tec_rep_no || i}
                 hideNameOnHover={false}
                 columnClass="experiment"
@@ -829,56 +897,9 @@ export default class ExperimentsTable extends React.Component {
                     className={contentsClassName}
                     title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
                 >
-                    { contentsClassName === 'file-pairs' ? /* File Pairs Exist */
-                        exp.file_pairs.map((filePair,j) =>
-                            <FilePairBlock
-                                key={j}
-                                selectedFiles={this.props.selectedFiles}
-                                files={filePair}
-                                columnHeaders={columnHeaders}
-                                handleFileCheckboxChange={this.handleFileCheckboxChange}
-                                experiment={exp}
-                                experimentSetAccession={this.props.experimentSetAccession}
-                                label={ exp.file_pairs.length > 1 ?
-                                    { title : "Pair " + (j + 1) } : { title : "Pair" }
-                                }
-                            />
-                        )
-                        : /* No File Pairs, but files may exist */
-                        <ExperimentsTable.StackedBlock
-                            key={exp['@id']}
-                            hideNameOnHover={false}
-                            columnClass="file-pair"
-                        >
-                            { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ?
-                                <ExperimentsTable.StackedBlock.Name/>
-                            : null }
-                            <ExperimentsTable.StackedBlock.List title="Files" className="files">
-                                { Array.isArray(exp.files) ?
-                                    exp.files.map((file) =>
-                                        <FileEntryBlock
-                                            key={file['@id']}
-                                            file={file}
-                                            columnHeaders={columnHeaders}
-                                            handleFileCheckboxChange={this.handleFileCheckboxChange}
-                                            selectedFiles={this.props.selectedFiles}
-                                            hideNameOnHover={false}
-                                            experiment={exp}
-                                            experimentSetAccession={this.props.experimentSetAccession}
-                                            isSingleItem={exp.files.length < 2 ? true : false}
-                                        />
-                                    )
-                                    : /* No Files Exist */
-                                    <FileEntryBlock
-                                        file={null}
-                                        columnHeaders={columnHeaders}
-                                    />
-                                }
-                            </ExperimentsTable.StackedBlock.List>
-                        </ExperimentsTable.StackedBlock>
-                    }
+                    { contents }
                 </StackedBlockList>
-            </ExperimentsTable.StackedBlock>
+            </StackedBlock>
         );
     }
 
@@ -893,7 +914,7 @@ export default class ExperimentsTable extends React.Component {
         );
 
         return (
-            <ExperimentsTable.StackedBlock
+            <StackedBlock
                 columnClass="biosample"
                 hideNameOnHover={false}
                 key={expsWithBiosample[0].biosample['@id']}
@@ -905,7 +926,7 @@ export default class ExperimentsTable extends React.Component {
                     accession : expsWithBiosample[0].biosample.accession
                 }}
             >
-                <ExperimentsTable.StackedBlock.Name
+                <StackedBlockName
                     relativePosition={
                         expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6
                     }
@@ -913,8 +934,8 @@ export default class ExperimentsTable extends React.Component {
                     <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title">
                         { visibleBiosampleTitle }
                     </a>
-                </ExperimentsTable.StackedBlock.Name>
-                <ExperimentsTable.StackedBlock.List
+                </StackedBlockName>
+                <StackedBlockList
                     className="experiments"
                     title="Experiments"
                     children={expsWithBiosample.map(this.renderExperimentBlock)}
@@ -935,7 +956,7 @@ export default class ExperimentsTable extends React.Component {
                     }
                 />
 
-            </ExperimentsTable.StackedBlock>
+            </StackedBlock>
         );
     }
 

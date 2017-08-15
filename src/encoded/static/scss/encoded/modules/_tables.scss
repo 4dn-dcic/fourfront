@@ -979,7 +979,7 @@ $small-label-accession-font-size : 0.75rem;
 									border-bottom-style: dotted;
 								}
 
-								> .s-block-list.files > .s-block.file:last-child {
+								> .s-block-list.files > .s-block.file:last-child:not(:first-child) {
 									border-top: 1px solid transparent;
 								}
 
