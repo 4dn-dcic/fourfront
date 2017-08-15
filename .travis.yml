@@ -150,7 +150,7 @@ after_success:
             echo "Job succeeded! PUBLISHING to fourfront-webprod environment..."
             git config --global user.email "travis@builder.com"
             git config --global user.name "Travis"
-            eb use fourfront-webprod --debug
+            eb use fourfront-webdev --debug
             travis_wait 30 python deploy/deploy_beanstalk.py --prod
           fi
         fi
