@@ -836,7 +836,7 @@ def list_visible_columns_for_schemas(request, schemas):
     for schema in schemas:
         if 'columns' in schema:
             schema_columns = OrderedDict(schema['columns'])
-            for name,obj in schema['columns'].items():
+            for name,obj in schema_columns.items():
                 columns[name] = obj.get('title')
     return columns
 
