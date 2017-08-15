@@ -39,8 +39,8 @@ def test_embedded_linked_uuids_object(content, dummy_request, threadlocals):
     # embedded_uuids are only returned with calls to @@index-data, or @@embedded
     # with fields_to_use provided
     dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@object')
-    assert dummy_request._embedded_uuids == {}
-    assert dummy_request._linked_uuids == {}
+    assert dummy_request._embedded_uuids == set()
+    assert dummy_request._linked_uuids == set()
 
 
 def test_embedded_uuids_embedded_no_fields(content, dummy_request, threadlocals):
