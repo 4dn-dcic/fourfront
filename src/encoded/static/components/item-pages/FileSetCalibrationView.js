@@ -3,7 +3,8 @@
 import React from 'react';
 import _ from 'underscore';
 import * as globals from './../globals';
-import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } from './components';
+import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, TabbedView } from './components';
+import { ItemBaseView } from './DefaultItemView';
 
 
 /**
@@ -13,51 +14,27 @@ import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInS
  * @module {Component} item-pages/file-set-calibration-view
  */
 
-export default class FileSetCalibrationView extends React.Component {
+export default class FileSetCalibrationView extends ItemBaseView {
+
+    constructor(props){
+        super(props);
+    }
+
+    getTabViewContents(){
+
+        var initTabs = [];
+        if (Array.isArray(this.props.context.files_in_set)){
+            initTabs.push(FilesInSetTable.getTabObject(this.props.context));
+        }
+
+        return initTabs.concat(_.filter(this.getCommonTabs(), function(tabObj){
+            if (tabObj.key === 'details') return false;
+            return true;
+        }));
+    }
 
     render(){
-        var context = this.props.context || null;
-        var schemas = this.props.schemas || null;
-
-        var itemClass = globals.itemClass(context, 'view-detail item-page-container');
-        var title = globals.listing_titles.lookup(context)({'context': context});
-
-        return (
-            <div className={itemClass}>
-
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={schemas}>
-                    <ItemHeader.TopRow />
-                    <ItemHeader.MiddleRow />
-                    <ItemHeader.BottomRow />
-                </ItemHeader.Wrapper>
-
-                <div className="row">
-
-                    <div className="col-xs-12 col-md-12">
-
-                        <h4 className="files-in-set-table-title">Files in Set</h4>
-
-                        {
-                            Array.isArray(context.files_in_set) ?
-                            <div>
-                                <FilesInSetTable files={context.files_in_set}/>
-                            </div>
-                            :
-                            <div>
-                                <h5 className="text-400 text-center"><em>No files in this set</em></h5>
-                            </div>
-                        }
-
-                    </div>
-
-
-                </div>
-
-                <ItemFooterRow context={context} schemas={schemas} />
-
-
-            </div>
-        );
+        return super.render();
     }
 
 }

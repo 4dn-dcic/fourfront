@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Tabs, { TabPane, TabContent } from './../../lib/rc-tabs';
 import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
@@ -11,6 +12,13 @@ import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
  */
 
 export class TabbedView extends React.Component {
+
+    static propTypes = {
+        'contents' : PropTypes.arrayOf(PropTypes.shape({
+            'tab' : PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
+            'content' : PropTypes.element.isRequired
+        })).isRequired
+    }
 
     static defaultProps = {
         'contents' : [
