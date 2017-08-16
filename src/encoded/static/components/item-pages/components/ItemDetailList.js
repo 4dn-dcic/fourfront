@@ -13,20 +13,6 @@ import { getTitleStringFromContext } from './../item';
 import JSONTree from 'react-json-tree';
 
 
-export class TooltipInfoIconContainer extends React.Component {
-    render(){
-        var { elementType, title, tooltip } = this.props;
-        return React.createElement(elementType || 'div', {
-            'className' : "tooltip-info-container"
-        }, (
-            <span>{ title }&nbsp;{ typeof tooltip === 'string' ?
-                <i data-tip={tooltip} className="icon icon-info-circle"/>
-            : null }</span>
-        ));
-    }
-}
-
-
 /**
  * Contains and toggles visibility/mounting of a Subview.
  *
@@ -525,7 +511,7 @@ class SubItemTable extends React.Component {
 
                                 return (
                                     <th key={"header-for-" + colKey} className={hasChildren ? 'has-children' : null}>
-                                        <TooltipInfoIconContainer title={title} tooltip={tooltip}/>
+                                        <object.TooltipInfoIconContainer title={title} tooltip={tooltip}/>
                                         { 
                                             hasChildren ? (()=>{
                                                 //var subKeyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
@@ -539,7 +525,7 @@ class SubItemTable extends React.Component {
                                                                 <div key={"sub-header-for-" + colKey + '.' + ck} className="inline-block" data-key={colKey + '.' + ck} ref={function(r){
                                                                     if (r) subListKeyRefs[colKey][ck] = r;
                                                                 }} style={{ 'width' : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[ck] || null) }}>
-                                                                    <TooltipInfoIconContainer
+                                                                    <object.TooltipInfoIconContainer
                                                                         title={(keyTitleDescriptionMap[this.props.parentKey + '.' + colKey + '.' + ck] || subKeyTitleDescriptionMap[ck] || {}).title || ck}
                                                                         tooltip={(keyTitleDescriptionMap[this.props.parentKey + '.' + colKey + '.' + ck] || subKeyTitleDescriptionMap[ck] || {}).description || null}
                                                                     />
@@ -698,7 +684,7 @@ export class Detail extends React.Component {
      * @static
      * @param {Object} tips - Mapping of field property names (1 level deep) to schema properties.
      * @param {Object} key - Key to use to get 'description' for tooltip from the 'tips' param.
-     * @returns {Element} <div> element with a tooltip and info-circle icon.
+     * @returns {JSX.Element} <div> element with a tooltip and info-circle icon.
      */
     static formKey(tips, key, includeTooltip = true){
         var tooltip = null;
@@ -710,7 +696,7 @@ export class Detail extends React.Component {
             if (info.description)   tooltip = info.description;
         }
 
-        return <TooltipInfoIconContainer title={title || key} tooltip={tooltip} />;
+        return <object.TooltipInfoIconContainer title={title || key} tooltip={tooltip} />;
     }
 
     /**
@@ -960,17 +946,6 @@ export class Detail extends React.Component {
             <PartialList
                 persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
                     <DetailRow key={key} label={Detail.formKey(columnDefinitions,key)} item={context[key]} popLink={popLink} data-key={key} itemType={context['@type'] && context['@type'][0]} columnDefinitions={columnDefinitions}/>
-                    /*
-                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
-                        { Detail.formValue(
-                            context[key],
-                            popLink,
-                            key,
-                            context['@type'] && context['@type'][0],
-                            columnDefinitions
-                        ) }
-                    </PartialList.Row>
-                    */
                 )}
                 collapsible={ collapsibleKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(columnDefinitions,key)}>

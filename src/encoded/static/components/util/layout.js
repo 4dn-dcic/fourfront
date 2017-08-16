@@ -3,7 +3,8 @@
 import React from 'react';
 import _ from 'underscore';
 import { isServerSide } from './misc';
-var d3 = require('d3');
+import * as d3 from 'd3';
+import * as vizUtil from './../viz/utilities';
 
 /** 
  * Most of these functions should not be run from a component until it has mounted as they do not work
@@ -284,6 +285,14 @@ export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 100, ca
 }
 
 
+
+/**
+ * Wrap this around other React components to send them a forceUpdate()-based re-render trigger
+ * when the page has been resized. Debounced at 300ms (default).
+ * 
+ * @prop {number} delay - Milliseconds to debounce.
+ * @prop {React.Component} children - Another React component which needs to be updated in response to window resize.
+ */
 export class WindowResizeUpdateTrigger extends React.Component {
 
     static defaultProps = {

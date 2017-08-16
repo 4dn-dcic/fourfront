@@ -10,17 +10,17 @@ import ReactTooltip from 'react-tooltip';
 import * as globals from './../globals';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import * as store from './../../store';
-import FacetList, { ReduxExpSetFiltersInterface } from './../facetlist';
 import { isServerSide, expFxn, Filters, navigate, object, layout } from './../util';
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
-    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane
+    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
+    FacetList, ReduxExpSetFiltersInterface
 } from './components';
 
 
 
 
-const browseTableConstantColumnDefinitions = extendColumnDefinitions([
+export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'display_title', },
     { 'field' : 'experiments_in_set.experiment_type', },
     { 'field' : 'number_of_experiments', },
@@ -256,6 +256,7 @@ class ResultTableContainer extends React.Component {
                                 selectedFiles={this.props.selectedFiles}
                                 selectFile={this.props.selectFile}
                                 unselectFile={this.props.unselectFile}
+                                paddingWidth={47}
                             />
                         }
                         stickyHeaderTopOffset={-78}

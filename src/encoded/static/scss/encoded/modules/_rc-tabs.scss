@@ -591,6 +591,7 @@
 
     &.rc-tabs-tab-disabled {
       color: rgba(255,255,255,0.66) !important;
+      pointer-events: none;
       //cursor: none;
     }
 

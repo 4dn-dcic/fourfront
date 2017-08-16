@@ -1,6 +1,7 @@
 'use strict';
 
 import _ from 'underscore';
+import { atIdFromObject } from './object';
 //import patchedConsoleInstance from './patched-console';
 
 /**
@@ -192,6 +193,7 @@ export function groupExperimentsIntoExperimentSets(experiments){
     return expSets;
 }
 
+
 /** @return Object with experiment accessions as keys, from input array of experiments. */
 export function convertToObjectKeyedByAccession(experiments, keepExpObject = true){
     return _.object(
@@ -202,6 +204,38 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
 }
 
 
+/**
+ * @param {Object} file - File Item object with 'experiments' and 'experiments.experiment_sets' properties.
+ * @returns {Object} Object with ExperimentSet @ids as keys and their JSON as values.
+ */
+export function experimentSetsFromFile(file){
+    if (!Array.isArray(file.experiments)) return null;
+    return _.reduce(file.experiments, function(sets, exp){
+
+        var expSetsFromExp = _.reduce(exp.experiment_sets || [], function(m, expSet){
+            var id = atIdFromObject(expSet);
+            if (id && typeof m[id] === 'undefined'){
+                m[id] = _.extend({ 'experiments_in_set' : [exp] }, expSet);
+            } else {
+                if (Array.isArray(m[id].experiments_in_set) && _.pluck(m[id].experiments_in_set, 'link_id').indexOf(expSet.link_id) === -1){
+                    m[id].experiments_in_set.push(expSet);
+                }
+            }
+            return m;
+        }, {});
+
+        _.keys(expSetsFromExp).forEach(function(es_id){
+            if (typeof sets[es_id] !== 'undefined'){
+                sets[es_id].experiments_in_set = (sets[es_id].experiments_in_set || []).concat(expSetsFromExp[es_id].experiments_in_set);
+            } else {
+                sets[es_id] = expSetsFromExp[es_id];
+            }
+        });
+
+        return sets;
+
+    }, {});
+}
 
 
 /*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *

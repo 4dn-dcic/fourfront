@@ -13,6 +13,7 @@ export class AttributionTabView extends React.Component {
         return {
             tab : <span><i className="icon icon-users icon-fw"/> Attribution</span>,
             key : "attribution",
+            disabled : (!context.lab && !context.award && !context.submitted_by),
             content : (
                 <div className="overflow-hidden">
                     <h3 className="tab-section-title">
@@ -214,19 +215,22 @@ export class AttributionTabView extends React.Component {
                             </div>
                         : null }
 
-                        { typeof attrInfo.userInfo !== 'undefined' ?
-                        <div className="col-sm-12 col-md-12 col-sm-float-right">
-                            { FormattedInfoBlock.User(attrInfo.userInfo) }
-                        </div>
-                        : null }
+                        
                         { typeof attrInfo.labInfo !== 'undefined' ?
                         <div className="col-sm-12 col-md-12 col-sm-float-right">
                             { FormattedInfoBlock.Lab(attrInfo.labInfo) }
                         </div>
                         : null}
+
                         { typeof attrInfo.awardInfo !== 'undefined' ?
                         <div className="col-sm-12 col-md-12 col-sm-float-right">
                             { FormattedInfoBlock.Award(attrInfo.awardInfo) }
+                        </div>
+                        : null }
+
+                        { typeof attrInfo.userInfo !== 'undefined' ?
+                        <div className="col-sm-12 col-md-12 col-sm-float-right">
+                            { FormattedInfoBlock.User(attrInfo.userInfo) }
                         </div>
                         : null }
 

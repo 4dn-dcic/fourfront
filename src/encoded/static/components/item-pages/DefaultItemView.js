@@ -3,7 +3,7 @@
 import React from 'react';
 import { panel_views, itemClass } from './../globals';
 import _ from 'underscore';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } from './components';
+import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters } from './../util';
 
 /**
@@ -12,6 +12,7 @@ import { console, object, DateUtility, Filters } from './../util';
  *
  * @module {Component} item-pages/DefaultItemView
  */
+
 
 /**
  * The ItemBaseView class extends React.Component to provide some helper functions to be used from an Item View page.
@@ -30,70 +31,63 @@ export class ItemBaseView extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.getDetailAndAuditsTabs = this.getDetailAndAuditsTabs.bind(this);
-        this.renderAttributionColumn = this.renderAttributionColumn.bind(this);
+        //this.componentDidMount = this.componentDidMount.bind(this);
+        this.getCommonTabs = this.getCommonTabs.bind(this);
+        this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {};
     }
-
+    /*
     componentDidMount(){
-        FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.context.lab);
-        FormattedInfoBlock.onMountMaybeFetch.call(this, 'award', this.props.context.award);
-        FormattedInfoBlock.onMountMaybeFetch.call(this, 'submitted_by', this.props.context.submitted_by);
+        FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.context.lab );
+        FormattedInfoBlock.onMountMaybeFetch.call(this, 'award', this.props.context.award );
+        FormattedInfoBlock.onMountMaybeFetch.call(this, 'submitted_by', this.props.context.submitted_by );
     }
-
-    getDetailAndAuditsTabs(){
+    */
+    getCommonTabs(){
         return [
             ItemDetailList.getTabObject(this.props.context, this.props.schemas),
+            AttributionTabView.getTabObject(this.props.context),
             AuditTabView.getTabObject(this.props.context)
         ];
     }
+    
+    itemClassName(){
+        return itemClass(this.props.context, 'view-detail item-page-container');
+    }
 
-    renderAttributionColumn(className = "col-xs-12 col-md-4"){
+    getTabViewContents(){
+        return this.getCommonTabs();
+    }
+
+    render() {
+        var schemas = this.props.schemas || {};
         var context = this.props.context;
+
         return (
-            <div className={className + " item-info-area section"}>
+            <div className={this.itemClassName()}>
 
-                { typeof context.lab !== 'undefined' || typeof context.award !== 'undefined' ?
-                <hr/>
-                : null }
+                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
+                    <ItemHeader.TopRow />
+                    <ItemHeader.MiddleRow />
+                    <ItemHeader.BottomRow />
+                </ItemHeader.Wrapper>
 
-                { typeof context.submitted_by !== 'undefined' && ((this.state && typeof this.state.details_submitted_by !== 'undefined') || context.submitted_by) ?
-                <div>
-                    { FormattedInfoBlock.User(
-                        this.state && typeof this.state.details_submitted_by !== 'undefined' ?
-                        this.state.details_submitted_by : context.submitted_by
-                    ) }
-                    { typeof context.lab !== 'undefined' ? <hr/> : null }
+                <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />
+
+                <div className="row">
+
+                    <div className="col-xs-12 col-md-12 tab-view-container">
+
+                        <TabbedView contents={this.getTabViewContents()} />
+
+                    </div>
+
                 </div>
-                : null }
 
-                
-                { typeof context.lab !== 'undefined' ?
-                <div className>
-                    { FormattedInfoBlock.Lab(
-                        this.state && typeof this.state.details_lab !== 'undefined' ?
-                        this.state.details_lab : context.lab
-                    ) }
-                    { typeof context.award !== 'undefined' ? <hr/> : null }
-                </div>
-                : null }
-
-                { typeof context.award !== 'undefined' ?
-                <div className>
-                    { FormattedInfoBlock.Award(
-                        this.state && typeof this.state.details_award !== 'undefined' ?
-                        this.state.details_award : context.award
-                    ) }
-                </div>
-                : null }
+                <ItemFooterRow context={context} schemas={schemas} />
 
             </div>
         );
-    }
-
-    render(){
-        return null;
     }
 
 }
@@ -106,7 +100,6 @@ export default class DefaultItemView extends ItemBaseView {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.getTabViewContents = this.getTabViewContents.bind(this);
     }
 
     topRightHeaderSection(){
@@ -115,40 +108,8 @@ export default class DefaultItemView extends ItemBaseView {
         return r;
     }
 
-    getTabViewContents(){
-        return this.getDetailAndAuditsTabs();
-    }
-
     render() {
-        var schemas = this.props.schemas || {};
-        var context = this.props.context;
-        var itemClassName = itemClass(this.props.context, 'view-detail item-page-container');
-
-        return (
-            <div className={itemClassName}>
-
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                    <ItemHeader.TopRow>{ this.topRightHeaderSection() || null }</ItemHeader.TopRow>
-                    <ItemHeader.MiddleRow />
-                    <ItemHeader.BottomRow />
-                </ItemHeader.Wrapper>
-
-                <div className="row">
-
-                    <div className="col-xs-12 col-md-8 tab-view-container">
-
-                        <TabbedView contents={this.getTabViewContents()} />
-
-                    </div>
-
-                    { this.renderAttributionColumn() }
-
-                </div>
-
-                <ItemFooterRow context={context} schemas={schemas} />
-
-            </div>
-        );
+        return super.render();
     }
 
 }
