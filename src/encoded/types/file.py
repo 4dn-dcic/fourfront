@@ -14,6 +14,10 @@ from .base import (
     Item,
     collection_add,
 )
+from .workflow import (
+    trace_workflows,
+    workflow_analysis_steps_schema
+)
 from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPTemporaryRedirect,
@@ -580,6 +584,10 @@ class FileProcessed(File):
     })
     def workflow_run_outputs(self, request):
         return self.rev_link_atids(request, "workflow_run_outputs")
+
+    @calculated_property(schema=workflow_analysis_steps_schema, category="page")
+    def analysis_steps(self, request, workflow_run_inputs, workflow_run_outputs):
+        return trace_workflows(self, request, workflow_run_inputs, workflow_run_outputs)
 
 
 @collection(

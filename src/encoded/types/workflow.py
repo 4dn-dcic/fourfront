@@ -136,6 +136,56 @@ workflow_analysis_steps_schema = {
 }
 
 
+def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workflow_runs, options={  }):
+
+    steps = []    
+
+    #input_of_workflow_run_uuids = [ wr['uuid'] for wr in input_of_workflow_runs ]
+    #output_of_workflow_run_uuids = [ wr['uuid'] for wr in output_of_workflow_runs ]
+
+    def trace_history(output_of_workflow_run_uuids):
+        for uuid in output_of_workflow_run_uuids:
+            workflow_run = file_item.collection.get(uuid)
+            workflow_uuid = workflow_run.properties.get('workflow')
+            workflow = None
+            if workflow_uuid:
+                workflow = workflow_run.collection.get(workflow_uuid)
+            input_file_uuids = [ f.get('value') for f in workflow_run.properties.get('input_files', []) ]
+
+            step = {
+                "uuid" : uuid,
+                "name" : workflow_run.display_title(),
+                "analysis_step_types" : [workflow.display_title()],
+                "inputs" : []
+            }
+
+            #output_files = workflow_run.properties.get('input_files')
+            #print('\n\n\n', workflow_run.properties, '\n\n\n\n', workflow.properties, step)
+            #print('\n\n\n', workflow_run.properties.get('output_files'))
+
+    def trace_future(input_of_workflow_run_uuids):
+        for uuid in input_of_workflow_run_uuids:
+            workflow_run = file_item.collection.get(uuid)
+            output_file_uuids = [ f.get('value') for f in workflow_run.properties.get('output_files', []) ]
+
+            #output_files = workflow_run.properties.get('input_files')
+            print('\n\n\n', input_file_uuids)
+            print('\n\n\n', workflow_run.properties.get('output_files'))
+
+
+    trace_history([ wr['uuid'] for wr in output_of_workflow_runs ])
+
+
+
+    #for uuid in input_of_workflow_run_uuids:
+    #    workflow_run = file_item.collection.get(uuid)
+    #    print('\n\n\n', workflow_run.properties.get('input_files'))
+
+
+
+    pass
+
+
 @collection(
     name='workflows',
     properties={
