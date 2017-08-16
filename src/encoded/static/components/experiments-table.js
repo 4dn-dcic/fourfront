@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
-import FacetList from './facetlist'; // Only used for statics.
+import { FacetList } from './browse/components';
 import { expFxn, Filters, console, isServerSide, analytics } from './util';
 
 
@@ -127,8 +127,7 @@ class StackedBlockNameLabel extends React.Component {
 
 /**
  * Name element to be put inside of StackedBlocks as the first child.
- * 
- * @memberof StackedBlock
+ *
  * @class StackedBlockList
  * @extends {React.Component}
  */
@@ -154,16 +153,10 @@ class StackedBlockName extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
     }
-    /*
-    shouldComponentUpdate(nextProps){
-        if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
-        return false;
-    }
-    */
+
     getColumnWidthStyle(){
         if (this.props.colWidthStyles && typeof this.props.colWidthStyles[this.props.columnClass] !== 'undefined'){
             return this.props.colWidthStyles[this.props.columnClass];
@@ -174,6 +167,7 @@ class StackedBlockName extends React.Component {
             this.props.expTable.state &&
             Array.isArray(this.props.expTable.state.columnWidths)
         ){
+            console.log('2nd IF STATE');
             var colWidthIndex = _.findIndex(this.props.expTable.columnHeaders(), { 'columnClass' : this.props.columnClass });
             if (colWidthIndex > -1) return { 'width' : this.props.expTable.state.columnWidths[colWidthIndex] };
         }
@@ -536,7 +530,7 @@ export default class ExperimentsTable extends React.Component {
             // No columnClassName specified.
             if (columnClassName === null) return widthsByColumnClass;
             // columnClassName specified and set.
-            else if (columnClassName !== null && _.contains(Object.keys(widthsByColumnClass), columnClassName)){
+            else if (columnClassName !== null && typeof widthsByColumnClass[columnClassName] === 'number'){
                 return widthsByColumnClass[columnClassName];
             }
             // columnClassName specified but width not configured.
@@ -621,12 +615,22 @@ export default class ExperimentsTable extends React.Component {
     }
 
     static propTypes = {
-        columnHeaders : PropTypes.array,
-        experimentArray : PropTypes.array,
-        passExperiments : PropTypes.instanceOf(Set),
-        expSetFilters : PropTypes.object,
-        selectedFiles : PropTypes.object.isRequired,
-        keepCounts : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
+        columnHeaders               : PropTypes.array,
+        experimentArray             : PropTypes.array,
+        passExperiments             : PropTypes.instanceOf(Set),
+        expSetFilters               : PropTypes.object,
+        'selectedFiles'               : PropTypes.object,
+        'experimentSetAccession'    : PropTypes.string.isRequired,
+        'replicateExpsArray'        : PropTypes.arrayOf(PropTypes.shape({
+            'bio_rep_no'                : PropTypes.number.isRequired,
+            'tec_rep_no'                : PropTypes.number.isRequired,
+            'replicate_exp'             : PropTypes.shape({
+                'accession'                 : PropTypes.string,
+                'uuid'                      : PropTypes.string,
+                'link_id'                   : PropTypes.string
+            }).isRequired
+        })).isRequired,
+        keepCounts              : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
     }
 
     static defaultProps = {
@@ -643,7 +647,8 @@ export default class ExperimentsTable extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.updateColumnWidths = this.updateColumnWidths.bind(this);
+        this.getColumnWidths = this.getColumnWidths.bind(this);
+        //this.updateColumnWidths = this.updateColumnWidths.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.staticColumnHeaders = this.staticColumnHeaders.bind(this);
@@ -668,38 +673,30 @@ export default class ExperimentsTable extends React.Component {
         this.state = initialState;
     }
 
-    updateColumnWidths(){
-        // Scale/expand width of columns to fit available width, if any.
-        var origColumnWidths;
+    getColumnWidths(columnHeaders = null){
         if (
             typeof this.props.width !== 'number' && (
                 !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
             )
         ){
-            this.setState({ columnWidths : ExperimentsTable.initialColumnWidths(null) });
-            return null;
+            return ExperimentsTable.initialColumnWidths(null);
         }
+
+        var origColumnWidths;
         if (!this.cache.origColumnWidths){
-            origColumnWidths = _.map(this.refs.header.children, function(c){
-                //if ( // For tests/server-side
-                //    typeof c.offsetWidth !== 'number' ||
-                //    Number.isNaN(c.offsetWidth)
-                //){
-                return ExperimentsTable.initialColumnWidths(c.getAttribute('data-column-class'));
-                //}
-                //return c.offsetWidth;
+            origColumnWidths = _.map(columnHeaders || this.columnHeaders(), function(c){
+                return ExperimentsTable.initialColumnWidths(c.columnClass);
             });
             this.cache.origColumnWidths = origColumnWidths;
         } else {
             origColumnWidths = this.cache.origColumnWidths;
         }
 
-        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960, // 960 = fallback for tests
-            totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
+        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960; // 960 = fallback for tests
+        var totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
 
         if (totalOrigColsWidth > availableWidth){
-            this.setState({ columnWidths : null });
-            return; // No room to scale up widths.
+            return null;
         }
 
         var scale = (availableWidth / totalOrigColsWidth) || 1;
@@ -712,25 +709,17 @@ export default class ExperimentsTable extends React.Component {
         var remainder = availableWidth - totalNewColsWidth;
         newColWidths[0] += Math.floor(remainder - 0.5);
 
-        this.setState({ columnWidths : newColWidths });
+        return newColWidths;
     }
 
     componentDidMount(){
-
-        this.throttledResizeHandler = _.throttle(this.updateColumnWidths, 300);
-
-        if (!isServerSide()){
-            window.addEventListener('resize', this.throttledResizeHandler);
-            this.updateColumnWidths();
-        }
-
         this.setState({ 'mounted' : true });
     }
 
     componentWillUnmount(){
-        if (!isServerSide()){
-            window.removeEventListener('resize', this.throttledResizeHandler);
-        }
+        delete this.lastColumnHeaders;
+        delete this.lastColumnWidths;
+        delete this.cache.origColumnWidths;
     }
 
     /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
@@ -759,8 +748,8 @@ export default class ExperimentsTable extends React.Component {
         return this.staticColumnHeaders().concat(this.customColumnHeaders());
     }
 
-    colWidthStyles(){
-
+    colWidthStyles(columnWidths = this.state.columnWidths, columnHeaders){
+        if (!columnHeaders) columnHeaders = this.columnHeaders();
         var colWidthStyles = {
             'experiment' : null,
             'biosample' : null,
@@ -769,10 +758,10 @@ export default class ExperimentsTable extends React.Component {
             'file-detail' : null
         };
 
-        if (Array.isArray(this.state.columnWidths)){
-            Object.keys(colWidthStyles).forEach((cn) => {
+        if (Array.isArray(columnWidths)){
+            _.keys(colWidthStyles).forEach((cn) => {
                 colWidthStyles[cn] = {
-                    width : this.state.columnWidths[_.findIndex(this.columnHeaders(), { 'columnClass' : cn })]
+                    width : columnWidths[_.findIndex(columnHeaders, { 'columnClass' : cn })]
                 };
             });
         }
@@ -975,7 +964,7 @@ export default class ExperimentsTable extends React.Component {
                 rootList={true}
                 expTable={this}
                 currentlyCollapsing={this.state.collapsing}
-                colWidthStyles={this.colWidthStyles()}
+                colWidthStyles={this.colWidthStyles(this.lastColumnWidths || this.getColumnWidths())}
                 showMoreExtTitle={
                     experimentsGroupedByBiosample.length > 5 ?
                         'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
@@ -1021,12 +1010,16 @@ export default class ExperimentsTable extends React.Component {
 
     render(){
 
+        // Cache for each render.
+        this.lastColumnHeaders = this.columnHeaders();
+        this.lastColumnWidths = this.getColumnWidths(this.lastColumnHeaders);
+
         var renderHeaderItem = function(h, i, arr){
             if (h.visible === false) return null;
             var visibleTitle = typeof h.visibleTitle !== 'undefined' ? h.visibleTitle : h.title;
             var style = null;
-            if (Array.isArray(this.state.columnWidths) && this.state.columnWidths.length === arr.length){
-                style = { 'width' : this.state.columnWidths[i] };
+            if (Array.isArray(this.lastColumnWidths) && this.lastColumnWidths.length === arr.length){
+                style = { 'width' : this.lastColumnWidths[i] };
             }
             return (
                 <div className={"heading-block col-" + h.columnClass + (h.className ? ' ' + h.className : '')} key={'header-' + i} style={style} data-column-class={h.columnClass}>
@@ -1042,7 +1035,7 @@ export default class ExperimentsTable extends React.Component {
                     <h6 className="text-center text-400"><em>No experiments</em></h6>
                     :
                     <div className="headers expset-headers" ref="header">
-                        { this.columnHeaders().map(renderHeaderItem) }
+                        { this.lastColumnHeaders.map(renderHeaderItem) }
                     </div>
                 }
 

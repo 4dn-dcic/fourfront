@@ -6,7 +6,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import Draggable from 'react-draggable';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
@@ -16,178 +15,14 @@ import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
 import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
-import { ColumnSorterIcon } from './LimitAndPageControls';
-
-/**
- * Default value rendering function.
- * Uses columnDefinition field (column key) to get nested property value from result and display it.
- * 
- * @param {Object} result - JSON object representing row data.
- * @param {any} columnDefinition - Object with column definition data - field, title, widthMap, render function (self)
- * @param {any} props - Props passed down from SearchResultTable/ResultRowColumnBlock instance
- * @returns {string|null} String value or null. Your function may return a React element, as well.
- */
-export function defaultColumnBlockRenderFxn(result: Object, columnDefinition: Object, props: Object, width: number){
-    var value = object.getNestedProperty(result, columnDefinition.field);
-    if (!value) value = null;
-    if (Array.isArray(value)){ // getNestedProperty may return a multidimensional array, # of dimennsions depending on how many child arrays were encountered in original result obj.
-        value = _.uniq(value.map(function(v){
-            if (Array.isArray(v)){
-                v = _.uniq(v);
-                if (v.length === 1) v = v[0];
-            }
-            return Schemas.Term.toName(columnDefinition.field, v);
-        })).join(', ');
-    } else {
-        value = Schemas.Term.toName(columnDefinition.field, value);
-    }
-    return value;
-}
+import {
+    defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap,
+    columnsToColumnDefinitions, ResultRowColumnBlockValue, DEFAULT_WIDTH_MAP,
+    getColumnWidthFromDefinition, HeadersRow
+} from './table-commons';
 
 
-export function extendColumnDefinitions(columnDefinitions: Array<Object>, columnDefinitionOverrideMap: Object){
-    if (_.keys(columnDefinitionOverrideMap).length > 0){
-        return columnDefinitions.map(function(colDef){
-            if (columnDefinitionOverrideMap[colDef.field]){
-                return _.extend({}, colDef, columnDefinitionOverrideMap[colDef.field]);
-            } else return colDef;
-        });
-    }
-    return columnDefinitions;
-}
 
-export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
-
-export const defaultColumnDefinitionMap = {
-    'display_title' : {
-        'title' : "Title",
-        'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
-        'minColumnWidth' : 90,
-        'render' : function(result: Object, columnDefinition: Object, props: Object, width: number){
-            var title = getTitleStringFromContext(result);
-            var link = object.atIdFromObject(result);
-            var tooltip;
-            if (title && (title.length > 20 || width < 100)) tooltip = title;
-            if (link){
-                title = <a href={link || '#'}>{ title }</a>;
-            }
-            
-            return (
-                <span>
-                    <div className="inline-block toggle-detail-button-container">
-                        <button className="toggle-detail-button" onClick={props.toggleDetailOpen}>
-                            <div className="icon-container">
-                                <i className={"icon icon-fw icon-" + (props.detailOpen ? 'minus' : 'plus') }/>
-                            </div>
-                        </button>
-                    </div>
-                    <div className="title-block text-ellipsis-container" data-tip={tooltip}>{ title }</div>
-                </span>
-            );
-        }
-    },
-    '@type' : {
-        'title' : "Type",
-        'render' : function(result, columnDefinition, props, width){
-            if (!Array.isArray(result['@type'])) return null;
-            return Schemas.getBaseItemTypeTitle(result);
-        }
-    },
-    'lab.display_title' : {
-        'title' : "Lab",
-        'widthMap' : {'lg' : 220, 'md' : 200, 'sm' : 180},
-        'render' : function(result, columnDefinition, props, width){
-            var labItem = result.lab;
-            if (!labItem) return null;
-            var labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
-
-            if (!result.submitted_by || !result.submitted_by.display_title){
-                return labLink;
-            }
-            return (
-                <span>
-                    <i
-                        className="icon icon-fw icon-user-o user-icon"
-                        data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title}
-                        data-html
-                    />
-                    { labLink }
-                </span>
-            );
-        }
-    },
-    'date_created' : {
-        'title' : 'Created',
-        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
-        'render' : function(result, columnDefinition, props, width){
-            return <DateUtility.LocalizedTime timestamp={defaultColumnBlockRenderFxn(result, columnDefinition, props, width)} formatType='date-sm' />;
-        }
-    },
-    'number_of_experiments' : {
-        'title' : '# of Experiments',
-        'widthMap' : {'lg' : 75, 'md' : 75, 'sm' : 50},
-        //'render' : function(result, columnDefinition, props, width){
-        //    if (!Array.isArray(result.experiments_in_set)) return null;
-        //    return result.experiments_in_set.length;
-        //}
-    },
-    'experiments_in_set.experiment_type' : {
-        'title' : 'Experiment Type',
-        'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120}
-    },
-    'status' : {
-        'title' : 'Status',
-        'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120},
-        'order' : 500
-    }
-};
-
-
-/**
- * Determine the typical column width, given current browser width. Defaults to large width if server-side.
- * 
- * @param {Object}  widthMap        Map of integer sizes to use at 'lg', 'md', or 'sm' sizes.
- * @param {boolean} [mounted=true]  Whether component calling this function is mounted. If false, uses 'lg' to align with server-side render.
- * @returns {string|number} - Width for div column block to be used at current screen/browser size.
- */
-export function searchResultTableColumnWidth(widthMap, mounted=true){
-    var responsiveGridSize;
-    if (!mounted || isServerSide()) responsiveGridSize = 'lg';
-    else responsiveGridSize = layout.responsiveGridState();
-    
-    if (responsiveGridSize === 'xs') return '100%'; // Mobile, stacking
-    return widthMap[responsiveGridSize || 'lg'] || 250;
-}
-
-
-/**
- * Convert a map of field:title to list of column definitions, setting defaults.
- * 
- * @param {Object.<string>} columns         Map of field names to field/column titles, as returned from back-end.
- * @param {Object[]} constantDefinitions    Preset list of column definitions, each containing at least 'field' and 'title'.
- * @param {Object} defaultWidthMap          Map of responsive grid states (lg, md, sm) to pixel number sizes.
- * @returns {Object[]}                      List of objects containing keys 'title', 'field', 'widthMap', and 'render'.
- */
-export function columnsToColumnDefinitions(columns, constantDefinitions, defaultWidthMap = DEFAULT_WIDTH_MAP){
-    let newColDefs = _.pairs(columns).map(function(p){
-        return {
-            'title' : p[1],
-            'field' : p[0]
-        };
-    }).filter(function(ncd){
-        if (_.findWhere(constantDefinitions, { 'field' : ncd.field })) return false;
-        return true;
-    });
-
-    // Add defaults for any missing properties for all columnDefinitions. Sort by order field.
-    return _.sortBy(constantDefinitions.concat(newColDefs).map(function(cd, cdIndex){
-        if (!cd.widthMap && defaultWidthMap)    cd.widthMap = defaultWidthMap;
-        if (!cd.render)                         cd.render   = defaultColumnBlockRenderFxn;
-        if (typeof cd.order !== 'number')       cd.order    = cdIndex;
-        return cd;
-    }), 'order');
-
-}
 
 export function compareResultsByID(listA, listB){
     var listALen = listA.length;
@@ -198,32 +33,6 @@ export function compareResultsByID(listA, listB){
     return true;
 }
 
-class ResultRowColumnBlockValue extends React.Component {
-
-    shouldComponentUpdate(nextProps, nextState){
-        if (
-            nextProps.columnNumber === 0 ||
-            nextProps.columnDefinition.field !== this.props.columnDefinition.field ||
-            nextProps.schemas !== this.props.schemas ||
-            object.atIdFromObject(nextProps.result) !== object.atIdFromObject(this.props.result)
-        ){
-            return true;
-        }
-        return false;
-    }
-
-    render(){
-        var { result, columnDefinition, mounted } = this.props;
-        var value = SearchResultTable.sanitizeOutputValue(
-            columnDefinition.render(result, columnDefinition, _.omit(this.props, 'columnDefinition', 'result'))
-        );
-        if (typeof value === 'string') value = <span className="value">{ value }</span>;
-        else if   (value === null)     value = <small className="text-300">-</small>;
-        return (
-            <div className="inner">{ value }</div>
-        );
-    }
-}
 
 
 class ResultRowColumnBlock extends React.Component {
@@ -233,12 +42,10 @@ class ResultRowColumnBlock extends React.Component {
         var isDesktopClientside = SearchResultTable.isDesktopClientside();
         var blockWidth;
 
-        if (mounted &&!isDesktopClientside){
-            blockWidth = '100%';
-        } else if (mounted && isDesktopClientside){
-            blockWidth = this.props.headerColumnWidths[this.props.columnNumber] || searchResultTableColumnWidth(columnDefinition.widthMap, mounted);
+        if (mounted && isDesktopClientside){
+            blockWidth = this.props.headerColumnWidths[this.props.columnNumber] || getColumnWidthFromDefinition(columnDefinition, mounted);
         } else {
-            blockWidth = searchResultTableColumnWidth(columnDefinition.widthMap, mounted);
+            blockWidth = getColumnWidthFromDefinition(columnDefinition, mounted);
         }
 
         return (
@@ -285,21 +92,10 @@ class ResultDetail extends React.Component{
 
     constructor(props){
         super(props);
-        //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'closing' : false };
     }
-    /*
-    componentWillReceiveProps(nextProps){
-        if (nextProps.open !== this.props.open){
-            if (!nextProps.open){
-                this.setState({ 'closing' : true }, ()=> {
-                    setTimeout( () => this.setState({ 'closing' : false }), 400 );
-                });
-            }
-        }
-    }
-    */
+
     componentDidUpdate(pastProps, pastState){
         if (pastProps.open !== this.props.open){
             if (this.props.open && typeof this.props.setDetailHeight === 'function'){
@@ -343,7 +139,7 @@ class ResultRow extends React.Component {
             if (typeof colDef === 'number') w = colDef;
             else {
                 if (Array.isArray(dynamicWidths) && dynamicWidths[i]) w = dynamicWidths[i];
-                else w = searchResultTableColumnWidth(colDef.widthMap, mounted);
+                else w = getColumnWidthFromDefinition(colDef, mounted);
             }
             if (typeof w !== 'number') w = 0;
             return fw + w;
@@ -464,105 +260,6 @@ class ResultRow extends React.Component {
     }
 }
 
-
-class HeadersRow extends React.Component {
-
-    static propTypes = {
-        'columnDefinitions' : ResultRow.propTypes.columnDefinitions,
-        'mounted' : PropTypes.bool.isRequired
-    }
-
-    constructor(props){
-        super(props);
-        this.throttledSetHeaderWidths = _.debounce(_.throttle(this.setHeaderWidths.bind(this), 1000), 350);
-        this.setHeaderWidths = this.setHeaderWidths.bind(this);
-        this.onAdjusterDrag = this.onAdjusterDrag.bind(this);
-        this.render = this.render.bind(this);
-        this.state = {
-            widths : props.headerColumnWidths.slice(0)
-        };
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (nextProps.headerColumnWidths !== this.props.headerColumnWidths){
-            this.setState({ 'widths' : nextProps.headerColumnWidths });
-        }
-    }
-    /*
-    shouldComponentUpdate(nextProps, nextState){
-        if (
-            this.props.mounted !== nextProps.mounted ||
-            this.state !== nextState ||
-            this.props.columnDefinitions !== nextProps.columnDefinitions ||
-            this.props.isSticky !== nextProps.isSticky ||
-            this.props.stickyStyle.width !== nextProps.stickyStyle.width ||
-            this.props.stickyStyle.left !== nextProps.stickyStyle.left
-        ) return true;
-        return false;
-    }
-    */
-
-    setHeaderWidths(idx, evt, r){
-        if (typeof this.props.setHeaderWidths !== 'function') throw new Error('props.setHeaderWidths not a function');
-        setTimeout(()=> this.props.setHeaderWidths(this.state.widths.slice(0)), 0);
-    }
-
-    getWidthFor(idx){
-        return (
-            this.state.widths[idx] ||
-            this.props.headerColumnWidths[idx] ||
-            searchResultTableColumnWidth(this.props.columnDefinitions[idx].widthMap, this.props.mounted)
-        );
-    }
-
-    onAdjusterDrag(idx, evt, r){
-        var widths = this.state.widths.slice(0);
-        widths[idx] = Math.max(this.props.columnDefinitions[idx].minColumnWidth || this.props.defaultMinColumnWidth || 55, r.x );
-        this.setState({ 'widths' : widths });
-    }
-
-    render(){
-        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset } = this.props;
-        return (
-            <div className={"search-headers-row hidden-xs" + (isSticky ? ' stickied' : '')} style={
-                isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
-                : null}
-            >
-                <div className="columns clearfix" style={{ 
-                    'left'  : isSticky ? stickyStyle.left - tableLeftOffset : null,
-                    'width' : stickyStyle.width
-                }}>
-                {
-                    columnDefinitions.map((colDef, i)=>{
-                        var w = this.getWidthFor(i);
-                        var sorterIcon;
-                        if (!colDef.noSort && typeof this.props.sortBy === 'function' && w >= 50){
-                            var { sortColumn, sortBy, sortReverse } = this.props;
-                            sorterIcon = <ColumnSorterIcon sortByFxn={sortBy} currentSortColumn={sortColumn} descend={sortReverse} value={colDef.field} />;
-                        }
-                        return (
-                            <div
-                                data-field={colDef.field}
-                                key={colDef.field}
-                                className={"search-headers-column-block" + (colDef.noSort ? " no-sort" : '')}
-                                style={{ width : w }}
-                            >
-                                <div className="inner">
-                                    <span className="column-title">{ colDef.title }</span>
-                                    { sorterIcon }
-                                </div>
-                                <Draggable position={{x:w,y:0}} axis="x" onDrag={this.onAdjusterDrag.bind(this, i)} onStop={this.setHeaderWidths.bind(this, i)}>
-                                    <div className="width-adjuster"/>
-                                </Draggable>
-                            </div>
-                        );
-                    })
-                }
-                </div>
-            </div>
-        );
-    }
-}
 
 class LoadMoreAsYouScroll extends React.Component {
 
@@ -1050,15 +747,19 @@ class DimensioningContainer extends React.Component {
         return (this.refs && this.refs.innerContainer && layout.getElementOffset(this.refs.innerContainer).left) || null;
     }
 
+    getTableContainerWidth(){
+        return (this.refs && this.refs.innerContainer && this.refs.innerContainer.offsetWidth) || null;
+    }
+
     getTableDims(){
         if (!SearchResultTable.isDesktopClientside()){
             return {
-                'tableContainerWidth' : null,
+                'tableContainerWidth' : this.getTableContainerWidth(),
                 'tableContainerScrollLeft' : null
             };
         }
         return {
-            'tableContainerWidth' : (this.refs && this.refs.innerContainer && this.refs.innerContainer.offsetWidth) || null,
+            'tableContainerWidth' : this.getTableContainerWidth(),
             'tableContainerScrollLeft' : (this.refs && this.refs.innerContainer && typeof this.refs.innerContainer.scrollLeft === 'number') ? this.refs.innerContainer.scrollLeft : null,
             'tableLeftOffset' : this.getTableLeftOffset()
         };
@@ -1102,7 +803,7 @@ class DimensioningContainer extends React.Component {
     }
 
     render(){
-        var { columnDefinitions, results, sortBy, sortColumn, sortReverse, href, limit, defaultMinColumnWidth } = this.props;
+        var { columnDefinitions, results, sortBy, sortColumn, sortReverse, href, limit, defaultMinColumnWidth, stickyHeaderTopOffset } = this.props;
         var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, this.state.mounted, this.state.widths);
         var responsiveGridSize = !isServerSide() && this.state.mounted && layout.responsiveGridState();
 
@@ -1113,8 +814,10 @@ class DimensioningContainer extends React.Component {
 
         var headerColumnWidthsFilled = this.state.widths.map((w, i)=>{
             if (typeof w === 'number' && w > 0) return w;
-            return searchResultTableColumnWidth(columnDefinitions[i].widthMap, this.state.mounted);
+            return getColumnWidthFromDefinition(columnDefinitions[i], this.state.mounted);
         });
+
+        if (responsiveGridSize === 'xs' || responsiveGridSize === 'sm') stickyHeaderTopOffset = 0;
 
         return (
             <div className="search-results-outer-container">
@@ -1123,8 +826,8 @@ class DimensioningContainer extends React.Component {
                         <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
                                 
-                                { !responsiveGridSize || responsiveGridSize !== 'xs' ? 
-                                    <Sticky topOffset={this.props.stickyHeaderTopOffset} >{
+                                {
+                                    <Sticky topOffset={stickyHeaderTopOffset} >{
                                         ({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}) =>
                                         <HeadersRow
                                             columnDefinitions={columnDefinitions}
@@ -1139,14 +842,14 @@ class DimensioningContainer extends React.Component {
                                             tableContainerWidth={tableContainerWidth}
                                             rowHeight={this.props.rowHeight}
                                             results={this.state.results}
-                                            stickyHeaderTopOffset={this.props.stickyHeaderTopOffset}
+                                            stickyHeaderTopOffset={stickyHeaderTopOffset}
 
                                             stickyStyle={style}
                                             isSticky={isSticky}
                                         />
                                     }</Sticky>
                                 
-                                : null }
+                                }
                                 <LoadMoreAsYouScroll
                                     results={this.state.results}
                                     mounted={this.state.mounted}
@@ -1207,30 +910,6 @@ export class SearchResultTable extends React.Component {
         return !isServerSide() && layout.responsiveGridState() !== 'xs';
     }
 
-    /**
-     * Ensure we have a valid React element to render.
-     * If not, try to detect if Item object, and generate link.
-     * Else, let exception bubble up.
-     * 
-     * @static
-     * @param {any} value
-     */
-    static sanitizeOutputValue(value){
-        if (typeof value !== 'string' && !React.isValidElement(value)){
-            if (value && typeof value === 'object'){
-                if (typeof value.display_title !== 'undefined'){
-                    if (typeof value.link_id !== 'undefined' || typeof value['@id'] !== 'undefined'){
-                        return <a href={object.atIdFromObject(value)}>{ value.display_title }</a>;
-                    } else {
-                        return value.display_title;
-                    }
-                }
-            } else if (!value) value = null;
-        }
-        if (value === "None") value = null;
-        return value;
-    }
-
     static propTypes = {
         'results' : PropTypes.arrayOf(ResultRow.propTypes.result).isRequired,
         'href'  : PropTypes.string.isRequired,
@@ -1246,7 +925,7 @@ export class SearchResultTable extends React.Component {
 
     static defaultProps = {
         'columns' : {},
-        'renderDetailPane' : function(result){ return <DefaultDetailPane result={result} />; },
+        'renderDetailPane' : function(result, rowNumber, width){ return <DefaultDetailPane result={result} />; },
         'defaultWidthMap' : DEFAULT_WIDTH_MAP,
         'defaultMinColumnWidth' : 55,
         'constantColumnDefinitions' : extendColumnDefinitions([
@@ -1276,6 +955,13 @@ export class SearchResultTable extends React.Component {
     render(){
         var { columns, constantColumnDefinitions, defaultWidthMap, hiddenColumns, columnDefinitionOverrideMap } = this.props;
         var columnDefinitions = columnsToColumnDefinitions(columns, constantColumnDefinitions, defaultWidthMap);
+
+        columnDefinitions.forEach(function(colDef){
+            if (colDef.widthMap && colDef.widthMap.sm && typeof colDef.widthMap.xs !== 'number'){
+                colDef.widthMap.xs = colDef.widthMap.sm;
+            }
+        });
+
         if (Array.isArray(hiddenColumns)){ // Remove hidden columns, if any defined
             columnDefinitions = columnDefinitions.filter(function(colDef){
                 if (hiddenColumns.indexOf(colDef.field) > -1) return false;

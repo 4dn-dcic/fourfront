@@ -231,6 +231,23 @@ export class FilesInSetTable extends React.Component {
 
     static Small = Small
 
+    static getTabObject(context, title, schemas = null){
+        title = title || 'Files in Set';
+        return {
+            tab : <span><i className="icon icon-list-ul icon-fw"/> { title }</span>,
+            key : 'files_in_set',
+            content : (
+                <div className="overflow-hidden">
+                    <h3 className="tab-section-title">
+                        <span>{ title }</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                    <FilesInSetTable files={context.files_in_set}/>
+                </div>
+            )
+        };
+    }
+
     /** 
      * Generate a download link for a file attachment from a fileObject, which should represent a (partial) JSON of a file Item.
      * 
@@ -302,7 +319,7 @@ export class FilesInSetTable extends React.Component {
     /**
      * Renders heading with titles for table on medium and large width screens.
      * 
-     * @returns {Element} <div> element
+     * @returns {JSX.Element} <div> element
     */
     header(){
         return (
