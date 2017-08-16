@@ -235,22 +235,27 @@ class SubItemTable extends React.Component {
                     continue;
                 }
                 embeddedKeys = _.keys(objectWithAllItemKeys[rootKeys[i]]);
+
                 if (embeddedKeys.length > 5) return false; // 5 properties to flatten up feels like a good limit. Lets render objects with more than that as lists or own table (not flattened up to another 1).
                 // Run some checks against the embedded object's properties. Ensure all nested lists contain plain strings or numbers, as will flatten to simple comma-delimited list.
                 for (j = 0; j < embeddedKeys.length; j++){
 
                     if (typeof objectWithAllItemKeys[ rootKeys[i] ][ embeddedKeys[j] ] === 'string' || typeof objectWithAllItemKeys[ rootKeys[i] ][ embeddedKeys[j] ] === 'number') continue;
-
                     // Ensure if property on embedded object's is an array, that is a simple array of strings or numbers - no objects. Will be converted to comma-delimited list.
                     if ( Array.isArray(  objectWithAllItemKeys[ rootKeys[i] ][ embeddedKeys[j] ]  ) ){
                         if (
                             objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]].length < 4 &&
-                            _.filter(objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]][0], function(v){
+                            _.filter(objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]], function(v){
                                 if (typeof v === 'string' || typeof v === 'number') { return false; }
+                                else if (v && typeof v === 'object' && _.keys(v).length < 2) { return false; }
                                 else { return true; }
                             }).length === 0
                             //(typeof objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]][0] === 'string' || typeof objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]][0] === 'number')
-                        ) { continue; } else { return false; }
+                        ) {
+                            continue;
+                        } else {
+                            return false;
+                        }
                     }
                     
                     // Ensure that if is not an array, it is a simple string or number (not another embedded object).
@@ -540,27 +545,40 @@ class SubItemTable extends React.Component {
                                         }
                                     </th>
                                 );
-                            })) 
+                            }))
                         }</tr>
                     </thead>
                     <tbody>{
                         rowData.map(function(row,i){
+
+                            function jsonify(val, key){
+                                var newVal;
+                                try {
+                                    newVal = JSON.stringify(val);
+                                    if (_.keys(val).length > 1){
+                                        console.error("ERROR: Value for table cell is not a string, number, or JSX element.\nKey: " + key + '; Value: ' + newVal);
+                                    }
+                                    newVal = <code>{ newVal.length <= 25 ? newVal : newVal.slice(0,25) + '...' }</code>;
+                                } catch (e){
+                                    console.error(e, val);
+                                    newVal = <em>{'{obj}'}</em>;
+                                }
+                                return newVal;
+                            }
+
                             return (
                                 <tr key={"row-" + i}>{
                                     [<td key="rowNumber">{ i + 1 }.</td>].concat(row.map(function(colVal, j){
                                         var val = colVal.value;
+                                        console.log(colVal.key, colVal.value);
                                         if ((colVal.key === 'link_id' || colVal.key === '@id') && val.slice(0,1) === '/') {
                                             val = <a href={val}>{ val }</a>;
                                         }
                                         if (val && typeof val === 'object' && !React.isValidElement(val) && !Array.isArray(val)) {
-                                            try {
-                                                val = JSON.stringify(val);
-                                                console.error("ERROR: Value for table cell is not a string, number, or JSX element.\nKey: " + columnKeys[j].key + '; Value: ' + val);
-                                                val = <code>{ val.length <= 25 ? val : val.slice(0,25) + '...' }</code>;
-                                            } catch (e){
-                                                console.error(e, val);
-                                                val = <em>{'{obj}'}</em>;
-                                            }
+                                            val = jsonify(val, columnKeys[j].key);
+                                        }
+                                        if (Array.isArray(val) && val.length > 0 && !React.isValidElement(val[0])){
+                                            val = _.map(val, jsonify);
                                         }
                                         return (
                                             <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>
