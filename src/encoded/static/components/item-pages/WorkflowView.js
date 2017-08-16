@@ -142,7 +142,6 @@ export class WorkflowView extends React.Component {
         return (
             <div className={ic}>
 
-                <ItemPageTitle context={context} schemas={schemas} />
                 <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
                     <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
                     <ItemHeader.MiddleRow />

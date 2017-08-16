@@ -35,19 +35,24 @@ def content(testapp):
         testapp.post_json(url, item, status=201)
 
 
-def test_embedded_uuids_object(content, dummy_request, threadlocals):
+def test_embedded_linked_uuids_object(content, dummy_request, threadlocals):
+    # embedded_uuids are only returned with calls to @@index-data, or @@embedded
+    # with fields_to_use provided
     dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@object')
-    assert dummy_request._embedded_uuids == {sources[0]['uuid']}
+    assert dummy_request._embedded_uuids == set()
+    assert dummy_request._linked_uuids == set()
 
 
-def test_linked_uuids_object(content, dummy_request, threadlocals):
-    dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@object')
-    assert dummy_request._linked_uuids == {sources[0]['uuid'], targets[0]['uuid']}
+def test_embedded_uuids_embedded_no_fields(content, dummy_request, threadlocals):
+    dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@embedded')
+    assert dummy_request._embedded_uuids == set()
+    assert dummy_request._linked_uuids == set()
 
 
-def test_embedded_uuids_expand_target(content, dummy_request, threadlocals):
-    dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@expand?expand=target')
+def test_embedded_uuids_embedded(content, dummy_request, threadlocals):
+    dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@embedded', fields_to_embed=['*', 'target.uuid'])
     assert dummy_request._embedded_uuids == {sources[0]['uuid'], targets[0]['uuid']}
+    assert dummy_request._linked_uuids == set()
 
 
 def test_updated_source(content, testapp):
@@ -69,7 +74,8 @@ def test_updated_target(content, testapp):
 
 
 def test_embedded_uuids_experiment(experiment, lab, award, human_biosample, human_biosource, mboI, dummy_request, threadlocals):
-    dummy_request.embed(experiment['@id'], '@@embedded')
+    to_embed = ['lab.uuid', 'award.uuid', 'biosample.uuid', 'biosample.biosource.uuid', 'digestion_enzyme.uuid']
+    dummy_request.embed(experiment['@id'], '@@embedded', fields_to_embed=to_embed)
     embedded_uuids = dummy_request._embedded_uuids
     assert experiment['uuid'] in embedded_uuids
     assert lab['uuid'] in embedded_uuids
