@@ -10,18 +10,45 @@ import { ItemBaseView } from './DefaultItemView';
 import ExperimentsTable from './../experiments-table';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
+import Graph from './../viz/Workflow';
+import { commonGraphPropsFromProps, graphBodyMixin, parseAnalysisStepsMixin, uiControlsMixin, doValidAnalysisStepsExist } from './WorkflowView';
+import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
+
+
+
+export function allFilesForWorkflowRunsMappedByUUID(items){
+    return _.reduce(items, function(m, workflowRun){
+        console.log('SDFAAS', workflowRun);
+        return _.extend(m, allFilesForWorkflowRunMappedByUUID(workflowRun));
+    }, {});
+}
 
 
 
 export default class FileView extends ItemBaseView {
 
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.state = { 'mounted' : false };
+    }
+
+    componentDidMount(){
+        this.setState({ 'mounted' : true });
+    }
+
     getTabViewContents(){
 
         var initTabs = [];
 
-        //if (Array.isArray(this.props.context.experiments)){
         initTabs.push(FileViewOverview.getTabObject(this.props.context, this.props.schemas));
-        //}
+        if (doValidAnalysisStepsExist(this.props.context.analysis_steps)){
+            initTabs.push({
+                tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
+                key : 'graph',
+                content : <GraphSection {...this.props} mounted={this.state.mounted} />
+            });
+        }
 
         return initTabs.concat(this.getCommonTabs());
     }
@@ -239,6 +266,78 @@ class OverViewBody extends React.Component {
 
     }
 }
+
+
+
+class GraphSection extends React.Component {
+
+    static isNodeDisabled(node){
+        if (node.type === 'step') return false;
+        if (node && node.meta && node.meta.run_data){
+            return false;
+        }
+        return true;
+    }
+
+    constructor(props){
+        super(props);
+        this.commonGraphProps = this.commonGraphProps.bind(this);
+        this.detailGraph = this.detailGraph.bind(this);
+        this.body = graphBodyMixin.bind(this);
+        this.parseAnalysisSteps = parseAnalysisStepsMixin.bind(this);
+        this.uiControls = uiControlsMixin.bind(this);
+        this.render = this.render.bind(this);
+        this.state = {
+            'showChart' : 'detail',
+            'showParameters' : false
+        };
+    }
+
+    commonGraphProps(){
+        var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
+        var fileMap = allFilesForWorkflowRunsMappedByUUID(
+            (this.props.context.workflow_run_outputs || []).concat(this.props.context.workflow_run_inputs || [])
+        );
+        console.log(graphData.nodes[2].meta.run_data.file);
+        console.log('FFF', fileMap, mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap )[2].meta.run_data.file);
+        return _.extend(commonGraphPropsFromProps(this.props), {
+            'isNodeDisabled' : GraphSection.isNodeDisabled,
+            'nodes' : mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap ),
+            'edges' : graphData.edges
+        });
+    }
+
+    detailGraph(){
+        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        return (
+            <Graph
+                { ...this.commonGraphProps() }
+            />
+        );
+    }
+
+    static keyTitleMap = {
+        'detail' : 'Analysis Steps',
+        'basic' : 'Basic Inputs & Outputs',
+    }
+
+    render(){
+
+        return (
+            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
+                <h3 className="tab-section-title">
+                    <span>Graph</span>
+                </h3>
+                <hr className="tab-section-title-horiz-divider"/>
+                { this.detailGraph() }
+            </div>
+        );
+
+    }
+
+}
+
+
 
 
 

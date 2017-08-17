@@ -171,11 +171,24 @@ export default class Node extends React.Component {
         if (selectedNode.name && currentNode.name) {
             if (selectedNode.name === currentNode.name) {
                 // Make sure target.step == selectedNode.inputOf.name
-                if (((selectedNode.inputOf && selectedNode.inputOf.name) || 'a') === ((currentNode.inputOf && currentNode.inputOf.name) || 'b')) return true;
-                if (selectedNode.inputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
-                    for (var i = 0; i < currentNode.meta.target.length; i++){
-                        if (typeof selectedNode.inputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.inputOf.name) {
-                            return true;
+                var i;
+                if (currentNode.type === 'input'){
+                    if (((selectedNode.inputOf && selectedNode.inputOf.name) || 'a') === ((currentNode.inputOf && currentNode.inputOf.name) || 'b')) return true;
+                    if (selectedNode.inputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
+                        for (i = 0; i < currentNode.meta.target.length; i++){
+                            if (typeof selectedNode.inputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.inputOf.name) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                else if (currentNode.type === 'output'){
+                    if (((selectedNode.outputOf && selectedNode.outputOf.name) || 'a') === ((currentNode.outputOf && currentNode.outputOf.name) || 'b')) return true;
+                    if (selectedNode.outputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
+                        for (i = 0; i < currentNode.meta.target.length; i++){
+                            if (typeof selectedNode.outputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.outputOf.name) {
+                                return true;
+                            }
                         }
                     }
                 }

@@ -626,6 +626,7 @@ export class WorkflowDetailPane extends React.Component {
 
     render(){
         var node = this.props.selectedNode;
+        console.log('SELECTED NODE', node);
         if (!node) return (
             <div className="detail-pane">
                 <h5 className="text-400 text-center" style={{ paddingTop : 7 }}>

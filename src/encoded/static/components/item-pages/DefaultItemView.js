@@ -34,15 +34,10 @@ export class ItemBaseView extends React.Component {
         //this.componentDidMount = this.componentDidMount.bind(this);
         this.getCommonTabs = this.getCommonTabs.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
+        this.itemHeader = this.itemHeader.bind(this);
         this.state = {};
     }
-    /*
-    componentDidMount(){
-        FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.context.lab );
-        FormattedInfoBlock.onMountMaybeFetch.call(this, 'award', this.props.context.award );
-        FormattedInfoBlock.onMountMaybeFetch.call(this, 'submitted_by', this.props.context.submitted_by );
-    }
-    */
+
     getCommonTabs(){
         return [
             ItemDetailList.getTabObject(this.props.context, this.props.schemas),
@@ -59,6 +54,16 @@ export class ItemBaseView extends React.Component {
         return this.getCommonTabs();
     }
 
+    itemHeader(){
+        return (
+            <ItemHeader.Wrapper context={this.props.context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
+                <ItemHeader.TopRow />
+                <ItemHeader.MiddleRow />
+                <ItemHeader.BottomRow />
+            </ItemHeader.Wrapper>
+        );
+    }
+
     render() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
@@ -66,11 +71,7 @@ export class ItemBaseView extends React.Component {
         return (
             <div className={this.itemClassName()}>
 
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                    <ItemHeader.TopRow />
-                    <ItemHeader.MiddleRow />
-                    <ItemHeader.BottomRow />
-                </ItemHeader.Wrapper>
+                { this.itemHeader() }
 
                 <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />
 
@@ -101,16 +102,18 @@ export default class DefaultItemView extends ItemBaseView {
         super(props);
         this.render = this.render.bind(this);
     }
-
+    /*
     topRightHeaderSection(){
         var r = [];
         // TODO: EDIT ACTIONS
         return r;
     }
-
+    */
+    /* Not even needed.
     render() {
         return super.render();
     }
+    */
 
 }
 

@@ -81,7 +81,7 @@ export function allFilesForWorkflowRunMappedByUUID(item){
  * @memberof module:item-pages
  * @extends module:item-pages/DefaultItemView.ItemBaseView
  */
-export class WorkflowRunView extends React.Component {
+export class WorkflowRunView extends ItemBaseView {
 
     constructor(props){
         super(props);
@@ -116,35 +116,20 @@ export class WorkflowRunView extends React.Component {
         });
     }
 
-    render() {
-        var schemas = this.props.schemas || {};
+    itemHeader(){
         var context = this.props.context;
-        var ic = itemClass(this.props.context, 'view-detail item-page-container');
-
+        var topRightTitle = (context.workflow && context.workflow.display_title) || null;
+        if (topRightTitle && context.workflow.workflow_type){
+            topRightTitle = (
+                <span><span className="text-400">{ topRightTitle }</span> | { context.workflow.workflow_type }</span>
+            );
+        }
         return (
-            <div className={ic}>
-                
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                    <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
-                    <ItemHeader.MiddleRow />
-                    <ItemHeader.BottomRow />
-                </ItemHeader.Wrapper>
-
-                <br/>
-
-                <div className="row">
-
-                    <div className="col-xs-12 col-md-12 tab-view-container">
-
-                        <TabbedView contents={this.getTabViewContents()} />
-
-                    </div>
-
-                </div>
-
-                <ItemFooterRow context={context} schemas={schemas} />
-
-            </div>
+            <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
+                <ItemHeader.TopRow typeInfo={{ title : topRightTitle, description : 'Workflow Type' }} />
+                <ItemHeader.MiddleRow />
+                <ItemHeader.BottomRow />
+            </ItemHeader.Wrapper>
         );
     }
 

@@ -44,6 +44,22 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         return id + '~' + (++ioIdsUsed[id]);
     }
 
+    function compareTwoFilesByUUID(file1, file2){
+        if (typeof file1 === 'string' && typeof file2 === 'string' && file1 === file2){
+            return true;
+        }
+        if (typeof file1 === 'object' && typeof file2 === 'object' && (file1.uuid || 'a') === (file2.uuid || 'b')){
+            return true;
+        }
+        if (typeof file1 === 'object' && typeof file2 === 'string' && (file1.uuid || 'a') === file2){
+            return true;
+        }
+        if (typeof file1 === 'string' && typeof file2 === 'object' && file1 === (file2.uuid || 'b')){
+            return true;
+        }
+        return false;
+    }
+
 
     function generateStepNode(step, column){
         return {
@@ -91,6 +107,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         });
 
         nodes = nodes.concat(outputNodes);
+        console.log(_.clone(outputNodes[0].meta.run_data));
         return outputNodes;
     }
 
@@ -169,6 +186,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
             // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
             var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode, "input", true);
+            console.log('NEEED TO MATCH', inputNodesToMatch);
             var nodesNamesMatched = {  };
 
             var currentInputNodesMatched = (
@@ -194,6 +212,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             );
 
             var matchedNames = _.keys(nodesNamesMatched);
+            var nodesNamesMatchedInverted = _.invert(nodesNamesMatched);
 
             if (currentInputNodesMatched.length > 0){
                 inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
@@ -201,7 +220,21 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 _.forEach(currentInputNodesMatched, function(n){
                     var inNodeName = nodesNamesMatched[n.name];
                     if (typeof inNodeName === 'undefined') return;
-                    var inNode = _.findWhere(inputNodesToMatch, { 'name' : inNodeName });
+                    var inNodes = _.where(inputNodesToMatch, { 'name' : inNodeName });
+                    if (!inNodes || inNodes.length === 0) return;
+                    
+                    var inNode;
+                    // Sometimes we have more than 1 file per argument 'name'. So lets narrow it down.
+                    if (inNodes.length === 1){
+                        inNode = inNodes[0];
+                    } else {
+                        inNode = _.find(inNodes, function(inMore){
+                            if (inMore && inMore.meta && inMore.meta.run_data && inMore.meta.run_data.file && n.meta && n.meta.run_data && n.meta.run_data.file){
+                                return compareTwoFilesByUUID(n.meta.run_data.file, inMore.meta.run_data.file);
+                            }
+                            return false;
+                        });
+                    }
                     if (!inNode) return;
                     _.extend(n, { 'inputOf' : inNode.inputOf, 'meta' : _.extend(n.meta, inNode.meta) });
                 });
@@ -211,7 +244,18 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             if (currentInputNodesMatched.length < inputNodesToMatch.length){
                 var unmatchedInputNodes = _.map(
                     _.filter(inputNodesToMatch, function(n,idx){
-                        if (matchedNames.indexOf(n.name) > -1) return false;
+                        if (typeof nodesNamesMatched[n.name] !== 'undefined') return false;
+                        // Compare file, if we have them.
+                        if (n.meta && n.meta.run_data && n.meta.run_data.file){
+                            var fileToMatch = n.meta.run_data.file;
+                            var filesToCheck = _.filter(_.map(currentInputNodesMatched, function(n2){
+                                return (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;
+                            }), function(n2){ return n2 !== null; });
+
+                            if ( _.any(filesToCheck, function(f){ return compareTwoFilesByUUID(f, fileToMatch); }) ){
+                                return false;
+                            }
+                        }
                         return true;
                     }),
                     function(n){
@@ -223,6 +267,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 inputNodesCreated = inputNodesCreated.concat(unmatchedInputNodes);
                 inputNodes = inputNodes.concat(unmatchedInputNodes);
             }
+
+            console.log('CREATED', inputNodesCreated);
 
             // Finally, attach edge to all input nodes associated to step input.
             if (inputNodes.length > 0) {

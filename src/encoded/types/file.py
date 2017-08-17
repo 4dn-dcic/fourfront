@@ -43,6 +43,24 @@ log = logging.getLogger(__name__)
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
+file_workflow_run_embeds = [
+    'workflow_run_inputs.input_files.workflow_argument_name',
+    'workflow_run_inputs.input_files.value.filename',
+    'workflow_run_inputs.input_files.value.display_title',
+    'workflow_run_inputs.input_files.value.file_format',
+    'workflow_run_inputs.input_files.value.uuid',
+    'workflow_run_inputs.input_files.value.accession',
+    'workflow_run_inputs.output_files.workflow_argument_name',
+    'workflow_run_inputs.output_files.value.display_title',
+    'workflow_run_inputs.output_files.value.file_format',
+    'workflow_run_inputs.output_files.value.uuid',
+    'workflow_run_inputs.output_files.value.accession',
+    'workflow_run_inputs.output_quality_metrics.name',
+    'workflow_run_inputs.output_quality_metrics.value.uuid'
+]
+
+file_workflow_run_embeds_processed = file_workflow_run_embeds + [ e.replace('workflow_run_inputs.', 'workflow_run_outputs.') for e in file_workflow_run_embeds ]
+
 
 def show_upload_credentials(request=None, context=None, status=None):
     if request is None or status not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
@@ -458,7 +476,7 @@ class FileFastq(File):
     """Collection for individual fastq files."""
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
-    embedded = File.embedded
+    embedded = File.embedded + file_workflow_run_embeds
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -548,7 +566,7 @@ class FileProcessed(File):
     """Collection for individual processed files."""
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
-    embedded = File.embedded
+    embedded = File.embedded + file_workflow_run_embeds_processed
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),

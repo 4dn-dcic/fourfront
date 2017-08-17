@@ -211,6 +211,9 @@ export class WorkflowNodeElement extends React.Component {
     }
     
     render(){
+
+        //console.log('NODE:', this.props.node);
+
         return (
             <div
                 className="node-visible-element"
