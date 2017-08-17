@@ -72,6 +72,12 @@ export const Term = {
             case 'biosample.biosource.individual.organism.name':
                 name = Term.capitalize(term);
                 break;
+            case 'file_type':
+            case 'file_classification':
+            case 'file_type_detailed':
+            case 'files.file_type':
+            case 'files.file_classification':
+            case 'files.file_type_detailed':
             case 'biosample.biosource.biosource_type':
                 name = Term.capitalizeSentence(term);
                 break;

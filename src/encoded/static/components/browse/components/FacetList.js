@@ -5,11 +5,11 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
-import * as store from '../store';
+import * as store from './../../../store';
 import { Collapse, Fade } from 'react-bootstrap';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, analytics, JWT } from './util';
-import * as vizUtil from './viz/utilities';
-import { PartialList } from './item-pages/components';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, analytics, JWT } from './../../util';
+import * as vizUtil from './../../viz/utilities';
+import { PartialList } from './../../item-pages/components';
 import ReactTooltip from 'react-tooltip';
 
 /**
@@ -134,6 +134,7 @@ class Term extends React.Component {
     render() {
         //var selected = this.isSelectedExpItem();
         var selected = this.props.isTermSelected(this.props.term.key, (this.state.facet || this.props.facet || {field:null}).field, this.props.expsOrSets || 'sets');
+        var title = this.props.title || Schemas.Term.toName(this.props.facet.field, this.props.term.key);
         return (
             <li className={"facet-list-element" + (selected ? " selected" : '')} key={this.props.term.key} data-key={this.props.term.key}>
                 <a className="term" data-selected={selected} href="#" onClick={this.handleClick} data-term={this.props.term.key}>
@@ -144,9 +145,7 @@ class Term extends React.Component {
                                 <i className="icon icon-times-circle icon-fw"></i>
                                 : '' }
                     </span>
-                    <span className="facet-item">
-                        { this.props.title || Schemas.Term.toName(this.props.facet.field, this.props.term.key) }
-                    </span>
+                    <span className="facet-item" data-tip={title.length > 30 ? title : null}>{ title }</span>
                     <span className="facet-count">{this.experimentSetsCount()}</span>
                 </a>
             </li>
@@ -658,7 +657,7 @@ export class ReduxExpSetFiltersInterface extends React.Component {
 
 }
 
-export default class FacetList extends React.Component {
+export class FacetList extends React.Component {
 
     /**
      * @deprecated
@@ -720,12 +719,18 @@ export default class FacetList extends React.Component {
         'onChange' : PropTypes.func         // Unused
     }
 
+    static isLoggedInAsAdmin(){
+        var details = JWT.getUserDetails();
+        if (details && Array.isArray(details.groups) && details.groups.indexOf('admin') > -1){
+            return true;
+        }
+        return false;
+    }
+
 
     static filterFacetsForBrowse(facet, props, state){
         if (facet.field.substring(0, 6) === 'audit.'){
-            if (props.session && JWT.getUserDetails().groups.indexOf('admin') > -1){
-                return true;
-            }
+            if (props.session && FacetList.isLoggedInAsAdmin()) return true;
             return false; // Ignore audit facets temporarily, if not logged in as admin.
         }
         if (facet.field === 'experimentset_type') return false;
@@ -737,9 +742,9 @@ export default class FacetList extends React.Component {
         // Lets extend Browse version w/ more strictness (remove audits).
         var browseFilterResult = FacetList.filterFacetsForBrowse.apply(this, arguments);
         if (!browseFilterResult) return false;
-        //if (facet.field.substring(0, 25) === 'experiments_in_set.audit.'){
-        //    return false; // Ignore audit facets temporarily, esp if logged out.
-        //}
+        if (facet.field.substring(0, 25) === 'experiments_in_set.audit.'){
+            return false; // Ignore audit facets, we have a different view for them.
+        }
         return true;
     }
 
@@ -748,9 +753,7 @@ export default class FacetList extends React.Component {
         if (facet.field === 'experiment_sets.@type') return false;
         if (facet.field === 'experiment_sets.experimentset_type') return false;
         if (facet.field.substring(0, 6) === 'audit.'){
-            if (props.session && JWT.getUserDetails().groups.indexOf('admin') > -1){
-                return true;
-            }
+            if (props.session && FacetList.isLoggedInAsAdmin()) return true;
             return false; // Ignore audit facets temporarily, esp if logged out.
         }
         return true;
@@ -835,7 +838,7 @@ export default class FacetList extends React.Component {
 
     renderFacets(facets, maxTermsToShow = 12){
 
-        facets = facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state));
+        facets = _.uniq(facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state)), false, function(f){ return f.field });
 
         var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
             if (m.end) return m;

@@ -259,3 +259,9 @@ def embed_testapp(app):
         'REMOTE_USER': 'EMBED',
     }
     return TestApp(app, environ)
+
+
+@pytest.fixture
+def wsgi_app(wsgi_server):
+    from webtest import TestApp
+    return TestApp(wsgi_server)

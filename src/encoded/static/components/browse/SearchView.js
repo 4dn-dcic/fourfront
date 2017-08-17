@@ -9,8 +9,7 @@ import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
 import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import FacetList from './../facetlist';
-import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController } from './components';
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList } from './components';
 
 
 
@@ -305,6 +304,7 @@ class ControlsAndResults extends React.Component {
                             filterFacetsFxn={FacetList.filterFacetsForSearch}
                             isTermSelected={this.props.isTermSelected}
                             itemTypeForSchemas={itemTypeForSchemas}
+                            session={this.props.session}
                             showClearFiltersButton={(()=>{
                                 var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
                                 var clearParts = url.parse(clearFiltersURL, true);
@@ -346,6 +346,7 @@ class ControlsAndResults extends React.Component {
                             hiddenColumns={hiddenColumns}
                             columnDefinitionOverrideMap={columnDefinitionOverrides}
                             href={this.props.href}
+                            totalExpected={context.total}
 
                             sortBy={this.props.sortBy}
                             sortColumn={this.props.sortColumn}

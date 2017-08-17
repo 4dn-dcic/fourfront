@@ -161,6 +161,16 @@
             "description": "Flag to indicate if the 4DN SOP for the selected type of experiment was followed - Yes or No",
             "type": "string",
             "enum": ["Yes", "No"]
+        },
+        "authentication_docs": {
+            "title": "Authentication Documents",
+            "description": "Images or Documents that authenticate the experiment - eg. gel picture",
+            "type": "array",
+            "items": {
+                "title": "Document or Image",
+                "type": "string",
+                "linkTo": "Protocol"
+            }
         }
     },
     "facets": {
@@ -187,6 +197,9 @@
         },
         "lab.title": {
             "title": "Lab"
+        },
+        "publications_of_exp.display_title": {
+            "title": "Publications"
         }
     },
     "columns": {

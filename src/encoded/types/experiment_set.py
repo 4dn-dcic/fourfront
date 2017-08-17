@@ -83,6 +83,7 @@ class ExperimentSet(Item):
                 "experiments_in_set.files.*",
                 "experiments_in_set.files.related_files.relationship_type",
                 "experiments_in_set.files.related_files.file.uuid",
+                "experiments_in_set.files.related_files.file.accession",
                 "experiments_in_set.filesets.*",
                 "experiments_in_set.filesets.files_in_set.*",
                 "experiments_in_set.filesets.files_in_set.related_files.relationship_type",
@@ -161,7 +162,6 @@ class ExperimentSetReplicate(ExperimentSet):
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
     embedded = ExperimentSet.embedded + [
-        "replicate_exps",
         "replicate_exps.replicate_exp.accession",
         "replicate_exps.replicate_exp.uuid"
     ]

@@ -108,11 +108,29 @@
         },
         "experiments_in_set.lab.title": {
             "title": "Lab"
+        },
+        "publications_of_set.display_title": {
+            "title": "Publication"
         }
     },
     "columns": {
         "experimentset_type": {
             "title": "Set Type"
+        },
+        "experiments_in_set.biosample.biosource.individual.organism.name": {
+            "title" : "Organism"
+        },
+        "experiments_in_set.biosample.biosource_summary": {
+            "title": "Biosource Summary"
+        },
+        "experiments_in_set.digestion_enzyme.name": {
+            "title" : "Enzyme"
+        },
+        "experiments_in_set.biosample.modifications_summary": {
+            "title" : "Modifications"
+        },
+        "experiments_in_set.biosample.treatments_summary": {
+            "title" : "Treatments"
         }
     }
 

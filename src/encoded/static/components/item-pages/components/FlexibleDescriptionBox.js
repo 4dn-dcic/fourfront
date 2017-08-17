@@ -135,7 +135,9 @@ export class FlexibleDescriptionBox extends React.Component {
         'textClassName' : null,
         'textElement' : 'p',
         'textStyle' : null,
-        'debug' : false
+        'debug' : false,
+        'linesOfText' : 1,
+        'lineHeight' : 21
     }
 
     constructor(props){
@@ -145,12 +147,14 @@ export class FlexibleDescriptionBox extends React.Component {
         this.dimensions = this.dimensions.bind(this);
         this.checkWillDescriptionFitOneLineAndUpdateHeight = this.checkWillDescriptionFitOneLineAndUpdateHeight.bind(this);
         this.toggleDescriptionExpand = this.toggleDescriptionExpand.bind(this);
+        this.makeShortContent = this.makeShortContent.bind(this);
         this.render = this.render.bind(this);
         this.descriptionHeight = null;
         this.state = {
             'descriptionExpanded' : false,
             'descriptionWillFitOneLine' : true,
-            'descriptionWhiteSpace' : 'nowrap'
+            'descriptionWhiteSpace' : this.props.linesOfText > 1 ? 'normal' : 'nowrap',
+            'shortContent' : null
         };
     }
 
@@ -168,17 +172,23 @@ export class FlexibleDescriptionBox extends React.Component {
                 var willDescriptionFitAtNewWindowSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
                 if (willDescriptionFitAtNewWindowSize != this.state.descriptionWillFitOneLine){
                     this.setState({
-                        descriptionWillFitOneLine : willDescriptionFitAtNewWindowSize
+                        descriptionWillFitOneLine : willDescriptionFitAtNewWindowSize,
+                        shortContent : this.props.linesOfText > 1 ? this.makeShortContent() : null
                     });
                 } else if (this.descriptionHeight != oldHeight) {
-                    this.forceUpdate();
+                    //this.forceUpdate();
+                    this.setState({
+                        shortContent : this.props.linesOfText > 1 ? this.makeShortContent() : null
+                    });
                 }
             }, 300, false);
 
             window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
             vizUtil.requestAnimationFrame(()=>{
+                var willDescriptionFitAtCurrentSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
                 this.setState({
-                    descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
+                    descriptionWillFitOneLine : willDescriptionFitAtCurrentSize,
+                    shortContent : this.props.linesOfText > 1 ? this.makeShortContent() : null
                 });
             });
         }
@@ -193,11 +203,16 @@ export class FlexibleDescriptionBox extends React.Component {
         }
     }
 
+    makeShortContent(){
+        var charsToKeep = 0.133 * (this.props.linesOfText * (this.descriptionWidth || 20));
+        return this.props.description.slice(0, charsToKeep) + (!this.props.description.charAt(charsToKeep) ? '' : '...');
+    }
+
     dimensions(){
         if (this.props.dimensions) return _.extend({}, FlexibleDescriptionBox.defaultDimensions, this.props.dimensions);
         else return _.clone(FlexibleDescriptionBox.defaultDimensions);
     }
-    
+
     checkWillDescriptionFitOneLineAndUpdateHeight(){
 
         if (isServerSide()) return true;
@@ -225,6 +240,18 @@ export class FlexibleDescriptionBox extends React.Component {
         if (!tcw) return true;
 
         this.descriptionHeight = tcw.containerHeight + dims.paddingHeight; // Account for padding, border.
+        this.descriptionWidth = containerWidth;
+
+        console.log('HEIGHT', this.descriptionHeight);
+
+        // If we want more than 1 line, calculate if descriptionheight / lineheight > linesWanted.
+        if (typeof this.props.linesOfText === 'number' && this.props.linesOfText > 1 && typeof this.props.lineHeight === 'number'){
+            var div = Math.ceil(this.descriptionHeight / this.props.lineHeight);
+            if (div > this.props.linesOfText) {
+                return false;
+            }
+            return true;
+        }
 
         if (tcw.textWidth < containerWidth){ 
             return true;
@@ -237,13 +264,15 @@ export class FlexibleDescriptionBox extends React.Component {
             descriptionWhiteSpace : 'normal',
             descriptionExpanded: !this.state.descriptionExpanded
         }, ()=>{
-            if (!this.state.descriptionExpanded) {
+            if (!this.state.descriptionExpanded && this.props.linesOfText === 1) {
                 // Delay whiteSpace style since can't transition it w/ CSS3
                 setTimeout(()=>{
                     this.setState({
                         descriptionWhiteSpace : 'nowrap'
                     });
                 }, 350);
+            } else if (!this.state.descriptionExpanded){
+
             }
         });
     }
@@ -251,10 +280,12 @@ export class FlexibleDescriptionBox extends React.Component {
     render(){
         if (this.props.debug) console.log('render FlexibleDescriptionBox');
         var expandButton;
-        if (!this.state.descriptionWillFitOneLine && this.props.expanded !== true){
+        var expanded = (this.state.descriptionExpanded || this.props.expanded);
+
+        if (!this.state.descriptionWillFitOneLine && typeof this.props.expanded !== 'boolean'){
             expandButton = (
                 <button type="button" className="description-expand-button right" onClick={this.throttledToggleDescriptionExpand}>
-                    <i className={"icon icon-" + (this.state.descriptionExpanded ? 'minus' : 'plus' )} />
+                    <i className={"icon icon-" + (expanded ? 'minus' : 'plus' )} />
                 </button>
             );
         }
@@ -263,8 +294,8 @@ export class FlexibleDescriptionBox extends React.Component {
                 ref={this.props.fitTo === 'grid' ? null : "box"}
                 className={"flexible-description-box " + (this.props.className ? this.props.className : '')}
                 style={{
-                    height : this.state.descriptionExpanded || this.props.expanded ? this.descriptionHeight : this.dimensions().initialHeight + 'px',
-                    whiteSpace : this.props.expanded ? 'normal' : this.state.descriptionWhiteSpace
+                    height : expanded ? this.descriptionHeight : Math.max(this.dimensions().initialHeight, this.props.lineHeight * (this.props.linesOfText || 1)),
+                    whiteSpace : expanded ? 'normal' : this.state.descriptionWhiteSpace
                 }}
             >
                 { expandButton }
@@ -272,7 +303,7 @@ export class FlexibleDescriptionBox extends React.Component {
                     React.createElement(
                         this.props.textElement,
                         { 'className' : this.props.textClassName, 'style' : this.props.textStyle },
-                        this.props.description
+                        expanded ? this.props.description : this.state.shortContent || this.props.description
                     )
                 }
             </div>

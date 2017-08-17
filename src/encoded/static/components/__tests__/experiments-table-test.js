@@ -26,14 +26,14 @@ describe('Testing experiments-table.js', function() {
         expFuncs = require('../util').expFxn;
 
         initiallySelectedFiles = {
-            "8e39bf85-02e2-4cbf-8352-55ca1ab402c7" : true, // Pair 1
-            "dbd37686-1427-4ed0-ba74-bf2ba9367554" : true,
+            "4DNESH4MYRID~4DNEXL6MFLSD~4DNFI4HKT2OG" : true, // Pair 1
+            "4DNESH4MYRID~4DNEXL6MFLSD~4DNFI397I6JO" : true,
 
-            "177a19b9-5801-4523-a1bf-c0f174a72864" : true, // Pair 2
-            "53eea9be-7b36-42d5-baba-8b138b73ba8d" : true,
+            "4DNESH4MYRID~4DNEXTBYNI67~4DNFIW6GQC2H" : true, // Pair 2
+            "4DNESH4MYRID~4DNEXTBYNI67~4DNFIYJESQV8" : true,
 
-            "30b99b06-3134-41e4-b326-bf922e2d178a" : true, // Pair 3 (there's more, but lets leave unselected)
-            "c315f5ae-62d4-4413-8606-9cd5556c2341" : true,
+            "4DNESH4MYRID~4DNEX9L8XZ38~4DNFIX7DX8L7" : true, // Pair 3 (there's more, but lets leave unselected)
+            "4DNESH4MYRID~4DNEX9L8XZ38~4DNFIAIZUF8R" : true,
             //"f08bbdca-247b-4c75-b3bf-a9ba2ac8c1e1" : true,
             //"210a7047-37cc-406d-8246-62fbe3400fc3" : true
         };
@@ -46,6 +46,7 @@ describe('Testing experiments-table.js', function() {
                         <SelectedFilesController initiallySelectedFiles={initiallySelectedFiles} ref="controller">
                             <ExperimentsTable
                                 experimentArray={context.experiments_in_set}
+                                experimentSetAccession={context.accession}
                                 replicateExpsArray={context.replicate_exps}
                                 experimentSetType={context.experimentset_type}
                                 width={960}
@@ -209,13 +210,11 @@ describe('Testing experiments-table.js', function() {
 
         // File pair blocks w checkboxes exist (prerequisite).
         expect(filePairBlocksWithCheckboxes.length).toBeGreaterThan(0); // If this fails, probably check getFilePairCheckboxElement.
-
         
         function selectedFilePairBlocksFileUUIDObj(sBlocks){
             return _.object(_.flatten(filePairBlocksWithCheckboxes.filter(function(sBlock){
                 var elem = getFilePairCheckboxElement(sBlock);
                 return elem.checked === true;
-                return false;
             }).map(function(sBlock){
                 return getFilePairCheckboxElement(sBlock).getAttribute('data-select-files').split(',');//id.split('~').pop();
             }).map(function(uuidSet){
@@ -230,6 +229,7 @@ describe('Testing experiments-table.js', function() {
 
         // Check that the selected file pairs / files in state match checkboxes that are selected.
         function selectedFilesMatchSelectedCheckboxes(stateKeys){
+            
             if (!stateKeys) stateKeys = _.keys(testExperimentsTable.refs.controller.state.selectedFiles).sort();
             var fileKeys = _.keys(selectedFilePairBlocksFileUUIDObj(filePairBlocksWithCheckboxes)).sort();
             if (fileKeys.length !== stateKeys.length) return false;

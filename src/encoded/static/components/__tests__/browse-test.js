@@ -16,7 +16,9 @@ jest.dontMock('underscore');
 
 function mapStateToProps(store) {
    return {
-       expSetFilters: store.expSetFilters
+       expSetFilters: store.expSetFilters,
+       href: store.href,
+       context: store.context
    };
 }
 
@@ -31,9 +33,13 @@ describe('Testing browse.js for experiment set browser', function() {
         Browse = require('../browse/BrowseView').default;
         context = require('../testdata/browse/context');
         store = require('../../store');
+
         var dispatch_vals = {
-            'expSetFilters': {}
+            'expSetFilters': {},
+            'href' : "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate",
+            'context' : context
         };
+
         store.dispatch({
             type: dispatch_vals
         });
@@ -41,7 +47,7 @@ describe('Testing browse.js for experiment set browser', function() {
         var UseBrowse = connect(mapStateToProps)(Browse);
         page = TestUtils.renderIntoDocument(
             <Provider store={store}>
-                <UseBrowse context={context} href="http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate" />
+                <UseBrowse />
             </Provider>
         );
     });

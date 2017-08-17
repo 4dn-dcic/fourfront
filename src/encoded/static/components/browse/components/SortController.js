@@ -112,7 +112,7 @@ export class SortController extends React.Component {
         var urlParts = url.parse(this.props.href, true);
         //var previousLimit = parseInt(urlParts.query.limit || this.state.limit || 25);
         //urlParts.query.limit = previousLimit + '';
-        urlParts.query.from = '0';
+        //urlParts.query.from = '0';
         if (key){
             urlParts.query.sort = (reverse ? '-' : '' ) + key;
         } else {

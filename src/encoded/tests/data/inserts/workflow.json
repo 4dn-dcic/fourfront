@@ -358,13 +358,25 @@
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step": "validatefiles",
+                    "step_argument_name": "input_file",
+                    "step_argument_type": "Input file"
+                }
+            ],
             "description": ""
         },
         {
             "workflow_argument_name": "report",
             "argument_type": "Output report file",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step": "validatefiles",
+                    "step_argument_name": "report",
+                    "step_argument_type": "Output file"
+                }
+            ],
             "description": ""
         }
     ],
@@ -1458,6 +1470,20 @@
         {
             "argument_mapping":[
                 {
+                    "step_argument_name":"pairs",
+                    "step_argument_type":"Input file or parameter",
+                    "workflow_step":"cooler"
+                },
+                {
+                    "step_argument_name":"output_pairs",
+                    "step_argument_type":"Output file or parameter",
+                    "workflow_step":"merge_pairs"
+                }
+            ]
+        },
+        {
+            "argument_mapping":[
+                {
                     "step_argument_name":"pairs_index",
                     "step_argument_type":"Input file or parameter",
                     "workflow_step":"cooler"
@@ -1600,7 +1626,7 @@
         {
             "workflow_argument_name": "output_normvector",
             "argument_type": "Output processed file",
-            "argument_format": "other",
+            "argument_format": "normvector_juicerformat",
             "argument_mapping": [
                 {
                     "workflow_step": "extract-mcool-normvector-for-juicebox",
@@ -1618,5 +1644,187 @@
         }
     ],
     "description": "extract-mcool-normvector-for-juicebox"
+},
+{
+    "title": "addnormtohic",
+    "accession": "4DNWFG6J82TH",
+    "uuid": "e554d10d-d1e7-4055-aef6-4226ff1bcdb2",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "name": "addnormtohic/7",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "arguments": [
+        {
+            "workflow_argument_name": "input_hic",
+            "argument_type": "Input file",
+            "argument_format": "hic",
+            "argument_mapping": [
+                {
+                    "workflow_step": "addnormtohic",
+                    "step_argument_name": "input_hic",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "description": ""
+        },
+        {
+            "argument_type": "parameter",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "min_res",
+                    "workflow_step": "addnormtohic",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "min_res"
+        },
+        {
+            "argument_type": "parameter",
+            "argument_mapping": [
+                {
+                    "step_argument_name": "max_mem",
+                    "workflow_step": "addnormtohic",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "max_mem"
+        },
+        {
+            "workflow_argument_name": "output_hic",
+            "argument_type": "Output processed file",
+            "argument_format": "hic",
+            "argument_mapping": [
+                {
+                    "workflow_step": "addnormtohic",
+                    "step_argument_name": "output_hic",
+                    "step_argument_type": "Output file"
+                }
+            ],
+            "description": ""
+        }
+    ],
+    "workflow_steps": [
+        {
+            "step_name":"addnormtohic",
+            "step":"12ad1dbe-cc44-4968-8a21-d1e5a12d3222"
+        }
+    ],
+    "description": "addnormtohic"
+},
+{
+    "cwl_pointer": "", 
+    "uuid": "c6480905-49e5-4c33-afab-9ec90d65faf3", 
+    "arguments": [
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "cool2mcool", 
+                    "step_argument_name": "input_cool", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "input_cool", 
+            "argument_format": "cool",
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "add_hic_normvector_to_mcool", 
+                    "step_argument_name": "input_hic", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "input_hic", 
+            "argument_format": "hic",
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "cool2mcool", 
+                    "step_argument_name": "ncores", 
+                    "step_argument_type": "parameter"
+                }
+            ], 
+            "workflow_argument_name": "ncores", 
+            "argument_type": "parameter"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "add_hic_normvector_to_mcool", 
+                    "step_argument_name": "output_mcool", 
+                    "step_argument_type": "Output file"
+                }
+            ], 
+            "workflow_argument_name": "output_mcool", 
+            "argument_format": "mcool",
+            "argument_type": "Output processed file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "extract_mcool_normvector_for_juicebox", 
+                    "step_argument_name": "output_normvector", 
+                    "step_argument_type": "Output file"
+                }
+            ], 
+            "workflow_argument_name": "output_normvector", 
+            "argument_format": "normvector_juicerformat",
+            "argument_type": "Output processed file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "extract_mcool_normvector_for_juicebox", 
+                    "step_argument_name": "input_mcool", 
+                    "step_argument_type": "Input file or parameter"
+                }, 
+                {
+                    "workflow_step": "add_hic_normvector_to_mcool", 
+                    "step_argument_name": "output_mcool", 
+                    "step_argument_type": "Output file or parameter"
+                }
+            ] 
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "add_hic_normvector_to_mcool", 
+                    "step_argument_name": "input_mcool", 
+                    "step_argument_type": "Input file or parameter"
+                }, 
+                {
+                    "workflow_step": "cool2mcool", 
+                    "step_argument_name": "output_mcool", 
+                    "step_argument_type": "Output file or parameter"
+                }
+            ] 
+        }
+    ], 
+    "title": "hi-c-processing-partc/6", 
+    "name": "hi-c-processing-partc/6", 
+    "workflow_steps": [
+        {
+            "step": "25e911b4-49e5-4c33-afab-9ec90d65faf3",
+            "step_name": "cool2mcool"
+        }, 
+        {
+            "step": "53e7b46f-1d3b-4a16-812f-c79456614bda", 
+            "step_name": "extract_mcool_normvector_for_juicebox"
+        }, 
+        {
+            "step": "11775554-5f85-4d0c-93e4-fa9d7f20d47a", 
+            "step_name": "add_hic_normvector_to_mcool"
+        }
+    ], 
+    "workflow_type": "Hi-C data analysis", 
+    "workflow_diagram": "", 
+    "description": "Hi-C processing partC Revision 6",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "accession": "4DNWF06BPEF2"
 }
 ]

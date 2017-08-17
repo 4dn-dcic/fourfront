@@ -36,6 +36,8 @@ def _type_length():
 
 TYPE_LENGTH = _type_length()
 
+INDEX_DATA_TYPES = ['file_fastq', 'workflow_run', 'biosample', 'experiment_set']
+
 PUBLIC_COLLECTIONS = [
     'source',
     'platform',
@@ -75,46 +77,35 @@ def test_vary_json(anontestapp):
 
 
 @pytest.mark.parametrize('item_type', [k for k in TYPE_LENGTH if k != 'user'])
-def test_collections_anon(workbook, anontestapp, item_type):
+def test_collections_anon(anontestapp, item_type):
     res = anontestapp.get('/' + item_type).follow(status=200)
     assert '@graph' in res.json
 
 
 @pytest.mark.parametrize('item_type', [k for k in TYPE_LENGTH if k != 'user'])
-def test_html_collections_anon(workbook, anonhtmltestapp, item_type):
+def test_html_collections_anon(anonhtmltestapp, item_type):
     res = anonhtmltestapp.get('/' + item_type).follow(status=200)
     assert res.body.startswith(b'<!DOCTYPE html>')
 
 
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_html_collections(workbook, htmltestapp, item_type):
+def test_html_collections(htmltestapp, item_type):
     res = htmltestapp.get('/' + item_type).follow(status=200)
     assert res.body.startswith(b'<!DOCTYPE html>')
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_html_pages(workbook, testapp, htmltestapp, item_type):
-    res = testapp.get('/%s?limit=all' % item_type).follow(status=200)
-    for item in res.json['@graph']:
-        res = htmltestapp.get(item['@id'])
-        assert res.body.startswith(b'<!DOCTYPE html>')
-
-
-@pytest.mark.slow
 @pytest.mark.parametrize('item_type', [k for k in TYPE_LENGTH if k != 'user'])
-def test_html_server_pages(workbook, item_type, wsgi_server):
-    from webtest import TestApp
-    testapp = TestApp(wsgi_server)
-    res = testapp.get(
-        '/%s?limit=all' % item_type,
+def test_html_server_pages(item_type, wsgi_app):
+    res = wsgi_app.get(
+        '/%s?limit=1' % item_type,
         headers={'Accept': 'application/json'},
     ).follow(
         status=200,
         headers={'Accept': 'application/json'},
     )
     for item in res.json['@graph']:
-        res = testapp.get(item['@id'], status=200)
+        res = wsgi_app.get(item['@id'], status=200)
         assert res.body.startswith(b'<!DOCTYPE html>')
         assert b'Internal Server Error' not in res.body
 
@@ -176,22 +167,6 @@ def test_abstract_collection(testapp, experiment):
     pass
     # testapp.get('/experiment/{accession}'.format(**experiment))
     # testapp.get('/expermient/{accession}'.format(**experiment))
-
-
-@pytest.mark.slow
-@pytest.mark.parametrize(('item_type', 'length'), TYPE_LENGTH.items())
-def test_load_workbook(workbook, testapp, item_type, length):
-    # testdata must come before testapp in the funcargs list for their
-    # savepoints to be correctly ordered.
-    # sometimes this is slow
-    for i in range(5):
-        res = testapp.get('/%s/?limit=all' % item_type).maybe_follow(status=200)
-        # TODO ASK_BEN about inherited collections i.e. protocol
-        if len(res.json['@graph']) != length:
-            sleep(1)
-            continue
-        assert len(res.json['@graph']) == length
-        return
 
 
 @pytest.mark.slow
@@ -315,12 +290,21 @@ def test_jsonld_term(testapp):
     assert res.json
 
 
-@pytest.mark.slow
-@pytest.mark.parametrize('item_type', TYPE_LENGTH)
-def test_index_data_workbook(workbook, testapp, indexer_testapp, item_type):
+@pytest.mark.parametrize('item_type', INDEX_DATA_TYPES)
+def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, item_type):
+    import random
+    # randomly sample all items and take 2
     res = testapp.get('/%s?limit=all' % item_type).follow(status=200)
-    for item in res.json['@graph']:
-        indexer_testapp.get(item['@id'] + '@@index-data')
+    # previously test_load_workbook
+    item_len = len(res.json['@graph'])
+    assert item_len == TYPE_LENGTH[item_type]
+    random_id_idxs = random.sample(range(item_len), 2)
+    random_ids = [res.json['@graph'][idx]['@id'] for idx in random_id_idxs]
+    for item_id in random_ids:
+        indexer_testapp.get(item_id + '@@index-data', status=200)
+        # previously test_html_pages
+        res = htmltestapp.get(item_id)
+        assert res.body.startswith(b'<!DOCTYPE html>')
 
 
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)

@@ -56,6 +56,8 @@ ORDER = [
     'experiment_capture_c',
     'experiment_repliseq',
     'experiment_atacseq',
+    'experiment_chiapet',
+    'experiment_seq',
     'experiment_mic',
     'experiment_set',
     'experiment_set_replicate',
@@ -578,6 +580,12 @@ PHASE1_PIPELINES = {
     'experiment_atacseq': [
         remove_keys('experiment_relation'),
     ],
+    'experiment_chiapet': [
+        remove_keys('experiment_relation'),
+    ],
+    'experiment_seq': [
+        remove_keys('experiment_relation'),
+    ],
     'publication': [
         remove_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
     ],
@@ -634,6 +642,12 @@ PHASE2_PIPELINES = {
     'experiment_atacseq': [
         skip_rows_missing_all_keys('experiment_relation'),
     ],
+    'experiment_chiapet': [
+        skip_rows_missing_all_keys('experiment_relation'),
+    ],
+    'experiment_seq': [
+        skip_rows_missing_all_keys('experiment_relation'),
+    ],
     'publication': [
         skip_rows_missing_all_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
     ],
@@ -652,7 +666,10 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
     exclude_list = []
     order = list(ORDER)
     if itype is not None:
-        order = [itype]
+        if isinstance(itype, list):
+            order = itype
+        else:
+            order = [itype]
     for item_type in order:
         try:
             source = read_single_sheet(filename, item_type)
@@ -760,11 +777,10 @@ def load_test_data(app, access_key_loc=None):
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
     inserts = resource_filename('encoded', 'tests/data/inserts/')
-    print(inserts)
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
-                               server="https://data.4dnucleome.org")
+                               server="https://mastertest.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
 
 
@@ -782,7 +798,7 @@ def load_prod_data(app, access_key_loc=None):
     docsdir = []
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
-                               server="https://testportal.4dnucleome.org")
+                               server="https://data.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
 
 

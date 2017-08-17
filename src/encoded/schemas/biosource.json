@@ -117,6 +117,9 @@
           },
           "individual.organism.name": {
               "title": "Organism"
+          },
+          "cell_line_tier": {
+              "title": "Tier"
           }
 
       }

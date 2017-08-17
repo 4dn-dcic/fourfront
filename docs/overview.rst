@@ -79,7 +79,9 @@ AuthZ
 
 	The pyramid app handles all URL dispatch and fetches JSON objects from Elasticsearch (or optionally, the database directly).  These can be either individual objects or Collections (arrays) of objects.  The objects can either be "flat" with no linked objects embedded, or with some or all linked objects embedded in the response.
 
-	The scope of embedding is decided on an object-by-object bases, listed in the /src/encoded/types directory. Each object has an 'embedded' list defined, which dictates what objects will be embedded in the elasticsearch indexing process. Whole objects can be embedded or specific fields of objects. For objects (with linkTo's in the schema) are not explicitly added to the 'embedded' list, two fields will automatically included, regardless of whether or not these are calculated properties. These are link_id and display_title.
+	The scope of embedding is decided on an object-by-object bases, listed in the /src/encoded/types directory. Each object has an 'embedded' list defined, which dictates what objects will be embedded in the elasticsearch indexing process. Whole objects can be embedded or specific fields of objects. For objects (with linkTo's in the schema) are not explicitly added to the 'embedded' list, three fields will automatically included, regardless of whether or not these are calculated properties. These are link_id, display_title, and uuid.
+
+    FOR MORE INFO ON EMBEDDING, reference docs/embedding-and-indexing.rst in snovault.
 
 	* renderers.py - code that determines whether to return HTML or JSON based on request, as well as code for starting the node subprocess renderer.js which converts the ReactJS pages into XHTML.
 

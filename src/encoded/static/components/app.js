@@ -65,7 +65,7 @@ const portal = {
         {id: 'help-menu-item', sid:'sHelp', title: 'Help', children: [
             {id: 'introduction-menu-item', title: 'Introduction to 4DN Metadata', url: '/help'},
             {id: 'getting-started-menu-item', title: 'Data Submission - Getting Started', url: '/help/getting-started'},
-            {id: 'cell-culture-menu-item', title: 'Cell Culture Metadata', url: '/help/cell-culture'},
+            {id: 'cell-culture-menu-item', title: 'Biosample Metadata', url: '/help/biosample'},
             {id: 'web-submission-menu-item', title: 'Online Submission', url: '/help/web-submission'},
             {id: 'spreadsheet-menu-item', title: 'Spreadsheet Submission', url: '/help/spreadsheet'},
             {id: 'rest-api-menu-item', title: 'REST API', url: '/help/rest-api'},
@@ -1186,6 +1186,10 @@ export default class App extends React.Component {
             this.historyEnabled = false;
 
         }
+
+        // Set current path for per-page CSS rule targeting.
+        var hrefParts = url.parse(canonical || base);
+
         return (
             <html lang="en">
                 <head>
@@ -1204,11 +1208,12 @@ export default class App extends React.Component {
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}></script>
                     <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
-                    <link rel="stylesheet" href="/static/css/style.css" />
+                    <script data-prop-name="lastCSSBuildTime" type="application/ld+json" dangerouslySetInnerHTML={{ __html: this.props.lastCSSBuildTime }}></script>
+                    <link rel="stylesheet" href={'/static/css/style.css?build=' + (this.props.lastCSSBuildTime || 0)} />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
-                <body onClick={this.handleClick} onSubmit={this.handleSubmit}>
+                <body onClick={this.handleClick} onSubmit={this.handleSubmit} data-path={hrefParts.path} data-pathname={hrefParts.pathname}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>

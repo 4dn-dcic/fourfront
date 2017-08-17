@@ -184,7 +184,7 @@ export class FacetCharts extends React.Component {
                 <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height }}>
                     <i
                         className="icon icon-spin icon-circle-o-notch" 
-                        style={{ 'top' : (height / 2 + 10) + 'px' }}
+                        style={{ 'top' : (height / 2 - 30) + 'px' }}
                     ></i>
                 </div>
             );

@@ -8,6 +8,9 @@ from encoded.verifier import verify_item
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
+# subset of collections to run test on
+TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
+
 
 @pytest.fixture(scope='session')
 def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
@@ -47,12 +50,10 @@ def DBSession(app):
     return app.registry[DBSESSION]
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=False)
 def teardown(app, dbapi_conn):
     from snovault.elasticsearch import create_mapping
-    create_mapping.run(app, collections=['biosample',
-                                         'testing_post_put_patch',
-                                         'file_processed'])
+    create_mapping.run(app, collections=TEST_COLLECTIONS)
     cursor = dbapi_conn.cursor()
     cursor.execute("""TRUNCATE resources, transactions CASCADE;""")
     cursor.close()
@@ -82,33 +83,11 @@ def listening_conn(dbapi_conn):
 
 
 @pytest.mark.slow
-def test_indexing_workbook(testapp, indexer_testapp):
-    # First post a single item so that subsequent indexing is incremental
-    testapp.post_json('/testing-post-put-patch/', {'required': ''})
-    res = indexer_testapp.post_json('/index', {'record': True})
-    assert res.json['indexed'] == 1
-
-    from ..loadxl import load_all
-    from pkg_resources import resource_filename
-    inserts = resource_filename('encoded', 'tests/data/inserts/')
-    docsdir = [resource_filename('encoded', 'tests/data/documents/')]
-    load_all(testapp, inserts, docsdir)
-    res = indexer_testapp.post_json('/index', {'record': True})
-    assert res.json['updated']
-    assert res.json['indexed']
-    res = testapp.get('/search/?type=Biosample')
-    # Compare specific fields of the search result from expected inserts
-    # The following assertions correspond to insert data for these embeds,
-    # (in types/biosample.py): 'biosource.biosource_type', 'biosource.individual.organism.name'
-    test_json = [bios for bios in res.json['@graph'] if bios['accession'] == '4DNBS1234567'][0]
-    assert test_json['uuid'] == "231111bc-8535-4448-903e-854af460b254"
-    assert test_json['biosource'][0]['biosource_type'] == "immortalized cell line"
-    assert test_json['biosource'][0]['individual']['organism']['name'] == "human"
-    assert res.json['total'] > 1
-
-
-def test_indexing_simple(app, testapp, indexer_testapp):
+def test_indexing_simple(app, testapp, indexer_testapp, teardown):
     import time
+    es = app.registry['elasticsearch']
+    doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
+    assert doc_count == 0
     # First post a single item so that subsequent indexing is incremental
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
@@ -119,6 +98,10 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert res.json['indexed'] == 1
     assert res.json['txn_count'] == 1
     assert res.json['updated'] == [uuid]
+    time.sleep(3)
+    # check es directly
+    doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
+    assert doc_count == 2
     res = testapp.get('/search/?type=TestingPostPutPatch')
     uuids = [indv_res['uuid'] for indv_res in res.json['@graph']]
     count = 0
@@ -130,7 +113,7 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert res.json['total'] >= 2
     assert uuid in uuids
     # test the meta index
-    es = app.registry['elasticsearch']
+
     indexing_doc = es.get(index='meta', doc_type='meta', id='indexing')
     indexing_source = indexing_doc['_source']
     assert 'xmin' in indexing_source
@@ -143,6 +126,41 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert 'settings' in testing_ppp_source
 
 
+def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch, teardown):
+    """
+    Test overall create_mapping functionality using app.
+    Do this by checking es directly before and after running mapping.
+    Delete an index directly, run again to see if it recovers.
+    """
+    from snovault.elasticsearch.create_mapping import type_mapping, create_mapping_by_type, build_index_record
+    from snovault.elasticsearch import ELASTIC_SEARCH
+    from snovault import TYPES
+    es = registry[ELASTIC_SEARCH]
+    item_types = TEST_COLLECTIONS
+    # check that mappings and settings are in index
+    for item_type in item_types:
+        item_mapping = type_mapping(registry[TYPES], item_type)
+        try:
+            item_index = es.indices.get(index=item_type)
+        except:
+            assert False
+        found_index_mapping = item_index.get(item_type, {}).get('mappings').get(item_type, {}).get('properties', {}).get('embedded')
+        found_index_settings = item_index.get(item_type, {}).get('settings')
+        assert found_index_mapping
+        assert found_index_settings
+        # get the item record from meta and compare that
+        full_mapping = create_mapping_by_type(item_type, registry)
+        item_record = build_index_record(full_mapping, item_type)
+        try:
+            item_meta = es.get(index='meta', doc_type='meta', id=item_type)
+        except:
+            assert False
+        meta_record = item_meta.get('_source', None)
+        assert meta_record
+        assert item_record == meta_record
+
+
+@pytest.mark.slow
 def test_listening(testapp, listening_conn):
     import time
     testapp.post_json('/testing-post-put-patch/', {'required': ''})

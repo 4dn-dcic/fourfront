@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
-import FacetList from './facetlist'; // Only used for statics.
+import { FacetList } from './browse/components';
 import { expFxn, Filters, console, isServerSide, analytics } from './util';
 
 
@@ -127,8 +127,7 @@ class StackedBlockNameLabel extends React.Component {
 
 /**
  * Name element to be put inside of StackedBlocks as the first child.
- * 
- * @memberof StackedBlock
+ *
  * @class StackedBlockList
  * @extends {React.Component}
  */
@@ -154,16 +153,10 @@ class StackedBlockName extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
     }
-    /*
-    shouldComponentUpdate(nextProps){
-        if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
-        return false;
-    }
-    */
+
     getColumnWidthStyle(){
         if (this.props.colWidthStyles && typeof this.props.colWidthStyles[this.props.columnClass] !== 'undefined'){
             return this.props.colWidthStyles[this.props.columnClass];
@@ -174,6 +167,7 @@ class StackedBlockName extends React.Component {
             this.props.expTable.state &&
             Array.isArray(this.props.expTable.state.columnWidths)
         ){
+            console.log('2nd IF STATE');
             var colWidthIndex = _.findIndex(this.props.expTable.columnHeaders(), { 'columnClass' : this.props.columnClass });
             if (colWidthIndex > -1) return { 'width' : this.props.expTable.state.columnWidths[colWidthIndex] };
         }
@@ -536,7 +530,7 @@ export default class ExperimentsTable extends React.Component {
             // No columnClassName specified.
             if (columnClassName === null) return widthsByColumnClass;
             // columnClassName specified and set.
-            else if (columnClassName !== null && _.contains(Object.keys(widthsByColumnClass), columnClassName)){
+            else if (columnClassName !== null && typeof widthsByColumnClass[columnClassName] === 'number'){
                 return widthsByColumnClass[columnClassName];
             }
             // columnClassName specified but width not configured.
@@ -621,12 +615,22 @@ export default class ExperimentsTable extends React.Component {
     }
 
     static propTypes = {
-        columnHeaders : PropTypes.array,
-        experimentArray : PropTypes.array,
-        passExperiments : PropTypes.instanceOf(Set),
-        expSetFilters : PropTypes.object,
-        selectedFiles : PropTypes.object.isRequired,
-        keepCounts : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
+        columnHeaders               : PropTypes.array,
+        experimentArray             : PropTypes.array,
+        passExperiments             : PropTypes.instanceOf(Set),
+        expSetFilters               : PropTypes.object,
+        'selectedFiles'               : PropTypes.object,
+        'experimentSetAccession'    : PropTypes.string.isRequired,
+        'replicateExpsArray'        : PropTypes.arrayOf(PropTypes.shape({
+            'bio_rep_no'                : PropTypes.number.isRequired,
+            'tec_rep_no'                : PropTypes.number.isRequired,
+            'replicate_exp'             : PropTypes.shape({
+                'accession'                 : PropTypes.string,
+                'uuid'                      : PropTypes.string,
+                'link_id'                   : PropTypes.string
+            }).isRequired
+        })).isRequired,
+        keepCounts              : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
     }
 
     static defaultProps = {
@@ -643,7 +647,8 @@ export default class ExperimentsTable extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.updateColumnWidths = this.updateColumnWidths.bind(this);
+        this.getColumnWidths = this.getColumnWidths.bind(this);
+        //this.updateColumnWidths = this.updateColumnWidths.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.staticColumnHeaders = this.staticColumnHeaders.bind(this);
@@ -668,38 +673,30 @@ export default class ExperimentsTable extends React.Component {
         this.state = initialState;
     }
 
-    updateColumnWidths(){
-        // Scale/expand width of columns to fit available width, if any.
-        var origColumnWidths;
+    getColumnWidths(columnHeaders = null){
         if (
             typeof this.props.width !== 'number' && (
                 !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
             )
         ){
-            this.setState({ columnWidths : ExperimentsTable.initialColumnWidths(null) });
-            return null;
+            return ExperimentsTable.initialColumnWidths(null);
         }
+
+        var origColumnWidths;
         if (!this.cache.origColumnWidths){
-            origColumnWidths = _.map(this.refs.header.children, function(c){
-                //if ( // For tests/server-side
-                //    typeof c.offsetWidth !== 'number' ||
-                //    Number.isNaN(c.offsetWidth)
-                //){
-                return ExperimentsTable.initialColumnWidths(c.getAttribute('data-column-class'));
-                //}
-                //return c.offsetWidth;
+            origColumnWidths = _.map(columnHeaders || this.columnHeaders(), function(c){
+                return ExperimentsTable.initialColumnWidths(c.columnClass);
             });
             this.cache.origColumnWidths = origColumnWidths;
         } else {
             origColumnWidths = this.cache.origColumnWidths;
         }
 
-        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960, // 960 = fallback for tests
-            totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
+        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960; // 960 = fallback for tests
+        var totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
 
         if (totalOrigColsWidth > availableWidth){
-            this.setState({ columnWidths : null });
-            return; // No room to scale up widths.
+            return null;
         }
 
         var scale = (availableWidth / totalOrigColsWidth) || 1;
@@ -712,25 +709,17 @@ export default class ExperimentsTable extends React.Component {
         var remainder = availableWidth - totalNewColsWidth;
         newColWidths[0] += Math.floor(remainder - 0.5);
 
-        this.setState({ columnWidths : newColWidths });
+        return newColWidths;
     }
 
     componentDidMount(){
-
-        this.throttledResizeHandler = _.throttle(this.updateColumnWidths, 300);
-
-        if (!isServerSide()){
-            window.addEventListener('resize', this.throttledResizeHandler);
-            this.updateColumnWidths();
-        }
-
         this.setState({ 'mounted' : true });
     }
 
     componentWillUnmount(){
-        if (!isServerSide()){
-            window.removeEventListener('resize', this.throttledResizeHandler);
-        }
+        delete this.lastColumnHeaders;
+        delete this.lastColumnWidths;
+        delete this.cache.origColumnWidths;
     }
 
     /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
@@ -759,8 +748,8 @@ export default class ExperimentsTable extends React.Component {
         return this.staticColumnHeaders().concat(this.customColumnHeaders());
     }
 
-    colWidthStyles(){
-
+    colWidthStyles(columnWidths = this.state.columnWidths, columnHeaders){
+        if (!columnHeaders) columnHeaders = this.columnHeaders();
         var colWidthStyles = {
             'experiment' : null,
             'biosample' : null,
@@ -769,10 +758,10 @@ export default class ExperimentsTable extends React.Component {
             'file-detail' : null
         };
 
-        if (Array.isArray(this.state.columnWidths)){
-            Object.keys(colWidthStyles).forEach((cn) => {
+        if (Array.isArray(columnWidths)){
+            _.keys(colWidthStyles).forEach((cn) => {
                 colWidthStyles[cn] = {
-                    width : this.state.columnWidths[_.findIndex(this.columnHeaders(), { 'columnClass' : cn })]
+                    width : columnWidths[_.findIndex(columnHeaders, { 'columnClass' : cn })]
                 };
             });
         }
@@ -784,28 +773,28 @@ export default class ExperimentsTable extends React.Component {
      * @param {string|string[]} uuid - String or list of strings (File Item UUID)
      * @param {Object|Object[]} fileObj - File Item JSON
      */
-    handleFileCheckboxChange(uuid, fileObj){
+    handleFileCheckboxChange(accessionTripleString, fileObj){
         if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
 
         var willSelect;
         var isMultiples;
 
-        if (Array.isArray(uuid)){
+        if (Array.isArray(accessionTripleString)){
             isMultiples = true;
-            willSelect = (typeof this.props.selectedFiles[uuid[0]] === 'undefined');
+            willSelect = (typeof this.props.selectedFiles[accessionTripleString[0]] === 'undefined');
         } else {
             isMultiples = false;
-            willSelect = (typeof this.props.selectedFiles[uuid] === 'undefined');
+            willSelect = (typeof this.props.selectedFiles[accessionTripleString] === 'undefined');
         }
 
         if (willSelect){
             if (isMultiples){
-                this.props.selectFile(_.zip(uuid, fileObj));
+                this.props.selectFile(_.zip(accessionTripleString, fileObj));
             } else {
-                this.props.selectFile(uuid, fileObj);
+                this.props.selectFile(accessionTripleString, fileObj);
             }
         } else {
-            this.props.unselectFile(uuid);
+            this.props.unselectFile(accessionTripleString);
         }
     }
 
@@ -821,7 +810,7 @@ export default class ExperimentsTable extends React.Component {
 
         return (
             <ExperimentsTable.StackedBlock
-                key={exp['@id']}
+                key={exp['@id'] || exp.tec_rep_no || i}
                 hideNameOnHover={false}
                 columnClass="experiment"
                 label={{
@@ -841,15 +830,17 @@ export default class ExperimentsTable extends React.Component {
                     title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
                 >
                     { contentsClassName === 'file-pairs' ? /* File Pairs Exist */
-                        exp.file_pairs.map((filePair,i) =>
+                        exp.file_pairs.map((filePair,j) =>
                             <FilePairBlock
-                                key={i}
+                                key={j}
                                 selectedFiles={this.props.selectedFiles}
                                 files={filePair}
                                 columnHeaders={columnHeaders}
                                 handleFileCheckboxChange={this.handleFileCheckboxChange}
+                                experiment={exp}
+                                experimentSetAccession={this.props.experimentSetAccession}
                                 label={ exp.file_pairs.length > 1 ?
-                                    { title : "Pair " + (i + 1) } : { title : "Pair" }
+                                    { title : "Pair " + (j + 1) } : { title : "Pair" }
                                 }
                             />
                         )
@@ -864,7 +855,7 @@ export default class ExperimentsTable extends React.Component {
                             : null }
                             <ExperimentsTable.StackedBlock.List title="Files" className="files">
                                 { Array.isArray(exp.files) ?
-                                    exp.files.map((file,i) =>
+                                    exp.files.map((file) =>
                                         <FileEntryBlock
                                             key={file['@id']}
                                             file={file}
@@ -872,6 +863,8 @@ export default class ExperimentsTable extends React.Component {
                                             handleFileCheckboxChange={this.handleFileCheckboxChange}
                                             selectedFiles={this.props.selectedFiles}
                                             hideNameOnHover={false}
+                                            experiment={exp}
+                                            experimentSetAccession={this.props.experimentSetAccession}
                                             isSingleItem={exp.files.length < 2 ? true : false}
                                         />
                                     )
@@ -971,7 +964,7 @@ export default class ExperimentsTable extends React.Component {
                 rootList={true}
                 expTable={this}
                 currentlyCollapsing={this.state.collapsing}
-                colWidthStyles={this.colWidthStyles()}
+                colWidthStyles={this.colWidthStyles(this.lastColumnWidths || this.getColumnWidths())}
                 showMoreExtTitle={
                     experimentsGroupedByBiosample.length > 5 ?
                         'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
@@ -1017,12 +1010,16 @@ export default class ExperimentsTable extends React.Component {
 
     render(){
 
+        // Cache for each render.
+        this.lastColumnHeaders = this.columnHeaders();
+        this.lastColumnWidths = this.getColumnWidths(this.lastColumnHeaders);
+
         var renderHeaderItem = function(h, i, arr){
             if (h.visible === false) return null;
             var visibleTitle = typeof h.visibleTitle !== 'undefined' ? h.visibleTitle : h.title;
             var style = null;
-            if (Array.isArray(this.state.columnWidths) && this.state.columnWidths.length === arr.length){
-                style = { 'width' : this.state.columnWidths[i] };
+            if (Array.isArray(this.lastColumnWidths) && this.lastColumnWidths.length === arr.length){
+                style = { 'width' : this.lastColumnWidths[i] };
             }
             return (
                 <div className={"heading-block col-" + h.columnClass + (h.className ? ' ' + h.className : '')} key={'header-' + i} style={style} data-column-class={h.columnClass}>
@@ -1038,7 +1035,7 @@ export default class ExperimentsTable extends React.Component {
                     <h6 className="text-center text-400"><em>No experiments</em></h6>
                     :
                     <div className="headers expset-headers" ref="header">
-                        { this.columnHeaders().map(renderHeaderItem) }
+                        { this.lastColumnHeaders.map(renderHeaderItem) }
                     </div>
                 }
 
@@ -1055,9 +1052,22 @@ export default class ExperimentsTable extends React.Component {
 
 class FilePairBlock extends React.Component {
 
+    static accessionTriplesFromProps(props){
+        var accessionTriples;
+        try {
+            accessionTriples = expFxn.filesToAccessionTriples(props.files, true);
+        } catch (e){
+            accessionTriples = _.map(props.files, (fileObj)=>{
+                return [ props.experimentSetAccession || null, (props.experiment || {}).accession || null, fileObj.accession || null ].join('~');
+            });
+        }
+        return accessionTriples;
+    }
+
     static propTypes = {
         selectedFiles : PropTypes.object,
-        handleFileCheckboxChange : PropTypes.func
+        handleFileCheckboxChange : PropTypes.func,
+        files : PropTypes.array
     }
 
     constructor(props){
@@ -1068,9 +1078,16 @@ class FilePairBlock extends React.Component {
         this.render = this.render.bind(this);
     }
 
-    isChecked(){
-        if (!Array.isArray(this.props.files) || !this.props.selectedFiles || !this.props.files[0].uuid) return null;
-        return !!(this.props.selectedFiles[this.props.files[0].uuid]);
+    isChecked(accessionTriples){
+        if (!accessionTriples){
+            accessionTriples = FilePairBlock.accessionTriplesFromProps(this.props);
+        }
+        if (!Array.isArray(this.props.files) || !this.props.selectedFiles || !this.props.files[0].accession) return null;
+        if (this.props.files.length === 0) return false;
+        for (var i = 0; i < this.props.files.length; i++){
+            if (typeof this.props.selectedFiles[accessionTriples[i]] === 'undefined') return false;
+        }
+        return true;
     }
 
     renderFileEntryBlock(file,i){
@@ -1079,27 +1096,36 @@ class FilePairBlock extends React.Component {
                 key={file['@id']}
                 file={file}
                 columnHeaders={ this.props.columnHeaders }
+                handleFileCheckboxChange={this.props.handleFileCheckboxChange}
                 className={null}
                 isSingleItem={this.props.files.length < 2 ? true : false}
                 pairParent={this}
                 type="paired-end"
                 colWidthStyles={this.props.colWidthStyles}
+                experiment={this.props.experiment}
+                experimentSetAccession={this.props.experimentSetAccession}
             />
         );
     }
 
     renderCheckBox(){
+        var accessionTriples = FilePairBlock.accessionTriplesFromProps(this.props);
         var checked = this.isChecked();
         if (checked === null) return null;
+
         return (
             <Checkbox
                 validationState='warning'
                 checked={checked}
                 name="file-checkbox"
-                id={checked + "~" + true + "~" + this.props.files[0].file_format + "~" + this.props.files[0].uuid}
+                id={'checkbox-for-' + accessionTriples.join('_')}
                 className='exp-table-checkbox'
-                data-select-files={_.pluck(this.props.files, 'uuid')}
-                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, _.pluck(this.props.files, 'uuid'), this.props.files)}
+                data-select-files={accessionTriples}
+                onChange={this.props.handleFileCheckboxChange.bind(
+                    this.props.handleFileCheckboxChange,
+                    accessionTriples,
+                    this.props.files
+                )}
             />
         );
     }
@@ -1134,7 +1160,13 @@ class FilePairBlock extends React.Component {
                     { Array.isArray(this.props.files) ?
                         this.props.files.map(this.renderFileEntryBlock)
                         :
-                        <FileEntryBlock file={null} columnHeaders={ this.props.columnHeaders } colWidthStyles={this.props.colWidthStyles} />
+                        <FileEntryBlock
+                            file={null}
+                            columnHeaders={ this.props.columnHeaders }
+                            colWidthStyles={this.props.colWidthStyles}
+                            experiment={this.props.experiment}
+                            experimentSetAccession={this.props.experimentSetAccession}
+                        />
                     }
                 </div>
             </div>
@@ -1146,6 +1178,16 @@ class FilePairBlock extends React.Component {
 
 
 class FileEntryBlock extends React.Component {
+
+    static accessionTripleFromProps(props){
+        var accessionTriple;
+        try {
+            accessionTriple = expFxn.fileToAccessionTriple(props.file, true);
+        } catch (e){
+            accessionTriple =  [ props.experimentSetAccession || null, (props.experiment || {}).accession || null, (props.file || {}).accession || null ].join('~');
+        }
+        return accessionTriple;
+    }
 
     static propTypes = {
         selectedFiles : PropTypes.object,
@@ -1162,8 +1204,9 @@ class FileEntryBlock extends React.Component {
     }
 
     isChecked(){
-        if (!this.props.file || !this.props.file.uuid || !this.props.selectedFiles) return null;
-        return this.props.selectedFiles[this.props.file.uuid];
+        if (!this.props.file || !this.props.file.accession || !this.props.selectedFiles) return null;
+        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
+        return this.props.selectedFiles[accessionTriple];
     }
 
     filledFileRow (file = this.props.file){
@@ -1210,6 +1253,8 @@ class FileEntryBlock extends React.Component {
         if (!this.props.file) return null; // No file to select.
         if (this.props.pairParent) return null; // Part of pair -- FilePairBlock has own checkbox.
 
+        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
+
         var checked = this.isChecked();
         if (checked === null) return null; // No checked state.
         return (
@@ -1217,10 +1262,14 @@ class FileEntryBlock extends React.Component {
                 validationState='warning'
                 checked={checked}
                 name="file-checkbox"
-                id={checked + "~" + true + "~" + this.props.file.file_format + "~" + this.props.file.uuid}
+                id={'checkbox-for-' + accessionTriple}
                 className='exp-table-checkbox'
-                data-select-files={[this.props.file.uuid]}
-                onChange={this.props.handleFileCheckboxChange.bind(this.props.handleFileCheckboxChange, this.props.file.uuid, this.props.file)}
+                data-select-files={[accessionTriple]}
+                onChange={this.props.handleFileCheckboxChange.bind(
+                    this.props.handleFileCheckboxChange,
+                    accessionTriple,
+                    this.props.file
+                )}
             />
         );
     }

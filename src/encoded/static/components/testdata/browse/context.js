@@ -4,6 +4,7 @@ module.exports = {
         {
             "experimentset_type":"biological replicates",
             "display_title" : "4DNES12345",
+            "accession" : "4DNES12345",
             "date_created" : "2017-06-12T13:49:18.412318+00:00",
             "@id":"/experiment-sets/431106bc-8535-4448-903e-854af460b260/",
             "description":"Sample experiment set",
