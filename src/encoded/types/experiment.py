@@ -268,14 +268,16 @@ class ExperimentRepliseq(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
+    def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
         sum_str = experiment_type
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
             sum_str += (' on ' + biosource)
-        if cell_cycle_stage:
-            sum_str += (' at ' + cell_cycle_stage)
+        if cell_cycle_phase:
+            sum_str += (' ' + cell_cycle_phase + '-phase')
+        if stage_fraction:
+            sum_str += (' ' + stage_fraction)
         return sum_str
 
     @calculated_property(schema={
@@ -283,8 +285,8 @@ class ExperimentRepliseq(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
-        return self.experiment_summary(request, experiment_type, cell_cycle_stage, biosample)
+    def display_title(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
+        return self.experiment_summary(request, experiment_type, cell_cycle_phase, stage_fraction, biosample)
 
 
 @collection(
