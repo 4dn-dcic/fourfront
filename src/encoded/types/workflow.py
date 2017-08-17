@@ -163,6 +163,8 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
             for in_file in in_files:
                 in_file_uuid = in_file.get('value')
                 input_file = request.embed('/files/' + in_file_uuid)
+                if not input_file:
+                    continue
                 for output_source in input_file.get('workflow_run_outputs', []): # There should only ever be one at most, right?
                     workflow_run_uuid = output_source.get('uuid')
                     workflow_run = request.embed('/workflow-runs/' + workflow_run_uuid)
