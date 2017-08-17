@@ -195,87 +195,94 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
         return sources
 
     def trace_history(output_of_workflow_run_uuids, depth = 0):
-        for uuid in output_of_workflow_run_uuids:
-            workflow_run = file_item.collection.get(uuid)
 
-            input_files = workflow_run.properties.get('input_files', [])
-            output_files = workflow_run.properties.get('output_files', [])
+        if len(output_of_workflow_run_uuids) == 0:
+            return
 
-            step = {
-                "uuid" : uuid,
-                "name" : workflow_run.display_title(),
-                "analysis_step_types" : [],
-                "inputs" : [],
-                "outputs" : [],
-                "TEMP_run" : workflow_run
-            }
+        # When we trace history, we care only about the last workflow_run out of which file was generated.
+        # A file should be output of only one run.
 
-            # Fill 'Analysis Step Types' w/ workflow name; TODO: Add component analysis_steps.
-            workflow_uuid = workflow_run.properties.get('workflow')
-            workflow = None
-            if workflow_uuid:
-                workflow = workflow_run.collection.get(workflow_uuid)
-                if workflow:
-                    #step['analysis_step_types'].append(workflow.display_title())
-                    if workflow.properties.get('workflow_type'):
-                        step['analysis_step_types'].append(workflow.properties['workflow_type'])
+        last_workflow_run_uuid = output_of_workflow_run_uuids[len(output_of_workflow_run_uuids) - 1]
+        workflow_run = file_item.collection.get(last_workflow_run_uuid)
 
+        input_files = workflow_run.properties.get('input_files', [])
+        output_files = workflow_run.properties.get('output_files', [])
 
-            # Add Output Files, 1-level deep max (maybe change in future)
-            output_files_by_argument_name = group_files_by_workflow_argument_name(output_files)
-            for argument_name, output_files_for_arg in output_files_by_argument_name.items():
-                targets = []
+        step = {
+            "uuid" : last_workflow_run_uuid,
+            "name" : workflow_run.display_title(),
+            "analysis_step_types" : [],
+            "inputs" : [],
+            "outputs" : [],
+            "TEMP_run" : workflow_run
+        }
 
-                if len(targets) == 0:
-                    targets = [{ "name" : argument_name, "type" : "Workflow Output File" }]
+        # Fill 'Analysis Step Types' w/ workflow name; TODO: Add component analysis_steps.
+        workflow_uuid = workflow_run.properties.get('workflow')
+        workflow = None
+        if workflow_uuid:
+            workflow = workflow_run.collection.get(workflow_uuid)
+            if workflow:
+                #step['analysis_step_types'].append(workflow.display_title())
+                if workflow.properties.get('workflow_type'):
+                    step['analysis_step_types'].append(workflow.properties['workflow_type'])
 
 
-                step['outputs'].append({
-                    "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
-                    "target" : targets, # TODO: TRACING
-                    "meta" : {
-                        "argument_type" : "Input File"
-                    },
-                    "run_data" : {
-                        "file" : [ f.get('value') for f in output_files_for_arg ],
-                        "type" : "input",
-                        "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in output_files_for_arg ]
-                    }
-                })
+        # Add Output Files, 1-level deep max (maybe change in future)
+        output_files_by_argument_name = group_files_by_workflow_argument_name(output_files)
+        for argument_name, output_files_for_arg in output_files_by_argument_name.items():
+            targets = []
+
+            if len(targets) == 0:
+                targets = [{ "name" : argument_name, "type" : "Workflow Output File" }]
 
 
-            # Trace Input Files
-            input_files_by_argument_name = group_files_by_workflow_argument_name(input_files)
-            for argument_name, input_files_for_arg in input_files_by_argument_name.items():
-                step['inputs'].append({
-                    "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
-                    "source" : generate_sources_for_input(input_files_for_arg, depth),
-                    "meta" : {
-                        "argument_type" : "Input File"
-                    },
-                    "run_data" : {
-                        "file" : [ request.embed('/files/' + f.get('value')) for f in input_files_for_arg ],
-                        "type" : "input",
-                        "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in input_files_for_arg ]
-                    }
-                })
-            
-            del step['TEMP_run']
+            step['outputs'].append({
+                "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
+                "target" : targets, # TODO: TRACING
+                "meta" : {
+                    "argument_type" : "Input File"
+                },
+                "run_data" : {
+                    "file" : [ f.get('value') for f in output_files_for_arg ],
+                    "type" : "input",
+                    "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in output_files_for_arg ]
+                }
+            })
 
-            # After plotting inputs, link up inputs w/ any outputs of prior step(s).
-            for input in step['inputs']:
-                for source in input.get('source', []):
-                    for existing_step in steps:
-                        if existing_step['name'] == source.get('step'):
-                            for output in existing_step.get('outputs', []):
-                                if output.get('name', 'blank1') == source.get('name', 'blank2'):
-                                    output['target'].append({
-                                        "name" : input.get("name"),
-                                        "step" : step["name"],
-                                        "type" : "Input file"
-                                    })
 
-            steps.append(step)
+        # Trace Input Files
+        input_files_by_argument_name = group_files_by_workflow_argument_name(input_files)
+        for argument_name, input_files_for_arg in input_files_by_argument_name.items():
+            step['inputs'].append({
+                "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
+                "source" : generate_sources_for_input(input_files_for_arg, depth),
+                "meta" : {
+                    "argument_type" : "Input File"
+                },
+                "run_data" : {
+                    "file" : [ f.get('value') for f in input_files_for_arg ],
+                    "type" : "input",
+                    "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in input_files_for_arg ]
+                }
+            })
+        
+        del step['TEMP_run']
+
+        # After plotting inputs, link up inputs w/ any outputs of prior step(s).
+        for input in step['inputs']:
+            for source in input.get('source', []):
+                for existing_step in steps:
+                    if existing_step['name'] == source.get('step'):
+                        for output in existing_step.get('outputs', []):
+                            if output.get('name', 'blank1') == source.get('name', 'blank2'):
+                                output['target'].append({
+                                    "name" : input.get("name"),
+                                    "step" : step["name"],
+                                    "type" : "Input file"
+                                })
+
+        steps.append(step)
 
 
     def trace_future(input_of_workflow_run_uuids):

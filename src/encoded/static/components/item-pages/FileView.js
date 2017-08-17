@@ -298,8 +298,6 @@ class GraphSection extends React.Component {
         var fileMap = allFilesForWorkflowRunsMappedByUUID(
             (this.props.context.workflow_run_outputs || []).concat(this.props.context.workflow_run_inputs || [])
         );
-        console.log(graphData.nodes[2].meta.run_data.file);
-        console.log('FFF', fileMap, mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap )[2].meta.run_data.file);
         return _.extend(commonGraphPropsFromProps(this.props), {
             'isNodeDisabled' : GraphSection.isNodeDisabled,
             'nodes' : mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap ),
