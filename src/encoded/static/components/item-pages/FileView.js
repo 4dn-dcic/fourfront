@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
 import { object, expFxn, ajax, Schemas, layout } from './../util';
 import { FormattedInfoBlock, TabbedView, FileDownloadButton, FileDownloadButtonAuto } from './components';
@@ -21,6 +22,28 @@ export function allFilesForWorkflowRunsMappedByUUID(items){
         console.log('SDFAAS', workflowRun);
         return _.extend(m, allFilesForWorkflowRunMappedByUUID(workflowRun));
     }, {});
+}
+
+
+export function filterOutIndirectFilesFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+        if (n.type === 'input' || n.type === 'output'){
+            if (n && n.meta && n.meta.in_path === true){
+                return true;
+            }
+            deleted[n.id] = true;
+            return false;
+        }
+        return true;
+    });
+    var edges = _.filter(graphData.edges, function(e,i){
+        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
+            return false;
+        }
+        return true;
+    });
+    return { nodes, edges };
 }
 
 
@@ -285,24 +308,32 @@ class GraphSection extends React.Component {
         this.detailGraph = this.detailGraph.bind(this);
         this.body = graphBodyMixin.bind(this);
         this.parseAnalysisSteps = parseAnalysisStepsMixin.bind(this);
-        this.uiControls = uiControlsMixin.bind(this);
+        this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
-            'showParameters' : false
+            'showIndirectFiles' : true
         };
     }
 
     commonGraphProps(){
         var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
+        if (!this.state.showIndirectFiles){
+            graphData = filterOutIndirectFilesFromGraphData(graphData);
+        }
         var fileMap = allFilesForWorkflowRunsMappedByUUID(
             (this.props.context.workflow_run_outputs || []).concat(this.props.context.workflow_run_inputs || [])
         );
+        var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
         return _.extend(commonGraphPropsFromProps(this.props), {
             'isNodeDisabled' : GraphSection.isNodeDisabled,
-            'nodes' : mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap ),
+            'nodes' : nodes,
             'edges' : graphData.edges
         });
+    }
+
+    onToggleIndirectFiles(){
+        this.setState({ showIndirectFiles : !this.state.showIndirectFiles });
     }
 
     detailGraph(){
@@ -325,6 +356,13 @@ class GraphSection extends React.Component {
             <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
+                    <div className="pull-right workflow-view-controls-container">
+                        <div className="inline-block show-params-checkbox-container">
+                            <Checkbox checked={this.state.showIndirectFiles} onChange={this.onToggleIndirectFiles}>
+                                Show Auxiliary Files
+                            </Checkbox>
+                        </div>
+                    </div>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 { this.detailGraph() }

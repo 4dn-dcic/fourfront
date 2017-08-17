@@ -236,15 +236,16 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
             if len(targets) == 0:
                 targets = [{ "name" : argument_name, "type" : "Workflow Output File" }]
 
-
+            files = [ f.get('value') for f in output_files_for_arg ]
             step['outputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
                 "target" : targets, # TODO: TRACING
                 "meta" : {
-                    "argument_type" : "Input File"
+                    "argument_type" : "Input File",
+                    "in_path" : str(file_item.uuid) in files
                 },
                 "run_data" : {
-                    "file" : [ f.get('value') for f in output_files_for_arg ],
+                    "file" : files,
                     "type" : "input",
                     "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in output_files_for_arg ]
                 }
@@ -258,7 +259,8 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
                 "source" : generate_sources_for_input(input_files_for_arg, depth),
                 "meta" : {
-                    "argument_type" : "Input File"
+                    "argument_type" : "Input File",
+                    "in_path" : True
                 },
                 "run_data" : {
                     "file" : [ f.get('value') for f in input_files_for_arg ],
@@ -281,6 +283,7 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
                                     "step" : step["name"],
                                     "type" : "Input file"
                                 })
+                                output["meta"]["in_path"] = True
 
         steps.append(step)
 
