@@ -19,9 +19,12 @@ import requests
 from botocore.exceptions import ClientError
 from time import sleep
 
+here = os.path.abspath(os.path.dirname(__file__))
+SCRIPTS_DIR = os.path.join(here, '..', '..', '..', 'scripts')
+
 
 def snapshot_db(db_identifier, snapshot_name):
-    client = boto3.client('rds')
+    client = _boto3client('rds')
     try:
         response = client.create_db_snapshot(
              DBSnapshotIdentifier=snapshot_name,
@@ -33,14 +36,29 @@ def snapshot_db(db_identifier, snapshot_name):
              DBSnapshotIdentifier=snapshot_name,
              DBInstanceIdentifier=db_identifier)
     print("Response from create db snapshot", response)
+
+    # while waiting check and see if target database needs to be deleted
+    try:
+        client.describe_db_instances(DBInstanceIdentifier=snapshot_name)
+        client.delete_db_instance(DBInstanceIdentifier=snapshot_name,
+                                  SkipFinalSnapshot=True)
+        print("waiting for target database to delete")
+        waiter = client.get_watier('db_instance_deleted')
+        waiter.wait(DBInstanceIdentifier=snapshot_name)
+    except ClientError as e:
+        print("looks like target db doesn't exists no need to drop it")
+
     print("waiting for snapshot to create")
     waiter = client.get_waiter('db_snapshot_completed')
     waiter.wait(DBSnapshotIdentifier=snapshot_name)
     print("done waiting, let's create a new database")
+
+    # restore from snapshot
     response = client.restore_db_instance_from_db_snapshot(
             DBInstanceIdentifier=snapshot_name,
             DBSnapshotIdentifier=snapshot_name,
             DBInstanceClass='db.t2.medium')
+
     print("Response from restore db from snapshot", response)
     waiter = client.get_waiter('db_instance_available')
     print("waiting for db to be restore... this might take some time")
@@ -56,6 +74,36 @@ def snapshot_db(db_identifier, snapshot_name):
             return endpoint['Address']
         print(".")
         sleep(10)
+
+
+def _read_env():
+    # beanstalk env path
+    config_file = "/opt/python/current/env"
+    if os.path.exists(config_file):
+        if not os.environ.get("AWS_ACCESS_KEY_ID"):
+            command = ['bash', '-c', 'source ' + config_file + ' && env']
+            proc = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
+            for line in proc.stdout:
+                key, _, value = line.partition("=")
+                os.environ[key] = value[:-1]
+
+            proc.communicate()
+
+
+_key = None
+_secret = None
+
+
+def _boto3client(name, **kwargs):
+    global _key
+    global _secret
+    if _key is None:
+        _read_env()
+        _key = os.environ.get("AWS_ACCESS_KEY_ID")
+        _secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
+
+    return boto3.client(name, region_name="us-east-1", aws_access_key_id=_key,
+                        aws_secret_access_key=_secret, **kwargs)
 
 
 def clone_bs_env(old, new, load_prod, db_endpoint, es_url):
@@ -74,7 +122,7 @@ def create_s3_buckets(new):
         'elasticbeanstalk-%s-wfoutput' % new,
         'elasticbeanstalk-%s-system' % new,
     ]
-    s3 = boto3.client('s3')
+    s3 = _boto3client('s3')
     for bucket in new_buckets:
         s3.create_bucket(Bucket=bucket)
 
@@ -92,7 +140,7 @@ def copy_s3_buckets(new, old):
         'elasticbeanstalk-%s-files' % old,
         'elasticbeanstalk-%s-wfoutput' % old,
     ]
-    s3 = boto3.client('s3')
+    #s3 = _boto3client('s3')
     for bucket in new_buckets:
         try:
             s3.create_bucket(Bucket=bucket)
@@ -107,12 +155,14 @@ def copy_s3_buckets(new, old):
         oldb = "s3://%s" % old
         newb = "s3://%s" % new
         print("copying data from old %s to new %s" % (oldb, newb))
-        subprocess.call(['aws', 's3', 'sync', oldb, newb])
+        s3mirror = str(os.path.join(SCRIPTS_DIR, 's3s3mirror.sh'))
+        subprocess.call([s3mirror, '--delete-removed', '--verbose', oldb, newb],
+                        cwd=SCRIPTS_DIR)
 
 
 def add_to_auth0_client(new):
     # first get the url of the newly created beanstalk environment
-    eb = boto3.client('elasticbeanstalk')
+    eb = _boto3client('elasticbeanstalk')
     env = eb.describe_environments(EnvironmentNames=[new])
     url = None
     print("waiting for beanstalk to be up, this make take some time...")
@@ -158,7 +208,7 @@ def auth0_client_update(url):
 
 
 def add_es(new):
-    es = boto3.client('es')
+    es = _boto3client('es')
     resp = es.create_elasticsearch_domain(
         DomainName=new,
         ElasticsearchVersion='5.3',
@@ -198,7 +248,7 @@ def add_es(new):
 
 def get_es_build_status(new):
     # get the status of this bad boy
-    es = boto3.client('es')
+    es = _boto3client('es')
     endpoint = None
     while endpoint is None:
         describe_resp = es.describe_elasticsearch_domain(DomainName=new)
@@ -227,14 +277,20 @@ def main():
     parser.add_argument('--deploy_current', action='store_true', help='deploy current branch')
     parser.add_argument('--skips3', action='store_true', default=False,
                         help='skip copying files from s3')
-
     parser.add_argument('--onlys3', action='store_true', default=False,
-                        help='skip copying files from s3')
+                        help='copying files from s3 and then quit')
+    parser.add_argument('--onlydb', action='store_true', default=False,
+                        help='clone database and then quit')
 
     args = parser.parse_args()
     if args.onlys3:
         print("### only copy contents of s3")
         copy_s3_buckets(args.new, args.old)
+        return
+    if args.onlydb:
+        print("### only copy contents of s3")
+        db_endpoint = snapshot_db(args.old, args.new)
+        print(db_endpoint)
         return
 
     print("### start build ES service")
