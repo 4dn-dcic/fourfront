@@ -716,7 +716,7 @@ $small-label-accession-font-size : 0.75rem;
 			> .name:after,
 			> .name > .label-ext-info {
 				position: absolute;
-				font-family: 'Work Sans', sans-serif;
+				font-family: $font-family-sans-serif;
 				left: 0;
 				top: 2px;
 				font-size: 0.625rem;

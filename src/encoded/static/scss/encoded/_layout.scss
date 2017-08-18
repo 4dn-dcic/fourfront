@@ -185,7 +185,7 @@ h3.submission-subtitle {
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
-	font-family: 'Work Sans', sans-serif;
+
 	a{
 		color: #bfbfbf;
 	}
@@ -453,6 +453,7 @@ body .__react_component_tooltip {
 /* *********************************************************
 		CARL'S LOGIN BOX
 ********************************************************** */
+
 .login-box{
     width: inherit;
 	height: inherit;
@@ -471,7 +472,7 @@ body .__react_component_tooltip {
     text-align: center;
     font-size: 16px;
     cursor: pointer;
-	font-family: 'Work Sans', sans-serif;
+	font-family: $font-family-sans-serif;
 }
 .sexy-btn:hover, .sexy-btn:focus {
   color: #000000;
@@ -501,6 +502,7 @@ body .__react_component_tooltip {
   right: 0;
 }
 
+
 .links {
     padding-left: 0px;
 }
@@ -515,7 +517,6 @@ body .__react_component_tooltip {
 
 .fill-label{
     display: block;
-    font-family: 'Work Sans', sans-serif;
     text-align: center;
 }
 .text-box {
@@ -528,7 +529,7 @@ body .__react_component_tooltip {
     margin-left: auto;
     margin-right: auto;
     font-size: 14px;
-    font-family: 'Work Sans', sans-serif;
+	font-family: $font-family-sans-serif;
 }
 
 .text-box:hover, .text-box:focus{
@@ -538,11 +539,9 @@ body .__react_component_tooltip {
 
 .title{
     text-align: center;
-    font-family: 'Work Sans', sans-serif;
 }
-.error{
+.error {
     text-align: center;
-    font-family: 'Work Sans', sans-serif;
     color: red;
 }
 
@@ -563,7 +562,7 @@ body .__react_component_tooltip {
 }
 
 h1, h2, h3, h4, h5, h6, td, th, span {
-	font-family: 'Work Sans', sans-serif;
+	font-family: $font-family-sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6, th {

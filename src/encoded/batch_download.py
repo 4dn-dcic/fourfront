@@ -206,6 +206,7 @@ def metadata_tsv(context, request):
 
     # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
     accession_triples = None
+    filename_to_suggest = None
     if ( # Check if triples are in URL.
         param_list.get('accession') is not None and
         param_list.get('experiments_in_set.accession') is not None and
@@ -222,11 +223,13 @@ def metadata_tsv(context, request):
             pass
         if body is None and request.POST.get('accession_triples') is not None: # Was submitted as a POST form JSON variable. Workaround to not being able to download files through AJAX.
             try:
-                body = { "accession_triples" : json.loads(request.POST['accession_triples']) }
+                body = { "accession_triples" : json.loads(request.POST['accession_triples']), "download_file_name" : json.loads(request.POST['download_file_name'] or None) }
             except:
                 pass
         if body is not None and body.get('accession_triples'):
             accession_triples = [ (accDict.get('accession'), accDict.get('experiments_in_set.accession'), accDict.get('experiments_in_set.files.accession') ) for accDict in body['accession_triples'] ]
+        if body is not None and body.get('download_file_name'):
+            filename_to_suggest = body['download_file_name']
 
     if 'referrer' in param_list:
         search_path = '/{}/'.format(param_list.pop('referrer')[0])
@@ -362,7 +365,8 @@ def metadata_tsv(context, request):
             writer.writerow(row)
             yield line.read().encode('utf-8')
 
-    filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
+    if filename_to_suggest is None:
+        filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
 
     return Response(
         content_type='text/tsv',
