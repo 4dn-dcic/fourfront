@@ -20,6 +20,31 @@ from botocore.exceptions import ClientError
 from time import sleep
 
 
+def delete_db(db_identifier, take_snapshot=True):
+    client = boto3.client('rds')
+    if take_snapshot:
+        try:
+            resp = client.delete_db_instance(
+                DBInstanceIdentifier=db_identifier,
+                SkipFinalSnapshot=False,
+                FinalDBSnapshotIdentifier=db_identifier + "-final"
+            )
+        except:
+            # try without the snapshot
+            resp = client.delete_db_instance(
+                DBInstanceIdentifier=db_identifier,
+                SkipFinalSnapshot=True,
+            )
+    else:
+        resp = client.delete_db_instance(
+            DBInstanceIdentifier=db_identifier,
+            SkipFinalSnapshot=True,
+        )
+
+
+    print(resp)
+
+
 def snapshot_db(db_identifier, snapshot_name):
     client = boto3.client('rds')
     try:
@@ -37,11 +62,15 @@ def snapshot_db(db_identifier, snapshot_name):
     waiter = client.get_waiter('db_snapshot_completed')
     waiter.wait(DBSnapshotIdentifier=snapshot_name)
     print("done waiting, let's create a new database")
-    response = client.restore_db_instance_from_db_snapshot(
-            DBInstanceIdentifier=snapshot_name,
-            DBSnapshotIdentifier=snapshot_name,
-            DBInstanceClass='db.t2.medium')
-    print("Response from restore db from snapshot", response)
+    try:
+        response = client.restore_db_instance_from_db_snapshot(
+                DBInstanceIdentifier=snapshot_name,
+                DBSnapshotIdentifier=snapshot_name,
+                DBInstanceClass='db.t2.medium')
+    except ClientError:
+        # drop target database
+        delete_db(snapshot_name)
+
     waiter = client.get_waiter('db_instance_available')
     print("waiting for db to be restore... this might take some time")
     # waiter.wait(DBInstanceIdentifier=snapshot_name)
@@ -155,6 +184,20 @@ def auth0_client_update(url):
 
     update_res = requests.patch(client_url, data=json.dumps(client_data), headers=headers)
     print(update_res.json().get('callbacks'))
+
+
+def sizeup_es(new):
+    es = boto3.client('es')
+    resp = es.update_elasticsearch_domain_config(
+        DomainName=new,
+        ElasticsearchClusterConfig={
+            'InstanceType': 'm3.xlarge.elasticsearch',
+            'InstanceCount': 4,
+            'DedicatedMasterEnabled': True,
+        }
+    )
+
+    print(resp)
 
 
 def add_es(new):

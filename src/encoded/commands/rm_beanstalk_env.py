@@ -20,16 +20,22 @@ from botocore.exceptions import ClientError
 from time import sleep
 
 
-def delete_db(db_identifier):
+def delete_db(db_identifier, take_snapshot=True):
     client = boto3.client('rds')
-    try:
-        resp = client.delete_db_instance(
-            DBInstanceIdentifier=db_identifier,
-            SkipFinalSnapshot=False,
-            FinalDBSnapshotIdentifier=db_identifier + "-final"
-        )
-    except:
-        # try without the snapshot
+    if take_snapshot:
+        try:
+            resp = client.delete_db_instance(
+                DBInstanceIdentifier=db_identifier,
+                SkipFinalSnapshot=False,
+                FinalDBSnapshotIdentifier=db_identifier + "-final"
+            )
+        except:
+            # try without the snapshot
+            resp = client.delete_db_instance(
+                DBInstanceIdentifier=db_identifier,
+                SkipFinalSnapshot=True,
+            )
+    else:
         resp = client.delete_db_instance(
             DBInstanceIdentifier=db_identifier,
             SkipFinalSnapshot=True,
