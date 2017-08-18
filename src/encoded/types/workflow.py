@@ -142,7 +142,31 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
     'max_depth_future' : 6
 }):
 
+    uuidCacheDB = {}
+    uuidCacheEmbed = {}
     steps = [] # Our output
+
+    def getItemByUUID(uuid, from_db = False, collection = None):
+        item = None
+        if from_db:
+            item = uuidCacheDB.get(uuid)
+        else:
+            item = uuidCacheEmbed.get(uuid)
+        if item is not None:
+            return item
+
+        if from_db:
+            item = file_item.collection.get(uuid)
+            uuidCacheDB[uuid] = item
+        else:
+            request_href = '/' + str(uuid)
+            if collection is not None:
+                request_href = '/' + collection + request_href
+            item = request.embed(request_href, '@@embedded')
+            uuidCacheEmbed[uuid] = item
+        return item
+
+
 
     def group_files_by_workflow_argument_name(set_of_files):
         files_by_argument_name = OrderedDict()
@@ -162,26 +186,25 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
         if depth <= options.get('max_depth_history', 6):
             for in_file in in_files:
                 in_file_uuid = in_file.get('value')
-                input_file = request.embed('/files/' + in_file_uuid)
+                input_file = getItemByUUID(in_file_uuid, False, 'files')
+                in_file_2 = getItemByUUID(in_file_uuid, True)
+                print('\n\n\n', in_file_2, in_file_2.__json__(request))
                 if not input_file:
                     continue
                 for output_source in input_file.get('workflow_run_outputs', []): # There should only ever be one at most, right?
                     workflow_run_uuid = output_source.get('uuid')
-                    workflow_run = request.embed('/workflow-runs/' + workflow_run_uuid)
-                    workflow_run_output_files = workflow_run.get('output_files', [])
-                    for out_file in workflow_run.get('output_files', []):
-                        out_file_uuid = out_file.get('value', {}).get('uuid')
-                        #print('\n\n\nN', out_file_uuid, in_file_uuid)
+                    workflow_run = getItemByUUID(workflow_run_uuid, True)
+                    print('\n\n\nWFR:', workflow_run.properties)
+                    for out_file in workflow_run.properties.get('output_files', []):
+                        out_file_uuid = out_file.get('value', {})
                         if out_file_uuid == in_file_uuid:
-                            step_name = workflow_run.get('display_title')
-                            #if sources_by_step.get(step_name) is None:
-
-                            step_uuid = workflow_run.get('uuid')
+                            step_name = workflow_run.display_title()
+                            step_uuid = str(workflow_run.uuid)
                             if step_uuid:
                                 step_uuids.add(step_uuid)
                             sources.append({
                                 "name" : out_file.get('workflow_argument_name'),
-                                "step" : workflow_run.get('display_title'),
+                                "step" : step_name,
                                 "type" : "Output file"
                             })
 
@@ -205,7 +228,7 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
         # A file should be output of only one run.
 
         last_workflow_run_uuid = output_of_workflow_run_uuids[len(output_of_workflow_run_uuids) - 1]
-        workflow_run = file_item.collection.get(last_workflow_run_uuid)
+        workflow_run = getItemByUUID(last_workflow_run_uuid, True)
 
         input_files = workflow_run.properties.get('input_files', [])
         output_files = workflow_run.properties.get('output_files', [])
@@ -223,7 +246,7 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
         workflow_uuid = workflow_run.properties.get('workflow')
         workflow = None
         if workflow_uuid:
-            workflow = workflow_run.collection.get(workflow_uuid)
+            workflow = getItemByUUID(workflow_uuid, True)
             if workflow:
                 #step['analysis_step_types'].append(workflow.display_title())
                 if workflow.properties.get('workflow_type'):
