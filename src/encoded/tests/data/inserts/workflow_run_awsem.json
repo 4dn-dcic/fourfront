@@ -38,32 +38,6 @@
     "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
     "awsem_job_id": "aleuryvaieuyv"
 },{
-    "uuid": "eca59539-9566-4769-952d-3b69f48acd2c",
-    "award": "1U01CA200059-01",
-    "lab": "4dn-dcic-lab",
-    "output_files": [
-        {
-            "workflow_argument_name": "report_zip",
-            "value": "fbdbe727-49e5-4c33-afab-9ec90d65faf3"
-        }
-    ],
-    "parameters": [
-        {
-            "workflow_argument_name": "adapters_file",
-            "value": ""
-        },
-        {
-            "workflow_argument_name": "limits_file",
-            "value": ""
-        },
-        {
-            "workflow_argument_name": "contaminants_file",
-            "value": ""
-        }
-    ],
-    "input_files": [],
-    "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
-},{
     "lab":"/labs/4dn-dcic-lab/",
     "award":"/awards/1U01CA200059-01/",
     "title":"hi-c-processing-partb/19 test run",
