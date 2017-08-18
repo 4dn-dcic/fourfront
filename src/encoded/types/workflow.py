@@ -187,8 +187,6 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
             for in_file in in_files:
                 in_file_uuid = in_file.get('value')
                 input_file = getItemByUUID(in_file_uuid, False, 'files')
-                in_file_2 = getItemByUUID(in_file_uuid, True)
-                print('\n\n\n', in_file_2, in_file_2.__json__(request))
                 if not input_file:
                     continue
                 for output_source in input_file.get('workflow_run_outputs', []): # There should only ever be one at most, right?
