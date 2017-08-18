@@ -111,6 +111,12 @@ h1.page-title {
 		margin-top: 0px;
 	}
 
+	.title {
+		&.has-callout-title {
+			/* margin-right: 12px; */
+		}
+	}
+
 	.page-subtitle {
 		margin-left: 2px;
 		margin-top: 0px;
@@ -124,7 +130,7 @@ h1.page-title {
 			font-weight: 300;
 			font-size : 0.875em;
 			display: inline-block;
-			margin-left: 12px;
+			margin-left: 18px;
 		}
 
 	}

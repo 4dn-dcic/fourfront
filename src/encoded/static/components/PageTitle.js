@@ -167,6 +167,14 @@ export default class PageTitle extends React.Component {
     render(){
         var { title, subtitle, calloutTitle } = PageTitle.calculateTitles(this.props.context, this.props.href, (this.props.shemas || Schemas.get()), this.state.mounted);
 
+        if (title) {
+            title = (
+                <span className={"title" + (calloutTitle ? ' has-callout-title' : '')}>
+                    { title }
+                </span>
+            );
+        }
+
         if (calloutTitle){
             calloutTitle = (
                 <span className="subtitle prominent">
