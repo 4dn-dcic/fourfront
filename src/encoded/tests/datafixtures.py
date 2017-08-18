@@ -518,7 +518,6 @@ def workflow_run_awsem(testapp, lab, award, workflow_bam):
             'parameters': [],
             'workflow': workflow_bam['@id'],
             'title': u'md5 run 2017-01-20 13:16:11.026176',
-            'awsem_import_ids': [u'TBCKPdzfUE9DpvtzO6yb9yoIvO81RaZd'],
             'award': award['@id'],
             'awsem_job_id': '1235',
             'lab': lab['@id'],
