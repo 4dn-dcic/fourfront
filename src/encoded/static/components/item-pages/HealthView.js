@@ -10,7 +10,7 @@ import { ItemPageTitle, ItemDetailList } from './components';
 /**
  * Fallback content_view for pages which are not specifically 'Items.
  * Renders out JSON.
- * 
+ *
  * @export
  * @class Item
  * @extends {React.Component}
@@ -45,17 +45,17 @@ export class HealthView extends React.Component {
                         title : "Database Location",
                         description : "URI used to connect to the back-end PgSQL DB."
                     },
-                    'db_count' : {
-                        title : "Number of Items",
-                        description : "Count of items stored in PgSQL DB."
-                    },
                     'elasticserach' : {
                         title : "ElasticSearch Location",
                         description : "URI used to connect to the back-end ES instance."
                     },
-                    'es_count' : {
-                        title : "ElasticSearch Statistics",
-                        description : "Statistics about ElasticSearch instance used."
+                    'db_es_total' : {
+                        title : "DB and ES Counts",
+                        description : "Total counts of items in database and elasticsearch."
+                    },
+                    'db_es_compare' : {
+                        title : "DB and ES Counts by Type",
+                        description : "Counts of items in database and elasticsearch for each doc_type index."
                     },
                     'file_upload_bucket' : {
                         title : "File Upload Bucket",
