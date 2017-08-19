@@ -183,41 +183,41 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
         #sources_by_step = OrderedDict()
         sources = []
         step_uuids = set()
-        if depth <= options.get('max_depth_history', 6):
-            for in_file in in_files:
-                in_file_uuid = in_file.get('value')
-                input_file = getItemByUUID(in_file_uuid, False, 'files')
-                if not input_file:
-                    continue
-                for output_source in input_file.get('workflow_run_outputs', []): # There should only ever be one at most, right?
-                    workflow_run_uuid = output_source.get('uuid')
-                    workflow_run = getItemByUUID(workflow_run_uuid, True)
-                    print('\n\n\nWFR:', workflow_run.properties)
-                    for out_file in workflow_run.properties.get('output_files', []):
-                        out_file_uuid = out_file.get('value', {})
-                        if out_file_uuid == in_file_uuid:
-                            step_name = workflow_run.display_title()
-                            step_uuid = str(workflow_run.uuid)
-                            if step_uuid:
-                                step_uuids.add(step_uuid)
-                            sources.append({
-                                "name" : out_file.get('workflow_argument_name'),
-                                "step" : step_name,
-                                "type" : "Output file"
-                            })
+        for in_file in in_files:
+            in_file_uuid = in_file.get('value')
+            input_file = getItemByUUID(in_file_uuid, False, 'files')
+            if not input_file:
+                continue
+            for output_source in input_file.get('workflow_run_outputs', []): # There should only ever be one at most, right?
+                workflow_run_uuid = output_source.get('uuid')
+                workflow_run = getItemByUUID(workflow_run_uuid, True)
+                print('\n\n\nWFR:', workflow_run.properties)
+                for out_file in workflow_run.properties.get('output_files', []):
+                    out_file_uuid = out_file.get('value', {})
+                    if out_file_uuid == in_file_uuid:
+                        step_name = workflow_run.display_title()
+                        step_uuid = str(workflow_run.uuid)
+                        if step_uuid:
+                            step_uuids.add(step_uuid)
+                        sources.append({
+                            "name" : out_file.get('workflow_argument_name'),
+                            "step" : step_name,
+                            "type" : "Output file"
+                        })
 
-
-        #sources = list(sources_by_step.values())
         if len(sources) == 0:
             sources = [{
                  "name" : in_file.get('workflow_argument_name'), "type" : "Workflow Input File" 
             }]
         else:
-            trace_history(list(step_uuids))
+            trace_history(list(step_uuids), depth + 1)
             pass
         return sources
 
     def trace_history(output_of_workflow_run_uuids, depth = 0):
+
+        if depth > options.get('max_depth_history', 3):
+            return
 
         if len(output_of_workflow_run_uuids) == 0:
             return
