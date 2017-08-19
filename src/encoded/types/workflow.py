@@ -180,7 +180,6 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
         return files_by_argument_name
 
     def generate_sources_for_input(in_files, depth = 0):
-        #sources_by_step = OrderedDict()
         sources = []
         step_uuids = set()
         for in_file in in_files:
@@ -188,30 +187,37 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
             input_file = getItemByUUID(in_file_uuid, False, 'files')
             if not input_file:
                 continue
-            for output_source in input_file.get('workflow_run_outputs', []): # There should only ever be one at most, right?
-                workflow_run_uuid = output_source.get('uuid')
-                workflow_run = getItemByUUID(workflow_run_uuid, True)
-                print('\n\n\nWFR:', workflow_run.properties)
-                for out_file in workflow_run.properties.get('output_files', []):
-                    out_file_uuid = out_file.get('value', {})
-                    if out_file_uuid == in_file_uuid:
-                        step_name = workflow_run.display_title()
-                        step_uuid = str(workflow_run.uuid)
-                        if step_uuid:
-                            step_uuids.add(step_uuid)
-                        sources.append({
-                            "name" : out_file.get('workflow_argument_name'),
-                            "step" : step_name,
-                            "type" : "Output file"
-                        })
+            output_of_workflow_runs = input_file.get('workflow_run_outputs', [])
+            if len(output_of_workflow_runs) == 0:
+                continue
+            # There should only ever be one 'workflow_run_outputs' at most, or versions of same one (grab most recent).
+            last_workflow_run_output_of = output_of_workflow_runs[len(output_of_workflow_runs) - 1]
+            workflow_run_uuid = last_workflow_run_output_of.get('uuid')
+            workflow_run = getItemByUUID(workflow_run_uuid, True)
+            if not workflow_run:
+                continue
+            print('\n\n\nWFR:', workflow_run.properties)
+            for out_file in workflow_run.properties.get('output_files', []):
+                out_file_uuid = out_file.get('value', {})
+                if out_file_uuid == in_file_uuid:
+                    step_name = workflow_run.display_title()
+                    step_uuid = str(workflow_run.uuid)
+                    if step_uuid:
+                        step_uuids.add(step_uuid)
+                    sources.append({
+                        "name" : out_file.get('workflow_argument_name'),
+                        "step" : step_name,
+                        "type" : "Output file",
+                        "for_file" : out_file_uuid
+                    })
 
         if len(sources) == 0:
             sources = [{
                  "name" : in_file.get('workflow_argument_name'), "type" : "Workflow Input File" 
             }]
         else:
-            trace_history(list(step_uuids), depth + 1)
-            pass
+            for s in step_uuids:
+                trace_history([s], depth + 1)
         return sources
 
     def trace_history(output_of_workflow_run_uuids, depth = 0):
