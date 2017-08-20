@@ -34,8 +34,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
     function preventDuplicateNodeID(id, readOnly = true){
         if (typeof id !== 'string') throw new Error('param id is not a string.');
+        id = id.replace(/(~\d+)/,'');
         if (readOnly) {
-            return (typeof ioIdsUsed[id] === 'number' ? id + '~' + ioIdsUsed[id] : id);
+            return (typeof ioIdsUsed[id] === 'number' && ioIdsUsed[id] > 1 ? id + '~' + ioIdsUsed[id] : id);
         }
         if (typeof ioIdsUsed[id] === 'undefined') {
             ioIdsUsed[id] = 1;
@@ -58,6 +59,12 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             return true;
         }
         return false;
+    }
+
+    function checkNodeFileForMatch(n, file){
+        return (n.meta && n.meta.run_data && n.meta.run_data.file &&
+                file &&
+                compareTwoFilesByUUID(file, n.meta.run_data.file));
     }
 
 
@@ -97,6 +104,33 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         var outputNodes = _.flatten(step.outputs.map(function(stepOutput, j){
             return expandIONodes(stepOutput, column, stepNode, "output", false);
         }), true);
+
+        // Find __ INPUT __ nodes with same file
+        // if any exist, replace them, re-use instead of adding new, and make edge.
+        // also... : move node down in column list somehow
+        outputNodes = _.filter(outputNodes, function(oN){
+            for (var i = 0; i < nodes.length; i++){
+                if (nodes[i] && nodes[i].meta && nodes[i].meta.run_data && nodes[i].meta.run_data.file){
+                    if (checkNodeFileForMatch(oN, nodes[i].meta.run_data.file)){
+                        nodes[i].outputOf = stepNode;
+                        
+                        nodes[i].format = oN.format;
+                        nodes[i].name = ioNodeNameCombo(nodes[i], oN);
+                        nodes[i].type = 'output';
+                        if (nodes[i].meta && oN.meta && oN.meta.argument_type){
+                            nodes[i].meta.argument_type = oN.meta.argument_type;
+                        }
+                        edges.push({
+                            'source' : stepNode,
+                            'target' : nodes[i],
+                            'capacity' : 'Output',
+                        });
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
         
         outputNodes.forEach(function(n){
             edges.push({
@@ -151,14 +185,29 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         });
     }
 
+    function ioNodeNameCombo(nodeAsInputNode, nodeAsOutputNode){
+        return (
+            nodeAsOutputNode.name.indexOf('>') > -1 ? nodeAsOutputNode.name : (
+                ((typeof nodeAsOutputNode.outputOf !== 'undefined' && nodeAsOutputNode.name) || '') +
+                (nodeAsInputNode.name && typeof nodeAsInputNode.inputOf !== 'undefined' ? ((nodeAsOutputNode.name && typeof nodeAsOutputNode.outputOf !== 'undefined' && ' > ') || '') + nodeAsInputNode.name : '' )
+            )
+        );
+    }
+
     function filterNodesToRelatedIONodes(allNodes, stepName){
         return _.filter(nodes, function(n){
             if (n.type === 'output' || n.type === 'input'){
                 var targetPropertyName = n.type === 'input' ? 'source' : 'target';
                 if (!Array.isArray(n.meta[targetPropertyName])) return false;
+
                 for (var i = 0; i < n.meta[targetPropertyName].length; i++){
                     if (n.meta[targetPropertyName][i].step === stepName) return true;
                 }
+
+                if (n[n.type + 'Of']){
+                    if (n[n.type + 'Of'].name === stepName) return true;
+                }
+
                 return false;
             }
             return false;
@@ -175,7 +224,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      * @param {Object} stepNode - Analysis Step Node Reference
      */
     function generateInputNodesComplex(step, column, stepNode){
-        var allRelatedIONodes = filterNodesToRelatedIONodes(nodes, step.name);
         var inputNodesMatched = [];
         var inputNodesCreated = [];
 
@@ -186,13 +234,17 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
             // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
             var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode, "input", true);
-            console.log('NEEED TO MATCH', inputNodesToMatch);
+            //console.log('NEED TO MATCH for' + fullStepInput.name, inputNodesToMatch);
             var nodesNamesMatched = {  };
 
             var currentInputNodesMatched = (
-                _.filter(allRelatedIONodes, function(n){
+                _.filter(nodes /*allRelatedIONodes*/, function(n){
                     if (_.find(fullStepInput.source, function(s){
-                        if (s.name === n.name && s.step === n.outputOf.name) return true;
+                        if (s.name === n.name && n.outputOf && s.step === n.outputOf.name) return true;
+                        if (s.name === n.name && n.inputOf && stepNode.name === n.inputOf.name) return true;
+
+                        if (Array.isArray(s.for_file) && _.any(s.for_file, checkNodeFileForMatch.bind(checkNodeFileForMatch, n))) return true;
+                        else if (s.for_file && !Array.isArray(s.for_file) && checkNodeFileForMatch(n, s.for_file)) return true;
 
                         if ( _.find(
                                 n.meta.target || [],
@@ -202,17 +254,21 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                                 }
                             )
                         ) return true;
-                        else return false;
+                        
+                        return false;
                     })){
                         nodesNamesMatched[n.name] = fullStepInput.name;
                         return true;
                     }
-                    else return false;
+
+                    return false;
                 })
             );
 
             var matchedNames = _.keys(nodesNamesMatched);
             var nodesNamesMatchedInverted = _.invert(nodesNamesMatched);
+
+            //console.log('MATCHED', currentInputNodesMatched);
 
             if (currentInputNodesMatched.length > 0){
                 inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
@@ -236,7 +292,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         });
                     }
                     if (!inNode) return;
-                    _.extend(n, { 'inputOf' : inNode.inputOf, 'meta' : _.extend(n.meta, inNode.meta) });
+                    _.extend(n, {
+                        'inputOf' : inNode.inputOf,
+                        'meta' : _.extend(n.meta, inNode.meta),
+                        'name' : ioNodeNameCombo(inNode, n)
+                    });
                 });
             }
 
@@ -273,6 +333,10 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             // Finally, attach edge to all input nodes associated to step input.
             if (inputNodes.length > 0) {
                 _.forEach(inputNodes, function(n){
+                    var existingEdge = _.find(edges, function(e){
+                        if (e.source === n && e.target === stepNode) return true;
+                    });
+                    if (existingEdge) return;
                     edges.push({
                         'source' : n,
                         'target' : stepNode,
@@ -305,7 +369,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
     }
 
     function generateOutputNodesComplex(step, column, stepNode){
-        var allRelatedIONodes = filterNodesToRelatedIONodes(nodes, step.name);
 
         var inputNodesMatched = [];
         var inputNodesCreated = [];
@@ -321,7 +384,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
             // Sorry. Try to match up a previous input node by its source (s) with one of our output target (t)
             var currentOutputNodesMatched = (
-                _.filter(allRelatedIONodes, function(n){
+                _.filter(nodes, function(n){
                     if (n.type === 'input'
                     &&  _.find(n.meta.source, function(s){
                         if (s.step === step.name && s.name === fullStepOutput.name) return true;
@@ -442,10 +505,14 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
             nodes.push(stepNode);
 
-            processedSteps[stepNode.id || stepNode.name] = step;
+            processedSteps[stepNode.id || stepNode.name] = stepNode;
 
             findNextStepsFromIONode(outputNodesCreated).forEach(function(nextStep){
-                processStepInPath(nextStep, level + 1);
+                if (typeof processedSteps[stepNodeID(nextStep)] === 'undefined'){
+                    processStepInPath(nextStep, level + 1);
+                } else {
+                    generateInputNodesComplex(nextStep, (level + 2) * 2 - 2, processedSteps[stepNodeID(nextStep)]);
+                }
             });
         } else {
             
@@ -454,7 +521,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
             nodes.push(stepNode);
 
-            processedSteps[stepNode.id || stepNode.name] = step;
+            processedSteps[stepNode.id || stepNode.name] = stepNode;
 
             findNextStepsFromIONode(inputNodesUsedOrCreated).forEach(function(nextStep){
                 processStepInPath(nextStep, level - 1);
@@ -475,7 +542,27 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
     function processStepIOPath(){
         if (Array.isArray(analysis_steps) && analysis_steps.length > 0){
             if (parsingMethod === 'output'){
+
+
                 processStepInPath(analysis_steps[0]);
+
+                for (var i = 0; i < 100; i++){
+
+                    if (_.keys(processedSteps).length < analysis_steps.length){
+                        var nextSteps = _.filter(analysis_steps, function(s){
+                            if (typeof processedSteps[stepNodeID(s)] === 'undefined') return true;
+                            return false;
+                        });
+                        //console.log('NEXTSTEPS', nextSteps);
+                        if (nextSteps.length > 0) processStepInPath(nextSteps[0]);
+                    } else {
+                        break;
+                    }
+
+                }
+
+
+
             } else if (parsingMethod === 'input') {
                 processStepInPath(analysis_steps[analysis_steps.length - 1], analysis_steps.length - 1);
                 var colDepthMin = _.reduce(nodes, function(m,n){ return Math.min(n.column, m); }, 100);

@@ -152,19 +152,27 @@ export default class Graph extends React.Component {
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
         _.pairs(_.groupBy(nodes, 'column')).forEach((columnGroup) => {
             var countInCol = columnGroup[1].length;
+            var nodesInColumn = _.sortBy(columnGroup[1], function(n){
+                if (n.type === 'input') return n && n.inputOf && n.inputOf.name;
+                if (n.type === 'output') return n && n.outputOf && n.outputOf.name;
+                if (n.type === 'step') return n.name;
+                return null;
+            });
             if (countInCol === 1){
                 columnGroup[1][0].y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
                 columnGroup[1][0].nodesInColumn = countInCol;
             } else if (this.props.rowSpacingType === 'compact') {
                 var padding = Math.max(0, contentHeight - ((countInCol - 1) * this.props.rowSpacing)) / 2;
                 d3.range(countInCol).forEach((i) => {
-                    columnGroup[1][i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
-                    columnGroup[1][i].nodesInColumn = countInCol;
+                    nodesInColumn[i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
+                    nodesInColumn[i].nodesInColumn = countInCol;
                 });
             } else {
                 _.forEach(d3.range(0, contentHeight, contentHeight / (countInCol - 1) ).concat([contentHeight]), (num, idx)=>{
-                    columnGroup[1][idx].y = num + (this.props.innerMargin.top + verticalMargin);
-                    columnGroup[1][idx].nodesInColumn = countInCol;
+                    var nodeInCol = nodesInColumn[idx];
+                    if (!nodeInCol) return;
+                    nodeInCol.y = num + (this.props.innerMargin.top + verticalMargin);
+                    nodeInCol.nodesInColumn = countInCol;
                 });
             }
         });

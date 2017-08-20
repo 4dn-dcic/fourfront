@@ -196,7 +196,7 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
             workflow_run = getItemByUUID(workflow_run_uuid, True)
             if not workflow_run:
                 continue
-            print('\n\n\nWFR:', workflow_run.properties)
+            #print('\n\n\nWFR:', workflow_run.properties)
             for out_file in workflow_run.properties.get('output_files', []):
                 out_file_uuid = out_file.get('value', {})
                 if out_file_uuid == in_file_uuid:
@@ -212,8 +212,11 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
                     })
 
         if len(sources) == 0:
+            files = [ in_file.get('value') for in_file in in_files ]
+            if len(files) == 1:
+                files = files[0]
             sources = [{
-                 "name" : in_file.get('workflow_argument_name'), "type" : "Workflow Input File" 
+                 "name" : in_file.get('workflow_argument_name'), "type" : "Workflow Input File", "for_file" : files
             }]
         else:
             for s in step_uuids:

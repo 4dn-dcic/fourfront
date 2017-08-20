@@ -14,6 +14,7 @@ import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph from './../viz/Workflow';
 import { commonGraphPropsFromProps, graphBodyMixin, parseAnalysisStepsMixin, uiControlsMixin, doValidAnalysisStepsExist } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
+//import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
 
 
 
@@ -328,7 +329,8 @@ class GraphSection extends React.Component {
         return _.extend(commonGraphPropsFromProps(this.props), {
             'isNodeDisabled' : GraphSection.isNodeDisabled,
             'nodes' : nodes,
-            'edges' : graphData.edges
+            'edges' : graphData.edges,
+            'columnSpacing' : graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90
         });
     }
 
