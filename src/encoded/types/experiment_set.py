@@ -73,6 +73,7 @@ class ExperimentSet(Item):
                 "lab.postal_code",
                 "lab.city",
                 "lab.title",
+
                 "produced_in_pub.*",
                 "publications_of_set.*",
 
@@ -83,17 +84,14 @@ class ExperimentSet(Item):
                 "experiments_in_set.biosample.modifications_summary",
                 "experiments_in_set.biosample.treatments_summary",
                 "experiments_in_set.biosample.biosource_summary",
-
                 "experiments_in_set.biosample.biosource.biosource_type",
                 "experiments_in_set.biosample.biosource.cell_line.slim_terms",
                 "experiments_in_set.biosample.biosource.cell_line.synonyms",
                 "experiments_in_set.biosample.biosource.tissue.slim_terms",
                 "experiments_in_set.biosample.biosource.tissue.synonyms",
-
+                "experiments_in_set.biosample.biosource.individual.organism.name",
                 'experiments_in_set.biosample.modifications.modification_type',
                 'experiments_in_set.biosample.treatments.treatment_type',
-
-                "experiments_in_set.biosample.biosource.individual.organism.name",
 
                 "experiments_in_set.files.href",
                 "experiments_in_set.files.accession",
@@ -186,8 +184,7 @@ class ExperimentSetReplicate(ExperimentSet):
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
     embedded = ExperimentSet.embedded + [
-        "replicate_exps.replicate_exp.accession",
-        "replicate_exps.replicate_exp.uuid"
+        "replicate_exps.replicate_exp.accession"
     ]
 
     def _update(self, properties, sheets=None):
