@@ -139,8 +139,14 @@ workflow_analysis_steps_schema = {
     }
 }
 
+def get_unique_key_from_at_id(at_id):
+    if not at_id:
+        return None
+    at_id_parts = at_id.split('/')
+    return at_id_parts[2]
 
-def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workflow_runs, options={
+
+def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options={
     'max_depth_history' : 6,
     'max_depth_future' : 6
 }):
@@ -148,33 +154,11 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
     pr = cProfile.Profile()
     pr.enable()
 
-
-    uuidCacheDB = {}
-    uuidCacheEmbed = {}
     uuidCacheModels = {}
     steps = [] # Our output
 
-    def getItemByUUID(uuid, from_db = False, collection = None):
-        item = None
-        if from_db:
-            item = uuidCacheDB.get(uuid)
-        else:
-            item = uuidCacheEmbed.get(uuid)
-        if item is not None:
-            return item
-
-        if from_db:
-            item = file_item.collection.get(uuid)
-            uuidCacheDB[uuid] = item
-        else:
-            request_href = '/' + str(uuid)
-            if collection is not None:
-                request_href = '/' + collection + request_href
-            item = request.embed(request_href, '@@embedded')
-            uuidCacheEmbed[uuid] = item
-        return item
-
     def get_model_by_uuid(uuid, key = None):
+        # TODO: Check for hasattr(model, 'source') and raise Exception? (after we have something setup to handle it)
         model = None
         cacheKey = uuid
         if key is not None:
@@ -183,19 +167,13 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
         model = uuidCacheModels.get(cacheKey)
         if model is not None:
             return model
+
         if key is None:
-            model = file_item.registry['connection'].storage.get_by_uuid(uuid)
+            model = request.registry['connection'].storage.get_by_uuid(uuid)
         else:
-            model = file_item.registry['connection'].storage.get_by_unique_key(key, uuid)
+            model = request.registry['connection'].storage.get_by_unique_key(key, uuid)
         uuidCacheModels[cacheKey] = model
         return model
-
-    def get_unique_key_from_at_id(at_id):
-        if not at_id:
-            return None
-        at_id_parts = at_id.split('/')
-        return at_id_parts[2]
-
 
     def group_files_by_workflow_argument_name(set_of_files):
         files_by_argument_name = OrderedDict()
@@ -227,7 +205,7 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
             if not workflow_run_uuid:
                 continue
             workflow_run_model = get_model_by_uuid(workflow_run_uuid)
-            if not workflow_run_model:
+            if not workflow_run_model or not hasattr(workflow_run_model, 'source'):
                 continue
             for out_file in workflow_run_model.source.get('object', {}).get('output_files', []):
                 out_file_uuid = out_file.get('value', {})
@@ -269,6 +247,9 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
         last_workflow_run_uuid = output_of_workflow_run_uuids[len(output_of_workflow_run_uuids) - 1]
         workflow_run_model = get_model_by_uuid(last_workflow_run_uuid)
 
+        if not workflow_run_model or not hasattr(workflow_run_model, 'source'):
+            return
+
         input_files = workflow_run_model.source.get('object',{}).get('input_files', [])
         output_files = workflow_run_model.source.get('object',{}).get('output_files', [])
 
@@ -285,7 +266,7 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
         workflow_model = None
         if workflow_uuid:
             workflow_model = get_model_by_uuid(workflow_uuid)
-            if workflow_model:
+            if workflow_model and hasattr(workflow_model, 'source'):
                 if workflow_model.source.get('object',{}).get('workflow_type'):
                     step['analysis_step_types'].append(workflow_model.source['object']['workflow_type'])
 
@@ -300,8 +281,11 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
 
             files = [ f.get('value') for f in output_files_for_arg ]
             file_items = []
+            original_file_in_output = False
             for file_at_id in files:
                 got_item = get_model_by_uuid(get_unique_key_from_at_id(file_at_id), 'accession')
+                if str(got_item.uuid) == original_file_item_uuid:
+                    original_file_in_output = True
                 file_items.append({
                     'accession' : got_item.properties.get('accession'),
                     'uuid' : str(got_item.uuid),
@@ -314,7 +298,7 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
                 "target" : targets, # TODO: TRACING
                 "meta" : {
                     "argument_type" : "Input File",
-                    "in_path" : str(file_item.jsonld_id(request)) in files
+                    "in_path" : original_file_in_output
                 },
                 "run_data" : {
                     "file" : file_items,
@@ -373,7 +357,7 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
 
     def trace_future(input_of_workflow_run_uuids):
         for uuid in input_of_workflow_run_uuids:
-            workflow_run = file_item.collection.get(uuid)
+            #workflow_run = file_item.collection.get(uuid)
             output_file_uuids = [ f.get('value') for f in workflow_run.properties.get('output_files', []) ]
 
             #output_files = workflow_run.properties.get('input_files')
@@ -381,7 +365,8 @@ def trace_workflows(file_item, request, input_of_workflow_runs, output_of_workfl
             print('\n\n\n', workflow_run.properties.get('output_files'))
 
 
-    trace_history([ wr['uuid'] for wr in output_of_workflow_runs ])
+    #trace_history([ wr['uuid'] for wr in output_of_workflow_runs ])
+    trace_history(file_item_output_of_workflow_run_uuids)
 
     pr.disable()
     

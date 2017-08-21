@@ -605,7 +605,9 @@ class FileProcessed(File):
 
     @calculated_property(schema=workflow_analysis_steps_schema, category="page")
     def analysis_steps(self, request, workflow_run_inputs, workflow_run_outputs):
-        return trace_workflows(self, request, workflow_run_inputs, workflow_run_outputs)
+        return trace_workflows(
+            str(self.uuid), request, [ wfr['uuid'] for wfr in workflow_run_inputs ], [ wfr['uuid'] for wfr in workflow_run_outputs ]
+        )
 
 
 @collection(
