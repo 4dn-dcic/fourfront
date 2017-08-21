@@ -141,7 +141,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         });
 
         nodes = nodes.concat(outputNodes);
-        console.log(_.clone(outputNodes[0].meta.run_data));
         return outputNodes;
     }
 
