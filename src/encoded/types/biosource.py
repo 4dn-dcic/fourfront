@@ -38,7 +38,9 @@ class Biosource(Item):
                 "individual.sex",
                 "individual.organism.name",
                 "tissue.slim_terms",
-                "cell_line.slim_terms"]
+                "tissue.synonyms",
+                "cell_line.slim_terms",
+                "cell_line.synonyms"]
 
     @calculated_property(schema={
         "title": "Biosource name",

@@ -32,6 +32,10 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'biosource.individual.sex',
         'biosource.individual.organism.name',
         'biosource.biosource_vendor.name',
+        "biosource.cell_line.slim_terms",
+        "biosource.cell_line.synonyms",
+        "biosource.tissue.slim_terms",
+        "biosource.tissue.synonyms",
         'cell_culture_details.*',
         'modifications.modification_type',
         'treatments.treatment_type'
