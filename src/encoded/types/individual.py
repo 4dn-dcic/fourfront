@@ -55,4 +55,4 @@ class IndividualMouse(Individual):
 
     item_type = 'individual_mouse'
     schema = load_schema('encoded:schemas/individual_mouse.json')
-    embedded = Individual.embedded + ['mouse_vendor.*']
+    embedded = Individual.embedded + ['mouse_vendor.name']

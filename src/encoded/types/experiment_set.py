@@ -77,7 +77,6 @@ class ExperimentSet(Item):
                 "produced_in_pub.*",
                 "publications_of_set.*",
 
-                "experiments_in_set.*",
                 "experiments_in_set.experiment_type",
 
                 "experiments_in_set.biosample.accession",
