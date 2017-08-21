@@ -24,7 +24,7 @@ class Individual(Item):
 
     base_types = ['Individual'] + Item.base_types
     schema = load_schema('encoded:schemas/individual.json')
-    embedded = ['organism.*']
+    embedded = ['organism.name']
     name_key = 'accession'
 
 
