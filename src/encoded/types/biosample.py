@@ -28,19 +28,13 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     schema = load_schema('encoded:schemas/biosample.json')
     # name_key = 'accession'
     embedded = [
-        'biosource.uuid',
         'biosource.biosource_type',
-        'biosource.individual.*',
+        'biosource.individual.sex',
         'biosource.individual.organism.name',
-        'biosource.biosource_vendor.*',
-        'references.*',
-        'biosample_protocols.*',
-        'treatments.*',
-        'modifications.*',
-        'modifications.modified_regions.*',
+        'biosource.biosource_vendor.name',
         'cell_culture_details.*',
-        'lab.*',
-        'award.*'
+        'modifications.modification_type',
+        'treatments.treatment_type'
     ]
     name_key = 'accession'
 
