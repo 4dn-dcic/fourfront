@@ -11,8 +11,8 @@ import { ItemBaseView } from './DefaultItemView';
 import ExperimentsTable from './../experiments-table';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
-import Graph from './../viz/Workflow';
-import { commonGraphPropsFromProps, graphBodyMixin, parseAnalysisStepsMixin, uiControlsMixin, doValidAnalysisStepsExist } from './WorkflowView';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { commonGraphPropsFromProps, graphBodyMixin, uiControlsMixin, doValidAnalysisStepsExist, filterOutParametersFromGraphData } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
 
@@ -20,7 +20,6 @@ import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } 
 
 export function allFilesForWorkflowRunsMappedByUUID(items){
     return _.reduce(items, function(m, workflowRun){
-        console.log('SDFAAS', workflowRun);
         return _.extend(m, allFilesForWorkflowRunMappedByUUID(workflowRun));
     }, {});
 }
@@ -51,14 +50,33 @@ export function filterOutIndirectFilesFromGraphData(graphData){
 
 export default class FileView extends ItemBaseView {
 
+    static doesGraphExist(context){
+        return (
+            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
+        );
+    }
+
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
-        this.state = { 'mounted' : false };
+        this.state = { 'mounted' : false, 'steps' : null };
     }
 
     componentDidMount(){
         this.setState({ 'mounted' : true });
+        if (!this.state.steps){
+            this.loadGraphSteps();
+        }
+    }
+
+    loadGraphSteps(){
+        if (typeof this.props.context.uuid !== 'string') return;
+        ajax.load('/trace_workflow_run_steps/' + this.props.context.uuid + '/', (r)=>{
+            console.log(r);
+            if (Array.isArray(r) && r.length > 0){
+                this.setState({ 'steps' : r });
+            }
+        });
     }
 
     getTabViewContents(){
@@ -66,11 +84,19 @@ export default class FileView extends ItemBaseView {
         var initTabs = [];
 
         initTabs.push(FileViewOverview.getTabObject(this.props.context, this.props.schemas));
-        if (doValidAnalysisStepsExist(this.props.context.analysis_steps)){
+
+        if (FileView.doesGraphExist(this.props.context)){
+            var iconClass = "icon icon-fw icon-";
+            if (this.state.steps === null){
+                iconClass += 'circle-o-notch icon-spin';
+            } else {
+                iconClass += 'code-fork';
+            }
             initTabs.push({
-                tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
+                tab : <span><i className={iconClass} /> Graph</span>,
                 key : 'graph',
-                content : <GraphSection {...this.props} mounted={this.state.mounted} />
+                disabled : !Array.isArray(this.state.steps) || this.state.steps.length === 0,
+                content : <GraphSection {...this.props} steps={this.state.steps} mounted={this.state.mounted} key={"graph-for-" + this.props.context.uuid} />
             });
         }
 
@@ -308,7 +334,6 @@ class GraphSection extends React.Component {
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
         this.body = graphBodyMixin.bind(this);
-        this.parseAnalysisSteps = parseAnalysisStepsMixin.bind(this);
         this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
         this.render = this.render.bind(this);
         this.state = {
@@ -318,7 +343,13 @@ class GraphSection extends React.Component {
     }
 
     commonGraphProps(){
-        var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
+        
+        var graphData = parseAnalysisSteps(this.props.steps);
+        if (!this.state.showParameters){
+            graphData = filterOutParametersFromGraphData(graphData);
+        }
+
+        //var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
         if (!this.state.showIndirectFiles){
             graphData = filterOutIndirectFilesFromGraphData(graphData);
         }
@@ -339,7 +370,7 @@ class GraphSection extends React.Component {
     }
 
     detailGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.steps)) return null;
         return (
             <Graph
                 { ...this.commonGraphProps() }
