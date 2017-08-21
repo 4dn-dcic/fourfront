@@ -155,9 +155,14 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded = ['files_in_set.submitted_by.*',
-                'files_in_set.lab.*',
-                'files_in_set.*'
+    embedded = ['files_in_set.submitted_by.job_title',
+                'files_in_set.lab.title',
+                'files_in_set.accesion'
+                "files_in_set.href",
+                "files_in_set.file_size",
+                "files_in_set.upload_key",
+                "files_in_set.file_format",
+                "files_in_set.file_classification"
                 ]
 
 
