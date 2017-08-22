@@ -78,6 +78,8 @@ class ExperimentSet(Item):
                 "publications_of_set.*",
 
                 "experiments_in_set.experiment_type",
+                "experiments_in_set.accession",
+                "experiments_in_set.display_title",
 
                 "experiments_in_set.biosample.accession",
                 "experiments_in_set.biosample.modifications_summary",
