@@ -32,7 +32,7 @@
         },
         "name": {
             "title": "Name",
-            "description": "The name of the workflow used by either SBG or Tibanna.",
+            "description": "The name and version of the workflow used by either SBG or Tibanna, in the format of name/version",
             "type": "string"
         },
         "description": {
@@ -59,6 +59,16 @@
         "cwl_pointer": {
             "title": "SBG CWL Path",
             "description": "Path to the SBG CWL file for the workflow - URL or directory path",
+            "type": "string"
+        },
+        "app_name": {
+            "title": "App name",
+            "description": "The name of the workflow app.",
+            "type": "string"
+        },
+        "app_version": {
+            "title": "App version",
+            "description": "The version of the workflow app.",
             "type": "string"
         },
         "cwl_directory_url": {
