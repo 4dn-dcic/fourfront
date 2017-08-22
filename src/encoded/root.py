@@ -7,7 +7,9 @@ from snovault import (
     Root,
     calculated_property,
     root,
+    COLLECTIONS
 )
+from snovault.elasticsearch.create_mapping import get_db_es_counts_and_db_uuids
 from .schema_formats import is_accession
 from pyramid.security import (
     ALL_PERMISSIONS,
@@ -16,6 +18,7 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
+from collections import OrderedDict
 
 
 def includeme(config):
@@ -180,17 +183,25 @@ def health_check(config):
         settings = request.registry.settings
 
         # how much stuff in database
-        db = request.registry['dbsession']
-        db_count = db.scalar("""SELECT count(*) FROM "propsheets";""")
+        db_total = 0
 
         # how much stuff in elasticsearch (among ALL indexes)
         es = request.registry['elasticsearch']
-        query = {"aggs":
-                 { "count_by_type":
-                  {"terms": { "field": "_type"}}
-                 }
-                }
-        es_count = es.search(index='_all', body=query, size=0)
+        es_total = 0
+
+        # find db and es counts for each index
+        db_es_compare = OrderedDict()
+        all_collections = list(request.registry[COLLECTIONS].by_item_type.keys())
+        for collection in all_collections:
+            db_count, es_count, _ = get_db_es_counts_and_db_uuids(request, es, collection)
+            warn_str = build_warn_string(db_count, es_count)
+            db_total += db_count
+            es_total += es_count
+            db_es_compare[collection] = ("DB: %s   ES: %s %s" %
+                            (str(db_count), str(es_count), warn_str))
+        warn_str = build_warn_string(db_total, es_total)
+        db_es_total = ("DB: %s   ES: %s %s" %
+                            (str(db_total), str(es_total), warn_str))
 
         # when ontologies were imported
         try:
@@ -212,13 +223,23 @@ def health_check(config):
             "@id" : "/health",
             "content" : None,
             "display_title" : "Health Status",
-            'es_count': es_count,
-            'db_count': db_count,
+            'db_es_total': db_es_total,
+            'db_es_compare': db_es_compare
         }
 
         return responseDict
 
     config.add_view(health_page_view, route_name='health-check')
+
+
+def build_warn_string(db_count, es_count):
+    if db_count > es_count:
+        warn_str = '  < WARNING: DB has %s more items >' % (str(db_count - es_count))
+    elif db_count < es_count:
+        warn_str = '  < WARNING: ES has %s more items >' % (str(es_count - db_count))
+    else:
+        warn_str = ''
+    return warn_str
 
 
 def submissions_page(config):
