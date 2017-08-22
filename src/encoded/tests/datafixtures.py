@@ -513,6 +513,20 @@ def workflow_run_sbg(testapp, lab, award, workflow_bam):
 
 
 @pytest.fixture
+def workflow_run_awsem(testapp, lab, award, workflow_bam):
+    item = {'run_platform': 'AWSEM',
+            'parameters': [],
+            'workflow': workflow_bam['@id'],
+            'title': u'md5 run 2017-01-20 13:16:11.026176',
+            'award': award['@id'],
+            'awsem_job_id': '1235',
+            'lab': lab['@id'],
+            'run_status': 'started',
+            }
+    return testapp.post_json('/workflow_run_awsem', item).json['@graph'][0]
+
+
+@pytest.fixture
 def workflow_run_json(testapp, lab, award, workflow_bam):
     return {'run_platform': 'SBG',
             'parameters': [],
