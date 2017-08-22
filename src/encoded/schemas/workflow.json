@@ -32,7 +32,7 @@
         },
         "name": {
             "title": "Name",
-            "description": "The name of the workflow used by either SBG or Tibanna.",
+            "description": "The name and version of the workflow used by either SBG or Tibanna, in the format of name/version",
             "type": "string"
         },
         "description": {
@@ -57,9 +57,39 @@
             "type": "string"
         },
         "cwl_pointer": {
-            "title": "CWL Path",
-            "description": "Path to the CWL file for the workflow - URL or directory path",
+            "title": "SBG CWL Path",
+            "description": "Path to the SBG CWL file for the workflow - URL or directory path",
             "type": "string"
+        },
+        "app_name": {
+            "title": "App name",
+            "description": "The name of the workflow app.",
+            "type": "string"
+        },
+        "app_version": {
+            "title": "App version",
+            "description": "The version of the workflow app.",
+            "type": "string"
+        },
+        "cwl_directory_url": {
+            "title": "CWL directory url",
+            "description": "URL of the directory that contains main and other CWL files needed for the workflow",
+            "type": "string"
+        },
+        "cwl_main_filename": {
+            "title": "CWL main file name",
+            "description": "Name of the main CWL file for the workflow",
+            "type": "string"
+        },
+        "cwl_child_filenames": {
+            "title": "CWL child file names",
+            "description": "Names of the other CWL files used by the main CWL file for the workflow",
+            "type": "array",
+            "items": {
+                "title": "CWL child file name",
+                "description": "name of a cwl file",
+                "type": "string"
+            }
         },
         "arguments": {
             "title": "Workflow Arguments",
