@@ -21,7 +21,7 @@ from .types.workflow import (
 def includeme(config):
     config.add_route('batch_hub', '/batch_hub/{search_params}/{txt}')
     config.add_route('batch_hub:trackdb', '/batch_hub/{search_params}/{assembly}/{txt}')
-    config.add_route('trace_workflow_runs', '/trace_workflow_run_steps/{file_uuid}/')
+    config.add_route('trace_workflow_runs', '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
     config.scan(__name__)
 
 
@@ -405,24 +405,17 @@ def batch_hub(context, request):
 
 # TODO: figure out how to make one of those cool /file/ACCESSION/@@download/-like URLs for this.
 @view_config(route_name='trace_workflow_runs', request_method='GET',
-             permission='view')
+             permission='view', context=File) # TODO: In future, expand to Item to accomodate Experiment, ExperimentSet.
 def trace_workflow_runs(context, request):
-    file_uuid = request.matchdict['file_uuid']
-    file_model = None
-    try:
-        file_model = request.registry['connection'].storage.get_by_uuid(file_uuid)
-    except Exception as e:
-        raise HTTPBadRequest(detail=repr(e))
-
+    file_model = context.model
+    
     if not hasattr(file_model, 'source'):
         raise HTTPBadRequest(detail="File not yet finished indexing.")
 
     workflow_run_input_uuids = [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_inputs', []) ]
     workflow_run_output_uuids = [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_outputs', []) ]
 
-    steps = trace_workflows(file_uuid, request, workflow_run_input_uuids, workflow_run_output_uuids)
-
-    return steps
+    return trace_workflows(str(context.uuid), request, workflow_run_input_uuids, workflow_run_output_uuids)
 
 
 
