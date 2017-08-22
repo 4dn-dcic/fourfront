@@ -168,7 +168,7 @@ def test_experiment_set_default_embedded_list(registry):
     test_exp = ExperimentHiC.create(registry, None, exp_data)
     embedded = test_exp.embedded
     experiment_set_emb = 'experiment_sets.*' in embedded
-    assert 'digestion_enzyme.*' in embedded
+    assert 'experiment_sets.accession' in embedded
     if 'references.*' not in embedded:
         assert 'references.link_id' in embedded
         assert 'references.display_title' in embedded

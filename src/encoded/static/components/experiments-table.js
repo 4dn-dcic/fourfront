@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { FacetList } from './browse/components';
-import { expFxn, Filters, console, isServerSide, analytics } from './util';
+import { expFxn, Filters, console, isServerSide, analytics, object } from './util';
 
 
 
@@ -581,7 +581,7 @@ export default class ExperimentsTable extends React.Component {
         if (useSet) return Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
         else return [...Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array
     }
-
+    /*
     static totalExperimentsCount(experimentArray = null){
         if (!experimentArray) return null;
         var experimentsCount = 0;
@@ -613,6 +613,7 @@ export default class ExperimentsTable extends React.Component {
             'files' : fileSet.size
         };
     }
+    */
 
     static propTypes = {
         columnHeaders               : PropTypes.array,
@@ -810,7 +811,7 @@ export default class ExperimentsTable extends React.Component {
 
         return (
             <ExperimentsTable.StackedBlock
-                key={exp['@id'] || exp.tec_rep_no || i}
+                key={ object.atIdFromObject(exp) || exp.tec_rep_no || i}
                 hideNameOnHover={false}
                 columnClass="experiment"
                 label={{
@@ -820,10 +821,10 @@ export default class ExperimentsTable extends React.Component {
                     subtitleVisible: true
                 }}
                 stripe={this.cache.oddExpRow}
-                id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || exp['@id']}
+                id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || object.atIdFromObject(exp)}
             >
                 <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
-                    <a href={ exp['@id'] || '#' } className="name-title">{ experimentVisibleName }</a>
+                    <a href={ object.atIdFromObject(exp) || '#' } className="name-title">{ experimentVisibleName }</a>
                 </StackedBlockName>
                 <StackedBlockList
                     className={contentsClassName}
@@ -846,7 +847,7 @@ export default class ExperimentsTable extends React.Component {
                         )
                         : /* No File Pairs, but files may exist */
                         <ExperimentsTable.StackedBlock
-                            key={exp['@id']}
+                            key={object.atIdFromObject(exp)}
                             hideNameOnHover={false}
                             columnClass="file-pair"
                         >
@@ -857,7 +858,7 @@ export default class ExperimentsTable extends React.Component {
                                 { Array.isArray(exp.files) ?
                                     exp.files.map((file) =>
                                         <FileEntryBlock
-                                            key={file['@id']}
+                                            key={object.atIdFromObject(exp)}
                                             file={file}
                                             columnHeaders={columnHeaders}
                                             handleFileCheckboxChange={this.handleFileCheckboxChange}
@@ -896,7 +897,7 @@ export default class ExperimentsTable extends React.Component {
             <ExperimentsTable.StackedBlock
                 columnClass="biosample"
                 hideNameOnHover={false}
-                key={expsWithBiosample[0].biosample['@id']}
+                key={object.atIdFromObject(expsWithBiosample[0].biosample)}
                 id={'bio-' + (expsWithBiosample[0].biosample.bio_rep_no || i + 1)}
                 label={{
                     title : 'Biosample',
@@ -910,7 +911,7 @@ export default class ExperimentsTable extends React.Component {
                         expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6
                     }
                 >
-                    <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title">
+                    <a href={ object.atIdFromObject(expsWithBiosample[0].biosample) || '#' } className="name-title">
                         { visibleBiosampleTitle }
                     </a>
                 </ExperimentsTable.StackedBlock.Name>
@@ -1093,7 +1094,7 @@ class FilePairBlock extends React.Component {
     renderFileEntryBlock(file,i){
         return (
             <FileEntryBlock
-                key={file['@id']}
+                key={object.atIdFromObject(file)}
                 file={file}
                 columnHeaders={ this.props.columnHeaders }
                 handleFileCheckboxChange={this.props.handleFileCheckboxChange}
@@ -1223,7 +1224,7 @@ class FileEntryBlock extends React.Component {
             var className = baseClassName + ' col-' + cols[i].columnClass + ' detail-col-' + i;
             var title = cols[i].valueTitle || cols[i].title;
 
-            if (!file || !file['@id']) {
+            if (!file || !object.atIdFromObject(file)) {
                 row.push(<div key={"file-detail-empty-" + i} className={className} style={baseStyle}></div>);
                 continue;
             }
@@ -1278,13 +1279,13 @@ class FileEntryBlock extends React.Component {
 
         function titleString(){
             if (!this.props.file) return 'No Files';
-            return this.props.file.accession || this.props.file.uuid || this.props.file['@id'];
+            return this.props.file.accession || this.props.file.uuid || object.atIdFromObject(this.props.file);
         }
 
         function title(){
             if (!this.props.file) return <span className="name-title">{ titleString.call(this) }</span>;
             return (
-                <a className="name-title mono-text" href={ this.props.file['@id'] || '#' }>
+                <a className="name-title mono-text" href={ object.atIdFromObject(this.props.file) || '#' }>
                     { titleString.call(this) }
                 </a>
             );
