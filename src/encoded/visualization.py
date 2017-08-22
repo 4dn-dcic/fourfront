@@ -414,6 +414,9 @@ def trace_workflow_runs(context, request):
     except Exception as e:
         raise HTTPBadRequest(detail=repr(e))
 
+    if not hasattr(file_model, 'source'):
+        raise HTTPBadRequest(detail="File not yet finished indexing.")
+
     workflow_run_input_uuids = [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_inputs', []) ]
     workflow_run_output_uuids = [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_outputs', []) ]
 
