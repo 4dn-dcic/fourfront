@@ -12,7 +12,16 @@ import React from 'react';
  */
 export function isFileDataComplete(file){
     if (!file || typeof file !== 'object') throw new Error('File param is not an object.');
-    if (typeof file.display_title === 'string' && typeof file.status !== 'string') {
+    if (typeof file.status !== 'string') {
+        return false;
+    }
+    if (typeof file.link_id !== 'string') {
+        return false;
+    }
+    if (typeof file.display_title !== 'string') {
+        return false;
+    }
+    if (!Array.isArray(file['@type'])) {
         return false;
     }
     return true;

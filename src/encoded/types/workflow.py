@@ -151,10 +151,11 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
     'max_depth_future' : 6
 }):
 
-    pr = cProfile.Profile()
-    pr.enable()
+    #pr = cProfile.Profile()
+    #pr.enable()
 
     uuidCacheModels = {}
+    uuidCacheTracedHistory = {}
     steps = [] # Our output
 
     def get_model_by_uuid(uuid, key = None):
@@ -191,6 +192,9 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
         step_uuids = set()
         for in_file in in_files:
             in_file_uuid = in_file.get('uuid')
+            if uuidCacheTracedHistory.get(in_file_uuid):
+                continue
+
             input_file_model = get_model_by_uuid(in_file_uuid)
 
             if not input_file_model or not hasattr(input_file_model, 'source') or input_file_model.source.get('object') is None:
@@ -202,7 +206,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             # There should only ever be one 'workflow_run_outputs' at most, or versions of same one (grab most recent).
             last_workflow_run_output_of = output_of_workflow_runs[len(output_of_workflow_runs) - 1]
             workflow_run_uuid = get_unique_key_from_at_id(last_workflow_run_output_of) #workflow_run_uuid_matched.group(0)
-            if not workflow_run_uuid:
+            if not workflow_run_uuid or uuidCacheTracedHistory.get(workflow_run_uuid):
                 continue
             workflow_run_model = get_model_by_uuid(workflow_run_uuid)
             if not workflow_run_model or not hasattr(workflow_run_model, 'source'):
@@ -220,6 +224,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
                         "type" : "Output file",
                         "for_file" : out_file_uuid
                     })
+            uuidCacheTracedHistory[in_file_uuid] = True
 
         if len(sources) == 0:
             for_files = in_files
@@ -245,30 +250,51 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
         # A file should be output of only one run.
 
         last_workflow_run_uuid = output_of_workflow_run_uuids[len(output_of_workflow_run_uuids) - 1]
+        uuidCacheTracedHistory[last_workflow_run_uuid] = True
         workflow_run_model = get_model_by_uuid(last_workflow_run_uuid)
 
         if not workflow_run_model or not hasattr(workflow_run_model, 'source'):
             return
 
-        input_files = workflow_run_model.source.get('object',{}).get('input_files', [])
-        output_files = workflow_run_model.source.get('object',{}).get('output_files', [])
+        workflow_run_model_obj = workflow_run_model.source.get('object',{})
+        input_files = workflow_run_model_obj.get('input_files', [])
+        output_files = workflow_run_model_obj.get('output_files', [])
 
         step = {
-            "uuid" : last_workflow_run_uuid,
-            "name" : workflow_run_model.source.get('object',{}).get('display_title'),
-            "analysis_step_types" : [],
+            "uuid" : last_workflow_run_uuid, # Gets moved to stepNode.meta.uuid on front-end
+            "name" : workflow_run_model_obj.get('display_title'), # Gets duplicated to stepNode.meta.name, and stepNode.name,
+            "meta" : {
+                "status" : workflow_run_model_obj.get('status'),
+                '@type'  : workflow_run_model_obj.get('@type'),
+            },
+            "analysis_step_types" : [], # Gets moved to stepNode.meta.analysis_step_types on front-end (we could put into meta here as well)
             "inputs" : [],
             "outputs" : []
         }
 
         # Fill 'Analysis Step Types' w/ workflow name; TODO: Add component analysis_steps.
-        workflow_uuid = get_unique_key_from_at_id(workflow_run_model.source.get('object',{}).get('workflow')) #workflow_run.properties.get('workflow')
+        workflow_uuid = get_unique_key_from_at_id(workflow_run_model_obj.get('workflow')) #workflow_run.properties.get('workflow')
         workflow_model = None
         if workflow_uuid:
             workflow_model = get_model_by_uuid(workflow_uuid)
             if workflow_model and hasattr(workflow_model, 'source'):
-                if workflow_model.source.get('object',{}).get('workflow_type'):
-                    step['analysis_step_types'].append(workflow_model.source['object']['workflow_type'])
+                workflow_model_obj = workflow_model.source.get('object',{})
+                if workflow_model_obj.get('workflow_type'):
+                    step['analysis_step_types'].append(workflow_model_obj['workflow_type'])
+                    step['meta']['workflow'] = {
+                        '@id'               : workflow_model_obj.get('@id') or workflow_run_model_obj.get('workflow'),
+                        '@type'             : workflow_model_obj.get('@type'),
+                        'title'             : workflow_model_obj.get('title'),
+                        'description'       : workflow_model_obj.get('description'),
+                        'display_title'     : workflow_model_obj.get('display_title') or workflow_model_obj.get('title'),
+                        'accession'         : workflow_model_obj.get('accession'),
+                        'workflow_steps'    : workflow_model_obj.get('workflow_steps'),
+                        'uuid'              : workflow_uuid,
+                        'date_created'      : workflow_model_obj.get('date_created'),
+                        'link_id'           : workflow_model_obj.get('link_id'),
+                        'workflow_type'     : workflow_model_obj.get('workflow_type'),
+                        'cwl_pointer'       : workflow_model_obj.get('cwl_pointer')
+                    }
 
 
         # Add Output Files, 1-level deep max (maybe change in future)
@@ -368,13 +394,13 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
     #trace_history([ wr['uuid'] for wr in output_of_workflow_runs ])
     trace_history(file_item_output_of_workflow_run_uuids)
 
-    pr.disable()
+    #pr.disable()
     
-    s = io.StringIO()
-    sortby = 'cumulative'
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-    print(s.getvalue())
+    #s = io.StringIO()
+    #sortby = 'cumulative'
+    #ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    #ps.print_stats()
+    #print(s.getvalue())
 
 
 
@@ -443,21 +469,28 @@ class Workflow(Item):
             :param stepContainer: A dictionary containing 'step' - a UUID of an AnalysisStep, and 'step_name', a name for the step used within workflow (overrides AnalysisStep.properties.name).
             '''
             uuid = stepContainer['step']
-            resultStepProperties = ['uuid', 'inputs', 'outputs', 'name', 'software_used', '@id', 'title', 'display_title', 'description', 'analysis_step_types', 'status'] # props to leave in
+            resultStepProperties = ['software_used', '@id', 'link_id', 'display_title', 'description', 'status', '@type'] # props to leave in
             step = self.collection.get(str(uuid))
-            stepDict = {}
-            stepDict.update(step.properties)
-            stepKeys = list(stepDict.keys())
+            stepDict = {
+                'uuid' : str(uuid),
+                'inputs' : step.properties.get('inputs', []), # Probably doesn't exist. We'll fill later.
+                'outputs' : step.properties.get('outputs', []),
+                'name' : step.properties.get('name') or step.properties.get('display_title'),
+                'analysis_step_types' : step.properties.get('analysis_step_types', []),
+                'meta' : {}
+            }
+            stepDict['meta'].update(step.properties)
+            stepKeys = list(stepDict['meta'].keys())
             for key in stepKeys:
                 if key not in resultStepProperties:
-                    del stepDict[key]
-            stepDict['uuid'] = str(step.uuid)
+                    del stepDict['meta'][key]
 
             # Use 'step_name' as provided in Workflow's 'workflow_steps', to override AnalysisStep 'name', in case step is renamed in Workflow.
             # Is unlikely, but possible, to differ from AnalysisStep own name.
             stepDict['name'] = stepContainer.get('step_name', stepDict.get('name'))
-            if stepDict.get('software_used') is not None:
-                stepDict['software_used'] = '/software/' + stepDict['software_used'] + '/' # Convert to '@id' form so is picked up for embedding.
+            if stepDict['meta'].get('software_used') is not None:
+                stepDict['meta']['software_used'] = '/software/' + stepDict['meta']['software_used'] + '/' # Convert to '@id' form so is picked up for embedding.
+            stepDict['meta']['@id'] = step.jsonld_id(request)
             return stepDict
 
         def mergeIOForStep(outputArgs, argType = "output"):

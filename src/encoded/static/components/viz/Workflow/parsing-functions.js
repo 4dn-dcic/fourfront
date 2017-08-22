@@ -73,8 +73,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             id : stepNodeID(step),
             type : 'step',
             name : stepNodeName(step),
-            meta : _.extend({}, step.meta || {}, _.omit(step, 'inputs', 'outputs', 'meta')),
-            description : step.description,
+            meta : _.extend(
+                {},
+                step.meta || {},
+                _.omit(step, 'inputs', 'outputs', 'meta'),
+            ),
             column : column
         };
     }

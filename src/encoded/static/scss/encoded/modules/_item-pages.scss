@@ -1013,6 +1013,21 @@ $download-button-width : 100px;
 						text-align: right;
 					}
 				}
+
+				&.steps-in-workflow {
+					a:not(:last-child) {
+						//margin-right: 5px;
+						margin-right: 5px;
+						&:after{
+							content: ',';
+							color: #000;
+							text-decoration: none;
+						}
+						&:hover:after {
+							text-decoration: none;
+						}
+					}
+				}
 			}
 
 			.description-box-container {

@@ -71,12 +71,16 @@ export default class FileView extends ItemBaseView {
 
     loadGraphSteps(){
         if (typeof this.props.context.uuid !== 'string') return;
-        ajax.load('/trace_workflow_run_steps/' + this.props.context.uuid + '/', (r)=>{
-            console.log(r);
+
+        var callback = function(r){
             if (Array.isArray(r) && r.length > 0){
                 this.setState({ 'steps' : r });
+            } else {
+                this.setState({ 'steps' : 'ERROR' });
             }
-        });
+        }.bind(this);
+
+        ajax.load('/trace_workflow_run_steps/' + this.props.context.uuid + '/', callback, 'GET', callback);
     }
 
     getTabViewContents(){
@@ -87,13 +91,18 @@ export default class FileView extends ItemBaseView {
 
         if (FileView.doesGraphExist(this.props.context)){
             var iconClass = "icon icon-fw icon-";
+            var tooltip = null;
             if (this.state.steps === null){
                 iconClass += 'circle-o-notch icon-spin';
+                tooltip = "Graph is loading";
+            } else if (!Array.isArray(this.state.steps) || this.state.steps.length === 0) {
+                iconClass += 'times';
+                tooltip = "Graph currently not available for this file. Please check back later.";
             } else {
                 iconClass += 'code-fork';
             }
             initTabs.push({
-                tab : <span><i className={iconClass} /> Graph</span>,
+                tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
                 key : 'graph',
                 disabled : !Array.isArray(this.state.steps) || this.state.steps.length === 0,
                 content : <GraphSection {...this.props} steps={this.state.steps} mounted={this.state.mounted} key={"graph-for-" + this.props.context.uuid} />

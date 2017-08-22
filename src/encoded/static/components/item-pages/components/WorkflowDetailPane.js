@@ -492,10 +492,56 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 
 }
 
+class WorkflowDetailsForWorkflowNodeRow extends React.Component {
+    render(){
+        var workflow = this.props.workflow;
+        var innerContent;
+
+        if (workflow) {
+            var link = object.atIdFromObject(workflow);
+            var title = workflow.display_title || workflow.title || workflow.name;
+            innerContent = <a href={link}>{ title }</a>;
+        } else {
+            innerContent = <em>N/A</em>;
+        }
+
+        var workflowSteps;
+        if (Array.isArray(workflow.workflow_steps) && workflow.workflow_steps.length > 0){
+            workflowSteps = _.map(workflow.workflow_steps, function(wf_step){
+                return (
+                    <a href={wf_step.step}>{ wf_step.step_name }</a>
+                );
+            });
+        } else {
+            workflowSteps = <em>N/A</em>;
+        }
+
+        return (
+            <div className="row">
+
+                <div className="col-sm-6 col-md-4 box">
+                    <span className="text-600">Workflow Name</span>
+                    <h4 className="text-400 text-ellipsis-container">
+                        { innerContent }
+                    </h4>
+                </div>
+
+                <div className="col-sm-6 col-md-4 box steps-in-workflow">
+                    <span className="text-600">Steps in Workflow</span>
+                    <h5 className="text-400 text-ellipsis-container">
+                        { workflowSteps }
+                    </h5>
+                </div>
+
+            </div>
+        );
+    }
+}
+
 class AnalysisStepDetailBody extends React.Component {
 
     stepTitleBox(){
-        var { step, context } = this.props;
+        var { step, context, node } = this.props;
         var stepHref = object.atIdFromObject(step) || '/' + step.uuid;
         console.log(object.atIdFromObject(step), object.atIdFromObject(context), step, context);
         var titleString = step.name || step.title || step.display_title || step.uuid;
@@ -510,9 +556,19 @@ class AnalysisStepDetailBody extends React.Component {
         ) : (
             <h3 className="text-400 text-ellipsis-container"><a href={stepHref}>{ titleString }</a></h3>
         );
+
+        var label;
+        if (isStepWorkflow){
+            label = 'Workflow Process';
+        } else if (step && Array.isArray(step['@type']) && step['@type'].indexOf('WorkflowRun') > -1){
+            label = 'Run Name';
+        } else {
+            label = 'Step Name';
+        }
+
         return (
             <div className="col-sm-6 col-md-4 box">
-                <span className="text-600">{ isStepWorkflow ? 'Workflow Process' : 'Step Name'}</span>
+                <span className="text-600">{ label }</span>
                 { content }
             </div>
         );
@@ -538,6 +594,9 @@ class AnalysisStepDetailBody extends React.Component {
 
     render(){
         var node = this.props.node;
+        var step = this.props.step;
+        var software_used = step.software_used;
+        var workflow = (step && step.workflow) || null;
         //var isThereAssociatedSoftware = !!(this.props.step && this.props.step.software_used);
         return(
             <div style={{ minHeight : this.props.minHeight }}>
@@ -548,8 +607,11 @@ class AnalysisStepDetailBody extends React.Component {
                         { this.purposesBox() }
 
                     </div>
-                    <hr/>
-                    <AnalysisStepSoftwareDetailRow software={this.props.step.software_used}/>
+                    { workflow ? <hr/> : null }
+                    { workflow ? <WorkflowDetailsForWorkflowNodeRow workflow={workflow}/> : null }
+                    { software_used ? <hr/> : null }
+                    { software_used ? <AnalysisStepSoftwareDetailRow software={step.software_used}/> : null }
+                    
                 </div>
                 <hr/>
             </div>
@@ -581,7 +643,7 @@ export class WorkflowDetailPane extends React.Component {
         this.body = this.body.bind(this);
     }
 
-    body(){
+    body(typeTitle){
         var node = this.props.selectedNode;
         
         if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file){
@@ -615,6 +677,7 @@ export class WorkflowDetailPane extends React.Component {
                 <AnalysisStepDetailBody
                     step={node.meta}
                     node={node}
+                    typeTitle={typeTitle}
                     schemas={this.props.schemas}
                     minHeight={this.props.minHeight}
                     context={this.props.context}
@@ -636,7 +699,12 @@ export class WorkflowDetailPane extends React.Component {
         );
 
         var type;
-        if (node.type === 'step'){
+
+        if ((node.meta && node.meta['@type']) && (node.meta['@type'].indexOf('WorkflowRun') > -1 || node.meta['@type'].indexOf('Workflow'))){
+            type = 'Workflow Run';
+        } else if ((node.meta && node.meta['@type']) && node.meta['@type'].indexOf('Workflow')) {
+            type = 'Workflow';
+        } else if (node.type === 'step'){
             type = 'Analysis Step';
         } else {
             type = node.format || node.type;
@@ -648,7 +716,7 @@ export class WorkflowDetailPane extends React.Component {
                     { type } <i className="icon icon-fw icon-angle-right"/> <span className="text-400">{ node.name }</span>
                 </h5>
                 <div className="detail-pane-body">
-                    { this.body() }
+                    { this.body(type) }
                 </div>
             </div>
         );
