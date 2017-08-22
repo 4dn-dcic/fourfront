@@ -18,7 +18,7 @@ def _type_length():
     # list of parent object and children (nested list)
     inherited_list = [
      ["experiment_set", ["experiment_set_replicate"]],
-     ["workflow_run", ["workflow_run_sbg"]],
+     ["workflow_run", ["workflow_run_sbg", "workflow_run_awsem"]],
      ["file_set", ["file_set_calibration"]],
     ]
     for inh in inherited_list:
@@ -158,6 +158,7 @@ def test_load_sample_data(
         submitter,
         workflow_mapping,
         workflow_run_sbg,
+        workflow_run_awsem,
         ):
     assert True, 'Fixtures have loaded sample data'
 
