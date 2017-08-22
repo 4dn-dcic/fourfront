@@ -1,0 +1,37 @@
+{
+    "title": "Workflow Run Awsem",
+    "description": "Schema for submitting metadata on the executation of a computational analysis workflow run on Awsem.",
+    "id": "/profiles/workflow_run_awsem.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["workflow", "award", "lab"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "aliases"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "workflow_run.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "workflow_run.json#/facets" }
+    ],
+    "properties": {
+        "run_platform": {
+            "title": "Run Platform",
+            "type": "string",
+            "enum": [
+                "AWSEM"
+            ]
+        },
+        "awsem_job_id": {
+            "title": "AWESM Job ID",
+            "type": "string"
+        }
+    }
+}

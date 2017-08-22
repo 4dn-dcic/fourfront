@@ -1760,7 +1760,7 @@
                 }
             ], 
             "workflow_argument_name": "output_normvector", 
-            "argument_format": "normvector_juicerformat",
+            "argument_format": "other",
             "argument_type": "Output processed file"
         }, 
         {

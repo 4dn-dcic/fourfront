@@ -790,6 +790,20 @@ class WorkflowRunSbg(WorkflowRun):
 
 
 @collection(
+    name='workflow-runs-awsem',
+    properties={
+        'title': 'Workflow Runs AWSEM',
+        'description': 'Listing of executions of 4DN analysis workflows on AWSEM platform',
+    })
+class WorkflowRunAwsem(WorkflowRun):
+    """The WorkflowRun class that describes execution of a workflow on AWSEM platform."""
+    base_types = ['WorkflowRun'] + Item.base_types
+    item_type = 'workflow_run_awsem'
+    schema = load_schema('encoded:schemas/workflow_run_awsem.json')
+    embedded = WorkflowRun.embedded
+
+
+@collection(
     name='workflow-mappings',
     properties={
         'title': 'Workflow Mappings',
