@@ -748,6 +748,12 @@ export class FacetList extends React.Component {
         if (facet.field.substring(0, 25) === 'experiments_in_set.audit.'){
             return false; // Ignore audit facets, we have a different view for them.
         }
+        // For now we exclude these fields because they aren't available to us when EXP is embedded as part of EXPSET.
+        // In future, we should, do something better. Like AJAX all experiments in so we have all properties that they can be filtered by.
+        if (facet.field === 'experiments_in_set.award.project') return false;
+        if (facet.field === 'experiments_in_set.lab.title') return false;
+        if (facet.field === 'experiments_in_set.status') return false;
+        if (facet.field === 'experiments_in_set.publications_of_exp.display_title') return false;
         return true;
     }
 
