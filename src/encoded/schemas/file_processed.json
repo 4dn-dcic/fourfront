@@ -66,9 +66,10 @@
          "description": "Experiments that this file is associated with",
          "type": "array",
          "items": {
-             "title": "Experiments",
+             "title": "Source Experiment",
              "type": "string",
              "linkTo": "Experiment"
+         }
      },
      "file_format_file_extension": {
         "bam": ".bam",
