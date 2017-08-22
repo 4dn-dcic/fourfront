@@ -985,6 +985,7 @@ $small-label-accession-font-size : 0.75rem;
 
 								.name.col-file-pair {
 									line-height: 25px;
+									white-space: nowrap;
 								}
 							}
 
@@ -997,10 +998,12 @@ $small-label-accession-font-size : 0.75rem;
 
 								&.single-item .name.col-file {
 									line-height: 55px;
+									white-space: nowrap;
 								}
 
 								&:not(.single-item) .name.col-file {
 									line-height: 20px;
+									white-space: nowrap;
 								}
 
 								.name.col-file > .exp-table-checkbox {
