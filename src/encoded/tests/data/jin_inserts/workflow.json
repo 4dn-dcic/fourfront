@@ -1,77 +1,90 @@
 [
     {
-        "status": "in review by lab", 
+        "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "441b46f5-5193-41ee-a90e-c7a74fbb65c1", 
         "documents": [], 
-        "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
-        "name": "md5", 
-        "title": "md5", 
+        "name": "extract-mcool-normvector-for-juicebox/2", 
+        "title": "extract-mcool-normvector-for-juicebox", 
+        "description": "extract-mcool-normvector-for-juicebox", 
+        "accession": "4DNWFG6JJBM8", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "workflow_type": "Hi-C data analysis", 
+        "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "arguments": [
             {
-                "argument_type": "Input file", 
+                "description": "", 
                 "argument_mapping": [
                     {
-                        "workflow_step": "md5", 
-                        "step_argument_name": "input_file", 
+                        "workflow_step": "extract-mcool-normvector-for-juicebox", 
+                        "step_argument_name": "input_mcool", 
                         "step_argument_type": "Input file"
                     }
                 ], 
-                "workflow_argument_name": "input_file", 
+                "workflow_argument_name": "input_mcool", 
                 "argument_cardinality": "1", 
-                "argument_format": "fastq", 
-                "description": "File on which MD5 calculation is run on."
+                "argument_format": "mcool", 
+                "argument_type": "Input file"
             }, 
             {
                 "argument_mapping": [
                     {
-                        "workflow_step": "md5", 
-                        "step_argument_name": "report", 
+                        "workflow_step": "extract-mcool-normvector-for-juicebox", 
+                        "step_argument_name": "nres", 
+                        "step_argument_type": "parameter"
+                    }
+                ], 
+                "argument_cardinality": "1", 
+                "argument_type": "parameter", 
+                "workflow_argument_name": "nres"
+            }, 
+            {
+                "description": "", 
+                "argument_mapping": [
+                    {
+                        "workflow_step": "extract-mcool-normvector-for-juicebox", 
+                        "step_argument_name": "output_normvector", 
                         "step_argument_type": "Output file"
                     }
                 ], 
-                "workflow_argument_name": "report", 
+                "workflow_argument_name": "output_normvector", 
                 "argument_cardinality": "1", 
-                "description": "The MD5 checksum generated.", 
-                "argument_type": "Output report file"
+                "argument_format": "other", 
+                "argument_type": "Output processed file"
             }
         ], 
-        "description": "md5 on uncompressed file", 
-        "accession": "4DNWFG6JOL4D", 
-        "schema_version": "1", 
-        "workflow_type": "Data QC", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "alternate_accessions": [], 
-        "date_created": "2017-05-09T07:21:37.200199+00:00", 
         "workflow_steps": [
             {
-                "step": "0786554a-49e5-4c33-afab-9ec90d657777", 
-                "step_name": "md5"
+                "step": "53e7b46f-1d3b-4a16-812f-c79456614bda", 
+                "step_name": "extract-mcool-normvector-for-juicebox"
             }
         ], 
-        "workflow_diagram": "", 
+        "date_created": "2017-07-10T15:03:59.582932+00:00", 
         "aliases": []
     }, 
     {
-        "status": "in review by lab", 
+        "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
         "documents": [], 
+        "name": "fastqc-0-11-4-1", 
+        "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0", 
         "description": "FastQC quality control step for fastq files", 
         "title": "FastQC", 
-        "aliases": [], 
-        "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0", 
         "accession": "4DNWFAW5VTA5", 
-        "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "name": "fastqc-0-11-4-1", 
+        "workflow_type": "Data QC", 
+        "schema_version": "1", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "arguments": [
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Input file", 
+                        "workflow_step": "FastQC", 
                         "step_argument_name": "limits_file", 
-                        "workflow_step": "FastQC"
+                        "step_argument_type": "Input file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -81,9 +94,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Input file", 
+                        "workflow_step": "FastQC", 
                         "step_argument_name": "input_fastq", 
-                        "workflow_step": "FastQC"
+                        "step_argument_type": "Input file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -94,9 +107,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Input file", 
+                        "workflow_step": "FastQC", 
                         "step_argument_name": "contaminants_file", 
-                        "workflow_step": "FastQC"
+                        "step_argument_type": "Input file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -106,9 +119,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Input file", 
+                        "workflow_step": "FastQC", 
                         "step_argument_name": "adapters_file", 
-                        "workflow_step": "FastQC"
+                        "step_argument_type": "Input file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -118,9 +131,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Output file", 
+                        "workflow_step": "FastQC", 
                         "step_argument_name": "report_zip", 
-                        "workflow_step": "FastQC"
+                        "step_argument_type": "Output file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -136,204 +149,29 @@
                 "step_name": "FastQC"
             }
         ], 
-        "workflow_type": "Data QC", 
-        "workflow_diagram": "", 
-        "schema_version": "1"
+        "aliases": []
     }, 
     {
-        "status": "in review by lab", 
+        "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "b9829418-49e5-4c33-afab-9ec90d659999", 
         "documents": [], 
-        "description": "extract-mcool-normvector-for-juicebox", 
-        "title": "extract-mcool-normvector-for-juicebox", 
-        "aliases": [], 
-        "accession": "4DNWFG6JJBM8", 
-        "uuid": "441b46f5-5193-41ee-a90e-c7a74fbb65c1", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "name": "extract-mcool-normvector-for-juicebox/2", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "arguments": [
-            {
-                "argument_type": "Input file", 
-                "argument_mapping": [
-                    {
-                        "step_argument_type": "Input file", 
-                        "step_argument_name": "input_mcool", 
-                        "workflow_step": "extract-mcool-normvector-for-juicebox"
-                    }
-                ], 
-                "workflow_argument_name": "input_mcool", 
-                "argument_cardinality": "1", 
-                "argument_format": "mcool", 
-                "description": ""
-            }, 
-            {
-                "argument_mapping": [
-                    {
-                        "step_argument_type": "parameter", 
-                        "step_argument_name": "nres", 
-                        "workflow_step": "extract-mcool-normvector-for-juicebox"
-                    }
-                ], 
-                "argument_cardinality": "1", 
-                "argument_type": "parameter", 
-                "workflow_argument_name": "nres"
-            }, 
-            {
-                "argument_type": "Output processed file", 
-                "argument_mapping": [
-                    {
-                        "step_argument_type": "Output file", 
-                        "step_argument_name": "output_normvector", 
-                        "workflow_step": "extract-mcool-normvector-for-juicebox"
-                    }
-                ], 
-                "workflow_argument_name": "output_normvector", 
-                "argument_cardinality": "1", 
-                "argument_format": "other", 
-                "description": ""
-            }
-        ], 
-        "alternate_accessions": [], 
-        "date_created": "2017-07-10T15:03:59.582932+00:00", 
-        "workflow_steps": [
-            {
-                "step": "53e7b46f-1d3b-4a16-812f-c79456614bda", 
-                "step_name": "extract-mcool-normvector-for-juicebox"
-            }
-        ], 
-        "workflow_type": "Hi-C data analysis", 
-        "workflow_diagram": "", 
-        "schema_version": "1"
-    }, 
-    {
-        "status": "in review by lab", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "documents": [], 
-        "description": "Hi-C processing part C revision 1", 
-        "title": "Hi-C processing part C revision 1", 
-        "aliases": [], 
-        "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partc.1.cwl", 
-        "accession": "4DNWFSOZLG11", 
-        "uuid": "1348354f-49e5-4c33-afab-9ec90d65faf3", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "name": "hi-c-processing-partc/1", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "arguments": [
-            {
-                "argument_mapping": [
-                    {
-                        "step_argument_type": "Input file", 
-                        "step_argument_name": "input_cool", 
-                        "workflow_step": "ede9938e-49e5-4c33-afab-9ec90d65faf3"
-                    }
-                ], 
-                "argument_type": "Input file", 
-                "argument_format": "cool", 
-                "workflow_argument_name": "input_cool"
-            }, 
-            {
-                "argument_mapping": [
-                    {
-                        "step_argument_type": "parameter", 
-                        "step_argument_name": "ncores", 
-                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3"
-                    }
-                ], 
-                "argument_type": "parameter", 
-                "workflow_argument_name": "ncores"
-            }, 
-            {
-                "argument_mapping": [
-                    {
-                        "step_argument_type": "Output file", 
-                        "step_argument_name": "output_mcool", 
-                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3"
-                    }
-                ], 
-                "argument_type": "Output processed file", 
-                "argument_format": "mcool", 
-                "workflow_argument_name": "output_mcool"
-            }, 
-            {
-                "argument_mapping": [
-                    {
-                        "step_argument_type": "Input file or parameter", 
-                        "step_argument_name": "input_cool", 
-                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3"
-                    }, 
-                    {
-                        "step_argument_type": "Output file or parameter", 
-                        "step_argument_name": "out_cool", 
-                        "workflow_step": "ede9938e-49e5-4c33-afab-9ec90d65faf3"
-                    }
-                ]
-            }, 
-            {
-                "argument_mapping": [
-                    {
-                        "step_argument_type": "Input file or parameter", 
-                        "step_argument_name": "input_cool", 
-                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3"
-                    }, 
-                    {
-                        "step_argument_type": "Output file or parameter", 
-                        "step_argument_name": "out_cool", 
-                        "workflow_step": "ede9938e-49e5-4c33-afab-9ec90d65faf3"
-                    }
-                ]
-            }, 
-            {
-                "argument_mapping": [
-                    {
-                        "step_argument_type": "Input file or parameter", 
-                        "step_argument_name": "input_cool", 
-                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3"
-                    }, 
-                    {
-                        "step_argument_type": "Output file or parameter", 
-                        "step_argument_name": "out_cool", 
-                        "workflow_step": "ede9938e-49e5-4c33-afab-9ec90d65faf3"
-                    }
-                ]
-            }
-        ], 
-        "alternate_accessions": [], 
-        "date_created": "2017-05-30T23:13:20.378269+00:00", 
-        "workflow_steps": [
-            {
-                "step": "ede9938e-49e5-4c33-afab-9ec90d65faf3", 
-                "step_name": "coolerbalance"
-            }, 
-            {
-                "step": "25e911b4-49e5-4c33-afab-9ec90d65faf3", 
-                "step_name": "cool2mcool"
-            }
-        ], 
-        "workflow_type": "Hi-C data analysis", 
-        "workflow_diagram": "", 
-        "schema_version": "1"
-    }, 
-    {
-        "status": "in review by lab", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "documents": [], 
+        "name": "hi-c-processing-partb/24", 
+        "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.24.cwl", 
         "description": "Hi-C processing part B revision 24", 
         "title": "Hi-C processing part B revision 24", 
-        "aliases": [], 
-        "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.24.cwl", 
         "accession": "4DNWFSOZLMMB", 
-        "uuid": "b9829418-49e5-4c33-afab-9ec90d659999", 
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
-        "name": "hi-c-processing-partb/24", 
+        "workflow_type": "Hi-C data analysis", 
+        "schema_version": "1", 
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "arguments": [
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Input file", 
+                        "workflow_step": "pairs2hic", 
                         "step_argument_name": "chromsizes_file", 
-                        "workflow_step": "pairs2hic"
+                        "step_argument_type": "Input file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -344,9 +182,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Input file", 
+                        "workflow_step": "merge_pairs", 
                         "step_argument_name": "input_pairs", 
-                        "workflow_step": "merge_pairs"
+                        "step_argument_type": "Input file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -357,9 +195,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Input file", 
+                        "workflow_step": "merge_pairs", 
                         "step_argument_name": "input_pairs_index", 
-                        "workflow_step": "merge_pairs"
+                        "step_argument_type": "Input file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -370,9 +208,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "parameter", 
+                        "workflow_step": "cooler", 
                         "step_argument_name": "ncores", 
-                        "workflow_step": "cooler"
+                        "step_argument_type": "parameter"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -382,9 +220,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "parameter", 
+                        "workflow_step": "cooler", 
                         "step_argument_name": "binsize", 
-                        "workflow_step": "cooler"
+                        "step_argument_type": "parameter"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -394,9 +232,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "parameter", 
+                        "workflow_step": "pairs2hic", 
                         "step_argument_name": "min_res", 
-                        "workflow_step": "pairs2hic"
+                        "step_argument_type": "parameter"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -406,9 +244,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Output file", 
+                        "workflow_step": "merge_pairs", 
                         "step_argument_name": "output_pairs_index", 
-                        "workflow_step": "merge_pairs"
+                        "step_argument_type": "Output file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -419,9 +257,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Output file", 
+                        "workflow_step": "merge_pairs", 
                         "step_argument_name": "output_pairs", 
-                        "workflow_step": "merge_pairs"
+                        "step_argument_type": "Output file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -432,9 +270,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Output file", 
+                        "workflow_step": "cooler", 
                         "step_argument_name": "out_cool", 
-                        "workflow_step": "cooler"
+                        "step_argument_type": "Output file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -445,9 +283,9 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Output file", 
+                        "workflow_step": "pairs2hic", 
                         "step_argument_name": "output_hic", 
-                        "workflow_step": "pairs2hic"
+                        "step_argument_type": "Output file"
                     }
                 ], 
                 "argument_cardinality": "1", 
@@ -458,14 +296,14 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Input file or parameter", 
+                        "workflow_step": "cooler", 
                         "step_argument_name": "pairs_index", 
-                        "workflow_step": "cooler"
+                        "step_argument_type": "Input file or parameter"
                     }, 
                     {
-                        "step_argument_type": "Output file or parameter", 
+                        "workflow_step": "merge_pairs", 
                         "step_argument_name": "output_pairs_index", 
-                        "workflow_step": "merge_pairs"
+                        "step_argument_type": "Output file or parameter"
                     }
                 ], 
                 "argument_cardinality": "1"
@@ -473,14 +311,14 @@
             {
                 "argument_mapping": [
                     {
-                        "step_argument_type": "Input file or parameter", 
+                        "workflow_step": "pairs2hic", 
                         "step_argument_name": "input_pairs", 
-                        "workflow_step": "pairs2hic"
+                        "step_argument_type": "Input file or parameter"
                     }, 
                     {
-                        "step_argument_type": "Output file or parameter", 
+                        "workflow_step": "merge_pairs", 
                         "step_argument_name": "output_pairs", 
-                        "workflow_step": "merge_pairs"
+                        "step_argument_type": "Output file or parameter"
                     }
                 ], 
                 "argument_cardinality": "1"
@@ -502,17 +340,187 @@
                 "step_name": "cooler"
             }
         ], 
-        "workflow_type": "Hi-C data analysis", 
-        "workflow_diagram": "", 
-        "schema_version": "1"
+        "aliases": []
     }, 
     {
-        "status": "in review by lab", 
+        "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41", 
         "documents": [], 
+        "name": "md5", 
+        "title": "md5", 
+        "description": "md5 on uncompressed file", 
+        "accession": "4DNWFG6JOL4D", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "workflow_type": "Data QC", 
+        "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "arguments": [
+            {
+                "description": "File on which MD5 calculation is run on.", 
+                "argument_mapping": [
+                    {
+                        "workflow_step": "md5", 
+                        "step_argument_name": "input_file", 
+                        "step_argument_type": "Input file"
+                    }
+                ], 
+                "workflow_argument_name": "input_file", 
+                "argument_cardinality": "1", 
+                "argument_format": "fastq", 
+                "argument_type": "Input file"
+            }, 
+            {
+                "argument_mapping": [
+                    {
+                        "workflow_step": "md5", 
+                        "step_argument_name": "report", 
+                        "step_argument_type": "Output file"
+                    }
+                ], 
+                "description": "The MD5 checksum generated.", 
+                "argument_cardinality": "1", 
+                "argument_type": "Output report file", 
+                "workflow_argument_name": "report"
+            }
+        ], 
+        "alternate_accessions": [], 
+        "workflow_steps": [
+            {
+                "step": "0786554a-49e5-4c33-afab-9ec90d657777", 
+                "step_name": "md5"
+            }
+        ], 
+        "date_created": "2017-05-09T07:21:37.200199+00:00", 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "1348354f-49e5-4c33-afab-9ec90d65faf3", 
+        "documents": [], 
+        "name": "hi-c-processing-partc/1", 
+        "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partc.1.cwl", 
+        "description": "Hi-C processing part C revision 1", 
+        "title": "Hi-C processing part C revision 1", 
+        "accession": "4DNWFSOZLG11", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "workflow_type": "Hi-C data analysis", 
+        "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "arguments": [
+            {
+                "argument_mapping": [
+                    {
+                        "workflow_step": "ede9938e-49e5-4c33-afab-9ec90d65faf3", 
+                        "step_argument_name": "input_cool", 
+                        "step_argument_type": "Input file"
+                    }
+                ], 
+                "argument_cardinality": "1", 
+                "argument_type": "Input file", 
+                "argument_format": "cool", 
+                "workflow_argument_name": "input_cool"
+            }, 
+            {
+                "argument_mapping": [
+                    {
+                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3", 
+                        "step_argument_name": "ncores", 
+                        "step_argument_type": "parameter"
+                    }
+                ], 
+                "argument_cardinality": "1", 
+                "argument_type": "parameter", 
+                "workflow_argument_name": "ncores"
+            }, 
+            {
+                "argument_mapping": [
+                    {
+                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3", 
+                        "step_argument_name": "output_mcool", 
+                        "step_argument_type": "Output file"
+                    }
+                ], 
+                "argument_cardinality": "1", 
+                "argument_type": "Output processed file", 
+                "argument_format": "mcool", 
+                "workflow_argument_name": "output_mcool"
+            }, 
+            {
+                "argument_mapping": [
+                    {
+                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3", 
+                        "step_argument_name": "input_cool", 
+                        "step_argument_type": "Input file or parameter"
+                    }, 
+                    {
+                        "workflow_step": "ede9938e-49e5-4c33-afab-9ec90d65faf3", 
+                        "step_argument_name": "out_cool", 
+                        "step_argument_type": "Output file or parameter"
+                    }
+                ], 
+                "argument_cardinality": "1"
+            }, 
+            {
+                "argument_mapping": [
+                    {
+                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3", 
+                        "step_argument_name": "input_cool", 
+                        "step_argument_type": "Input file or parameter"
+                    }, 
+                    {
+                        "workflow_step": "ede9938e-49e5-4c33-afab-9ec90d65faf3", 
+                        "step_argument_name": "out_cool", 
+                        "step_argument_type": "Output file or parameter"
+                    }
+                ], 
+                "argument_cardinality": "1"
+            }, 
+            {
+                "argument_mapping": [
+                    {
+                        "workflow_step": "25e911b4-49e5-4c33-afab-9ec90d65faf3", 
+                        "step_argument_name": "input_cool", 
+                        "step_argument_type": "Input file or parameter"
+                    }, 
+                    {
+                        "workflow_step": "ede9938e-49e5-4c33-afab-9ec90d65faf3", 
+                        "step_argument_name": "out_cool", 
+                        "step_argument_type": "Output file or parameter"
+                    }
+                ], 
+                "argument_cardinality": "1"
+            }
+        ], 
+        "alternate_accessions": [], 
+        "date_created": "2017-05-30T23:13:20.378269+00:00", 
+        "workflow_steps": [
+            {
+                "step": "ede9938e-49e5-4c33-afab-9ec90d65faf3", 
+                "step_name": "coolerbalance"
+            }, 
+            {
+                "step": "25e911b4-49e5-4c33-afab-9ec90d65faf3", 
+                "step_name": "cool2mcool"
+            }
+        ], 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "uuid": "f05dac74-1363-4eb4-ba8f-7465938b58f1", 
+        "documents": [], 
         "name": "hi-c-processing-parta-juicer/21", 
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.21.cwl", 
+        "description": "Hi-C processing partA based on Juicer", 
+        "title": "hi-c-processing-parta-juicer", 
+        "accession": "4DNWFSOBGKB5", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "workflow_type": "Hi-C data analysis", 
+        "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "arguments": [
             {
                 "argument_mapping": [
@@ -523,9 +531,9 @@
                     }
                 ], 
                 "argument_cardinality": "1", 
-                "workflow_argument_name": "fastq1", 
+                "argument_type": "Input file", 
                 "argument_format": "fastq", 
-                "argument_type": "Input file"
+                "workflow_argument_name": "fastq1"
             }, 
             {
                 "argument_mapping": [
@@ -536,9 +544,9 @@
                     }
                 ], 
                 "argument_cardinality": "1", 
-                "workflow_argument_name": "fastq2", 
+                "argument_type": "Input file", 
                 "argument_format": "fastq", 
-                "argument_type": "Input file"
+                "workflow_argument_name": "fastq2"
             }, 
             {
                 "argument_mapping": [
@@ -549,9 +557,9 @@
                     }
                 ], 
                 "argument_cardinality": "1", 
-                "workflow_argument_name": "bwa_index", 
+                "argument_type": "Input file", 
                 "argument_format": "bwaIndex", 
-                "argument_type": "Input file"
+                "workflow_argument_name": "bwa_index"
             }, 
             {
                 "argument_mapping": [
@@ -562,9 +570,9 @@
                     }
                 ], 
                 "argument_cardinality": "1", 
-                "workflow_argument_name": "chrsizes", 
+                "argument_type": "Input file", 
                 "argument_format": "chromsizes", 
-                "argument_type": "Input file"
+                "workflow_argument_name": "chrsizes"
             }, 
             {
                 "argument_mapping": [
@@ -575,9 +583,9 @@
                     }
                 ], 
                 "argument_cardinality": "1", 
-                "workflow_argument_name": "reference_fasta", 
+                "argument_type": "Input file", 
                 "argument_format": "reference_fasta", 
-                "argument_type": "Input file"
+                "workflow_argument_name": "reference_fasta"
             }, 
             {
                 "argument_mapping": [
@@ -588,9 +596,9 @@
                     }
                 ], 
                 "argument_cardinality": "1", 
-                "workflow_argument_name": "restriction_file", 
+                "argument_type": "Input file", 
                 "argument_format": "juicer_format_restriction_site_file", 
-                "argument_type": "Input file"
+                "workflow_argument_name": "restriction_file"
             }, 
             {
                 "argument_mapping": [
@@ -637,9 +645,9 @@
                     }
                 ], 
                 "argument_cardinality": "1", 
-                "workflow_argument_name": "out_pairs", 
+                "argument_type": "Output processed file", 
                 "argument_format": "pairs", 
-                "argument_type": "Output processed file"
+                "workflow_argument_name": "out_pairs"
             }, 
             {
                 "argument_mapping": [
@@ -650,9 +658,9 @@
                     }
                 ], 
                 "argument_cardinality": "1", 
-                "workflow_argument_name": "out_pairs_index", 
+                "argument_type": "Output processed file", 
                 "argument_format": "pairs_px2", 
-                "argument_type": "Output processed file"
+                "workflow_argument_name": "out_pairs_index"
             }, 
             {
                 "argument_mapping": [
@@ -663,9 +671,9 @@
                     }
                 ], 
                 "argument_cardinality": "1", 
-                "workflow_argument_name": "merged_nodups", 
+                "argument_type": "Output processed file", 
                 "argument_format": "other", 
-                "argument_type": "Output processed file"
+                "workflow_argument_name": "merged_nodups"
             }, 
             {
                 "argument_mapping": [
@@ -683,13 +691,6 @@
                 "argument_cardinality": "1"
             }
         ], 
-        "description": "Hi-C processing partA based on Juicer", 
-        "title": "hi-c-processing-parta-juicer", 
-        "accession": "4DNWFSOBGKB5", 
-        "schema_version": "1", 
-        "workflow_type": "Hi-C data analysis", 
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
         "alternate_accessions": [], 
         "date_created": "2017-07-14T17:54:52.575704+00:00", 
         "workflow_steps": [
@@ -702,7 +703,6 @@
                 "step_name": "juicer2pairs"
             }
         ], 
-        "workflow_diagram": "", 
         "aliases": []
     }
 ]

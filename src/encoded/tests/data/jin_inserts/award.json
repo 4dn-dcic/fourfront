@@ -6,27 +6,13 @@
         "title": "4D NUCLEOME NETWORK DATA COORDINATION AND INTEGRATION CENTER", 
         "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8987140&icde=30570219", 
         "viewing_group": "4DN", 
+        "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "schema_version": "1", 
-        "name": "1U01CA200059-01", 
         "project": "4DN", 
         "date_created": "2017-04-07T19:56:09.579997+00:00", 
         "pi": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "start_date": "2015-09-07", 
-        "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
-    }, 
-    {
-        "status": "current", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "description": "The human embryonic stem cells (hESCs) are a unique model system for investigating the mechanisms of human development due to their ability to replicate indefinitely while retaining the capacity to differentiate into a host of functionally distinct cell types. In addition, these cells could be potentially used as therapeutic agents in regenerative medicine. Differentiation of hESCs involves selective activation or silencing of genes, a process controlled in part by the epigenetic state of the cell. In order to gain a better understanding of the epigenetic mechanisms regulating differentiation of hESCs, and produce general reference epigenome maps of the human cells, we propose to establish an Epigenome Center in San Diego. Our center will be focused on both undifferentiated hESC and four hESC-derived early embryonic cell lineages including extraembryonic endoderm, trophoblast, mesendoderm (a common precursor to mesodermal and endodermal lineages), and mesenchymal cells (a specific mesoderm derivative). We have developed and validated high throughput technologies for mapping the state of DNA methylation and chromatin modifications throughout the genome, and will use these methods to generate high-resolution maps of the reference epigenomes. Specifically, we will grow and differentiate hESCs into multiple lineages, and map DNA methylation sites using a newly developed technology that combines bisulfite conversion and whole genome shotgun sequencing. We will also determine the histone modification status in the genome by performing both ChlP-chip and ChlP-Seq analysis. We will develop advanced statistical and algorithmic solutions to facilitate high-throughput sequencing data analysis, and establish an informatics pipeline for collecting, storage, and distribution of epigenome maps. Finally, we will perform integrated data analysis to identify new epigenetic patterns in the genome that could provide insights in mechanisms of epigenetic regulation.", 
-        "title": "THE SAN DIEGO EPIGENOME CENTER", 
-        "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=7585851&icde=34246404&ddparam=&ddvalue=&ddsub=&cr=7&csb=default&cs=ASC&pball=", 
-        "viewing_group": "Not 4DN", 
-        "schema_version": "1", 
-        "name": "1U01ES017166-01", 
-        "project": "External", 
-        "date_created": "2017-05-10T17:31:20.741335+00:00", 
-        "pi": "e3159ffc-a5a9-43a1-8cfa-90b776c39788", 
-        "uuid": "1dbecc95-ec91-4081-a862-c79d18a8d0bd"
+        "name": "1U01CA200059-01"
     }, 
     {
         "status": "current", 
@@ -36,12 +22,26 @@
         "title": "SAN DIEGO CENTER FOR 4D NUCLEOME RESEARCH", 
         "url": "https://projectreporter.nih.gov/project_description.cfm?projectnumber=1U54DK107977-01", 
         "viewing_group": "4DN", 
+        "uuid": "4871e338-b07d-4665-a00a-357648e5bad6", 
         "schema_version": "1", 
-        "name": "1U54DK107977-01", 
         "project": "4DN", 
         "date_created": "2017-04-08T13:01:31.291212+00:00", 
         "pi": "e3159ffc-a5a9-43a1-8cfa-90b776c39788", 
         "start_date": "2015-09-30", 
-        "uuid": "4871e338-b07d-4665-a00a-357648e5bad6"
+        "name": "1U54DK107977-01"
+    }, 
+    {
+        "status": "current", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "description": "The human embryonic stem cells (hESCs) are a unique model system for investigating the mechanisms of human development due to their ability to replicate indefinitely while retaining the capacity to differentiate into a host of functionally distinct cell types. In addition, these cells could be potentially used as therapeutic agents in regenerative medicine. Differentiation of hESCs involves selective activation or silencing of genes, a process controlled in part by the epigenetic state of the cell. In order to gain a better understanding of the epigenetic mechanisms regulating differentiation of hESCs, and produce general reference epigenome maps of the human cells, we propose to establish an Epigenome Center in San Diego. Our center will be focused on both undifferentiated hESC and four hESC-derived early embryonic cell lineages including extraembryonic endoderm, trophoblast, mesendoderm (a common precursor to mesodermal and endodermal lineages), and mesenchymal cells (a specific mesoderm derivative). We have developed and validated high throughput technologies for mapping the state of DNA methylation and chromatin modifications throughout the genome, and will use these methods to generate high-resolution maps of the reference epigenomes. Specifically, we will grow and differentiate hESCs into multiple lineages, and map DNA methylation sites using a newly developed technology that combines bisulfite conversion and whole genome shotgun sequencing. We will also determine the histone modification status in the genome by performing both ChlP-chip and ChlP-Seq analysis. We will develop advanced statistical and algorithmic solutions to facilitate high-throughput sequencing data analysis, and establish an informatics pipeline for collecting, storage, and distribution of epigenome maps. Finally, we will perform integrated data analysis to identify new epigenetic patterns in the genome that could provide insights in mechanisms of epigenetic regulation.", 
+        "title": "THE SAN DIEGO EPIGENOME CENTER", 
+        "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=7585851&icde=34246404&ddparam=&ddvalue=&ddsub=&cr=7&csb=default&cs=ASC&pball=", 
+        "viewing_group": "Not 4DN", 
+        "uuid": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
+        "schema_version": "1", 
+        "project": "External", 
+        "date_created": "2017-05-10T17:31:20.741335+00:00", 
+        "pi": "e3159ffc-a5a9-43a1-8cfa-90b776c39788", 
+        "name": "1U01ES017166-01"
     }
 ]

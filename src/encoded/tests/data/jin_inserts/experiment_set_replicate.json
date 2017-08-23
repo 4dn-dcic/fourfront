@@ -2,9 +2,18 @@
     {
         "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "uuid": "e58e2141-9253-4c91-85c3-d67ce06db28f", 
         "documents": [], 
         "experimentset_type": "replicate", 
         "description": "Imr90 dilution Hi-C experiments from Jin et al (GSE43070)", 
+        "processed_files": [
+            "ec567538-98db-4960-9848-1578b76af5a1", 
+            "16437560-891e-4a50-aa87-0c7cc74f84ca", 
+            "439cd2d1-9586-4942-b3cd-8b0ea5971206", 
+            "96a1dda7-ec95-41f2-bb68-88d3b40447a6", 
+            "3372419a-207e-4e97-9f82-6f86a0ba2258", 
+            "6ddf9ef1-a90d-4d5a-a285-c50674647d80"
+        ], 
         "replicate_exps": [
             {
                 "replicate_exp": "2d16d443-2afd-47d6-a9e5-52b94188cedc", 
@@ -37,9 +46,8 @@
                 "tec_rep_no": 1
             }
         ], 
-        "uuid": "e58e2141-9253-4c91-85c3-d67ce06db28f", 
-        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
         "accession": "4DNES4296C5Q", 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
         "schema_version": "1", 
         "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
         "alternate_accessions": [], 

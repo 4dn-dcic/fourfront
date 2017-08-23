@@ -1,8 +1,73 @@
 [
     {
         "status": "released", 
+        "term_name": "definition", 
+        "term_url": "http://www.ebi.ac.uk/efo/definition", 
+        "term_id": "EFO:definition", 
+        "namespace": "http://www.ebi.ac.uk/efo", 
+        "schema_version": "1", 
+        "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "date_created": "2017-04-26T07:22:23.300338+00:00", 
+        "uuid": "111115bc-8535-4448-903e-854af460a233"
+    }, 
+    {
+        "status": "released", 
+        "definition": "An alternative label for a given entity such as a commonly used abbreviation or synonym.", 
+        "term_name": "alternative_term", 
+        "term_url": "http://www.ebi.ac.uk/efo/alternative_term", 
+        "term_id": "EFO:alternative_term", 
+        "namespace": "http://www.ebi.ac.uk/efo", 
+        "schema_version": "1", 
+        "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "date_created": "2017-04-26T07:22:23.156086+00:00", 
+        "uuid": "111111bc-8535-4448-903e-854af460a233"
+    }, 
+    {
+        "status": "released", 
+        "term_name": "has_narrow_synonym", 
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym", 
+        "term_id": "oboInOwl:hasNarrowSynonym", 
+        "namespace": "http://www.geneontology.org/formats/oboInOwl", 
+        "schema_version": "1", 
+        "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "date_created": "2017-04-26T07:22:23.231967+00:00", 
+        "uuid": "111113bc-8535-4448-903e-854af460a233"
+    }, 
+    {
+        "status": "released", 
+        "term_name": "has_related_synonym", 
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#RelatedSynonym", 
+        "term_id": "oboInOwl:hasRelatedSynonym", 
+        "namespace": "http://www.geneontology.org/formats/oboInOwl", 
+        "schema_version": "1", 
+        "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "date_created": "2017-04-26T07:22:23.265915+00:00", 
+        "uuid": "111114bc-8535-4448-903e-854af460a233"
+    }, 
+    {
+        "status": "released", 
+        "definition": "An experimental factor in Array Express which are essentially the variable aspects of an experiment design which can be used to describe an experiment, or set of experiments, in an increasingly detailed manner. This upper level class is really used to give a root class from which applications can rely on and not be tied to upper ontology classses which do change.", 
+        "term_name": "experimental factor", 
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000001", 
+        "term_id": "EFO:0000001", 
+        "namespace": "http://www.ebi.ac.uk/efo", 
+        "schema_version": "1", 
+        "synonyms": [
+            "ExperimentalFactor"
+        ], 
+        "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "date_created": "2017-05-11T15:42:00.141073+00:00", 
+        "uuid": "a27ad2c3-cd3b-46fe-b69b-9673eacdd9b0"
+    }, 
+    {
+        "status": "released", 
         "definition": "Human Fetal Lung Fibroblast cell line", 
-        "uuid": "c45d70f2-980b-4a6c-b762-bb48fdd7913a", 
+        "term_name": "IMR-90", 
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0001196", 
         "term_id": "EFO:0001196", 
         "namespace": "http://www.ebi.ac.uk/efo", 
@@ -18,112 +83,27 @@
             "ba0db777-83bc-4bc4-beb5-f37f2828ad5c"
         ], 
         "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "references": [], 
         "date_created": "2017-05-11T15:51:28.137093+00:00", 
-        "references": [], 
-        "term_name": "IMR-90"
-    }, 
-    {
-        "status": "released", 
-        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
-        "uuid": "111189bc-8535-4448-903e-854af460a233", 
-        "definition": "A cell line is a population of cells cultured in vitro that are descended through one or more generations (and possible sub-cultures) from a single primary culture which was originally derived from part of an organism.", 
-        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322", 
-        "term_id": "EFO:0000322", 
-        "namespace": "http://www.ebi.ac.uk/efo", 
-        "slim_terms": [
-            "111189bc-8535-4448-903e-854af460a233"
-        ], 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "synonyms": [
-            "cell_line"
-        ], 
-        "parents": [
-            "3a3aca22-7824-4179-ba02-9fdc68abcc2f"
-        ], 
-        "schema_version": "1", 
-        "date_created": "2017-04-26T07:22:26.586071+00:00", 
-        "references": [], 
-        "term_name": "cell line", 
-        "is_slim_for": "cell"
-    }, 
-    {
-        "status": "released", 
-        "uuid": "111115bc-8535-4448-903e-854af460a233", 
-        "term_url": "http://www.ebi.ac.uk/efo/definition", 
-        "term_id": "EFO:definition", 
-        "namespace": "http://www.ebi.ac.uk/efo", 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "references": [], 
-        "schema_version": "1", 
-        "date_created": "2017-04-26T07:22:23.300338+00:00", 
-        "term_name": "definition"
-    }, 
-    {
-        "status": "released", 
-        "uuid": "111116bc-8535-4448-903e-854af460a233", 
-        "term_url": "http://purl.obolibrary.org/obo/IAO_0000115", 
-        "term_id": "IAO:0000115", 
-        "namespace": "http://purl.obolibrary.org/obo", 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "references": [], 
-        "schema_version": "1", 
-        "date_created": "2017-04-26T07:22:23.334452+00:00", 
-        "term_name": "definition"
-    }, 
-    {
-        "status": "released", 
-        "definition": "An alternative label for a given entity such as a commonly used abbreviation or synonym.", 
-        "uuid": "111111bc-8535-4448-903e-854af460a233", 
-        "term_url": "http://www.ebi.ac.uk/efo/alternative_term", 
-        "term_id": "EFO:alternative_term", 
-        "namespace": "http://www.ebi.ac.uk/efo", 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "references": [], 
-        "schema_version": "1", 
-        "date_created": "2017-04-26T07:22:23.156086+00:00", 
-        "term_name": "alternative_term"
+        "uuid": "c45d70f2-980b-4a6c-b762-bb48fdd7913a"
     }, 
     {
         "status": "released", 
         "definition": "An alias in which the alias exhibits true synonymy. Example: ornithine cycle is an exact synonym of urea cycle.", 
-        "uuid": "111112bc-8535-4448-903e-854af460a233", 
+        "term_name": "has_exact_synonym", 
         "term_url": "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym", 
         "term_id": "oboInOwl:hasExactSynonym", 
         "namespace": "http://www.geneontology.org/formats/oboInOwl", 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "references": [], 
         "schema_version": "1", 
+        "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
         "date_created": "2017-04-26T07:22:23.197018+00:00", 
-        "term_name": "has_exact_synonym"
-    }, 
-    {
-        "status": "released", 
-        "uuid": "111113bc-8535-4448-903e-854af460a233", 
-        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym", 
-        "term_id": "oboInOwl:hasNarrowSynonym", 
-        "namespace": "http://www.geneontology.org/formats/oboInOwl", 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "references": [], 
-        "schema_version": "1", 
-        "date_created": "2017-04-26T07:22:23.231967+00:00", 
-        "term_name": "has_narrow_synonym"
-    }, 
-    {
-        "status": "released", 
-        "uuid": "111114bc-8535-4448-903e-854af460a233", 
-        "term_url": "http://www.geneontology.org/formats/oboInOwl#RelatedSynonym", 
-        "term_id": "oboInOwl:hasRelatedSynonym", 
-        "namespace": "http://www.geneontology.org/formats/oboInOwl", 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "references": [], 
-        "schema_version": "1", 
-        "date_created": "2017-04-26T07:22:23.265915+00:00", 
-        "term_name": "has_related_synonym"
+        "uuid": "111112bc-8535-4448-903e-854af460a233"
     }, 
     {
         "status": "released", 
         "definition": "A material entity is an entity that exists in full during the length of time of its existence, persists through this time while maintaining its identity and has no temporal parts. For example a heart, a human, a fly, a microarray.", 
-        "uuid": "3a3aca22-7824-4179-ba02-9fdc68abcc2f", 
+        "term_name": "material entity", 
         "term_url": "http://www.ifomis.org/bfo/1.1/snap#MaterialEntity", 
         "term_id": "MaterialEntity", 
         "namespace": "http://www.ifomis.org/bfo/1.1/snap", 
@@ -135,29 +115,13 @@
             "a27ad2c3-cd3b-46fe-b69b-9673eacdd9b0"
         ], 
         "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "references": [], 
         "date_created": "2017-05-11T17:30:41.711681+00:00", 
-        "references": [], 
-        "term_name": "material entity"
+        "uuid": "3a3aca22-7824-4179-ba02-9fdc68abcc2f"
     }, 
     {
         "status": "released", 
-        "definition": "An experimental factor in Array Express which are essentially the variable aspects of an experiment design which can be used to describe an experiment, or set of experiments, in an increasingly detailed manner. This upper level class is really used to give a root class from which applications can rely on and not be tied to upper ontology classses which do change.", 
-        "uuid": "a27ad2c3-cd3b-46fe-b69b-9673eacdd9b0", 
-        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000001", 
-        "term_id": "EFO:0000001", 
-        "namespace": "http://www.ebi.ac.uk/efo", 
-        "schema_version": "1", 
-        "synonyms": [
-            "ExperimentalFactor"
-        ], 
-        "references": [], 
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "date_created": "2017-05-11T15:42:00.141073+00:00", 
-        "term_name": "experimental factor"
-    }, 
-    {
-        "status": "released", 
-        "uuid": "deb6b2a7-fb85-4b6a-8f6e-6ec2e81286ac", 
+        "term_name": "fibroblast derived cell line", 
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0002009", 
         "term_id": "EFO:0002009", 
         "namespace": "http://www.ebi.ac.uk/efo", 
@@ -169,13 +133,13 @@
             "111189bc-8535-4448-903e-854af460a233"
         ], 
         "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "date_created": "2017-05-11T15:55:12.260022+00:00", 
         "references": [], 
-        "term_name": "fibroblast derived cell line"
+        "date_created": "2017-05-11T15:55:12.260022+00:00", 
+        "uuid": "deb6b2a7-fb85-4b6a-8f6e-6ec2e81286ac"
     }, 
     {
         "status": "released", 
-        "uuid": "ba0db777-83bc-4bc4-beb5-f37f2828ad5c", 
+        "term_name": "Homo sapiens cell line", 
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0002888", 
         "term_id": "EFO:0002888", 
         "namespace": "http://www.ebi.ac.uk/efo", 
@@ -187,8 +151,44 @@
             "111189bc-8535-4448-903e-854af460a233"
         ], 
         "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
-        "date_created": "2017-05-11T18:28:25.753472+00:00", 
         "references": [], 
-        "term_name": "Homo sapiens cell line"
+        "date_created": "2017-05-11T18:28:25.753472+00:00", 
+        "uuid": "ba0db777-83bc-4bc4-beb5-f37f2828ad5c"
+    }, 
+    {
+        "status": "released", 
+        "definition": "A cell line is a population of cells cultured in vitro that are descended through one or more generations (and possible sub-cultures) from a single primary culture which was originally derived from part of an organism.", 
+        "uuid": "111189bc-8535-4448-903e-854af460a233", 
+        "term_name": "cell line", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322", 
+        "term_id": "EFO:0000322", 
+        "namespace": "http://www.ebi.ac.uk/efo", 
+        "slim_terms": [
+            "111189bc-8535-4448-903e-854af460a233"
+        ], 
+        "schema_version": "1", 
+        "synonyms": [
+            "cell_line"
+        ], 
+        "parents": [
+            "3a3aca22-7824-4179-ba02-9fdc68abcc2f"
+        ], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "references": [], 
+        "date_created": "2017-04-26T07:22:26.586071+00:00", 
+        "is_slim_for": "cell"
+    }, 
+    {
+        "status": "released", 
+        "term_name": "definition", 
+        "term_url": "http://purl.obolibrary.org/obo/IAO_0000115", 
+        "term_id": "IAO:0000115", 
+        "namespace": "http://purl.obolibrary.org/obo", 
+        "schema_version": "1", 
+        "references": [], 
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254", 
+        "date_created": "2017-04-26T07:22:23.334452+00:00", 
+        "uuid": "111116bc-8535-4448-903e-854af460a233"
     }
 ]
