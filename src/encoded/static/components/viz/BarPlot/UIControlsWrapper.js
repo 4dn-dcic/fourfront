@@ -36,17 +36,17 @@ export class UIControlsWrapper extends React.Component {
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
             { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
-            { title : "Project", field : "experiments_in_set.award.project" },
-            { title : "Lab", field : "experiments_in_set.lab.title" }
+            { title : "Project", field : "award.project" },
+            { title : "Lab", field : "lab.title" }
         ],
         'availableFields_Subdivision' : [
-            { title : "Project", field : "experiments_in_set.award.project" },
+            { title : "Project", field : "award.project" },
             { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
             { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
             { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
-            { title : "Lab", field : "experiments_in_set.lab.title" }
+            { title : "Lab", field : "lab.title" }
         ],
         'legend' : false,
         'chartHeight' : 300
