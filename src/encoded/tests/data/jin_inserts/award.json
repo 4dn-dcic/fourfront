@@ -1,0 +1,47 @@
+[
+    {
+        "status": "current", 
+        "description": "The goals of the 4D Nucleome (4DN) Data Coordination and Integration Center (DCIC) are to collect, store, curate, display, and analyze data generated in the 4DN Network. We have assembled a team of investigators with a strong track record in analysis of chromatin interaction data, image processing and three-dimensional data visualization, integrative analysis of genomic and epigenomic data, data portal development, large-scale computing, and development of secure and flexible cloud technologies. In Aim 1, we will develop efficient submission pipelines for data and metadata from 4DN data production groups. We will define data/metadata requirements and quality metrics in conjunction with the production groups and ensure that high-quality, well- annotated data become available to the wider scientific community in a timely manner. In Aim 2, we will develop a user-friendly data portal for the broad scientific community. This portal will provide an easy-to-navigate interface for accessing raw and intermediate data files, allow for programmatic access via APIs, and will incorporate novel analysis and visualization tools developed by DCIC as well as other Network members. For computing and storage scalability and cost-effectiveness, significant efforts will be devoted to development and deployment of cloud-based technology. We will conduct tutorials and workshops to facilitate the use of 4DN data and tools by external investigators. In Aim 3, we will coordinate and assist in conducting integrative analysis of the multiple data types. These efforts will examine key questions in higher-order chromatin organization using both sequence and image data, and the tools and algorithms developed here will be incorporated into the data portal for use by other investigators. These three aims will ensure that the data generated in 4DN will have maximal impact for the scientific community.", 
+        "end_date": "2020-08-31", 
+        "title": "4D NUCLEOME NETWORK DATA COORDINATION AND INTEGRATION CENTER", 
+        "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8987140&icde=30570219", 
+        "viewing_group": "4DN", 
+        "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "project": "4DN", 
+        "date_created": "2017-04-07T19:56:09.579997+00:00", 
+        "pi": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "start_date": "2015-09-07", 
+        "name": "1U01CA200059-01"
+    }, 
+    {
+        "status": "current", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "description": "NOFIC: The complete sequencing of the human genome has provided an unprecedented opportunity for the study of the structure and function of the human genome. While our genome has historically been viewed as a linear sequence of bases, it has progressively become clear that this is an inadequate way to represent our genetic information. Notably, research over the last 30 years has begun to shed light on the fact that the higher-order, 3-dimensional organization of our genome plays a critical role in the interpretation of the genetic information encoded in our genome. The structure of our genome in the nucleus has been clearly demonstrated to play influential roles in diverse nuclear processes including DNA replication and gene expression. Despite this, our understanding of the structure of our genome within the nucleus remains incomplete. The reasons for this include limitations in the resolution and throughput of existing tools in chromatin topology mapping, a scarcity of the analytical tools for studying genome structure datasets, and the difficulty to relate the nuclear structure to function. Due to recent advancements in molecular methods based on high-throughput DNA sequencing, single cell analytical approaches, and high-resolution microscopy, the time for breaking through these previous limitations has come. We will establish a highly collaborative, innovative team in order to develop the tools necessary to transform our understanding of chromatin architecture and function in mammalian cells. We will begin by developing datasets that establish gold standards for the study of nuclear structure and function using genetic, biochemical and imaging approaches. We will optimize current existing technologies for mapping genome wide chromatin interactions, while also developing novel, complementary approaches for studying chromatin structure. We will also develop innovative analytical methods to interpret the chromatin structural data, unraveling principles of structural- and temporal- chromatin organization. Our highly collaborative team will draw on the diverse experiences of its members to provide a synergistic environment to push the limits of our understanding of nuclear structure. We expect that the tools and datasets generated through the proposed research will dramatically advance our understanding of the chromatin structure and function in human cells.", 
+        "end_date": "2020-07-31", 
+        "title": "SAN DIEGO CENTER FOR 4D NUCLEOME RESEARCH", 
+        "url": "https://projectreporter.nih.gov/project_description.cfm?projectnumber=1U54DK107977-01", 
+        "viewing_group": "4DN", 
+        "uuid": "4871e338-b07d-4665-a00a-357648e5bad6", 
+        "schema_version": "1", 
+        "project": "4DN", 
+        "date_created": "2017-04-08T13:01:31.291212+00:00", 
+        "pi": "e3159ffc-a5a9-43a1-8cfa-90b776c39788", 
+        "start_date": "2015-09-30", 
+        "name": "1U54DK107977-01"
+    }, 
+    {
+        "status": "current", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "description": "The human embryonic stem cells (hESCs) are a unique model system for investigating the mechanisms of human development due to their ability to replicate indefinitely while retaining the capacity to differentiate into a host of functionally distinct cell types. In addition, these cells could be potentially used as therapeutic agents in regenerative medicine. Differentiation of hESCs involves selective activation or silencing of genes, a process controlled in part by the epigenetic state of the cell. In order to gain a better understanding of the epigenetic mechanisms regulating differentiation of hESCs, and produce general reference epigenome maps of the human cells, we propose to establish an Epigenome Center in San Diego. Our center will be focused on both undifferentiated hESC and four hESC-derived early embryonic cell lineages including extraembryonic endoderm, trophoblast, mesendoderm (a common precursor to mesodermal and endodermal lineages), and mesenchymal cells (a specific mesoderm derivative). We have developed and validated high throughput technologies for mapping the state of DNA methylation and chromatin modifications throughout the genome, and will use these methods to generate high-resolution maps of the reference epigenomes. Specifically, we will grow and differentiate hESCs into multiple lineages, and map DNA methylation sites using a newly developed technology that combines bisulfite conversion and whole genome shotgun sequencing. We will also determine the histone modification status in the genome by performing both ChlP-chip and ChlP-Seq analysis. We will develop advanced statistical and algorithmic solutions to facilitate high-throughput sequencing data analysis, and establish an informatics pipeline for collecting, storage, and distribution of epigenome maps. Finally, we will perform integrated data analysis to identify new epigenetic patterns in the genome that could provide insights in mechanisms of epigenetic regulation.", 
+        "title": "THE SAN DIEGO EPIGENOME CENTER", 
+        "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=7585851&icde=34246404&ddparam=&ddvalue=&ddsub=&cr=7&csb=default&cs=ASC&pball=", 
+        "viewing_group": "Not 4DN", 
+        "uuid": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
+        "schema_version": "1", 
+        "project": "External", 
+        "date_created": "2017-05-10T17:31:20.741335+00:00", 
+        "pi": "e3159ffc-a5a9-43a1-8cfa-90b776c39788", 
+        "name": "1U01ES017166-01"
+    }
+]
