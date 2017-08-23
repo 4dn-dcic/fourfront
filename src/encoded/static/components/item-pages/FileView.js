@@ -46,6 +46,30 @@ export function filterOutIndirectFilesFromGraphData(graphData){
     return { nodes, edges };
 }
 
+export function filterOutReferenceFilesFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+
+        if (n && n.meta && n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type'])){
+
+            if (n.meta.run_data.file['@type'].indexOf('FileReference') > -1) {
+                deleted[n.id] = true;
+                return false;
+            }
+
+        }
+
+        return true;
+    });
+    var edges = _.filter(graphData.edges, function(e,i){
+        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
+            return false;
+        }
+        return true;
+    });
+    return { nodes, edges };
+}
+
 
 
 export default class FileView extends ItemBaseView {
@@ -344,10 +368,12 @@ class GraphSection extends React.Component {
         this.detailGraph = this.detailGraph.bind(this);
         this.body = graphBodyMixin.bind(this);
         this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
+        this.onToggleReferenceFiles = this.onToggleReferenceFiles.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
-            'showIndirectFiles' : true
+            'showIndirectFiles' : false,
+            'showReferenceFiles' : false
         };
     }
 
@@ -361,6 +387,9 @@ class GraphSection extends React.Component {
         //var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
         if (!this.state.showIndirectFiles){
             graphData = filterOutIndirectFilesFromGraphData(graphData);
+        }
+        if (!this.state.showReferenceFiles){
+            graphData = filterOutReferenceFilesFromGraphData(graphData);
         }
         var fileMap = allFilesForWorkflowRunsMappedByUUID(
             (this.props.context.workflow_run_outputs || []).concat(this.props.context.workflow_run_inputs || [])
@@ -376,6 +405,10 @@ class GraphSection extends React.Component {
 
     onToggleIndirectFiles(){
         this.setState({ showIndirectFiles : !this.state.showIndirectFiles });
+    }
+
+    onToggleReferenceFiles(){
+        this.setState({ showReferenceFiles : !this.state.showReferenceFiles });
     }
 
     detailGraph(){
@@ -399,6 +432,11 @@ class GraphSection extends React.Component {
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <div className="pull-right workflow-view-controls-container">
+                        <div className="inline-block show-params-checkbox-container">
+                            <Checkbox checked={this.state.showReferenceFiles} onChange={this.onToggleReferenceFiles}>
+                                Show Reference Files
+                            </Checkbox>
+                        </div>
                         <div className="inline-block show-params-checkbox-container">
                             <Checkbox checked={this.state.showIndirectFiles} onChange={this.onToggleIndirectFiles}>
                                 Show Auxiliary Files

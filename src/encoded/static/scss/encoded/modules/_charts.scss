@@ -1486,10 +1486,10 @@ $workflow-step-node-lineheight: 18px;
     font-size: 1rem;
     div.inline-block {
         vertical-align: middle;
-        line-height: 22px;
+        line-height: 24px;
     }
     .show-params-checkbox-container {
-        padding-right: 12px;
+        padding: 5px 12px 5px 0;
         vertical-align: middle;
         div.checkbox {
             margin: 0;

@@ -115,7 +115,6 @@ export default class Graph extends React.Component {
 
     width()  {
         var width = this.props.width;
-        console.log(width, isNaN(width));
         if ((!width || isNaN(width)) && this.state.mounted && !isServerSide()){
             width = this.refs.outerContainer.offsetWidth;
         } else if (!width || isNaN(width)){

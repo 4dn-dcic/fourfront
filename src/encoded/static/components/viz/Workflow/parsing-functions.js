@@ -330,7 +330,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 inputNodes = inputNodes.concat(unmatchedInputNodes);
             }
 
-            console.log('CREATED', inputNodesCreated);
+            //console.log('CREATED', inputNodesCreated);
 
             // Finally, attach edge to all input nodes associated to step input.
             if (inputNodes.length > 0) {

@@ -199,8 +199,15 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
 
             if not input_file_model or not hasattr(input_file_model, 'source') or input_file_model.source.get('object') is None:
                 continue
+
+            input_file_model_obj = input_file_model.source.get('object', {})
+            
+            # Update in_file with metadata we want from the file.
+            in_file['@type'] = input_file_model_obj.get('@type')
+            in_file['file_type'] = input_file_model_obj.get('file_type')
+            in_file['filename'] = input_file_model_obj.get('filename')
             # Get @ids from ES source.
-            output_of_workflow_runs = input_file_model.source.get('object', {}).get('workflow_run_outputs', [])
+            output_of_workflow_runs = input_file_model_obj.get('workflow_run_outputs', [])
             if len(output_of_workflow_runs) == 0:
                 continue
             # There should only ever be one 'workflow_run_outputs' at most, or versions of same one (grab most recent).
