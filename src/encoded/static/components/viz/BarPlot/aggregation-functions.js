@@ -7,6 +7,8 @@ import * as vizUtil from './../utilities';
 import { console, object, expFxn } from './../../util';
 
 
+// TODO: Some of these funcs are deprecated & longer used. Check what they are & remove them.
+
 /**
  * Various aggregation functions which are used by BarPlot.Chart and/or BarPlot.Aggregator to convert & aggregate list of experiments
  * into a chart-friendly structure.
@@ -171,7 +173,7 @@ export function getUniqueMatchedTermsFromExpsInSetWhereFieldIsTerm(experiments_i
     if (parentField && typeof parentField === 'object' && typeof parentField.field === 'string') parentField = parentField.field;
     return getUniqueMatchedTermsFromExpsInSet(
         _.filter(experiments_in_set, function(exp){
-            var foundTerm = getNestedExpSetPropertyFromExperiment(exp, parentField, true); //object.getNestedProperty(exp, parentField.replace('experiments_in_set.',''), true);
+            var foundTerm = getNestedExpSetPropertyFromExperiment(exp, parentField, true);
             if (Array.isArray(foundTerm)) foundTerm = foundTerm[0]; // Use first term if it evals to multiple for now.
             if (!foundTerm && parentTerm === "None") return true;
             return parentTerm === foundTerm;
@@ -327,8 +329,8 @@ function combinedFieldTermsForExperiments(fields, experiments){
 
     function aggregateExpAndFilesFromExp(exp){
 
-        var topLevelFieldTerm = getNestedExpSetPropertyFromExperiment(exp, field.field, true); //object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
-        var nextLevelFieldTerm =   getNestedExpSetPropertyFromExperiment(exp, field.childField.field, true); //object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
+        var topLevelFieldTerm = getNestedExpSetPropertyFromExperiment(exp, field.field, true);
+        var nextLevelFieldTerm = getNestedExpSetPropertyFromExperiment(exp, field.childField.field, true);
 
         // For now, just use first term if evaluates to list.
         if (Array.isArray(topLevelFieldTerm)) topLevelFieldTerm = topLevelFieldTerm[0];
