@@ -148,6 +148,7 @@ export default class ExperimentSetView extends React.Component {
                         { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ?
                         <ReduxExpSetFiltersInterface
                             experimentSets={this.props.context.experiments_in_set}
+                            itemTypes={['Experiment']}
                             expSetFilters={this.props.expSetFilters}
                             experimentsOrSets="experiments"
                             filterOnClientSide
@@ -158,7 +159,6 @@ export default class ExperimentSetView extends React.Component {
                         >
                             <FacetList
                                 orientation="vertical"
-                                itemTypes={this.props.context['@type'] || ['ExperimentSetReplicate']}
                                 className="with-header-bg"
                                 filterFacetsFxn={FacetList.filterFacetsForExpSetView}
                                 isTermSelected={(term, field, expsOrSets)=>
