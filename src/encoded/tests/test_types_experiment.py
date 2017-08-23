@@ -166,7 +166,7 @@ def test_experiment_set_default_embedded_list(registry):
     # create experimentHiC obj; _update (and by extension, add_default_embeds)
     # are called automatically
     test_exp = ExperimentHiC.create(registry, None, exp_data)
-    embedded = test_exp.embedded
+    embedded = test_exp.embedded_full
     experiment_set_emb = 'experiment_sets.*' in embedded
     assert 'digestion_enzyme.*' in embedded
     if 'references.*' not in embedded:

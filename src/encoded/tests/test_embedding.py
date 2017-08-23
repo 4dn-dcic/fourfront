@@ -99,6 +99,7 @@ def test_add_default_embeds(registry, item_type):
         split_embed = embed.strip().split('.')
         error, added_embeds = crawl_schemas_by_embeds(item_type, registry[TYPES], split_embed, schema['properties'])
         assert error is None
+    assert embeds == type_info.embedded_full
 
 
 @pytest.mark.parametrize('item_type', ORDER)
