@@ -1,5 +1,6 @@
 var CryptoJS = require('crypto-js');
 import React from 'react';
+import PropTypes from 'prop-types';
 
 
 /**
@@ -33,6 +34,69 @@ export function isFileDataComplete(file){
 
 /*** Common React Classes ***/
 
+export class FileDownloadButton extends React.Component {
+
+    static defaultProps = {
+        'title' : 'Download',
+        'disabled' : false
+    }
+
+    render(){
+        var { href, className, disabled, title, filename } = this.props;
+        return (
+            <a href={ href } className={(className || '') + " btn btn-default btn-info download-button " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
+                <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
+            </a>
+        );
+    }
+}
+
+export class FileDownloadButtonAuto extends React.Component {
+
+    static propTypes = {
+        'result' : PropTypes.shape({
+            'href' : PropTypes.string.isRequired,
+            'filename' : PropTypes.string.isRequired,
+        })
+    }
+
+    static defaultProps = {
+        'canDownloadStatuses' : [
+            'uploaded',
+            'released',
+            'replaced',
+            'in review by project',
+            'released to project'
+        ]
+    }
+
+    canDownload(){
+        var file = this.props.result;
+        if (!file || typeof file !== 'object'){
+            console.error("Incorrect data type");
+            return false;
+        }
+        if (typeof file.status !== 'string'){
+            console.error("No 'status' property on file:", file);
+            return false;
+        }
+
+        if (this.props.canDownloadStatuses.indexOf(file.status) > -1){
+            return true;
+        }
+        return false;
+    }
+
+    render(){
+        var file = this.props.result;
+        var props = {
+            'href' : file.href,
+            'filename' : file.filename,
+            'disabled' : !this.canDownload()
+        };
+        return <FileDownloadButton {...props} {...this.props} />;
+    }
+}
 
 
 

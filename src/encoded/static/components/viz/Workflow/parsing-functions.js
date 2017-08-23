@@ -295,7 +295,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         });
                     }
                     if (!inNode) return;
-                    console.log(n, inNode);
+                    //console.log(n, inNode);
                     _.extend(n, {
                         'inputOf' : inNode.inputOf,
                         'meta' : _.extend(n.meta, inNode.meta),

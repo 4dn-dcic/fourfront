@@ -3,10 +3,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ItemDetailList, TooltipInfoIconContainer } from './ItemDetailList';
+import { ItemDetailList } from './ItemDetailList';
+import { ExperimentSetTablesLoaded } from './ExperimentSetTables';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
-import { console, object, layout, ajax, fileUtil } from './../../util';
+import { console, object, layout, ajax, fileUtil, expFxn } from './../../util';
 
 
 export class ViewMetricButton extends React.Component {
@@ -41,71 +42,6 @@ export class ViewMetricButton extends React.Component {
                 <i className="icon icon-fw icon-external-link" style={{ top : 1, position: 'relative' }}/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
-    }
-}
-
-
-export class FileDownloadButton extends React.Component {
-
-    static defaultProps = {
-        'title' : 'Download',
-        'disabled' : false
-    }
-
-    render(){
-        var { href, className, disabled, title, filename } = this.props;
-        return (
-            <a href={ href } className={(className || '') + " btn btn-default btn-info download-button " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
-                <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
-            </a>
-        );
-    }
-}
-
-export class FileDownloadButtonAuto extends React.Component {
-
-    static propTypes = {
-        'result' : PropTypes.shape({
-            'href' : PropTypes.string.isRequired,
-            'filename' : PropTypes.string.isRequired,
-        })
-    }
-
-    static defaultProps = {
-        'canDownloadStatuses' : [
-            'uploaded',
-            'released',
-            'replaced',
-            'in review by project',
-            'released to project'
-        ]
-    }
-
-    canDownload(){
-        var file = this.props.result;
-        if (!file || typeof file !== 'object'){
-            console.error("Incorrect data type");
-            return false;
-        }
-        if (typeof file.status !== 'string'){
-            console.error("No 'status' property on file:", file);
-            return false;
-        }
-
-        if (this.props.canDownloadStatuses.indexOf(file.status) > -1){
-            return true;
-        }
-        return false;
-    }
-
-    render(){
-        var file = this.props.result;
-        var props = {
-            'href' : file.href,
-            'filename' : file.filename,
-            'disabled' : !this.canDownload()
-        };
-        return <FileDownloadButton {...props} {...this.props} />;
     }
 }
 
@@ -186,7 +122,7 @@ class FileDetailBody extends React.Component {
     }
 
     static defaultProps = {
-        'canDownloadStatuses' : FileDownloadButtonAuto.defaultProps.canDownloadStatuses
+        'canDownloadStatuses' : fileUtil.FileDownloadButtonAuto.defaultProps.canDownloadStatuses
     }
 
     constructor(props){
@@ -281,7 +217,7 @@ class FileDetailBody extends React.Component {
         var title = file.href ? <span>Download</span> : 'File Name';
         var disabled = !this.canDownload();
         var content = file.href ?
-            <FileDownloadButton title={title} href={file.href} disabled={disabled} filename={file.filename} />
+            <fileUtil.FileDownloadButton title={title} href={file.href} disabled={disabled} filename={file.filename} />
             :
             <span>{ file.filename || file.href }</span>;
 
@@ -300,7 +236,7 @@ class FileDetailBody extends React.Component {
     descriptionBox(){
         var file = this.state.file;
         var gridSize = layout.responsiveGridState();
-        if (!this.doesDescriptionOrNotesExist()) return null;
+        if (!this.doesDescriptionOrNotesExist() || typeof file === 'string' || !fileUtil.isFileDataComplete(file)) return null;
         return (
             <div className="col-xs-12 col-lg-4 box">
                 <span className="text-600">{ file.description ? 'Description' : (file.notes ? 'Notes' : 'Description') }</span>
@@ -357,13 +293,31 @@ class FileDetailBody extends React.Component {
             });
             body = <MetricsView metrics={metrics} />;
         } else {
+            var table = null;
+            if (
+                this.state.file && Array.isArray(this.state.file.experiments) && this.state.file.experiments.length > 0 &&
+                Array.isArray(this.state.file.experiments[0].experiment_sets)
+            ){
+                var setsByKey = expFxn.experimentSetsFromFile(this.state.file);
+                if (_.keys(setsByKey).length > 0){
+                    table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} />;
+                }
+            }
             body = (
-                <ItemDetailList
-                    context={this.state.file}
-                    schemas={this.props.schemas}
-                    minHeight={this.props.minHeight}
-                    keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
-                />
+                <div>
+                    { table }
+                    <br/>
+                    <h3 className="tab-section-title">
+                        <span>Details</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                    <ItemDetailList
+                        context={this.state.file}
+                        schemas={this.props.schemas}
+                        minHeight={this.props.minHeight}
+                        keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                    />
+                </div>
             );
         }
 

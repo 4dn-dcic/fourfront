@@ -95,7 +95,71 @@ export default class Graph extends React.Component {
             'right' : 20
         },
         'minimumHeight' : 120,
-        'edgeStyle' : 'bezier'
+        'edgeStyle' : 'bezier',
+        'nodesInColumnSortFxn' : function(node1, node2){
+            if (node1.type === 'step' && node2.type === 'step'){
+                if (node1.name === node2.name){
+                    return (node1.id < node2.id) ? -2 : 2;
+                }
+                return (node1.name < node2.name) ? -2 : 2;
+            }
+            if (node1.type === 'output' && node2.type === 'input'){
+                if (typeof node1.inputOf !== 'undefined'){
+                    return -4;
+                }
+                return -1;
+            } else if (node1.type === 'input' && node2.type === 'output'){
+                if (typeof node2.inputOf !== 'undefined'){
+                    return 4;
+                }
+                return 1;
+            }
+            if (node1.type === node2.type){
+
+                if (node1.type === 'output'){
+                    /*
+                    if (typeof node1.inputOf !== 'undefined' && typeof node2.inputOf === 'undefined'){
+                        return -3;
+                    } else if (typeof node1.inputOf === 'undefined' && typeof node2.inputOf !== 'undefined'){
+                        return 3;
+                    }
+                    */
+                    if ((node1.outputOf && node1.outputOf.name && node2.outputOf && node2.outputOf.name)){
+                        if (node1.outputOf.name === node2.outputOf.name){
+                            if (node1.outputOf.id == node2.outputOf.id){
+                                if (typeof node1.inputOf !== 'undefined' && typeof node2.inputOf === 'undefined'){
+                                    return -3;
+                                } else if (typeof node1.inputOf === 'undefined' && typeof node2.inputOf !== 'undefined'){
+                                    return 3;
+                                }
+                                return 0;
+                            }
+                            return node1.outputOf.id < node2.outputOf.id ? -3 : 3;
+                        }
+                        return node1.outputOf.name < node2.outputOf.name ? -3 : 3;
+                    }
+                }
+
+                if (node1.type === 'input'){
+                    if ((node1.inputOf && node1.inputOf.name && node2.inputOf && node2.inputOf.name)){
+                        if (node1.inputOf.name === node2.inputOf.name){
+                            if (node1.inputOf.id == node2.inputOf.id){
+                                if (node1.name === node2.name){
+                                    return (node1.id < node2.id) ? -2 : 2;
+                                }
+                                return (node1.name < node2.name) ? -2 : 2;
+                            }
+                            return node1.inputOf.id < node2.inputOf.id ? -3 : 3;
+                        }
+                        return node1.inputOf.name < node2.inputOf.name ? -1 : 1;
+                    }
+                }
+            }
+
+            //if ((node1.type === 'input' || node1.type === 'output') && (node2.type === 'input' || node2.type === 'output') ){
+            //    return node1.name < node2.name;
+            //}
+        }
     }
 
     constructor(props){
@@ -151,12 +215,19 @@ export default class Graph extends React.Component {
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
         _.pairs(_.groupBy(nodes, 'column')).forEach((columnGroup) => {
             var countInCol = columnGroup[1].length;
+            
+            // Sort
+
+            var nodesInColumn = columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn);
+            /*
             var nodesInColumn = _.sortBy(columnGroup[1], function(n){
                 if (n.type === 'input') return n && n.inputOf && n.inputOf.name;
                 if (n.type === 'output') return n && n.outputOf && n.outputOf.name;
                 if (n.type === 'step') return n.name;
                 return null;
             });
+            */
+
             if (countInCol === 1){
                 columnGroup[1][0].y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
                 columnGroup[1][0].nodesInColumn = countInCol;
