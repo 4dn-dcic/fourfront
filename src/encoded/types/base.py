@@ -247,13 +247,11 @@ class Item(snovault.Item):
         self.STATUS_ACL = self.__class__.STATUS_ACL
 
     @reify
-    def embedded_full(self, registry):
-        print('>>>>>>>>>>>>>>>>>>>>>>>')
-        # update self.embedded here
-        embedded_full = self.update_embeds(registry[snovault.TYPES])
+    def embedded_full(self):
+        embedded_res = self.update_embeds(self.registry[snovault.TYPES])
         # update registry embedded
-        self.registry.embedded_full = embedded_full
-        return embedded_full
+        self.registry.embedded_full = embedded_res
+        return embedded_res
 
     @property
     def __name__(self):

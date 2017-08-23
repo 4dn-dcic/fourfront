@@ -13,7 +13,7 @@ def test_create_mapping(registry, item_type):
     assert mapping
     type_info = registry[TYPES].by_item_type[item_type]
     schema = type_info.schema
-    embeds = add_default_embeds(item_type, registry[TYPES], type_info.embedded_full, schema)
+    embeds = add_default_embeds(item_type, registry[TYPES], type_info.embedded, schema)
     # assert that all embeds exist in mapping for the given type
     for embed in embeds:
         mapping_pointer = mapping
