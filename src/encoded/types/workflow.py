@@ -201,7 +201,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
                 continue
 
             input_file_model_obj = input_file_model.source.get('object', {})
-            
+
             # Update in_file with metadata we want from the file.
             in_file['@type'] = input_file_model_obj.get('@type')
             in_file['file_type'] = input_file_model_obj.get('file_type')
@@ -693,11 +693,12 @@ class WorkflowRun(Item):
             :param runParams: List Step inputs or outputs, such as 'input_files', 'output_files', 'quality_metric', or 'parameters'.
             :returns: True if found and added run_data property to analysis_step.input or analysis_step.output (param inputOrOutput).
             '''
-            if 'Workflow' in stepOutputTarget.get('type', ''):
+            if 'Workflow' in stepOutputTarget.get('type', 'Workflow'):
 
                 # Gather params (e.g. files) with same workflow_argument_name.
                 # Assume these have been combined correctly unless have differing ordinal number.
                 paramsForTarget = []
+                
                 for param in runParams:
                     if (stepOutputTarget['name'] == param.get('workflow_argument_name')) and param.get('value') is not None:
                         paramsForTarget.append(param)
@@ -760,6 +761,8 @@ class WorkflowRun(Item):
                     found = handleSourceTargetFile(output, outputTarget, combined_outputs)
                     if found:
                         break
+                if not found:
+                    found = handleSourceTargetFile(output, output, combined_outputs)
 
             for input in step['inputs']:
                 found = False

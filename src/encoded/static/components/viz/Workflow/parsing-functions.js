@@ -188,6 +188,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
     }
 
     function ioNodeNameCombo(nodeAsInputNode, nodeAsOutputNode){
+        if (nodeAsOutputNode.name === nodeAsInputNode.name) return nodeAsOutputNode.name;
         return (
             nodeAsOutputNode.name.indexOf('>') > -1 ? nodeAsOutputNode.name : (
                 ((typeof nodeAsOutputNode.outputOf !== 'undefined' && nodeAsOutputNode.name) || '') +
@@ -294,6 +295,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         });
                     }
                     if (!inNode) return;
+                    console.log(n, inNode);
                     _.extend(n, {
                         'inputOf' : inNode.inputOf,
                         'meta' : _.extend(n.meta, inNode.meta),
@@ -548,7 +550,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
                 processStepInPath(analysis_steps[0]);
 
-                for (var i = 0; i < 100; i++){
+                for (var i = 0; i < 1000; i++){
 
                     if (_.keys(processedSteps).length < analysis_steps.length){
                         var nextSteps = _.filter(analysis_steps, function(s){
