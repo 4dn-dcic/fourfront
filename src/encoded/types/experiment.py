@@ -7,7 +7,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    paths_filtered_by_status
 )
 
 
@@ -23,9 +24,52 @@ class Experiment(Item):
 
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
-    embedded = ["protocol", "protocol_variation", "lab", "award",
-                "biosample", "biosample.biosource", "biosample.modifications",
-                "biosample.treatments", "biosample.biosource.individual.organism"]
+    rev = {
+        'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
+    }
+    embedded = ["award.project",
+                "lab.city",
+                "lab.state",
+                "lab.country",
+                "lab.postal_code",
+                "lab.city",
+                "lab.title",
+
+                "experiment_sets.experimentset_type",
+                "experiment_sets.accession",
+
+                "produced_in_pub.*",
+                "publications_of_exp.*",
+
+                "biosample.accession",
+                "biosample.modifications_summary",
+                "biosample.treatments_summary",
+                "biosample.biosource_summary",
+                "biosample.biosource.biosource_type",
+                "biosample.biosource.cell_line.slim_terms",
+                "biosample.biosource.cell_line.synonyms",
+                "biosample.biosource.tissue.slim_terms",
+                "biosample.biosource.tissue.synonyms",
+                "biosample.biosource.individual.organism.name",
+                'biosample.modifications.modification_type',
+                'biosample.treatments.treatment_type',
+
+                "files.href",
+                "files.accession",
+                "files.uuid",
+                "files.file_size",
+                "files.upload_key",
+                "files.file_format",
+                "files.file_classification",
+                "files.paired_end",
+
+                "processed_files.href",
+                "processed_files.accession",
+                "processed_files.uuid",
+                "processed_files.file_size",
+                "processed_files.upload_key",
+                "processed_files.file_format",
+                "processed_files.file_classification"]
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
@@ -100,27 +144,47 @@ class Experiment(Item):
         "title": "Experiment Sets",
         "description": "Experiment Sets to which this experiment belongs.",
         "type": "array",
+        "exclude_from": ["submit4dn", "FFedit-create"],
         "items": {
             "title": "Experiment Set",
-            "type": "string",
+            "type": ["string", "object"],
             "linkTo": "ExperimentSet"
         }
     })
     def experiment_sets(self, request):
-        exp_set_coll = list(self.registry['collections']['ExperimentSet'])
-        exp_set_coll.extend(list(self.registry['collections']['ExperimentSetReplicate']))
-        sets = []
-        for uuid in exp_set_coll:
-            eset = self.collection.get(uuid)
-            for exp in eset.properties['experiments_in_set']:
-                if str(exp) == str(self.uuid):
-                    ty = eset.properties['experimentset_type']
-                    prefix = '/experiment_set/'
-                    if ty == 'replicate':
-                        prefix = '/experiment_set_replicate/'
-                    s = prefix + str(uuid)
-                    sets.append(s)
-        return list(set(sets))
+        return self.rev_link_atids(request, "experiment_sets")
+
+    @calculated_property(schema={
+        "title": "Produced in Publication",
+        "description": "The Publication in which this Experiment was produced.",
+        "type": "string",
+        "linkTo": "Publication"
+    })
+    def produced_in_pub(self, request):
+        esets = [request.embed('/', str(uuid), '@@object') for uuid in
+                 self.experiment_sets(request)]
+        # replicate experiment set is the boss
+        reps = [eset for eset in esets if 'ExperimentSetReplicate' in eset['@type']]
+        if reps:
+            return reps[0].get('produced_in_pub')
+
+    @calculated_property(schema={
+        "title": "Publications",
+        "description": "Publications associated with this Experiment.",
+        "type": "array",
+        "items": {
+            "title": "Publication",
+            "type": "string",
+            "linkTo": "Publication"
+        }
+    })
+    def publications_of_exp(self, request):
+        esets = [request.embed('/', str(uuid), '@@object') for uuid in
+                 self.experiment_sets(request)]
+        import itertools
+        pubs = list(set(itertools.chain.from_iterable([eset.get('publications_of_set', [])
+                                                      for eset in esets])))
+        return pubs
 
 
 @collection(
@@ -135,7 +199,7 @@ class ExperimentHiC(Experiment):
 
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+    embedded = Experiment.embedded + ["digestion_enzyme.name"]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -175,11 +239,9 @@ class ExperimentCaptureC(Experiment):
     """The experiment class for Capture Hi-C experiments."""
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme",
-                                      "submitted_by",
-                                      "targeted_regions",
-                                      "targeted_regions.target",
-                                      "targeted_regions.oligo_file"]
+    embedded = Experiment.embedded + ["digestion_enzyme.name",
+                                      "targeted_regions.target.target_summary",
+                                      "targeted_regions.oligo_file.href"]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -220,7 +282,7 @@ class ExperimentRepliseq(Experiment):
     """The experiment class for Repliseq experiments."""
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
-    embedded = Experiment.embedded + ["submitted_by"]
+    embedded = Experiment.embedded
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -228,14 +290,16 @@ class ExperimentRepliseq(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
+    def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
         sum_str = experiment_type
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
             sum_str += (' on ' + biosource)
-        if cell_cycle_stage:
-            sum_str += (' at ' + cell_cycle_stage)
+        if cell_cycle_phase:
+            sum_str += (' ' + cell_cycle_phase + '-phase')
+        if stage_fraction:
+            sum_str += (' ' + stage_fraction)
         return sum_str
 
     @calculated_property(schema={
@@ -243,8 +307,131 @@ class ExperimentRepliseq(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
-        return self.experiment_summary(request, experiment_type, cell_cycle_stage, biosample)
+    def display_title(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
+        return self.experiment_summary(request, experiment_type, cell_cycle_phase, stage_fraction, biosample)
+
+
+@collection(
+    name='experiments-atacseq',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments ATAC-seq',
+        'description': 'Listing ATAC-seq Experiments',
+    })
+class ExperimentAtacseq(Experiment):
+    """The experiment class for ATAC-seq experiments."""
+
+    item_type = 'experiment_atacseq'
+    schema = load_schema('encoded:schemas/experiment_atacseq.json')
+    embedded = Experiment.embedded
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
+        sum_str = experiment_type
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', biosample=None):
+        return self.experiment_summary(request, experiment_type, biosample)
+
+
+@collection(
+    name='experiments-chiapet',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments CHIA-pet',
+        'description': 'Listing CHIA-pet and PLAC-seq Experiments',
+    })
+class ExperimentChiapet(Experiment):
+    """The experiment class for CHIA-pet and PLAC-seq experiments."""
+
+    item_type = 'experiment_chiapet'
+    schema = load_schema('encoded:schemas/experiment_chiapet.json')
+    embedded = Experiment.embedded
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
+        sum_str = experiment_type
+
+        if target:
+            target_props = request.embed(target, '@@object')
+            target_summary = target_props['target_summary_short']
+            sum_str += ('against ' + target_summary)
+
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+        return self.experiment_summary(request, experiment_type, biosample, target)
+
+
+@collection(
+    name='experiments-seq',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments CHIPseq, RNAseq ...',
+        'description': 'Listing of ChIP and RNA seq type experiments',
+    })
+class ExperimentSeq(Experiment):
+    """The experiment class for ChIPseq and RNAseq and potentially other types."""
+
+    item_type = 'experiment_seq'
+    schema = load_schema('encoded:schemas/experiment_seq.json')
+    embedded = Experiment.embedded
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
+        sum_str = experiment_type
+
+        if target:
+            target_props = request.embed(target, '@@object')
+            target_summary = target_props['target_summary_short']
+            sum_str += ('against ' + target_summary)
+
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+        return self.experiment_summary(request, experiment_type, biosample, target)
 
 
 @collection(
@@ -258,7 +445,7 @@ class ExperimentMic(Experiment):
     """The experiment class for Microscopy experiments."""
     item_type = 'experiment_mic'
     schema = load_schema('encoded:schemas/experiment_mic.json')
-    embedded = Experiment.embedded + ["submitted_by"]
+    embedded = Experiment.embedded
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -281,3 +468,16 @@ class ExperimentMic(Experiment):
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None):
         return self.experiment_summary(request, experiment_type, biosample)
+
+
+@calculated_property(context=Experiment, category='action')
+def clone(context, request):
+    """If the user submits for any lab, allow them to clone
+    This is like creating, but keeps previous fields"""
+    if request.has_permission('create'):
+        return {
+            'name': 'clone',
+            'title': 'Clone',
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!clone'.format(item_uri=request.resource_path(context)),
+        }

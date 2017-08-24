@@ -7,7 +7,7 @@ import random
 
 def generate_uuid ():
   rand_uuid_start=''
-  for i in xrange(8):
+  for i in range(8):
     r=random.choice('abcdef1234567890')
     rand_uuid_start += r
     uuid=rand_uuid_start + "-49e5-4c33-afab-9ec90d65faf3"
@@ -71,7 +71,7 @@ def map_workflow_output_argument_to_step_argument ( workflow, source, workflow_a
 # Assumes the global source exists in workflow['arguments']
 def map_step_argument_to_workflow_input_argument ( workflow, source, step_id, step_argument ):
 
-  if workflow.has_key('arguments'):
+  if 'arguments' in workflow:
     argument_index= -1
     for i in range(0,len(workflow['arguments'])):
       e = workflow['arguments'][i]
@@ -97,11 +97,11 @@ def map_step_argument_to_workflow_input_argument ( workflow, source, step_id, st
 # the function assumes that the source is not a global argument.
 def map_step_argument_to_another_step_argument ( workflow, source, step_id, step_argument ):
 
-  if workflow.has_key('arguments'):
+  if 'arguments' in workflow:
     for i in range(0,len(workflow['arguments'])):
       e= workflow['arguments'][i]
       argument_index=-1
-      if e.has_key('workflow_argument_mapping'):
+      if 'workflow_argument_mapping' in e:
         for e2 in e['workflow_argument_mapping']:
           if e['workflow_step'] == source.step and e['step_argument_name'] == source.arg: # sourced from a previously entered entry.
             argument_index=i
@@ -143,7 +143,7 @@ def parse_cwl(cwlfile, workflow_metadata_json, workflow_name, workflow_descripti
     cwl_dict=json.load(f)
 
   # handle SBG cwl.
-  if cwl_dict.has_key('raw'):
+  if 'raw' in cwl_dict:
     cwl_dict=cwl_dict['raw']  # 'some' SBG's cwl is one level down under the 'raw' field.
   
   # initialize dictionary to write to output json file
@@ -173,7 +173,7 @@ def parse_cwl(cwlfile, workflow_metadata_json, workflow_name, workflow_descripti
   ## fill in 'arguments'
   for x in cwl_dict['steps']:
     for y in x['inputs']:
-      if y.has_key('source'):
+      if 'source' in y:
         source = parse_source(y['source'][0])
   
         ## case 1: global argument is the source

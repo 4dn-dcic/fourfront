@@ -5,8 +5,9 @@
 
 .fourDN-header{
 	font-family: 'Work Sans', sans-serif;
-	font-weight: 400;
+	font-weight: 300;
 	margin-bottom: 20px;
+	margin-top: 20px;
 	padding-bottom: 15px;
 	border-bottom: 1px solid #f4f4f4;
 	font-size: 32px;
@@ -134,7 +135,7 @@ h5.fourDN-header {
 		margin: 0 -10px;
 		padding: 0 10px;
 		top: 115px;
-		transition: top .75s, max-height .75s;
+		transition: top .75s, max-height .75s, margin-top .75s ease-out;
 		overflow-y: auto;
 		body.scrolled-past-top & {
 			top : 70px;
@@ -154,13 +155,14 @@ h5.fourDN-header {
 			line-height: 1.25rem;
 			transition: font-weight .5s .25s, color .5s .25s;
 			color: #888;
+			position: relative;
 			
 			&[data-depth="0"] {
 				padding-top: 0;
 			}
 
 			&[data-depth="1"]:first-child {
-				margin-top: 8px;
+				//margin-top: 8px;
 				a { border-top: none; }
 			}
 
@@ -214,11 +216,12 @@ h5.fourDN-header {
 					line-height: 33px;
 				}
 			}
+
 			a {
 				display: block;
 				transition: color .5s .25s;
 				font-weight: 400;
-				padding: 6px 0px 6px 22px;
+				padding: 5px 0px 7px 22px;
 				border-top: 1px dotted transparent;
 				border-bottom: 1px dotted transparent;
 				margin-bottom: 0;
@@ -233,6 +236,40 @@ h5.fourDN-header {
 					color: #042d50;
 					//box-shadow: 0 6px 7px -8px rgba(0,0,0,0.5);
 					transition: color 0s;
+				}
+			}
+
+			> div.title-link-wrapper {
+				position: relative;
+				> a {
+					display: inline-block;
+					vertical-align: middle;
+				}
+				> i.icon {
+                    position: absolute;
+					left: -40px;
+					top: 50%;
+					margin-top: -9px;
+					font-size: 0.85rem;
+					cursor: pointer;
+					width: 15px;
+					height: 15px;
+					line-height: 16px;
+					vertical-align: middle;
+					text-align: center;
+					//border: 1px solid transparent;
+					transform: scale3d(1,1,1);
+					transition: transform .3s, color .3s;
+
+					left: -70px;
+					margin-left: 14%;
+					
+					&:hover {
+						cursor: pointer;
+						//border-color: initial;
+						color: #000;
+						transform: scale3d(1.2, 1.2, 1.2);
+					}
 				}
 			}
 
@@ -251,6 +288,14 @@ h5.fourDN-header {
 				color: #000;
 				//text-shadow: 0 0 0;
 			}
+		}
+
+	}
+
+	> ol.inner {
+		> li:first-child {
+			margin-top: 8px;
+			a { border-top: none; }
 		}
 	}
 
@@ -287,6 +332,10 @@ h5.fourDN-header {
 		*/
 	}
 
+}
+
+.home-content-area {
+	margin-top: 40px;
 }
 
 // Error
@@ -508,3 +557,94 @@ h5.fourDN-header {
 	}
 
 }
+
+
+/*********************************************
+ *** Temporary NOFIC Matrices Side by Side ***
+ *********************************************/
+
+@media screen and (min-width: $screen-lg-min){
+
+	#content.container > .static-page.row #nofic-matrix-1,
+	#content.container > .static-page.row #nofic-matrix-2,
+	#content.container > .static-page.row #nofic-matrix-3,
+	#content.container > .static-page.row #nofic-matrix-4 {
+		position: relative;
+		float: left;
+		width: 50%;
+		margin-top: 0px;
+		margin-bottom: 20px;
+	}
+
+	#content.container > .static-page.row #nofic-matrix-1 {
+		padding-right: 15px;
+	}
+
+	#content.container > .static-page.row #nofic-matrix-2,
+	#content.container > .static-page.row #nofic-matrix-3,
+	#content.container > .static-page.row #nofic-matrix-4 {
+		padding-left: 15px;
+	}
+
+	body[data-path="/joint-analysis-data-plans"]{
+		#content.container > .static-page.row #nofic-matrix-2,
+		#content.container > .static-page.row #nofic-matrix-3,
+		#content.container > .static-page.row #nofic-matrix-4 {
+			float: right;
+		}
+
+		#content.container > .static-page.row #nofic-matrix-2,
+		#content.container > .static-page.row #nofic-matrix-3 {
+			> div:first-child {
+				border-bottom: 1px solid #bbb;
+			}
+		}
+
+	}
+
+}
+
+#content.container,
+#legend.static-section-entry {
+	div.rm-cell.cellType-submitted, div.color-patch.cellType-submitted {
+		background-color: #53a74e !important;
+	}
+	div.rm-cell.cellType-planned, div.color-patch.cellType-planned {
+		background-color: rgba(143, 143, 169, 0.5) !important;
+	}
+	div.rm-cell.cellType-in-submission, div.color-patch.cellType-in-submission {
+		background-color: rgba(143, 143, 169, 0.5) !important;
+		overflow: hidden;
+		&:before {
+			content: '';
+			display: block;
+			width: 150%;
+			height: 150%;
+			background-color: #53a74e;
+			transform: rotate3d(0,0,1, 45deg) translate3d(-74%, 0px, 0px);
+		}
+	}
+	div.rm-cell.cellType-none, div.color-patch.cellType-none {
+		background-color: transparent !important;
+	}
+}
+
+#legend.static-section-entry {
+	margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+	.section-joint-anlysis-data-legend {
+		font-family: "Work Sans",Helvetica,Arial,sans-serif;
+		font-size: 1rem;
+		> .col-sm-3 {
+			text-align: center;
+		}
+		.color-patch {
+			height: 10px;
+			width: 10px;
+			display: inline-block;
+			margin-right: 5px;
+		}
+	}
+}
+

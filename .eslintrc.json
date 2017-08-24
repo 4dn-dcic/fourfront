@@ -5,22 +5,28 @@
         "semi": [2, "always"],
         "no-console": 0,
         "no-unused-vars": 0,
-        "no-empty": 0
+        "no-empty": 0,
+        "flowtype/define-flow-type" : 1,
+        "flowtype/no-primitive-constructor-types": 2
     },
     "env": {
         "es6": true,
         "browser": true,
         "commonjs": true
     },
+    "parser" : "babel-eslint",
     "extends": "eslint:recommended",
     "parserOptions": {
         "ecmaVersion": 6,
         "sourceType": "module",
         "ecmaFeatures": {
-            "jsx": true
+            "jsx": true,
+            "classes" : true
         }
     },
     "plugins": [
-        "react"
+        "react",
+        "class-property",
+        "flowtype"
     ]
 }

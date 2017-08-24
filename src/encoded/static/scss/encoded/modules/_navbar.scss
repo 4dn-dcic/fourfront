@@ -2,7 +2,8 @@
 
 $navbar-full-height : 80px;
 $navbar-small-height : 40px; /* Bootstrap navbar default */
-$navbar-transition-length: .75s;
+$navbar-transition-length: .3s;
+$navbar-transition-easing: ease-out;
 
 #top-nav {
     background: #ffffff;
@@ -32,8 +33,8 @@ $navbar-transition-length: .75s;
                 -moz-backface-visibility: hidden;
                 backface-visibility: hidden;
                 transform: translate3d(0,0,0);
-                transition: height $navbar-transition-length, 
-                    line-height $navbar-transition-length;
+                transition: height $navbar-transition-length $navbar-transition-easing, 
+                    line-height $navbar-transition-length $navbar-transition-easing;
                     /* box-shadow $navbar-transition-length, 
                     border-color $navbar-transition-length */;
             }
@@ -217,7 +218,7 @@ $navbar-transition-length: .75s;
             text-align: left;
             display: block;
             height : 38px;
-            transition: height .75s;
+            transition: height .3s;
             overflow: hidden;
             &.showing {
                 &.showing-filters {
@@ -285,6 +286,14 @@ $navbar-transition-length: .75s;
                     display: inline-block;
                     margin-left: 5px;
                     color : rgba(100, 100, 100, 0.5);
+                    > a {
+                        color : inherit;
+                        display: inline-block;
+                        &:hover {
+                            color: rgba(100, 100, 100, 1);
+                            text-decoration: none;
+                        }
+                    }
                 }
             }
         }
@@ -350,9 +359,56 @@ $navbar-transition-length: .75s;
 
 .test-warning {
     position: relative;
-    padding: 6px 0 5px;
+    padding: 8px 0 15px;
     color: #fff;
     background-color: #7e4544;
+    height: 52px;
+    line-height: 17px;
+    overflow: hidden;
+    transition: margin-top $navbar-transition-length $navbar-transition-easing;
+    transform: translate3d(0,0,0);
+
+    body.scrolled-past-80 & {
+        margin-top: -52px;
+    }
+
+    > .container > div > span {
+    
+        position: relative;
+
+        &:before {
+            content: ' ';
+            display: block;
+            position: absolute;
+            left: -1080px;
+            top: -270px;
+            height: 600px;
+            width: 600px;
+            transform: rotate3d(0,0,1,-40deg);
+            background: rgba(255,255,255,0.08);
+            background: #4e2828;
+            box-shadow: 0 0 200px rgba(0,0,0,0.5);
+            //border-right: 7px solid rgba(255, 255, 255, 0.45);
+            //outline-offset: -14px;
+            //outline-color: rgba(255, 255, 255, 0.2);
+            //outline-width: 4px;
+            //outline-style: solid;
+            //transition: outline-color .5s ease-out, border-color .5s ease-out, transform 1s ease-out;
+        }
+    }
+
+    //&:hover > .container > div > span:before {
+        //border-color: #f4f4f4;
+        //outline-color: rgba(245,245,245, 0.76);
+        //transform: rotate3d(0, 0, 1, -45deg) translate3d(25px,-5px,0);
+    //}
+
+    @media screen and (min-width: $screen-sm-min){
+        padding-top: 11px;
+        line-height: 28px;
+        padding-bottom: 12px;
+    }
+
     //@include background-image(linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%));
     //background-image: -ms-linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%);
 
@@ -368,6 +424,16 @@ $navbar-transition-length: .75s;
     }
 }
 
+.icon-fw.icon-info.circle-icon {
+    font-size: 20px;
+    vertical-align: middle;
+    text-align: center;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    height: 27px;
+    line-height: 25px;
+    width: 27px;
+}
 
 .test-warning-close {
     position: absolute;
@@ -381,24 +447,34 @@ $navbar-transition-length: .75s;
     color: #fff;
     vertical-align: middle;
     cursor: pointer;
+    transform: scale3d(1,1,1);
+    transition: transform .3s;
 
-    &:hover {
+    &:hover, .test-warning:hover & {
         color: #fff;
         text-decoration: none;
+        transform: scale3d(1.5,1.5,1.5) translate3d(0, 0, 0);
     }
 
     @media screen and (min-width: $screen-md-min) {
         position: static;
-        display: inline;
-        margin-top: 0;
-        margin-left: 10px;
+        margin-top: -4px;
+        margin-left: 30px;
+        margin-right: 3px;
     }
 }
 
 @media (min-width: $screen-md-min) {
-	.navbar-container.test-warning-visible {
-		padding-bottom: 34px;
-	}
+    .navbar-container {
+
+        &.scrolled-at-top {
+            transition: padding-bottom .5s ease-out;
+        }
+
+        &.test-warning-visible {
+            padding-bottom: 52px;
+        }
+    }
 }
 
 @media (max-width: $screen-xs-max) {

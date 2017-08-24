@@ -1,6 +1,6 @@
 [
     {
-        "accession":"4DNEX067AXE1",
+        "accession":"4DNEXO67AXE1",
         "status": "in review by lab",
         "experiment_type": "repliseq",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
@@ -11,7 +11,7 @@
         "antibody": "ENCAB926CDX",
         "antibody_lot_id": "11111111",
         "cell_cycle_phase": "S",
-        "stage_fraction": "S1 subfraction",
+        "stage_fraction": "early fraction",
         "notes": "sample rep notes",
         "lab": "test-4dn-lab",
         "description": "Repli Test",
@@ -19,7 +19,8 @@
         "uuid": "75041e2f-3e43-4388-8aaa-e861f209c555",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "submitted_by": "4dndcic@gmail.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "files": ["4DNFIN232JJ6", "4DNFIN232JJ7"]
     },
     {
         "accession":"4DNEX34DAX2S",
@@ -32,7 +33,8 @@
         "labeling_time": 90,
         "antibody": "ENCAB926CDX",
         "antibody_lot_id": "11111111",
-        "cell_cycle_phase": "G1",
+        "cell_cycle_phase": "S",
+        "stage_fraction": "early fraction",
         "notes": "sample rep notes",
         "lab": "test-4dn-lab",
         "description": "Repli Test 2",
@@ -40,7 +42,8 @@
         "uuid": "75041e2f-3e43-4388-8aaa-e861f209c553",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "submitted_by": "4dndcic@gmail.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "files": ["4DNFIN232JK1", "4DNFIN232JK2"]
     },
     {
         "accession":"4DNEX42CAX15",
@@ -54,7 +57,7 @@
         "antibody": "ENCAB926CDX",
         "antibody_lot_id": "11111111",
         "cell_cycle_phase": "S",
-        "stage_fraction": "late S phase - fraction 2",
+        "stage_fraction": "early fraction",
         "notes": "sample rep notes",
         "lab": "test-4dn-lab",
         "description": "Repli Test 3",
@@ -62,6 +65,30 @@
         "uuid": "75041e2f-3e43-4388-8aaa-e861f209c551",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "submitted_by": "4dndcic@gmail.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "files": ["4DNFIN232JK3", "4DNFIN232JK4"]
+    },
+    {
+        "accession":"4DNEX42CAX16",
+        "status": "in review by lab",
+        "experiment_type": "repliseq",
+        "biosample":"231111bc-8535-4448-903e-854af460b242",
+        "fragment_size_range": "200-500",
+        "average_fragment_size": 300,
+        "dna_label": "BrdU",
+        "labeling_time": 90,
+        "antibody": "ENCAB926CDX",
+        "antibody_lot_id": "11111111",
+        "cell_cycle_phase": "S",
+        "stage_fraction": "late fraction",
+        "notes": "sample rep notes",
+        "lab": "test-4dn-lab",
+        "description": "Repli Test 3",
+        "award": "1U01CA200059-01",
+        "uuid": "75041e2f-3e43-4388-8aaa-e771f209c551",
+        "protocol": "131106bc-8535-4448-903e-854af460b244",
+        "submitted_by": "4dndcic@gmail.com",
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "files": ["4DNFIN232JK5", "4DNFIN232JK6"]
     }
 ]

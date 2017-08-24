@@ -1,6 +1,6 @@
 {
-    "title": "File set calibration",
-    "description": "Schema for submitting metadata for a calibration file set.",
+    "title": "Calibration File Set",
+    "description": "File set dedicated to imaging calibration files.",
     "id": "/profiles/file_set_calibration.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -30,16 +30,15 @@
             "description": "List of data files to be associated together.",
             "type": "array",
             "default": [],
-            "exclude_from": ["submit4dn", "FFedit-create"],
             "uniqueItems": true,
             "items": {
-                "title": "Data file",
+                "title": "Data File",
                 "type": "string",
                 "linkTo": "FileCalibration"
             }
         },
         "fileset_type": {
-            "title": "Fileset type",
+            "title": "Fileset Type",
             "description": "The categorization of the set of files.",
             "type": "string",
             "enum" : [

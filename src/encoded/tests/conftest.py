@@ -44,6 +44,7 @@ _app_settings = {
     'ontology_path': pkg_resources.resource_filename('encoded', '../../ontology.json'),
     # some file specific stuff for testing
     'file_upload_bucket': 'test-bucket',
+    'file_wfout_bucket': 'test-wfout-bucket',
     'file_upload_profile_name': 'test-profile',
 }
 
@@ -258,3 +259,9 @@ def embed_testapp(app):
         'REMOTE_USER': 'EMBED',
     }
     return TestApp(app, environ)
+
+
+@pytest.fixture
+def wsgi_app(wsgi_server):
+    from webtest import TestApp
+    return TestApp(wsgi_server)

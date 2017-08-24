@@ -1,6 +1,6 @@
 {
-    "title": "Capture Hi-C Experiment Variables",
-    "description": "Experimental variables for a Capture Hi-C experiment.",
+    "title": "Capture Hi-C Experiment",
+    "description": "Hi-C coupled with oligonucleotide capture technology.",
     "id": "/profiles/experiment_capture_c.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -22,6 +22,9 @@
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "experiment.json#/properties" },
         { "$ref": "experiment_hi_c.json#/properties" }
+    ],
+    "mixinColumns": [
+        { "$ref": "experiment.json#/columns"}
     ],
     "dependencies": {
       "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
@@ -78,7 +81,7 @@
             "title": "Organism"
         },
         "biosample.biosource.biosource_type": {
-            "title": "Biosource type"
+            "title": "Biosource Type"
         },
         "biosample.biosource_summary": {
             "title": "Biosource"
@@ -95,5 +98,11 @@
         "lab.title": {
             "title": "Lab"
         }
+    },
+    "columns": {
+        "experiment_summary":{
+            "title": "Experiment summary"
+        }
     }
+
 }

@@ -4,7 +4,7 @@
     "id": "/profiles/protocol.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
+    "required": ["award", "lab", "protocol_type"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -14,29 +14,44 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
         },
-        "protocol_documents": {
-          "title": "Protocol Documents",
-          "type": "array",
-          "additionalProperties": false,
-          "uniqueItems": true,
-          "items": {
-            "title": "Protocol Document",
-            "description": "A protocol specific document.",
-            "type": "string",
-            "linkTo": "Document"
-          }
-        },
         "description": {
             "title": "Description",
-            "description": "A short description of the protocol",
+            "description": "A short description of the protocol or document",
             "type": "string",
             "default": ""
+        },
+        "protocol_type": {
+            "title": "Protocol Type",
+            "description": "The category that best describes the protocol or document.",
+            "type": "string",
+            "enum": [
+                "Cell culture protocol",
+                "Cell sorting protocol",
+                "Biosample preparation protocol",
+                "Experimental protocol",
+                "Authentication document",
+                "Other"
+            ]
+        },
+        "protocol_classification": {
+            "title": "Document Classification",
+            "description": "A classification for a protocol or document that is more specific than it's type.  For example, an Authentication document can be classified as a 'Cell Cycle Authentication' or a Biosample preparation protocol can be classified as 'Tissue Preparation Methods'",
+            "type": "string",
+            "enum": [
+               "Experiment Authentication",
+               "Karyotyping Authentication",
+               "Differentiation Authentication",
+               "Cell cycle Authentication",
+               "Instrument Authentication",
+               "Tissue Preparation Methods"
+            ]
         }
     }
 }

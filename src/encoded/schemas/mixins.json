@@ -33,11 +33,11 @@
             "serverDefault": "accession"
         },
         "alternate_accessions": {
-            "title": "Alternate accessions",
+            "title": "Alternate Accessions",
             "description": "Accessions previously assigned to objects that have been merged with this object.",
             "type": "array",
             "internal_comment":"Only admins are allowed to set or update this value.",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "default": [],
             "items": {
                 "title": "Alternate Accession",
@@ -50,13 +50,13 @@
     },
     "aliases": {
         "aliases": {
-            "title": "Lab aliases",
+            "title": "Aliases",
             "description": "Lab specific identifiers to reference an object.",
             "type": "array",
             "comment": "Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).",
             "default": [],
             "uniqueItems": true,
-            "clear_create": "clear",
+            "ff_flag": "clear clone",
             "items": {
                 "uniqueKey": "alias",
                 "title": "Lab alias",
@@ -69,7 +69,7 @@
     "status": {
         "status": {
             "title": "Status",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "type": "string",
             "default": "in review by lab",
             "permission": "import_items",
@@ -78,6 +78,7 @@
                 "current",
                 "revoked",
                 "deleted",
+                "obsolete",
                 "replaced",
                 "in review by lab",
                 "in review by project",
@@ -88,8 +89,8 @@
     "submitted": {
         "date_created": {
             "rdfs:subPropertyOf": "dc:created",
-            "title": "Date created",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "title": "Date Created",
+            "exclude_from": ["submit4dn"],
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -100,8 +101,8 @@
         },
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
-            "title": "Submitted by",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "title": "Submitted By",
+            "exclude_from": ["submit4dn"],
             "type": "string",
             "linkTo": "User",
             "serverDefault": "userid",
@@ -110,8 +111,8 @@
     },
     "modified": {
       "lastmodified": {
-          "title": "Last modified",
-          "exclude_from": ["submit4dn", "FFedit-create"],
+          "title": "Last Modified",
+          "exclude_from": ["submit4dn"],
           "type": "array",
           "items": {
               "date_modified": {
@@ -140,7 +141,7 @@
     },
     "references": {
         "references": {
-            "title": "References",
+            "title": "Reference publications",
             "description": "The publications that provide more information about the object.",
             "type": "array",
             "default": [],
@@ -209,11 +210,12 @@
     },
     "attachment": {
         "attachment": {
-            "title": "Attached Document",
+            "title": "Attached File",
             "type": "object",
             "additionalProperties": false,
             "formInput": "file",
             "attachment": true,
+            "ff_flag": "clear clone",
             "properties": {
                 "download": {
                     "title": "File Name",
@@ -227,6 +229,7 @@
                     "title": "MIME type",
                     "type": "string",
                     "enum": [
+                        "application/msword",
                         "application/pdf",
                         "application/zip",
                         "text/plain",
@@ -256,6 +259,11 @@
                 "height": {
                     "title": "Image height",
                     "type": "integer"
+                },
+                "blob_id":{
+                    "title": "Blob ID",
+                    "type": "string",
+                    "internal_comment": "blob storage ID. Use to like with s3/rds"
                 }
             }
         }
@@ -284,7 +292,7 @@
             "description": "Unique identifiers from external resources.",
             "type": "array",
             "default": [],
-            "clear_create": "clear",
+            "ff_flag": "clear clone",
             "uniqueItems": true,
             "items": {
                 "title": "External identifier",
@@ -337,25 +345,39 @@
     },
     "sop_mapping": {
         "sop_mapping": {
-            "title": "SOP mappping",
+            "title": "SOP Mappping",
             "permission": "import-items",
-            "exclude_from" : "submit4dn",
+            "exclude_from" : ["submit4dn", "FFedit-create"],
             "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",
             "type": "object",
             "additionalProperties": false,
             "properties": {
                 "has_sop": {
-                    "title": "has SOP",
-                    "description": "does this item have an sop when it was submitted",
+                    "title": "Has SOP",
+                    "description": "Does this item have an sop when it was submitted",
                     "type": "string",
                     "enum": ["Yes", "No"]
                 },
                 "sop_map": {
                     "title": "SOP MAP",
-                    "description": "the SOP map that the item maps to",
+                    "description": "The SOP map that the item maps to",
                     "type": "string",
                     "linkTo": "SopMap"
                 }
+            }
+        }
+    },
+    "tags": {
+        "tags": {
+            "title": "Tags",
+            "description": "Key words that can tag an item - useful for filtering.",
+            "type": "array",
+            "uniqueItems": true,
+            "ff_clear": "clone",
+            "items": {
+                "title": "Tag",
+                "description": "A tag for the item.",
+                "type":  "string"
             }
         }
     }

@@ -1,22 +1,23 @@
 // Render a simple static about page
 
-var React = require('react');
-var globals = require('../globals');
-var { Wrapper } = require('./static-page-base');
+import React from 'react';
+import PropTypes from 'prop-types';
+import { content_views } from '../globals';
+import { Wrapper } from './static-page-base';
 
-var AboutPage = module.exports = React.createClass({
+export default class AboutPage extends React.Component {
 
-    propTypes : {
-        context : React.PropTypes.shape({
-            "content" : React.PropTypes.shape({
-                "dcic" : React.PropTypes.string,
-                "acknowledgements" : React.PropTypes.string,
-                "funding" : React.PropTypes.string
+    static PropTypes = {
+        'context' : PropTypes.shape({
+            "content" : PropTypes.shape({
+                "dcic" : PropTypes.string,
+                "acknowledgements" : PropTypes.string,
+                "funding" : PropTypes.string
             }).isRequired
         }).isRequired
-    },
+    }
 
-    render: function() {
+    render() {
         var c = this.props.context.content;
         return (
             <Wrapper title="About">
@@ -34,6 +35,7 @@ var AboutPage = module.exports = React.createClass({
             </Wrapper>
         );
     }
-});
 
-globals.content_views.register(AboutPage, 'AboutPage');
+}
+
+content_views.register(AboutPage, 'AboutPage');

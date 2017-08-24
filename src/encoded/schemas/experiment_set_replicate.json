@@ -1,6 +1,6 @@
 {
-    "title": "Experiment set for Replicate experiments",
-    "description": "Schema for submitting metadata for an experiment set.",
+    "title": "Replicate Experiments",
+    "description": "Experiment Set for technical/biological replicates.",
     "id": "/profiles/experiment_set_replicate.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -17,7 +17,14 @@
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "experiment_set.json#/properties" }
+    ],
+    "mixinColumns": [
+        { "$ref": "experiment_set.json#/columns"}
+    ],
+    "mixinFacets": [
+        { "$ref": "experiment_set.json#/facets"}
     ],
     "properties": {
         "schema_version": {
@@ -27,14 +34,20 @@
             "accessionType": "ES"
         },
         "experimentset_type": {
-            "default" : "replicate"
+            "default" : "replicate",
+            "enum" : [
+              "replicate"
+            ]
+        },
+        "experiments_in_set": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "replicate_exps": {
-            "title": "Set of replicate experiments",
+            "title": "Replicates",
             "description": "Replicate experiments with biological and technical replication numbers.",
             "type": "array",
             "default": [],
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "uniqueItems": true,
             "items": {
                 "title": "Replicate experiment",
@@ -59,35 +72,6 @@
                     }
                 }
             }
-        }
-    },
-    "facets": {
-        "experimentset_type": {
-            "title": "Experiment set type"
-        },
-        "experiments_in_set.award.project": {
-            "title": "Project"
-        },
-        "experiments_in_set.biosample.biosource.individual.organism.name": {
-            "title": "Organism"
-        },
-        "experiments_in_set.biosample.biosource.biosource_type": {
-            "title": "Biosource type"
-        },
-        "experiments_in_set.biosample.biosource_summary": {
-            "title": "Biosource"
-        },
-        "experiments_in_set.digestion_enzyme.name": {
-            "title": "Enzyme"
-        },
-        "experiments_in_set.biosample.modifications_summary": {
-            "title": "Modifications"
-        },
-        "experiments_in_set.biosample.treatments_summary": {
-            "title": "Treatments"
-        },
-        "experiments_in_set.lab.title": {
-            "title": "Lab"
         }
     }
 }

@@ -1,39 +1,43 @@
 [
     {
-        "accession":"4DNFI0TEST01",
+        "accession":"4DNFIOTESTO1",
         "description": "Template Calibration File01",
         "attachment": "photo.jpg",
         "lab": "4dn-dcic-lab",
+        "file_format": "other",
         "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fab9",
         "status": "uploaded"
     },
     {
-        "accession":"4DNFI0TEST02",
+        "accession":"4DNFIOTESTO2",
         "description": "Template Calibration File02",
         "attachment": "photo.jpg",
         "lab": "4dn-dcic-lab",
+        "file_format": "other",
         "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fcd9",
         "status": "uploaded"
     },
     {
-        "accession":"4DNFI0TEST03",
+        "accession":"4DNFIOTESTO3",
         "description": "Template Calibration File03",
         "attachment": "photo.jpg",
         "lab": "4dn-dcic-lab",
+        "file_format": "other",
         "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fef9",
         "status": "uploaded"
     },
     {
-        "accession":"4DNFI0TEST04",
+        "accession":"4DNFIOTESTO4",
         "description": "Template Calibration File04",
         "attachment": "photo.jpg",
         "lab": "4dn-dcic-lab",
+        "file_format": "other",
         "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fdd9",

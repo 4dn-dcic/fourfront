@@ -1,6 +1,6 @@
 {
-    "title": "File set",
-    "description": "Schema for submitting metadata for a file set.",
+    "title": "File Set",
+    "description": "Grouping for files with similar features.",
     "id": "/profiles/file_set.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -26,11 +26,10 @@
             "accessionType": "FS"
         },
         "files_in_set": {
-            "title": "Sets of data files",
+            "title": "Sets of Data Files",
             "description": "List of data files to be associated with the experiment.",
             "type": "array",
             "default": [],
-            "exclude_from": ["submit4dn", "FFedit-create"],
             "uniqueItems": true,
             "items": {
                 "title": "Data file",
@@ -39,7 +38,7 @@
             }
         },
         "fileset_type": {
-            "title": "Fileset type",
+            "title": "Fileset Type",
             "description": "The categorization of the set of files.",
             "type": "string",
             "enum" : [

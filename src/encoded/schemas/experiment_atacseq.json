@@ -1,0 +1,88 @@
+{
+    "title": "ATAC-seq Experiment",
+    "description": "Genome-wide chromosome chromatin-accessibility experiments ATAC-seq",
+    "id": "/profiles/experiment_atacseq.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["experiment_type", "award", "lab", "biosample"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/sop_mapping"},
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "experiment.json#/properties"}
+    ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "experiment.json#/columns"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "experiment_type": {
+            "title" : "Experiment Type",
+            "default": "ATAC-seq",
+            "enum": [
+                "ATAC-seq"
+            ]
+        },
+        "transposase": {
+            "title": "Transposase",
+            "description": "The transposase used to 'insert' sequencing adapters.",
+            "type": "string",
+            "linkTo": "Enzyme"
+        },
+        "enzyme_lot_number": {
+            "title": "Transposase Lot Number",
+            "description": "Lot number of batch of enzyme used to digest DNA",
+            "type": "string"
+        },
+        "enzyme_incubation_time": {
+            "title": "Time (min) enzyme reaction",
+            "description": "Time of incubation with enzyme in minutes",
+            "type": "number"
+        },
+        "incubation_temperature": {
+            "title": "Incubation Temperature (°C)",
+            "description": "Temperature of transposase step in degrees Celsius",
+            "type": "number"
+        },
+        "library_preparation_date": {
+            "title": "Library Preparation Date",
+            "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
+            "type": "string",
+            "format": "date"
+        },
+        "pcr_cycles": {
+            "title": "PCR Cycles for Final amplification",
+            "description": "Number of PCR Cycles used for additional amplification after qPCR",
+            "type": "integer"
+        },
+        "primer_removal_method": {
+            "title": "Primer removal method",
+            "description": "A short description of the method used to remove the amplification primers.",
+            "type": "string",
+            "enum": [
+              "gel",
+              "see document",
+              "minelute column",
+              "SPRI beads"
+          ]
+        }
+    },
+    "columns": {
+
+    }
+}

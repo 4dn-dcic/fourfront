@@ -83,3 +83,31 @@ $tooltip-color: desaturate(lighten(#0a253d,30%),30%);
 .no-csstransforms .tooltip-arrow {
     display: none;
 }
+
+/*** Override ReactTooltip styles ***/
+
+.__react_component_tooltip {
+    max-width: 630px;
+    @media screen and (max-width: $screen-xs-max){
+        max-width : 400px;
+    }
+    @media screen and (max-width: $screen-sm-max){
+        max-width : 500px;
+    }
+    @media screen and (max-width: $screen-md-max){
+        max-width : 600px;
+    }
+
+    h1,h2,h3,h4,h5,h6 {
+        color: #fff;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    small + h2, small + h3,
+    small + h4, small + h5,
+    small + h6 {
+        margin-top: 0;
+    }
+
+}

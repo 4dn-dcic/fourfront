@@ -19,7 +19,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "ID":{
             "title": "Publication Identifier",
@@ -77,7 +77,7 @@
             }
         },
         "exp_sets_prod_in_pub": {
-            "title": "Experiment sets produced by this publication",
+            "title": "Experiment Sets Produced by This Publication",
             "description": "List of experiment sets that are produced by this publication.",
             "type": "array",
             "comment": "use accessions for identifiers.",
@@ -89,7 +89,7 @@
             }
         },
         "exp_sets_used_in_pub": {
-            "title": "Experiment sets used by this publication (not produced)",
+            "title": "Experiment Sets Used by This Publication (not produced)",
             "description": "List of experiment sets that are used (not produced) by this publication.",
             "type": "array",
             "comment": "use accessions for identifiers.",
@@ -105,7 +105,7 @@
             "description": "DON'T SUBMIT, auto-generated.",
             "uniqueKey": true,
             "type": "string",
-            "exclude_from": "edit"
+            "exclude_from": ["FFedit-create"]
         },
         "abstract": {
             "title": "Abstract",
@@ -113,14 +113,23 @@
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
-        "authors": {
-            "title": "Authors",
-            "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
+        "journal": {
+            "title": "Journal",
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
+        "authors": {
+            "title": "Authors",
+            "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Author",
+                "type": "string"
+            }
+        },
         "date_published": {
-            "title": "Publication date",
+            "title": "Publication Date",
             "description": "Publication date.",
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"]

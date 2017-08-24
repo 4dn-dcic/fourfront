@@ -13,6 +13,17 @@ def remc_lab(testapp):
 
 
 @pytest.fixture
+def somelab_w_shared_award(testapp, award):
+    item = {
+        'name': 'some-lab',
+        'title': 'SOME lab',
+        'status': 'current',
+        'awards': [award['@id']]
+    }
+    return testapp.post_json('/lab', item).json['@graph'][0]
+
+
+@pytest.fixture
 def remc_award(testapp):
     item = {
         'name': 'remc-award',
@@ -45,6 +56,20 @@ def lab_viewer(testapp, lab, award):
         'lab': lab['name'],
         'status': 'current',
         'viewing_groups': [award['viewing_group']]
+    }
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
+
+@pytest.fixture
+def award_viewer(testapp, somelab_w_shared_award):
+    item = {
+        'first_name': 'SOME',
+        'last_name': 'award viewer',
+        'email': 'awardee@example.org',
+        'lab': somelab_w_shared_award['@id'],
+        'status': 'current',
     }
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
@@ -164,6 +189,11 @@ def submitter_testapp(submitter, app, external_tx, zsa_savepoints):
 @pytest.fixture
 def lab_viewer_testapp(lab_viewer, app, external_tx, zsa_savepoints):
     return remote_user_testapp(app, lab_viewer['uuid'])
+
+
+@pytest.fixture
+def award_viewer_testapp(award_viewer, app, external_tx, zsa_savepoints):
+    return remote_user_testapp(app, award_viewer['uuid'])
 
 
 @pytest.fixture
@@ -289,6 +319,10 @@ def test_lab_viewer_view(lab_viewer_testapp, experiment):
     lab_viewer_testapp.get(experiment['@id'], status=200)
 
 
+def test_award_viewer_view(award_viewer_testapp, experiment):
+    award_viewer_testapp.get(experiment['@id'], status=200)
+
+
 def test_submitter_patch_lab_disallowed(submitter, other_lab, submitter_testapp):
     res = submitter_testapp.get(submitter['@id'])
     lab = {'lab': other_lab['@id']}
@@ -400,7 +434,8 @@ def test_submitter_can_view_ownitem(ind_human_item, submitter_testapp, wrangler_
         submitter_testapp.get(res.json['@graph'][0]['@id'], status=200)
 
 
-def test_submitter_cannot_view_ownitem_replaced(ind_human_item, submitter_testapp, wrangler_testapp):
+def test_submitter_cannot_view_ownitem_replaced(ind_human_item, submitter_testapp,
+                                                wrangler_testapp):
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
     submitter_testapp.get(res.json['@graph'][0]['@id'], status=404)
@@ -493,6 +528,39 @@ def test_labmember_cannot_patch_submitter_file(file_item, submitter_testapp, wra
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
         lab_viewer_testapp.patch_json(res.json['@graph'][0]['@id'], {'paired_end': '2'}, status=422)
+
+
+# person with shared award tests
+# award member would need to have viewing_group set to have the ...project ones work
+def test_awardmember_cannot_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
+    statuses = ['deleted', 'released to project', 'in review by project']
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        award_viewer_testapp.get(res.json['@graph'][0]['@id'], status=403)
+
+
+def test_awardmember_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
+    statuses = ['current', 'released', 'revoked', 'in review by lab']
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        award_viewer_testapp.get(res.json['@graph'][0]['@id'], status=200)
+
+
+def test_awardmember_cannot_view_submitter_item_replaced(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    award_viewer_testapp.get(res.json['@graph'][0]['@id'], status=404)
+
+
+# Submitter created item and lab member wants to patch
+def test_awardmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'in review by project']
+    res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        award_viewer_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=422)
 
 
 # Submitter created item and project member wants to view

@@ -1,7 +1,9 @@
 'use strict';
-var React = require('react');
-var globals = require('../globals');
-var ResultTable = require('../search').ResultTable;
+
+import React from 'react';
+import createReactClass from 'create-react-class';
+import * as globals from './../globals';
+import { ResultTableHandlersContainer } from './../browse/SearchView';
 
 
 var openLinksInNewWindow = function(e) {
@@ -19,12 +21,12 @@ var openLinksInNewWindow = function(e) {
 };
 
 
-var SearchBlockEdit = React.createClass({
+var SearchBlockEdit = createReactClass({
     render: function() {
         var styles = {maxHeight: 300, overflow: 'scroll', clear: 'both' };
         return (
             <div className="well" style={styles} onClick={openLinksInNewWindow}>
-                <ResultTable {...this.props} mode="picker" />
+                <ResultTableHandlersContainer {...this.props} mode="picker" />
             </div>
         );
     },
@@ -39,7 +41,7 @@ var SearchBlockEdit = React.createClass({
 });
 
 
-var ItemPreview = module.exports.ItemPreview = React.createClass({
+var ItemPreview = module.exports.ItemPreview = createReactClass({
     render: function() {
         var context = this.props.data;
         if (context === undefined) return null;
@@ -51,6 +53,8 @@ var ItemPreview = module.exports.ItemPreview = React.createClass({
         );
     }
 });
+
+
 // **** Deprecated when fetch was removed.
 //
 // var ObjectPicker = module.exports.ObjectPicker = React.createClass({

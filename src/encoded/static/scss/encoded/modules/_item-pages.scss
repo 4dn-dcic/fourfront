@@ -2,20 +2,49 @@
 Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 ************************************************************/
 
+.item-page-container {
+	/** Override margin-bottom for margin pages so accession and title are close to each other **/
+	h1.page-title {
+		margin-bottom: 2px;
+	}
+}
 
 @media screen and (min-width: $screen-md-min){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
+	/*
 	.item-view-header {
 		margin-top: -27px;
 	}
-	
+	*/
+
 }
 
-.item-label-title {
-	margin-bottom: 9px;
+.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
 	font-family: 'Work Sans', sans-serif;
 	font-weight: 300;
-	margin-top: 0;
+	height: 36px;
+	/* line-height: 36px; */
+	margin: 0;
+	padding-left: 13px;
+
+	> span:not(:last-child){
+		padding-right: 5px;
+		margin-right: 5px;
+		border-right: 1px solid #ccc;
+	}
+
+	/*
+	.accession-label {
+		font-size: 1rem;
+		font-weight: 400;
+		color: #888;
+	}
+	*/
+
+	.accession {
+		font-weight: 500;
+		font-size: 1.15rem;
+	}
 }
 
 .item-label-extra {
@@ -91,10 +120,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.flexcol-heading, .item-page-heading {
+.flexcol-heading, .item-page-heading, .submission-page-heading{
     position: relative;
-    margin-right: -10px;
-    margin-left: -10px;
+    //margin-right: -10px;
+    //margin-left: -10px;
     background-color: #f4f4f4;
 
     h1, h2, h3, h4, h5, h6 {
@@ -267,7 +296,25 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .item-page-container {
     .info-area {
 	    margin-top: 17px;
+		//border-bottom: 1px solid #ddd;
+		padding-bottom: 7px;
     }
+
+	.rc-tabs-tabpane {
+		.info-area {
+			overflow: hidden;
+			border-bottom: none;
+		}
+	}
+
+	.tab-view-container {
+		.rc-tabs {
+			@media screen and (min-width: $screen-sm-min){
+				//margin-top: -17px;
+			}
+		}
+	}
+
     .item-info-area {
         margin-bottom: 20px;
         min-height: 120px;
@@ -279,28 +326,34 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	margin-bottom: 12px;
 
+	.expandable-list {
+		overflow: hidden;
+	}
+
 	.list-item {
-		
+
 		/* Equalize Height of Columns, unsupported for IE9 and below: */
 		display: -webkit-box;
 		display: -webkit-flex;
 		display: -ms-flexbox;
 		display: flex;
-		
-		.item-label, .item-value {		
+
+
+
+		.item-label, .item-value {
 			> div {
-				min-height: 20px;
+				min-height: 26px;
 				height: 100%;
 				word-break: break-all;
 				border-bottom: 1px solid #eee;
-				padding-top: 5px;
-				padding-bottom: 5px;
+				padding-top: 8px;
+				padding-bottom: 8px;
 			}
 		}
 		.item-label {
 			font-weight: 500;
 		}
-		ul {
+		ol {
 			padding-left: 20px;
 			margin-bottom: 0;
 			//margin-top: 3px;
@@ -310,9 +363,16 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		.subitem-toggle {
 			display: inline-block;
 			> .link {
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
 				color: #00cca3; // temporary?
-				&:hover,&:focus {
+				cursor:pointer;
+				&:hover {
 					color: #00cca3;
+					text-shadow : 0 0 0;
 				}
 			}
 			> i.icon {
@@ -335,8 +395,163 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			}
 		}
 
+		&.array-group-row {
+			&:not(.last-item):not(.open) {
+				> .item-label, .item-value {
+					> .inner {
+						border-bottom-color: transparent;
+						padding-bottom: 2px;
+						min-height: 20px;
+					}
+				}
+			}
+			&:not(.first-item) {
+				> .item-label, .item-value {
+					> .inner {
+						padding-top: 2px;
+					}
+				}
+			}
+			> .item-label {
+				.label-number {
+					transition: transform .3s ease-out, color .3s ease-out;
+					transform: scale3d(0.85, 0.85, 0.85) translate3d(16px,1px,0);
+					transform-origin: 100% 25%;
+					margin-top: -1px;
+					color: #888;
+					.number-icon {
+						opacity: 0;
+						transition: opacity .3s ease-out;
+					}
+					&.active {
+						color: #000;
+						transform: scale3d(1,1,1);
+						.number-icon {
+							opacity: 1;
+						}
+					}
+				}
+				span.dim-duplicate {
+					color: transparent;
+					transition: color .3s ease-out;
+					white-space: nowrap;
+					overflow-x: hidden;
+					text-overflow: ellipsis;
+					i.icon {
+						display: none;
+					}
+				}
+			}
+			//> .item-value {
+			//	> .inner {
+			//		border-bottom-color: transparent;
+			//	}
+			//}
+		}
+
+		&.open {
+			> .item-label {
+				> .inner {
+					border-bottom-color: transparent;
+					span.dim-duplicate {
+						color: #bbb;
+					}
+				}
+			}
+			> .item-value {
+				> .inner {
+					border-bottom-color: transparent;
+				}
+			}
+		}
+		.detail-embedded-table-container {
+			overflow-x: auto;
+			table.detail-embedded-table {
+				min-width: 100%;
+				tr th {
+					white-space: normal;
+					word-break: normal;
+					padding: 7px 4px;
+
+					&.has-children {
+						> .tooltip-info-container {
+							padding-left: 36px;
+							border-bottom: 1px solid #ddd;
+							padding-bottom: 7px;
+						}
+					}
+					
+					.sub-list-keys-header {
+						margin-left: -4px;
+						margin-right: -4px;
+						> div.inline-block {
+							padding: 5px 8px 0px;
+						}
+						div.child-list-row-number {
+							width: 36px;
+						}
+
+					}
+				}
+				tr td {
+					word-break: normal;
+					padding: 7px 8px;
+					&.child-list-row-container {
+						padding: 0;
+						border-left: 1px dotted #ccc;
+						border-right: 1px dotted #ccc;
+						border-bottom: 1px solid #ddd;
+					}
+					&.no-word-break {
+						white-space: nowrap;
+					}
+				}
+				tr:not(:last-child) {
+					border-bottom: 1px solid #eee;
+				}
+				.child-list-row {
+					> div {
+						padding: 5px 8px;
+						text-align: center;
+					}
+					&:not(:last-child) {
+						border-bottom: 1px dotted #eee;
+					}
+					div.child-list-row-number {
+						width: 36px;
+					}
+				}
+			}
+		}
+
 	}
 
+	.sub-panel {
+		padding-left: 40px;
+		padding-bottom: 0;
+		margin-bottom: 8px;
+		border-bottom: 1px dotted #bbb;
+		border-left: 1px dotted #aaa;
+		.item-label {
+			.tooltip-info-container {
+				white-space: nowrap;
+				overflow-x: hidden;
+				text-overflow: ellipsis;
+			}
+		}
+	}
+
+}
+
+/** JSON Tree Wrapper (e.g. fallback view) **/
+
+.json-tree-wrapper {
+	border-radius: 4px;
+	overflow: hidden;
+	> ul {
+		padding: 8px 16px 16px !important;
+		margin: 0 !important;
+	}
 }
 
 /*** Partial or Expandable Lists ***/
@@ -347,9 +562,13 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	ul {
 		margin-bottom: 0px;
 	}
+
 }
 
 /*** Files In Set Table ***/
+
+$download-button-width : 100px;
+
 
 .files-in-set-table-title {
 	font-weight: 300;
@@ -361,9 +580,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .files-in-set-table {
 
+	margin-bottom: 20px;
+
 	.row {
 
-		
+
 
 		> div {
 			padding-top: 5px;
@@ -426,6 +647,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		}
 
 		&.header-row {
+			user-select: none;
+
 			> div {
 				font-weight: 500;
 			}
@@ -437,20 +660,57 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 					width: 32px;
 					text-align: center;
 				}
+				> span.file {
+					display: inline-block;
+					min-width: $download-button-width;
+					text-align: left;
+				}
+				> span.docs {
+					width : 33px;
+					margin-left: 6px;
+					display: inline-block;
+					text-align: center;
+				}
 			}
 		}
 
 		> .download-button{
 			position: relative;
 			z-index: 10;
-			> a.btn {
-				margin-bottom: -23px;
+			> a.btn, > button.btn {
+				&.button-dl-doc {
+					margin-left: 5px;
+					&.disabled {
+						opacity: 0.33;
+					}
+				}
+				&.button-dl-file {
+					min-width: $download-button-width;
+				}
 			}
+
 		}
 
 	}
 }
 
+// Tablet & mobile screen size adjustments
+@media screen and (max-width : $screen-sm-max){
+	.files-in-set-table .row > .download-button {
+		margin-bottom: -50px;
+	}
+}
+
+// Mobile screen size
+@media screen and (max-width : $screen-xs-max){
+	.files-in-set-table .row > .download-button {
+		> .button-dl-file {
+			margin-bottom: 5px;
+		}
+	}
+}
+
+// Large screen adjustments
 @media screen and (min-width : $screen-md-min){
 
 	.files-in-set-table-title {
@@ -468,7 +728,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				text-align: right;
 			}
 
-			
+
 
 			> .title {
 				padding-top: 5px;
@@ -487,12 +747,13 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				height: 40px;
                 padding-top: 3px;
                 padding-bottom: 3px;
-				> button, > a.btn {
-					height: 30px;
-					margin-bottom: 0;
-				}
 			}
 
+		}
+	}
+	.files-in-set-table.smaller-version {
+		.title h6 {
+			margin: 0;
 		}
 	}
 }
@@ -523,7 +784,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		text-align: center;
 		padding-top: 4px;
 		font-size: 20px;
-		margin-bottom: -10px;
+		//margin-bottom: -10px;
 
 		&.col-xs-2 {
 			padding-right: 0px;
@@ -631,22 +892,37 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 /************** Publications Block ****************/
 
 .publications-block {
-	margin-bottom: 17px;
 
 	ul {
 		margin-bottom: 0;
-		padding-left: 0;
+		padding-left: 10px;
 	}
 
 	&.single-item {
 		ul {
-			margin-bottom: -10px;
-			margin-top: 5px;
+			margin-bottom: 1px;
+    		margin-top: 7px;
+		}
+	}
+
+	.details {
+		padding-top: 3px;
+		> .details-row {
+			margin-top: 7px;
 		}
 	}
 
 	h6.publication-label {
 		@include small-block-label();
+	}
+
+	.label-col {
+		user-select: none;
+	}
+
+	.icon.abstract-toggle {
+		cursor : pointer;
+		color : #888;
 	}
 
 	@include icon-container-child();
@@ -658,10 +934,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .exp-table-section {
 
 	h3 {
-		font-weight: 300;
-		margin: 0;
-		border-top: 1px solid #eee;
-		padding: 16px 0 16px;
 
 		span.exp-number {
 			padding-top: 5px;
@@ -672,6 +944,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	.exp-table-container {
 		overflow-x: auto;
 		display: block;
+		border-bottom: 1px solid #888;
 	}
 
 	/*
@@ -684,3 +957,158 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 	*/
 }
+
+/****** Graph Detail Pane ******/
+
+.workflow-chart-inner-container {
+	.detail-pane {
+		> h5 {
+			margin-bottom: 0px;
+			& + h4 {
+				margin-top: 4px;
+				margin-bottom: 0;
+			}
+		}
+		> .detail-pane-body {
+			overflow-x: hidden;
+		}
+		.information {
+			margin-top: 12px;
+			padding-bottom: 3px;
+			padding-top: 0;
+			border-top: 1px solid #ccc;
+			
+			> hr {
+				margin-bottom: 0;
+			}
+
+			& + hr {
+				border-color: #ccc;
+			}
+
+
+			> .row > .box {
+				padding-top : 20px;
+				min-height: 64px;
+				> h3 {
+					margin-top: 1px;
+					margin-bottom : 0px;
+					> pre {
+						margin-top: 5px;
+					}
+				}
+				> h4 {
+					margin-top: 4px;
+					margin-bottom: 2px;
+				}
+				> h5 {
+					margin-top: 6px;
+					margin-bottom: 2px;
+				}
+				> .download-button {
+					margin-top: 6px;
+				}
+
+				&.buttons-container {
+					text-align: left;
+					@media screen and (min-width: $screen-sm-min){
+						text-align: right;
+					}
+				}
+			}
+
+			.description-box-container {
+				padding-top: 2px;
+			}
+
+			.file-title {
+
+				> h3.node-file-title {
+					overflow: hidden;
+				}
+
+				.download-button-container {
+					position: absolute;
+					right: 10px;
+					top: 40px;
+				}
+
+				.download-button-container.exists + h3.node-file-title {
+					@media screen and (max-width: $screen-md-max){
+						padding-right: 30px;
+					}
+				}
+			}
+
+		}
+	}
+}
+
+/** MetricsView **/
+
+.metrics-view {
+
+	.metrics-view-item {
+
+		.inner {
+			padding-top: 9px;
+			padding-bottom: 9px;
+
+			border-bottom: 1px solid #f4f4f4;
+
+			.icon-exclamation-circle {
+				color : $audit-color-error;
+			}
+			.icon-warning {
+				color : $audit-color-warning;
+			}
+			.icon-check {
+				color : green;
+			}
+		}
+
+		h1,h2,h3,h4,h5,h6 {
+			margin: 0;
+		}
+	}
+
+}
+
+/**** File VIew ****/
+
+.item-page-container.type-File {
+
+	.rc-tabs-content {
+
+		.overview-blocks {
+			> div {
+				> .inner {
+					padding: 15px 0 10px;
+					h5 {
+						margin-top: 0;
+						margin-bottom: 5px;
+						font-weight: 500;
+					}
+				}
+			}
+		}
+
+		 .file-download-container {
+
+			border-top: 1px solid #eee;
+			margin-top: 20px;
+			padding-top: 20px;
+
+			@media screen and (min-width: $screen-md-min){
+				float: right;
+				padding-top: 16px;
+				margin-top: 0;
+				border-top: none;
+			}
+
+		}
+
+	}
+
+}
+

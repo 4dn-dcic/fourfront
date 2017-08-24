@@ -1,5 +1,7 @@
 'use strict';
 
+import createReactClass from 'create-react-class';
+
 /** Test ExperimentsTable for Replicate Experiment Set */
 
 jest.autoMockOff();
@@ -10,40 +12,46 @@ jest.dontMock('underscore');
 
 
 describe('Testing experiments-table.js', function() {
-    var React, ExperimentsTable, expFuncs, testExperimentsTable, TestUtils, FetchContext, context, schemas, _, ExperimentsTableWrapper;
+    var React, ExperimentsTable, expFuncs, testExperimentsTable, TestUtils, FetchContext, context, schemas, _, ExperimentsTableWrapper, SelectedFilesController, initiallySelectedFiles;
 
     beforeEach(function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        ExperimentsTable = require('../experiments-table').ExperimentsTable;
+
+        ExperimentsTable = require('../experiments-table').default;
+        SelectedFilesController = require('./../browse/components').SelectedFilesController;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
 
-        ExperimentsTableWrapper = React.createClass({
+        initiallySelectedFiles = {
+            "4DNESH4MYRID~4DNEXL6MFLSD~4DNFI4HKT2OG" : true, // Pair 1
+            "4DNESH4MYRID~4DNEXL6MFLSD~4DNFI397I6JO" : true,
 
-            getInitialState : function(){
-                return {
-                    selectedFiles : new Set ([
-                        "8e39bf85-02e2-4cbf-8352-55ca1ab402c7",
-                        "177a19b9-5801-4523-a1bf-c0f174a72864",
-                        "c315f5ae-62d4-4413-8606-9cd5556c2341",
-                        "f08bbdca-247b-4c75-b3bf-a9ba2ac8c1e1",
-                        "210a7047-37cc-406d-8246-62fbe3400fc3"
-                    ])
-                };
-            },
+            "4DNESH4MYRID~4DNEXTBYNI67~4DNFIW6GQC2H" : true, // Pair 2
+            "4DNESH4MYRID~4DNEXTBYNI67~4DNFIYJESQV8" : true,
+
+            "4DNESH4MYRID~4DNEX9L8XZ38~4DNFIX7DX8L7" : true, // Pair 3 (there's more, but lets leave unselected)
+            "4DNESH4MYRID~4DNEX9L8XZ38~4DNFIAIZUF8R" : true,
+            //"f08bbdca-247b-4c75-b3bf-a9ba2ac8c1e1" : true,
+            //"210a7047-37cc-406d-8246-62fbe3400fc3" : true
+        };
+
+        ExperimentsTableWrapper = createReactClass({
 
             render: function() {
                 return (
                     <div>
-                        <ExperimentsTable
-                            experimentArray={context.experiments_in_set}
-                            replicateExpsArray={context.replicate_exps}
-                            experimentSetType={context.experimentset_type}
-                            parentController={this}
-                        />
+                        <SelectedFilesController initiallySelectedFiles={initiallySelectedFiles} ref="controller">
+                            <ExperimentsTable
+                                experimentArray={context.experiments_in_set}
+                                experimentSetAccession={context.accession}
+                                replicateExpsArray={context.replicate_exps}
+                                experimentSetType={context.experimentset_type}
+                                width={960}
+                            />
+                        </SelectedFilesController>
                     </div>
                 );
             }
@@ -54,7 +62,7 @@ describe('Testing experiments-table.js', function() {
     });
 
     it('Has proper built-in headers (at least)', function() {
-        var checkIfHaveHeaders = ['Experiment Accession', 'Biosample Accession', 'File Accession'].sort(); // Sort b/c indices matter
+        var checkIfHaveHeaders = ['Experiment', 'Biosample', 'File'].sort(); // Sort b/c indices matter
         
         // Check if built-in header definitions match headers to be checked in rendered table.
         expect(
@@ -80,10 +88,12 @@ describe('Testing experiments-table.js', function() {
 
     it('Header columns have width styles which fit available width', function() {
         var headers = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');
-        var availableWidthForTests = 960; // Defined as a fallback in ExperimentsTable.prototype.updateColumnWidths.
-        var orderedHeaderWidths = _.pluck(headers, 'style').map(function(hStyle, i){
-            var w = parseInt(hStyle._values.width); 
-            if (Number.isNaN(w)) return 120; // Default
+        var availableWidthForTests = 960;
+        var orderedHeaderWidths = headers.map(function(h, i){
+            var w = parseInt(h.style._values.width); 
+            if (Number.isNaN(w)){
+                return ExperimentsTable.initialColumnWidths(h.getAttribute('data-column-class')) || 120;
+            }
             return w;
         });
 
@@ -99,8 +109,8 @@ describe('Testing experiments-table.js', function() {
         var headerWidths = _.object(
             _.map(headers, function(h, i){
                 var w = parseInt(h.style._values.width);
-                if (Number.isNaN(w)) w = 120; // Default
                 var columnClassName = h.getAttribute('data-column-class');
+                if (Number.isNaN(w)) w = ExperimentsTable.initialColumnWidths(columnClassName) || 120; // Default
                 return [columnClassName, w];
             })
         ); // Returns { 'biosample' : 201, 'experiment' : 253, ... }
@@ -182,7 +192,7 @@ describe('Testing experiments-table.js', function() {
 
         function getFilePairCheckboxElement(sBlock){
             if (
-                sBlock.className.split(' ').indexOf('file-pair') > -1 && 
+                sBlock.className.split(' ').indexOf('file-pair') > -1 &&
                 sBlock.children[0].className.indexOf('name') !== -1 &&
                 sBlock.children[0].children[1].className.indexOf('name-title') !== -1 &&
                 sBlock.children[0].children[1].children[0].className.indexOf('checkbox') !== -1 &&
@@ -200,25 +210,33 @@ describe('Testing experiments-table.js', function() {
 
         // File pair blocks w checkboxes exist (prerequisite).
         expect(filePairBlocksWithCheckboxes.length).toBeGreaterThan(0); // If this fails, probably check getFilePairCheckboxElement.
-
         
-        function selectedFilePairBlocksFileUUIDs(sBlocks){
-            return filePairBlocksWithCheckboxes.filter(function(sBlock){
-                return getFilePairCheckboxElement(sBlock).checked === true;
+        function selectedFilePairBlocksFileUUIDObj(sBlocks){
+            return _.object(_.flatten(filePairBlocksWithCheckboxes.filter(function(sBlock){
+                var elem = getFilePairCheckboxElement(sBlock);
+                return elem.checked === true;
             }).map(function(sBlock){
-                return getFilePairCheckboxElement(sBlock).id.split('~').pop();
-            });
+                return getFilePairCheckboxElement(sBlock).getAttribute('data-select-files').split(',');//id.split('~').pop();
+            }).map(function(uuidSet){
+                return uuidSet.map(function(uuid){
+                    return [uuid, true];
+                });
+            }), true));
         }
 
         // Ensure we have 5 initially selected file pairs in parentController state (from test def beforeEach)
-        expect(5).toEqual(testExperimentsTable.state.selectedFiles.size);
-        
+        expect(_.keys(initiallySelectedFiles).length).toEqual(_.keys(testExperimentsTable.refs.controller.state.selectedFiles).length);
+
         // Check that the selected file pairs / files in state match checkboxes that are selected.
-        function selectedFilesMatchSelectedCheckboxes(){
-            return _.isEqual(
-                new Set(selectedFilePairBlocksFileUUIDs(filePairBlocksWithCheckboxes)),
-                testExperimentsTable.state.selectedFiles
-            );
+        function selectedFilesMatchSelectedCheckboxes(stateKeys){
+            
+            if (!stateKeys) stateKeys = _.keys(testExperimentsTable.refs.controller.state.selectedFiles).sort();
+            var fileKeys = _.keys(selectedFilePairBlocksFileUUIDObj(filePairBlocksWithCheckboxes)).sort();
+            if (fileKeys.length !== stateKeys.length) return false;
+            for (var i = 0; i < fileKeys.length; i++){
+                if (fileKeys[i] !== stateKeys[i]) return false;
+            }
+            return true;
         }
 
         function clickRandomFilePairCheckboxes(){
@@ -234,10 +252,14 @@ describe('Testing experiments-table.js', function() {
         expect(selectedFilesMatchSelectedCheckboxes()).toBe(true);
 
         // Check some checkboxes RANDOMLYish and compare again.
-        var originalSelectedFiles = new Set(testExperimentsTable.state.selectedFiles); // copy orig set
+        var originalSelectedFiles = _.clone(testExperimentsTable.refs.controller.state.selectedFiles); // copy orig set
         clickRandomFilePairCheckboxes();
         // Ensure our state has changed in response to edits/clicks.
-        expect(testExperimentsTable.state.selectedFiles.size).not.toEqual(originalSelectedFiles.size);
+        expect(
+            selectedFilesMatchSelectedCheckboxes(originalSelectedFiles)
+        ).toEqual(
+            false
+        );
 
         // Make sure checkbox values align with state again... then click and check some more times.
         expect(selectedFilesMatchSelectedCheckboxes()).toBe(true);
@@ -245,6 +267,9 @@ describe('Testing experiments-table.js', function() {
             clickRandomFilePairCheckboxes();
             expect(selectedFilesMatchSelectedCheckboxes()).toBe(true);
         }
+
+        console.log("Initially selected files:\n", SelectedFilesController.objectToCompleteList(originalSelectedFiles));
+        console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", SelectedFilesController.objectToCompleteList(testExperimentsTable.refs.controller.state.selectedFiles));
 
     });
 

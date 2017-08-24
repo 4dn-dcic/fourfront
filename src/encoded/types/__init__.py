@@ -1,6 +1,13 @@
 """init.py lists all the collections that do not have a dedicated types file."""
 
 from snovault.attachment import ItemWithAttachment
+
+from pyramid.security import (
+    Allow,
+    Deny,
+    Everyone,
+)
+
 from snovault import (
     # calculated_property,
     collection,
@@ -29,9 +36,8 @@ class AnalysisStep(Item):
     """The AnalysisStep class that descrbes a step in a workflow."""
 
     item_type = 'analysis_step'
-    name_key = 'name'
     schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded = ['software_used', 'qa_stats_generated']
+    embedded = ['software_used.*', 'qa_stats_generated.*']
 
 
 @collection(
@@ -47,7 +53,34 @@ class Award(Item):
     item_type = 'award'
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
-    embedded = ['pi']
+    embedded = ['pi.*']
+
+    # define some customs acls; awards can only be created/edited by admin
+    ONLY_ADMIN_VIEW = [
+        (Allow, 'group.admin', ['view', 'edit']),
+        (Allow, 'group.read-only-admin', ['view']),
+        (Allow, 'remoteuser.INDEXER', ['view']),
+        (Allow, 'remoteuser.EMBED', ['view']),
+        (Deny, Everyone, ['view', 'edit'])
+    ]
+
+    SUBMITTER_CREATE = []
+
+    ALLOW_EVERYONE_VIEW = [
+        (Allow, Everyone, 'view'),
+    ]
+
+    ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT = [
+        (Allow, Everyone, 'view'),
+    ] + ONLY_ADMIN_VIEW
+
+    STATUS_ACL = {
+        'current': ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT,
+        'deleted': ONLY_ADMIN_VIEW,
+        'revoked': ALLOW_EVERYONE_VIEW,
+        'replaced': ALLOW_EVERYONE_VIEW,
+        'inactive': ALLOW_EVERYONE_VIEW
+    }
 
 
 @collection(
@@ -88,7 +121,7 @@ class Document(ItemWithAttachment, Item):
 
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
-    embedded = ['lab', 'award', 'submitted_by']
+    embedded = []
 
     def display_title(self):
         if self.properties.get('attachment'):
@@ -110,7 +143,7 @@ class Enzyme(Item):
     item_type = 'enzyme'
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
-    embedded = ['enzyme_source']
+    embedded = ['enzyme_source.title']
 
 
 @collection(
@@ -149,9 +182,31 @@ class Organism(Item):
         'title': 'Protocols',
         'description': 'Listing of protocols',
     })
-class Protocol(Item):
+class Protocol(Item, ItemWithAttachment):
     """Protocol class."""
 
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
+    embedded = []
+
+    def display_title(self):
+        if self.properties.get('attachment'):
+            attach = self.properties['attachment']
+            if attach.get('download'):
+                return attach['download']
+
+
+@collection(
+    name='sysinfos',
+    unique_key='sysinfo:name',
+    properties={
+        'title': 'Sysinfo',
+        'description': 'Just for internal use',
+    })
+class Sysinfo(Item):
+    """sysinfo class."""
+
+    item_type = 'sysinfo'
+    schema = load_schema('encoded:schemas/sysinfo.json')
+    name_key = 'name'
     embedded = []

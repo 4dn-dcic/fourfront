@@ -10,7 +10,7 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 
-describe('Testing item-view.js', function() {
+describe('Testing DefaultItemView.js', function() {
     var React, ItemView, testItem, TestUtils, FetchContext, context, schemas, _, Wrapper, sinon, server;
 
     beforeAll(function(){
@@ -47,8 +47,8 @@ describe('Testing item-view.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        ItemView = require('./../item-pages/item-view');
-        var { Item } = require('./../item-pages/item');
+        ItemView = require('./../item-pages/DefaultItemView').default;
+        var Item = require('./../item-pages/item').default;
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');
         Wrapper = React.createClass({
@@ -76,8 +76,8 @@ describe('Testing item-view.js', function() {
         expect(defDescs.length).toBeLessThan(19);
     });
 
-    it('has a good title', function() {
-        var titleLine = TestUtils.findRenderedDOMComponentWithClass(testItem, 'subtitle');
+    it('has an accession', function() {
+        var titleLine = TestUtils.findRenderedDOMComponentWithClass(testItem, 'accession');
         var exptHeading = titleLine;
         expect(exptHeading.textContent).toEqual('ENCLB055ZZZ');
     });

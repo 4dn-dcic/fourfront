@@ -2,7 +2,7 @@
 .facet-charts {
     transition: opacity 0.75s;
     opacity : 1;
-    margin-top: 64px;
+    margin-top: 45px;
     &.loading {
         opacity : 0.125;
         text-align: center;
@@ -162,6 +162,7 @@
         color: #fff;
         font-weight: 500;
         padding: 0 12px;
+        background-color: $facetlist-selected-term-color;
         > .icon-container {
             padding-left: 7px;
             cursor: pointer;
@@ -420,6 +421,8 @@
     .chart-bar {
         transition: transform .75s ease-out, opacity .5s, width .75s ease-out;
         position: absolute;
+        //outline-offset: 5px;
+        //outline: 2px solid transparent;
 
         .bar-top-label {
             display: block;
@@ -437,7 +440,14 @@
 
         .bar-part {
             opacity: 1;
-            transition: opacity 0.5s, height .75s ease-out, width .75s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s, -webkit-filter .5s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s, filter .5s;
+            //outline-offset: 5px;
+            //outline: 1px solid transparent;
+            box-shadow : none;
+            width: 100%;
+            transform: translate3d(0,0,0);
             /*
             &:first-of-type {
                 border-top-left-radius: 3px;
@@ -449,6 +459,30 @@
                 border-bottom-right-radius: 3px;
             }
             */
+
+            &.hover {
+                cursor: pointer;
+            }
+            
+            &.hover,
+            &.selected {
+                //outline-color: rgba(0,0,0,0.25);
+                box-shadow: inset 0 0 0 3px rgba(0,0,0,0.25);
+                //outline-color: transparent !important;
+            }
+        }
+
+        &.highlight {
+            > .bar-part:not(.highlight) {
+                opacity : 0.33;
+                filter: saturate(0%);
+                -webkit-filter: saturate(0%);
+            }
+        }
+
+        &:hover,
+        &.selected {
+
         }
 
         > rect {
@@ -457,7 +491,7 @@
         }
 
     }
-
+    /*
     &.highlight {
         .chart-bar > rect {
             fill-opacity: 0.4;
@@ -488,14 +522,18 @@
         .bar-part {
             opacity: 1;
             &.multiple-parts {
-                opacity : 0.1;
+                //opacity : 0.1;
                 border-radius: 0;
                 &.highlight {
-                    opacity : 1;
+                    //opacity : 1;
+                    outline-color: rgba(0,0,0,0.2);
+                    //outline-offset: 5px;
+                    //border-color: rgba(0,0,0,0.25);
                 }
             }
         }
     }
+    */
 
     .silhouette {
         opacity : 0.75;
@@ -520,6 +558,15 @@
 
     position: relative;
 
+    .dropdown-heading {
+        margin-bottom: 4px;
+        margin-top: 10px;
+        font-weight: 400;
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+
     .overlay {
         position: absolute;
         left: 0;
@@ -533,7 +580,40 @@
             transform-origin: 0 100%;
             z-index: 100;
             @media screen and (min-width: 1250px){
-                left: -10px;
+                left: -5px;
+            }
+
+            > .row {
+                //text-align: center;
+                //display: inline-block;
+                > div:first-child {
+                    padding-right: 5px;
+                }
+                > div:last-child {
+                    padding-left: 3px;
+                    .dropdown.btn-group {
+                        width: 100%;
+                        .dropdown-toggle.btn.btn-xs {
+                            width: 100%;
+                            padding-right: 20px;
+                            text-align: left;
+                            padding-left: 10px;
+
+                            span.caret {
+                                position: absolute;
+                                top: 9px;
+                                right: 10px;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .dropdown-heading {
+                margin: 0;
+                line-height: 22px;
+                white-space: nowrap;
+                text-align: right;
             }
 
             .dropdown-toggle.btn.btn-xs {
@@ -544,6 +624,7 @@
             .dropdown-menu {
                 transform: rotate3d(0,0,1,90deg);
                 top: 54px;
+                left: 10px;
                 z-index: 100;
             }
         }
@@ -561,11 +642,17 @@
                 margin-right: 10px;
                 display: inline-block;
                 margin-top: -5px;
-                vertical-align: middle;
+                vertical-align: baseline;
                 text-align: right;
             }
             i.icon {
+                vertical-align: middle;
+                margin-right: 7px;
+                font-size: 15px;
                 transition : transform .75s ease-out, opacity .75s ease-out;
+            }
+            > span.toggle-container {
+                vertical-align: middle;
             }
             &.no-click {
                 cursor: default;
@@ -591,15 +678,51 @@
     }
 
     .chart-aside{
+
+        .show-type-change-section {
+            padding-bottom: 10px;
+        }
+        
+        .x-axis-right-label {
+            > .row > div {
+                &:last-child {
+                    padding-left: 5px;
+                }
+                &:first-child {
+                    padding-right: 5px;
+                }
+            }
+            .dropdown-heading {
+                margin: 0;
+                line-height: 33px;
+                white-space: nowrap;
+                text-align: right;
+                font-weight: 400;
+            }
+        }
         .dropdown {
             width : 100%;
             > button {
                 width: 100%;
                 text-align: left;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding-right: 20px;
                 span.caret {
                     position: absolute;
                     right: 12px;
                     top: 14px;
+                }
+            }
+            &.btn-group-xs {
+                > button {
+                    span.caret {
+                        top: 9px;
+                    }
+                    padding-left: 12px;
+                    padding-right: 24px;
+                    overflow-x: hidden;
+                    text-overflow: ellipsis;
                 }
             }
         }
@@ -607,6 +730,7 @@
             margin-bottom: 8px;
             border-bottom: 1px dotted #eee;
             overflow-y: auto;
+            overflow-x: hidden;
         }
     }
 
@@ -624,6 +748,13 @@
             margin : 0;
             font-weight: 600;
         }
+    }
+
+    .dropdown-open-title {
+        font-weight: 400;
+        line-height: 1rem;
+        font-size: 1.1rem;
+        vertical-align: text-bottom;
     }
 
     .controls {
@@ -912,19 +1043,49 @@
 
 /**** Legend Style *****/
 
+.legend-expand-container {
+    &.expanded {
+        position: absolute;
+        top: 0;
+        z-index: 10;
+        background: #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.33);
+    }
+}
+
 .chart-color-legend {
     /*
     position: absolute;
     right: 20px;
     top: 0;
     */
-    padding: 14px 16px 14px;
+    padding: 9px 12px 9px;
     background-color: #fff;
-    min-width: 200px;
+    min-width: 160px;
     opacity : 1;
     transition: opacity .75s;
     //border: 1px solid #eee;
     //border-radius: 1px;
+
+    > .expand-toggle {
+        float: right;
+        width: 20px;
+        line-height: 20px;
+        margin-right: -2px;
+        opacity : 0.33;
+        cursor: pointer;
+        &:hover {
+            opacity : 1;
+        }
+    }
+
+    &.expanded {
+        background: #fff;
+        padding-top: 11px;
+        > .expand-toggle {
+            opacity: 1;
+        }
+    }
 
     .legend-title {
         margin-bottom: 1px;
@@ -938,7 +1099,8 @@
         margin-right: 6px;
         position: relative;
         top: 1px;
-        transition: opacity .25s;
+        background-color: transparent; // Default
+        transition: opacity .25s, background-color .5s ease-out;
         //border: 1px solid #000;
     }
 
@@ -968,6 +1130,378 @@
 }
 
 
+
+
+/************************/
+/**** Workflow Chart ****/
+/************************/
+
+$workflow-io-node-height : 28px;
+$workflow-io-node-lineheight: 18px;
+$workflow-step-node-height: 40px;
+$workflow-step-node-lineheight: 18px;
+
+.worfklow-chart-outer-container {
+
+    .workflow-chart-inner-container {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        overflow-y: hidden;
+        overflow-x: visible;
+
+        .scroll-container-wrapper {
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        .scroll-container {
+
+            overflow: hidden;
+            position: relative;
+            transition: height .5s ease-out;
+
+            .nodes-layer-wrapper,
+            .edges-layer-wrapper {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+
+            .nodes-layer-wrapper {
+                pointer-events: none;
+                .nodes-layer {
+                    pointer-events: inherit;
+                    position: relative;
+                    
+                    .node {
+                        pointer-events: all;
+                        position: absolute;
+                        transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out;
+                        transform: translate3d(0,0,0);
+                        cursor: pointer;
+
+                        > .inner {
+
+                            .node-visible-element {
+                                background-color: #ddd;
+                                white-space: nowrap;
+
+                                > .node-name {
+                                    padding-left: 2px;
+                                    padding-right: 5px;
+                                    display: inline-block;
+                                    max-width: 100%;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                }
+
+                                i.icon.icon-fw {
+                                    margin-right: 5px;
+                                    margin-left: 1px;
+                                }
+                            }
+
+                            .above-node-title ,
+                            .below-node-title {
+                                pointer-events: none;
+                                position: absolute;
+                                left : 0px;
+                                transform: translate3d(0px,0px,0);
+                                transition: opacity .25s ease-out, transform .33s ease-out;
+                                opacity: 1;
+                                font-size: 75%;
+                                line-height: 12px;
+                            }
+
+                            .above-node-title {
+                                top : -16px;
+                            }
+
+                            .below-node-title {
+                                bottom : -16px;
+                                transform: translate3d(0px,0px,0);
+                                .lighter {
+                                    opacity: 0.66;
+                                }
+                            }
+                        }
+
+                        &[data-node-selected="true"],
+                        &[data-node-related="true"],
+                        &:hover {
+                            > .inner {
+                                .above-node-title {
+                                    transform: translate3d(0px,-6px,0);
+                                }
+                                .below-node-title {
+                                    transform: translate3d(0px,6px,0);
+                                    .lighter {
+                                        opacity: 1;
+                                    }
+                                }
+                            }
+                        }
+
+                        &.disabled {
+                            opacity : 0.33;
+                            &.node-type-input,
+                            &.node-type-output {
+                                &:before {
+                                    background-color: #ddd !important;
+                                }
+                            }
+                        }
+
+                        &.node-type-step {
+                            margin-top: - ($workflow-step-node-height / 2);
+                            outline: 2px solid transparent;
+                            outline-offset: 4px;
+                            transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out, outline-color .2s;
+
+                            > .inner {
+                                
+                                .node-visible-element {
+                                    height : $workflow-step-node-height;
+                                    line-height: $workflow-step-node-lineheight;
+                                    padding-top: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
+                                    padding-bottom: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
+                                    
+                                    background-color: #b0c4da;
+                                    border-radius: 2px;
+                                    border: 1px solid rgba(0,0,0,0.2);
+                                    > .node-name {
+                                        padding-left: 10px;
+                                        padding-right: 4px;
+                                    }
+                                }
+                            }
+
+                            &:hover{
+                                outline-color: #ddd;
+                            }
+
+                            &[data-node-selected="true"]{
+                                outline-color: #000;
+                            }
+
+                        }
+
+                        &.node-type-input,
+                        &.node-type-output {
+                            
+                            margin-top: - ($workflow-io-node-height / 2);
+
+                            /*
+                            &:before, &:after {
+                                display: inline-block;
+                                content: '';
+                                width: 10px;
+                                height: $workflow-io-node-height;
+                                background: transparent;
+                                vertical-align: middle;
+                            }
+                            &:before {
+                                border-right: 10px solid #ddd;
+                                border-top: $workflow-io-node-height solid transparent;
+                            }
+                            &:after {
+                                border-left: 10px solid #ddd;
+                                border-bottom: $workflow-io-node-height solid transparent;
+                            }
+                            */
+                            &:before {
+                                display : block;
+                                content : ' ';
+                                position: absolute;
+                                left: 0;
+                                top: 0;
+                                bottom: 0;
+                                right: 0;
+                                background-color: #e0e0e0;
+                                transform: skewX(25deg);
+                                z-index: 1;
+                                outline: 2px solid transparent;
+                                outline-offset: 4px;
+                                transition: outline-color .2s, outline-width .2s;
+                            }
+                            > .inner {
+                                
+                                .node-visible-element {
+                                    height : $workflow-io-node-height;
+                                    line-height: $workflow-io-node-lineheight;
+                                    padding-top: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
+                                    padding-bottom: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
+                                    display: inline-block;
+                                    vertical-align: middle;
+                                    position: relative;
+                                    z-index: 5;
+                                    background-color: transparent;
+                                    > .node-name {
+                                        padding-left: 7px;
+                                    }
+                                }
+
+                                .above-node-title {
+                                    transform: translate3d(-6px,0px,0);
+                                }
+                                .below-node-title {
+                                    transform: translate3d(6px,0px,0);
+                                }
+                                
+                            }
+
+                            &[data-node-selected="true"],
+                            &[data-node-related="true"],
+                            &:hover {
+                                > .inner {
+                                    .above-node-title {
+                                        transform: translate3d(-6px,-6px,0);
+                                    }
+                                    .below-node-title {
+                                        transform: translate3d(6px,5px,0);
+                                    }
+                                }
+                            }
+
+                            &:hover:not(.disabled){
+                                &:before {
+                                    outline-color: #ddd;
+                                }
+                            }
+                            &[data-node-selected="true"]:not(.disabled){
+                                &:before {
+                                    outline-color: #000;
+                                }
+                            }
+                            &[data-node-related="true"]:not(.disabled):not([data-node-selected="true"]){
+                                &:before {
+                                    outline-color: rgba(0,0,0,0.55);
+                                    outline-width: 1px;
+                                    outline-style: dashed;
+                                }
+                            }
+                        }
+
+                        &.node-type-output {
+                            &[data-node-global="true"] {
+                                &:before {
+                                    background-color: #cde2e1;
+                                }
+                                .workflow-viewing-basic &:after {
+                                    content: '';
+                                    top: 50%;
+                                    margin-top: -1px;
+                                    height: 1px;
+                                    width: 10px;
+                                    background-color: #555;
+                                    position: absolute;
+                                    right: -15px;
+                                }
+                                .workflow-viewing-basic &[data-node-selected="true"]:after{
+                                    height : 2px;
+                                }
+                            }
+                        }
+                        &.node-type-input {
+                            &[data-node-global="true"] {
+                                &:before {
+                                    background-color: #d1cde2;
+                                }
+                                &[data-node-type-detail="Workflow Parameter"] {
+                                    &:before {
+                                        // background-color: #d1cde2;
+                                        background-color: #cfdff1;
+                                    }
+                                }
+                                &:after {
+                                    content: '';
+                                    top: 50%;
+                                    margin-top: -0.5px;
+                                    height: 1px;
+                                    width: 10px;
+                                    background-color: #555;
+                                    position: absolute;
+                                    left: -15px;
+                                }
+                                &[data-node-selected="true"]:after {
+                                    height: 2px;
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            .edges-layer-wrapper {
+                pointer-events: none;
+                .edges-layer {
+                    pointer-events: inherit;
+
+                    path.pathArrow-marker {
+                        fill: #333;
+                        stroke: none;
+                    }
+
+                    path {
+                        pointer-events: all;
+                        stroke: #888;
+                        stroke: rgba(58,58,58,0.75);
+                        fill: none;
+                        stroke-width: 1px;
+                        stroke-width: 1.5px;
+                        transition: stroke-width .3s;
+
+                        &:hover {
+                            stroke: #000;
+                            stroke-width: 2px;
+                        }
+                        &[data-edge-selected="true"]{
+                            stroke-width: 3px;
+                            stroke: #000;
+                        }
+                        &[data-edge-related="true"]:not([data-edge-selected="true"]){
+                            stroke-width: 3px;
+                            stroke: rgba(0,0,0,0.75);
+                        }
+                        &.disabled {
+                            stroke-width: 1px;
+                            //stroke: #bbb;
+                            opacity: 0.33;
+                        }
+                    }
+
+                }
+            }
+
+        }
+
+    }
+
+}
+
+.workflow-view-controls-container {
+    margin-top: -10px;
+    font-size: 1rem;
+    div.inline-block {
+        vertical-align: middle;
+    }
+    .show-params-checkbox-container {
+        padding-right: 12px;
+        vertical-align: middle;
+        div.checkbox {
+            margin: 0;
+            input[type="checkbox"]{
+                margin-top: 6px;
+            }
+        }
+    }
+}
+
+
+
+
 /**** Cursor Component(s) ****/
 
 .cursor-component-container {
@@ -978,8 +1512,12 @@
     left: 0;
     //display: none !important;
     opacity: 1;
-    transition: opacity .25s, transform .05s linear;
-    pointer-events: none;
+    transition: opacity .25s, transform .05s linear, margin-left 0s .05s;
+    //pointer-events: none;
+
+    &:not(.sticky) {
+        pointer-events: none;
+    }
 
     .mosaic-cursor-body {
         background-color: #fff;
@@ -1069,6 +1607,21 @@
                 padding-right: 6px;
                 padding-left: 2px;
                 transition: color .5s;
+                height: 25px;
+            }
+            .primary-count {
+                margin-left: 10px;
+            }
+        }
+
+        .actions.buttons-container {
+            margin-left: 0;
+            margin-right: 0;
+            > .button-container {
+                padding-left: 7px;
+                padding-right: 7px;
+                padding-bottom: 7px;
+                padding-top: 3px;
             }
         }
 
@@ -1118,4 +1671,10 @@
 
     }
 
+}
+
+/*** ToolTip Extend ***/
+
+.__react_component_tooltip {
+    z-index: 9999 !important;
 }

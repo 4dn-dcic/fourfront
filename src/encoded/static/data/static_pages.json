@@ -4,52 +4,110 @@
         "home"  : true,
         "about" : true,
 
+
+
         "help"  : {
-            "title"     : "Getting Started",
-            "directory" : "/src/encoded/static/data/help",
+            "title": "Introduction to 4DN Metadata",
+            "directory" : "/docs/public/help",
             "sections"  : [
                 {
-                    "filename" : "gettingStarted.html",
-                    "toc-title" : "Getting Started"
-                },
-                {
-                    "title" : "Metadata Structure",
-                    "filename" : "metadataStructure1.html"
+                    "filename" : "introduction.md",
+                    "title": null
                 },
                 {
                     "filename" : "carousel-place-holder",
                     "content" : "placeholder: <SlideCarousel />"
                 },
-                {   "filename" : "metadataStructure2.html"  },
                 {
-                    "title" : "Data Submission via Spreadsheet",
-                    "filename" : "submissionXLS.html"
-                },
-                {   "title" : "REST API", "filename" : "restAPI.html" }
+                    "filename" : "introduction2.md",
+                    "title": null
+                }
             ],
             "table-of-contents" : {
-                "enabled" : true
+                "enabled" : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth": 1
             }
         },
 
-        "help/submitting" : {
-            "title"     : "Submitting Metadata and Data files to 4DN-DCIC",
+        "help/account-creation" : {
+            "title": "Creating an Account",
             "directory" : "/docs/public/metadata-submission",
             "sections"  : [
                 {
-                    "filename"  : "introduction.md",
-                    "toc-title" : "Introduction"
+                    "filename"  : "account_creation.md",
+                    "title" : null
+                }
+            ]
+        },
+
+        "help/getting-started" : {
+            "title": "Getting Started with Submissions",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "filename"  : "getting_started.md",
+                    "title" : null
+                }
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth": 1
+            }
+        },
+
+        "help/biosample": {
+            "title": "Biosample Metadata",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "title" : null,
+                    "filename"  : "biosample_metadata.md"
+                }
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 2,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth"    : 1
+            }
+        },
+
+        "help/web-submission": {
+            "title": "Online Submissions",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "title" : null,
+                    "filename"  : "web_submission.md"
+                }
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth": 1
+            }
+        },
+
+
+        "help/spreadsheet": {
+            "title": "Spreadsheet Submissions",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "title"     : null,
+                    "filename"  : "excel_submission.md"
                 },
                 {
-                    "title"     : "Getting a Submitter Account",
-                    "filename"  : "getting_added_as_user.md"
-                },
-                {
-                    "title"     : "Metadata Submission by Excel Workbook",
-                    "filename"  : "submission_using_excel_as_template.md"
-                },
-                {
-                    "title"     : "Information About Schemas",
+                    "title"     : null,
                     "filename"  : "schema_info.md"
                 }
             ],
@@ -57,8 +115,221 @@
                 "enabled"       : true,
                 "header-depth"  : 3,
                 "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
-                "include-top-link" : false
+                "include-top-link" : false,
+                "skip-depth": 1
             }
+        },
+
+        "help/rest-api": {
+            "title": "The REST-API",
+            "directory" : "/docs/public/metadata-submission",
+            "sections"  : [
+                {
+                    "title" : null,
+                    "filename"  : "rest_api_submission.md"
+                }
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 4,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false,
+                "skip-depth"    : 1
+            }
+        },
+
+        "error/login-failed"  : {
+            "title": "Login Failed",
+            "directory" : "/src/encoded/static/data",
+            "sections"  : [
+                {
+                    "filename" : "no-account",
+                    "content" : "There is no account registered with the provided email. Access is restricted to members of the 4DN consortium."
+                },
+                {
+                    "filename" : "new-account-registration",
+                    "content" : "<b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/account-creation\">creating an account</a></b>."
+                }
+            ]
+        },
+
+
+        "nofic-matrix/2017-05"  : {
+            "title"     : "NOFIC Matrix",
+            "directory" : "/src/encoded/static/data",
+            "sections"  : [
+                {
+                    "id" : "introduction",
+                    "title" : "Introduction",
+                    "content" : "This matrix shows a cross-section of experiment methods & groups vs cell lines. "
+                },
+                {
+                    "id" : "nofic-matrix-1",
+                    "filename" : "nofic-collab.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [1,2],
+                        "xaxisRows" : [3],
+                        "titleCell" : [1,4],
+                        "skipRows"  : [22,23,24],
+                        "startCell" : [3,5],
+                        "endCell"   : [8,21],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-2",
+                    "filename" : "nofic-collab.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [1,2],
+                        "xaxisRows" : [3],
+                        "titleCell" : [1,24],
+                        "skipRows"  : [22,23,24],
+                        "startCell" : [3,25],
+                        "endCell"   : [8,32],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                }
+            ]
+        },
+
+        "joint-analysis-data-plans"  : {
+            "title"     : "Joint Analysis Data",
+            "directory" : "/src/encoded/static/data",
+            "sections"  : [
+                {
+                    "id" : "legend",
+                    "title" : null,
+                    "filename" : "joint_data_analysis-legend.html"
+                },
+                {
+                    "id" : "nofic-matrix-1",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [4],
+                        "titleCell" : [2,3],
+                        "skipRows"  : [],
+                        "startCell" : [4,5],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-2",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [58],
+                        "titleCell" : [2,57],
+                        "skipRows"  : [],
+                        "startCell" : [4,59],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-3",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [77],
+                        "titleCell" : [2,76],
+                        "skipRows"  : [],
+                        "startCell" : [4,78],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-4",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [95],
+                        "titleCell" : [2,94],
+                        "skipRows"  : [],
+                        "startCell" : [4,96],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                }
+            ]
+        },
+
+        "joint-analysis-data-plans/dev"  : {
+            "title"     : "Joint Analysis Data",
+            "directory" : "/src/encoded/static/data",
+            "sections"  : [
+                {
+                    "id" : "legend",
+                    "title" : null,
+                    "filename" : "joint_data_analysis-legend.html"
+                },
+                {
+                    "id" : "nofic-matrix-1",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [4],
+                        "titleCell" : [2,3],
+                        "skipRows"  : [],
+                        "startCell" : [4,5],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-2",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [58],
+                        "titleCell" : [2,57],
+                        "skipRows"  : [],
+                        "startCell" : [4,59],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-3",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [77],
+                        "titleCell" : [2,76],
+                        "skipRows"  : [],
+                        "startCell" : [4,78],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                },
+                {
+                    "id" : "nofic-matrix-4",
+                    "filename" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [95],
+                        "titleCell" : [2,94],
+                        "skipRows"  : [],
+                        "startCell" : [4,96],
+                        "yaxisTitle" : "Method",
+                        "xaxisTitle" : "Cell Line"
+                    }
+                }
+            ]
         }
 
     }

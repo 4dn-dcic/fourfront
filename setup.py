@@ -16,10 +16,11 @@ requires = [
     'WSGIProxy2',
     'WebTest',
     'boto',
-    'botocore',
+    'botocore==1.5.71',
     'jmespath',
     'boto3',
-    'elasticsearch',
+    'elasticsearch>=5.0.0,<6.0.0',
+    'elasticsearch_dsl>=5.0.0,<6.0.0',
     'lucenequery',
     'future',
     'humanfriendly',
@@ -46,6 +47,8 @@ requires = [
     'xlrd',
     'zope.sqlalchemy',
     'pyJWT',
+    # add it here for some command line tools
+    'pytest>=2.4.0',
 ]
 
 if sys.version_info.major == 2:
@@ -55,7 +58,6 @@ if sys.version_info.major == 2:
     ])
 
 tests_require = [
-    'pytest>=2.4.0',
     'pytest-bdd',
     'pytest-mock',
     'pytest-splinter',
@@ -93,20 +95,22 @@ setup(
         add-date-created = encoded.commands.add_date_created:main
         check-rendering = encoded.commands.check_rendering:main
         deploy = encoded.commands.deploy:main
-        extract_test_data = encoded.commands.extract_test_data:main
+        extract-test-data = encoded.commands.extract_test_data:main
         es-index-data = encoded.commands.es_index_data:main
         generate-ontology = encoded.commands.generate_ontology:main
+        load-ontology = encoded.commands.load_ontology_terms:main
         import-data = encoded.commands.import_data:main
         jsonld-rdf = encoded.commands.jsonld_rdf:main
         migrate-files-aws = encoded.commands.migrate_files_aws:main
         profile = encoded.commands.profile:main
         spreadsheet-to-json = encoded.commands.spreadsheet_to_json:main
-        generate-annotations = encoded.commands.generate_annotations:main
-        index-annotations = encoded.commands.index_annotations:main
         migrate-attachments-aws = encoded.commands.migrate_attachments_aws:main
         migrate-dataset-type = encoded.commands.migrate_dataset_type:main
         load-data = encoded.commands.load_data:main
         dropdb = encoded.commands.dropdb:main
+        verify-item = encoded.commands.verify_item:main
+        clone-beanstalk = encoded.commands.clone_beanstalk_env:main
+        rm-beanstalk = encoded.commands.rm_beanstalk_env:main
 
         [paste.app_factory]
         main = encoded:main

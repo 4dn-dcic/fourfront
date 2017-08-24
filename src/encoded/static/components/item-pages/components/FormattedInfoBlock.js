@@ -1,85 +1,88 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var { ajax, console, isServerSide } = require('./../../util');
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import { ajax, console, isServerSide, analytics } from './../../util';
 
 /**
  * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.
  * Encapsulates all required ajax/aggregation for fetching array of fields/data.
  * Available via FormattedInfoBlock.List
  * 
- * @param details (optional) - Array of complete details to display.
- * @param endpoints (required if details is blank) - Array of endpoints to AJAX details from.
- * @param renderItem (required) - Render function for items. Should return a FormattedInfoBlock component.
- * @param fallbackMsg (optional) - What to display if both details and endpoints don't exist or are empty.
- * @param propertyName (optional) - Descriptive unique ID of property/ies displayed.
- * @param ajaxCallback (optional) - Callback to execute with details, if/after they are fetched w/ AJAX. 
+ * @namespace
+ * @type {Component}
+ * @memberof module:item-pages/components.FormattedInfoBlock
+ * @prop {Object[]} details         - Array of complete details to display.
+ * @prop {string[]} endpoints       - Array of endpoints to AJAX details from.
+ * @prop {function} renderItem      - Render function for items. Should return a FormattedInfoBlock component.
+ * @prop {Component|Element|string} fallbackMsg - What to display if both details and endpoints don't exist or are empty.
+ * @prop {string} [propertyName]    - Descriptive unique ID of property/ies displayed.
+ * @prop {function} [ajaxCallback]  - Callback to execute with details, if/after they are fetched w/ AJAX. 
  */
-var FormattedInfoBlockList = React.createClass({
+class FormattedInfoBlockList extends React.Component {
 
-    statics : {
-        
-        /**
-         * Same functionality as @see FormattedInfoBlock.ajaxPropertyDetails, catered to a list.
-         * Use (FormattedInfoBlock.List.ajaxPropertyDetails.)bind/call/apply and from another (e.g. parent) React component.
-         * 
-         * @param {string[]} endpoints - Array of endpoints to get data from.
-         * @param {string} propertyName - A unique id to use as state property suffix for saving results, e.g. 'labs' for state.details_labs.
-         * @param {function} [callback] - Optional callback, takes results as parameter.
-         */
-        ajaxPropertyDetails : function(endpoints, propertyName, callback = null){
-            if (!Array.isArray(endpoints) || endpoints.length === 0) return false;
+    /**
+     * Same functionality as @see FormattedInfoBlock.ajaxPropertyDetails, catered to a list.
+     * Use (FormattedInfoBlock.List.ajaxPropertyDetails.)bind/call/apply and from another (e.g. parent) React component.
+     * 
+     * @param {string[]} endpoints - Array of endpoints to get data from.
+     * @param {string} propertyName - A unique id to use as state property suffix for saving results, e.g. 'labs' for state.details_labs.
+     * @param {function} [callback] - Optional callback, takes results as parameter.
+     */
+    static ajaxPropertyDetails(endpoints, propertyName, callback = null){
+        if (!Array.isArray(endpoints) || endpoints.length === 0) return false;
 
-            var results = [];
-            endpoints.forEach(function(endpoint, i){
+        var results = [];
+        endpoints.forEach(function(endpoint, i){
 
-                console.log('Obtaining ' + propertyName + '[' + i + '] via AJAX from ' + endpoint);
-                ajax.load(endpoint + '?format=json&frame=embedded', function(result){
-                    results[i] = result;
-                    console.log('Obtained ' + propertyName + '[' + i + '] via AJAX.');
-                    if (results.length == endpoints.length){
-                        // All loaded
-                        var newState = {};
-                        newState['details_' + propertyName] = results;
-                        this.setState(newState, ()=>{
-                            if (typeof callback == 'function'){
-                                callback(results);
-                            }
-                        });
-                        console.log('Obtained details_'+ propertyName +' (' + results.length + ') via AJAX: ', results);
-                    }
-                }.bind(this), 'GET');
-            }.bind(this));
-        },
+            console.log('Obtaining ' + propertyName + '[' + i + '] via AJAX from ' + endpoint);
+            ajax.load(endpoint + '?format=json&frame=embedded', function(result){
+                results[i] = result;
+                console.log('Obtained ' + propertyName + '[' + i + '] via AJAX.');
+                if (results.length === endpoints.length){
+                    // All loaded
+                    var newState = {};
+                    newState['details_' + propertyName] = results;
+                    this.setState(newState, ()=>{
+                        if (typeof callback === 'function'){
+                            callback(results);
+                        }
+                    });
+                    console.log('Obtained details_'+ propertyName +' (' + results.length + ') via AJAX: ', results);
+                }
+            }.bind(this), 'GET');
+        }.bind(this));
+    }
 
-    },
+    static propTypes = {
+        details         : PropTypes.array,        // Complete detail data for all list items, if available.
+        endpoints       : PropTypes.array,      // Endpoints to use for fetching detail data. Required if details is empty.
+        propertyName    : PropTypes.string,  // Property from which array is gotten.
+        renderItem      : PropTypes.func,      // Function used to render child FormattedInfoBlocks
+        ajaxCallback    : PropTypes.func,    // Optional callback to invoke on recieving ajax'd data, taking results as a param.
+        fallbackMsg     : PropTypes.any,      // Fallback text or component(s) if endpoints not set.
+        loading         : PropTypes.bool,         // Override this.state.loading - only do so if providing details array prop.
+        debug           : PropTypes.bool            // Verbose lifecycle logging.
+    }
 
-    propTypes : {
-        details : React.PropTypes.array,        // Complete detail data for all list items, if available.
-        endpoints : React.PropTypes.array,      // Endpoints to use for fetching detail data. Required if details is empty.
-        propertyName : React.PropTypes.string,  // Property from which array is gotten.
-        renderItem : React.PropTypes.func,      // Function used to render child FormattedInfoBlocks
-        ajaxCallback : React.PropTypes.func,    // Optional callback to invoke on recieving ajax'd data, taking results as a param.
-        fallbackMsg : React.PropTypes.any,      // Fallback text or component(s) if endpoints not set.
-        loading : React.PropTypes.bool,         // Override this.state.loading - only do so if providing details array prop.
-        debug : React.PropTypes.bool            // Verbose lifecycle logging.
-    },
+    static defaultProps = {
+        propertyName : 'property',
+        fallbackMsg : 'Not set'
+    }
 
-    getDefaultProps : function(){
-        return {
-            propertyName : 'property',
-            fallbackMsg : 'Not set'
-        };
-    },
+    static propEndpointsValid(props){
+        return props.endpoints && Array.isArray(props.endpoints) && props.endpoints.length > 0;
+    }
 
-    getInitialState : function(props = this.props){
-        return _.extend(this.getInitialDetailsState(props), {
-            loading : props.loading || (!this.propDetailsValid(props) && this.propEndpointsValid(props) ? true : null)
-        });
-    },
+    static propDetailsValid(props){
+        return (
+            (props.details && Array.isArray(props.details) && props.details.length > 0) &&
+            (!props.endpoints || (FormattedInfoBlockList.propEndpointsValid(props) && props.endpoints.length === props.details.length))
+        );
+    }
 
-    getInitialDetailsState : function(props = this.props){
+    static getInitialDetailsState(props){
         var state = {};
         if (this.propDetailsValid(props)) {
             state['details_' + props.propertyName] = props.details;
@@ -87,34 +90,45 @@ var FormattedInfoBlockList = React.createClass({
             state['details_' + props.propertyName] = null;
         }
         return state;
-    },
+    }
 
-    componentDidMount : function(){
-        if (!this.state['details_' + this.props.propertyName] && this.propEndpointsValid()){
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.render = this.render.bind(this);
+        this.state = _.extend(FormattedInfoBlockList.getInitialDetailsState(props), {
+            'loading' : props.loading || (!FormattedInfoBlockList.propDetailsValid(props) && FormattedInfoBlockList.propEndpointsValid(props) ? true : null),
+            'mounted' : false
+        });
+    }
+
+    componentDidMount(){
+        if (!this.state['details_' + this.props.propertyName] && FormattedInfoBlockList.propEndpointsValid(this.props)){
             FormattedInfoBlockList.ajaxPropertyDetails.call(this, this.props.endpoints, this.props.propertyName, (results) => {
                 this.setState({ loading : false });
                 if (typeof this.props.ajaxCallback === 'function') this.props.ajaxCallback(results);
             });
         }
-        this.hasMounted = true;
-    },
+        this.setState({ mounted : true });
+    }
 
-    componentWillReceiveProps : function(newProps){
+    componentWillReceiveProps(newProps){
         var stateChange = {};
         if (this.props.details !== newProps.details){
-            stateChange = this.getInitialDetailsState(newProps);
+            stateChange = FormattedInfoBlockList.getInitialDetailsState(newProps);
         }
         if (this.props.loading !== newProps.loading && this.state.loading !== newProps.loading){
             stateChange.loading = newProps.loading;
         }
         this.setState(stateChange);
-    },
+    }
 
-    componentDidUpdate : function(prevProps, prevState){
+    componentDidUpdate(prevProps, prevState){
         if (prevState.loading === true && this.state.loading === false && !this.state.transitionDelayElapsed){
             if (this.props.debug) console.info('FormattedInfoBlock.List > updated this.props.loading');
             
-            if (this.hasMounted && !isServerSide()){
+            if (this.state.mounted && !isServerSide()){
                 setTimeout(()=>{
                     if (this.props.debug) console.info('FormattedInfoBlock.List > setting state.transitionDelayElapsed');
                     this.setState({ transitionDelayElapsed : true });
@@ -122,22 +136,11 @@ var FormattedInfoBlockList = React.createClass({
             }
             
         }
-    },
+    }
 
-    propEndpointsValid : function(props = this.props){
-        return props.endpoints && Array.isArray(props.endpoints) && props.endpoints.length > 0;
-    },
+    render(){
 
-    propDetailsValid : function(props = this.props){
-        return (
-            (props.details && Array.isArray(props.details) && props.details.length > 0) &&
-            (!props.endpoints || (this.propEndpointsValid() && props.endpoints.length === props.details.length))
-        );
-    },
-
-    render: function(){
-
-        if (!this.propDetailsValid() && !this.propEndpointsValid() && !this.state.loading){
+        if (!FormattedInfoBlockList.propDetailsValid(this.props) && !FormattedInfoBlockList.propEndpointsValid(this.props) && !this.state.loading){
             return (
                 <span className="not-set">{ this.props.fallbackMsg }</span>
             );
@@ -173,220 +176,250 @@ var FormattedInfoBlockList = React.createClass({
         );
     }
 
-});
+}
 
-var FormattedInfoBlock = module.exports = React.createClass({
+/**
+ * Formats a lab, award, or potentially other object to appear in a small rectangle that can be included in a sidebar.
+ * Also offers mix-in functions to help AJAX in the required details to the parent component's state.
+ *
+ * Also contains FormattedInfoBlock.List which is meant to display a list of FormattedInfoBlocks, and potentially AJAX in details for them.
+ *
+ * @class FormattedInfoBlock
+ * @type {Component}
+ */
+export class FormattedInfoBlock extends React.Component {
 
-    statics : {
+    static List = FormattedInfoBlockList
 
-        List : FormattedInfoBlockList, // Extension/wrapper component to house multiple blocks in a <UL> list.
-
-        /**
-         * Set a parent component's state to have 'details_' + propertyName data fetched via AJAX.
-         * Must supply 'this' from parent component, via .call/.apply/.bind(this, args...),
-         * AKA use like a mixin.
-         * 
-         * @param {string} endpoint - REST endpoint to get from. Usually a '@id' field in schema-derived JSON data.
-         * @param {string} propertyName - The second part of state variable to save results into, after 'details_'. E.g. 'lab' for 'details_lab'.
-         * @param {function} [callback] - Optional callback.
-         * 
-         * @example
-         * componentDidMount : function(){
-         *     if (typeof this.props.context.lab == 'string' && this.props.context.lab.length > 0){
-         *         FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.lab, 'lab');
-         *     }
-         * },
-         */
-        ajaxPropertyDetails : function(endpoint, propertyName, callback = null){
-            console.info('Obtaining details_' + propertyName + ' via AJAX.');
-            ajax.load(endpoint + '?format=json&frame=embedded', function(result){
-                var newStateAddition = {};
-                newStateAddition['details_' + propertyName] = result;
-                this.setState(newStateAddition, ()=>{
-                    if (typeof callback == 'function'){
-                        callback(result);
-                    }
-                });
-                console.info('Obtained details_' + propertyName + ' via AJAX:', result);
-            }.bind(this), 'GET', function(error){
-                var newStateAddition = {};
-                newStateAddition['details_' + propertyName] = {
-                    'error' : true,
-                    'body' : error
-                };
-                this.setState(newStateAddition);
-            }.bind(this));
-        },
-
-        /** Use like a mixin from a component which parents a FormattedInfoBlock(s) */
-        onMountMaybeFetch : function(propertyName = 'lab', contextProperty = this.props.context.lab, cb = null){
-            if (typeof contextProperty == 'string' && contextProperty.length > 0){
-                FormattedInfoBlock.ajaxPropertyDetails.call(this, contextProperty, propertyName, cb);
-                return true;
-            } 
-            if (contextProperty && typeof contextProperty === 'object'){
-                if (
-                    _.keys(contextProperty).length <= 3 &&
-                    typeof contextProperty.link_id === 'string' &&
-                    typeof contextProperty.display_title === 'string'
-                ){
-                    FormattedInfoBlock.ajaxPropertyDetails.call(
-                        this, contextProperty.link_id.replace(/~/g,'/'), propertyName, cb
-                    );
-                    return true;
+    /**
+     * Set a parent component's state to have 'details_' + propertyName data fetched via AJAX.
+     * Must supply 'this' from parent component, via .call/.apply/.bind(this, args...),
+     * AKA use like a mixin.
+     * 
+     * @param {string} endpoint - REST endpoint to get from. Usually a '@id' field in schema-derived JSON data.
+     * @param {string} propertyName - The second part of state variable to save results into, after 'details_'. E.g. 'lab' for 'details_lab'.
+     * @param {function} [callback] - Optional callback.
+     * 
+     * @example
+     * componentDidMount : function(){
+     *     if (typeof this.props.context.lab == 'string' && this.props.context.lab.length > 0){
+     *         FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.lab, 'lab');
+     *     }
+     * },
+     */
+    static ajaxPropertyDetails(endpoint, propertyName, callback = null){
+        console.info('Obtaining details_' + propertyName + ' via AJAX.');
+        ajax.load(endpoint + '?format=json&frame=embedded', function(result){
+            var newStateAddition = {};
+            newStateAddition['details_' + propertyName] = result;
+            this.setState(newStateAddition, ()=>{
+                if (typeof callback == 'function'){
+                    callback(result);
                 }
+            });
+            console.info('Obtained details_' + propertyName + ' via AJAX:', result);
+        }.bind(this), 'GET', function(error){
+            var newStateAddition = {};
+            newStateAddition['details_' + propertyName] = {
+                'error' : true,
+                'body' : error
+            };
+            this.setState(newStateAddition);
+            analytics.event('FormattedInfoBlock', 'ERROR', {
+                eventLabel : (
+                    "AJAX Error: "  + (error.title       || 'N/A') + ' | ' +
+                    'Detail: '      + (error.detail      || 'N/A') + ' | ' +
+                    'Description: ' + (error.description || 'N/A')
+                ),
+                eventValue : error.code || null
+            });
+        }.bind(this));
+    }
+
+    /** 
+     * Use like a mixin from a component which parents a FormattedInfoBlock(s).
+     * 
+     * @param {string} propertyName - Name/key of linkTo property to fetch.
+     * @param {string|Object} contextProperty - What we have as value in context, e.g. uuid or object with link_id.
+     * @param {function} cb - Callback function passed down to ajaxPropertyDetails.
+     * @returns {boolean} Whether an AJAX load/fetch was initiated.
+     */
+    static onMountMaybeFetch(propertyName = 'lab', contextProperty = this.props.context.lab, cb = null){
+        if (typeof contextProperty == 'string' && contextProperty.length > 0){
+            FormattedInfoBlock.ajaxPropertyDetails.call(this, contextProperty, propertyName, cb);
+            return true;
+        } 
+        if (contextProperty && typeof contextProperty === 'object'){
+
+            if (typeof contextProperty.error === 'string' && contextProperty.error.toLowerCase() === 'no view permissions') return false;
+
+            if (
+                _.keys(contextProperty).length <= 3 &&
+                typeof contextProperty.link_id === 'string' &&
+                typeof contextProperty.display_title === 'string'
+            ){
+                FormattedInfoBlock.ajaxPropertyDetails.call(
+                    this, contextProperty.link_id.replace(/~/g,'/'), propertyName, cb
+                );
+                return true;
             }
-            return false;
-        },
-
-        /**
-         * Preset generator for Lab detail block.
-         * @see FormattedInfoBlock.generate
-         * 
-         * @param {Object} details_lab - Object containing Lab Details.
-         * @param {boolean|string} [includeIcon] - Include icon or not. Supply string to override default lab icon. Defaults to true.
-         * @param {boolean} [includeLabel] - Include 'Lab >' label in top left corner, or not. Defaults to true.
-         * @param {boolean} [includeDetail] - Include description/details or not. Defaults to true.
-         * @param {string} [key] - Unique key to add to generated element, supply if generating a collection/array.
-         */
-        Lab : function(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
-            if (details_lab && typeof details_lab.error !== 'undefined' && details_lab.error) {
-                return FormattedInfoBlock.Error.apply(this, arguments);
-            }
-            return FormattedInfoBlock.generate(
-                details_lab,
-                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null),
-                includeLabel ? "Lab" : null,
-                details_lab && includeDetail ?
-                        (details_lab.city ? details_lab.city + ', ' : '') + 
-                        (details_lab.state ? details_lab.state : '') + 
-                        (details_lab.postal_code ? ' ' + details_lab.postal_code : '' ) +
-                        (details_lab.country ? ', ' + details_lab.country : '')
-                    : ( includeDetail ? true : null ),
-                'lab',
-                'address',
-                key
-            );
-        },
-
-        /**
-         * Preset generator for Award detail block.
-         * @see FormattedInfoBlock.Lab
-         */
-        Award : function(details_award, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
-            if (details_award && typeof details_award.error !== 'undefined' && details_award.error) {
-                return FormattedInfoBlock.Error.apply(this, arguments);
-            }
-            return FormattedInfoBlock.generate(
-                details_award,
-                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution" : null),
-                includeLabel ? "Award" : null,
-                details_award && includeDetail ? details_award.project : null,
-                'award',
-                'project',
-                key
-            );
-        },
-
-        /**
-         * Preset generator for User detail block.
-         * @see FormattedInfoBlock.Lab
-         */
-        User : function(details_user, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
-            if (details_user && typeof details_user.error !== 'undefined' && details_user.error) {
-                return FormattedInfoBlock.Error.apply(this, arguments);
-            }
-            return FormattedInfoBlock.generate(
-                details_user,
-                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user" : null),
-                includeLabel ? (typeof includeLabel === 'string' ? includeLabel : "Submitted By") : null,
-                details_user && includeDetail ? details_user.lab : null,
-                'award',
-                'project',
-                key
-            );
-        },
-
-        Error : function(details_error, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
-            return FormattedInfoBlock.generate(
-                details_error.body,
-                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-exclamation-circle" : null),
-                includeLabel ? "Error" : null,
-                details_error && details_error.body && includeDetail ? details_error.body.detail : null,
-                'error-block',
-                'error-message',
-                key
-            );
-        },
-
-        generate : function(detail, iconClass = null, label = null, contents = null, extraContainerClassName = null, extraDetailClassName = null, key = null){
-            return (
-                <FormattedInfoBlock
-                    key={key}
-                    label={label}
-                    iconClass={iconClass}
-                    title={(detail && (detail.display_title || detail.title)) || null }
-                    titleHref={
-                        (detail && 
-                            (detail['@id'] || 
-                                (detail.link_id && detail.link_id.replace(/~/g, "/"))
-                        )) || null
-                    }
-                    extraContainerClassName={extraContainerClassName}
-                    extraDetailClassName={extraDetailClassName}
-                    loading={!detail}
-                >
-                    { contents }
-                </FormattedInfoBlock>
-            );
         }
+        return false;
+    }
 
-    },
+    /**
+     * Preset generator for Lab detail block.
+     * @see FormattedInfoBlock.generate
+     * 
+     * @param {Object} details_lab - Object containing Lab Details.
+     * @param {boolean|string} [includeIcon] - Include icon or not. Supply string to override default lab icon. Defaults to true.
+     * @param {boolean} [includeLabel] - Include 'Lab >' label in top left corner, or not. Defaults to true.
+     * @param {boolean} [includeDetail] - Include description/details or not. Defaults to true.
+     * @param {string} [key] - Unique key to add to generated element, supply if generating a collection/array.
+     */
+    static Lab(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+        if (details_lab && typeof details_lab.error !== 'undefined' && details_lab.error) {
+            return null;
+            //return FormattedInfoBlock.Error.apply(this, arguments);
+        }
+        return FormattedInfoBlock.generate(
+            details_lab,
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null),
+            includeLabel ? "Lab" : null,
+            details_lab && includeDetail ?
+                    (details_lab.city ? details_lab.city + ', ' : '') + 
+                    (details_lab.state ? details_lab.state : '') + 
+                    (details_lab.postal_code ? ' ' + details_lab.postal_code : '' ) +
+                    (details_lab.country ? ', ' + details_lab.country : '')
+                : ( includeDetail ? true : null ),
+            'lab',
+            'address',
+            key
+        );
+    }
 
-    propTypes : {
-        label : React.PropTypes.string,
-        iconClass : React.PropTypes.string,
-        title : React.PropTypes.string,
-        titleHref : React.PropTypes.string,
-        detailContent : React.PropTypes.any,
-        extraContainerClassName : React.PropTypes.string,
-        extraDetailClassName : React.PropTypes.string,
-        loading : React.PropTypes.bool,
-        debug : React.PropTypes.bool    // Verbose log messages.
-    },
+    /**
+     * Preset generator for Award detail block.
+     * @see FormattedInfoBlock.Lab
+     */
+    static Award(details_award, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+        if (details_award && typeof details_award.error !== 'undefined' && details_award.error) {
+            return null;
+            //return FormattedInfoBlock.Error.apply(this, arguments);
+        }
+        return FormattedInfoBlock.generate(
+            details_award,
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution" : null),
+            includeLabel ? "Award" : null,
+            details_award && includeDetail ? details_award.project : null,
+            'award',
+            'project',
+            key
+        );
+    }
 
-    getDefaultProps : function(){
-        return {
-            label : null,
-            title : null,
-            titleHref : "#",
-            detailContent : null,
-            extraContainerClassName : null,
-            extraDetailClassName : null,
-            loading : false,
-            children : null, // Inner contents of <FormattedInfoBlock>...</FormattedInfoBlock>
-            debug : false
+    /**
+     * Preset generator for User detail block.
+     * @see FormattedInfoBlock.Lab
+     */
+    static User(details_user, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+        if (details_user && typeof details_user.error !== 'undefined' && details_user.error) {
+            return null;
+            //return FormattedInfoBlock.Error.apply(this, arguments);
+        }
+        return FormattedInfoBlock.generate(
+            details_user,
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user" : null),
+            includeLabel ? (typeof includeLabel === 'string' ? includeLabel : "Submitted By") : null,
+            details_user && includeDetail ? (
+                (details_user.lab && details_user.lab.display_title) || details_user.job_title || details_user.timezone
+            ) : null,
+            'award',
+            'project',
+            key
+        );
+    }
+
+    static Error(details_error, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+        return FormattedInfoBlock.generate(
+            details_error.body,
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-exclamation-circle" : null),
+            includeLabel ? "Error" : null,
+            details_error && details_error.body && includeDetail ? details_error.body.detail : null,
+            'error-block',
+            'error-message',
+            key
+        );
+    }
+
+    static generate(detail, iconClass = null, label = null, contents = null, extraContainerClassName = null, extraDetailClassName = null, key = null){
+        return (
+            <FormattedInfoBlock
+                key={key}
+                label={label}
+                iconClass={iconClass}
+                title={(detail && (detail.display_title || detail.title)) || null }
+                titleHref={
+                    (detail && 
+                        (detail['@id'] || 
+                            (detail.link_id && detail.link_id.replace(/~/g, "/"))
+                    )) || null
+                }
+                extraContainerClassName={extraContainerClassName}
+                extraDetailClassName={extraDetailClassName}
+                loading={!detail}
+            >
+                { contents }
+            </FormattedInfoBlock>
+        );
+    }
+
+    static propTypes = {
+        'label'                     : PropTypes.string,
+        'iconClass'                 : PropTypes.string,
+        'title'                     : PropTypes.string,
+        'titleHref'                 : PropTypes.string,
+        'detailContent'             : PropTypes.any,
+        'extraContainerClassName'   : PropTypes.string,
+        'extraDetailClassName'      : PropTypes.string,
+        'loading'                   : PropTypes.bool,
+        'debug'                     : PropTypes.bool    // Verbose log messages.
+    }
+
+
+    static defaultProps = {
+        'label'                     : null,
+        'title'                     : null,
+        'titleHref'                 : "#",
+        'detailContent'             : null,
+        'extraContainerClassName'   : null,
+        'extraDetailClassName'      : null,
+        'loading'                   : false,
+        'children'                  : null, // Inner contents of <FormattedInfoBlock>...</FormattedInfoBlock>
+        'debug'                     : false
+    }
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.render = this.render.bind(this);
+        this.state = {
+            transitionDelayElapsed : !props.loading,
+            mounted : false
         };
-    },
+    }
 
-    hasMounted : false,
-
-    componentDidMount : function(){
+    componentDidMount(){
         if (this.props.debug) console.info('FormattedInfoBlock > Mounted');
-        this.hasMounted = true;
-    },
+        this.setState({ mounted : true });
+    }
 
-    getInitialState : function(){
-        return {
-            transitionDelayElapsed : !this.props.loading
-        };
-    },
-
-    componentDidUpdate : function(prevProps, prevState){
+    componentDidUpdate(prevProps, prevState){
         if (prevProps.loading === true && this.props.loading === false && !this.state.transitionDelayElapsed){
             if (this.props.debug) console.info('FormattedInfoBlock > updated this.props.loading');
             
-            if (this.hasMounted && !isServerSide()){
+            if (this.state.mounted && !isServerSide()){
                 setTimeout(()=>{
                     if (this.props.debug) console.info('FormattedInfoBlock > setting state.transitionDelayElapsed');
                     this.setState({ transitionDelayElapsed : true });
@@ -394,9 +427,9 @@ var FormattedInfoBlock = module.exports = React.createClass({
             }
             
         }
-    },
+    }
     
-    render : function(){
+    render(){
         var innerContent;
 
         var blockClassName = function(){
@@ -453,4 +486,4 @@ var FormattedInfoBlock = module.exports = React.createClass({
         );
     }
 
-});
+}

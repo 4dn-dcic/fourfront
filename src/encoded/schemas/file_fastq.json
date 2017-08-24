@@ -1,6 +1,6 @@
 {
     "title": "FASTQ file",
-    "description": "Schema for submitting metadata for a FASTQ file.",
+    "description": "Raw DNA sequncing file details and file in fastq.gz format.",
     "id": "/profiles/file_fastq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -17,6 +17,12 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "file.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
     ],
     "properties": {
         "schema_version": {
@@ -50,7 +56,7 @@
               ]
         },
         "read_length": {
-            "title": "Sequencing read length (bp)",
+            "title": "Sequencing Read Length (bp)",
             "description": "Length of sequencing reads in base pairs for fastq files",
             "type": "integer"
         },
@@ -97,7 +103,7 @@
                         "type": "string"
                     },
                     "barcode_in_read": {
-                        "title": "Barcode in read",
+                        "title": "Barcode in Read",
                         "description": "The read the barcode is located on.",
                         "type": "string",
                         "enum": [
@@ -106,7 +112,7 @@
                         ]
                     },
                     "barcode_position": {
-                        "title": "Barcode position",
+                        "title": "Barcode Position",
                         "description": "The 1-based start position of the barcode in 5->3 orientation.",
                         "type": "integer"
                     },

@@ -52,5 +52,10 @@
         "state": "TX",
         "title": "Erez Lieberman Aiden Lab, BCM",
         "uuid": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc98a"
+    },
+    {
+        "name": "some-guys-lab",
+        "title": "Some Guy's lab",
+        "uuid": "811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"
     }
 ]

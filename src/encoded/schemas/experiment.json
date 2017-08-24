@@ -1,6 +1,6 @@
 {
     "title": "Experiment",
-    "description": "Schema for submitting metadata for an assay.",
+    "description": "Common metadata for all experiments.",
     "id": "/profiles/experiment.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -32,7 +32,7 @@
             "accessionType": "EX"
         },
         "description": {
-            "title": "description",
+            "title": "Description",
             "description": "A short description of the experiment",
             "type": "string"
         },
@@ -59,8 +59,9 @@
               }
         },
         "experiment_relation": {
-            "title": "Experiment relations",
+            "title": "Experiment Relations",
             "description": "All related experiments",
+            "ff_flag": "second round",
             "type": "array",
             "items": {
                 "title": "Experiment relation",
@@ -93,12 +94,12 @@
             "linkTo": "Biosample"
         },
         "biosample_quantity": {
-            "title": "Biological Sample Quantity",
+            "title": "Biosample Quantity",
             "description": "The amount of starting Biological sample going into the experiment",
             "type": "number"
         },
         "biosample_quantity_units": {
-            "title": "Quantity Units",
+            "title": "Biosample Quantity Units",
             "description": "The units that go along with the biological sample quantity",
             "type": "string",
             "enum": [
@@ -110,7 +111,7 @@
             ]
         },
         "files": {
-            "title": "Data files",
+            "title": "Data Files",
             "description": "Information about the data files associated with the experiment.",
             "type": "array",
             "items": {
@@ -120,8 +121,19 @@
                 "linkTo": "File"
             }
         },
+        "processed_files": {
+            "title": "Processed Files",
+            "description": "Processed files that are derived from files in this experiment.",
+            "type": "array",
+            "items": {
+                "title": "Processed File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileProcessed"
+            }
+        },
         "filesets": {
-            "title": "Sets of Metadata on Data files",
+            "title": "Sets of Data Files",
             "description": "Information about a set of data files associated with the experiment.",
             "type": "array",
             "exclude_from": ["submit4dn", "FFedit-create"],
@@ -149,9 +161,22 @@
             "description": "Flag to indicate if the 4DN SOP for the selected type of experiment was followed - Yes or No",
             "type": "string",
             "enum": ["Yes", "No"]
+        },
+        "authentication_docs": {
+            "title": "Authentication Documents",
+            "description": "Images or Documents that authenticate the experiment - eg. gel picture",
+            "type": "array",
+            "items": {
+                "title": "Document or Image",
+                "type": "string",
+                "linkTo": "Protocol"
+            }
         }
     },
     "facets": {
+        "experiment_type" : {
+            "title" : "Experiment Type"
+        },
         "award.project": {
             "title": "Project"
         },
@@ -159,7 +184,7 @@
             "title": "Organism"
         },
         "biosample.biosource.biosource_type": {
-            "title": "Biosource type"
+            "title": "Biosource Type"
         },
         "biosample.biosource_summary": {
             "title": "Biosource"
@@ -172,6 +197,32 @@
         },
         "lab.title": {
             "title": "Lab"
+        },
+        "publications_of_exp.display_title": {
+            "title": "Publications"
+        }
+    },
+    "columns": {
+        "award.project": {
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "biosample.modifications_summary_short": {
+            "title": "Modifications"
+        },
+        "biosample.treatments_summary": {
+            "title": "Treatments"
         }
     }
 }

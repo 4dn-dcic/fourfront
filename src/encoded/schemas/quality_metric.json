@@ -9,6 +9,7 @@
     "properties": {
         "overall_quality_status": {
             "description": "Overall QC decision",
+            "title" : "Overall Quality",
             "type": "string",
             "enum": [
                 "PASS",
@@ -18,6 +19,7 @@
         },
         "url": {
             "type": "string",
+            "title" : "Link to Report",
             "description": "Location of the main html file",
             "format": "uri"
         }

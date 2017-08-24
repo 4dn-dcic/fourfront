@@ -1,6 +1,6 @@
 {
     "title": "Biosource",
-    "description": "Schema for submitting a biosource.",
+    "description": "General description of the biological material, e.g. cell line",
     "id": "/profiles/biosource.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -20,7 +20,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "accession": {
             "accessionType": "SR"
@@ -32,7 +32,7 @@
             "default": ""
         },
         "biosource_type": {
-            "title": "Biosource type",
+            "title": "Biosource Type",
             "description": "The categorization of the biosource.",
             "type": "string",
             "enum" : [
@@ -53,7 +53,7 @@
               "linkTo": "Individual"
           },
           "modifications": {
-              "title": "Stable genomic modifications",
+              "title": "Stable Genomic Modifications",
               "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
               "type": "array",
               "default": [],
@@ -66,41 +66,13 @@
               }
           },
           "cell_line": {
-              "title": "Cell line name",
+              "title": "Cell Line Name",
               "description": "Ontology term for the cell line used.",
               "type":  "string",
-              "enum": [
-                  "H1-hESC",
-                  "GM12878",
-                  "IMR-90",
-                  "HFF-hTERT",
-                  "F121-9-CASTx129",
-                  "K562",
-                  "RPE-hTERT",
-                  "HEK293",
-                  "HAP-1",
-                  "U2OS",
-                  "WTC-11",
-                  "H9",
-                  "F123-CASTx129",
-                  "CC-2551",
-                  "CH12-LX",
-                  "KBM-7",
-                  "192627",
-                  "CC-2517",
-                  "HeLa-S3",
-                  "HFF",
-                  "HFFc6"
-              ]
-          },
-          "cell_line_termid": {
-              "title": "Cell Line EFO ID",
-              "description": "DON'T SUBMIT - CALCULATED",
-              "type": "string",
-              "permission": "import_items"
+              "linkTo": "OntologyTerm"
           },
           "cell_line_tier": {
-              "title": "Cell line tier",
+              "title": "Cell Line Tier",
               "description": "DON'T SUBMIT - CALCULATED",
               "type": "string",
               "default": "Unclassified",
@@ -112,9 +84,10 @@
               ]
           },
           "tissue": {
-              "title": "Tissue name",
+              "title": "Tissue Name",
               "description": "Anatomy (UBERON) Ontology term for the tissue used.",
-              "type":  "string"
+              "type":  "string",
+              "linkTo": "OntologyTerm"
           },
           "biosource_vendor": {
                 "title": "Biosource Vendor",
@@ -129,7 +102,7 @@
               "format": "uri"
           },
           "SOP_cell_line":{
-              "title": "SOP document for the cell line",
+              "title": "SOP for the Cell Line",
               "description": "Standard operation protocol for the cell line as determined by 4DN Cells Working Group",
               "type": "string",
               "linkTo": "Protocol"
@@ -137,13 +110,16 @@
       },
       "facets": {
           "biosource_type": {
-              "title": "Biosource type"
+              "title": "Biosource Type"
           },
           "biosource_name": {
               "title": "Biosource"
           },
           "individual.organism.name": {
               "title": "Organism"
+          },
+          "cell_line_tier": {
+              "title": "Tier"
           }
 
       }

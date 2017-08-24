@@ -8,9 +8,11 @@ from snovault import (
     abstract_collection,
 )
 from snovault.schema_utils import schema_validator
+from snovault.validators import validate_item_content_post
 from snovault.attachment import ItemWithAttachment
 from .base import (
-    Item
+    Item,
+    collection_add,
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -25,15 +27,47 @@ from urllib.parse import (
     urlparse,
 )
 import boto
+from boto.exception import BotoServerError
 import datetime
 import json
 import pytz
+import os
+
+import logging
+logging.getLogger('boto').setLevel(logging.CRITICAL)
+log = logging.getLogger(__name__)
+
+BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 
 def show_upload_credentials(request=None, context=None, status=None):
-    if request is None or status not in ('uploading', 'upload failed'):
+    if request is None or status not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
         return False
     return request.has_permission('edit', context)
+
+
+def force_beanstalk_env(profile_name, config_file=None):
+    # set env variables if we are on elasticbeanstalk
+    if not config_file:
+        config_file = BEANSTALK_ENV_PATH
+    if os.path.exists(config_file):
+        if not os.environ.get("AWS_ACCESS_KEY_ID"):
+            import subprocess
+            command = ['bash', '-c', 'source ' + config_file + ' && env']
+            proc = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
+            for line in proc.stdout:
+                key, _, value = line.partition("=")
+                os.environ[key] = value[:-1]
+
+            proc.communicate()
+
+        conn = boto.connect_sts(aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+                                aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
+        print("on beanstalk so adding environment variables")
+    else:
+        conn = boto.connect_sts(profile_name=profile_name)
+
+    return conn
 
 
 def external_creds(bucket, key, name=None, profile_name=None):
@@ -42,6 +76,9 @@ def external_creds(bucket, key, name=None, profile_name=None):
     an access token.  This is useful for linking metadata to files that
     already exist on s3.
     '''
+
+    import logging
+    logging.getLogger('boto').setLevel(logging.CRITICAL)
     credentials = {}
     if name is not None:
         policy = {
@@ -54,8 +91,8 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-        boto.set_stream_logger('boto')
-        conn = boto.connect_sts(profile_name=profile_name)
+        # boto.set_stream_logger('boto')
+        conn = force_beanstalk_env(profile_name)
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.credentials.to_dict()
@@ -64,6 +101,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
             'federated_user_arn': token.federated_user_arn,
             'federated_user_id': token.federated_user_id,
             'request_id': token.request_id,
+            'key': key
         })
     return {
         'service': 's3',
@@ -117,11 +155,14 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded = ['files_in_set.submitted_by',
+    embedded = ['files_in_set.submitted_by.job_title',
+                'files_in_set.lab.title',
                 'files_in_set.accession',
-                'files_in_set.description',
-                'files_in_set.attachment',
-                'files_in_set.lab'
+                "files_in_set.href",
+                "files_in_set.file_size",
+                "files_in_set.upload_key",
+                "files_in_set.file_format",
+                "files_in_set.file_classification"
                 ]
 
 
@@ -137,18 +178,126 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ['lab', 'file_format', 'related_files.file']
+    embedded = ["award.project",
+                "lab.city",
+                "lab.state",
+                "lab.country",
+                "lab.postal_code",
+                "lab.city",
+                "lab.title",
+                'experiments.display_title',
+                'experiments.accession',
+                'experiments.experiment_type',
+                'experiments.experiment_sets.accession',
+                'experiments.experiment_sets.experimentset_type',
+                'experiments.experiment_sets.@type',
+                'experiments.biosample.biosource.display_title',
+                'experiments.biosample.biosource.biosource_type',
+                'experiments.biosample.biosource_summary',
+                'experiments.biosample.modifications_summary',
+                'experiments.biosample.treatments_summary',
+                'experiments.biosample.biosource.individual.organism.name',
+                'experiments.digestion_enzyme.name',
+                'related_files.relationship_type',
+                'related_files.file.accession']
     name_key = 'accession'
+    rev = {
+        'experiments': ('Experiment', 'files')
+    }
+
+
+    @calculated_property(schema={
+        "title": "Experiments",
+        "description": "Experiments that this file is associated with",
+        "type": "array",
+        "items": {
+            "title": "Experiments",
+            "type": ["string", "object"],
+            "linkTo": "Experiment"
+        }
+    })
+    def experiments(self, request):
+        return self.rev_link_atids(request, "experiments")
+
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "Name of this File",
+        "type": "string"
+    })
+    def display_title(self, request, file_format, accession=None, external_accession=None):
+        accession = accession or external_accession
+        file_extension = self.schema['file_format_file_extension'][file_format]
+        return '{}{}'.format(accession, file_extension)
+
+
+    @calculated_property(schema={
+        "title": "File Type",
+        "description": "Type of File",
+        "type": "string"
+    })
+    def file_type_detailed(self, request, file_format, file_type=None):
+        outString = (file_type or 'other')
+        if file_format is not None:
+            outString = outString + ' (' + file_format + ')'
+
+        #accession = accession or external_accession
+        #file_extension = self.schema['file_format_file_extension'][file_format]
+        #return '{}{}'.format(accession, file_extension)
+        return outString
+
 
     def _update(self, properties, sheets=None):
         if not properties:
             return
-
         # ensure we always have s3 links setup
         sheets = {} if sheets is None else sheets.copy()
-        uuid = properties.get('uuid', False)
-        if not sheets.get('external', False) and uuid:
-            sheets['external'] = self.build_external_creds(self.registry, uuid, properties)
+        uuid = self.uuid
+        old_creds = self.propsheets.get('external', None)
+        new_creds = old_creds
+
+        # don't get new creds
+        if properties.get('status', None) in ('uploading', 'to be uploaded by workflow',
+                                              'upload failed'):
+            new_creds = self.build_external_creds(self.registry, uuid, properties)
+            sheets['external'] = new_creds
+            file_formats = [properties.get('file_format'), ]
+
+            # handle extra files
+            updated_extra_files = []
+            for idx, xfile in enumerate(properties.get('extra_files', [])):
+                # ensure a file_format (identifier for extra_file) is given and non-null
+                if not('file_format' in xfile and bool(xfile['file_format'])):
+                    continue
+                # todo, make sure file_format is unique
+                if xfile['file_format'] in file_formats:
+                    raise Exception("Each file in extra_files must have unique file_format")
+                file_formats.append(xfile['file_format'])
+                xfile['accession'] = properties.get('accession')
+                # just need a filename to trigger creation of credentials
+                xfile['filename'] = xfile['accession']
+                xfile['uuid'] = str(uuid)
+                xfile['status'] = properties.get('status')
+                ext = self.build_external_creds(self.registry, uuid, xfile)
+                # build href
+                file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
+                filename = '{}{}'.format(xfile['accession'], file_extension)
+                xfile['href'] = '/' + str(uuid) + '/@@download/' + filename
+                xfile['upload_key'] = ext['key']
+                sheets['external' + xfile['file_format']] = ext
+                updated_extra_files.append(xfile)
+            properties['extra_files'] = updated_extra_files
+
+        if old_creds:
+            if old_creds.get('key') != new_creds.get('key'):
+                try:
+                    # delete the old sumabeach
+                    conn = boto.connect_s3()
+                    bname = old_creds['bucket']
+                    bucket = boto.s3.bucket.Bucket(conn, bname)
+                    bucket.delete_key(old_creds['key'])
+                except Exception as e:
+                    print(e)
 
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
@@ -195,6 +344,7 @@ class File(Item):
             return self.uuid
         return properties.get(self.name_key, None) or self.uuid
 
+
     def unique_keys(self, properties):
         keys = super(File, self).unique_keys(properties)
         if properties.get('status') != 'replaced':
@@ -203,12 +353,15 @@ class File(Item):
                 keys.setdefault('alias', []).append(value)
         return keys
 
+
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
+        "description": "Accession of this file"
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
+
 
     @calculated_property(schema={
         "title": "Download URL",
@@ -218,7 +371,25 @@ class File(Item):
         accession = accession or external_accession
         file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
-        return request.resource_path(self, '@@download', filename)
+        return request.resource_path(self) + '@@download/' + filename
+
+
+    @calculated_property(schema={
+        "title": "Upload Key",
+        "type": "string",
+    })
+    def upload_key(self, request):
+        properties = self.properties
+        external = self.propsheets.get('external', {})
+        if not external:
+            try:
+                external = self.build_external_creds(self.registry, self.uuid, properties)
+            except BotoServerError as e:
+                log.error(os.environ)
+                log.error(self.properties)
+                return 'UPLOAD KEY FAILED'
+        return external['key']
+
 
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
@@ -228,21 +399,35 @@ class File(Item):
         if external is not None:
             return external['upload_credentials']
 
-    @calculated_property(schema={
-        "title": "File type",
-        "type": "string"
+
+    @calculated_property(condition=show_upload_credentials, schema={
+        "type": "object",
     })
-    def file_type(self, file_format, file_format_type=None):
-        if file_format_type is None:
-            return file_format
-        else:
-            return file_format + ' ' + file_format_type
+    def extra_files_creds(self):
+        external = self.propsheets.get('external', None)
+        if external is not None:
+            extras = []
+            for extra in self.properties.get('extra_files', []):
+                extra_creds = self.propsheets.get('external' + extra['file_format'])
+                extra['upload_credentials'] = extra_creds['upload_credentials']
+                extras.append(extra)
+            return extras
+
+
+    @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['file_upload_bucket']
+
 
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
-        bucket = registry.settings['file_upload_bucket']
+        bucket = cls.get_bucket(registry)
         mapping = cls.schema['file_format_file_extension']
-        file_extension = mapping[properties['file_format']]
+        prop_format = properties['file_format']
+        try:
+            file_extension = mapping[prop_format]
+        except KeyError:
+            raise Exception('File format not in list of supported file types')
         key = '{uuid}/{accession}{file_extension}'.format(
             file_extension=file_extension, uuid=uuid,
             accession=properties.get('accession'))
@@ -256,12 +441,16 @@ class File(Item):
         profile_name = registry.settings.get('file_upload_profile_name')
         return external_creds(bucket, key, name, profile_name)
 
+
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
-        if properties.get('status') == 'uploading':
+        if properties.get('status') in ('uploading', 'to be uploaded by workflow'):
             sheets = {} if sheets is None else sheets.copy()
             sheets['external'] = cls.build_external_creds(registry, uuid, properties)
         return super(File, cls).create(registry, uuid, properties, sheets)
+
+    class Collection(Item.Collection):
+        pass
 
 
 @collection(
@@ -277,6 +466,36 @@ class FileFastq(File):
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
     name_key = 'accession'
+    rev = dict(File.rev, **{
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    })
+
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
 @collection(
@@ -292,6 +511,36 @@ class FileFasta(File):
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
     name_key = 'accession'
+    rev = dict(File.rev, **{
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    })
+
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
 @collection(
@@ -307,6 +556,40 @@ class FileProcessed(File):
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded = File.embedded
     name_key = 'accession'
+    rev = dict(File.rev, **{
+        'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
+        'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+    })
+
+    @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['file_wfout_bucket']
+
+    @calculated_property(schema={
+        "title": "Input of Workflow Runs",
+        "description": "All workflow runs that this file serves as an input to",
+        "type": "array",
+        "items": {
+            "title": "Input of Workflow Run",
+            "type": ["string", "object"],
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_inputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_inputs")
+
+    @calculated_property(schema={
+        "title": "Output of Workflow Runs",
+        "description": "All workflow runs that this file serves as an output from",
+        "type": "array",
+        "items": {
+            "title": "Output of Workflow Run",
+            "type": "string",
+            "linkTo": "WorkflowRun"
+        }
+    })
+    def workflow_run_outputs(self, request):
+        return self.rev_link_atids(request, "workflow_run_outputs")
 
 
 @collection(
@@ -345,6 +628,7 @@ def get_upload(context, request):
     external = context.propsheets.get('external', {})
     upload_credentials = external.get('upload_credentials')
     # Show s3 location info for files originally submitted to EDW.
+
     if upload_credentials is None and external.get('service') == 's3':
         upload_credentials = {
             'upload_url': 's3://{bucket}/{key}'.format(**external),
@@ -353,6 +637,7 @@ def get_upload(context, request):
         '@graph': [{
             '@id': request.resource_path(context),
             'upload_credentials': upload_credentials,
+            'extra_files_creds': context.extra_files_creds(),
         }],
     }
 
@@ -360,9 +645,8 @@ def get_upload(context, request):
 @view_config(name='upload', context=File, request_method='POST',
              permission='edit', validators=[schema_validator({"type": "object"})])
 def post_upload(context, request):
-
     properties = context.upgrade_properties()
-    if properties['status'] not in ('uploading', 'upload failed'):
+    if properties['status'] not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
 
     accession_or_external = properties.get('accession')
@@ -394,9 +678,8 @@ def post_upload(context, request):
     # in case we haven't uploaded a file before
     context.propsheets['external'] = creds
 
-    new_properties = None
+    new_properties = properties.copy()
     if properties['status'] == 'upload failed':
-        new_properties = properties.copy()
         new_properties['status'] = 'uploading'
 
     registry = request.registry
@@ -413,32 +696,56 @@ def post_upload(context, request):
     return result
 
 
-@view_config(name='download', context=File, request_method='GET',
-             permission='view', subpath_segments=[0, 1])
-def download(context, request):
-    properties = context.upgrade_properties()
-    mapping = context.schema['file_format_file_extension']
+def is_file_to_download(properties, mapping, expected_filename=None):
     file_extension = mapping[properties['file_format']]
     accession_or_external = properties.get('accession') or properties['external_accession']
     filename = accession_or_external + file_extension
-    if request.subpath:
-        _filename, = request.subpath
-        if filename != _filename:
-            raise HTTPNotFound(_filename)
+    if expected_filename is None:
+        return filename
+    elif expected_filename != filename:
+        return False
+    else:
+        return filename
 
+
+@view_config(name='download', context=File, request_method='GET',
+             permission='view', subpath_segments=[0, 1])
+def download(context, request):
+    # to use or not to use the proxy
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
-
     try:
         use_download_proxy = request.client_addr not in request.registry['aws_ipset']
     except TypeError:
         # this fails in testing due to testapp not having ip
         use_download_proxy = False
 
-    external = context.propsheets.get('external', {})
+    # with extra_files the user may be trying to download the main file
+    # or one of the files in extra files, the following logic will
+    # search to find the "right" file and redirect to a download link for that one
+    properties = context.upgrade_properties()
+    mapping = context.schema['file_format_file_extension']
+
+    _filename = None
+    if request.subpath:
+        _filename, = request.subpath
+    filename = is_file_to_download(properties, mapping, _filename)
+    if not filename:
+        found = False
+        for extra in properties.get('extra_files'):
+            filename = is_file_to_download(extra, mapping, _filename)
+            if filename:
+                found = True
+                properties = extra
+                external = context.propsheets.get('external' + extra['file_format'])
+                break
+        if not found:
+            raise HTTPNotFound(_filename)
+    else:
+        external = context.propsheets.get('external', {})
+
     if not external:
-        profile_name = request.registry.settings.get('file_upload_profile_name')
-        sheets['external'] = external_creds(bucket, key, name, profile_name)
-    elif external.get('service') == 's3':
+        external = context.build_external_creds(request.registry, context.uuid, properties)
+    if external.get('service') == 's3':
         conn = boto.connect_s3()
         location = conn.generate_url(
             36*60*60, request.method, external['bucket'], external['key'],
@@ -465,3 +772,38 @@ def download(context, request):
 
     # 307 redirect specifies to keep original method
     raise HTTPTemporaryRedirect(location=location)
+
+
+def validate_file_filename(context, request):
+    ''' validator for filename field '''
+
+    data = request.json
+    if 'filename' not in data or 'file_format' not in data:
+        return
+    filename = data['filename']
+    file_format = data['file_format']
+    valid_schema = context.type_info.schema
+    file_extensions = valid_schema['file_format_file_extension'][file_format]
+    if not isinstance(file_extensions, list):
+        file_extensions = [file_extensions]
+    found_match = False
+    for extension in file_extensions:
+        if extension == "":
+            found_match = True
+            break
+        elif filename[-len(extension):] == extension:
+            found_match = True
+            break
+    if not found_match:
+        file_extensions_msg = ["'"+ext+"'" for ext in file_extensions]
+        file_extensions_msg = ', '.join(file_extensions_msg)
+        request.errors.add('body', None, 'Filename extension does not '
+                           'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
+    else:
+        request.validated.update({})
+
+
+@view_config(context=File.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_file_filename])
+def file_add(context, request, render=None):
+    return collection_add(context, request, render)

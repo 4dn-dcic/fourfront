@@ -32,5 +32,11 @@
         "description": "The Ontology for Biomedical Investigations (OBI) project is developing an integrated ontology for the description of biological and clinical investigations.",
         "synonym_terms": ["111117bc-8535-4448-903e-854af460a233"],
         "definition_terms": ["111116bc-8535-4448-903e-854af460a233"]
+    },
+    {
+        "uuid": "540026bc-8535-4448-903e-854af460b254",
+        "ontology_name": "4DN Controlled Vocabulary",
+        "ontology_prefix": "4DN",
+        "description": "These are controlled terms that are not yet part of one of the formal ontologies imported into our system"
     }
 ]

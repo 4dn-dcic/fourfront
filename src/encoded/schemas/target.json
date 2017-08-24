@@ -1,6 +1,6 @@
 {
     "title": "Target",
-    "description": "Schema for submitting a targeted region of the genome, gene or set of genes.",
+    "description": "Protein/RNA/DNA or cell structures that define a target.",
     "id": "/profiles/target.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -75,8 +75,9 @@
             "enum": [
                 "Cell membrane",
                 "Nucleolus",
-                "NPC",
-                "Microtubules"
+                "Nuclear pore complex",
+                "Microtubules",
+                "Endoplasmic reticulum"
             ]
         }
     }

@@ -1,10 +1,10 @@
 {
-    "title": "Imaging Files for Calibration",
-    "description": "Schema for submitting metadata for a Calibration File.",
+    "title": "File Calibration",
+    "description": "Imaging Files for Calibration",
     "id": "/profiles/file_calibration.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
+    "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -19,6 +19,12 @@
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "file.json#/properties" }
     ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -28,19 +34,20 @@
             "title": "Description"
         },
         "file_format": {
-            "title": "File format",
+            "title": "File Format",
             "type": "string",
-            "default": "other",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "default": "zip",
             "enum": [
+                "zip",
+                "tiff",
                 "other"
             ]
         },
         "file_type": {
-            "title": "File type",
+            "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "default": "calibration file",
             "exclude_from": ["submit4dn", "FFedit-create"],
+            "default": "calibration file",
             "enum": [
                 "calibration file"
             ]
@@ -61,13 +68,23 @@
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "quality_metric": {
-          "exclude_from": ["submit4dn", "FFedit-create"]
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "dbxrefs": {
-          "exclude_from": ["submit4dn", "FFedit-create"]
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "attachment": {
+            "title": "Metadata Document",
+            "description": "Document (PDF/DOC/TXT) with information about the files"
+        },
+        "filename": {
+            "title": "Microscopy Files (Zip/TIFF)",
+            "description": "Single zipped file with microscopy files, or a sigle TIFF file"
         }
     },
     "file_format_file_extension": {
-        "other": ""
+        "other": "",
+        "zip": ".zip",
+        "tiff": ".tiff"
     }
 }

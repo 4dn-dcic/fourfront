@@ -39,19 +39,26 @@ def publication_doi_biorxiv(testapp, lab, award):
 def test_update_publication_PMID(testapp, publication_PMID):
     assert publication_PMID['title'][:50] == 'A deep proteomics perspective on CRM1-mediated nuc'
     assert publication_PMID['abstract'][:50] == 'CRM1 is a highly conserved, RanGTPase-driven expor'
-    assert publication_PMID['authors'] == 'Kirli K, Karaca S, Dehne HJ, Samwer M, Pan KT, Lenz C, Urlaub H, Gorlich D'
+    assert publication_PMID['authors'][:4] == ['Kirli K', 'Karaca S', 'Dehne HJ', 'Samwer M']
     assert publication_PMID['url'] == 'https://www.ncbi.nlm.nih.gov/pubmed/26673895'
+    assert publication_PMID['journal'] == 'eLife'
 
 
 def test_update_publication_doi_pubmed(testapp, publication_doi_pubmed):
     assert publication_doi_pubmed['title'][:50] == 'FlyBase: establishing a Gene Group resource for Dr'
     assert publication_doi_pubmed['abstract'][:50] == 'Many publications describe sets of genes or gene p'
-    assert publication_doi_pubmed['authors'][:50] == 'Attrill H, Falls K, Goodman JL, Millburn GH, Anton'
+    assert publication_doi_pubmed['authors'][:4] == ['Attrill H', 'Falls K', 'Goodman JL', 'Millburn GH']
     assert publication_doi_pubmed['url'] == 'https://www.ncbi.nlm.nih.gov/pubmed/26467478'
+    assert publication_doi_pubmed['journal'] == 'Nucleic acids research'
 
 
 def test_update_publication_doi_biorxiv(testapp, publication_doi_biorxiv):
     assert publication_doi_biorxiv['title'][:50] == 'Designing Robustness to Temperature in a Feedforwa'
     assert publication_doi_biorxiv['abstract'][:50] == 'Incoherent feedforward loops represent important b'
-    assert publication_doi_biorxiv['authors'] == 'Shaunak Sen, Jongmin Kim, Richard M. Murray'
-    assert publication_doi_biorxiv['url'] == 'http://biorxiv.org/content/early/2013/11/07/000091'
+    assert publication_doi_biorxiv['authors'] == ['Shaunak Sen', 'Jongmin Kim', 'Richard M. Murray']
+    assert publication_doi_biorxiv['url'] == 'http://www.biorxiv.org/content/early/2013/11/07/000091'
+    assert publication_doi_biorxiv['journal'] == 'bioRxiv'
+
+
+def test_publication_diplay_title(testapp, publication_PMID):
+    assert publication_PMID['display_title'].startswith('Kirli K et al. (2016) A deep proteomics')

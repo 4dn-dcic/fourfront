@@ -1,0 +1,63 @@
+error on data.4dnucleome.org
+[Mon Mar 13 14:38:12.262175 2017] [:error] [pid 12982] ERROR [snovault.elasticsearch.es_index_listener][listener] index failed at max xid: 100511
+[Mon Mar 13 14:38:12.262210 2017] [:error] [pid 12982] Traceback (most recent call last):
+[Mon Mar 13 14:38:12.262214 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/develop/snovault/src/snovault/elasticsearch/es_index_listener.py", line 98, in run
+[Mon Mar 13 14:38:12.262217 2017] [:error] [pid 12982]     'recovery': recovery,
+[Mon Mar 13 14:38:12.262220 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/WebTest-2.0.20-py3.4.egg/webtest/utils.py", line 37, in wrapper
+[Mon Mar 13 14:38:12.262223 2017] [:error] [pid 12982]     return self._gen_request(method, url, **kw)
+[Mon Mar 13 14:38:12.262226 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/WebTest-2.0.20-py3.4.egg/webtest/app.py", line 736, in _gen_request
+[Mon Mar 13 14:38:12.262228 2017] [:error] [pid 12982]     expect_errors=expect_errors)
+[Mon Mar 13 14:38:12.262231 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/WebTest-2.0.20-py3.4.egg/webtest/app.py", line 606, in do_request
+[Mon Mar 13 14:38:12.262234 2017] [:error] [pid 12982]     res = req.get_response(app, catch_exc_info=True)
+[Mon Mar 13 14:38:12.262236 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/WebOb-1.6.0-py3.4.egg/webob/request.py", line 1295, in send
+[Mon Mar 13 14:38:12.262239 2017] [:error] [pid 12982]     application, catch_exc_info=True)
+[Mon Mar 13 14:38:12.262242 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/WebOb-1.6.0-py3.4.egg/webob/request.py", line 1263, in call_application
+[Mon Mar 13 14:38:12.262244 2017] [:error] [pid 12982]     app_iter = application(self.environ, start_response)
+[Mon Mar 13 14:38:12.262247 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/WebTest-2.0.20-py3.4.egg/webtest/lint.py", line 198, in lint_app
+[Mon Mar 13 14:38:12.262250 2017] [:error] [pid 12982]     iterator = application(environ, start_response_wrapper)
+[Mon Mar 13 14:38:12.262253 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/router.py", line 223, in __call__
+[Mon Mar 13 14:38:12.262255 2017] [:error] [pid 12982]     response = self.invoke_subrequest(request, use_tweens=True)
+[Mon Mar 13 14:38:12.262258 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/router.py", line 198, in invoke_subrequest
+[Mon Mar 13 14:38:12.262260 2017] [:error] [pid 12982]     response = handle_request(request)
+[Mon Mar 13 14:38:12.262263 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/develop/snovault/src/snovault/stats.py", line 63, in stats_tween
+[Mon Mar 13 14:38:12.262266 2017] [:error] [pid 12982]     response = handler(request)
+[Mon Mar 13 14:38:12.262268 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/src/encoded/renderers.py", line 75, in fix_request_method_tween
+[Mon Mar 13 14:38:12.262271 2017] [:error] [pid 12982]     return handler(request)
+[Mon Mar 13 14:38:12.262273 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/src/encoded/renderers.py", line 174, in normalize_cookie_tween
+[Mon Mar 13 14:38:12.262276 2017] [:error] [pid 12982]     response = handler(request)
+[Mon Mar 13 14:38:12.262279 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/subprocess_middleware-0.3-py3.4.egg/subprocess_middleware/tween.py", line 31, in subprocess_tween
+[Mon Mar 13 14:38:12.262281 2017] [:error] [pid 12982]     response = handler(request)
+[Mon Mar 13 14:38:12.262284 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/src/encoded/renderers.py", line 197, in set_x_request_url_tween
+[Mon Mar 13 14:38:12.262287 2017] [:error] [pid 12982]     response = handler(request)
+[Mon Mar 13 14:38:12.262299 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/tweens.py", line 20, in excview_tween
+[Mon Mar 13 14:38:12.262303 2017] [:error] [pid 12982]     response = handler(request)
+[Mon Mar 13 14:38:12.262305 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid_tm-0.12.1-py3.4.egg/pyramid_tm/__init__.py", line 101, in tm_tween
+[Mon Mar 13 14:38:12.262308 2017] [:error] [pid 12982]     reraise(*exc_info)
+[Mon Mar 13 14:38:12.262310 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid_tm-0.12.1-py3.4.egg/pyramid_tm/compat.py", line 15, in reraise
+[Mon Mar 13 14:38:12.262313 2017] [:error] [pid 12982]     raise value
+[Mon Mar 13 14:38:12.262315 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid_tm-0.12.1-py3.4.egg/pyramid_tm/__init__.py", line 83, in tm_tween
+[Mon Mar 13 14:38:12.262317 2017] [:error] [pid 12982]     response = handler(request)
+[Mon Mar 13 14:38:12.262320 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/src/encoded/renderers.py", line 148, in security_tween
+[Mon Mar 13 14:38:12.262322 2017] [:error] [pid 12982]     return handler(request)
+[Mon Mar 13 14:38:12.262324 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/router.py", line 145, in handle_request
+[Mon Mar 13 14:38:12.262327 2017] [:error] [pid 12982]     view_name
+[Mon Mar 13 14:38:12.262329 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/view.py", line 541, in _call_view
+[Mon Mar 13 14:38:12.262331 2017] [:error] [pid 12982]     response = view_callable(context, request)
+[Mon Mar 13 14:38:12.262334 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/config/views.py", line 327, in attr_view
+[Mon Mar 13 14:38:12.262336 2017] [:error] [pid 12982]     return view(context, request)
+[Mon Mar 13 14:38:12.262338 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/config/views.py", line 303, in predicate_wrapper
+[Mon Mar 13 14:38:12.262341 2017] [:error] [pid 12982]     return view(context, request)
+[Mon Mar 13 14:38:12.262343 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/config/views.py", line 243, in _secured_view
+[Mon Mar 13 14:38:12.262346 2017] [:error] [pid 12982]     return view(context, request)
+[Mon Mar 13 14:38:12.262348 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/config/views.py", line 352, in rendered_view
+[Mon Mar 13 14:38:12.262350 2017] [:error] [pid 12982]     result = view(context, request)
+[Mon Mar 13 14:38:12.262353 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/eggs/pyramid-1.6a2-py3.4.egg/pyramid/config/views.py", line 506, in _requestonly_view
+[Mon Mar 13 14:38:12.262355 2017] [:error] [pid 12982]     response = view(request)
+[Mon Mar 13 14:38:12.262358 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/src/encoded/peak_indexer.py", line 229, in index_file
+[Mon Mar 13 14:38:12.262360 2017] [:error] [pid 12982]     invalidated = list(all_uuids(request.root, types))
+[Mon Mar 13 14:38:12.262363 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/develop/snovault/src/snovault/elasticsearch/indexer.py", line 196, in all_uuids
+[Mon Mar 13 14:38:12.262365 2017] [:error] [pid 12982]     collections = registry[COLLECTIONS]
+[Mon Mar 13 14:38:12.262367 2017] [:error] [pid 12982]   File "/opt/python/bundle/20/app/develop/snovault/src/snovault/resources.py", line 84, in __getitem__
+[Mon Mar 13 14:38:12.262370 2017] [:error] [pid 12982]     raise KeyError(name)
+[Mon Mar 13 14:38:12.262374 2017] [:error] [pid 12982] KeyError: 'collections'
+[Mon Mar 13 14:38:12.262381 2017] [:error] [pid 12982]

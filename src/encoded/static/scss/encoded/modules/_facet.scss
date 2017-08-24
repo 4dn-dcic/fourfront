@@ -1,12 +1,20 @@
 
+/************** Styles for FacetList ***************/
+
 .facets-container {
     padding-top: 0;
     padding-bottom: 2px;
     padding-left: ($grid-gutter-width / 2);
     padding-right: ($grid-gutter-width / 2);
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    border: 1px solid #e8e8e8;
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     //border-radius: 3px;
+
+    /*
+    .browse-page-container & {
+        margin-top: 38px;
+    }
+    */
 
     .facets-header {
         padding-top: ($grid-gutter-width / 2);
@@ -26,7 +34,7 @@
     }
 
     &.with-header-bg .facets-header {
-        background-color: #388a92;
+        background-color: #22656d; //#388a92;
         border-top: inherit;
         border-left: inherit;
         border-right: inherit;
@@ -110,6 +118,10 @@
         // .row not for inner columns, used for margin offset
         padding-left : 10px;
         padding-right : 10px;
+        &.active-submission-row {
+            position: relative;
+            z-index: 5;
+        }
     }
 
     &:not(:last-child) {
@@ -144,16 +156,51 @@
     }
 
     &:not(.static) {
+        transition: padding-bottom .35s ease, background-color .35s ease;
+        transform: translate3d(0,0,0);
+        background-color: transparent;
         h5.facet-title {
-            margin : -2px 0 9px;
+            margin : -1px 0 0;
             padding: 0 0 8px;
             border-bottom: 1px solid #f8f8f8;
             cursor: pointer;
+            > span.expand-toggle > i.icon {
+                font-size: 0.7rem;
+                margin-right: 7px;
+            }
+
+            .closed-terms-count {
+                position: relative;
+                transition: top .35s ease-out, opacity .35s ease;
+                top: 1px;
+                font-weight: 300;
+                color: #707070;
+                font-size: 0.75rem;
+                line-height : 1.25rem;
+                margin-right: 5px;
+                > i {
+                    margin-right: 2px;
+                    margin-right: 1.5px;
+                }
+            }
         }
-        &.closed h5.facet-title {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
+        &.open:not(.closing) {
+            h5.facet-title .closed-terms-count {
+                top : 9px;
+            }
+        }
+        &.closed, &.closing {
+            padding-bottom: 0px;
+            background-color: #fcfcfc;
+            border-bottom-color: #f0f0f0;
+            h5.facet-title {
+                font-weight: 400;
+            }
+        }
+        &.closed {
+            h5.facet-title {
+                border-bottom: none;
+            }
         }
     }
 
@@ -165,7 +212,7 @@
         .facet-title,
         .facet-item {
             display: inline-block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             width: 50%;
         }
 
@@ -195,7 +242,7 @@
                     font-size: .5rem;
                     vertical-align: text-top;
                     line-height: 1.15rem;
-                    opacity: 0.33;
+                    opacity: 0.05;
                     width: 25px;
                     margin-left: -25px;
                 }
@@ -203,7 +250,7 @@
 
             span:hover {
                 text-shadow: 0 0 0;
-                i.icon { 
+                i.icon {
                     opacity: 0.5;
                 }
             }
@@ -230,9 +277,10 @@
         }
     }
 
-    .facet-list { 
+    .facet-list {
         margin: 0;
-    
+        padding-top: 8px;
+
         li {
             margin-bottom: 1px;
             position: relative;
@@ -245,7 +293,7 @@
 
             > a {
                 border-radius: 3px;
-                padding: 4px 3px 1px 24px;
+                padding: 4px 3px 1px 21px;
                 text-decoration: none;
                 display: block;
                 position: relative;
@@ -273,7 +321,7 @@
             &.selected > a {
                 text-decoration: none;
                 color: #f8f8f8;
-                background-color: #248bac;
+                background-color: $facetlist-selected-term-color;
                 &:hover {
                     color: #fff;
                     .facet-item, .facet-count {
@@ -286,8 +334,37 @@
                 display:inline-block;
                 overflow: hidden;
                 margin-right: 30px;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                max-width: 85%;
             }
 
+        }
+
+        .view-more-button {
+            cursor: pointer;
+            font-size: 0.85rem;
+            border: 1px solid #888;
+            padding: 0 6px;
+            line-height: 24px;
+            margin-top: -5px;
+            border-radius: 2px;
+            &:hover {
+                border-color: #000;
+            }
+
+            i.icon {
+                font-size: 0.8rem;
+            }
+        }
+
+        
+    }
+
+    // Hide 'Data Type' : 'Item'
+    &[data-field="type"] .facet-list {
+        li[data-key="Item"]{
+            display: none;
         }
     }
 
@@ -298,6 +375,10 @@
     &[data-field="experiments_in_set.biosample.biosource_summary"] .term {
         text-transform: capitalize;
     }
+}
+
+.facet-selector{
+    margin-left: -18px;
 }
 
 .facet-entry {
@@ -459,41 +540,6 @@ div.meta-status {
     display: block;
 }
 
-.result-table {
-    position: relative;
-    z-index: 10;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-
-    li {
-        margin-top: 7px;
-        border-bottom: 1px solid #E8E8E8;
-        margin-bottom: 7px;
-        @include font-size(0.9);
-
-        &:first {
-            margin-top: 0px;
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 10px;
-            @include font-size(0.9);
-        }
-
-    }
-
-    &:before {
-        content: none;
-        display: block;
-    }
-
-    .pull-right {
-        position: relative;
-        z-index: 2;
-    }
-}
-
-
 .main-panel {
     position: relative;
     z-index: 0;
@@ -537,6 +583,3 @@ div.meta-status {
     }
 }
 
-.facet-selector{
-    margin-left: -20px;
-}

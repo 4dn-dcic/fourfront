@@ -1,0 +1,753 @@
+[
+{
+"uuid": "111111bc-8535-4448-903e-854af460a233",
+"term_name": "alternative_term",
+"term_id": "EFO:alternative_term",
+"source_ontology": "530006bc-8535-4448-903e-854af460b254",
+"term_url": "http://www.ebi.ac.uk/efo/alternative_term",
+"definition": "An alternative label for a given entity such as a commonly used abbreviation or synonym.",
+"namespace": "http://www.ebi.ac.uk/efo"
+},
+{
+"uuid": "111112bc-8535-4448-903e-854af460a233",
+"term_name": "has_exact_synonym",
+"term_id": "oboInOwl:hasExactSynonym",
+"source_ontology": "530006bc-8535-4448-903e-854af460b254",
+"term_url": "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
+"definition": "An alias in which the alias exhibits true synonymy. Example: ornithine cycle is an exact synonym of urea cycle.",
+"namespace": "http://www.geneontology.org/formats/oboInOwl"
+},
+{
+"uuid": "111113bc-8535-4448-903e-854af460a233",
+"term_name": "has_narrow_synonym",
+"term_id": "oboInOwl:hasNarrowSynonym",
+"source_ontology": "530006bc-8535-4448-903e-854af460b254",
+"term_url": "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
+"namespace": "http://www.geneontology.org/formats/oboInOwl"
+},
+{
+"uuid": "111114bc-8535-4448-903e-854af460a233",
+"term_name": "has_related_synonym",
+"term_id": "oboInOwl:hasRelatedSynonym",
+"source_ontology": "530006bc-8535-4448-903e-854af460b254",
+"term_url": "http://www.geneontology.org/formats/oboInOwl#RelatedSynonym",
+"namespace": "http://www.geneontology.org/formats/oboInOwl"
+},
+{
+"uuid": "111115bc-8535-4448-903e-854af460a233",
+"term_name": "definition",
+"term_id": "EFO:definition",
+"source_ontology": "530006bc-8535-4448-903e-854af460b254",
+"term_url": "http://www.ebi.ac.uk/efo/definition",
+"namespace": "http://www.ebi.ac.uk/efo"
+},
+{
+"uuid": "111116bc-8535-4448-903e-854af460a233",
+"term_name": "definition",
+"term_id": "IAO:0000115",
+"source_ontology": "530006bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/IAO_0000115",
+"namespace": "http://purl.obolibrary.org/obo"
+},
+{
+"uuid": "111117bc-8535-4448-903e-854af460a233",
+"term_name": "alternative term",
+"term_id": "IAO:0000118",
+"source_ontology": "530026bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/IAO_0000118",
+"namespace": "http://purl.obolibrary.org/obo"
+},
+{
+"uuid": "111118bc-8535-4448-903e-854af460a233",
+"term_name": "germ layer",
+"term_id": "UBERON:0000923",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000923",
+"namespace": "http://purl.obolibrary.org/obo",
+"definition": "A layer of cells produced during the process of gastrulation during the early development of the animal embryo, which is distinct from other such layers of cells, as an early step of cell differentiation. The three types of germ layers are the endoderm, ectoderm, and mesoderm.",
+"synonyms": [
+"embryonic germ layer",
+"germinal layer",
+"primary germ layer"
+]
+},
+{
+"uuid": "111119bc-8535-4448-903e-854af460a233",
+"term_name": "ectoderm",
+"term_id": "UBERON:0000924",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000924",
+"namespace": "http://purl.obolibrary.org/obo",
+"definition": "Primary germ layer that is the outer of the embryo's three germ layers and gives rise to epidermis and neural tissue.",
+"is_slim_for": "developmental",
+"synonyms": [
+"embryonic ectoderm"
+],
+"parents": [
+"111118bc-8535-4448-903e-854af460a233"
+]
+},
+{
+"uuid": "111120bc-8535-4448-903e-854af460a233",
+"term_name": "mesoderm",
+"term_id": "UBERON:0000926",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000926",
+"namespace": "http://purl.obolibrary.org/obo",
+"definition": "The middle germ layer of the embryo, between the endoderm and ectoderm.",
+"is_slim_for": "developmental",
+"synonyms": [
+"entire mesoderm",
+"embryonic mesoderm",
+"mesodermal mantle"
+],
+"parents": [
+"111118bc-8535-4448-903e-854af460a233"
+]
+},
+{
+"uuid": "111121bc-8535-4448-903e-854af460a233",
+"term_name": "endoderm",
+"term_id": "UBERON:0000925",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000925",
+"namespace": "http://purl.obolibrary.org/obo",
+"definition": "Primary germ layer that lies remote from the surface of the embryo and gives rise to internal tissues such as gut.",
+"is_slim_for": "developmental",
+"synonyms": [
+"entoderm"
+],
+"parents": [
+"111118bc-8535-4448-903e-854af460a233"
+]
+},
+{
+"uuid": "111125bc-8535-4448-903e-854af460a233",
+"term_name": "musculature of body",
+"term_id": "UBERON:0000383",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000383",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111126bc-8535-4448-903e-854af460a233",
+"term_name": "endocrine system",
+"term_id": "UBERON:0000949",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000949",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111127bc-8535-4448-903e-854af460a233",
+"term_name": "reproductive system",
+"term_id": "UBERON:0000990",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000990",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111128bc-8535-4448-903e-854af460a233",
+"term_name": "respiratory system",
+"term_id": "UBERON:0001004",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001004",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111129bc-8535-4448-903e-854af460a233",
+"term_name": "digestive system",
+"term_id": "UBERON:0001007",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001007",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111130bc-8535-4448-903e-854af460a233",
+"term_name": "renal system",
+"term_id": "UBERON:0001008",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001008",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111131bc-8535-4448-903e-854af460a233",
+"term_name": "circulatory system",
+"term_id": "UBERON:0001009",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001009",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111132bc-8535-4448-903e-854af460a233",
+"term_name": "skeletal system",
+"term_id": "UBERON:0001434",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001434",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111133bc-8535-4448-903e-854af460a233",
+"term_name": "immune system",
+"term_id": "UBERON:0002405",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002405",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111134bc-8535-4448-903e-854af460a233",
+"term_name": "integumental system",
+"term_id": "UBERON:0002416",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002416",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111135bc-8535-4448-903e-854af460a233",
+"term_name": "sensory system",
+"term_id": "UBERON:0001032",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001032",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111136bc-8535-4448-903e-854af460a233",
+"term_name": "central nervous system",
+"term_id": "UBERON:0001017",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001017",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111137bc-8535-4448-903e-854af460a233",
+"term_name": "peripheral nervous system",
+"term_id": "UBERON:0000010",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000010",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "system"
+},
+{
+"uuid": "111138bc-8535-4448-903e-854af460a233",
+"preferred_name": "DNA binding",
+"term_name": "protein and DNA interaction identification objective",
+"term_id": "OBI:0001398",
+"source_ontology": "530026bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/OBI_0001398",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "assay"
+},
+{
+"uuid": "111139bc-8535-4448-903e-854af460a233",
+"preferred_name": "DNA accessibility",
+"term_name": "protein and DNA interaction identification objective",
+"term_id": "OBI:0000870",
+"source_ontology": "530026bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/OBI_0000870",
+"namespace": "http://purl.obolibrary.org/obo",
+"is_slim_for": "assay"
+},
+{
+"uuid": "111122bc-8535-4448-903e-854af460a233",
+"preferred_name": "3D chromatin structure",
+"term_name": "chromosome conformation identification objective",
+"term_id": "OBI:0001917",
+"source_ontology": "530026bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/OBI_0001917",
+"namespace": "http://purl.obolibrary.org/obo",
+"definition": "A molecular feature identification objective that aims to determine spatial organization of chromatin.",
+"is_slim_for": "assay"
+},
+{
+"uuid": "111123bc-8535-4448-903e-854af460a233",
+"preferred_name": "Replication timing",
+"term_name": "DNA replication identification objective",
+"term_id": "OBI:0001916",
+"source_ontology": "530026bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/OBI_0001916",
+"namespace": "http://purl.obolibrary.org/obo",
+"definition": "A molecular feature identification objective that aims to examine charateristics of DNA replication, such as replication time.",
+"is_slim_for": "assay"
+},
+{
+"uuid": "111124bc-8535-4448-903e-854af460a233",
+"preferred_name": "Imaging",
+"term_name": "imaging assay",
+"term_id": "OBI:0000185",
+"source_ontology": "530026bc-8535-4448-903e-854af460b254",
+"term_url": "http://purl.obolibrary.org/obo/OBI_0000185",
+"namespace": "http://purl.obolibrary.org/obo",
+"definition": "An imaging assay is an assay to produce a picture of an entity.",
+"is_slim_for": "assay"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001264",
+"term_name": "pancreas",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001264",
+"uuid": "111140bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001255",
+"term_name": "urinary bladder",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001255",
+"uuid": "111141bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000165",
+"term_name": "mouth",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000165",
+"uuid": "111142bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0007844",
+"term_name": "cartilage element",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0007844",
+"uuid": "111143bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000057",
+"term_name": "urethra",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000057",
+"uuid": "111144bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001981",
+"term_name": "blood vessel",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001981",
+"uuid": "111145bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000029",
+"term_name": "lymph node",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000029",
+"uuid": "111146bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000178",
+"term_name": "blood",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000178",
+"uuid": "111147bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000056",
+"term_name": "ureter",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000056",
+"uuid": "111148bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0006562",
+"term_name": "pharynx",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0006562",
+"uuid": "111149bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000478",
+"term_name": "extraembryonic structure",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000478",
+"uuid": "111150bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0003126",
+"term_name": "trachea",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0003126",
+"uuid": "111151bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002240",
+"term_name": "spinal cord",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002240",
+"uuid": "111152bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002046",
+"term_name": "thyroid gland",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002046",
+"uuid": "111153bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001043",
+"term_name": "esophagus",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001043",
+"uuid": "111154bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001103",
+"term_name": "diaphragm",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001103",
+"uuid": "111155bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000945",
+"term_name": "stomach",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000945",
+"uuid": "111156bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002369",
+"term_name": "adrenal gland",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002369",
+"uuid": "111157bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001630",
+"term_name": "muscle organ",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001630",
+"uuid": "111158bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000004",
+"term_name": "nose",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000004",
+"uuid": "111159bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001132",
+"term_name": "parathyroid gland",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001132",
+"uuid": "111160bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002268",
+"term_name": "olfactory organ",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002268",
+"uuid": "111161bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001911",
+"term_name": "mammary gland",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001911",
+"uuid": "111162bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002110",
+"term_name": "gall bladder",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002110",
+"uuid": "111163bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000991",
+"term_name": "gonad",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000991",
+"uuid": "111164bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001473",
+"term_name": "lymphatic vessel",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001473",
+"uuid": "111165bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001737",
+"term_name": "larynx",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001737",
+"uuid": "111166bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002113",
+"term_name": "kidney",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002113",
+"uuid": "111167bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001021",
+"term_name": "nerve",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001021",
+"uuid": "111168bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000007",
+"term_name": "pituitary gland",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000007",
+"uuid": "111169bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000955",
+"term_name": "brain",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000955",
+"uuid": "111170bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0010133",
+"term_name": "neuroendocrine gland",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0010133",
+"uuid": "111171bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001987",
+"term_name": "placenta",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001987",
+"uuid": "111172bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001173",
+"term_name": "biliary tree",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001173",
+"uuid": "111173bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000059",
+"term_name": "large intestine",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000059",
+"uuid": "111174bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001723",
+"term_name": "tongue",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001723",
+"uuid": "111175bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002367",
+"term_name": "prostate gland",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002367",
+"uuid": "111176bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002106",
+"term_name": "spleen",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002106",
+"uuid": "111177bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002108",
+"term_name": "small intestine",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002108",
+"uuid": "111178bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002370",
+"term_name": "thymus",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002370",
+"uuid": "111179bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001474",
+"term_name": "bone element",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001474",
+"uuid": "111180bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000970",
+"term_name": "eye",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000970",
+"uuid": "111181bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002107",
+"term_name": "liver",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002107",
+"uuid": "111182bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002391",
+"term_name": "lymph",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002391",
+"uuid": "111183bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0001690",
+"term_name": "ear",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0001690",
+"uuid": "111184bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002185",
+"term_name": "bronchus",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002185",
+"uuid": "111185bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002048",
+"term_name": "lung",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002048",
+"uuid": "111186bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0000948",
+"term_name": "heart",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0000948",
+"uuid": "111187bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "organ",
+"namespace": "http://purl.obolibrary.org/obo",
+"source_ontology": "530016bc-8535-4448-903e-854af460b254",
+"term_id": "UBERON:0002097",
+"term_name": "skin of body",
+"term_url": "http://purl.obolibrary.org/obo/UBERON_0002097",
+"uuid": "111188bc-8535-4448-903e-854af460a233"
+},
+{
+"is_slim_for": "cell",
+"namespace": "http://www.ebi.ac.uk/efo",
+"term_id": "EFO:0000322",
+"term_name": "cell line",
+"uuid": "111189bc-8535-4448-903e-854af460a233",
+"source_ontology": "530006bc-8535-4448-903e-854af460b254",
+"term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
+},
+{
+"is_slim_for": "cell",
+"namespace": "http://www.ebi.ac.uk/efo",
+"term_id": "EFO:0003064",
+"term_name": "primary cell line",
+"uuid": "111190bc-8535-4448-903e-854af460a233",
+"source_ontology": "530006bc-8535-4448-903e-854af460b254",
+"term_url": "http://www.ebi.ac.uk/efo/EFO_0003064"
+}
+]

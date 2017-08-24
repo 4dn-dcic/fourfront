@@ -1,11 +1,16 @@
 branch-defaults:
+  FF-687:
+    ec2_keyname: alexkb
+    environment: 4dn-web-alex-2
   aws_beanstalk:
     environment: 4dn-web-prod
     group_suffix: null
+  fix_404_no_auth:
+    environment: 4dn-web-alex
   master:
-    environment: 4dnweb-prod
+    environment: fourfront-webprod
   production:
-    environment: 4dn-web-dev
+    environment: fourfront-webprod
 global:
   application_name: 4dn-web
   default_ec2_keyname: 4dn-encode

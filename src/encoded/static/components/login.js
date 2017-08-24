@@ -1,78 +1,91 @@
 'use strict';
-var React = require('react');
-var store = require('../store');
-var { JWT } = require('./util');
-var { MenuItem } = require('react-bootstrap');
-var Alerts = require('./alerts');
 
-// Component that contains auth0 functions
-var Login = React.createClass({
-    contextTypes: {
-    	fetch: React.PropTypes.func,
-    	session: React.PropTypes.bool,
-        navigate: React.PropTypes.func,
-        updateUserInfo: React.PropTypes.func
-    },
+import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import * as store from '../store';
+import { JWT, ajax, navigate, isServerSide } from './util';
+import { MenuItem } from 'react-bootstrap';
+import Alerts from './alerts';
 
-    componentWillMount: function () {
-        const isClient = typeof window !== 'undefined';
+/** Component that contains auth0 functions */
+export default class Login extends React.Component {
+
+    static propTypes = {
+        updateUserInfo      : PropTypes.func.isRequired,
+        session             : PropTypes.bool.isRequired,
+        navCloseMobileMenu  : PropTypes.func.isRequired,
+        href                : PropTypes.string.isRequired
+    }
+
+    constructor(props){
+        super(props);
+        this.componentWillMount = this.componentWillMount.bind(this);
+        this.showLock           = this.showLock.bind(this);
+        this.logout             = this.logout.bind(this);
+        this.handleAuth0Login   = this.handleAuth0Login.bind(this);
+        this.render             = this.render.bind(this);
+    }
+
+    componentWillMount () {
         var lock_;
-        if (isClient) {
-            lock_ = require('auth0-lock').default;
-        }else{
+        if (isServerSide()) {
             return;
+        } else {
+            lock_ = require('auth0-lock').default;
         }
         // Login / logout actions must be deferred until Auth0 is ready.
         // TODO: these should be read in from base and production.ini
         this.lock = new lock_('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
             'hms-dbmi.auth0.com', {
-            auth: {
-            	redirect: false,
-                responseType: 'token',
-                params: {scope: 'openid email'}
-            },
-            socialButtonStyle: 'big',
-            languageDictionary: {
-            	title: "Log in"
-            },
-            theme: {
-                logo: '/static/img/4dn_logo.svg'
-            },
-            allowedConnections: ['github', 'google-oauth2']
-        });
+                auth: {
+                    sso: false,
+                    redirect: false,
+                    responseType: 'token',
+                    params: {scope: 'openid email', prompt: 'select_account'}
+                },
+                socialButtonStyle: 'big',
+                languageDictionary: {
+                    title: "Log in"
+                },
+                theme: {
+                    logo: '/static/img/4dn_logo.svg'
+                },
+                allowedConnections: ['github', 'google-oauth2']
+            });
         this.lock.on("authenticated", this.handleAuth0Login);
-    },
+    }
 
-	showLock: function(eventKey, e) {
-		this.lock.show();
-	},
+    showLock(eventKey, e) {
+        this.lock.show();
+    }
 
-    logout: function (eventKey, e) {
+    logout(eventKey, e) {
         JWT.remove();
         console.log('Logging out');
-        if (!this.context.session) return;
+        if (!this.props.session) return;
         if (typeof this.props.navCloseMobileMenu === 'function') this.props.navCloseMobileMenu();
 
-        this.context.fetch('/logout?redirect=false')
+        ajax.fetch('/logout?redirect=false')
         .then(data => {
             if(typeof document !== 'undefined'){
 
                 // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
                 document.dispatchEvent(new MouseEvent('click'));
 
-                this.context.updateUserInfo();
-                this.context.navigate('', {'inPlace':true});
+                this.props.updateUserInfo();
+                navigate('', {'inPlace':true});
             }
         });
-    },
+    }
 
-    handleAuth0Login: function(authResult, retrying){
+    handleAuth0Login(authResult, retrying){
         var idToken = authResult.idToken; //JWT
         if (!idToken) return;
 
         JWT.save(idToken); // We just got token from Auth0 so probably isn't outdated.
 
-        this.context.fetch('/login', {
+        ajax.fetch('/login', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer '+idToken },
             body: JSON.stringify({id_token: idToken})
@@ -83,41 +96,37 @@ var Login = React.createClass({
         })
         .then(response => {
             JWT.saveUserInfoLocalStorage(response);
-            this.context.updateUserInfo();
+            this.props.updateUserInfo();
             Alerts.deQueue(Alerts.LoggedOut);
-            this.context.navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
+            if(this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
+                navigate('/', {'inPlace':true}, this.lock.hide.bind(this.lock));
+            }else{
+                navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
+            }
         }, error => {
             console.log("got an error: ", error.description);
             console.log(error);
-            store.dispatch({
-                type: {'context':error}
-            });
-            this.lock.hide.bind(this.lock);
+            var errorPageHref = '/';
+            if (error.code === 403) {
+                errorPageHref = '/error/login-failed';
+            }
+            navigate(errorPageHref);
+            this.lock.hide.call(this.lock);
         });
+    }
 
-    },
-
-    render: function () {
+    render() {
         if (this.props.invisible) return null;
-        if (this.context.session){
-            return (
-                <MenuItem id="logoutbtn" onSelect={this.logout} className="global-entry">
-                    Log Out
-                </MenuItem>
-            );
-        }
-        return (
+        if (this.props.session) return (
+            <MenuItem id="logoutbtn" onSelect={this.logout} className="global-entry">
+                Log Out
+            </MenuItem>
+        );
+        else return (
             <MenuItem id="loginbtn" onSelect={this.showLock} className="global-entry">
                 Log In
             </MenuItem>
         );
-        /* For old nav
-        return (this.context.session ?
-            <a href="#" className="global-entry" onClick={this.logout}>Log out</a>
-            :
-            <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>
-        );
-        */
-    },
-});
-module.exports = Login;
+    }
+
+}

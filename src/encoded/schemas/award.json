@@ -19,17 +19,14 @@
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "released",
+            "default": "current",
             "permission": "import_items",
             "enum": [
-                "released",
                 "current",
                 "revoked",
                 "deleted",
                 "replaced",
-                "in review by lab",
-                "in review by project",
-                "released to project"
+                "inactive"
             ]
         },
         "title": {
@@ -89,6 +86,7 @@
             "type": "string",
             "enum": [
                 "4DN",
+                "ENCODE",
                 "External"
             ]
         },

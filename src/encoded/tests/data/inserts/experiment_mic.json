@@ -1,6 +1,6 @@
 [
     {
-        "accession":"4DNEX067AWMM",
+        "accession":"4DNEXO67AWMM",
         "status": "in review by lab",
         "biosample":"123111bc-8535-4448-903e-854af460b123",
         "experiment_type": "DNA-paint",
@@ -11,6 +11,6 @@
         "award": "1U01CA200059-01",
         "uuid": "40041e2f-3e43-4388-8bbb-e861f209c555",
         "submitted_by": "4dndcic@gmail.com",
-        "imaging_paths":["test:imagepath001"]
+        "imaging_paths":[{"imaging_path": "test:imagepath001", "channel": "ch01"}]
     }
 ]

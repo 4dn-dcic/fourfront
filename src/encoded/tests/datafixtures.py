@@ -7,9 +7,10 @@ def lab(testapp, award):
         'name': 'encode-lab',
         'title': 'ENCODE lab',
         'status': 'current',
-        'awards':[award['@id']]
+        'awards': [award['@id']]
     }
     return testapp.post_json('/lab', item).json['@graph'][0]
+
 
 @pytest.fixture
 def admin(testapp):
@@ -59,6 +60,7 @@ def award(testapp):
         'name': 'encode3-award',
         'description': 'ENCODE test award',
         'viewing_group': '4DN',
+        'project': '4DN'
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
@@ -66,7 +68,7 @@ def award(testapp):
 @pytest.fixture
 def human_individual(testapp, award, lab, human):
     item = {
-        "accession": "4DNIN000AAQ1",
+        "accession": "4DNINOOOAAQ1",
         "age": 53,
         "age_units": "year",
         'award': award['@id'],
@@ -110,10 +112,10 @@ def mboI(testapp, worthington_biochemical, lab, award):
 
 
 @pytest.fixture
-def lung_biosource(testapp, lab, award):
+def lung_biosource(testapp, lab, award, lung_oterm):
     item = {
         "biosource_type": "tissue",
-        "tissue": "lung",
+        'tissue': lung_oterm['@id'],
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -124,7 +126,7 @@ def lung_biosource(testapp, lab, award):
 def tissue_biosample(testapp, lung_biosource, lab, award):
     item = {
         'description': "Tissue Biosample",
-        'biosource': [lung_biosource['@id']],
+        'biosource': [lung_biosource['uuid']],
         'award': award['@id'],
         'lab': lab['@id']
     }
@@ -134,6 +136,7 @@ def tissue_biosample(testapp, lung_biosource, lab, award):
 @pytest.fixture
 def protocol(testapp, lab, award):
     item = {'description': 'A Protocol',
+            'protocol_type': 'Experimental protocol',
             'award': award['@id'],
             'lab': lab['@id']
             }
@@ -141,11 +144,49 @@ def protocol(testapp, lab, award):
 
 
 @pytest.fixture
-def F123_biosource(testapp, lab, award):
+def cell_line_term(testapp, ontology):
     item = {
-        "accession": "4DNSR000AAQ2",
+        "is_slim_for": "cell",
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "term_id": "EFO:0000322",
+        "term_name": "cell line",
+        "uuid": "111189bc-8535-4448-903e-854af460a233",
+        "source_ontology": ontology['@id'],
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def f123_oterm(testapp, ontology, cell_line_term):
+    item = {
+        "uuid": "530036bc-8535-4448-903e-854af460b254",
+        "term_name": "F123-CASTx129",
+        "term_id": "EFO:0000008",
+        "source_ontology": ontology['@id'],
+        "slim_terms": [cell_line_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def gm12878_oterm(testapp, ontology, cell_line_term):
+    item = {
+        "uuid": "530056bc-8535-4448-903e-854af460b111",
+        "term_name": "GM12878",
+        "term_id": "EFO:0000009",
+        "source_ontology": ontology['@id'],
+        "slim_terms": [cell_line_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def F123_biosource(testapp, lab, award, f123_oterm):
+    item = {
+        "accession": "4DNSROOOAAQ2",
         "biosource_type": "stem cell",
-        "cell_line": "F123-CASTx129",
+        "cell_line": f123_oterm['@id'],
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -153,12 +194,38 @@ def F123_biosource(testapp, lab, award):
 
 
 @pytest.fixture
-def human_biosource(testapp, human_individual, worthington_biochemical, lab, award):
+def GM12878_biosource(testapp, lab, award, gm12878_oterm):
+    item = {
+        "accession": "4DNSROOOAAQ1",
+        "biosource_type": "immortalized cell line",
+        "cell_line": gm12878_oterm['@id'],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def tier1_biosource(testapp, protocol, lab, award, gm12878_oterm):
+    item = {
+        'description': 'Tier 1 cell line Biosource',
+        'biosource_type': 'immortalized cell line',
+        'cell_line': gm12878_oterm['@id'],
+        'SOP_cell_line': protocol['@id'],
+        'cell_line_tier': 'Tier 1',
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def human_biosource(testapp, human_individual, worthington_biochemical, gm12878_oterm, lab, award):
     item = {
         "description": "GM12878 cells",
         "biosource_type": "immortalized cell line",
         "individual": human_individual['@id'],
-        "cell_line": "GM12878",
+        "cell_line": gm12878_oterm['@id'],
         "biosource_vendor": worthington_biochemical['@id'],
         "status": "current",
         'award': award['@id'],
@@ -170,11 +237,11 @@ def human_biosource(testapp, human_individual, worthington_biochemical, lab, awa
 @pytest.fixture
 def human_data():
     return {
-            'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
-            'name': 'human',
-            'scientific_name': 'Homo sapiens',
-            'taxon_id': '9606',
-           }
+        'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
+        'name': 'human',
+        'scientific_name': 'Homo sapiens',
+        'taxon_id': '9606',
+    }
 
 
 @pytest.fixture
@@ -217,12 +284,13 @@ def experiment(testapp, experiment_data):
 
 
 @pytest.fixture
-def experiment_data(lab, award, human_biosample):
+def experiment_data(lab, award, human_biosample, mboI):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'micro-C',
+        'digestion_enzyme': mboI['@id'],
         'status': 'in review by lab'
     }
 
@@ -242,6 +310,54 @@ def experiment_project_review(testapp, lab, award, human_biosample):
 @pytest.fixture
 def base_experiment(testapp, experiment_data):
     return testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
+
+
+#@pytest.fixture
+#def experiment_data(lab, award, human_biosample, mboI):
+#    return {
+#        'lab': lab['@id'],
+#        'award': award['@id'],
+#        'biosample': human_biosample['@id'],
+#        'experiment_type': 'micro-C',
+#        'digestion_enzyme': mboI['@id']
+#    }
+
+
+@pytest.fixture
+def experiments(testapp, experiment_data):
+    expts = []
+    for i in range(4):
+        experiment_data['description'] = 'Experiment ' + str(i)
+        expts.append(testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0])
+    return expts
+
+
+@pytest.fixture
+def rep_set_data(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'Test replicate set',
+    }
+
+
+@pytest.fixture
+def empty_replicate_set(testapp, rep_set_data):
+    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+
+
+@pytest.fixture
+def two_experiment_replicate_set(testapp, rep_set_data, experiments):
+    rep_set_data['description'] = 'Two one BioRep Experiment Replicate Set'
+    rep_set_data['replicate_exps'] = [
+        {'replicate_exp': experiments[0]['@id'],
+         'bio_rep_no': 1,
+         'tec_rep_no': 1},
+        {'replicate_exp': experiments[1]['@id'],
+         'bio_rep_no': 1,
+         'tec_rep_no': 2}
+    ]
+    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -375,8 +491,7 @@ def analysis_step(testapp, software, lab, award):
 def document(testapp, lab, award):
     item = {
         'award': award['@id'],
-        'lab': lab['@id'],
-        'document_type': 'growth protocol',
+        'lab': lab['@id']
     }
     return testapp.post_json('/document', item).json['@graph'][0]
 
@@ -393,8 +508,37 @@ def workflow_run_sbg(testapp, lab, award, workflow_bam):
             'lab': lab['@id'],
             'sbg_mounted_volume_ids': ['4dn_s32gkz1s7x', '4dn_s33xkquabu'],
             'run_status': 'started',
-           }
+            }
     return testapp.post_json('/workflow_run_sbg', item).json['@graph'][0]
+
+
+@pytest.fixture
+def workflow_run_awsem(testapp, lab, award, workflow_bam):
+    item = {'run_platform': 'AWSEM',
+            'parameters': [],
+            'workflow': workflow_bam['@id'],
+            'title': u'md5 run 2017-01-20 13:16:11.026176',
+            'award': award['@id'],
+            'awsem_job_id': '1235',
+            'lab': lab['@id'],
+            'run_status': 'started',
+            }
+    return testapp.post_json('/workflow_run_awsem', item).json['@graph'][0]
+
+
+@pytest.fixture
+def workflow_run_json(testapp, lab, award, workflow_bam):
+    return {'run_platform': 'SBG',
+            'parameters': [],
+            'workflow': workflow_bam['@id'],
+            'title': u'md5 run 2017-01-20 13:16:11.026176',
+            'sbg_import_ids': [u'TBCKPdzfUE9DpvtzO6yb9yoIvO81RaZd'],
+            'award': award['@id'],
+            'sbg_task_id': '1235',
+            'lab': lab['@id'],
+            'sbg_mounted_volume_ids': ['4dn_s32gkz1s7x', '4dn_s33xkquabu'],
+            'run_status': 'started',
+            }
 
 
 @pytest.fixture
@@ -467,3 +611,40 @@ def basic_genomic_region(testapp, lab, award):
         'lab': lab['@id'],
     }
     return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def uberon_ont(testapp):
+    return testapp.post_json('/ontology', {'ontology_name': 'Uberon'}).json['@graph'][0]
+
+
+@pytest.fixture
+def ontology(testapp):
+    data = {
+        "uuid": "530006bc-8535-4448-903e-854af460b254",
+        "ontology_name": "Experimental Factor Ontology",
+        "ontology_url": "http://www.ebi.ac.uk/efo/",
+        "download_url": "http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw",
+        "namespace_url": "http://www.ebi.ac.uk/efo/",
+        "ontology_prefix": "EFO",
+        "description": "The description",
+        "notes": "The download",
+    }
+    return testapp.post_json('/ontology', data).json['@graph'][0]
+
+
+@pytest.fixture
+def oterm(uberon_ont):
+    return {
+        "uuid": "530036bc-8535-4448-903e-854af460b222",
+        "preferred_name": "preferred lung name",
+        "term_name": "lung",
+        "term_id": "UBERON:0002048",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0002048",
+        "source_ontology": uberon_ont['@id']
+    }
+
+
+@pytest.fixture
+def lung_oterm(oterm, testapp):
+    return testapp.post_json('/ontology_term', oterm).json['@graph'][0]

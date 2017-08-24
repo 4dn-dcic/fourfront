@@ -6,3 +6,135 @@
 .hubs-controls-button {
     display: inline-block;
 }
+
+
+/*** UPDATED MATRIX ***/
+
+.matrix-view-container-wrapper {
+
+    .matrix-title {
+        font-weight: 500;
+        &.no-x-axis-title {
+            position: absolute;
+            bottom: 42px;
+            font-weight: 700;
+        }
+    }
+
+    .matrix-view-container {
+
+        .matrix-y-axis {
+            float: left;
+            display: flex;
+            flex-direction: column;
+            .y-axis-matrix-label {
+                display: block;
+                position: relative;
+                margin: 1px 0;
+                margin-right: 10px;
+                border-bottom: 1px dotted #ddd;
+                border-top: 1px dotted #ddd;
+                > .inner {
+                    position: relative;
+                    .label-container {
+                        position: relative;
+                        > .part-1 {
+                            font-weight: 500;
+                            //display: inline-block;
+                        }
+                        > .part-2 {
+                            //font-weight: 300;
+                            font-size: 0.85rem;
+                            float: right;
+                            margin-left: 7px;
+                        }
+
+                        > .part-1 + .part-2 {
+                            max-width: 40%;
+                            margin-top: 2px;
+                        }
+
+                        /* Height increments are 0, 30, 45, 64 */
+
+                        &:not(.height-at-least-64){
+                            > .part-1 {
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            }
+                        }
+
+                        &.height-at-least-0,
+                        &.height-at-least-30 {
+                            > .part-2 {
+                                display: none;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .matrix-x-axis {
+            display: flex;
+            flex-direction: row;
+
+            .prefix {
+                position: relative;
+
+                .matrix-x-axis-title,
+                .matrix-y-axis-title {
+                    position: absolute;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    font-weight: 600;
+                    small > i.icon {
+                        font-size: 0.75rem;
+                        color: rgba(0,0,0,0.33);
+                    }
+                }
+
+                .matrix-x-axis-title {
+                    //bottom: 25px;
+                    //right: 5px;
+                    position: relative;
+                    float: right;
+                    margin-right: 5px;
+                    small > i.icon {
+                        margin-left: 5px;
+                    }
+                }
+
+                .matrix-y-axis-title {
+                    bottom: 5px;
+                    small > i.icon {
+                        margin-left: 5px;
+                    }
+                }
+            }
+            
+            .x-axis-matrix-label-container {
+                position: relative;
+                margin: 0 1px;
+                .x-axis-matrix-label {
+                    position: absolute;
+                    bottom: 0;
+                    transform-origin: 0 100%;
+                    transform: rotate(-45deg);
+                    > .inner {
+                        position: relative;
+                    }
+                }
+            }
+        }
+
+        .matrix-grid-container {
+            float: left;
+            .rm-cell {
+                border-radius: 0px;
+            }
+        }
+
+    }
+
+}

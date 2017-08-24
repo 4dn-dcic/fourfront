@@ -63,4 +63,6 @@ class TreatmentRnai(Treatment):
 
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
-    embedded = ['rnai_vendor', 'rnai_constructs', 'target']
+    embedded = ['rnai_vendor.name',
+                'rnai_constructs.designed_to_target',
+                'target.target_summary']

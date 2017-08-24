@@ -3,6 +3,16 @@ pytestmark = pytest.mark.working
 
 
 @pytest.fixture
+def external_award(testapp):
+    item = {
+        'name': 'some-award',
+        'description': 'test award',
+        'project': 'External'
+    }
+    return testapp.post_json('/award', item).json['@graph'][0]
+
+
+@pytest.fixture
 def biosample_cell_culture_data(lab, award):
     return {
         'lab': lab['@id'],
@@ -10,7 +20,6 @@ def biosample_cell_culture_data(lab, award):
         'culture_start_date': '2016-01-01',
         'culture_harvest_date': '2016-01-15',
         'culture_duration': 15,
-        'culture_duration_units': 'days',
         'passage_number': 1
     }
 
@@ -74,26 +83,6 @@ def fastq_files(testapp, lab, award):
 
 
 @pytest.fixture
-def experiment_data(lab, award, human_biosample, mboI):
-    return {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
-        'digestion_enzyme': mboI['@id']
-    }
-
-
-@pytest.fixture
-def experiments(testapp, experiment_data):
-    expts = []
-    for i in range(4):
-        experiment_data['description'] = 'Experiment ' + str(i)
-        expts.append(testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0])
-    return expts
-
-
-@pytest.fixture
 def bs_f_experiments(testapp, experiment_data, biosamples4rep_set, fastq_files):
     expts = []
     for i in range(4):
@@ -108,20 +97,6 @@ def bs_f_experiments(testapp, experiment_data, biosamples4rep_set, fastq_files):
 
 
 @pytest.fixture
-def rep_set_data(lab, award):
-    return {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'description': 'Test replicate set',
-    }
-
-
-@pytest.fixture
-def empty_replicate_set(testapp, rep_set_data):
-    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
-
-
-@pytest.fixture
 def one_experiment_replicate_set(testapp, rep_set_data, experiments):
     rep_set_data['description'] = 'One Experiment Replicate Set'
     rep_set_data['replicate_exps'] = [
@@ -133,16 +108,14 @@ def one_experiment_replicate_set(testapp, rep_set_data, experiments):
 
 
 @pytest.fixture
-def two_experiment_replicate_set(testapp, rep_set_data, experiments):
-    rep_set_data['description'] = 'Two one BioRep Experiment Replicate Set'
+def external_exp_set(testapp, rep_set_data, experiments, external_award):
+    rep_set_data['description'] = 'External Experiment Set no pub'
     rep_set_data['replicate_exps'] = [
         {'replicate_exp': experiments[0]['@id'],
          'bio_rep_no': 1,
-         'tec_rep_no': 1},
-        {'replicate_exp': experiments[1]['@id'],
-         'bio_rep_no': 1,
-         'tec_rep_no': 2}
+         'tec_rep_no': 1}
     ]
+    rep_set_data['award'] = external_award['@id']
     return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
@@ -269,3 +242,23 @@ def test_audit_replicate_set_inconsistency_checks(testapp, invalid_replicate_set
             assert any('Biosample field' in error['detail'] for error in errors)
         else:
             assert any('Cell Culture Detail field' in error['detail'] for error in errors)
+
+
+def test_audit_external_experiment_set_no_pub_warns(testapp, external_exp_set):
+    res = testapp.get(external_exp_set['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    assert any(error['category'] == 'missing mandatory metadata' for error in errors)
+    assert any(error['detail'].startswith('External ExperimentSet') for error in errors)
+
+
+def test_audit_external_experiment_set_w_pub_no_warn(testapp, external_exp_set, publication):
+    testapp.patch_json(publication['@id'], {'exp_sets_prod_in_pub': [external_exp_set['@id']]}, status=200)
+    res = testapp.get(external_exp_set['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
+
+
+def test_audit_project_experiment_set_wo_pub_no_warn(testapp, one_experiment_replicate_set):
+    res = testapp.get(one_experiment_replicate_set['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)

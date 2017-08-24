@@ -1,10 +1,10 @@
 {
     "title": "Processed file from workflow runs",
-    "description": "Schema for submitting metadata for a FASTA file.",
+    "description": "Files produced by 4DN pipelines.",
     "id": "/profiles/file_processed.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
+    "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -18,10 +18,16 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "file.json#/properties" }
     ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
-        }, 
+        },
         "file_format": {
             "title": "File Format",
             "type": "string",
@@ -32,6 +38,25 @@
                 "pairs_px2",
                 "cool",
                 "hic",
+                "mcool",
+                "normvector_juicerformat",
+                "other"
+            ]
+        },
+        "file_type": {
+            "title": "File Type",
+            "description": "The type of file based on the information in the file.",
+            "enum": [
+                "read pairs",
+                "alignments",
+                "unfiltered alignments",
+                "contact list",
+                "contact matrix",
+                "normalized contact matrix",
+                "long range chromatin interactions",
+                "intensity values",
+                "peaks",
+                "image",
                 "other"
             ]
         }
@@ -39,10 +64,12 @@
      "file_format_file_extension": {
         "bam": ".bam",
         "bai": ".bam.bai",
-        "pairs": ".pairs.txt.gz",
-        "pairs_px2": ".pairs.txt.gz.px2",
+        "pairs": ".pairs.gz",
+        "pairs_px2": ".pairs.gz.px2",
         "cool": ".cool",
+        "mcool": ".mcool",
         "hic": ".hic",
+        "normvector_juicerformat": ".normvector.juicerformat.gz",
         "other": ""
     }
 }

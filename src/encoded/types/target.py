@@ -1,4 +1,4 @@
-"""Modifications types file."""
+"""Targets types file."""
 from snovault import (
     calculated_property,
     collection,
@@ -20,22 +20,38 @@ class Target(Item):
 
     item_type = 'target'
     schema = load_schema('encoded:schemas/target.json')
-    embedded = ['targeted_region']
+    embedded = ['targeted_genome_regions.*']
 
     @calculated_property(schema={
         "title": "Target summary",
         "description": "Summary of target information, either specific genes or genomic coordinates.",
         "type": "string",
     })
-    def target_summary(self, request, targeted_genes=None, targeted_regions=None):
-        if targeted_genes:
-            value = ""
-            value += ' and '.join(targeted_genes)
+    def target_summary(self, request, targeted_genes=None, targeted_genome_regions=None,
+                       targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
+        value = ""
+        for target_info, name in [[targeted_genes, "Gene"], [targeted_proteins, "Protein"], [targeted_rnas, "RNA"]]:
+            try:
+                add = name + ':' + ', '.join(target_info)
+                # if there are multiple species of targets combine them with &
+                if value and add:
+                    value += " & "
+                if add:
+                    value += add
+            except:
+                pass
+        if targeted_structure:
+            if value:
+                value += " & "
+            value += targeted_structure
+
+        if value:
             return value
-        elif targeted_regions:
+
+        elif targeted_genome_regions:
             values = []
             # since targetted region is a list, go through each item and get summary elements
-            for each_target in targeted_regions:
+            for each_target in targeted_genome_regions:
                 genomic_region = request.embed(each_target, '@@object')
                 value = ""
                 value += genomic_region['genome_assembly']
@@ -53,10 +69,25 @@ class Target(Item):
         "description": "Shortened version of target summary.",
         "type": "string",
     })
-    def target_summary_short(self, request, targeted_genes=None, description=None):
-        if targeted_genes:
-            value = ""
-            value += ' and '.join(targeted_genes)
+    def target_summary_short(self, request, targeted_genes=None, description=None,
+                             targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
+        value = ""
+        for target_info, name in [[targeted_genes, "Gene"], [targeted_proteins, "Protein"], [targeted_rnas, "RNA"]]:
+            try:
+                add = name + ':' + ', '.join(target_info)
+                # if there are multiple species of targets combine them with &
+                if value and add:
+                    value += " & "
+                if add:
+                    value += add
+            except:
+                pass
+        if targeted_structure:
+            if value:
+                value += " & "
+            value += targeted_structure
+
+        if value:
             return value
         elif description:
             return description
@@ -67,6 +98,8 @@ class Target(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, targeted_genes=None, description=None):
+    def display_title(self, request, targeted_genes=None, description=None,
+                      targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         # biosample = '/biosample/'+ self.properties['biosample']
-        return self.target_summary_short(request, targeted_genes, description)
+        return self.target_summary_short(request, targeted_genes, description,
+                                         targeted_proteins, targeted_rnas, targeted_structure)

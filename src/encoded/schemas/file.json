@@ -1,5 +1,6 @@
+
 {
-    "title": "Data file",
+    "title": "Data File",
     "description": "Schema for submitting metadata for a data file.",
     "id": "/profiles/file.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -11,11 +12,19 @@
         "accession": {
             "accessionType": "FI"
         },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the task.",
+            "type": "string"
+        },
         "filename": {
             "title": "File Name",
-            "description": "The local file name used at time of submission.",
+            "description": "The local file name used at time of submission. Must be alphanumeric, with the exception of the following special characters: '+=,.@-_'",
+            "s3Upload": true,
+            "ff_flag": "second round",
             "type": "string",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "pattern": "^[\\w+=,.@-]*$",
+            "exclude_from": ["submit4dn"],
             "comment": "ultimately uploaded filename will be uuid/accession, but filename with no directory will be store in metadata as passed in"
         },
         "file_format": {
@@ -25,23 +34,7 @@
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "type": "string",
-            "enum": [
-                "reads",
-                "read pairs",
-                "intensity values",
-                "alignments",
-                "unfiltered alignments",
-                "contact matrix",
-                "normalized contact matrix",
-                "long range chromatin interactions",
-                "peaks",
-                "genome reference",
-                "genome index",
-                "blacklisted regions",
-                "repeats",
-                "oligonucleotides"
-            ]
+            "type": "string"
         },
         "file_classification": {
             "title": "General Classification",
@@ -53,7 +46,7 @@
                 "processed file",
                 "ancillary file",
                 "other file"
-              ]
+            ]
         },
         "file_format_specifications": {
             "title": "File format specifications documents",
@@ -61,17 +54,18 @@
             "type": "array",
             "uniqueItems": true,
             "items": {
-                    "comment": "See document.json for a list of available identifiers.",
-                    "type": "string",
-                    "linkTo": "Document"
-                    }
+                "comment": "See document.json for a list of available identifiers.",
+                "type": "string",
+                "linkTo": "Document"
+            }
         },
         "md5sum": {
             "title": "MD5sum",
             "description": "The md5sum of the file being transferred.",
             "comment": "This can vary for files of same content gzipped at different times",
             "type": "string",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
+            "ff_flag":"clear edit",
             "format": "hex"
         },
         "content_md5sum": {
@@ -80,17 +74,36 @@
             "comment": "This is only relavant for gzipped files.",
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"],
-            "format": "hex"
+            "format": "hex",
+            "uniqueKey": "file:content_md5sum"
         },
         "file_size": {
-            "title": "File size",
+            "title": "File Size",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
             "type": "integer"
         },
+        "extra_files": {
+            "title": "Extra Files",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "description": "Links to extra files on s3 that don't have associated metadata",
+            "type": "array",
+            "items": {
+                "title": "Extra File",
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                    "file_format": {
+                        "title": "File Format",
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "related_files": {
             "title": "Related Files",
             "description": "Files related to this one",
+            "ff_flag": "second round",
             "type": "array",
             "items": {
                 "title": "Related File",
@@ -110,15 +123,15 @@
                         ]
                     },
                     "file": {
-                      "type": "string",
-                      "description": "The related file",
-                      "linkTo": "File"
+                        "type": "string",
+                        "description": "The related file",
+                        "linkTo": "File"
                     }
                 }
             }
         },
         "restricted": {
-            "title": "Restricted file",
+            "title": "Is Restricted File",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "description": "A flag to indicate whether this file is subject to restricted access",
             "type": "boolean"
@@ -128,7 +141,7 @@
             "type": "string",
             "default": "uploading",
             "permission": "import_items",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "enum" : [
                 "uploading",
                 "uploaded",
@@ -138,15 +151,67 @@
                 "revoked",
                 "released",
                 "in review by project",
-                "released to project"
+                "released to project",
+                "to be uploaded by workflow"
             ]
         },
         "quality_metric": {
-          "type": "string",
-          "description": "The associated qc reports",
-          "linkTo": "QualityMetric"
+            "type": "string",
+            "title": "Quality Metric",
+            "description": "The associated QC reports",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "linkTo": "QualityMetric"
         }
     },
     "file_format_file_extension": {
+    },
+    "facets": {
+        "file_type" : {
+            "title" : "File Type"
+        },
+        "file_format": {
+            "title" : "File Format"
+        },
+        "experiments.experiment_type" : {
+            "title" : "Experiment Type"
+        },
+        "experiments.biosample.biosource.individual.organism.name" : {
+            "title" : "Organism"
+        },
+        "experiments.biosample.biosource.biosource_type" : {
+            "title" : "Biosource Type"
+        },
+        "experiments.biosample.biosource_summary" : {
+            "title" : "Biosource"
+        },
+        "experiments.digestion_enzyme.name" : {
+            "title" : "Enzyme"
+        },
+        "award.project": {
+            "title": "Project"
+        },
+        "lab.title": {
+            "title": "Lab"
+        }
+    },
+    "columns": {
+        "file_type" : {
+            "title" : "File Type"
+        },
+        "file_format": {
+            "title" : "File Format"
+        },
+        "award.project": {
+            "title": "Project"
+        },
+        "experiments.display_title": {
+            "title": "Experiments"
+        },
+        "experiments.biosample.biosource.display_title": {
+            "title": "Biosource"
+        },
+        "file_size" : {
+            "title" : "File Size"
+        }
     }
 }

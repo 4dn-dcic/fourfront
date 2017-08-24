@@ -13,289 +13,431 @@ var { console, isServerSide } = require('./../util');
  */
 
 /** @alias module:viz/utilities */
-var vizUtil = module.exports = {
 
-    /** 
-     * Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
-     * 
-     * @param {string} str - String to generate a color form.
-     * @returns {string} A CSS color.
-     */
-    stringToColor : function(str) {
-        var hash = 0;
-        var i;
-        for (i = 0; i < str.length; i++) {
-            hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        var colour = '#';
-        for (i = 0; i < 3; i++) {
-            var value = (hash >> (i * 8)) & 0xFF;
-            colour += ('00' + value.toString(16)).substr(-2);
-        }
-        return colour;
-    },
-    /** 
-     * Helper function for window.requestAnimationFrame. Falls back to browser-prefixed versions if default not available, or falls back to setTimeout with 0ms delay if no requestAnimationFrame available at all.
-     * 
-     * @param {function} cb - Callback method.
-     * @returns {undefined|string} Undefined or timeout ID if falling back to setTimeout.
-     */
-    requestAnimationFrame : function(cb){
-        if (!isServerSide() && typeof window !== 'undefined'){
-            if (typeof window.requestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
-            if (typeof window.webkitRequestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
-            if (typeof window.mozRequestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
-        }
-        return setTimeout(cb, 0);
-    },
-    /** @ignore */
-    colorCache : {},        // We cache generated colors into here to re-use and speed up.
-    /** @ignore */
-    colorCacheByField : {},
+/** 
+ * Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
+ * 
+ * @param {string} str - String to generate a color form.
+ * @returns {string} A CSS color.
+ */
+export function stringToColor(str) {
+    var hash = 0;
+    var i;
+    for (i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    var colour = '#';
+    for (i = 0; i < 3; i++) {
+        var value = (hash >> (i * 8)) & 0xFF;
+        colour += ('00' + value.toString(16)).substr(-2);
+    }
+    return colour;
+}
 
-    /**
-     * Mapping of colors to particular terms.
-     * @type {Object.<string>}
-     */
-    predefinedColors : {    // Keys should be all lowercase
-        "human (homo sapiens)"  : "rgb(218, 112, 6)",
-        "human"                 : "rgb(218, 112, 6)",
-        "mouse (mus musculus)"  : "rgb(43, 88, 169)",
-        "mouse"                 : "rgb(43, 88, 169)",
-        "other"                 : "#a173d1",
-        "end"                   : "#bbbbbb",
-        "none"                  : "#bbbbbb"
-    },
 
-    colorPalettes : {
-        'muted' : [
-            '#5da5da',  // blue
-            '#faa43a',  // orange
-            '#60bd68',  // green
-            '#f17cb0',  // pink
-            '#b2912f',  // brown
-            '#b276b2',  // purple
-            '#decf3f',  // yellow
-            '#f15854',  // red
-            '#4d4d4d'   // gray
-        ]
-    },
-    /** 
-     * @param   {string} field
-     * @param   {string} term
-     * @param   {string|Object} [color]
-     * @param   {string} [palette="muted"]
-     * @returns {string|Object}
-     */
-    addToColorCacheByField : function(field, term, color = null, palette = 'muted'){
-        if (typeof vizUtil.colorCacheByField[field] === 'undefined'){
-            vizUtil.colorCacheByField[field] = {};
-        }
-        var index = _.keys(vizUtil.colorCacheByField[field]).length;
-        if (!color){
-            // Select one.
-            color = vizUtil.colorPalettes[palette][index % vizUtil.colorPalettes[palette].length];
-        }
-        vizUtil.colorCacheByField[field][term] = {
-            'index' : index,
-            'color' : color
-        };
-        return color;
-    },
+/** 
+ * Helper function for window.requestAnimationFrame. Falls back to browser-prefixed versions if default not available, or falls back to setTimeout with 0ms delay if no requestAnimationFrame available at all.
+ * 
+ * @param {function} cb - Callback method.
+ * @returns {undefined|string} Undefined or timeout ID if falling back to setTimeout.
+ */
+export function requestAnimationFrame(cb){
+    if (!isServerSide() && typeof window !== 'undefined'){
+        if (typeof window.requestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
+        if (typeof window.webkitRequestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
+        if (typeof window.mozRequestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
+    }
+    return setTimeout(cb, 0);
+}
 
-    getFromColorCacheByField : function(field, term){
-        if (typeof vizUtil.colorCacheByField[field] === 'undefined'){
-            return null;
-        }
-        return (vizUtil.colorCacheByField[field][term] && vizUtil.colorCacheByField[field][term].color) || null;
-    },
 
-    colorForNode : function(node, cachedOnly = false, palette = null, predefinedColors = null, nullInsteadOfDefaultColor = false){
-        var defaultColor = nullInsteadOfDefaultColor ? null : '#aaaaaa';
-        
-        var nodeDatum = node.data || node, // Handle both pre-D3-ified and post-D3-ified nodes.
-            field = nodeDatum.field || null,
-            term = (nodeDatum.term && nodeDatum.term.toLowerCase()) || null;
+/** @ignore */
+var colorCache = {};        // We cache generated colors into here to re-use and speed up.
+/** @ignore */
+var colorCacheByField = {};
 
-        // Handle exceptions first
-        if (nodeDatum.color){
-            return nodeDatum.color;
-        } else if (field === 'accession'){ // This is an experiment_set node. We give it a unique color.
-            return defaultColor;
-        }
+/**
+ * Mapping of colors to particular terms.
+ * @type {Object.<string>}
+ */
+export const predefinedColors = {    // Keys should be all lowercase
+    "human (homo sapiens)"  : "rgb(218, 112, 6)",
+    "human"                 : "rgb(218, 112, 6)",
+    "mouse (mus musculus)"  : "rgb(43, 88, 169)",
+    "mouse"                 : "rgb(43, 88, 169)",
+    "other"                 : "#a173d1",
+    "end"                   : "#bbbbbb",
+    "none"                  : "#bbbbbb"
+};
 
-        // Grab from existing cache, if set.
-        var existingColor = vizUtil.getFromColorCacheByField(field,term);
-        if (existingColor !== null) return existingColor;
 
-        // Grab from predefined colors, if set.
-        if (
-            field && term && predefinedColors &&
-            typeof predefinedColors[term] !== 'undefined'
-        ){
-            return vizUtil.addToColorCacheByField(field, term, predefinedColors[term]);
-        }
+export const colorPalettes = {
+    'muted' : [
+        '#5da5da',  // blue
+        '#faa43a',  // orange
+        '#60bd68',  // green
+        '#f17cb0',  // pink
+        '#b2912f',  // brown
+        '#b276b2',  // purple
+        '#decf3f',  // yellow
+        '#f15854',  // red
+        '#4d4d4d'   // gray
+    ]
+};
 
-        if (cachedOnly) return defaultColor;
 
-        // Set a cycled palette color
-        return vizUtil.addToColorCacheByField(field, term, null, palette || 'muted');
-    },
+/** 
+ * @param   {string} field
+ * @param   {string} term
+ * @param   {string|Object} [color]
+ * @param   {string} [palette="muted"]
+ * @returns {string|Object}
+ */
+export function addToColorCacheByField(field, term, color = null, palette = 'muted'){
+    if (typeof colorCacheByField[field] === 'undefined'){
+        colorCacheByField[field] = {};
+    }
+    var index = _.keys(colorCacheByField[field]).length;
+    if (!color){
+        // Select one.
+        color = colorPalettes[palette][index % colorPalettes[palette].length];
+    }
+    colorCacheByField[field][term] = {
+        'index' : index,
+        'color' : color
+    };
+    return color;
+}
 
-    colorForNodeAutoGenerated : function cfn(node, predefinedColors = vizUtil.predefinedColors, cachedOnly = false){
-        var nodeDatum = node.data || node; // So can process on d3-gen'd/wrapped elements as well as plain datums.
 
-        if (nodeDatum.color){
-            return nodeDatum.color;
-        }
+export function getFromColorCacheByField(field, term){
+    if (typeof colorCacheByField[field] === 'undefined'){
+        return null;
+    }
+    return (colorCacheByField[field][term] && colorCacheByField[field][term].color) || null;
+}
 
-        // Normalize name to lower case (as capitalization etc may change in future)
-        var nodeName = 
-            (nodeDatum.name && nodeDatum.name.toLowerCase()) ||
-            (nodeDatum.term && nodeDatum.term.toLowerCase()) ||
-            null;
+export function colorForNode(node, cachedOnly = false, palette = null, predefinedColors = null, nullInsteadOfDefaultColor = false){
+    var defaultColor = nullInsteadOfDefaultColor ? null : '#aaaaaa';
+    
+    var nodeDatum = node.data || node, // Handle both pre-D3-ified and post-D3-ified nodes.
+        field = nodeDatum.field || null,
+        term = (nodeDatum.term && nodeDatum.term.toLowerCase()) || null;
 
-        if (nodeName && typeof predefinedColors[nodeName] !== 'undefined'){
-            vizUtil.colorCache[nodeName] = predefinedColors[nodeName];
-            return predefinedColors[nodeName];
-        } else if (nodeName && typeof vizUtil.colorCache[nodeName] !== 'undefined') {
-            return vizUtil.colorCache[nodeName]; // Previously calc'd color
-        } else if (cachedOnly || !nodeName){
-            return '#aaa';
-        } else if (
-            nodeDatum.field === 'accession' ||
-            nodeDatum.field === 'experiments_in_set.accession' || 
-            nodeDatum.field === 'experiments_in_set.experiment_summary' ||
-            nodeDatum.field === 'experiments_in_set.digestion_enzyme.name' ||
-            nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'
-        ){
+    // Handle exceptions first
+    if (nodeDatum.color){
+        return nodeDatum.color;
+    } else if (field === 'accession'){ // This is an experiment_set node. We give it a unique color.
+        return defaultColor;
+    }
 
-            //if (node.data.field === 'experiments_in_set.accession'){
-            //    return '#bbb';
-            //}
+    // Grab from existing cache, if set.
+    var existingColor = getFromColorCacheByField(field,term);
+    if (existingColor !== null) return existingColor;
 
-            // Use a variant of parent node's color
-            if (node.parent) {
-                var color = null;
-                if (nodeDatum.field === 'accession'){
-                    color = d3.color('#aaa').darker(Math.sqrt(nodeDatum.experiments) / 10);
-                } else if (nodeDatum.field === 'experiments_in_set.experiment_summary' || nodeDatum.field === 'experiments_in_set.digestion_enzyme.name'){
-                    color = d3.interpolateRgb(
-                        cfn(node.parent, predefinedColors),
-                        vizUtil.stringToColor(nodeName)
-                    )(.4);
-                } else if (nodeDatum.field === 'experiments_in_set.biosample.biosource_summary' && Array.isArray(node.parent.children)){
-                    color = d3.interpolateRgb(
-                        cfn(node.parent, predefinedColors),
-                        d3.color(vizUtil.stringToColor(nodeName)).darker(
-                            0.5 + (
-                                (2 * (node.parent.children.indexOf(node) + 1)) / node.parent.children.length
-                            )
+    // Grab from predefined colors, if set.
+    if (
+        field && term && predefinedColors &&
+        typeof predefinedColors[term] !== 'undefined'
+    ){
+        return addToColorCacheByField(field, term, predefinedColors[term]);
+    }
+
+    if (cachedOnly) return defaultColor;
+
+    // Set a cycled palette color
+    return addToColorCacheByField(field, term, null, palette || 'muted');
+}
+
+export function colorForNodeAutoGenerated(node, predefinedColors = predefinedColors, cachedOnly = false){
+    var nodeDatum = node.data || node; // So can process on d3-gen'd/wrapped elements as well as plain datums.
+
+    if (nodeDatum.color){
+        return nodeDatum.color;
+    }
+
+    // Normalize name to lower case (as capitalization etc may change in future)
+    var nodeName = 
+        (nodeDatum.name && nodeDatum.name.toLowerCase()) ||
+        (nodeDatum.term && nodeDatum.term.toLowerCase()) ||
+        null;
+
+    if (nodeName && typeof predefinedColors[nodeName] !== 'undefined'){
+        colorCache[nodeName] = predefinedColors[nodeName];
+        return predefinedColors[nodeName];
+    } else if (nodeName && typeof colorCache[nodeName] !== 'undefined') {
+        return colorCache[nodeName]; // Previously calc'd color
+    } else if (cachedOnly || !nodeName){
+        return '#aaa';
+    } else if (
+        nodeDatum.field === 'accession' ||
+        nodeDatum.field === 'experiments_in_set.accession' || 
+        nodeDatum.field === 'experiments_in_set.experiment_summary' ||
+        nodeDatum.field === 'experiments_in_set.digestion_enzyme.name' ||
+        nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'
+    ){
+
+        //if (node.data.field === 'experiments_in_set.accession'){
+        //    return '#bbb';
+        //}
+
+        // Use a variant of parent node's color
+        if (node.parent) {
+            var color = null;
+            if (nodeDatum.field === 'accession'){
+                color = d3.color('#aaa').darker(Math.sqrt(nodeDatum.experiments) / 10);
+            } else if (nodeDatum.field === 'experiments_in_set.experiment_summary' || nodeDatum.field === 'experiments_in_set.digestion_enzyme.name'){
+                color = d3.interpolateRgb(
+                    colorForNodeAutoGenerated(node.parent, predefinedColors),
+                    stringToColor(nodeName)
+                )(.4);
+            } else if (nodeDatum.field === 'experiments_in_set.biosample.biosource_summary' && Array.isArray(node.parent.children)){
+                color = d3.interpolateRgb(
+                    colorForNodeAutoGenerated(node.parent, predefinedColors),
+                    d3.color(stringToColor(nodeName)).darker(
+                        0.5 + (
+                            (2 * (node.parent.children.indexOf(node) + 1)) / node.parent.children.length
                         )
-                    )(.3);
-                } else if (nodeDatum.field === 'experiments_in_set.accession') {
-                    // color = d3.color(this.colorForNodeAutoGenerated(node.parent)).brighter(0.7);
-                    color = d3.interpolateRgb(
-                        cfn(node.parent, predefinedColors),
-                        d3.color("#ddd")
-                    )(.8);
-                }
-                
-                if (color) {
-                    vizUtil.colorCache[nodeName] = color;
-                    return color;
-                }
+                    )
+                )(.3);
+            } else if (nodeDatum.field === 'experiments_in_set.accession') {
+                // color = d3.color(this.colorForNodeAutoGenerated(node.parent)).brighter(0.7);
+                color = d3.interpolateRgb(
+                    colorForNodeAutoGenerated(node.parent, predefinedColors),
+                    d3.color("#ddd")
+                )(.8);
+            }
+            
+            if (color) {
+                colorCache[nodeName] = color;
+                return color;
             }
         }
+    }
 
-        // Fallback
-        vizUtil.colorCache[nodeName] = vizUtil.stringToColor(nodeName);
-        return vizUtil.colorCache[nodeName];
+    // Fallback
+    colorCache[nodeName] = stringToColor(nodeName);
+    return colorCache[nodeName];
+}
+
+export function sortObjectsByColorPalette(objects, palette = null){
+    if (!palette) palette = 'muted';
+    
+    var orderedColorList = colorPalettes[palette];
+    if (!orderedColorList) {
+        console.error("No palette " + palette + ' found.');
+        return objects;
+    }
+    if (objects && objects[0] && !objects[0].color){
+        console.warn("No colors assigned to objects.");
+        return objects;
+    }
+
+    var groups = _.groupBy(objects, 'color');
+    var runs = 0;
+
+    function getSortedSection(){
+        return _.map(orderedColorList, function(color){
+            var o = groups[color] && groups[color].shift();
+            if (groups[color] && groups[color].length === 0) delete groups[color];
+            return o;
+        }).filter(function(o){
+            if (!o) return false;
+            return true;
+        });
+    }
+
+    var result = [];
+    while (_.keys(groups).length > 0 && runs < 20){
+        result = result.concat(getSortedSection());
+        runs++;
+    }
+
+    if (runs > 1){
+        console.warn("sortObjectsByColorPalette took longer than 1 run: " + runs, groups);
+    }
+
+    return result;
+}
+
+export function extendStyleOptions(propsStyleOpts, defaultStyleOpts){
+    if (!defaultStyleOpts) throw new Error("No default style options provided.");
+    if (!propsStyleOpts) return defaultStyleOpts;
+    else {
+        Object.keys(defaultStyleOpts).forEach((styleProp) => {
+            if (typeof propsStyleOpts[styleProp] === 'undefined') return;
+            if (typeof propsStyleOpts[styleProp] === 'object' && propsStyleOpts[styleProp]){
+                _.extend(defaultStyleOpts[styleProp], propsStyleOpts[styleProp]);
+            } else {
+                defaultStyleOpts[styleProp] = propsStyleOpts[styleProp];
+            }
+        });
+        return defaultStyleOpts;
+    }
+}
+
+
+export const style = {
+    
+    translate3d : function(x=0, y=0, z=0, append = 'px'){
+        if (!append) append = '';
+        return 'translate3d(' + x + append + ',' + y + append + ',' + z + append + ')';
     },
 
-    extendStyleOptions : function(propsStyleOpts, defaultStyleOpts){
-        if (!defaultStyleOpts) throw new Error("No default style options provided.");
-        if (!propsStyleOpts) return defaultStyleOpts;
-        else {
-            Object.keys(defaultStyleOpts).forEach((styleProp) => {
-                if (typeof propsStyleOpts[styleProp] === 'undefined') return;
-                if (typeof propsStyleOpts[styleProp] === 'object' && propsStyleOpts[styleProp]){
-                    _.extend(defaultStyleOpts[styleProp], propsStyleOpts[styleProp]);
-                } else {
-                    defaultStyleOpts[styleProp] = propsStyleOpts[styleProp];
-                }
-            });
-            return defaultStyleOpts;
+    translate : function(x=0, y=0, append = 'px'){
+        if (!append) append = '';
+        return 'translate(' + x + append + ',' + y + append + ')';
+    },
+
+    /** 
+     * @param {number} rotation - How much to rotate, in degrees.
+     * @param {string|string[]|Object} [axes='z'] - Axes around which to rotate.
+     */
+    rotate3d : function(rotation, axes=['z']){
+        if (typeof axes === 'string') axes = axes.split(',').map(function(axis){ return axis.trim(); });
+        if (Array.isArray(axes)) axes = _.extend({ 'x': 0 , 'y': 0, 'z': 0 }, _.object(axes.map(function(axis){ return [axis, 1]; })));
+        return 'rotate3d(' + axes.x + ',' + axes.y + ',' + axes.z + ',' + rotation + 'deg)';
+    },
+
+    scale3d : function(x=1, y=null, z=null){
+        if (!y) y = x;
+        if (!z) z = 1;
+        return 'scale3d(' + x + ',' + y + ',' + z + ')';
+    }
+};
+
+
+/** Functions which are to be called from Chart instances with .apply(this, ...) */
+export const mixin = {
+
+    getBreadcrumbs : function(){
+        if (this.refs && typeof this.refs.breadcrumbs !== 'undefined') return this.refs.breadcrumbs;
+        if (this.props.breadcrumbs && typeof this.props.breadcrumbs === 'function') {
+            return this.props.breadcrumbs();
         }
-    },
-
-    getCommonDefaultStyleOpts : function(){
-        // TODO
-    },
-
-    /** @namespace */
-    style : {
-        
-        translate3d : function(x=0, y=0, z=0, append = 'px'){
-            if (!append) append = '';
-            return 'translate3d(' + x + append + ',' + y + append + ',' + z + append + ')';
-        },
-
-        translate : function(x=0, y=0, append = 'px'){
-            if (!append) append = '';
-            return 'translate(' + x + append + ',' + y + append + ')';
-        },
-
-        /** 
-         * @param {number} rotation - How much to rotate, in degrees.
-         * @param {string|string[]|Object} [axes='z'] - Axes around which to rotate.
-         */
-        rotate3d : function(rotation, axes=['z']){
-            if (typeof axes === 'string') axes = axes.split(',').map(function(axis){ return axis.trim(); });
-            if (Array.isArray(axes)) axes = _.extend({ 'x': 0 , 'y': 0, 'z': 0 }, _.object(axes.map(function(axis){ return [axis, 1]; })));
-            return 'rotate3d(' + axes.x + ',' + axes.y + ',' + axes.z + ',' + rotation + 'deg)';
-        },
-
-        scale3d : function(x=1, y=null, z=null){
-            if (!y) y = x;
-            if (!z) z = 1;
-            return 'scale3d(' + x + ',' + y + ',' + z + ')';
+        if (this.props.breadcrumbs && typeof this.props.breadcrumbs !== 'boolean') {
+            return this.props.breadcrumbs;
         }
+        return null;
     },
 
-    /** Functions which are to be called from Chart instances with .apply(this, ...) */
-    mixin : {
-
-        getBreadcrumbs : function(){
-            if (this.refs && typeof this.refs.breadcrumbs !== 'undefined') return this.refs.breadcrumbs;
-            if (this.props.breadcrumbs && typeof this.props.breadcrumbs === 'function') {
-                return this.props.breadcrumbs();
-            }
-            if (this.props.breadcrumbs && typeof this.props.breadcrumbs !== 'boolean') {
-                return this.props.breadcrumbs;
-            }
-            return null;
-        },
-
-        getDescriptionElement : function(){
-            if (this.refs && typeof this.refs.description !== 'undefined') return this.refs.description;
-            if (this.props.descriptionElement && typeof this.props.descriptionElement === 'function') {
-                return this.props.descriptionElement();
-            }
-            if (this.props.descriptionElement && typeof this.props.descriptionElement !== 'boolean') {
-                return this.props.descriptionElement;
-            }
-            return null;
-        },
-
-        cancelPreventClicks : function(){
-            if (typeof this.props.getCancelPreventClicksCallback === 'function'){
-                var cancelPreventClicks = this.props.getCancelPreventClicksCallback();
-                if (typeof cancelPreventClicks === 'function') return cancelPreventClicks();
-            }
-            return false;
+    getDescriptionElement : function(){
+        if (this.refs && typeof this.refs.description !== 'undefined') return this.refs.description;
+        if (this.props.descriptionElement && typeof this.props.descriptionElement === 'function') {
+            return this.props.descriptionElement();
         }
+        if (this.props.descriptionElement && typeof this.props.descriptionElement !== 'boolean') {
+            return this.props.descriptionElement;
+        }
+        return null;
+    },
 
+    cancelPreventClicks : function(){
+        if (typeof this.props.getCancelPreventClicksCallback === 'function'){
+            var cancelPreventClicks = this.props.getCancelPreventClicksCallback();
+            if (typeof cancelPreventClicks === 'function') return cancelPreventClicks();
+        }
+        return false;
     }
 
 };
+
+
+
+const highlightTermFxn = _.debounce(function(
+    field = 'experiments_in_set.biosample.biosource.individual.organism.name',
+    term = 'human',
+    color = ''
+){
+
+    if (isServerSide()) return false;
+    if (!document.querySelectorAll) return false;
+
+    function setHighlightClass(el, off = false){
+        var isSVG, className;
+        //if (el.nodeName.toLowerCase() === 'path') console.log(el);
+        if (el.className.baseVal) {
+            isSVG = true;
+            className = el.className.baseVal;
+            //if (el.nodeName.toLowerCase() === 'path')console.log('isSVG', off);
+        } else {
+            isSVG = false;
+            className = el.className;
+        }
+
+        if (el.classList && el.classList.add){
+            if (!off) el.classList.add('highlight');
+            else el.classList.remove('highlight');
+            return isSVG;
+        }
+
+        if (!off){
+            if (className.indexOf(' highlight') < 0) className = className + ' highlight';
+        } else {
+            if (className.indexOf(' highlight') > -1)   className = className.replace(' highlight', '');
+        }
+
+        if (isSVG)  el.className.baseVal = className;
+        else        el.className = className;
+        return isSVG;
+    }
+
+    requestAnimationFrame(function(){
+
+        var colorIsSet =
+            (color === null || color === false) ? false :
+            (typeof color === 'string') ? color.length > 0 :
+            (typeof color === 'object') ? true : false;
+
+        _.each(document.querySelectorAll('[data-field]:not(.no-highlight)'), function(fieldContainerElement){
+            setHighlightClass(fieldContainerElement, true);
+        });
+
+        if (colorIsSet){
+            _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']:not(.no-highlight)'), function(fieldContainerElement){
+                setHighlightClass(fieldContainerElement, false);
+            });
+        }
+
+        // unhighlight previously selected terms, if any.
+        _.each(document.querySelectorAll('[data-term]:not(.no-highlight)'), function(termElement){
+            var dataField = termElement.getAttribute('data-field');
+            if (field && dataField && dataField === field) return; // Skip, we need to leave as highlighted as also our field container.
+            var isSVG = setHighlightClass(termElement, true);
+            if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = '';
+        });
+
+        if (colorIsSet){
+            _.each(document.querySelectorAll('[data-term="' + term + '"]:not(.no-highlight)'), function(termElement){
+                var isSVG = setHighlightClass(termElement, false);
+                if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = color;
+            });
+        }
+
+    });
+    return true;
+
+}, 50);
+
+
+/**
+ * Highlights all terms on document (changes background color) of given field,term.
+ * @param {string} field - Field, in object dot notation.
+ * @param {string} term - Term to highlight.
+ * @param {string} color - A valid CSS color.
+ */
+export function highlightTerm(
+    field = 'experiments_in_set.biosample.biosource.individual.organism.name',
+    term = 'human',
+    color = ''
+){
+    return highlightTermFxn.apply(this, arguments);
+}
+
+/**
+ * Resets background color of terms.
+ */
+export function unhighlightTerms(field = null){
+    return highlightTermFxn(field, null, '');
+}
+

@@ -1,6 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var env = process.env.NODE_ENV;
+var FlowtypePlugin = require('flowtype-loader/plugin');
 
 var PATHS = {
     static: path.resolve(__dirname, 'src/encoded/static'),
@@ -21,7 +22,7 @@ if (env === 'production') {
         }
     }));
     // uglify code for production
-    plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
+    plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true, compress: { warnings: false}}));
     // add chunkhash to chunk names for production only (it's slower)
     chunkFilename = '[name].[chunkhash].js';
     devTool = 'source-map';
@@ -36,6 +37,8 @@ if (env === 'production') {
     devTool = 'source-map';
 }
 
+plugins.push(new FlowtypePlugin());
+
 var preLoaders = [
     // Strip @jsx pragma in react-forms, which makes babel abort
     {
@@ -45,13 +48,18 @@ var preLoaders = [
             search: '@jsx',
             replace: 'jsx',
         }
+    },
+    {
+        test: /\.js$/,
+        loader: "flowtype",
+        exclude: /node_modules/
     }
 ];
 
 var loaders = [
     // add babel to load .js files as ES6 and transpile JSX
     {
-        test: /\.js$/,
+        test: /\.(js|jsx)$/,
         include: [
             path.resolve(__dirname, 'src/encoded/static'),
         ],
@@ -62,6 +70,10 @@ var loaders = [
         loader: 'json',
     }
 ];
+
+var resolve = {
+    extensions : ["", ".webpack.js", ".web.js", ".js", ".json", '.jsx']
+};
 
 module.exports = [
     // for browser
@@ -85,6 +97,8 @@ module.exports = [
             preLoaders: preLoaders,
             loaders: loaders,
         },
+        resolve : resolve,
+        resolveLoader : resolve,
         devtool: devTool,
         plugins: plugins,
         debug: true
@@ -119,6 +133,8 @@ module.exports = [
             preLoaders: preLoaders,
             loaders: loaders,
         },
+        resolve : resolve,
+        resolveLoader : resolve,
         devtool: devTool, // No way to debug/log serverside JS currently, so may as well speed up builds for now.
         plugins: plugins,
         debug: false // See devtool comment.

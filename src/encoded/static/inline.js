@@ -13,6 +13,7 @@ window.onload = function () {
     window._onload_event_fired = true;
 
     // Delay non-React script execution until clientside app is mounted (hopefully).
+    /*
     setTimeout(function(){
         // Use a separate tracker for dev / test
         var ga = require('google-analytics');
@@ -21,6 +22,7 @@ window.onload = function () {
         ga('create', tracker, {'cookieDomain': 'none', 'siteSpeedSampleRate': 100});
         ga('send', 'pageview');
     }, 0);
+    */
 };
 
 // Not Used

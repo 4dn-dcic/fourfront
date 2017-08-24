@@ -15,8 +15,11 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/notes"},
-        { "$ref": "workflow_run.json#/properties"}
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "workflow_run.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "workflow_run.json#/facets" }
     ],
     "properties": {
         "run_platform": {
@@ -53,6 +56,10 @@
                "title": "SBG Export ID",
                "type": "string"
             }
-        }
+        },
+		"sbg_app_name": {
+				"title": "SBG App Name",
+				"type": "string"
+		}
     }
 }

@@ -1,10 +1,10 @@
 {
     "title": "Reference file",
-    "description": "Schema for submitting metadata for a FASTA file.",
+    "description": "Files used in pipelines as references.",
     "id": "/profiles/file_reference.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
+    "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -18,16 +18,37 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "file.json#/properties" }
     ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
         },
         "file_format": {
-            "title": "File format",
+            "title": "File Format",
             "type": "string",
             "enum": [
                 "bwaIndex",
                 "chromsizes",
+                "reference_fasta",
+                "juicer_format_restriction_site_file",
+                "other"
+            ]
+        },
+        "file_type": {
+            "title": "File Type",
+            "description": "The type of file based on the information in the file.",
+            "enum": [
+                "genome reference",
+                "genome index",
+                "index",
+                "restriction sites",
+                "blacklisted regions",
+                "repeats",
                 "other"
             ]
         }
@@ -35,6 +56,8 @@
     "file_format_file_extension": {
         "bwaIndex": ".bwaIndex.tgz",
         "chromsizes": ".chrom.sizes",
-        "other": "no_file_extension"
+        "reference_fasta": ".fasta.gz",
+        "juicer_format_restriction_site_file": ".txt",
+        "other": ""
     }
 }

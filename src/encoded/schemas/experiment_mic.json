@@ -1,6 +1,6 @@
 {
     "title": "Microscopy Experiments",
-    "description": "Experimental metadata fields for microsopy experiments.",
+    "description": "Target/Label/Channel information for microscopy experiments.",
     "id": "/profiles/experiment_mic.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -21,6 +21,9 @@
         { "$ref": "mixins.json#/library"},
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "experiment.json#/properties"}
+    ],
+    "mixinColumns": [
+        { "$ref": "experiment.json#/columns"}
     ],
     "properties": {
         "schema_version": {
@@ -53,12 +56,24 @@
         },
         "imaging_paths": {
             "title": "Imaging Paths",
-            "description": "Target to label connections used in microscopy",
+            "description": "Target to label connections in each channel",
             "type":  "array",
             "items": {
-                "title": "Imaging Path",
-                "type": "string",
-                "linkTo": "ImagingPath"
+                "title": "Imaging path",
+                "type": "object",
+                "properties":{
+                    "path":{
+                        "title": "Imaging Path",
+                        "type": "string",
+                        "linkTo": "ImagingPath"
+                    },
+                    "channel":{
+                        "title": "Imaging channnel",
+                        "description" : "channel info, ie. ch01, ch02...",
+                        "type": "string",
+                        "pattern": "^(ch\\d\\d)$"
+                    }
+                }
             }
         }
     },
@@ -70,7 +85,7 @@
             "title": "Organism"
         },
         "biosample.biosource.biosource_type": {
-            "title": "Biosource type"
+            "title": "Biosource Type"
         },
         "biosample.biosource_summary": {
             "title": "Biosource"
@@ -87,5 +102,8 @@
         "lab.title": {
             "title": "Lab"
         }
+    },
+    "columns": {
+
     }
 }

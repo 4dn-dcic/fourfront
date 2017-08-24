@@ -1,0 +1,42 @@
+[
+    {
+        "accession":"4DNEXO6777A1",
+        "biosample":"234411bc-8535-4448-903e-854af460b255",
+        "experiment_type": "CHIP-seq",
+        "files": ["4DNFIN232JB1", "4DNFIN232JB2"],
+        "description": "Biorep 1 Techrep 1 CHIP-seq on GM12878 batch 1",
+        "award": "1U01CA200059-01",
+        "lab": "test-4dn-lab",
+        "uuid": "66641e2f-3e43-4388-8bbb-e861f209c450",
+        "submitted_by": "4dndcic@gmail.com",
+        "biosample_quantity": 2000000,
+        "biosample_quantity_units": "cells",
+        "follows_sop": "Yes",
+        "status": "in review by lab",
+        "targeted_factor": "dcic:test_targ4",
+        "antibody": "ENCAB000AAA",
+        "average_fragment_size": 100,
+        "fragmentation_method": "chemical",
+        "library_preparation_date": "2017-01-01"
+    },
+    {
+        "accession":"4DNEXO6777B1",
+        "biosample":"234511bc-8535-4448-903e-854af460b255",
+        "experiment_type": "CHIP-seq",
+        "files": ["4DNFIN232JB3"],
+        "description": "Biorep 1 Techrep 2 CHIP-seq on GM12878 batch 1",
+        "award": "1U01CA200059-01",
+        "lab": "test-4dn-lab",
+        "uuid": "66741e2f-3e43-4388-8bbb-e861f209c450",
+        "submitted_by": "4dndcic@gmail.com",
+        "biosample_quantity": 2000000,
+        "biosample_quantity_units": "cells",
+        "follows_sop": "Yes",
+        "status": "in review by lab",
+        "targeted_factor": "dcic:test_targ4",
+        "antibody": "ENCAB000AAA",
+        "average_fragment_size": 100,
+        "fragmentation_method": "chemical",
+        "library_preparation_date": "2017-01-05"
+    }
+]

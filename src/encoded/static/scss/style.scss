@@ -72,7 +72,7 @@ $expset-table-border-color : #eee;
 // Components w/ JavaScript
 @import "bootstrap/modals";
 @import "bootstrap/tooltip";
-//@import "bootstrap/popovers";
+@import "bootstrap/popovers";
 //@import "bootstrap/carousel";
 
 // ENCODED
@@ -97,6 +97,7 @@ $expset-table-border-color : #eee;
 @import "encoded/bootstrap-lib";
 // @import "encoded/modals"; -- Deleted
 @import "encoded/modules/breadcrumbs",
+        "encoded/modules/rc-tabs",
         "encoded/modules/forms",
         "encoded/modules/key-value-display",
         "encoded/modules/lightbox",

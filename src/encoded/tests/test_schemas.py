@@ -110,7 +110,8 @@ def test_load_schema(schema, master_mixins, registry):
                 'submitted_by',
                 'status'
             ]
-            no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json', 'ontology.json', 'ontology_term.json']
+            no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json',
+                                       'ontology.json', 'ontology_term.json', 'sysinfo.json']
             for prop in shared_properties:
                 if schema == 'experiment.json':
                     # currently experiment is abstract and has no mixin properties
@@ -134,11 +135,11 @@ def verify_mixins(loaded_schema, master_mixins):
         # get the mixin name from {'$ref':'mixins.json#/schema_version'}
         mixin_file_name, mixin_name = mixin['$ref'].split('/')
         if mixin_file_name != "mixins.json":
-            #skip any mixins not in main mixins.json
+            # skip any mixins not in main mixins.json
             continue
         mixin_schema = master_mixins[mixin_name]
 
-        #each field in the mixin should be present in the parent schema with same properties
+        # each field in the mixin should be present in the parent schema with same properties
         for mixin_field_name, mixin_field in mixin_schema.items():
             schema_field = loaded_schema['properties'][mixin_field_name]
             for key in mixin_field.keys():

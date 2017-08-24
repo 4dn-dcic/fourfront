@@ -27,30 +27,41 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 }
 
 // Navbar search
-#navbar-search {
-	font-family: 'Work Sans', sans-serif;
-	width: 150px;
-	font-size: 1em;
-	border-radius: 0px;
-	border-top: none;
-	border-left: none;
-	border-right: none;
-	height: 30px;
-	padding: 2px 5px 0px 5px;
-	margin-top: 25px;
-	margin-bottom: 25px;
-	-ms-transition: width 0.3s ease-out;
-	-moz-transition: width 0.3s ease-out;
-	-webkit-transition: width 0.3s ease-out;
-	transition: width 0.3s ease-out;
-	@media (min-width: $screen-sm-min) {
-		font-size: 1.4em;
-		margin-left: 30px;
+.navbar-form.navbar-right {
+	#navbar-search {
+		font-family: 'Work Sans', sans-serif;
+		font-size: 1em;
+		width: 140px;
+		color: rgba(0,0,0,0.5);
+		border-radius: 3px;
+		border: 1px solid rgb(125,125,125);
+		height: inherit;
+		padding: 4px 5px 3px 5px;
+		-ms-transition: width 0.3s ease-out;
+		-moz-transition: width 0.3s ease-out;
+		-webkit-transition: width 0.3s ease-out;
+		transition: width 0.3s ease-out;
+		@media (max-width: $screen-xs-max) {
+			width: 100%;
+			display: block;
+		}
+		@media (min-width: $screen-sm-min) {
+			margin-top: -4px;
+			font-size: 1em;
+			margin-left: 30px;
+			border: 1px solid rgba(125,125,125,0.5);
+			&:focus {
+				width: 300px;
+				color: rgba(0,0,0,1.0);
+				border-color: rgba(125,125,125,1.0);
+				@include transition(width 0.3s ease-out);
+			}
+		}
+		
 	}
-	&:focus {
-		width: 250px;
-		color: #000000;
-		@include transition(width 0.3s ease-out);
+	@media (max-width: $screen-xs-max) {
+		padding-left : 25px;
+		padding-right: 25px;
 	}
 }
 
@@ -60,8 +71,8 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		display: inline-block;
 		outline: none !important;
 		box-shadow: none;
-	}
 
+	}
 }
 
 // large text inputBorder
@@ -452,4 +463,55 @@ div.fieldset.editable-fields {
 		}
 	}
 
+}
+
+/************ TOGGLE SWITCH *************/
+// Generated via https://proto.io/freebies/onoff/
+
+.onoffswitch {
+    position: relative; width: 40px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #E3E3E3; border-radius: 20px;
+	height: 20px;
+	margin: 0;
+}
+.onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 20px; padding: 0; line-height: 20px;
+    font-size: 11px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+    content: "";
+    padding-left: 10px;
+    background-color: #46A9EB; color: #FFFFFF;
+}
+.onoffswitch-inner:after {
+    content: "";
+    padding-right: 10px;
+    background-color: #FFFFFF; color: #666666;
+    text-align: right;
+}
+.onoffswitch-switch {
+    display: block; width: 20px; margin: 0px;
+    background: #FFFFFF;
+    position: absolute; top: 0; bottom: 0;
+    right: 20px;
+    border: 2px solid #E3E3E3; border-radius: 20px;
+    transition: all 0.3s ease-in 0s;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px;
 }

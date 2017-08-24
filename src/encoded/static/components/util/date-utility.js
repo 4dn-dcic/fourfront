@@ -2,6 +2,8 @@
 
 var moment = require('moment');
 var { isServerSide } = require('./misc');
+var React = require('react');
+import PropTypes from 'prop-types';
 
 var DateUtility = module.exports = (function(){
 
@@ -26,6 +28,8 @@ var DateUtility = module.exports = (function(){
 
         function date(ft){
             switch(ft){
+                case 'date-file':
+                    return "YYYY-MM-DD";
                 case 'date-xs':
                     // 11/03/2016
                     return "MM/DD/YYYY";
@@ -43,6 +47,8 @@ var DateUtility = module.exports = (function(){
 
         function time(ft){
             switch(ft){
+                case 'time-file':
+                    return "HH[h]-mm[m]";
                 case 'time-xs':
                     // 12pm
                     return "ha";
@@ -96,46 +102,48 @@ var DateUtility = module.exports = (function(){
         return DateUtility.display(moment.utc(timestamp), formatType, dateTimeSeparator, localize, customOutputFormat);
     };
 
-    var React = require('react');
+    class LocalizedTime extends React.Component {
 
-    DateUtility.LocalizedTime = React.createClass({
-        
-        propTypes : {
+        static defaultProps = {
+            momentDate : null,
+            timestamp : null,
+            formatType : 'date-md',
+            dateTimeSeparator : ' ',
+            customOutputFormat : null,
+            fallback : "N/A",
+            className : "localized-date-time"
+        }
+
+        static propTypes = {
             momentDate : function(props, propName, componentName){
                 if (props[propName] && !moment.isMoment(props[propName])){
                     return new Error("momentDate must be an instance of Moment.");
                 }
             },
-            timestamp : React.PropTypes.string,
-            formatType : React.PropTypes.string,
-            dateTimeSeparator : React.PropTypes.string,
-            customOutputFormat : React.PropTypes.string,
-            fallback : React.PropTypes.string,
-            className : React.PropTypes.string
-        },
+            timestamp : PropTypes.string,
+            formatType : PropTypes.string,
+            dateTimeSeparator : PropTypes.string,
+            customOutputFormat : PropTypes.string,
+            fallback : PropTypes.string,
+            className : PropTypes.string
+        }
 
-        getDefaultProps: function(){
-            return {
-                momentDate : null,
-                timestamp : null,
-                formatType : 'date-md',
-                dateTimeSeparator : ' ',
-                customOutputFormat : null,
-                fallback : "N/A",
-                className : "localized-date-time"
-            };
-        },
-        getInitialState : function(){
-            return {
-                moment : this.props.momentDate ? this.props.momentDate :
-                    this.props.timestamp ? moment.utc(this.props.timestamp) : moment.utc(),
+        constructor(props){
+            super(props);
+            this.render = this.render.bind(this);
+            this.componentDidMount = this.componentDidMount.bind(this);
+            this.state = {
+                moment : props.momentDate ? props.momentDate :
+                    props.timestamp ? moment.utc(props.timestamp) : moment.utc(),
                 mounted : false
             };
-        },
-        componentDidMount : function(){
+        }
+
+        componentDidMount(){
             this.setState({ mounted : true });
-        },
-        render : function(){
+        }
+
+        render(){
             if (!this.state.mounted || isServerSide()) {
                 return (
                     <span className={this.props.className + ' utc'}>{ 
@@ -162,7 +170,10 @@ var DateUtility = module.exports = (function(){
                 );
             }
         }
-    });
+
+    }
+
+    DateUtility.LocalizedTime = LocalizedTime;
 
     return DateUtility;
 })();

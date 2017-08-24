@@ -28,19 +28,17 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     schema = load_schema('encoded:schemas/biosample.json')
     # name_key = 'accession'
     embedded = [
-        'biosource.uuid',
         'biosource.biosource_type',
-        'biosource.individual',
+        'biosource.individual.sex',
         'biosource.individual.organism.name',
-        'biosource.biosource_vendor',
-        'references',
-        'biosample_protocols',
-        'treatments',
-        'modifications',
-        'modifications.modified_regions',
-        'cell_culture_details',
-        'lab',
-        'award'
+        'biosource.biosource_vendor.name',
+        "biosource.cell_line.slim_terms",
+        "biosource.cell_line.synonyms",
+        "biosource.tissue.slim_terms",
+        "biosource.tissue.synonyms",
+        'cell_culture_details.*',
+        'modifications.modification_type',
+        'treatments.treatment_type'
     ]
     name_key = 'accession'
 
@@ -137,3 +135,16 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                         # make data for new biosample_relation
                         target_bs.properties['biosample_relation'].append(relationship_entry)
                         target_bs.update(target_bs.properties)
+
+
+@calculated_property(context=Biosample, category='action')
+def clone(context, request):
+    """If the user submits for any lab, allow them to clone
+    This is like creating, but keeps previous fields"""
+    if request.has_permission('create'):
+        return {
+            'name': 'clone',
+            'title': 'Clone',
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!clone'.format(item_uri=request.resource_path(context)),
+        }

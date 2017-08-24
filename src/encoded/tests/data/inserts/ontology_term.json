@@ -1,11 +1,12 @@
 [
     {
-        "uuid": "530036bc-8535-4448-903e-854af460b254",
+        "uuid": "530036bc-8535-4448-903e-854af460b24c",
         "preferred_name": "GM12878",
         "term_name": "GM12878",
         "term_id": "EFO:0002784",
         "source_ontology": "530006bc-8535-4448-903e-854af460b254",
-        "term_url": "http://www.ebi.ac.uk/efo/EFO_0002784"
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0002784",
+        "slim_terms": ["111189bc-8535-4448-903e-854af460a233"]
     },
     {
         "uuid": "530056bc-8535-4448-903e-854af460b254",
@@ -19,7 +20,7 @@
         "uuid": "111111bc-8535-4448-903e-854af460a233",
         "term_name": "alternative_term",
         "term_id": "EFO:alternative_term",
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "source_ontology": "540026bc-8535-4448-903e-854af460b254",
         "term_url": "http://www.ebi.ac.uk/efo/alternative_term",
         "definition": "An alternative label for a given entity such as a commonly used abbreviation or synonym.",
         "namespace": "http://www.ebi.ac.uk/efo"
@@ -28,7 +29,7 @@
         "uuid": "111112bc-8535-4448-903e-854af460a233",
         "term_name": "has_exact_synonym",
         "term_id": "oboInOwl:hasExactSynonym",
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "source_ontology": "540026bc-8535-4448-903e-854af460b254",
         "term_url": "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
         "definition": "An alias in which the alias exhibits true synonymy. Example: ornithine cycle is an exact synonym of urea cycle.",
         "namespace": "http://www.geneontology.org/formats/oboInOwl"
@@ -37,7 +38,7 @@
         "uuid": "111113bc-8535-4448-903e-854af460a233",
         "term_name": "has_narrow_synonym",
         "term_id": "oboInOwl:hasNarrowSynonym",
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "source_ontology": "540026bc-8535-4448-903e-854af460b254",
         "term_url": "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
         "namespace": "http://www.geneontology.org/formats/oboInOwl"
     },
@@ -45,7 +46,7 @@
         "uuid": "111114bc-8535-4448-903e-854af460a233",
         "term_name": "has_related_synonym",
         "term_id": "oboInOwl:hasRelatedSynonym",
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "source_ontology": "540026bc-8535-4448-903e-854af460b254",
         "term_url": "http://www.geneontology.org/formats/oboInOwl#RelatedSynonym",
         "namespace": "http://www.geneontology.org/formats/oboInOwl"
     },
@@ -53,7 +54,7 @@
         "uuid": "111115bc-8535-4448-903e-854af460a233",
         "term_name": "definition",
         "term_id": "EFO:definition",
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "source_ontology": "540026bc-8535-4448-903e-854af460b254",
         "term_url": "http://www.ebi.ac.uk/efo/definition",
         "namespace": "http://www.ebi.ac.uk/efo"
     },
@@ -61,7 +62,7 @@
         "uuid": "111116bc-8535-4448-903e-854af460a233",
         "term_name": "definition",
         "term_id": "IAO:0000115",
-        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "source_ontology": "540026bc-8535-4448-903e-854af460b254",
         "term_url": "http://purl.obolibrary.org/obo/IAO_0000115",
         "namespace": "http://purl.obolibrary.org/obo"
     },
@@ -69,7 +70,7 @@
         "uuid": "111117bc-8535-4448-903e-854af460a233",
         "term_name": "alternative term",
         "term_id": "IAO:0000118",
-        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "source_ontology": "540026bc-8535-4448-903e-854af460b254",
         "term_url": "http://purl.obolibrary.org/obo/IAO_0000118",
         "namespace": "http://purl.obolibrary.org/obo"
     },
@@ -729,5 +730,23 @@
         "term_name": "skin of body",
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002097",
         "uuid": "111188bc-8535-4448-903e-854af460a233"
+    },
+    {
+    "is_slim_for": "cell",
+    "namespace": "http://www.ebi.ac.uk/efo",
+    "term_id": "EFO:0000322",
+    "term_name": "cell line",
+    "uuid": "111189bc-8535-4448-903e-854af460a233",
+    "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+    "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
+    },
+    {
+    "is_slim_for": "cell",
+    "namespace": "http://www.ebi.ac.uk/efo",
+    "term_id": "EFO:0003064",
+    "term_name": "primary cell line",
+    "uuid": "111190bc-8535-4448-903e-854af460a233",
+    "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+    "term_url": "http://www.ebi.ac.uk/efo/EFO_0003064"
     }
 ]

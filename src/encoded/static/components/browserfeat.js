@@ -1,7 +1,8 @@
 // Handle browser capabilities, a la Modernizr. Can *only* be called from
 // mounted components (componentDidMount method would be a good method to
 // use this from), because actual DOM is needed.
-module.exports.BrowserFeat = {
+
+export const BrowserFeat = {
     feat: {},
 
     // Return object with browser capabilities; return from cache if available

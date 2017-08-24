@@ -1,7 +1,11 @@
 """Create publication class and contain methods for data fetching."""
 import requests
 import json
-from snovault import (collection, load_schema)
+from snovault import (
+    collection,
+    load_schema,
+    calculated_property
+)
 from .base import (
     Item
 )
@@ -21,6 +25,7 @@ def fetch_pubmed(PMID):
     author_list = []
     authors = ''
     date = ''
+    journal = ''
     NIHe = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
     NIHw = "https://www.ncbi.nlm.nih.gov/pubmed/"
     url = NIHw + PMID
@@ -48,14 +53,17 @@ def fetch_pubmed(PMID):
         if key_pb == 'DA':
             date_flat = data_pb.strip()
             date = date_flat[:4]+"-"+date_flat[4:6]+"-"+date_flat[6:8]
+        # get journal name
+        if key_pb == 'JT':
+            journal = data_pb.strip()
         # accumulate authors
         if key_pb == 'AU':
             author_list.append(data_pb.strip())
         # add consortiums to author list
         if key_pb == 'CN':
             author_list.append(data_pb.strip())
-        authors = ', '.join(author_list)
-    return title, abstract, authors, url, date
+        authors = author_list
+    return title, abstract, authors, url, date, journal
 
 
 class BioRxivExtractor(HTMLParser):
@@ -86,6 +94,7 @@ def fetch_biorxiv(url):
     abstract = ''
     authors = ''
     date = ''
+    journal = "bioRxiv"
     # try fetching data 5 times and return empty if fails
     for count in range(5):
         r = requests.get(url)
@@ -99,8 +108,8 @@ def fetch_biorxiv(url):
     title = parser.title
     abstract = parser.abstract
     date = parser.date
-    authors = ", ".join(parser.author_list)
-    return title, abstract, authors, url, date
+    authors = parser.author_list
+    return title, abstract, authors, url, date, journal
 
 
 def map_doi_pmid(doi):
@@ -136,6 +145,7 @@ def map_doi_biox(doi):
     else:
         return
 
+
 ################################################
 # Outside methods for online data fetch
 ################################################
@@ -152,46 +162,72 @@ class Publication(Item):
     """Publication class."""
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
-    embedded = ["exp_sets_prod_in_pub", "exp_sets_used_in_pub"]
+    embedded = ["exp_sets_prod_in_pub.experimentset_type",
+                "exp_sets_prod_in_pub.accession",
+                "exp_sets_used_in_pub.experimentset_type",
+                "exp_sets_used_in_pub.accession"]
 
     def _update(self, properties, sheets=None):
+        # import pdb; pdb.set_trace()
+        self.upgrade_properties()
         title = ''
         abstract = ''
-        authors = ''
+        authors = []
         url = ''
         date = ''
+        journal = ''
         p_id = properties['ID']
         # parse if id is from pubmed
         try:
             if p_id.startswith('PMID'):
                 pubmed_id = p_id[5:]
-                title, abstract, authors, url, date = fetch_pubmed(pubmed_id)
+                title, abstract, authors, url, date, journal = fetch_pubmed(pubmed_id)
             # if id is doi, first check if it maps to pubmed id, else see where it goes
             elif p_id.startswith('doi'):
                 doi_id = p_id[4:]
                 if map_doi_pmid(doi_id):
                     pubmed_id = map_doi_pmid(doi_id)
-                    title, abstract, authors, url, date = fetch_pubmed(pubmed_id)
+                    title, abstract, authors, url, date, journal = fetch_pubmed(pubmed_id)
                 # if it goes to biorxiv fetch from biorxiv
                 elif map_doi_biox(doi_id):
                     biox_url = map_doi_biox(doi_id)
-                    title, abstract, authors, url, date = fetch_biorxiv(biox_url)
+                    title, abstract, authors, url, date, journal = fetch_biorxiv(biox_url)
                 else:
                     pass
         except:
             pass
-        if title != "":
+        if title:
             properties['title'] = title
-        if abstract != "":
+        if abstract:
             properties['abstract'] = abstract
-        if authors != "":
+        if authors:
             properties['authors'] = authors
-        if url != "":
+        if url:
             properties['url'] = url
-        if date != "":
+        if date:
             properties['date_published'] = date
+        if journal:
+            properties['journal'] = journal
+
         super(Publication, self)._update(properties, sheets)
-        if 'exp_sets_prod_in_pub' in properties:
-            invalidate_linked_items(self, 'exp_sets_prod_in_pub')
-        if 'exp_sets_used_in_pub' in properties:
-            invalidate_linked_items(self, 'exp_sets_used_in_pub')
+        return
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, authors=None, date_published=None, title=None):
+        minipub = ''
+
+        if authors is not None:
+            minipub = authors[0]
+            if len(authors) > 2:
+                minipub = minipub + ' et al.'
+            elif len(authors) == 2:
+                minipub = minipub + ' and ' + authors[1]
+        if date_published is not None:
+            minipub = minipub + ' (' + date_published[0:4] + ')'
+        if title is not None:
+            minipub = minipub + ' ' + title[0:100]
+        return minipub

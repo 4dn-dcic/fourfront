@@ -1,12 +1,20 @@
 import pytest
-from encoded.types.file import File, FileFastq, FileFasta, post_upload
+from encoded.types.file import File, FileFastq, FileFasta, post_upload, force_beanstalk_env
 from pyramid.httpexceptions import HTTPForbidden
+import os
 pytestmark = pytest.mark.working
 
 
 def test_reference_file_by_md5(testapp, file):
     res = testapp.get('/md5:{md5sum}'.format(**file)).follow(status=200)
     assert res.json['@id'] == file['@id']
+
+
+def test_file_content_md5sum_unique(testapp, file, fastq_json):
+    testapp.patch_json('/{uuid}'.format(**file), {'content_md5sum': '1234'}, status=200)
+    fastq_json['content_md5sum'] = '1234'
+    res2 = testapp.post_json('/file_fastq', fastq_json, status=409)
+    assert res2.json.get('detail').startswith("Keys conflict")
 
 
 def test_replaced_file_not_uniqued(testapp, file):
@@ -17,24 +25,37 @@ def test_replaced_file_not_uniqued(testapp, file):
 @pytest.fixture
 def fastq_json(award, experiment, lab):
     return {
-        'accession': '4DNFI067APU2',
+        'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'fastq',
-        'filename': 'test.fastq',
+        'filename': 'test.fastq.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploaded',
     }
 
 
 @pytest.fixture
+def proc_file_json(award, experiment, lab):
+    return {
+        'accession': '4DNFIO67APU2',
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': 'pairs',
+        'filename': 'test.pairs.gz',
+        'md5sum': '0123456789abcdef0123456789abcdef',
+        'status': 'uploading',
+    }
+
+
+@pytest.fixture
 def fasta_json(award, experiment, lab):
     return {
-        'accession': '4DNFI067APA2',
+        'accession': '4DNFIO67APA2',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'fasta',
-        'filename': 'test.fasta',
+        'filename': 'test.fasta.gz',
         'md5sum': '0123456789abcdef0123456789111111',
         'status': 'uploaded',
     }
@@ -68,6 +89,106 @@ def test_file_post_all(testapp, all_file_jsons):
 def fastq_uploading(fastq_json):
     fastq_json['status'] = 'uploading'
     return fastq_json
+
+
+def test_extra_files(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    assert len(resobj['extra_files']) == len(extra_files)
+    file_name = ("%s.pairs.gz.px2" % (resobj['accession']))
+    expected_key = "%s/%s" % (resobj['uuid'], file_name)
+    assert resobj['extra_files'][0]['upload_key'] == expected_key
+    assert resobj['extra_files'][0]['href']
+    assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
+    assert resobj['extra_files_creds'][0]['upload_credentials']
+    assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
+    assert resobj['extra_files'][0]['status'] == proc_file_json['status']
+
+
+def test_extra_files_download(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    download_link = resobj['extra_files'][0]['href']
+    testapp.get(download_link, status=307)
+    testapp.get(resobj['href'], status=307)
+
+
+def test_extra_files_get_upload(testapp, proc_file_json):
+    extra_files = [{'file_format': 'pairs_px2'}]
+    proc_file_json['extra_files'] = extra_files
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+
+    get_res = testapp.get(resobj['@id']+'/upload')
+    get_resobj = get_res.json['@graph'][0]
+    assert get_resobj['upload_credentials']
+    assert get_resobj['extra_files_creds'][0]
+
+
+def test_extra_files_throws_on_duplicate_file_format(testapp, proc_file_json):
+    # same file_format as original file
+    extra_files = [{'file_format': 'pairs'}]
+    proc_file_json['extra_files'] = extra_files
+    with pytest.raises(Exception) as exc:
+        testapp.post_json('/file_processed', proc_file_json, status=201)
+        assert "must have unique file_format" in exc.value
+
+
+def test_extra_files_throws_on_duplicate_file_format_in_extra(testapp, proc_file_json):
+    # same file_format as original file
+    extra_files = [{'file_format': 'pairs_px2'},
+                   {'file_format': 'pairs_px'}]
+    proc_file_json['extra_files'] = extra_files
+    with pytest.raises(Exception) as exc:
+        testapp.post_json('/file_processed', proc_file_json, status=201)
+        assert "must have unique file_format" in exc.value
+
+
+def test_files_aws_credentials(testapp, fastq_uploading):
+    # fastq_uploading.pop('filename')
+    res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
+    resobj = res.json['@graph'][0]
+
+    res_put = testapp.put_json(resobj['@id'], fastq_uploading)
+
+    assert resobj['upload_credentials']['key'] == res_put.json['@graph'][0]['upload_credentials']['key']
+    assert 'test-bucket' in resobj['upload_credentials']['upload_url']
+
+
+def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
+    fastq_uploading['filename'] = 'test.zip'
+    fastq_uploading['file_format'] = 'zip'
+    res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
+    resobj = res.json['@graph'][0]
+
+    fastq_uploading['filename'] = 'test.tiff'
+    fastq_uploading['file_format'] = 'tiff'
+    res_put = testapp.put_json(resobj['@id'], fastq_uploading)
+
+    assert resobj['upload_credentials']['key'].endswith('zip')
+    assert resobj['href'].endswith('zip')
+    assert res_put.json['@graph'][0]['upload_credentials']['key'].endswith('tiff')
+    assert res_put.json['@graph'][0]['href'].endswith('tiff')
+
+
+def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading):
+    fastq_uploading['filename'] = 'test.zip'
+    fastq_uploading['file_format'] = 'zip'
+    res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
+    resobj = res.json['@graph'][0]
+
+    fastq_uploading['status'] = 'released'
+    res_put = testapp.put_json(resobj['@id'], fastq_uploading)
+    res_upload = testapp.get(resobj['@id'] + '/upload')
+    put_obj = res_upload.json['@graph'][0]
+
+    assert resobj['upload_credentials']['key'] == put_obj['upload_credentials']['key']
+
+    assert resobj['href'] == res_put.json['@graph'][0]['href']
 
 
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
@@ -109,7 +230,7 @@ def file(testapp, award, experiment, lab):
         'lab': lab['@id'],
         'file_format': 'fastq',
         'md5sum': '00000000000000000000000000000000',
-        'filename': 'my.tsv',
+        'filename': 'my.fastq.gz',
         'status': 'uploaded',
     }
     res = testapp.post_json('/file_fastq', item)
@@ -183,12 +304,8 @@ def test_name_for_file_is_accession(registry, fastq_json):
     assert my_file.__name__ == fastq_json['accession']
 
 
-def test_file_type(registry, fastq_json):
-    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = FileFastq.create(registry, uuid, fastq_json)
-    assert 'gz' == my_file.file_type('gz')
-    assert "fastq gz" == my_file.file_type('fastq', 'gz')
-
+def test_calculated_display_title_for_fastq(file):
+    assert file['display_title'] == file['accession'] + '.fastq.gz'
 
 
 def test_post_upload_only_on_uploading(registry, fastq_json, request):
@@ -212,3 +329,49 @@ def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq_
         assert True
     else:
         assert False
+
+
+def test_workflowrun_output_rev_link(testapp, fastq_json, workflow_run_json):
+    res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
+    workflow_run_json['output_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
+
+    new_file = testapp.get(res['@id']).json
+    assert new_file['workflow_run_outputs'][0]['@id'] == res2['@id']
+
+
+def test_workflowrun_input_rev_link(testapp, fastq_json, workflow_run_json):
+    res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
+    workflow_run_json['input_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
+
+    new_file = testapp.get(res['@id']).json
+    assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
+
+
+
+def test_force_beanstalk_env(mocker):
+    secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    key = os.environ.get("AWS_ACCESS_KEY_ID")
+    os.environ.pop("AWS_SECRET_ACCESS_KEY")
+    os.environ.pop("AWS_ACCESS_KEY_ID")
+
+    import tempfile
+    test_cfg = tempfile.NamedTemporaryFile(mode='w', delete=False)
+    test_cfg.write('export AWS_SECRET_ACCESS_KEY="its a secret"\n')
+    test_cfg.write('export AWS_ACCESS_KEY_ID="its a secret id"\n')
+    test_cfg_name = test_cfg.name
+    test_cfg.close()
+
+    # mock_boto
+    mock_boto = mocker.patch('encoded.types.file.boto', autospec=True)
+
+    force_beanstalk_env(profile_name=None, config_file=test_cfg_name)
+    # reset
+    os.environ["AWS_SECRET_ACCESS_KEY"] = secret
+    os.environ["AWS_ACCESS_KEY_ID"] = key
+    # os.remove(test_cfg.delete)
+
+    # ensure boto called with correct arguments
+    mock_boto.connect_sts.assert_called_once_with(aws_access_key_id='its a secret id',
+                                                  aws_secret_access_key='its a secret')

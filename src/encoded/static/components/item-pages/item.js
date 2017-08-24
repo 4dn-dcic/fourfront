@@ -1,50 +1,50 @@
 'use strict';
-var React = require('react');
-var globals = require('./../globals');
-var Panel = require('react-bootstrap').Panel;
-var Table = require('./../collection').Table;
-var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
-var { console, object } = require('./../util');
 
-var Fallback = module.exports.Fallback = React.createClass({
-    contextTypes: {
-        location_href: React.PropTypes.string
-    },
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Panel } from 'react-bootstrap';
+import _ from 'underscore';
+import url from 'url';
+import * as globals from './../globals';
+import { AuditIndicators, AuditDetail, AuditMixin } from './../audit';
+import { console, object, Filters, Schemas } from './../util';
+import AuditTabView from './components/AuditTabView';
 
-    render: function() {
-        var url = require('url');
-        var context = this.props.context;
-        var title = typeof context.title == "string" ? context.title : url.parse(this.context.location_href).path;
-        return (
-            <div className="view-item">
-                <header className="row">
-                    <div className="col-sm-12">
-                        <h2>{title}</h2>
-                    </div>
-                </header>
-                {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
-                <section className="view-detail panel">
-                    <div className="container">
-                        <pre>{JSON.stringify(context, null, 4)}</pre>
-                    </div>
-                </section>
-            </div>
-        );
+
+/********************/
+/**** Components ****/
+/********************/
+
+/**
+ * Acts as a "controller". This is the 'content_view' for all 'Items'.
+ * Looks up best panel_view to use for the detailed Item type and renders it with props passed down
+ * from App.
+ * 
+ * @export
+ * @class Item
+ * @extends {React.Component}
+ */
+export default class Item extends React.Component {
+
+    static propTypes = {
+        schemas : PropTypes.any.isRequired,
+        listActionsFor : PropTypes.func.isRequired,
+        href : PropTypes.string.isRequired,
+        session : PropTypes.bool.isRequired,
+        expSetFilters : PropTypes.object.isRequired
     }
-});
 
-var Item = module.exports.Item = React.createClass({
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+    }
 
-    getChildContext     : AuditMixin.getChildContext,
-    getInitialState     : AuditMixin.getInitialState,
-    auditStateToggle    : AuditMixin.auditStateToggle,
-    childContextTypes   : AuditMixin.childContextTypes,
+    //getChildContext     : AuditMixin.getChildContext,
+    //getInitialState     : AuditMixin.getInitialState,
+    //auditStateToggle    : AuditMixin.auditStateToggle,
+    //childContextTypes   : AuditMixin.childContextTypes,
 
-    contextTypes: {
-        schemas: React.PropTypes.object
-    },
-
-    render: function() {
+    render() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var ContentPanel = globals.panel_views.lookup(context);
@@ -57,59 +57,43 @@ var Item = module.exports.Item = React.createClass({
             </div>
         );
     }
-});
+}
+
+//Item.contextTypes = {
+//    schemas: React.PropTypes.object
+//}
 
 globals.content_views.register(Item, 'Item');
 
 
-// Also use this view as a fallback for anything we haven't registered
-globals.content_views.fallback = function () {
-    return Fallback;
-};
-
-
-var title = module.exports.title = function (props) {
-    var context = props.context;
-    return (
-        context.display_title   ||
-        context.title           ||
-        context.name            ||
-        context.download        ||
-        context.accession       ||
-        context.uuid            ||
-        (typeof context['@id'] === 'string' ? context['@id'] :
-        'No title found')
-    );
-};
-
-globals.listing_titles.register(title, 'Item');
-
-
-// Also use this view as a fallback for anything we haven't registered
-globals.listing_titles.fallback = function () {
-    return title;
-};
-
-
-var FetchedRelatedItems = React.createClass({
-    getDefaultProps: function() {
-        return {Component: Table};
-    },
-
-    render: function() {
-        var {Component, context, title, url, props} = this.props;
-        if (context === undefined) return null;
-        var items = context['@graph'];
-        if (!items.length) return null;
-
-        return (
-            <Component {...props} title={title} context={context} total={context.total} items={items} url={url} showControls={false} />
-        );
-    }
-
-});
 
 // **** Deprecated when fetch was removed.
+
+//export class FetchedRelatedItems extends React.Component {
+//
+//    constructor(props){
+//        super(props);
+//        this.render = this.render.bind(this);
+//    }
+//
+//    render() {
+//        var {Component, context, title, url, props} = this.props;
+//        if (context === undefined) return null;
+//        var items = context['@graph'];
+//        if (!items.length) return null;
+//
+//        return (
+//            <Component {...props} title={title} context={context} total={context.total} items={items} url={url} showControls={false} />
+//        );
+//    }
+//
+//};
+//
+//FetchedRelatedItems.defaultProps = {
+//    'Component' : Table
+//}
+//
+//
 //
 // var RelatedItems = module.exports.RelatedItems = React.createClass({
 //     getDefaultProps: function() {
@@ -128,3 +112,66 @@ var FetchedRelatedItems = React.createClass({
 //         );
 //     },
 // });
+
+
+/************************************/
+/**** Utility & Helper Functions ****/
+/************************************/
+
+/**
+ * Function to determine title for each Item object.
+ * 
+ * @export
+ * @param {Object} props - Object containing props commonly supplied to Item page. At minimum, must have a 'context' property.
+ * @returns {string} Title string to use.
+ */
+export function title(props) {
+    var context = props.context;
+    return (
+        context.display_title   ||
+        context.title           ||
+        context.name            ||
+        context.download        ||
+        context.accession       ||
+        context.uuid            ||
+        ( typeof context['@id'] === 'string' ? context['@id'] : 
+            null //: 'No title found'
+        )
+    );
+}
+
+globals.listing_titles.register(title, 'Item');
+
+// Also use this 'title' function as a fallback for anything we haven't registered
+globals.listing_titles.fallback = function () {
+    return title;
+};
+
+/**
+ * Get Item title string from a context object (JSON representation of Item).
+ * 
+ * @public
+ * @export
+ * @param {Object} context - JSON representation of an Item object.
+ * @returns {string} The title.
+ */
+export function getTitleStringFromContext(context){
+    return title({'context' : context});
+}
+
+/**
+ * Determine whether the title which is displayed is an accession or not.
+ * Use for determining whether to include accession in ItemHeader.TopRow.
+ * 
+ * @export
+ * @public
+ * @param {Object} context - JSON representation of an Item object.
+ * @param {string} [displayTitle] - Display title of Item object. Gets it from context if not provided.
+ * @returns {boolean} If title is an accession (or contains it).
+ */
+export function isDisplayTitleAccession(context, displayTitle = null, checkContains = false){
+    if (!displayTitle) displayTitle = getTitleStringFromContext(context);
+    if (context.accession && context.accession === displayTitle) return true;
+    if (checkContains && displayTitle.indexOf(context.accession) > -1) return true;
+    return false;
+}

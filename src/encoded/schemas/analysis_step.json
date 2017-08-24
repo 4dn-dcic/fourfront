@@ -4,9 +4,9 @@
     "id": "/profiles/analysis_step.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["name", "version", "software_used"],
+    "required": ["name", "version"],
     "additionalProperties": false,
-    "identifyingProperties": ["uuid", "aliases", "name"],
+    "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/aliases" },
@@ -23,11 +23,10 @@
         },
         "name": {
             "title": "Name",
-            "description": "Unique name of the analysis step",
-            "comment": "Unique for each parent analysis_step, using a naming system where the pipeline, software used, the purpose and the version of the step is described: rampage-grit-peak-calling-step-v-1",
+            "description": "non-unique name of the analysis step",
+            "comment": "non-unique for each parent analysis_step, using a naming system where the pipeline, software used, the purpose and the version of the step is described: rampage-grit-peak-calling-step-v-1",
             "type": "string",
-            "pattern": "^[a-zA-Z0-9\\-\\_]+$",
-            "uniqueKey": "analysis_step:name"
+            "pattern": "^[a-zA-Z0-9\\-\\_]+$"
         },
         "title": {
             "title": "Title",
@@ -36,7 +35,7 @@
         },
         "version": {
             "title": "Version",
-            "description": "The software version number.",
+            "description": "The step version number.",
             "type": "string"
         },
         "description": {
@@ -77,7 +76,8 @@
                    "quantification",
                    "open chromatin region identification",
                    "read trimming",
-                   "interaction calling"
+                   "interaction calling",
+                   "file merging"
                  ]
              }
         },

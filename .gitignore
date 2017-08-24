@@ -14,16 +14,20 @@ coverage.xml
 /eggs/
 /.eggs/
 /extends/
+/jsconfig.json
 /node_modules/
+package-lock.json
 /documentation/
 /ontology.json
 /parts/
 /session-secret.b64
+/src/encoded/static/components/lib/react-infinite
 /src/encoded/static/css/bootstrap.css
 /src/encoded/static/css/responsive.css
 /src/encoded/static/css/style.css
 /src/encoded/static/scss/_variables.original.scss
 
+*.swp
 *.DS_Store
 *.egg-info
 *.pyc

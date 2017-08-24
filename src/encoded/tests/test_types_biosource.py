@@ -3,18 +3,6 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def GM12878_biosource(testapp, lab, award):
-    item = {
-        "accession": "4DNSR000AAQ1",
-        "biosource_type": "immortalized cell line",
-        "cell_line": "GM12878",
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
 def cell_lines(GM12878_biosource, F123_biosource):
     return [GM12878_biosource, F123_biosource]
 
@@ -37,16 +25,6 @@ def biosources(cell_lines, lung_biosource, whole_biosource):
     return bs
 
 
-def test_biosource_update_termids(cell_lines):
-    acc2termid = {'4DNSR000AAQ1': 'EFO_0002784', '4DNSR000AAQ2': None}
-    for cell in cell_lines:
-        if cell['accession'] in acc2termid:
-            if acc2termid[cell['accession']] is not None:
-                assert cell['cell_line_termid'] == acc2termid[cell['accession']]
-            else:
-                assert 'cell_line_termid' not in cell
-
-
 def test_calculated_biosource_name(biosources):
     for biosource in biosources:
         biotype = biosource['biosource_type']
@@ -59,3 +37,146 @@ def test_calculated_biosource_name(biosources):
             assert name == 'lung'
         if biotype == 'whole organisms':
             assert name == 'whole human'
+
+
+def test_validate_biosource_tissue_no_tissue(testapp, award, lab, gm12878_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'immortalized cell line',
+                 'cell_line': 'GM12878'}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_biosource_tissue_invalid(testapp, award, lab, lung_oterm, ontology):
+    testapp.patch_json(lung_oterm['@id'], {'source_ontology': ontology['@id']}, status=200)
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'tissue',
+                 'tissue': lung_oterm['@id']}
+    res = testapp.post_json('/biosource', biosource, status=422)
+    errors = res.json['errors']
+    assert 'not found in UBERON' in errors[0]['description']
+
+
+def test_validate_biosource_tissue_valid_atid(testapp, award, lab, lung_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'tissue',
+                 'tissue': lung_oterm['@id']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_biosource_tissue_valid_uuid(testapp, award, lab, lung_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'tissue',
+                 'tissue': lung_oterm['uuid']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_biosource_tissue_on_valid_patch(testapp, award, lab, lung_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'tissue',
+                 'tissue': lung_oterm['uuid']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+    new_oterm = {'term_name': 'finger',
+                 'term_id': 'UBERON:0000009',
+                 'source_ontology': lung_oterm['source_ontology']}
+    ot = testapp.post_json('/ontology_term', new_oterm, status=201)
+    pid = '/' + res.json['@graph'][0].get('uuid')
+    res2 = testapp.patch_json(pid, {'tissue': ot.json['@graph'][0]['uuid']})
+    assert not res2.json.get('errors')
+
+
+def test_validate_biosource_tissue_on_invalid_patch(testapp, award, lab, lung_oterm, ontology):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'tissue',
+                 'tissue': lung_oterm['uuid']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+    new_oterm = {'term_name': 'finger',
+                 'term_id': 'UBERON:0000009',
+                 'source_ontology': ontology['uuid']}
+    ot = testapp.post_json('/ontology_term', new_oterm, status=201)
+    pid = '/' + res.json['@graph'][0].get('uuid')
+    res2 = testapp.patch_json(pid, {'tissue': ot.json['@graph'][0]['uuid']}, status=422)
+    errors = res2.json['errors']
+    assert 'not found in UBERON' in errors[0]['description']
+
+
+def test_validate_biosource_cell_line_no_cell_line(testapp, award, lab):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'tissue'
+                 }
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_biosource_cell_line_invalid_ont(testapp, award, lab, gm12878_oterm, lung_oterm):
+    testapp.patch_json(gm12878_oterm['@id'], {'slim_terms': [lung_oterm['@id']]}, status=200)
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'immortalized cell line',
+                 'cell_line': gm12878_oterm['@id']}
+    res = testapp.post_json('/biosource', biosource, status=422)
+    errors = res.json['errors']
+    assert 'not a known valid cell line' in errors[0]['description']
+
+
+def test_validate_biosource_cell_line_valid_atid(testapp, award, lab, gm12878_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'immortalized cell line',
+                 'cell_line': gm12878_oterm['@id']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_biosource_cell_line_valid_uuid(testapp, award, lab, gm12878_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'immortalized cell line',
+                 'cell_line': gm12878_oterm['uuid']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+
+
+def test_validate_biosource_cell_line_on_valid_patch(testapp, award, lab, gm12878_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'immortalized cell line',
+                 'cell_line': gm12878_oterm['uuid']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+    new_oterm = {'term_name': 'bigcell',
+                 'term_id': 'test:1',
+                 'source_ontology': gm12878_oterm['source_ontology'],
+                 'slim_terms': gm12878_oterm['slim_terms']}
+    ot = testapp.post_json('/ontology_term', new_oterm, status=201)
+    pid = '/' + res.json['@graph'][0].get('uuid')
+    res2 = testapp.patch_json(pid, {'cell_line': ot.json['@graph'][0]['uuid']})
+    assert not res2.json.get('errors')
+
+
+def test_validate_biosource_cell_line_on_invalid_patch(testapp, award, lab, gm12878_oterm):
+    biosource = {'award': award['@id'],
+                 'lab': lab['@id'],
+                 'biosource_type': 'immortalized cell line',
+                 'cell_line': gm12878_oterm['uuid']}
+    res = testapp.post_json('/biosource', biosource, status=201)
+    assert not res.json.get('errors')
+    new_oterm = {'term_name': 'bigcell',
+                 'term_id': 'test:1',
+                 'source_ontology': gm12878_oterm['source_ontology']}
+    ot = testapp.post_json('/ontology_term', new_oterm, status=201)
+    pid = '/' + res.json['@graph'][0].get('uuid')
+    res2 = testapp.patch_json(pid, {'cell_line': ot.json['@graph'][0]['uuid']}, status=422)
+    errors = res2.json['errors']
+    assert 'not a known valid cell line' in errors[0]['description']

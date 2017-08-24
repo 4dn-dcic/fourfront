@@ -80,3 +80,15 @@ def test_audit_item_status_mismatch(testapp, experiment, embed_testapp):
     print(res)
     errors_list = res.json['audit']
     assert any(error['category'] == 'mismatched status' for error in errors_list)
+
+
+def test_audit_item_status_ontology_term_obsolete(
+        lung_biosource, uberon_ont, embed_testapp, testapp):
+    item = {'term_id': 't1', 'status': 'obsolete', 'source_ontology': uberon_ont['@id']}
+    term = testapp.post_json('/ontology_term', item).json['@graph'][0]
+    testapp.patch_json(lung_biosource['@id'], {'tissue': term['@id']})
+    res = embed_testapp.get(lung_biosource['@id'] + '/@@audit-self')
+    print(res)
+    errors_list = res.json['audit']
+    assert any(error['name'] == 'audit_item_status' for error in errors_list)
+    assert any(error['category'] == 'mismatched status' for error in errors_list)

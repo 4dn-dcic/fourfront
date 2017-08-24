@@ -6,7 +6,7 @@ pytestmark = pytest.mark.working
 
 
 def test_parse_args_defaults():
-    args = ''
+    args = ['development.ini', '--app-name', 'app']
     args = go.parse_args(args)
     assert args.ontologies == 'all'
     assert args.keyfile == os.path.expanduser('~/keypairs.json')
@@ -67,21 +67,21 @@ all_ontology = [{'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
                  'ontology_name': 'Experimental Factor Ontology'
                  },
                  {'ontology_name': 'Uberon',
-                 '@type': ['Ontology', 'Item'],
-                 'ontology_prefix': 'UBERON',
-                 'namespace_url': 'http://purl.obolibrary.org/obo/',
-                 'download_url': 'http://purl.obolibrary.org/obo/uberon/composite-metazoan.owl',
-                 '@id': '/ontologys/530016bc-8535-4448-903e-854af460b254/',
-                 'definition_terms': ['/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
-                 'uuid': '530016bc-8535-4448-903e-854af460b254',
+                  '@type': ['Ontology', 'Item'],
+                  'ontology_prefix': 'UBERON',
+                  'namespace_url': 'http://purl.obolibrary.org/obo/',
+                  'download_url': 'http://purl.obolibrary.org/obo/uberon/composite-metazoan.owl',
+                  '@id': '/ontologys/530016bc-8535-4448-903e-854af460b254/',
+                  'definition_terms': ['/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
+                  'uuid': '530016bc-8535-4448-903e-854af460b254',
                  },
                  {'ontology_name': 'Ontology for Biomedical Investigations',
-                 '@type': ['Ontology', 'Item'],
-                 'ontology_prefix': 'OBI',
-                 'namespace_url': 'http://purl.obolibrary.org/obo/',
-                 'download_url': 'http://purl.obolibrary.org/obo/obi.owl',
-                 '@id': '/ontologys/530026bc-8535-4448-903e-854af460b254/',
-                 'definition_terms': [
+                  '@type': ['Ontology', 'Item'],
+                  'ontology_prefix': 'OBI',
+                  'namespace_url': 'http://purl.obolibrary.org/obo/',
+                  'download_url': 'http://purl.obolibrary.org/obo/obi.owl',
+                  '@id': '/ontologys/530026bc-8535-4448-903e-854af460b254/',
+                  'definition_terms': [
                      {'term_name': 'definition',
                       '@type': ['OntologyTerm', 'Item'],
                       'term_id': 'IAO:0000115',
@@ -90,8 +90,8 @@ all_ontology = [{'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
                       'term_url': 'http://purl.obolibrary.org/obo/IAO_0000115'
                      }
                   ],
-                 'uuid': '530026bc-8535-4448-903e-854af460b254',
-                 'synonym_terms': [
+                  'uuid': '530026bc-8535-4448-903e-854af460b254',
+                  'synonym_terms': [
                     {'term_name': 'alternative term',
                      '@type': ['OntologyTerm', 'Item'],
                      'term_id': 'IAO:0000118',
@@ -110,7 +110,7 @@ all_ontology = [{'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
                   }]
 
 
-def get_fdn_ontology_side_effect(*args):
+def get_fdn_ontology_side_effect(*args, **kwargs):
     for i, arg in enumerate(args):
         print('ARG', i, ' = ', arg)
     if args[0] is not None:
@@ -166,6 +166,7 @@ def slim_terms_by_ont(slim_term_list):
         [slim_term_list[0],
          slim_term_list[1]],
         [slim_term_list[2]],
+        {'notification': 'No result found'},
         {'notification': 'No result found'},
         {'notification': 'No result found'}
     ]
@@ -281,7 +282,7 @@ def syn_uris_as_URIRef(syn_uris):
 
 def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
     present = ['developmental', 'assay']
-    absent = ['organ', 'system']
+    absent = ['organ', 'system', 'cell']
     test_slim_terms = slim_terms_by_ont
     with mocker.patch('encoded.commands.generate_ontology.get_FDN',
                       side_effect=test_slim_terms):
@@ -293,7 +294,7 @@ def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
 
 
 def test_add_slim_to_term(terms_w_closures, slim_term_list):
-    slim_ids = ['uuida1', 'uuidd1', 'uuida2']
+    slim_ids = ['a_term1', 'd_term1', 'a_term2']
     for i, term in enumerate(terms_w_closures):
         test_term = go.add_slim_to_term(term, slim_term_list)
         assert test_term['term_id'] == str(i + 1)
@@ -314,16 +315,16 @@ def test_add_slim_terms(terms, slim_term_list):
     for tid, term in terms.items():
         if tid == 'id6':
             assert len(term['slim_terms']) == 2
-            assert 'uuidd1' in term['slim_terms']
-            assert 'uuida1' in term['slim_terms']
+            assert 'd_term1' in term['slim_terms']
+            assert 'a_term1' in term['slim_terms']
         elif tid == 'id9':
             assert 'slim_terms' not in term
         else:
             assert len(term['slim_terms']) == 1
             if tid in ['a_term1', 'id2', 'id3', 'id4']:
-                assert term['slim_terms'][0] == 'uuida1'
+                assert term['slim_terms'][0] == 'a_term1'
             elif tid in ['d_term1', 'id7', 'id8']:
-                assert term['slim_terms'][0] == 'uuidd1'
+                assert term['slim_terms'][0] == 'd_term1'
 
 
 def test_remove_obsoletes_and_unnamed_obsoletes(terms):
@@ -349,10 +350,10 @@ def test_convert2namespace(syn_uris):
         assert str(ns) == uri
 
 
-def test_get_syndef_terms_as_uri(mocker, connection, syn_uris):
+def test_get_syndef_terms_as_uri(mocker, syn_uris):
     asrdf = [True, False]
     for rdf in asrdf:
-        uris = go.get_syndef_terms_as_uri(connection, all_ontology[2], 'synonym_terms', rdf)
+        uris = go.get_syndef_terms_as_uri(all_ontology[2], 'synonym_terms', rdf)
         if rdf:
             for uri in uris:
                 assert check_if_URIRef(uri)
@@ -361,26 +362,26 @@ def test_get_syndef_terms_as_uri(mocker, connection, syn_uris):
             assert str(uri) in syn_uris
 
 
-def test_get_synonym_term_uris_no_ontology(mocker, connection):
+def test_get_synonym_term_uris_no_ontology(mocker):
     with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
                       return_value=[]):
-        synterms = go.get_synonym_term_uris(connection, 'ontologys/FAKE')
+        synterms = go.get_synonym_term_uris('ontologys/FAKE')
         assert not synterms
 
 
-def test_get_definition_term_uris_no_ontology(mocker, connection):
+def test_get_definition_term_uris_no_ontology(mocker):
     with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
                       return_value=[]):
-        synterms = go.get_definition_term_uris(connection, 'ontologys/FAKE')
+        synterms = go.get_definition_term_uris('ontologys/FAKE')
         assert not synterms
 
 
-def test_get_synonym_term_uris(mocker, connection, syn_uris, syn_uris_as_URIRef):
+def test_get_synonym_term_uris(mocker, syn_uris, syn_uris_as_URIRef):
     asrdf = [True, False]
     with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
                       return_value=syn_uris_as_URIRef):
         for rdf in asrdf:
-            uris = go.get_synonym_term_uris(connection, 'ontid', rdf)
+            uris = go.get_synonym_term_uris('ontid', rdf)
             if rdf:
                 for uri in uris:
                     assert check_if_URIRef(uri)
@@ -389,12 +390,12 @@ def test_get_synonym_term_uris(mocker, connection, syn_uris, syn_uris_as_URIRef)
                 assert str(uri) in syn_uris
 
 
-def test_get_definition_term_uris(mocker, connection, syn_uris, syn_uris_as_URIRef):
+def test_get_definition_term_uris(mocker, syn_uris, syn_uris_as_URIRef):
     asrdf = [True, False]
     with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
                       return_value=syn_uris_as_URIRef):
         for rdf in asrdf:
-            uris = go.get_synonym_term_uris(connection, 'ontid', rdf)
+            uris = go.get_synonym_term_uris('ontid', rdf)
             if rdf:
                 for uri in uris:
                     assert check_if_URIRef(uri)
@@ -526,7 +527,7 @@ def test_combine_all_parents_w_two_parents():
     assert len(term['all_parents']) == 2
     assert 'id2' in term['all_parents']
     assert 'id3' in term['all_parents']
-    assert term['development'] == term['all_parents']
+    assert sorted(term['development']) == sorted(term['all_parents'])
 
 
 def test_combine_all_parents_w_two_same_parents():
@@ -545,7 +546,7 @@ def test_combine_all_parents_w_parent_and_relationship_diff():
     assert len(term['all_parents']) == 2
     assert 'id2' in term['all_parents']
     assert 'id3' in term['all_parents']
-    assert term['development'] == term['all_parents']
+    assert sorted(term['development']) == sorted(term['all_parents'])
 
 
 def test_combine_all_parents_w_parent_and_relationship_same():
@@ -614,25 +615,25 @@ def test_combine_all_parents_w_has_part_inverse_to_exclude_plus_others():
 
 
 def test_has_human_empty():
-    l = []
-    assert not go._has_human(l)
+    ll = []
+    assert not go._has_human(ll)
 
 
 def test_has_human_no_human():
-    l = ['http://purl.obolibrary.org/obo/BFO_0000051']
-    assert not go._has_human(l)
+    ll = ['http://purl.obolibrary.org/obo/BFO_0000051']
+    assert not go._has_human(ll)
 
 
 def test_has_human_human():
-    l = ['http://purl.obolibrary.org/obo/BFO_0000051', 'http://purl.obolibrary.org/obo/NCBITaxon_9606']
-    assert go._has_human(l)
+    ll = ['http://purl.obolibrary.org/obo/BFO_0000051', 'http://purl.obolibrary.org/obo/NCBITaxon_9606']
+    assert go._has_human(ll)
 
 
 def test_has_human_uriref_human():
     uri = 'http://purl.obolibrary.org/obo/NCBITaxon_9606'
     uri = go.convert2URIRef(uri)
-    l = [uri]
-    assert go._has_human(l)
+    ll = [uri]
+    assert go._has_human(ll)
 
 
 def test_get_termid_from_uri_no_uri():
@@ -880,13 +881,225 @@ def test_add_additional_term_info(mocker, simple_terms):
                         assert 'definition' not in term
 
 
-def test_write_outfile(simple_terms):
+def test_write_outfile_pretty(simple_terms):
     import json
     filename = 'tmp_test_file'
-    go.write_outfile(simple_terms, filename)
+    go.write_outfile(list(simple_terms.values()), filename, pretty=True)
     infile = open(filename, 'r')
     result = json.load(infile)
     print(result)
     for r in result:
         assert r in simple_terms.values()
     os.remove(filename)
+
+
+def test_write_outfile_notpretty(simple_terms):
+    print(simple_terms)
+    import json
+    filename = 'tmp_test_file'
+    go.write_outfile(simple_terms.values(), filename)
+    with open(filename, 'r') as infile:
+        for l in infile:
+            result = json.loads(l)
+            for v in simple_terms.values():
+                assert v in result
+    os.remove(filename)
+
+
+@pytest.fixture
+def matches():
+    return [{'term_id': 't1', 'a': 1, 'b': 2, 'c': 3}, {'term_id': 't1', 'a': 1, 'b': 2, 'c': 3}]
+
+
+def test_terms_match_identical(matches):
+    assert go._terms_match(matches[0], matches[1])
+
+
+def test_terms_match_w_parents(matches):
+    t1 = matches[0]
+    t2 = matches[1]
+    p1 = ['OBI:01', 'EFO:01']
+    p2 = [{'link_id': '~ontology-terms~OBI:01~', 'display_title': 'blah'},
+          {'link_id': '~ontology-terms~EFO:01~', 'display_title': 'hah'}]
+    t1['parents'] = p1
+    t2['parents'] = p2
+    assert go._terms_match(t1, t2)
+
+
+def test_terms_match_unmatched_parents_1(matches):
+    t1 = matches[0]
+    t2 = matches[1]
+    p1 = ['OBI:01', 'EFO:01']
+    p2 = [{'link_id': '~ontology-terms~OBI:01~', 'display_title': 'blah'}]
+    t1['parents'] = p1
+    t2['parents'] = p2
+    assert not go._terms_match(t1, t2)
+
+
+def test_terms_match_unmatched_parents_2(matches):
+    t1 = matches[0]
+    t2 = matches[1]
+    p1 = ['OBI:01', 'EFO:01']
+    p2 = [{'link_id': '~ontology-terms~OBI:01~', 'display_title': 'blah'},
+          {'link_id': '~ontology-terms~EFO:02~', 'display_title': 'hah'}]
+    t1['parents'] = p1
+    t2['parents'] = p2
+    assert not go._terms_match(t1, t2)
+
+
+def test_terms_match_w_ontology(matches):
+    t1 = matches[0]
+    t2 = matches[1]
+    o1 = '530016bc-8535-4448-903e-854af460b254'
+    o2 = {'link_id': '~ontologys~530016bc-8535-4448-903e-854af460b254~', 'display_title': 'blah'}
+    t1['source_ontology'] = o1
+    t2['source_ontology'] = o2
+    assert go._terms_match(t1, t2)
+
+
+def test_terms_match_unmatched_ontology(matches):
+    t1 = matches[0]
+    t2 = matches[1]
+    o1 = '530016bc-8535-4448-903e-854af460b254'
+    o2 = {'link_id': '~ontologys~530016bc-8535-4448-903e-854af460b000~', 'display_title': 'blah'}
+    t1['source_ontology'] = o1
+    t2['source_ontology'] = o2
+    assert not go._terms_match(t1, t2)
+
+
+@pytest.fixture
+def ont_terms(matches):
+    t2 = matches[1]
+    t2['term_id'] = 't2'
+    t2['parents'] = ['OBI:01', 'EFO:01']
+    return {
+        't1': matches[0],
+        't2': t2,
+        't3': {'term_id': 't3', 'x': 7, 'y': 8, 'z': 9}
+    }
+
+
+@pytest.fixture
+def ontology_list():
+    return [
+        {'uuid': '1', 'ontology_name': 'ont1'},
+        {'uuid': '2', 'ontology_name': 'ont2'}
+    ]
+
+
+@pytest.fixture
+def db_terms(ont_terms):
+    db_terms = ont_terms.copy()
+    db_terms['t1']['uuid'] = '1234'
+    db_terms['t2']['uuid'] = '5678'
+    del db_terms['t2']['parents']
+    del db_terms['t3']
+    return db_terms
+
+
+def test_id_post_and_patch_filter(ont_terms, db_terms, ontology_list):
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+    assert len(result['post']) == 1
+    assert 't3' in result['post']
+    assert not result['patch']
+    assert len(result['idmap']) == 2
+    for k, v in result['idmap'].items():
+        assert k in ['t1', 't2']
+        assert v in ['1234', '5678']
+
+
+def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, False)
+    assert len(result['post']) == 1
+    assert 't3' in result['post']
+    assert len(result['patch']) == 2
+    for k in result['patch'].keys():
+        assert k in '12345678'
+    assert len(result['idmap']) == 2
+    for k, v in result['idmap'].items():
+        assert k in ['t1', 't2']
+        assert v in ['1234', '5678']
+
+
+def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
+    db_terms['t4'] = {'term_id': 't4', 'source_ontology': '1', 'uuid': '7890'}
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+    assert len(result['patch']) == 1
+    for k in result['patch'].keys():
+        assert k == '7890'
+    assert 't4' in result['idmap']
+
+
+def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):
+    db_terms['t4'] = {'term_id': 't4', 'source_ontology': '1', 'uuid': '7890'}
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, True, False)
+    assert not result['patch']
+    assert 't4' not in result['idmap']
+
+
+def test_id_post_and_patch_ignore_4dn(ont_terms, db_terms, ontology_list):
+    db_terms['t4'] = {'term_id': 't4', 'source_ontology': '4DN ont', 'uuid': '7890'}
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+    print(result)
+    assert not result['patch']
+    assert 't4' not in result['idmap']
+
+
+@pytest.fixture
+def partitioned_terms():
+    return {
+        'post': {'t1': {'term_id': 't1', 'a': 1, 'b': 2, 'c': 3, 'parents': ['OBI:01', 'EFO:01']},
+                 't2': {'term_id': 't2', 'a': 4, 'b': 5},
+                 't3': {'term_id': 't3', 'parents': ['t1']}},
+        'patch': {'12f908f9-a55d-4d31-acb8-eaf5278db6dc': {'term_id': 't4', 'uuid': '12f908f9-a55d-4d31-acb8-eaf5278db6dc', 'a': 6, 'parents': ['OBI:01']}},
+        'idmap': {
+            't4': '12f908f9-a55d-4d31-acb8-eaf5278db6dc',
+            'OBI:01': '22f908f9-a55d-4d31-acb8-eaf5278db6dc',
+            'EFO:01': '32f908f9-a55d-4d31-acb8-eaf5278db6dc'
+        }
+    }
+
+
+def valid_uuid(uid):
+    validchars = '0123456789abcdef'
+    uid = uid.replace('-', '')
+    if len(uid) != 32:
+        return False
+    for c in uid:
+        if c not in validchars:
+            return False
+    return True
+
+
+def test_add_uuids(partitioned_terms):
+    result = go.add_uuids(partitioned_terms)
+    assert len(result) == 2
+    news = result[0]
+    for t in news:
+        assert 'uuid' in t
+        assert valid_uuid(t['uuid'])
+        if t['term_id'] == 't1':
+            t1uuid = t['uuid']
+        elif t['term_id'] == 't3':
+            t3puuid = t['parents'][0]
+        if 'parents' in t:
+            for p in t['parents']:
+                assert valid_uuid(p)
+    assert t1uuid == t3puuid
+    patch = result[1][0]
+    assert valid_uuid(patch['uuid'])
+    assert valid_uuid(patch['parents'][0])
+
+
+def test_add_uuids_no_post(partitioned_terms):
+    del partitioned_terms['post']
+    result = go.add_uuids(partitioned_terms)
+    assert len(result) == 2
+    assert result[0] is None
+
+
+def test_add_uuids_no_patch(partitioned_terms):
+    del partitioned_terms['patch']
+    result = go.add_uuids(partitioned_terms)
+    assert len(result) == 2
+    assert result[1] is None

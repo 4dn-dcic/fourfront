@@ -1,0 +1,41 @@
+{
+    "title": "SysInfo",
+    "description": "Schema for internal use",
+    "id": "/profiles/sysinfo.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["name"],
+    "identifyingProperties": ["uuid", "name", "alias"],
+    "additionalProperties": true,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/aliases" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "status": {
+            "default": "released"
+        },
+		"name": {
+			"tile": "Name",
+			"description": "some name",
+            "type": "string",
+            "uniqueKey": true
+		},
+        "ontolgy_updated": {
+            "title": "Last time Ontology was updated",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ],
+            "serverDefault": "now",
+            "permission": "import_items"
+		}
+    }
+}

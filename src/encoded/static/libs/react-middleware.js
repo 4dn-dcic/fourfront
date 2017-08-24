@@ -1,6 +1,7 @@
 'use strict';
-var React = require('react');
-var ReactDOMServer = require('react-dom/server');
+
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 var doctype = '<!DOCTYPE html>\n';
 var transformResponse = require('subprocess-middleware').transformResponse;
 var fs = require('fs');
@@ -8,7 +9,11 @@ var inline = fs.readFileSync(__dirname + '/../build/inline.js', 'utf8').toString
 var store = require('../store');
 var { Provider, connect } = require('react-redux');
 var { JWT, Filters } = require('../components/util');
-var Alerts = require('../components/alerts');
+import Alerts from './../components/alerts';
+
+
+var cssFileStats = fs.statSync(__dirname + '/../css/style.css');
+var lastCSSBuildTime = Date.parse(cssFileStats.mtime.toUTCString());
 
 var render = function (Component, body, res) {
     //var start = process.hrtime();
@@ -17,7 +22,8 @@ var render = function (Component, body, res) {
         'context': context,
         'href': res.getHeader('X-Request-URL') || context['@id'],
         'inline': inline,
-        'expSetFilters' : Filters.hrefToFilters(res.getHeader('X-Request-URL') || context['@id'])
+        'expSetFilters' : Filters.hrefToFilters(res.getHeader('X-Request-URL') || context['@id']),
+        'lastCSSBuildTime' : lastCSSBuildTime
     };
 
     // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request. 
@@ -41,7 +47,8 @@ var render = function (Component, body, res) {
         (jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token.")
     ){
         sessionMayBeSet = false;
-        disp_dict.alerts = [Alerts.LoggedOut];
+        // TEMPORARY DISABLED (maybe not temporary eventually)
+        //disp_dict.alerts = [Alerts.LoggedOut];
     }
     // End JWT token grabbing
 

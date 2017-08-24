@@ -223,6 +223,59 @@ def app_version(config):
 
         config.registry.settings['snovault.app_version'] = version
 
+'''
+def add_schemas_to_html_responses(config):
+
+    from pyramid.events import BeforeRender
+    from snovault.schema_views import schemas
+    from .renderers import should_transform
+
+    # Exclude some keys, to make response smaller.
+    exclude_schema_keys = [
+        'AccessKey', 'Image', 'ImagingPath', 'OntologyTerm', 'PublicationTracking', 'Modification',
+        'QualityMetricBamqc', 'QualityMetricFastqc', 'QualityMetricFlag', 'QualityMetricPairsqc',
+        'TestingDependencies', 'TestingDownload', 'TestingKey', 'TestingLinkSource', 'TestingPostPutPatch',
+        'TestingServerDefault'
+    ]
+
+    def add_schemas(event):
+        request = event.get('request')
+        if request is not None:
+
+            if event.get('renderer_name') != 'null_renderer' and ('application/html' in request.accept or 'text/html' in request.accept):
+                #print('\n\n\n\n')
+                #print(event.keys())
+                #print(event.get('renderer_name'))
+                #print(should_transform(request, request.response))
+                #print(request.response.content_type)
+
+                if event.rendering_val.get('@type') is not None and event.rendering_val.get('@id') is not None and event.rendering_val.get('schemas') is None:
+                    schemasDict = {
+                        k:v for k,v in schemas(None, request).items() if k not in exclude_schema_keys
+                    }
+                    for schema in schemasDict.values():
+                        if schema.get('@type') is not None:
+                            del schema['@type']
+                        if schema.get('mixinProperties') is not None:
+                            del schema['mixinProperties']
+                        if schema.get('properties') is not None:
+                            if schema['properties'].get('@id') is not None:
+                                del schema['properties']['@id']
+                            if schema['properties'].get('@type') is not None:
+                                del schema['properties']['@type']
+                            if schema['properties'].get('display_title') is not None:
+                                del schema['properties']['display_title']
+                            if schema['properties'].get('link_id') is not None:
+                                del schema['properties']['link_id']
+                            if schema['properties'].get('schema_version') is not None:
+                                del schema['properties']['schema_version']
+                            if schema['properties'].get('uuid') is not None:
+                                del schema['properties']['uuid']
+                    event.rendering_val['schemas'] = schemasDict
+
+    config.add_subscriber(add_schemas, BeforeRender)
+'''
+
 
 def main(global_config, **local_config):
     """ This function returns a Pyramid WSGI application.
@@ -254,6 +307,7 @@ def main(global_config, **local_config):
     config.commit()  # commit so search can override listing
 
     # Render an HTML page to browsers and a JSON document for API clients
+    #config.include(add_schemas_to_html_responses)
     config.include('.renderers')
     config.include('.authentication')
     config.include('.server_defaults')
@@ -266,21 +320,11 @@ def main(global_config, **local_config):
         config.include('snovault.elasticsearch')
         config.include('.search')
 
-    if 'snp_search.server' in config.registry.settings:
-        addresses = aslist(config.registry.settings['snp_search.server'])
-        config.registry['snp_search'] = Elasticsearch(
-            addresses,
-            serializer=PyramidJSONSerializer(json_renderer),
-            connection_class=TimedUrllib3HttpConnection,
-            retry_on_timeout=True,
-            timeout=30,
-        )
-        config.include('.region_search')
-        config.include('.peak_indexer')
     config.include(static_resources)
     config.include(changelogs)
 
-    config.registry['ontology'] = json_from_path(settings.get('ontology_path'), {})
+    # we are loading ontologies now as regular items
+    # config.registry['ontology'] = json_from_path(settings.get('ontology_path'), {})
     aws_ip_ranges = json_from_path(settings.get('aws_ip_ranges_path'), {'prefixes': []})
     config.registry['aws_ipset'] = netaddr.IPSet(
         record['ip_prefix'] for record in aws_ip_ranges['prefixes'] if record['service'] == 'AMAZON')

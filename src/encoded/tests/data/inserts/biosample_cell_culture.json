@@ -1,16 +1,29 @@
 [
     {
         "uuid": "131106bc-8535-4448-903e-854af460b212",
-        "description": "cell culture for Hi-C",
+        "description": "cell culture for GM12878 used for Hi-C batch 1",
         "status": "in review by lab",
         "culture_start_date": "2016-01-01",
         "culture_duration": 2.5,
-        "culture_duration_units": "minutes",
         "passage_number": 5,
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "synchronization_stage": "S-phase"
 
+    },
+    {
+        "uuid": "131112bc-8535-4448-903e-854af460b212",
+        "description": "cell culture for GM12878 cells used for Hi-C batch 2",
+        "status": "in review by lab",
+        "culture_start_date": "2017-01-31",
+        "culture_harvest_date": "2017-02-28",
+        "doubling_number": "Split 1:4 for 10 passages",
+        "doubling_time": "passaged 10 times and split 1:4",
+        "culture_duration": 33,
+        "passage_number": 16,
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com"
     }
 ]

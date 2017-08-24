@@ -18,7 +18,7 @@ var reducers = {
     context : function(state={}, action){
         if (action.type && _.contains(Object.keys(action.type), 'context')){
             var context = action.type.context ? action.type.context : state;
-            if (!isServerSide() && context && context['@type'] && context['@type'].indexOf('User') > -1){ 
+            if (!isServerSide() && context && context['@type'] && context['@type'].indexOf('User') > -1){
                 // If context type is user, and is of current user, update localStorage user_info appropriately.
                 // E.g. in case of user editing their own profile, or just keep localStorage up-to-date w/ any other changes
                 var userInfo = JWT.getUserInfo();
@@ -38,6 +38,15 @@ var reducers = {
     inline : function(state='', action) {
         if (action.type && _.contains(Object.keys(action.type), 'inline')){
             var val = action.type.inline ? action.type.inline : state;
+            return val
+        }else{
+            return state
+        }
+    },
+
+    lastCSSBuildTime : function(state='', action) {
+        if (action.type && _.contains(Object.keys(action.type), 'lastCSSBuildTime')){
+            var val = action.type.lastCSSBuildTime ? action.type.lastCSSBuildTime : state;
             return val
         }else{
             return state
@@ -87,8 +96,7 @@ var reducers = {
         }else{
             return state
         }
-    }
-    
+    },
 };
 
 

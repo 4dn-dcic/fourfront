@@ -4,8 +4,7 @@ $mainThemeColor: 			#ffffff; /* i.e. the background color ..for now */
 $appVersionHeight:          0px;
 $footerHeight: 				50px + $appVersionHeight;
 $footerTopBorderHeight:		0px;
-$footerBackground:          #ffffff !default;
-$footerBackgroundHighlight: #000000 !default;
+$appBackgroundColor:        #fff; /* Not sure where $mainThemeColor is used... definitely not #application background-color, so creating new one */
 
 $tableHeadFootBackgroundColor: #000000;
 
@@ -19,6 +18,12 @@ $navbar-link-active-color : #000;
 $navbar-link-active-background-color: #eee;
 
 $modal-backdrop-opacity : 0.8;
+
+$facetlist-selected-term-color : #248bac;
+
+$audit-color-warning : #e29302;
+$audit-color-error : #bd0000;
+$audit-color-internal-action: #d0d0d0;
 
 // Pass value with CSS units and get just the value back
 @function strip-units($value) {
@@ -56,15 +61,24 @@ html {
     }
 }
 
-body { background: #f8f8f8 !important; @include font-size(1); }
+body {
+    text-rendering: optimizeLegibility;
+    background: #f8f8f8 !important;
+    @include font-size(1);
+}
 
 .float-wrap { overflow: hidden; }
 
 [hidden] { display: none !important; }
 
-#slot-application, #application {
-	min-height: 100%;
-    background-color: #fff;
+#slot-application {
+	height: 100%;
+    background-color: $appBackgroundColor;
+}
+
+#application {
+    height: 100%;
+    background-color: $appBackgroundColor;
 }
 
 hr { clear: both; }
