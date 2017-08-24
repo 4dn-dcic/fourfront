@@ -249,15 +249,15 @@ class ExperimentCaptureC(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, **kwargs):
-        import pdb; pdb.set_trace()
+    def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
         sum_str = experiment_type
-        if kwargs.get('biosample'):
-            biosamp_props = request.embed(kwargs['biosample'], '@@object')
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
+
             sum_str += (' on ' + biosource)
-        if kwargs.get('digestion_enzyme'):
-            de_props = request.embed(kwargs['digestion_enzyme'], '@@object')
+        if digestion_enzyme:
+            de_props = request.embed(digestion_enzyme, '@@object')
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
         return sum_str
@@ -267,8 +267,8 @@ class ExperimentCaptureC(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, **kwargs):
-        return self.experiment_summary(request, **kwargs)
+    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+        return self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
 
 
 @collection(
