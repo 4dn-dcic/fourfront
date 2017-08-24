@@ -135,6 +135,7 @@ class Term extends React.Component {
         //var selected = this.isSelectedExpItem();
         var selected = this.props.isTermSelected(this.props.term.key, (this.state.facet || this.props.facet || {field:null}).field, this.props.expsOrSets || 'sets');
         var title = this.props.title || Schemas.Term.toName(this.props.facet.field, this.props.term.key);
+        if (!title || title === 'null' || title === 'undefined') title = 'None';
         return (
             <li className={"facet-list-element" + (selected ? " selected" : '')} key={this.props.term.key} data-key={this.props.term.key}>
                 <a className="term" data-selected={selected} href="#" onClick={this.handleClick} data-term={this.props.term.key}>
@@ -145,7 +146,7 @@ class Term extends React.Component {
                                 <i className="icon icon-times-circle icon-fw"></i>
                                 : '' }
                     </span>
-                    <span className="facet-item" data-tip={title.length > 30 ? title : null}>{ title }</span>
+                    <span className="facet-item" data-tip={title.length > 30 ? title : null}>{ title || "None" }</span>
                     <span className="facet-count">{this.experimentSetsCount()}</span>
                 </a>
             </li>
@@ -416,6 +417,8 @@ class Facet extends React.Component {
         if (this.isStatic()){
             // Only one term
             var selected = this.props.isTermSelected(facet.terms[0].key, standardizedFieldKey);
+            var termName = Schemas.Term.toName(facet.field, facet.terms[0].key);
+            if (!termName || termName === 'null' || termName === 'undefined') termName = 'None';
             return (
                 <div
                     className={
@@ -453,7 +456,7 @@ class Facet extends React.Component {
                                     (this.state.filtering ? 'icon-spin icon-circle-o-notch' :
                                         ( selected ? 'icon-times-circle' : 'icon-circle' )
                                     )
-                                }></i> { Schemas.Term.toName(facet.field, facet.terms[0].key) }
+                                }></i> { termName }
                             </span>
                         </div>
                     </div>
@@ -745,6 +748,12 @@ export class FacetList extends React.Component {
         if (facet.field.substring(0, 25) === 'experiments_in_set.audit.'){
             return false; // Ignore audit facets, we have a different view for them.
         }
+        // For now we exclude these fields because they aren't available to us when EXP is embedded as part of EXPSET.
+        // In future, we should, do something better. Like AJAX all experiments in so we have all properties that they can be filtered by.
+        if (facet.field === 'experiments_in_set.award.project') return false;
+        if (facet.field === 'experiments_in_set.lab.title') return false;
+        if (facet.field === 'experiments_in_set.status') return false;
+        if (facet.field === 'experiments_in_set.publications_of_exp.display_title') return false;
         return true;
     }
 
