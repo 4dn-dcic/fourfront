@@ -66,29 +66,51 @@ class ExperimentSet(Item):
         'publications_using': ('Publication', 'exp_sets_used_in_pub'),
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
-    embedded = ["award.*",
-                "lab.*",
+    embedded = ["award.project",
+                "lab.city",
+                "lab.state",
+                "lab.country",
+                "lab.postal_code",
+                "lab.city",
+                "lab.title",
+
                 "produced_in_pub.*",
                 "publications_of_set.*",
-                "experiments_in_set.*",
-                "experiments_in_set.protocol.*",
-                "experiments_in_set.protocol_variation.*",
-                "experiments_in_set.lab.*",
-                "experiments_in_set.award.*",
-                "experiments_in_set.biosample.*",
-                "experiments_in_set.biosample.biosource.*",
-                "experiments_in_set.biosample.modifications.*",
-                "experiments_in_set.biosample.treatments.*",
-                "experiments_in_set.biosample.biosource.individual.organism.*",
-                "experiments_in_set.files.*",
+
+                "experiments_in_set.experiment_type",
+                "experiments_in_set.accession",
+
+                "experiments_in_set.biosample.accession",
+                "experiments_in_set.biosample.modifications_summary",
+                "experiments_in_set.biosample.treatments_summary",
+                "experiments_in_set.biosample.biosource_summary",
+                "experiments_in_set.biosample.biosource.biosource_type",
+                "experiments_in_set.biosample.biosource.cell_line.slim_terms",
+                "experiments_in_set.biosample.biosource.cell_line.synonyms",
+                "experiments_in_set.biosample.biosource.tissue.slim_terms",
+                "experiments_in_set.biosample.biosource.tissue.synonyms",
+                "experiments_in_set.biosample.biosource.individual.organism.name",
+                'experiments_in_set.biosample.modifications.modification_type',
+                'experiments_in_set.biosample.treatments.treatment_type',
+
+                "experiments_in_set.files.href",
+                "experiments_in_set.files.accession",
+                "experiments_in_set.files.uuid",
+                "experiments_in_set.files.file_size",
+                "experiments_in_set.files.upload_key",
+                "experiments_in_set.files.file_format",
+                "experiments_in_set.files.file_classification",
+                "experiments_in_set.files.paired_end",
+
                 "experiments_in_set.files.related_files.relationship_type",
-                "experiments_in_set.files.related_files.file.uuid",
                 "experiments_in_set.files.related_files.file.accession",
-                "experiments_in_set.filesets.*",
-                "experiments_in_set.filesets.files_in_set.*",
-                "experiments_in_set.filesets.files_in_set.related_files.relationship_type",
-                "experiments_in_set.filesets.files_in_set.related_files.file.uuid",
-                "experiments_in_set.digestion_enzyme.*",
+                "experiments_in_set.files.related_files.file.paired_end",
+                "experiments_in_set.files.related_files.file.file_type",
+
+                "experiments_in_set.filesets.files_in_set.accession",
+
+                "experiments_in_set.digestion_enzyme.name",
+
                 "processed_files.href",
                 "processed_files.accession",
                 "processed_files.uuid",
@@ -162,8 +184,7 @@ class ExperimentSetReplicate(ExperimentSet):
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
     embedded = ExperimentSet.embedded + [
-        "replicate_exps.replicate_exp.accession",
-        "replicate_exps.replicate_exp.uuid"
+        "replicate_exps.replicate_exp.accession"
     ]
 
     def _update(self, properties, sheets=None):

@@ -7,6 +7,8 @@ import * as vizUtil from './../utilities';
 import { console, object, expFxn } from './../../util';
 
 
+// TODO: Some of these funcs are deprecated & longer used. Check what they are & remove them.
+
 /**
  * Various aggregation functions which are used by BarPlot.Chart and/or BarPlot.Aggregator to convert & aggregate list of experiments
  * into a chart-friendly structure.
@@ -70,6 +72,15 @@ function createZeroCountTermObj(){
         'experiment_sets' : 0,
         'files' : 0
     };
+}
+
+export function getNestedExpSetPropertyFromExperiment(experiment, property, suppressNotFoundError = true){
+    if (property.slice(0,19) === 'experiments_in_set.'){
+        return object.getNestedProperty(experiment, property.slice(19), suppressNotFoundError);
+    } else {
+        return object.getNestedProperty(experiment.from_experiment_set, property, suppressNotFoundError);
+    }
+
 }
 
 
@@ -146,13 +157,7 @@ function aggregateByType(fields, experiments){
  */
 export function getUniqueMatchedTermsFromExpsInSet(experiments_in_set, field){
     if (field && typeof field === 'object' && typeof field.field === 'string') field = field.field;
-    return _(experiments_in_set).chain()
-        .map(function(exp){
-            return object.getNestedProperty(exp, field.replace('experiments_in_set.',''), true);
-        })
-        .sort()
-        .uniq(true)
-        .value();
+    return _.uniq(_.map(experiments_in_set, function(exp){ return getNestedExpSetPropertyFromExperiment(exp, field, true); }).sort(), true);
 }
 
 
@@ -168,7 +173,7 @@ export function getUniqueMatchedTermsFromExpsInSetWhereFieldIsTerm(experiments_i
     if (parentField && typeof parentField === 'object' && typeof parentField.field === 'string') parentField = parentField.field;
     return getUniqueMatchedTermsFromExpsInSet(
         _.filter(experiments_in_set, function(exp){
-            var foundTerm = object.getNestedProperty(exp, parentField.replace('experiments_in_set.',''), true);
+            var foundTerm = getNestedExpSetPropertyFromExperiment(exp, parentField, true);
             if (Array.isArray(foundTerm)) foundTerm = foundTerm[0]; // Use first term if it evals to multiple for now.
             if (!foundTerm && parentTerm === "None") return true;
             return parentTerm === foundTerm;
@@ -218,7 +223,7 @@ function partitionFields(fields, experiments, useOnlyPopulatedFields = false){
  * @param {string|string[]} term - A string or array of strings denoting terms.
  * @param {boolean} [updateTotal=true] - Whether to update fieldObj.total property as well.
  * @param {number} [countIncrease=1] - Amount to increase count for term by.
- * @returns {undefined}
+ * @returns {void}
  */
 export function countFieldTerm(fieldObj, term, updateTotal = true, aggregateType = 'experiments', countIncrease = 1){
     if (term === null) term = "None";
@@ -274,7 +279,7 @@ export function doFieldsDiffer(fields1, fields2){
  */
 export function getTermsForFieldsFromExperiment(fields, exp){
     return fields.map(function(f){
-        return [f.field, object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''), true)];
+        return [f.field, getNestedExpSetPropertyFromExperiment(exp, f.field, true) ];
     });
 }
 
@@ -324,8 +329,8 @@ function combinedFieldTermsForExperiments(fields, experiments){
 
     function aggregateExpAndFilesFromExp(exp){
 
-        var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
-        var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
+        var topLevelFieldTerm = getNestedExpSetPropertyFromExperiment(exp, field.field, true);
+        var nextLevelFieldTerm = getNestedExpSetPropertyFromExperiment(exp, field.childField.field, true);
 
         // For now, just use first term if evaluates to list.
         if (Array.isArray(topLevelFieldTerm)) topLevelFieldTerm = topLevelFieldTerm[0];
@@ -350,7 +355,6 @@ function combinedFieldTermsForExperiments(fields, experiments){
     // Aggregate experiment sets for child (subdivision) field
     // [ [set1exp1, set1exp2, set1exp3], [set2exp1, set2exp2, ...], ...].forEach
     _.values(expFxn.groupExperimentsIntoExperimentSets(experiments)).forEach(function(expsInSet){
-
         var topLevelFieldTerms = _.uniq(getUniqueMatchedTermsFromExpsInSet(
             expsInSet,
             field.field
