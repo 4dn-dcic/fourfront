@@ -549,6 +549,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
 
                 processStepInPath(analysis_steps[0]);
+                //console.log('FIRSTSTEP', analysis_steps[0])
 
                 for (var i = 0; i < 1000; i++){
 
@@ -557,7 +558,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                             if (typeof processedSteps[stepNodeID(s)] === 'undefined') return true;
                             return false;
                         });
-                        //console.log('NEXTSTEPS', nextSteps);
+                        //console.log('NEXTSTEPS', i, nextSteps);
                         if (nextSteps.length > 0) processStepInPath(nextSteps[0]);
                     } else {
                         break;

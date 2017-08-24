@@ -15,6 +15,7 @@ import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/W
 import { commonGraphPropsFromProps, graphBodyMixin, uiControlsMixin, doValidAnalysisStepsExist, filterOutParametersFromGraphData } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
+//import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
 
 
 
@@ -72,6 +73,7 @@ export function filterOutReferenceFilesFromGraphData(graphData){
 
 
 
+
 export default class FileView extends ItemBaseView {
 
     static doesGraphExist(context){
@@ -83,7 +85,9 @@ export default class FileView extends ItemBaseView {
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
-        this.state = { 'mounted' : false, 'steps' : null };
+        //var steps = dummy_analysis_steps;
+        var steps = null;
+        this.state = { 'mounted' : false, 'steps' : steps };
     }
 
     componentDidMount(){
@@ -95,6 +99,7 @@ export default class FileView extends ItemBaseView {
 
     loadGraphSteps(){
         if (typeof this.props.context.uuid !== 'string') return;
+        if (Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
 
         var callback = function(r){
             if (Array.isArray(r) && r.length > 0){
@@ -110,16 +115,19 @@ export default class FileView extends ItemBaseView {
     getTabViewContents(){
 
         var initTabs = [];
+        var context = this.props.context;
 
-        initTabs.push(FileViewOverview.getTabObject(this.props.context, this.props.schemas));
+        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas));
+        
+        var steps = this.state.steps;
 
-        if (FileView.doesGraphExist(this.props.context)){
+        if (FileView.doesGraphExist(context)){
             var iconClass = "icon icon-fw icon-";
             var tooltip = null;
-            if (this.state.steps === null){
+            if (steps === null){
                 iconClass += 'circle-o-notch icon-spin';
                 tooltip = "Graph is loading";
-            } else if (!Array.isArray(this.state.steps) || this.state.steps.length === 0) {
+            } else if (!Array.isArray(steps) || steps.length === 0) {
                 iconClass += 'times';
                 tooltip = "Graph currently not available for this file. Please check back later.";
             } else {
@@ -128,8 +136,8 @@ export default class FileView extends ItemBaseView {
             initTabs.push({
                 tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
                 key : 'graph',
-                disabled : !Array.isArray(this.state.steps) || this.state.steps.length === 0,
-                content : <GraphSection {...this.props} steps={this.state.steps} mounted={this.state.mounted} key={"graph-for-" + this.props.context.uuid} />
+                disabled : !Array.isArray(steps) || steps.length === 0,
+                content : <GraphSection {...this.props} steps={steps} mounted={this.state.mounted} key={"graph-for-" + this.props.context.uuid} />
             });
         }
 
@@ -170,59 +178,6 @@ class FileViewOverview extends React.Component {
         }).isRequired
     }
 
-    constructor(props){
-        super(props);
-        //this.componentDidMount = this.componentDidMount.bind(this);
-        //this.componentWillUnmount = this.componentWillUnmount.bind(this);
-
-        // Get ExpSets from this file, check if are complete (have bio_rep_no, etc.), and use if so; otherwise, save 'this.experiment_set_uris' to be picked up by componentDidMount and fetched.
-        //var experiment_sets_obj = expFxn.experimentSetsFromFile(props.context);
-        //var experiment_sets = _.values(expFxn.experimentSetsFromFile(props.context));
-        //var experiment_sets_for_state = null;
-
-        //if (Array.isArray(experiment_sets) && experiment_sets.length > 0 && FileViewOverview.isExperimentSetCompleteEnough(experiment_sets[0])){
-        //    experiment_sets_for_state = experiment_sets;
-        //} else {
-        //    this.experiment_set_uris = _.keys(experiment_sets_obj);
-        //}
-
-        //this.state = {
-        //    'experiment_sets' : experiment_sets_for_state,
-        //    'current_es_index' : false
-        //};
-    }
-    /*
-    componentDidMount(){
-        var newState = {};
-
-        var onFinishLoad = null;
-
-        if (Array.isArray(this.experiment_set_uris) && this.experiment_set_uris.length > 0){
-
-            onFinishLoad = _.after(this.experiment_set_uris.length, function(){
-                this.setState({ 'loading' : false });
-            }.bind(this));
-
-            newState.loading = true;
-            _.forEach(this.experiment_set_uris, (uri)=>{
-                ajax.load(uri, (r)=>{
-                    var currentExpSets = (this.state.experiment_sets || []).slice(0);
-                    currentExpSets.push(r);
-                    this.setState({ experiment_sets : currentExpSets });
-                    onFinishLoad();
-                }, 'GET', onFinishLoad);
-            });
-        }
-        
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
-    }
-
-    componentWillUnmount(){
-        delete this.experiment_set_uris;
-    }
-    */
     render(){
         var { context } = this.props;
 
@@ -295,7 +250,7 @@ class OverViewBody extends React.Component {
                             <div className="inner">
                                 <object.TooltipInfoIconContainerAuto result={file} property={'file_classification'} tips={tips} elementType="h5" fallbackTitle="General Classification" />
                                 <div>
-                                    { Schemas.Term.toName('file_classification', file.file_classification) }
+                                    { file.file_classification ? Schemas.Term.toName('file_classification', file.file_classification) : 'Unknown/Other' }
                                 </div>
                             </div>
                         </div>
@@ -359,6 +314,8 @@ class GraphSection extends React.Component {
     }
 
     commonGraphProps(){
+
+        var steps = this.props.steps;
         
         var graphData = parseAnalysisSteps(this.props.steps);
         if (!this.state.showParameters){

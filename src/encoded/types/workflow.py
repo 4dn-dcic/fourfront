@@ -193,6 +193,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
         for in_file in in_files:
             in_file_uuid = in_file.get('uuid')
             if uuidCacheTracedHistory.get(in_file_uuid):
+                sources = sources + uuidCacheTracedHistory[in_file_uuid]
                 continue
 
             input_file_model = get_model_by_uuid(in_file_uuid)
@@ -218,23 +219,25 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             workflow_run_model = get_model_by_uuid(workflow_run_uuid)
             if not workflow_run_model or not hasattr(workflow_run_model, 'source'):
                 continue
+            sources_for_in_file = []
             for out_file in workflow_run_model.source.get('object', {}).get('output_files', []):
-                out_file_uuid = out_file.get('value', {})
-                if out_file_uuid == in_file.get('@id', 'b'):
+                out_file_atid = out_file.get('value', {})
+                if out_file_atid == in_file.get('@id', 'b'):
                     step_name = workflow_run_model.source.get('object', {}).get('display_title')
                     step_uuid = workflow_run_uuid
                     if step_uuid:
                         step_uuids.add(step_uuid)
-                    sources.append({
+                    sources_for_in_file.append({
                         "name" : out_file.get('workflow_argument_name'),
                         "step" : step_name,
                         "type" : "Output file",
-                        "for_file" : out_file_uuid
+                        "for_file" : in_file_uuid
                     })
-            uuidCacheTracedHistory[in_file_uuid] = True
+            uuidCacheTracedHistory[in_file_uuid] = sources_for_in_file
+            sources = sources + sources_for_in_file
 
         if len(sources) == 0:
-            for_files = in_files
+            for_files = [ f['uuid'] for f in in_files ]
             if len(for_files) == 1:
                 for_files = for_files[0]
             sources = [{
