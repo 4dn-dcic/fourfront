@@ -54,14 +54,21 @@ class Biosource(Item):
                            'induced pluripotent stem cell line', 'stem cell']
         if biosource_type == "tissue":
             if tissue:
-                return request.embed(tissue, '@@object').get('term_name')
+                tissue_props = request.embed(tissue, '@@object')
+                if tissue_props.get('term_name') is not None:
+                    return tissue_props.get('term_name')
+                else:
+                    return biosource_type
         elif biosource_type in cell_line_types:
             if cell_line:
-                cell_line_name = request.embed(cell_line, '@@object').get('term_name')
-                if cell_line_tier:
-                    if cell_line_tier != 'Unclassified':
-                        return cell_line_name + ' (' + cell_line_tier + ')'
-                return cell_line_name
+                cell_line_props = request.embed(cell_line, '@@object')
+                if cell_line_props.get('term_name') is not None:
+                    cell_line_name = cell_line_props.get('term_name')
+                    if cell_line_tier:
+                        if cell_line_tier != 'Unclassified':
+                            return cell_line_name + ' (' + cell_line_tier + ')'
+                    return cell_line_name
+            return biosource_type
         elif biosource_type == "whole organisms":
             if individual:
                 individual_props = request.embed(individual, '@@object')
