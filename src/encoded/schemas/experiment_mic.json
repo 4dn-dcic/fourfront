@@ -75,6 +75,16 @@
                     }
                 }
             }
+        },
+        "plate_id": {
+            "title": "Plate ID",
+            "description": "Plate ID for multi-well plate experiments",
+            "type": "string"
+        },
+        "plate_well_id": {
+            "title": "Well Position",
+            "description": "Well position for experiments on multi-well plates, eg H8, B18",
+            "type": "string"
         }
     },
     "facets": {
