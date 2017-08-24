@@ -45,7 +45,7 @@ def snapshot_db(db_identifier, snapshot_name):
         print("waiting for target database to delete")
         waiter = client.get_watier('db_instance_deleted')
         waiter.wait(DBInstanceIdentifier=snapshot_name)
-    except ClientError as e:
+    except ClientError:
         print("looks like target db doesn't exists no need to drop it")
 
     print("waiting for snapshot to create")
@@ -291,6 +291,11 @@ def main():
         print("### only copy contents of s3")
         db_endpoint = snapshot_db(args.old, args.new)
         print(db_endpoint)
+        return
+
+    if args.onlydb:
+        print("### copy database")
+        db_endpoint = snapshot_db(args.old, args.new)
         return
 
     print("### start build ES service")
