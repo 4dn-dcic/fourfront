@@ -245,8 +245,8 @@ class ExperimentCaptureC(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        return self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
+    def display_title(self, request, **kwargs):
+        return self.experiment_summary(request, **kwargs)
 
 
 @collection(
