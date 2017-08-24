@@ -27,18 +27,42 @@ class Experiment(Item):
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
-    embedded = ["protocol.*",
-                "protocol_variation.*",
-                "lab.*",
-                "award.*",
-                "experiment_sets.*",
+    embedded = ["award.project",
+                "lab.city",
+                "lab.state",
+                "lab.country",
+                "lab.postal_code",
+                "lab.city",
+                "lab.title",
+
+                "experiment_sets.experimentset_type",
+                "experiment_sets.accession",
+
                 "produced_in_pub.*",
                 "publications_of_exp.*",
-                "biosample.*",
-                "biosample.biosource.*",
-                "biosample.modifications.*",
-                "biosample.treatments.*",
-                "biosample.biosource.individual.organism.*",
+
+                "biosample.accession",
+                "biosample.modifications_summary",
+                "biosample.treatments_summary",
+                "biosample.biosource_summary",
+                "biosample.biosource.biosource_type",
+                "biosample.biosource.cell_line.slim_terms",
+                "biosample.biosource.cell_line.synonyms",
+                "biosample.biosource.tissue.slim_terms",
+                "biosample.biosource.tissue.synonyms",
+                "biosample.biosource.individual.organism.name",
+                'biosample.modifications.modification_type',
+                'biosample.treatments.treatment_type',
+
+                "files.href",
+                "files.accession",
+                "files.uuid",
+                "files.file_size",
+                "files.upload_key",
+                "files.file_format",
+                "files.file_classification",
+                "files.paired_end",
+
                 "processed_files.href",
                 "processed_files.accession",
                 "processed_files.uuid",
@@ -175,7 +199,7 @@ class ExperimentHiC(Experiment):
 
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme.*", "submitted_by.*"]
+    embedded = Experiment.embedded + ["digestion_enzyme.name"]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -215,11 +239,9 @@ class ExperimentCaptureC(Experiment):
     """The experiment class for Capture Hi-C experiments."""
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme.*",
-                                      "submitted_by.*",
-                                      "targeted_regions.*",
-                                      "targeted_regions.target.*",
-                                      "targeted_regions.oligo_file.*"]
+    embedded = Experiment.embedded + ["digestion_enzyme.name",
+                                      "targeted_regions.target.target_summary",
+                                      "targeted_regions.oligo_file.href"]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -260,7 +282,7 @@ class ExperimentRepliseq(Experiment):
     """The experiment class for Repliseq experiments."""
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
-    embedded = Experiment.embedded + ["submitted_by.*"]
+    embedded = Experiment.embedded
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -301,7 +323,7 @@ class ExperimentAtacseq(Experiment):
 
     item_type = 'experiment_atacseq'
     schema = load_schema('encoded:schemas/experiment_atacseq.json')
-    embedded = Experiment.embedded + ["submitted_by.*"]
+    embedded = Experiment.embedded
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -338,7 +360,7 @@ class ExperimentChiapet(Experiment):
 
     item_type = 'experiment_chiapet'
     schema = load_schema('encoded:schemas/experiment_chiapet.json')
-    embedded = Experiment.embedded + ["submitted_by.*"]
+    embedded = Experiment.embedded
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -381,7 +403,7 @@ class ExperimentSeq(Experiment):
 
     item_type = 'experiment_seq'
     schema = load_schema('encoded:schemas/experiment_seq.json')
-    embedded = Experiment.embedded + ["submitted_by.*"]
+    embedded = Experiment.embedded
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -423,7 +445,7 @@ class ExperimentMic(Experiment):
     """The experiment class for Microscopy experiments."""
     item_type = 'experiment_mic'
     schema = load_schema('encoded:schemas/experiment_mic.json')
-    embedded = Experiment.embedded + ["submitted_by.*"]
+    embedded = Experiment.embedded
     name_key = 'accession'
 
     @calculated_property(schema={
