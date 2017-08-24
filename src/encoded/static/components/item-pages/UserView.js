@@ -11,7 +11,7 @@ var jwt = require('jsonwebtoken');
 import { ItemStore } from './../lib/store';
 import { panel_views, content_views } from './../globals';
 var store = require('./../../store');
-import { ajax, JWT, console, DateUtility, navigate } from './../util';
+import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
 import { FormattedInfoBlock } from './components';
 import { EditableField, FieldSet } from './../forms';
 
@@ -568,12 +568,11 @@ class ProfileWorkFields extends React.Component {
         var currentAwardsList = (this.state.awards_list || []).slice(0);
         var currentAwardsListIDs = currentAwardsList.map((awd) => {
             if (typeof awd === 'string') return awd;
-            if (typeof awd['@id'] === 'string') return awd['@id'];
-            if (typeof awd.link_id === 'string') return awd.link_id.replace(/~/g, "/");
+            return object.atIdFromObject(awd);
         });
         var newAwards = this.getAwardsList(labDetails);
         for (var i = 0; i < newAwards.length; i++){
-            if (currentAwardsListIDs.indexOf(newAwards[i]['@id']) === -1){
+            if (currentAwardsListIDs.indexOf(object.atIdFromObject(newAwards[i])) === -1){
                 currentAwardsList.push(newAwards[i]);
             }
         }
@@ -588,6 +587,9 @@ class ProfileWorkFields extends React.Component {
         if (user.submits_for && user.submits_for.length > 0){
             var submits_for = user.submits_for;
         }
+
+        console.log(this.state.awards_list);
+
         // THESE FIELDS ARE NOT EDITABLE.
         // To be modified by admins, potentially w/ exception of 'Primary Lab' (e.g. select from submits_for list).
         return (

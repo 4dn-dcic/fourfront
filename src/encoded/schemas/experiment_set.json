@@ -85,7 +85,7 @@
         "experiments_in_set.experiment_type": {
             "title": "Experiment Type"
         },
-        "experiments_in_set.award.project": {
+        "award.project": {
             "title": "Project"
         },
         "experiments_in_set.biosample.biosource.individual.organism.name": {
@@ -100,13 +100,13 @@
         "experiments_in_set.digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "experiments_in_set.biosample.modifications_summary": {
+        "experiments_in_set.biosample.modifications.modification_type'": {
             "title": "Modifications"
         },
-        "experiments_in_set.biosample.treatments_summary": {
+        "experiments_in_set.biosample.treatments.treatment_type": {
             "title": "Treatments"
         },
-        "experiments_in_set.lab.title": {
+        "lab.title": {
             "title": "Lab"
         },
         "publications_of_set.display_title": {

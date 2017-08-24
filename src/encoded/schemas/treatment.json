@@ -12,6 +12,16 @@
             "title": "Description",
             "description": "A brief plain text description of the treatment.",
             "type": "string"
+        },
+        "treatment_type": {
+            "title": "Treatment Type",
+            "description": "The method used to make the treatment.",
+            "type": "string",
+            "enum" : [
+              "Chemical",
+              "RNAi",
+              "Other"
+            ]
         }
     }
 }

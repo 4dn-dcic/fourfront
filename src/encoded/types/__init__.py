@@ -121,7 +121,7 @@ class Document(ItemWithAttachment, Item):
 
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
-    embedded = ['lab.*', 'award.*', 'submitted_by.*']
+    embedded = []
 
     def display_title(self):
         if self.properties.get('attachment'):
@@ -143,7 +143,7 @@ class Enzyme(Item):
     item_type = 'enzyme'
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
-    embedded = ['enzyme_source.*']
+    embedded = ['enzyme_source.title']
 
 
 @collection(
