@@ -166,17 +166,19 @@ def test_experiment_set_default_embedded_list(registry):
     # create experimentHiC obj; _update (and by extension, add_default_embeds)
     # are called automatically
     test_exp = ExperimentHiC.create(registry, None, exp_data)
+    #call reify embedded property (defined in snovault/resources.py)
     embedded = test_exp.embedded
-    experiment_set_emb = 'experiment_sets.*' in embedded
-    assert 'experiment_sets.accession' in embedded
-    if 'references.*' not in embedded:
-        assert 'references.link_id' in embedded
-        assert 'references.display_title' in embedded
-    if not experiment_set_emb:
-        assert 'experiment_sets.link_id' in embedded
-        assert 'experiment_sets.display_title' in embedded
-    else:
-        assert 'experiment_sets.*' in embedded
+    embedded_list = test_exp.embedded_list
+    type_info_embedded = registry[TYPES]['experiment_hi_c'].embedded_list
+    assert type_info_embedded == embedded_list
+    if 'produced_in_pub.*' in embedded_list:
+        assert 'produced_in_pub.link_id' in embedded
+        assert 'produced_in_pub.display_title' in embedded
+        assert 'produced_in_pub.display_title' in embedded
+    assert 'experiment_sets.accession' in embedded_list
+    assert 'experiment_sets.link_id' in embedded
+    assert 'experiment_sets.display_title' in embedded
+    assert 'experiment_sets.uuid' in embedded
 
 
 # tests for the experiment_sets calculated properties

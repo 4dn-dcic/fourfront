@@ -271,7 +271,7 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     test_type = 'biosample'
     type_info = registry[TYPES].by_item_type[test_type]
     schema = type_info.schema
-    embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded, schema)
+    embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded_list, schema)
     # we're looking for this specific facet, which is not in the schema
     assert 'treatments.rnai_vendor.display_title' in embeds
     res = testapp.get('/search/?type=Biosample&treatments.rnai_vendor.display_title=Worthington+Biochemical').json
