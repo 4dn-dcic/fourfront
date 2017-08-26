@@ -23,7 +23,7 @@ class Treatment(Item):
 
     base_types = ['Treatment'] + Item.base_types
     schema = load_schema('encoded:schemas/treatment.json')
-    embedded = []
+    embedded_list = []
 
     @calculated_property(schema={
         "title": "Treatment_type",
@@ -49,7 +49,7 @@ class TreatmentChemical(Treatment):
 
     item_type = 'treatment_chemical'
     schema = load_schema('encoded:schemas/treatment_chemical.json')
-    embedded = Treatment.embedded
+    embedded_list = Treatment.embedded_list
 
 
 @collection(
@@ -63,6 +63,6 @@ class TreatmentRnai(Treatment):
 
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
-    embedded = ['rnai_vendor.name',
+    embedded_list = ['rnai_vendor.name',
                 'rnai_constructs.designed_to_target',
                 'target.target_summary']

@@ -27,7 +27,7 @@ class Experiment(Item):
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
-    embedded = ["award.project",
+    embedded_list = ["award.project",
                 "lab.city",
                 "lab.state",
                 "lab.country",
@@ -199,7 +199,7 @@ class ExperimentHiC(Experiment):
 
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme.name"]
+    embedded_list = Experiment.embedded_list + ["digestion_enzyme.name"]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -239,7 +239,7 @@ class ExperimentCaptureC(Experiment):
     """The experiment class for Capture Hi-C experiments."""
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme.name",
+    embedded_list = Experiment.embedded_list + ["digestion_enzyme.name",
                                       "targeted_regions.target.target_summary",
                                       "targeted_regions.oligo_file.href"]
     name_key = 'accession'
@@ -282,7 +282,7 @@ class ExperimentRepliseq(Experiment):
     """The experiment class for Repliseq experiments."""
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -323,7 +323,7 @@ class ExperimentAtacseq(Experiment):
 
     item_type = 'experiment_atacseq'
     schema = load_schema('encoded:schemas/experiment_atacseq.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -360,7 +360,7 @@ class ExperimentChiapet(Experiment):
 
     item_type = 'experiment_chiapet'
     schema = load_schema('encoded:schemas/experiment_chiapet.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -403,7 +403,7 @@ class ExperimentSeq(Experiment):
 
     item_type = 'experiment_seq'
     schema = load_schema('encoded:schemas/experiment_seq.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -445,7 +445,7 @@ class ExperimentMic(Experiment):
     """The experiment class for Microscopy experiments."""
     item_type = 'experiment_mic'
     schema = load_schema('encoded:schemas/experiment_mic.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
