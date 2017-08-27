@@ -156,7 +156,8 @@ class GraphSection extends React.Component {
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
-            'showParameters' : false
+            'showParameters' : false,
+            'rowSpacingType' : 'stacked'
         };
     }
 
@@ -165,7 +166,8 @@ class GraphSection extends React.Component {
         return _.extend(commonGraphPropsFromProps(this.props), {
             'isNodeDisabled' : GraphSection.isNodeDisabled,
             'nodes' : mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, allFilesForWorkflowRunMappedByUUID(this.props.context) ),
-            'edges' : graphData.edges
+            'edges' : graphData.edges,
+            'rowSpacingType' : this.state.rowSpacingType
         });
     }
 

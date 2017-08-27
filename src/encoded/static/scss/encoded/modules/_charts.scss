@@ -1212,6 +1212,8 @@ $workflow-step-node-lineheight: 18px;
                                 opacity: 1;
                                 font-size: 75%;
                                 line-height: 12px;
+                                background: rgba(255,255,255,0.95);
+                                box-shadow: -1px -2px 9px 3px rgba(255,255,255,0.95);
                             }
 
                             .above-node-title {

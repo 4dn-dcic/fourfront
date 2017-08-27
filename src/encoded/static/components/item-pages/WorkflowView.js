@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { itemClass, panel_views } from './../globals';
 import _ from 'underscore';
 import { 
@@ -62,7 +63,8 @@ export function commonGraphPropsFromProps(props){
         'href'        : props.href,
         'onNodeClick' : onItemPageNodeClick,
         'detailPane'  : <WorkflowDetailPane schemas={props.schemas} context={props.context} />,
-        'nodeElement' : <WorkflowNodeElement schemas={props.schemas} />
+        'nodeElement' : <WorkflowNodeElement schemas={props.schemas} />,
+        'rowSpacingType' : 'wide'
     };
 }
 
@@ -182,6 +184,7 @@ export const onShowParametersCheckboxChangeMixin = _.throttle(function(){
 }, 500, { trailing : false });
 
 export function uiControlsMixin(){
+    console.log('STATE', this.state);
     return (
         <div className="pull-right workflow-view-controls-container">
             <div className="inline-block show-params-checkbox-container">
@@ -191,6 +194,13 @@ export function uiControlsMixin(){
             </div>
             <div className="inline-block">
                 { dropDownMenuMixin.call(this) }
+            </div>
+            {' '}
+            <div className="inline-block">
+                <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
+                    if (eventKey === this.state.rowSpacingType) return;
+                    this.setState({ rowSpacingType : eventKey });
+                }}/>
             </div>
         </div>
     );
@@ -202,6 +212,60 @@ export function graphBodyMixin(){
     if (this.state.showChart === 'basic') return this.basicGraph();
     return null;
 }
+
+
+
+export class RowSpacingTypeDropdown extends React.Component {
+    
+    static propTypes = {
+        'onSelect' : PropTypes.func.isRequired,
+        'currentKey' : Graph.propTypes.rowSpacingType,
+    }
+
+    static rowSpacingTypeTitleMap = {
+        'stacked' : 'Stack Nodes',
+        'compact' : 'Center Nodes',
+        'wide' : 'Spread Nodes'
+    }
+
+    render(){
+
+        var currentKey = this.props.currentKey;
+
+        var stacked = (
+            <MenuItem eventKey='stacked' active={currentKey === 'stacked'}>
+                { RowSpacingTypeDropdown.rowSpacingTypeTitleMap['stacked'] }
+            </MenuItem>
+        );
+    
+        var compact = (
+            <MenuItem eventKey='compact' active={currentKey === 'compact'}>
+                { RowSpacingTypeDropdown.rowSpacingTypeTitleMap['compact'] }
+            </MenuItem>
+        );
+
+        var spread = (
+            <MenuItem eventKey='wide' active={currentKey === 'wide'}>
+                { RowSpacingTypeDropdown.rowSpacingTypeTitleMap['wide'] }
+            </MenuItem>
+        );
+    
+    
+        return (
+            <DropdownButton
+                pullRight
+                onSelect={this.props.onSelect}
+                title={RowSpacingTypeDropdown.rowSpacingTypeTitleMap[currentKey]}
+            >
+                { stacked }{ compact }{ spread }
+            </DropdownButton>
+        );
+    }
+
+}
+
+
+
 
 class GraphSection extends React.Component {
 
@@ -223,12 +287,13 @@ class GraphSection extends React.Component {
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : GraphSection.analysisStepsSet(props.context) ? 'detail' : 'basic',
-            'showParameters' : false
+            'showParameters' : false,
+            'rowSpacingType' : 'wide'
         };
     }
 
     commonGraphProps(){
-        return _.extend(commonGraphPropsFromProps(this.props), this.parseAnalysisSteps());
+        return _.extend(commonGraphPropsFromProps(this.props), this.parseAnalysisSteps(), { 'rowSpacingType' : this.state.rowSpacingType });
     }
 
     basicGraph(){

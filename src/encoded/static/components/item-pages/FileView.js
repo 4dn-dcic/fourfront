@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Checkbox } from 'react-bootstrap';
+import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
 import { object, expFxn, ajax, Schemas, layout, fileUtil } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded } from './components';
@@ -12,10 +12,10 @@ import ExperimentsTable from './../experiments-table';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { commonGraphPropsFromProps, graphBodyMixin, uiControlsMixin, doValidAnalysisStepsExist, filterOutParametersFromGraphData } from './WorkflowView';
+import { commonGraphPropsFromProps, doValidAnalysisStepsExist, filterOutParametersFromGraphData, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
-//import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
+import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
 
 
 
@@ -85,8 +85,8 @@ export default class FileView extends ItemBaseView {
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
-        //var steps = dummy_analysis_steps;
-        var steps = null;
+        var steps = dummy_analysis_steps;
+        //var steps = null;
         this.state = { 'mounted' : false, 'steps' : steps };
     }
 
@@ -302,14 +302,14 @@ class GraphSection extends React.Component {
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
-        this.body = graphBodyMixin.bind(this);
         this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
         this.onToggleReferenceFiles = this.onToggleReferenceFiles.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
             'showIndirectFiles' : false,
-            'showReferenceFiles' : false
+            'showReferenceFiles' : false,
+            'rowSpacingType' : 'stacked'
         };
     }
 
@@ -337,7 +337,8 @@ class GraphSection extends React.Component {
             'isNodeDisabled' : GraphSection.isNodeDisabled,
             'nodes' : nodes,
             'edges' : graphData.edges,
-            'columnSpacing' : graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90
+            'columnSpacing' : graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
+            'rowSpacingType' : this.state.rowSpacingType
         });
     }
 
@@ -358,11 +359,6 @@ class GraphSection extends React.Component {
         );
     }
 
-    static keyTitleMap = {
-        'detail' : 'Analysis Steps',
-        'basic' : 'Basic Inputs & Outputs',
-    }
-
     render(){
 
         return (
@@ -380,6 +376,12 @@ class GraphSection extends React.Component {
                                 Show Auxiliary Files
                             </Checkbox>
                         </div>
+                        <div className="inline-block">
+                            <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
+                                if (eventKey === this.state.rowSpacingType) return;
+                                this.setState({ rowSpacingType : eventKey });
+                            }}/>
+                        </div>
                     </div>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
@@ -390,6 +392,4 @@ class GraphSection extends React.Component {
     }
 
 }
-
-
 

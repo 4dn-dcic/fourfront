@@ -73,7 +73,7 @@ export default class Graph extends React.Component {
             'capacity'          : PropTypes.string
         })).isRequired,
         'nodeTitle'         : PropTypes.func,
-        'rowSpacingType'    : PropTypes.oneOf([ 'compact', 'wide' ])
+        'rowSpacingType'    : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ])
     }
 
     static defaultProps = {
@@ -228,22 +228,41 @@ export default class Graph extends React.Component {
             });
             */
 
-            if (countInCol === 1){
-                columnGroup[1][0].y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
-                columnGroup[1][0].nodesInColumn = countInCol;
-            } else if (this.props.rowSpacingType === 'compact') {
-                var padding = Math.max(0, contentHeight - ((countInCol - 1) * this.props.rowSpacing)) / 2;
-                d3.range(countInCol).forEach((i) => {
-                    nodesInColumn[i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
-                    nodesInColumn[i].nodesInColumn = countInCol;
-                });
-            } else {
-                _.forEach(d3.range(0, contentHeight, contentHeight / (countInCol - 1) ).concat([contentHeight]), (num, idx)=>{
-                    var nodeInCol = nodesInColumn[idx];
+            var centerNode = function(n){
+                n.y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
+                n.nodesInColumn = countInCol;
+            }.bind(this);
+
+            if (this.props.rowSpacingType === 'compact') {
+                if (countInCol === 1) centerNode(nodesInColumn[0]);
+                else {
+                    var padding = Math.max(0, contentHeight - ((countInCol - 1) * this.props.rowSpacing)) / 2;
+                    d3.range(countInCol).forEach((i) => {
+                        nodesInColumn[i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
+                        nodesInColumn[i].nodesInColumn = countInCol;
+                    });
+                }
+            } else if (this.props.rowSpacingType === 'stacked') {
+
+                _.forEach(nodesInColumn, (nodeInCol, idx)=>{
                     if (!nodeInCol) return;
-                    nodeInCol.y = num + (this.props.innerMargin.top + verticalMargin);
+                    nodeInCol.y = this.props.rowSpacing * idx + (this.props.innerMargin.top + verticalMargin);//num + (this.props.innerMargin.top + verticalMargin);
                     nodeInCol.nodesInColumn = countInCol;
                 });
+
+            } else if (this.props.rowSpacingType === 'wide') {
+                if (countInCol === 1) centerNode(nodesInColumn[0]);
+                else {
+                    _.forEach(d3.range(0, contentHeight, contentHeight / (countInCol - 1) ).concat([contentHeight]), (num, idx)=>{
+                        var nodeInCol = nodesInColumn[idx];
+                        if (!nodeInCol) return;
+                        nodeInCol.y = num + (this.props.innerMargin.top + verticalMargin);
+                        nodeInCol.nodesInColumn = countInCol;
+                    });
+                }
+            } else {
+                console.error("Prop 'rowSpacingType' not valid. Must be ", Graph.propTypes.rowSpacingType);
+                throw new Error("Prop 'rowSpacingType' not valid.");
             }
         });
 
@@ -308,8 +327,8 @@ export default class Graph extends React.Component {
                             onNodeClick={this.props.onNodeClick}
                         >
                             <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer edgeElement={this.props.edgeElement} isNodeDisabled={this.props.isNodeDisabled} edgeStyle={this.props.edgeStyle} />
-                                <NodesLayer nodeElement={this.props.nodeElement} isNodeDisabled={this.props.isNodeDisabled} title={this.props.nodeTitle} />
+                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeDisabled', 'edgeStyle', 'rowSpacing')} />
+                                <NodesLayer {..._.pick(this.props, 'nodeElement', 'isNodeDisabled')} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }
                         </StateContainer>

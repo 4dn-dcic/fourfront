@@ -168,23 +168,74 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      * @returns {Object[]} List of expanded I/O nodes.
      */
     function expandIONodes(stepInput, column, inputOfNode, inputOrOutput, readOnly){
+
         var nodeGenerateFxn = inputOrOutput === 'output' ? generateOutputNode : generateInputNode;
 
         if (typeof stepInput.run_data === 'undefined' || !Array.isArray(stepInput.run_data.file) || stepInput.run_data.file.length === 0) { // Not valid WorkflowRun
             return [nodeGenerateFxn(stepInput, column, inputOfNode, readOnly)];
         }
-        
-        return _.map(stepInput.run_data.file, function(file, idx){
-            var stepInputAdjusted = _.extend({}, stepInput, {
-                'name' : stepInput.name,
-                'id' : stepInput.name + '.' + (file.accession || file.uuid || idx),
-                'run_data' : _.extend({}, stepInput.run_data, {
-                    'file' : file,
-                    'meta' : (stepInput.run_data.meta && stepInput.run_data.meta[idx]) || null
-                })
+
+        function expandFilesToIndividualNodes(files){
+            return _.map(files, function(file, idx){
+                var stepInputAdjusted = _.extend({}, stepInput, {
+                    'name' : stepInput.name,
+                    'id' : stepInput.name + '.' + (file.accession || file.uuid || idx),
+                    'run_data' : _.extend({}, stepInput.run_data, {
+                        'file' : file,
+                        'meta' : (stepInput.run_data.meta && stepInput.run_data.meta[idx]) || null
+                    })
+                });
+                return nodeGenerateFxn(stepInputAdjusted, column, inputOfNode, readOnly);
             });
-            return nodeGenerateFxn(stepInputAdjusted, column, inputOfNode, readOnly);
+        }
+
+        var files = stepInput.run_data.file;
+        var groupSources = _.filter(stepInput.source || [], function(s){
+            return (s.type === 'Output File Group' && typeof s.for_file === 'string');
         });
+        if (groupSources.length > 0){
+            var groups = _.reduce(groupSources, function(m,v){
+                if (typeof m[v.grouped_by] === 'undefined'){
+                    m[v.grouped_by] = {};
+                }
+                if (typeof m[v.grouped_by][v[v.grouped_by]] === 'undefined'){
+                    m[v.grouped_by][v[v.grouped_by]] = new Set();
+                }
+                m[v.grouped_by][v[v.grouped_by]].add(v.for_file) ;
+                return m;
+            }, {});
+
+            var groupKeys = _.keys(groups);
+            var filesNotInGroups = [];
+            var filesByGroup = _.reduce(stepInput.run_data.file, function(m, file, idx){
+                var incl = false;
+                _.forEach(groupKeys, function(grouping){
+                    _.forEach(_.keys(groups[grouping]), function(group){
+                        if (groups[grouping][group].has(file.uuid || file)){
+                            if (typeof m[grouping] === 'undefined'){
+                                m[grouping] = {};
+                            }
+                            if (typeof m[grouping][group] === 'undefined'){
+                                m[grouping][group] = new Set();
+                            }
+                            m[grouping][group].add(file);
+                            incl = true;
+                        }
+                    });
+                    
+                });
+                if (!incl) {
+                    filesNotInGroups.push(file);
+                }
+                return m;
+
+            }, {}); // Returns e.g. { 'workflow' : { '/someWorkflow/@id/' : Set([ { ..file.. },{ ..file.. },{ ..file.. }  ]) } }
+
+            // return expandFilesToIndividualNodes(files).concat(....TODO....)
+        }
+        
+        return expandFilesToIndividualNodes(files);
+        
     }
 
     function ioNodeNameCombo(nodeAsInputNode, nodeAsOutputNode){

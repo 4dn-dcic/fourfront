@@ -65,7 +65,9 @@ export default class Edge extends React.Component {
             y : edge.target.y
         };
 
+        var pathAscend;
         var path;
+        var controlPoints;
         if (edgeStyle === 'straight'){
             path = d3.path();
             path.moveTo(startPt.x, startPt.y);
@@ -113,18 +115,56 @@ export default class Edge extends React.Component {
             return path.toString();
         }
         if (edgeStyle === 'bezier'){
-            var pathAscend = endPt.y > startPt.y ? 10 : (endPt.y === startPt.y ? 0 : -10);
+            //pathAscend = endPt.y > startPt.y ? 10 : (endPt.y === startPt.y ? 0 : -10);
             path = d3.path();
             path.moveTo(startPt.x, startPt.y);
             path.lineTo(
                 startPt.x + 3,
                 startPt.y
             );
+            controlPoints = [
+                {'x' : startPt.x + (Math.abs(endPt.x - startPt.x) * 0.5),   'y': startPt.y},
+                {'x' : endPt.x - (Math.abs(endPt.x - startPt.x) * 0.8),     'y': endPt.y}
+            ];
+            if (startPt.x > endPt.x){
+                // Our input edge appears AFTER the target.
+                //var dif = Math.min(1, 5 / Math.max(1, Math.abs(endPt.y - startPt.y) )) * (this.props.rowSpacing || 75);
+                var dif = Math.max(this.props.rowSpacing || 75);
+                controlPoints[0].y += dif * (endPt.y >= startPt.y ? 1 : -1);
+                controlPoints[1].y += dif * (endPt.y - startPt.y > this.props.rowSpacing ? -1 : 1);
+                controlPoints[1].x = endPt.x - (Math.abs(endPt.x - startPt.x) * .5);
+
+            }
             path.bezierCurveTo(
-                startPt.x + ((endPt.x - startPt.x) * 0.5),    // cp1x
-                startPt.y,// - pathAscend,                                  // cp1y
-                endPt.x - ((endPt.x - startPt.x) * 0.8),    // cp2x
-                endPt.y,// + pathAscend,                                    // cp2y
+                controlPoints[0].x,
+                controlPoints[0].y,// - pathAscend,
+                controlPoints[1].x,
+                controlPoints[1].y,// + pathAscend,
+                endPt.x - 5, endPt.y
+            );
+            path.lineTo(
+                endPt.x,
+                endPt.y
+            );
+            return path.toString();
+        }
+        if (edgeStyle === 'bezier-old'){
+            //pathAscend = endPt.y > startPt.y ? 10 : (endPt.y === startPt.y ? 0 : -10);
+            path = d3.path();
+            path.moveTo(startPt.x, startPt.y);
+            path.lineTo(
+                startPt.x + 3,
+                startPt.y
+            );
+            controlPoints = [
+                {'x' : startPt.x + ((endPt.x - startPt.x) * 0.5),   'y': startPt.y},
+                {'x' : endPt.x - ((endPt.x - startPt.x) * 0.8),     'y': endPt.y}
+            ];
+            path.bezierCurveTo(
+                controlPoints[0].x,
+                controlPoints[0].y,// - pathAscend,
+                controlPoints[1].x,
+                controlPoints[1].y,// + pathAscend,
                 endPt.x - 5, endPt.y
             );
             path.lineTo(

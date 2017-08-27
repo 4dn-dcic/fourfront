@@ -148,7 +148,8 @@ def get_unique_key_from_at_id(at_id):
 
 def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options={
     'max_depth_history' : 6,
-    'max_depth_future' : 6
+    'max_depth_future' : 6,
+    "group_similar_workflow_runs" : False
 }):
 
     #pr = cProfile.Profile()
@@ -187,9 +188,60 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
                     files_by_argument_name[arg_name].append(f)
         return files_by_argument_name
 
+    def group_workflow_runs_by_workflow():
+        pass
+
+    def filter_workflow_runs(workflow_run_tuples):
+        if len(workflow_run_tuples) < 2:
+            return (workflow_run_tuples, [])
+        filtered_tuples = []
+        filtered_out_tuples = []
+        tuples_by_workflow = {}
+        for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in workflow_run_tuples:
+            workflow_atid = workflow_run_model_obj.get('workflow')
+            if not tuples_by_workflow.get(workflow_atid):
+                tuples_by_workflow[workflow_atid] = []
+            tuples_by_workflow[workflow_atid].append((workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file))
+
+        def get_date_created_from_tuple(wfr_tuple):
+            workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file = wfr_tuple
+            return workflow_run_model_obj.get('date_created')
+
+        for workflow_atid, wfr_tuples_for_wf in tuples_by_workflow.items():
+            # Get most recent workflow
+            sorted_wfr_tuples = sorted(wfr_tuples_for_wf, key=get_date_created_from_tuple)
+            filtered_tuples.append(sorted_wfr_tuples[0])
+            filtered_out_tuples = filtered_out_tuples + sorted_wfr_tuples[1:]
+
+
+        return (filtered_tuples, filtered_out_tuples)
+
+
     def generate_sources_for_input(in_files, workflow_argument_name, depth = 0):
-        sources = []
+
+        sources = [] # Our output
         step_uuids = set()
+
+        def try_match_input_with_workflow_run_output_to_generate_source(workflow_run_model_obj, workflow_run_uuid, in_file, in_file_uuid):
+            sources_for_in_file = [] # We only are looking for 1 source, but might re-use for trace_future later
+            for out_file in workflow_run_model_obj.get('output_files', []):
+                out_file_atid = out_file.get('value', {})
+                if out_file_atid == in_file.get('@id', 'b'):
+                    step_name = workflow_run_model_obj.get('display_title')
+                    step_uuid = workflow_run_uuid
+                    if step_uuid:
+                        step_uuids.add(step_uuid)
+                    sources_for_in_file.append({
+                        "name" : out_file.get('workflow_argument_name'),
+                        "step" : step_name,
+                        "type" : "Output file",
+                        "for_file" : in_file_uuid
+                    })
+            return sources_for_in_file
+
+        # Gather all workflow_runs out of which our input files (1 run per file) come from
+        all_workflow_runs = []
+
         for in_file in in_files:
             in_file_uuid = in_file.get('uuid')
             if uuidCacheTracedHistory.get(in_file_uuid):
@@ -213,28 +265,45 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
                 continue
             # There should only ever be one 'workflow_run_outputs' at most, or versions of same one (grab most recent).
             last_workflow_run_output_of = output_of_workflow_runs[len(output_of_workflow_runs) - 1]
-            workflow_run_uuid = get_unique_key_from_at_id(last_workflow_run_output_of) #workflow_run_uuid_matched.group(0)
+            workflow_run_uuid = get_unique_key_from_at_id(last_workflow_run_output_of)
             if not workflow_run_uuid or uuidCacheTracedHistory.get(workflow_run_uuid):
                 continue
             workflow_run_model = get_model_by_uuid(workflow_run_uuid)
             if not workflow_run_model or not hasattr(workflow_run_model, 'source'):
                 continue
-            sources_for_in_file = []
-            for out_file in workflow_run_model.source.get('object', {}).get('output_files', []):
-                out_file_atid = out_file.get('value', {})
-                if out_file_atid == in_file.get('@id', 'b'):
-                    step_name = workflow_run_model.source.get('object', {}).get('display_title')
-                    step_uuid = workflow_run_uuid
-                    if step_uuid:
-                        step_uuids.add(step_uuid)
-                    sources_for_in_file.append({
-                        "name" : out_file.get('workflow_argument_name'),
-                        "step" : step_name,
-                        "type" : "Output file",
-                        "for_file" : in_file_uuid
-                    })
-            uuidCacheTracedHistory[in_file_uuid] = sources_for_in_file
-            sources = sources + sources_for_in_file
+            workflow_run_model_obj = workflow_run_model.source.get('object', {})
+            all_workflow_runs.append( (workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file) )
+
+        # Filter WFRs by WF down to most recent WFR - working, but not enabled as no UI for it yet.
+        if options.get('group_similar_workflow_runs'):
+
+            filtered_in_workflow_runs, filtered_out_workflow_runs = filter_workflow_runs(all_workflow_runs)
+
+            for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in filtered_in_workflow_runs:
+                sources_for_in_file = try_match_input_with_workflow_run_output_to_generate_source(workflow_run_model_obj, workflow_run_uuid, in_file, in_file_uuid)
+                uuidCacheTracedHistory[in_file_uuid] = sources_for_in_file
+                sources = sources + sources_for_in_file
+
+            untraced_in_files = []
+            for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in filtered_out_workflow_runs:
+                untraced_in_files.append(in_file_uuid)
+                source_for_in_file = {
+                    "type" : "Output File Group",
+                    "for_file" : in_file_uuid,
+                    "step" : workflow_run_model_obj.get('display_title'),
+                    "grouped_by" : "workflow",
+                    "workflow" : workflow_run_model_obj.get('workflow')
+                }
+                uuidCacheTracedHistory[in_file_uuid] = source_for_in_file
+                sources.append(source_for_in_file)
+
+        else:
+
+            for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in all_workflow_runs:
+                sources_for_in_file = try_match_input_with_workflow_run_output_to_generate_source(workflow_run_model_obj, workflow_run_uuid, in_file, in_file_uuid)
+                uuidCacheTracedHistory[in_file_uuid] = sources_for_in_file
+                sources = sources + sources_for_in_file
+
 
         if len(sources) == 0:
             for_files = [ f['uuid'] for f in in_files ]
