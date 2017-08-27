@@ -12,6 +12,7 @@ import ExperimentsTable from './../experiments-table';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, filterOutParametersFromGraphData, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
@@ -378,8 +379,10 @@ class GraphSection extends React.Component {
                         </div>
                         <div className="inline-block">
                             <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
-                                if (eventKey === this.state.rowSpacingType) return;
-                                this.setState({ rowSpacingType : eventKey });
+                                requestAnimationFrame(()=>{
+                                    if (eventKey === this.state.rowSpacingType) return;
+                                    this.setState({ rowSpacingType : eventKey });
+                                });
                             }}/>
                         </div>
                     </div>

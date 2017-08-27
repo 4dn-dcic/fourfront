@@ -118,7 +118,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         nodes[i].outputOf = stepNode;
                         
                         nodes[i].format = oN.format;
-                        nodes[i].name = ioNodeNameCombo(nodes[i], oN);
+                        //nodes[i].name = oN.name || nodes[i].name; //ioNodeNameCombo(nodes[i], oN);
                         nodes[i].type = 'output';
                         if (nodes[i].meta && oN.meta && oN.meta.argument_type){
                             nodes[i].meta.argument_type = oN.meta.argument_type;
@@ -350,7 +350,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     _.extend(n, {
                         'inputOf' : inNode.inputOf,
                         'meta' : _.extend(n.meta, inNode.meta),
-                        'name' : ioNodeNameCombo(inNode, n)
+                        //'name' : n.name || inNode.name //ioNodeNameCombo(inNode, n)
                     });
                 });
             }

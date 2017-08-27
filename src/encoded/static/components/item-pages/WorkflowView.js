@@ -12,6 +12,7 @@ import {
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Schemas, isServerSide, navigate } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { requestAnimationFrame } from './../viz/utilities';
 import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 
 
@@ -104,7 +105,6 @@ export class WorkflowView extends ItemBaseView {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {
             mounted : false
@@ -169,8 +169,10 @@ export function dropDownMenuMixin(){
         <DropdownButton
             pullRight
             onSelect={(eventKey, evt)=>{
-                if (eventKey === this.state.showChart) return;
-                this.setState({ showChart : eventKey });
+                requestAnimationFrame(()=>{
+                    if (eventKey === this.state.showChart) return;
+                    this.setState({ showChart : eventKey });
+                });
             }}
             title={GraphSection.keyTitleMap[this.state.showChart]}
         >
@@ -184,7 +186,6 @@ export const onShowParametersCheckboxChangeMixin = _.throttle(function(){
 }, 500, { trailing : false });
 
 export function uiControlsMixin(){
-    console.log('STATE', this.state);
     return (
         <div className="pull-right workflow-view-controls-container">
             <div className="inline-block show-params-checkbox-container">
@@ -198,8 +199,10 @@ export function uiControlsMixin(){
             {' '}
             <div className="inline-block">
                 <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
-                    if (eventKey === this.state.rowSpacingType) return;
-                    this.setState({ rowSpacingType : eventKey });
+                    requestAnimationFrame(()=>{
+                        if (eventKey === this.state.rowSpacingType) return;
+                        this.setState({ rowSpacingType : eventKey });
+                    });
                 }}/>
             </div>
         </div>
