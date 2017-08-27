@@ -173,9 +173,10 @@ def test_experiment_set_default_embedded_list(registry):
     type_info_embedded = registry[TYPES]['experiment_hi_c'].embedded_list
     assert type_info_embedded == embedded_list
     if 'produced_in_pub.*' in embedded_list:
-        assert 'produced_in_pub.link_id' in embedded
-        assert 'produced_in_pub.display_title' in embedded
-        assert 'produced_in_pub.display_title' in embedded
+        assert 'produced_in_pub.*' in embedded
+        assert 'produced_in_pub.award.link_id' in embedded
+        assert 'produced_in_pub.award.display_title' in embedded
+        assert 'produced_in_pub.award.uuid' in embedded
     assert 'experiment_sets.accession' in embedded_list
     assert 'experiment_sets.link_id' in embedded
     assert 'experiment_sets.display_title' in embedded
