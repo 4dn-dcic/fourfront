@@ -167,34 +167,65 @@ export default class Node extends React.Component {
     }
 
     static isRelated(currentNode, selectedNode) {
+
         if (!selectedNode) return false;
+
+        if (Node.isFromSameWorkflowType(currentNode, selectedNode)) return true;
+
         if (selectedNode.name && currentNode.name) {
-            if (selectedNode.name === currentNode.name) {
+            //if (selectedNode.name === currentNode.name) {
                 // Make sure target.step == selectedNode.inputOf.name
                 var i;
-                if (currentNode.type === 'input'){
-                    if (((selectedNode.inputOf && selectedNode.inputOf.name) || 'a') === ((currentNode.inputOf && currentNode.inputOf.name) || 'b')) return true;
+                if (currentNode.type === 'input' || currentNode.type === 'input-group'){
+                    if (((selectedNode.inputOf && selectedNode.inputOf.id) || 'a') === ((currentNode.inputOf && currentNode.inputOf.id) || 'b')) return true;
                     if (selectedNode.inputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
                         for (i = 0; i < currentNode.meta.target.length; i++){
-                            if (typeof selectedNode.inputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.inputOf.name) {
+                            if (typeof selectedNode.inputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.inputOf.id) {
                                 return true;
                             }
                         }
                     }
+                    // Check related workflow
+                    
+
                 }
                 else if (currentNode.type === 'output'){
-                    if (((selectedNode.outputOf && selectedNode.outputOf.name) || 'a') === ((currentNode.outputOf && currentNode.outputOf.name) || 'b')) return true;
+                    if (((selectedNode.outputOf && selectedNode.outputOf.id) || 'a') === ((currentNode.outputOf && currentNode.outputOf.id) || 'b')) return true;
                     if (selectedNode.outputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
                         for (i = 0; i < currentNode.meta.target.length; i++){
-                            if (typeof selectedNode.outputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.outputOf.name) {
+                            if (typeof selectedNode.outputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.outputOf.id) {
                                 return true;
                             }
                         }
                     }
                 }
-            }
+            //}
         }
         return false;
+    }
+
+    static isFromSameWorkflowType(currentNode, selectedNode){
+        if (typeof currentNode.meta.workflow === 'string' && typeof selectedNode.meta.workflow === 'string' && selectedNode.meta.workflow === currentNode.meta.workflow){
+            return true;
+        }
+        if (typeof selectedNode.meta.workflow === 'string' && Array.isArray(currentNode.meta.source)){
+            if (_.any(currentNode.meta.source, function(s){ return typeof s.workflow === 'string' && s.workflow === selectedNode.meta.workflow; })){
+                return true;
+            }
+        }
+        if (typeof currentNode.meta.workflow === 'string' && Array.isArray(selectedNode.meta.source)){
+            if (_.any(selectedNode.meta.source, function(s){ return typeof s.workflow === 'string' && s.workflow === currentNode.meta.workflow; })){
+                return true;
+            }
+        }
+        if (Array.isArray(currentNode.meta.source) && Array.isArray(selectedNode.meta.source)){
+            if (
+                _.intersection(
+                    _.pluck(_.filter(currentNode.meta.source, function(s){ return (typeof s.workflow === 'string'); }), 'workflow'),
+                    _.pluck(_.filter(selectedNode.meta.source, function(s){ return (typeof s.workflow === 'string'); }), 'workflow')
+                ).length > 0
+            ) return true;
+        }
     }
 
     static propTypes = {
@@ -249,7 +280,8 @@ export default class Node extends React.Component {
                 style={{
                     'top' : node.y,
                     'left' : node.x,
-                    'width' : this.props.columnWidth || 100
+                    'width' : this.props.columnWidth || 100,
+                    'zIndex' : 2 + (node.indexInColumn || 0)
                 }}
             >
                 <div

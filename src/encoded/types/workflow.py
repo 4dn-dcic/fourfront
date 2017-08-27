@@ -145,12 +145,14 @@ def get_unique_key_from_at_id(at_id):
     at_id_parts = at_id.split('/')
     return at_id_parts[2]
 
-
-def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options={
+DEFAULT_TRACING_OPTIONS = {
     'max_depth_history' : 6,
     'max_depth_future' : 6,
-    "group_similar_workflow_runs" : False
-}):
+    "group_similar_workflow_runs" : True
+}
+
+
+def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options=DEFAULT_TRACING_OPTIONS):
 
     #pr = cProfile.Profile()
     #pr.enable()
@@ -192,7 +194,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
         pass
 
     def filter_workflow_runs(workflow_run_tuples):
-        if len(workflow_run_tuples) < 2:
+        if len(workflow_run_tuples) < 3:
             return (workflow_run_tuples, [])
         filtered_tuples = []
         filtered_out_tuples = []
@@ -235,7 +237,8 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
                         "name" : out_file.get('workflow_argument_name'),
                         "step" : step_name,
                         "type" : "Output file",
-                        "for_file" : in_file_uuid
+                        "for_file" : in_file_uuid,
+                        "workflow" : workflow_run_model_obj.get('workflow')
                     })
             return sources_for_in_file
 
@@ -288,13 +291,13 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in filtered_out_workflow_runs:
                 untraced_in_files.append(in_file_uuid)
                 source_for_in_file = {
-                    "type" : "Output File Group",
+                    "type" : "Input File Group",
                     "for_file" : in_file_uuid,
                     "step" : workflow_run_model_obj.get('display_title'),
                     "grouped_by" : "workflow",
                     "workflow" : workflow_run_model_obj.get('workflow')
                 }
-                uuidCacheTracedHistory[in_file_uuid] = source_for_in_file
+                uuidCacheTracedHistory[in_file_uuid] = [source_for_in_file]
                 sources.append(source_for_in_file)
 
         else:

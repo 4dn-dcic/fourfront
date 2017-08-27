@@ -177,6 +177,10 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
         function expandFilesToIndividualNodes(files){
             return _.map(files, function(file, idx){
+                if (Array.isArray(file)){
+                    idx = file[0];
+                    file = file[1];
+                }
                 var stepInputAdjusted = _.extend({}, stepInput, {
                     'name' : stepInput.name,
                     'id' : stepInput.name + '.' + (file.accession || file.uuid || idx),
@@ -190,8 +194,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         }
 
         var files = stepInput.run_data.file;
+        var groupTypeToCheck = inputOrOutput === 'output' ? 'Output File Group' : 'Input File Group';
         var groupSources = _.filter(stepInput.source || [], function(s){
-            return (s.type === 'Output File Group' && typeof s.for_file === 'string');
+            return (s.type === groupTypeToCheck && typeof s.for_file === 'string');
         });
         if (groupSources.length > 0){
             var groups = _.reduce(groupSources, function(m,v){
@@ -225,15 +230,32 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     
                 });
                 if (!incl) {
-                    filesNotInGroups.push(file);
+                    filesNotInGroups.push([idx, file]);
                 }
                 return m;
 
             }, {}); // Returns e.g. { 'workflow' : { '/someWorkflow/@id/' : Set([ { ..file.. },{ ..file.. },{ ..file.. }  ]) } }
 
-            // return expandFilesToIndividualNodes(files).concat(....TODO....)
+            // Should only be one groupingName for now.
+            var groupingName = 'workflow';
+            var groupNodes = _.reduce(_.pairs(filesByGroup[groupingName]), function(m, wfPair, i){
+                var groupNode = {
+                    column      : column,
+                    format      : groupTypeToCheck,
+                    id          : stepInput.name + '.group:' + groupingName + '.' + wfPair[0],
+                    name        : stepInput.name,
+                    type        : inputOrOutput + '-group',
+                    meta        : _.extend({}, stepInput.meta || {}, _.omit(stepInput, 'required', 'name', 'meta')),
+                    inputOfNode : inputOfNode
+                };
+                groupNode.meta[groupingName] = wfPair[0];
+                m.push(groupNode);
+                return m;
+            },[]);
+
+            return expandFilesToIndividualNodes(filesNotInGroups).concat(groupNodes);
         }
-        
+
         return expandFilesToIndividualNodes(files);
         
     }
@@ -294,12 +316,20 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             var currentInputNodesMatched = (
                 _.filter(nodes /*allRelatedIONodes*/, function(n){
                     if (_.find(fullStepInput.source, function(s){
+                        // Match source/target (todo: inputOf to array)
                         if (s.name === n.name && n.outputOf && s.step === n.outputOf.name) return true;
                         if (s.name === n.name && n.inputOf && stepNode.name === n.inputOf.name) return true;
 
+                        // Match Groups
+                        if (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
+                            if (n.meta && Array.isArray(n.meta.source) && _.any(n.meta.source, function(nS){
+                                return typeof nS.grouped_by === 'string' && typeof nS[nS.grouped_by] === 'string' && nS[nS.grouped_by] === s[s.grouped_by];
+                            })) return true;
+                        }
+                        // Match File
                         if (Array.isArray(s.for_file) && _.any(s.for_file, checkNodeFileForMatch.bind(checkNodeFileForMatch, n))) return true;
                         else if (s.for_file && !Array.isArray(s.for_file) && checkNodeFileForMatch(n, s.for_file)) return true;
-
+                        // Match Output Nodes
                         if ( _.find(
                                 n.meta.target || [],
                                 function(t){

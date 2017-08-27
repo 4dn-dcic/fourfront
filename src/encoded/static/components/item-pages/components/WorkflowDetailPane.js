@@ -149,8 +149,10 @@ class FileDetailBody extends React.Component {
         
         if (typeof file === 'string') {
             hrefToRequest = '/files/' + file + '/';
-        } else if (file && typeof file === 'object'){
+        } else if (file && typeof file === 'object' && !Array.isArray(file)){
             if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.atIdFromObject(file);
+        } else if (Array.isArray(file) && this.props.node && this.props.node.meta && this.props.node.meta.workflow){
+            hrefToRequest = this.props.node.meta.workflow;
         }
 
         if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.
@@ -161,7 +163,9 @@ class FileDetailBody extends React.Component {
             }, 'GET', () => {
                 this.setState({ file : null });
             });
+            return true;
         }
+        return false;
     }
 
     doesDescriptionOrNotesExist(){
@@ -169,8 +173,8 @@ class FileDetailBody extends React.Component {
         return !!(file.description || file.notes || false);
     }
 
-    canDownload(){
-        if (this.state.file && typeof this.state.file !== 'string' && this.props.canDownloadStatuses.indexOf(this.state.file.status) > -1){
+    canDownload(fileObj = this.state.file){
+        if (fileObj && !Array.isArray(fileObj) && typeof fileObj !== 'string' && this.props.canDownloadStatuses.indexOf(fileObj.status) > -1){
             return true;
         }
         return false;
@@ -182,9 +186,17 @@ class FileDetailBody extends React.Component {
         var fileTitle;
         var fileTitleFormatted;
         var colClassName = "col-sm-6 col-lg-4";
-        if (typeof file === 'string' || !fileUtil.isFileDataComplete(file)) {
+        if ((typeof file === 'string' || !fileUtil.isFileDataComplete(file)) && !Array.isArray(file)) {
             fileTitle = null;
             fileTitleFormatted = <small><i className="icon icon-circle-o-notch icon-spin icon-fw"/></small>;
+        } else if (Array.isArray(this.props.file)) { // Some sort of group
+            fileTitle = 'Workflow';
+            if (file && file.display_title) fileTitle = file.display_title;
+            if (typeof node.meta.workflow === 'string'){
+                fileTitleFormatted = <a href={node.meta.workflow}>{ fileTitle }</a>;
+            } else {
+                fileTitleFormatted = fileTitle;
+            }
         } else {
             fileTitle = getTitleStringFromContext(file);
             if (!this.doesDescriptionOrNotesExist()){
@@ -199,7 +211,12 @@ class FileDetailBody extends React.Component {
                     node.type === 'output' ? 'Generated' :
                         node.type === 'input' ? 'Used' :
                             null
-                    } File
+                    } {
+                        Array.isArray(this.props.file) ?
+                            this.props.file.length + ' total files from' + (file && file.display_title ? ' workflow' : '')
+                            :
+                            'File'
+                    }
                 </span>
                 <h3 className="text-400 text-ellipsis-container node-file-title" title={fileTitle}>
                     { fileTitleFormatted }
@@ -274,6 +291,8 @@ class FileDetailBody extends React.Component {
             return null;
         }
 
+        console.log('FILE', this.props.file);
+
         var node = this.props.node;
         var body;
         if (typeof this.state.file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
@@ -292,6 +311,12 @@ class FileDetailBody extends React.Component {
                 });
             });
             body = <MetricsView metrics={metrics} />;
+        } else if (Array.isArray(this.props.file) && typeof this.props.file[0] === 'object' && object.atIdFromObject(this.props.file[0])) {
+            body = <ol>{
+                _.map(this.props.file, function(f){
+                    return <li><a href={object.atIdFromObject(f)}>{ f.display_title || f.accession }</a></li>;
+                })
+            }</ol>;
         } else {
             var table = null;
             if (

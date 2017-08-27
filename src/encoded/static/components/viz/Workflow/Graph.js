@@ -231,6 +231,7 @@ export default class Graph extends React.Component {
             var centerNode = function(n){
                 n.y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
                 n.nodesInColumn = countInCol;
+                n.indexInColumn = 0;
             }.bind(this);
 
             if (this.props.rowSpacingType === 'compact') {
@@ -240,6 +241,7 @@ export default class Graph extends React.Component {
                     d3.range(countInCol).forEach((i) => {
                         nodesInColumn[i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
                         nodesInColumn[i].nodesInColumn = countInCol;
+                        nodesInColumn[i].indexInColumn = i;
                     });
                 }
             } else if (this.props.rowSpacingType === 'stacked') {
@@ -248,6 +250,7 @@ export default class Graph extends React.Component {
                     if (!nodeInCol) return;
                     nodeInCol.y = this.props.rowSpacing * idx + (this.props.innerMargin.top + verticalMargin);//num + (this.props.innerMargin.top + verticalMargin);
                     nodeInCol.nodesInColumn = countInCol;
+                    nodeInCol.indexInColumn = idx;
                 });
 
             } else if (this.props.rowSpacingType === 'wide') {
@@ -258,6 +261,7 @@ export default class Graph extends React.Component {
                         if (!nodeInCol) return;
                         nodeInCol.y = num + (this.props.innerMargin.top + verticalMargin);
                         nodeInCol.nodesInColumn = countInCol;
+                        nodeInCol.indexInColumn = idx;
                     });
                 }
             } else {

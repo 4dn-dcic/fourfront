@@ -86,31 +86,52 @@ export default class FileView extends ItemBaseView {
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
         //var steps = dummy_analysis_steps;
         var steps = null;
-        this.state = { 'mounted' : false, 'steps' : steps };
+        this.state = {
+            'mounted' : false,
+            'steps' : steps,
+            'allRuns' : false,
+            'loading' : false
+        };
     }
 
     componentDidMount(){
-        this.setState({ 'mounted' : true });
+        var state = { 'mounted' : true };
         if (!this.state.steps){
+            state.loading = true;
             this.loadGraphSteps();
         }
+        this.setState(state);
     }
 
-    loadGraphSteps(){
+    loadGraphSteps(force = false, cb = null){
         if (typeof this.props.context.uuid !== 'string') return;
-        if (Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
+        if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
 
         var callback = function(r){
-            if (Array.isArray(r) && r.length > 0){
-                this.setState({ 'steps' : r });
-            } else {
-                this.setState({ 'steps' : 'ERROR' });
-            }
+            requestAnimationFrame(()=>{
+                if (Array.isArray(r) && r.length > 0){
+                    this.setState({ 'steps' : r, 'loading' : false }, cb);
+                } else {
+                    this.setState({ 'steps' : 'ERROR', 'loading' : false }, cb);
+                }
+            });
         }.bind(this);
 
-        ajax.load('/trace_workflow_run_steps/' + this.props.context.uuid + '/', callback, 'GET', callback);
+        var tracingHref = '/trace_workflow_run_steps/' + this.props.context.uuid + '/';
+        if (this.state.allRuns === true){
+            tracingHref += '?all_runs=True';
+        }
+
+        ajax.load(tracingHref, callback, 'GET', callback);
+    }
+
+    handleToggleAllRuns(){
+        this.setState({ 'allRuns' : !this.state.allRuns, 'loading' : true }, ()=>{
+            this.loadGraphSteps(true);
+        });
     }
 
     getTabViewContents(){
@@ -125,7 +146,7 @@ export default class FileView extends ItemBaseView {
         if (FileView.doesGraphExist(context)){
             var iconClass = "icon icon-fw icon-";
             var tooltip = null;
-            if (steps === null){
+            if (steps === null || this.state.loading){
                 iconClass += 'circle-o-notch icon-spin';
                 tooltip = "Graph is loading";
             } else if (!Array.isArray(steps) || steps.length === 0) {
@@ -138,7 +159,15 @@ export default class FileView extends ItemBaseView {
                 tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
                 key : 'graph',
                 disabled : !Array.isArray(steps) || steps.length === 0,
-                content : <GraphSection {...this.props} steps={steps} mounted={this.state.mounted} key={"graph-for-" + this.props.context.uuid} />
+                content : <GraphSection
+                    {...this.props}
+                    steps={steps}
+                    mounted={this.state.mounted}
+                    key={"graph-for-" + this.props.context.uuid}
+                    onToggleAllRuns={this.handleToggleAllRuns}
+                    allRuns={this.state.allRuns}
+                    loading={this.state.loading}
+                />
             });
         }
 
@@ -305,6 +334,7 @@ class GraphSection extends React.Component {
         this.detailGraph = this.detailGraph.bind(this);
         this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
         this.onToggleReferenceFiles = this.onToggleReferenceFiles.bind(this);
+        this.onToggleAllRuns = _.throttle(this.onToggleAllRuns.bind(this), 1000);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
@@ -338,7 +368,7 @@ class GraphSection extends React.Component {
             'isNodeDisabled' : GraphSection.isNodeDisabled,
             'nodes' : nodes,
             'edges' : graphData.edges,
-            'columnSpacing' : graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
+            'columnSpacing' : 120, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
             'rowSpacingType' : this.state.rowSpacingType
         });
     }
@@ -349,6 +379,10 @@ class GraphSection extends React.Component {
 
     onToggleReferenceFiles(){
         this.setState({ showReferenceFiles : !this.state.showReferenceFiles });
+    }
+
+    onToggleAllRuns(){
+        return this.props.onToggleAllRuns();
     }
 
     detailGraph(){
@@ -374,7 +408,12 @@ class GraphSection extends React.Component {
                         </div>
                         <div className="inline-block show-params-checkbox-container">
                             <Checkbox checked={this.state.showIndirectFiles} onChange={this.onToggleIndirectFiles}>
-                                Show Auxiliary Files
+                                Show More Context
+                            </Checkbox>
+                        </div>
+                        <div className="inline-block show-params-checkbox-container">
+                            <Checkbox checked={this.props.allRuns} onChange={this.onToggleAllRuns} disabled={this.props.loading}>
+                            { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Show All Runs
                             </Checkbox>
                         </div>
                         <div className="inline-block">
@@ -388,7 +427,9 @@ class GraphSection extends React.Component {
                     </div>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                { this.detailGraph() }
+                <div style={{ opacity : this.props.loading ? 0.33 : 1 }}>
+                    { this.detailGraph() }
+                </div>
             </div>
         );
 
