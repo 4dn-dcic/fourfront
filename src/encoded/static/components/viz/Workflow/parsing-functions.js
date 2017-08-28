@@ -380,6 +380,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     _.extend(n, {
                         'inputOf' : inNode.inputOf,
                         'meta' : _.extend(n.meta, inNode.meta),
+                        'name' : inNode.name,
+                        'id' : inNode.id
                         //'name' : n.name || inNode.name //ioNodeNameCombo(inNode, n)
                     });
                 });

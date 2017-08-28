@@ -439,7 +439,7 @@ class GraphSection extends React.Component {
                     </div>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                <div style={{ opacity : this.props.loading ? 0.33 : 1 }}>
+                <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }}>
                     { this.detailGraph() }
                 </div>
             </div>

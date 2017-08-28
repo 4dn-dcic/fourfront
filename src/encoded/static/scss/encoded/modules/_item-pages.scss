@@ -956,6 +956,15 @@ $download-button-width : 100px;
 	*/
 }
 
+/****** Graph Tab Section ******/
+
+.workflow-view-container {
+	.graph-wrapper {
+		opacity : 1;
+		transition: opacity .5s ease-out;
+	}
+}
+
 /****** Graph Detail Pane ******/
 
 .workflow-chart-inner-container {

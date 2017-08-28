@@ -173,10 +173,10 @@ export default class Node extends React.Component {
         if (Node.isFromSameWorkflowType(currentNode, selectedNode)) return true;
 
         if (selectedNode.name && currentNode.name) {
-            //if (selectedNode.name === currentNode.name) {
+            if (selectedNode.name === currentNode.name || _.any((currentNode.meta.source || []).concat(currentNode.meta.target || []), function(s){ return s.name === selectedNode.name; })) {
                 // Make sure target.step == selectedNode.inputOf.name
                 var i;
-                if (currentNode.type === 'input' || currentNode.type === 'input-group'){
+                if (currentNode.type === 'input' || currentNode.type === 'output'){
                     if (((selectedNode.inputOf && selectedNode.inputOf.id) || 'a') === ((currentNode.inputOf && currentNode.inputOf.id) || 'b')) return true;
                     if (selectedNode.inputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
                         for (i = 0; i < currentNode.meta.target.length; i++){
@@ -189,17 +189,17 @@ export default class Node extends React.Component {
                     
 
                 }
-                else if (currentNode.type === 'output'){
+                if (currentNode.type === 'output'){
                     if (((selectedNode.outputOf && selectedNode.outputOf.id) || 'a') === ((currentNode.outputOf && currentNode.outputOf.id) || 'b')) return true;
-                    if (selectedNode.outputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
-                        for (i = 0; i < currentNode.meta.target.length; i++){
-                            if (typeof selectedNode.outputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.outputOf.id) {
+                    if (selectedNode.outputOf !== 'undefined' && Array.isArray(currentNode.meta.source)){
+                        for (i = 0; i < currentNode.meta.source.length; i++){
+                            if (typeof selectedNode.outputOf !== 'undefined' && currentNode.meta.source[i].step === selectedNode.outputOf.id) {
                                 return true;
                             }
                         }
                     }
                 }
-            //}
+            }
         }
         return false;
     }
@@ -218,6 +218,7 @@ export default class Node extends React.Component {
                 return true;
             }
         }
+        /*
         if (Array.isArray(currentNode.meta.source) && Array.isArray(selectedNode.meta.source)){
             if (
                 _.intersection(
@@ -226,6 +227,7 @@ export default class Node extends React.Component {
                 ).length > 0
             ) return true;
         }
+        */
     }
 
     static propTypes = {
@@ -269,30 +271,32 @@ export default class Node extends React.Component {
         );
 
         return (
-            <div
-                className={className}
-                data-node-key={node.id || node.name}
-                data-node-type={node.type}
-                data-node-global={node.isGlobal || null}
-                data-node-selected={selected}
-                data-node-related={related}
-                data-node-type-detail={node.format}
-                style={{
-                    'top' : node.y,
-                    'left' : node.x,
-                    'width' : this.props.columnWidth || 100,
-                    'zIndex' : 2 + (node.indexInColumn || 0)
-                }}
-            >
+            <Fade in transitionAppear>
                 <div
-                    className="inner"
-                    onMouseEnter={this.props.onMouseEnter}
-                    onMouseLeave={this.props.onMouseLeave}
-                    onClick={disabled ? null : this.props.onClick}
+                    className={className}
+                    data-node-key={node.id || node.name}
+                    data-node-type={node.type}
+                    data-node-global={node.isGlobal || null}
+                    data-node-selected={selected}
+                    data-node-related={related}
+                    data-node-type-detail={node.format}
+                    style={{
+                        'top' : node.y,
+                        'left' : node.x,
+                        'width' : this.props.columnWidth || 100,
+                        'zIndex' : 2 + (node.indexInColumn || 0)
+                    }}
                 >
-                    { visibleNode }
+                    <div
+                        className="inner"
+                        onMouseEnter={this.props.onMouseEnter}
+                        onMouseLeave={this.props.onMouseLeave}
+                        onClick={disabled ? null : this.props.onClick}
+                    >
+                        { visibleNode }
+                    </div>
                 </div>
-            </div>
+            </Fade>
         );
     }
 
