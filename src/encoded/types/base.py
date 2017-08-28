@@ -285,6 +285,11 @@ class Item(snovault.Item):
                 roles[award_group_members] = 'role.award_member'
         return roles
 
+    def add_accession_to_title(self, title):
+        if self.properties.get('accession') is not None:
+            return title + ' - ' + self.properties.get('accession')
+        return title
+
     def unique_keys(self, properties):
         """smth."""
         keys = super(Item, self).unique_keys(properties)
@@ -350,6 +355,8 @@ class Item(snovault.Item):
             # special case for user: concatenate first and last names
             display_title = self.properties.get(field, None)
             if display_title:
+                if field != 'accession':
+                    display_title = self.add_accession_to_title(display_title)
                 return display_title
         # if none of the existing terms are available, use @type + date_created
         try:

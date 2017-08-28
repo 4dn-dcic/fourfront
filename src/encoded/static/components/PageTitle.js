@@ -125,6 +125,15 @@ export default class PageTitle extends React.Component {
             }
 
             if (isDisplayTitleAccession(context, title, true)){ // Don't show Accessions in titles.
+
+                // But show rest of title if it is in form 'Something - ACCESSION'
+                if (typeof context.accession === 'string' && context.accession.length >= 12 && title.indexOf(' - ' + context.accession) > -1){
+                    title = title.replace(' - ' + context.accession, '');
+                    if (title.length > 0){
+                        return { 'title' : itemTypeTitle, 'calloutTitle' : title };
+                    }
+                }
+
                 return { 'title' : itemTypeTitle };
                 // Re-Enable below if want Accessions as Page Subtitles.
                 // return { 'title' : itemTypeTitle, 'subtitle' : title };
@@ -166,6 +175,14 @@ export default class PageTitle extends React.Component {
 
     render(){
         var { title, subtitle, calloutTitle } = PageTitle.calculateTitles(this.props.context, this.props.href, (this.props.shemas || Schemas.get()), this.state.mounted);
+
+        if (title) {
+            title = (
+                <span className={"title" + (calloutTitle ? ' has-callout-title' : '')}>
+                    { title }
+                </span>
+            );
+        }
 
         if (calloutTitle){
             calloutTitle = (
