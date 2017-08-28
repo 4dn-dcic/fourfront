@@ -419,6 +419,8 @@ def trace_workflow_runs(context, request):
     options = copy(DEFAULT_TRACING_OPTIONS)
     if request.params.get('all_runs'):
         options['group_similar_workflow_runs'] = False
+    if request.params.get('track_performance'):
+        options['track_performance'] = True
 
     return trace_workflows(
         str(context.uuid),

@@ -330,6 +330,7 @@ class GraphSection extends React.Component {
 
     constructor(props){
         super(props);
+        //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
         this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
@@ -343,7 +344,18 @@ class GraphSection extends React.Component {
             'rowSpacingType' : 'stacked'
         };
     }
-
+    /*
+    componentWillReceiveProps(nextProps){
+        if (nextProps.allRuns !== this.props.allRuns){
+            if (nextProps.allRuns && this.state.rowSpacingType !== 'stacked') {
+                this.setState({ 'rowSpacingType' : 'stacked' });
+            }
+            else if (!nextProps.allRuns && this.state.rowSpacingType !== 'wide') {
+                this.setState({ 'rowSpacingType' : 'wide' });
+            }
+        }
+    }
+    */
     commonGraphProps(){
 
         var steps = this.props.steps;

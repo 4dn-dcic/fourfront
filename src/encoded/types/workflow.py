@@ -2,6 +2,8 @@
 """
 from itertools import chain
 from collections import OrderedDict
+#import gevent
+from pyramid.response import Response
 from snovault import (
     calculated_property,
     collection,
@@ -148,14 +150,16 @@ def get_unique_key_from_at_id(at_id):
 DEFAULT_TRACING_OPTIONS = {
     'max_depth_history' : 6,
     'max_depth_future' : 6,
-    "group_similar_workflow_runs" : True
+    "group_similar_workflow_runs" : True,
+    "track_performance" : False
 }
 
 
 def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options=DEFAULT_TRACING_OPTIONS):
-
-    #pr = cProfile.Profile()
-    #pr.enable()
+    
+    if options.get('track_performance'):
+        pr = cProfile.Profile()
+        pr.enable()
 
     uuidCacheModels = {}
     uuidCacheTracedHistory = {}
@@ -278,6 +282,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             all_workflow_runs.append( (workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file) )
 
         # Filter WFRs by WF down to most recent WFR - working, but not enabled as no UI for it yet.
+        # TODO: DRYing (can check group_similar_workflow_runs option in filter_workflow_runs func, then remove this IF/ELSE statement)
         if options.get('group_similar_workflow_runs'):
 
             filtered_in_workflow_runs, filtered_out_workflow_runs = filter_workflow_runs(all_workflow_runs)
@@ -316,8 +321,12 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
                  "name" : workflow_argument_name, "type" : "Workflow Input File", "for_file" : for_files
             }]
         else:
+            #futures = []
             for s in step_uuids:
+                #futures.append(gevent.spawn(trace_history, [s], depth + 1))
                 trace_history([s], depth + 1)
+            #for f in futures:
+                #print('\n\n\nGOT', f.get())
         return sources
 
     def trace_history(output_of_workflow_run_uuids, depth = 0):
@@ -330,7 +339,6 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
 
         # When we trace history, we care only about the last workflow_run out of which file was generated.
         # A file should be output of only one run.
-
         last_workflow_run_uuid = output_of_workflow_run_uuids[len(output_of_workflow_run_uuids) - 1]
         uuidCacheTracedHistory[last_workflow_run_uuid] = True
         workflow_run_model = get_model_by_uuid(last_workflow_run_uuid)
@@ -403,7 +411,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
                 })
             step['outputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
-                "target" : targets, # TODO: TRACING
+                "target" : targets, # TODO: Trace these maybe (probably not, already too much context shown in graph)
                 "meta" : {
                     "argument_type" : "Input File",
                     "in_path" : original_file_in_output
@@ -462,7 +470,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
 
         steps.append(step)
 
-
+    # TODO:
     def trace_future(input_of_workflow_run_uuids):
         for uuid in input_of_workflow_run_uuids:
             #workflow_run = file_item.collection.get(uuid)
@@ -473,18 +481,20 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             print('\n\n\n', workflow_run.properties.get('output_files'))
 
 
-    #trace_history([ wr['uuid'] for wr in output_of_workflow_runs ])
     trace_history(file_item_output_of_workflow_run_uuids)
 
-    #pr.disable()
-    
-    #s = io.StringIO()
-    #sortby = 'cumulative'
-    #ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    #ps.print_stats()
-    #print(s.getvalue())
-
-
+    if options.get('track_performance'):
+        pr.disable()
+        s = io.StringIO()
+        sortby = 'cumulative'
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        output = s.getvalue()
+        print(output)
+        return Response(
+            content_type='text/plain',
+            body=output
+        )
 
     return steps
 
