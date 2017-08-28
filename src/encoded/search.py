@@ -435,6 +435,7 @@ def build_query(search, prepared_terms, source_fields):
         if field == 'q':
             query_info['query'] = value
             query_info['lenient'] = True
+            query_string['default_operator']= 'AND'
             break
     if query_info != {}:
         string_query = {'must': {'query_string': query_info}}
