@@ -1,6 +1,11 @@
 ## Overview
 
-In order to make your data accessible, searchable and assessable you should submit as much metadata as possible to the 4DN system along with the raw files you have generated in your experiments. These pages can show you how to find out what kind of metadata we collect for your particular type of experiment and the mechanisms by which you can submit your metadata and data to the 4DN system.
+In order to make your data accessible, searchable and assessable you should submit as much metadata as possible to the 4DN system along with the raw files you have generated in your experiments. 
+
+These pages are designed to
+
+* show you how to find out what kind of metadata we collect for your particular type of experiment
+*  the mechanisms by which you can submit your metadata and data to the 4DN system.
 
 For an overview of the metadata structure and relationships between different items please see [the slides](/help#metadata-structure) available on the [introductory page](/help).
 
@@ -8,24 +13,36 @@ We have three primary ways that you can submit data to the 4DN data portal.
 
 ### Web Submission
 
-To submit one or a few experiments or for a hands on way to gain familiarity with the 4DN data model the online submission interface is a useful tool.
+The online web submission forms are best used
+
+* To submit one or a few experiments.
+* To edit one or a few fields of an already submitted but not yet released item.
+* As a hands on way to gain familiarity with the 4DN data model. 
+
 Documentation on how to get started with this interface is [here](/help/web-submission).
 
 ### Data Submission via Spreadsheet
 
-We provide data submission forms as excel workbooks that are flattened versions of the metadata schemas, but only
-containing fields that actually can and should be submitted.
-We also provide software tools that handle the interaction with our REST API to generate these forms and push the
-content of the forms to our database.
+The excel metadata workbooks
+
+* Are useful for submitting metadata for several experiments or biosamples all at once
+* Can be used to make bulk edits of submitted but not yet released metadata
+* Contain multiple sheets with each sheet a data submission form that is a flattened version of an object metadata schema
+containing only the fields that actually can and should be submitted.
+* Can be generated using the Submit4DN software
+* Are used as input to the Submit4DN software which validates submissions and pushes the content of the forms to our database.
+
 Documentation of the data submission process using these forms can be found
 [here](/help/spreadsheet).
 
 ### REST API
 
 For both meta/data submission and retrival, you can also access our database directly via the REST-API.
-Data objects exchanged with the server conform to the standard JavaScript Object Notation (JSON) format.
-Our implementation is analagous to the one developed
+
+*  Data objects exchanged with the server conform to the standard JavaScript Object Notation (JSON) format.
+* Our implementation is analagous to the one developed
 by the [ENCODE DCC](https://www.encodeproject.org/help/rest-api/).
+
 If you would like to directly interact with the REST API for data submission see the documentation [here](/help/rest-api).
 
 

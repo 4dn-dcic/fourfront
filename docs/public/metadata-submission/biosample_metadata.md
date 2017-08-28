@@ -1,6 +1,13 @@
 ## Overview
 
-The 4DN consortium will collect metadata on the preparation of a biological sample (biosample) in order to make the data FAIR, Findable, Accessible, Interoperable and Reusable, to the extent that such a service benefits the network and scientific community at large.  Many 4DN experiments are performed using cell lines.  Other experiments may be performed on isolated primary cells or tissues.  Experimenters may also perform assays where cells are transiently treated, for example by addition of a drug or introduction of a silencing construct, or stably genomically modified through Crispr technologies.  This page outlines and describes the types of metadata that is requested for biological samples.  The first part of the document outlines the few fields shared by all biosamples.  The Cell Lines and Samples Working Group has focused on developing requirements for cell line metadata and this is the primary focus of the [remainder of this document](#cc_meta).
+* The 4DN consortium will collect metadata on the preparation of a biological sample (biosample) in order to make the data FAIR, Findable, Accessible, Interoperable and Reusable, to the extent that such a service benefits the network and scientific community at large. 
+* Many 4DN experiments are performed using cell lines.  Other experiments may be performed on isolated primary cells or tissues. 
+* Experimenters may also perform assays where cells are transiently treated, for example by addition of a drug or introduction of a silencing construct, or stably genomically modified through Crispr technologies.  
+
+This page outlines and describes the types of metadata that is requested for biological samples.
+  
+* The first part of the document outlines the few fields shared by all biosamples.  
+* The Cell Lines and Samples Working Group has focused on developing requirements for cell line metadata and this is the primary focus of the [remainder of this document](#cc_meta).
 
 *Note that the working group is still discussing some of the metadata and requirements are evolving.  If you have any questions or concerns please feel free to [contact us](mailto:4DN.DCIC.support@hms-dbmi.atlassian.net).*
 
@@ -42,7 +49,18 @@ The 4DN consortium will collect metadata on the preparation of a biological samp
 
 ## Cell Culture Metadata
 
-The consortium has designated 4 cell lines as [Tier 1](https://data.4dnucleome.org/search/?type=Biosource&cell_line_tier=Tier+1), which will be a primary focus of 4DN research and integrated analysis.  A number of other lines that are expected to be used by multiple labs and have approved SOPs for maintaining them have been designated [Tier 2](https://data.4dnucleome.org/search/?type=Biosource&cell_line_tier=Tier+2).  In addition, some labs may wish to submit datasets produced using other cell lines.  To maintain consistent data standards and in order to facilitate integrated analysis the Cell Lines and Samples Working Group has designated what metadata regarding cell line biosample preparation is required.  Other metadata is strongly encouraged.  The exact requirements may vary somewhat depending on the cell type and when the data was produced (i.e. some older experiments can be 'grandfathered' in even if they do not 'pass' all the requirements.  The biosample metadata fields that can be submitted are described below.
+* The consortium has designated 4 cell lines as [Tier 1](https://data.4dnucleome.org/search/?type=Biosource&cell_line_tier=Tier+1), which will be a primary focus of 4DN research and integrated analysis.  
+* A number of other lines that are expected to be used by multiple labs and have approved SOPs for maintaining them have been designated [Tier 2](https://data.4dnucleome.org/search/?type=Biosource&cell_line_tier=Tier+2).  
+* In addition, some labs may wish to submit datasets produced using other cell lines.  
+
+To maintain consistent data standards and in order to facilitate integrated analysis the Cell Lines and Samples Working Group has designated:
+
+1. metadata regarding cell line biosample preparation is required.   
+2. metadata that is strongly encouraged.  
+
+The exact requirements may vary somewhat depending on the cell type and when the data was produced (i.e. some older experiments can be 'grandfathered' in even if they do not 'pass' all the requirements.  
+
+The biosample metadata fields that can be submitted are described below.
 
 ### BiosampleCellCulture fields
 
