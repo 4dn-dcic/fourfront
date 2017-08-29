@@ -11,7 +11,6 @@ from urllib.parse import (
 )
 
 from .search import _ASSEMBLY_MAPPER
-from .types.base import Item
 from .types.file import File
 from .types.workflow import (
     trace_workflows,
@@ -412,7 +411,7 @@ def batch_hub(context, request):
 def trace_workflow_runs(context, request):
 
     file_model = context.model
-    
+
     if not hasattr(file_model, 'source'):
         raise HTTPBadRequest(detail="File not yet finished indexing.")
 

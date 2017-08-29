@@ -13,7 +13,6 @@ from .base import (
     Item
 )
 
-
 import cProfile, pstats, io
 
 
@@ -155,8 +154,11 @@ DEFAULT_TRACING_OPTIONS = {
 }
 
 
-def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options=DEFAULT_TRACING_OPTIONS):
-    
+def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options=None):
+
+    if options is None:
+        options = DEFAULT_TRACING_OPTIONS
+
     if options.get('track_performance'):
         pr = cProfile.Profile()
         pr.enable()
@@ -164,6 +166,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
     uuidCacheModels = {}
     uuidCacheTracedHistory = {}
     steps = [] # Our output
+
 
     def get_model_by_uuid(uuid, key = None):
         # TODO: Check for hasattr(model, 'source') and raise Exception? (after we have something setup to handle it)
@@ -183,6 +186,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
         uuidCacheModels[cacheKey] = model
         return model
 
+
     def group_files_by_workflow_argument_name(set_of_files):
         files_by_argument_name = OrderedDict()
         for f in set_of_files:
@@ -194,8 +198,6 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
                     files_by_argument_name[arg_name].append(f)
         return files_by_argument_name
 
-    def group_workflow_runs_by_workflow():
-        pass
 
     def filter_workflow_runs(workflow_run_tuples):
         if len(workflow_run_tuples) < 3:
@@ -218,7 +220,6 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             sorted_wfr_tuples = sorted(wfr_tuples_for_wf, key=get_date_created_from_tuple)
             filtered_tuples.append(sorted_wfr_tuples[0])
             filtered_out_tuples = filtered_out_tuples + sorted_wfr_tuples[1:]
-
 
         return (filtered_tuples, filtered_out_tuples)
 
