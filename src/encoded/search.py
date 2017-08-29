@@ -28,7 +28,7 @@ sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?
 @view_config(route_name='search', request_method='GET', permission='search')
 def search(context, request, search_type=None, return_generator=False, forced_type='Search'):
     """
-    Search view connects to ElasticSearch and returns the results.
+    Search view connects to ElasticSearch and returns the results
     """
     types = request.registry[TYPES]
     search_base = normalize_query(request, search_type)

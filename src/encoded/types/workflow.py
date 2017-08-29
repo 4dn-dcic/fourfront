@@ -513,7 +513,7 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
-    embedded = ['arguments.argument_type',
+    embedded_list = ['arguments.argument_type',
                 'arguments.argument_format',
                 'arguments.workflow_argument_name',
                 'arguments.argument_mapping.workflow_step',
@@ -724,7 +724,7 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow.*',
+    embedded_list = ['workflow.*',
                 #'analysis_steps.*',
                 #'analysis_steps.software_used.*',
                 #'analysis_steps.outputs.*',
@@ -884,7 +884,7 @@ class WorkflowRunSbg(WorkflowRun):
     base_types = ['WorkflowRun'] + Item.base_types
     item_type = 'workflow_run_sbg'
     schema = load_schema('encoded:schemas/workflow_run_sbg.json')
-    embedded = WorkflowRun.embedded
+    embedded_list = WorkflowRun.embedded_list
 
 
 @collection(
@@ -898,7 +898,7 @@ class WorkflowRunAwsem(WorkflowRun):
     base_types = ['WorkflowRun'] + Item.base_types
     item_type = 'workflow_run_awsem'
     schema = load_schema('encoded:schemas/workflow_run_awsem.json')
-    embedded = WorkflowRun.embedded
+    embedded_list = WorkflowRun.embedded_list
 
 
 @collection(
@@ -912,4 +912,4 @@ class WorkflowMapping(Item):
 
     item_type = 'workflow_mapping'
     schema = load_schema('encoded:schemas/workflow_mapping.json')
-    embedded = []
+    embedded_list = []

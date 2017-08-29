@@ -24,7 +24,7 @@ class Software(Item):
     """The Software class that contains the software... used."""
     item_type = 'software'
     schema = load_schema('encoded:schemas/software.json')
-    embedded = []
+    embedded_list = []
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'software_relation' are stored in self.properties
