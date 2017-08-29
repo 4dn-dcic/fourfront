@@ -275,6 +275,11 @@
     "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
+    "cwl_main_filename" : "fastqc-0-11-4-1.9.cwl",
+    "cwl_child_filenames" : ["fastqc-0-11-4.6.cwl"],
+    "app_name" : "fastqc-0-11-4-1",
+    "app_version" : "8",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
     "arguments": [
         {
             "argument_mapping": [
