@@ -397,6 +397,11 @@
     "name": "md5",
     "workflow_type": "Data QC",
     "workflow_diagram": "",
+    "app_name": "md5",
+    "app_version": "5",
+    "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
+    "cwl_main_filename": "md5.5.cwl",
+    "cwl_child_filenames": "",
     "arguments": [
         {
             "workflow_argument_name": "input_file",
