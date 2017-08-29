@@ -356,6 +356,8 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             "meta" : {
                 "status" : workflow_run_model_obj.get('status'),
                 '@type'  : workflow_run_model_obj.get('@type'),
+                '@id'    : workflow_run_model_obj.get('@id'),
+                'date_created' : workflow_run_model_obj.get('date_created')
             },
             "analysis_step_types" : [], # Gets moved to stepNode.meta.analysis_step_types on front-end (we could put into meta here as well)
             "inputs" : [],

@@ -248,7 +248,7 @@ export default class Graph extends React.Component {
 
                 _.forEach(nodesInColumn, (nodeInCol, idx)=>{
                     if (!nodeInCol) return;
-                    nodeInCol.y = this.props.rowSpacing * idx + (this.props.innerMargin.top + verticalMargin);//num + (this.props.innerMargin.top + verticalMargin);
+                    nodeInCol.y = (this.props.rowSpacing * idx) + (this.props.innerMargin.top + verticalMargin);//num + (this.props.innerMargin.top + verticalMargin);
                     nodeInCol.nodesInColumn = countInCol;
                     nodeInCol.indexInColumn = idx;
                 });

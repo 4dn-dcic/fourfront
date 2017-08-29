@@ -412,7 +412,7 @@ class GraphSection extends React.Component {
             <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
-                    <div className="pull-right workflow-view-controls-container">
+                    <div className="workflow-view-controls-container">
                         <div className="inline-block show-params-checkbox-container">
                             <Checkbox checked={this.state.showReferenceFiles} onChange={this.onToggleReferenceFiles}>
                                 Show Reference Files

@@ -517,6 +517,10 @@
   overflow: visible;
 }
 
+
+
+
+
 /***
  *** Extra Things Be Here
  ***/
@@ -646,6 +650,22 @@
 
     }
 
+  }
+
+  .rc-tabs-tab-next,
+  .rc-tabs-tab-prev {
+    color: #fff;
+    &.rc-tabs-tab-btn-disabled {
+      opacity: 0.25;
+    }
+    > .rc-tabs-tab-next-icon:before {
+      font-family: FontAwesome;
+      content: "\f105";
+    }
+    > .rc-tabs-tab-prev-icon:before {
+      font-family: FontAwesome;
+      content: "\f104";
+    }
   }
 
 }
