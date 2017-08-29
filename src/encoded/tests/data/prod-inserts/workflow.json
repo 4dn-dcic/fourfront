@@ -358,13 +358,25 @@
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step": "validatefiles",
+                    "step_argument_name": "input_file",
+                    "step_argument_type": "Input file"
+                }
+            ],
             "description": ""
         },
         {
             "workflow_argument_name": "report",
             "argument_type": "Output report file",
-            "argument_mapping": [],
+            "argument_mapping": [
+                {
+                    "workflow_step": "validatefiles",
+                    "step_argument_name": "report",
+                    "step_argument_type": "Output file"
+                }
+            ],
             "description": ""
         }
     ],
@@ -385,6 +397,11 @@
     "name": "md5",
     "workflow_type": "Data QC",
     "workflow_diagram": "",
+    "app_name": "md5",
+    "app_version": "5",
+    "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
+    "cwl_main_filename": "md5.5.cwl",
+    "cwl_child_filenames": "",
     "arguments": [
         {
             "workflow_argument_name": "input_file",
@@ -1760,7 +1777,7 @@
                 }
             ], 
             "workflow_argument_name": "output_normvector", 
-            "argument_format": "other",
+            "argument_format": "normvector_juicerformat",
             "argument_type": "Output processed file"
         }, 
         {
