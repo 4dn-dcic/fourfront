@@ -291,7 +291,7 @@ def test_workflow_dependencies(workflow_dependencies):
 def test_calculated_analysis_steps(testapp, workflow_dependencies, custom_workflow_data):
     res = testapp.post_json('/workflow', custom_workflow_data).json['@graph'][0]
 
-    assert res['display_title'] == custom_workflow_data["title"]
+    assert res['display_title'] == custom_workflow_data["title"] + ' - ' + res['accession']
 
     # Remove this line if analysis_steps becomes embedded. Maybe.
     res = testapp.get('/workflows/' + custom_workflow_data['uuid'] + '/').json
