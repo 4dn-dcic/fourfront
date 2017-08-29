@@ -1542,11 +1542,11 @@
     "lab": "4dn-dcic-lab"
 },
 {
-    "title":"Hi-C processing part B revision 41",
-    "description":"Hi-C processing part B revision 41",
+    "title":"Hi-C processing part B revision 44",
+    "description":"Hi-C processing part B revision 44",
     "workflow_diagram":"",
     "lab": "4dn-dcic-lab",
-    "cwl_pointer":"https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.41.cwl",
+    "cwl_pointer":"https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.44.cwl",
     "cwl_main_filename" : "hi-c-processing-partb.44.cwl",
     "cwl_child_filenames" : "merge-pairs.30.cwl,pairs2hic.18.cwl,cooler.24.cwl",
     "app_name" : "hi-c-processing-partb",
@@ -1714,7 +1714,7 @@
             ]
         }
     ],
-    "name": "hi-c-processing-partb/24",
+    "name": "hi-c-processing-partb/44",
     "workflow_steps": [
         {
             "step": "e4068c7a-49e5-4c33-afab-9ec90d65faf3",
