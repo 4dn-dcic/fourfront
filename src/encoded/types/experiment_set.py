@@ -98,6 +98,7 @@ class ExperimentSet(Item):
                 "experiments_in_set.files.uuid",
                 "experiments_in_set.files.file_size",
                 "experiments_in_set.files.upload_key",
+                "experiments_in_set.files.md5sum",
                 "experiments_in_set.files.file_format",
                 "experiments_in_set.files.file_classification",
                 "experiments_in_set.files.paired_end",

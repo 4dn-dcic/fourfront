@@ -43,7 +43,7 @@ _tsv_mapping = OrderedDict([
     ('Size', ['experiments_in_set.files.file_size']),
     ('md5sum', ['experiments_in_set.files.md5sum']),
 
-    ('File Format', ['experiments_in_set.files.file_type']),
+    ('File Format', ['experiments_in_set.files.file_format']),
     #('Output type', ['output_type']),
     ('Experiment Title', ['experiments_in_set.display_title']),
     ('Experiment Type', ['experiments_in_set.experiment_type']),
