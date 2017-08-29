@@ -10,10 +10,11 @@
 
 ## Creating New Items
 
-* There are several possible 'entry' points to a web submission
-    * You may want to start by entering metadata for an ExperimentSetReplicate object or an Experiment object of a particular type (eg. a Hi-C experiment or Microscopy experiment).  
-    * You can start by creating experiments and then as a subsequent step associating multiple experiments with a Replicate Set.  
-    * You can start your submission at a lower level item type (eg. Biosample) if that makes things easier for you.
+There are several possible 'entry' points to a web submission
+
+* You may want to start by entering metadata for an ExperimentSetReplicate object or an Experiment object of a particular type (eg. a Hi-C experiment or Microscopy experiment).  
+* You can start by creating experiments and then as a subsequent step associating multiple experiments with a Replicate Set.  
+* You can start your submission at a lower level item type (eg. Biosample) if that makes things easier for you.
 
 **To create a new item**
 

@@ -120,10 +120,11 @@ For instructions on creating an account, please see [this page](/help/account-cr
 
 **Metadata and data accessibility.**
  
-* Most metadata items have the default permission
+* Most metadata items have the following default permissions:
     *  that members of the submitting lab can view
     *  submitters for the lab can edit
     *  to help you review and edit a lab's submissions the DCIC data wranglers can view and edit
+
 *  Once the data and metadata are complete and quality controlled, they will be released according to the data release policy adopted by the 4DN network.
 *  After release the data can no longer be edited by data submitters - contact the DCIC to report data issues and we can work together to get them resolved
 
