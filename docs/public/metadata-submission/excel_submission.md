@@ -33,35 +33,36 @@
 <span id="preparing-workbook"></span>
 
 * You may notice that in some sheets there are additional commented rows that contain data values. 
-* These are rows corresponding to items that already exist in the database and can provide you with identifiers that you can reuse in your submission (see [Referencing existing items](/help/getting-started#referencing-existing-items).  
+* These are rows corresponding to items that already exist in the database and can provide you with identifiers that you can reuse in your submission (see [Referencing existing items](/help/getting-started#referencing-existing-objects)).  
 * Only those items that either are associated with your lab or are already released to the public will appear in these commented data rows.   
 * Your data entry should begin at the first non-commented row.
 
 ## Preparing Excel Workbooks
-A field can be one of a few different types; 
 
-* string 
-* number/integer
-* array/list 
-* Item 
+* A field can be one of a few different types; 
+    * string 
+    * number/integer
+    * array/list 
+    * Item 
 
-The type will be indicated in the second row.
+* The type will be indicated in the second row.
 
 <span id="basic-field"></span>
 
-Most field values are strings:
+* Most field values are strings:
 
-* a term from a controlled vocabulary, i.e. from a constrained list of choices
-* a string that identifies an Item
-* a text description. 
-* If the field type is an array, you may enter multiple values separated by commas.
+    * a term from a controlled vocabulary, i.e. from a constrained list of choices
+    * a string that identifies an Item
+    * a text description. 
+    * If the field type is an array, you may enter multiple values separated by commas.
 
 **Basic field formats**
 ![Basic fields](/static/img/docs/submitting-metadata/field_types.png)
 
 **Basic fields example**
 ![Basic fields examples](/static/img/docs/submitting-metadata/basic_field_eg.png)
-There are some fields values that require specific formatting. These cases and how to identify them are described below.
+
+* There are some fields values that require specific formatting. These cases and how to identify them are described below.
 
 ### Required string formatting
 In some cases a field value must be formatted in a certain way or the Item will fail validation. In most cases tips on formatting requirements will be included in the *Additional Info* row of the spreadsheet. 
@@ -83,9 +84,9 @@ Examples of these are
 * The *'files'* field is also an example of a list field that can take multiple values.
 * You can reference an item in the excel workbooks using one of four possible ways: 
     1. lab-specific alias
-    * accession
-    * item-type-specific identifier
-    * UUID
+    2. accession
+    3. item-type-specific identifier
+    4. UUID
 
 More information about these four identifiers is provided in [Using aliases](/help/getting-started#referencing-existing-objects).
 
@@ -96,8 +97,8 @@ More information about these four identifiers is provided in [Using aliases](/he
 * These are indicated in the Item spreadsheet using a ‘.’ (dot) notation. 
 
     For example the *"experiment_relations"* field has 2 sub-fields called *"relationship_type"*, and *"experiment"*. In the spreadsheet field names you will see *experiment\_relations.relationship_type* and *experiment\_relations.experiment*.
+    
 * If the Item field is designed to store a list of embedded sub-objects, you can enter multiple sub-objects by manually creating new columns and appending incremented integers to the fields names for each new sub-object.
-
 
     For example, to submit a total of three related experiments to an ExperimentHiC Item you would find the *experimen\_relations.relationship\_type* and *experiment\_relations.experiment* columns, copy them and have total of 6 columns named:
 
@@ -120,8 +121,7 @@ and enter a valid *relationship\_type* term and *experiment* identifier to each 
 
 ### Referencing existing items
 
-* Ways that you can reference items that already exist in the 4DN database in your spreadsheet submission is described [here](/help/getting-started#referencing-existing-items)
-).
+* Ways that you can reference items that already exist in the 4DN database in your spreadsheet submission is described [here](/help/getting-started#referencing-existing-objects).
 
 <span id="supp_files"></span>
 
