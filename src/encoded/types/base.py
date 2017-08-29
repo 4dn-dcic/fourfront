@@ -244,10 +244,7 @@ class Item(snovault.Item):
     def __init__(self, registry, models):
         super().__init__(registry, models)
         self.STATUS_ACL = self.__class__.STATUS_ACL
-        # update self.embedded here
-        self.update_embeds(registry[snovault.TYPES])
-        # update registry embedded
-        self.registry.embedded = self.embedded
+
 
     @property
     def __name__(self):
@@ -399,21 +396,6 @@ class Item(snovault.Item):
         principals = calc_principals(self)
         return principals
 
-    def update_embeds(self, types):
-        """
-        extend self.embedded to have link_id and display_title for every linkTo
-        field in the properties schema and the schema of all calculated properties
-        (this is created here)
-        """
-        total_schema = self.schema['properties'].copy() if self.schema else {}
-        self.calc_props_schema = {}
-        if self.registry and self.registry['calculated_properties']:
-            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
-                if calc_props_val.schema:
-                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
-        total_schema.update(self.calc_props_schema)
-        this_type = self.type_info.item_type
-        self.embedded = add_default_embeds(this_type, types, self.embedded, total_schema)
 
     def rev_link_atids(self, request, rev_name):
         conn = request.registry[CONNECTION]

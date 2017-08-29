@@ -20,7 +20,7 @@ class Target(Item):
 
     item_type = 'target'
     schema = load_schema('encoded:schemas/target.json')
-    embedded = ['targeted_genome_regions.*']
+    embedded_list = ['targeted_genome_regions.*']
 
     @calculated_property(schema={
         "title": "Target summary",

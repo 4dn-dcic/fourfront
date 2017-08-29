@@ -33,7 +33,7 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
-    embedded = ["individual.age",
+    embedded_list = ["individual.age",
                 "individual.age_units",
                 "individual.sex",
                 "individual.organism.name",
