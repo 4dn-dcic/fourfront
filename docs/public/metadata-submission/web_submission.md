@@ -18,9 +18,9 @@ There are several possible 'entry' points to a web submission
 
 **To create a new item**
 
-1. Navigate to an item of the type for which you want to create metadata eg. [Hi-C Experiment 4DNEX5LRCIOK](https://data.4dnucleome.org/experiments-hi-c/4DNEX5LRCIOK/)
+1. Navigate to an item of the type for which you want to create metadata.
 
-2. You can find **Create** and **Edit** links near the top of a page for most items in our system.  You will not see one or both of these buttons if you lack permission to perform these operations, which may be due to the status of the item and/or your role in our system.
+2. You can find **Create** and **Edit** links near the top of a page for most items in our system.  **NOTE** You will not see one or both of these buttons if you lack permission to perform these operations, which may be due to the status of the item and/or your role in our system.
 3. When you click **Create** the first thing you will be asked is to create an alias for your item.  This is a lab specific unique identifier for this object taking the form of xxxx:xxxxx where the portion before the colon is a lab designation eg. 4dndcic and the portion after is an identifier that you choose that is unique within your lab group (see section on using aliases [here](/help/getting-started#referencing-existing-objects)).
 4. When you submit your alias you will be brought to a page where you can start entering metadata.  
     * You will see two gray bars *Fields* and *Linked Objects* and selecting the *+* will expand those bars to show the fields and objects that can be entered.  

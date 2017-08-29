@@ -16,7 +16,7 @@ If you would like submit data to the portal:
 * Please contact [the data wranglers](mailto:support@4dnucleome.org) to get data submitter accounts.
 * Please skim through the [metadata structure](#metadata-structure)
 * Check out the other pages in the **Help** menu for detailed information on the submission process.  
-* Of note are the required metadata for the biological samples used in experiments, which is specified [on this page](/help/cell-culture).
+* Of note are the required metadata for the biological samples used in experiments, which is specified [on this page](/help/biosample).
 * We can set up a webex call to discuss the details and the most convenient approach for your existing system.
 
 ## Metadata Structure

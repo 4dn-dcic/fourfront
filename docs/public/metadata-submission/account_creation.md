@@ -2,8 +2,8 @@
 
 *  Please email data wranglers at [support@4dnucleome.org](mailto:support@4dnucleome.org) to get set up with an account with the access credentials for your role. 
 * Please provide an email which you wish to use for your account and cc your PI for validation purposes. **The email associated with the account you use for login must be the same as the one registered with the 4DN-DCIC.** 
-* * This can be any email address (_e.g. an institutional email account_) but must be connected to either a Google or Github account. 
-* For more information on linking your institutional email account to a Google account, see below.
+    * This can be any email address (_e.g. an institutional email account_) but must be connected to either a Google or Github account. 
+    * For more information on linking your institutional email account to a Google account, see below.
 
 
 **Using an institutional email account with Google**

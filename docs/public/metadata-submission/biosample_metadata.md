@@ -9,7 +9,7 @@ This page outlines and describes the types of metadata that is requested for bio
 * The first part of the document outlines the few fields shared by all biosamples.  
 * The Cell Lines and Samples Working Group has focused on developing requirements for cell line metadata and this is the primary focus of the [remainder of this document](#cc_meta).
 
-*Note that the working group is still discussing some of the metadata and requirements are evolving.  If you have any questions or concerns please feel free to [contact us](mailto:4DN.DCIC.support@hms-dbmi.atlassian.net).*
+*Note that the working group is still discussing some of the metadata and requirements are evolving.  If you have any questions or concerns please feel free to [contact us](mailto:support@4dnucleome.org).*
 
 ## Basic Biosample Metadata
 

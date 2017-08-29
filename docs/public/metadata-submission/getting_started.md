@@ -58,7 +58,9 @@ If you would like to directly interact with the REST API for data submission see
 
 * Multiple sequencing runs performed at different times using a library prepared from the same Biosample and the same methods up until the sample is sent to the sequencer - i.e. technical replicates.
 
-The replicate information is stored and represented as a set of experiments that includes labels indicating the replicate type and replicate number of each experiment in the set.
+**Submitting replicate information**
+
+* The replicate information is stored and represented as a set of experiments that includes labels indicating the replicate type and replicate number of each experiment in the set.
 
 * The mechanism that you use to submit your metadata will dictate the type of item that you will associate replicate information with
     * In excel workbooks bioreplicate and technical replicate numbers are entered in the Experiment sheet
@@ -66,7 +68,7 @@ The replicate information is stored and represented as a set of experiments that
     * Using the web submission interface the replicate numbers and linked experiments are added from the ExperimentSetReplicate page
     
 * In the database the information will always end up directly associated with ExperimentSetReplicate objects.  
-* Specific details on formatting information regarding replicates is given in the [Spreadsheet Submission](/help/spreadsheet) page.  
+* Specific details on formatting information regarding replicates is given in the [Spreadsheet Submission](/help/spreadsheet#experimental-replicate-information) page.  
 * When submitting using the REST API you should format your json according to the specifications in the schema as described in the [REST API page](/help/rest-api).
 
 
@@ -87,10 +89,9 @@ You don't need to use an alias if you are referencing an item that already exist
 
 Any of the following can be used to reference an existing item in an excel sheet or when using the REST-API.
 
-* **uuid** - Every item in our database is assigned a “uuid” upon its creation, e.g. “44d3cdd1-a842-408e-9a60-7afadca11575”. 
 * **accession** - Objects of some types (eg. Files, Experiments, Biosamples, Biosources, Individuals...) are *accessioned*, e.g. 4DNEX4723419. 
+* **uuid** - Every item in our database is assigned a “uuid” upon its creation, e.g. “44d3cdd1-a842-408e-9a60-7afadca11575”. 
 * **type/id** in a few cases object specific identifying terms are also available, eg. award number for awards, or lab name for labs. (see table below)
-
 
 | Object | Field | type/ID | ID|
 |---|---|---|---|
@@ -101,10 +102,15 @@ Any of the following can be used to reference an existing item in an excel sheet
 | Enzyme | name | /enzymes/HindIII/ | HindIII |
 | Construct | name | /constructs/GFP-H1B/ | GFP-H1B
 
+<br>
 
 * Many of the objects that you may need for your submissions may already exist on the 4DN web site.
 * We encourage submitters to use existing database items as much as possible. 
-* Common reusable items include Vendors, Enzymes, Biosources and Protocols
+* Common reusable items include:
+    *  Vendors
+    *  Enzymes
+    *  Biosources
+    *  Protocols
 * For example, if there is an existing biosource (e.g. accession 4DNSRV3SKQ8M for H1-hESC (Tier 1) ) for the new biosample you are creating, you should reference the existing one instead of creating a new one.
 
 ## Getting Added as a 4DN User or Submitter
@@ -119,9 +125,9 @@ For instructions on creating an account, please see [this page](/help/account-cr
 
 
 **Metadata and data accessibility.**
- 
+
 * Most metadata items have the following default permissions:
-    *  that members of the submitting lab can view
+    *  members of the submitting lab can view
     *  submitters for the lab can edit
     *  to help you review and edit a lab's submissions the DCIC data wranglers can view and edit
 
