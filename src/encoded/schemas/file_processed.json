@@ -40,6 +40,7 @@
                 "hic",
                 "mcool",
                 "normvector_juicerformat",
+                "zip",
                 "other"
             ]
         },
@@ -70,6 +71,7 @@
         "mcool": ".mcool",
         "hic": ".hic",
         "normvector_juicerformat": ".normvector.juicerformat.gz",
+        "zip": ".zip",
         "other": ""
     }
 }
