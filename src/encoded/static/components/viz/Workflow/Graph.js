@@ -141,17 +141,18 @@ export default class Graph extends React.Component {
                 }
 
                 if (node1.type === 'input'){
-                    if ((node1.inputOf && node1.inputOf.name && node2.inputOf && node2.inputOf.name)){
-                        if (node1.inputOf.name === node2.inputOf.name){
-                            if (node1.inputOf.id == node2.inputOf.id){
+                    if (Array.isArray(node1.inputOf) && Array.isArray(node2.inputOf) && (node1.inputOf[0] && node1.inputOf[0].name && node2.inputOf[0] && node2.inputOf[0].name)){
+
+                        if (node1.inputOf[0].name === node2.inputOf[0].name){
+                            if (node1.inputOf[0].id === node2.inputOf[0].id){
                                 if (node1.name === node2.name){
                                     return (node1.id < node2.id) ? -2 : 2;
                                 }
                                 return (node1.name < node2.name) ? -2 : 2;
                             }
-                            return node1.inputOf.id < node2.inputOf.id ? -3 : 3;
+                            return node1.inputOf[0].id < node2.inputOf[0].id ? -3 : 3;
                         }
-                        return node1.inputOf.name < node2.inputOf.name ? -1 : 1;
+                        return node1.inputOf[0].name < node2.inputOf[0].name ? -1 : 1;
                     }
                 }
             }
@@ -331,7 +332,7 @@ export default class Graph extends React.Component {
                             onNodeClick={this.props.onNodeClick}
                         >
                             <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeDisabled', 'edgeStyle', 'rowSpacing')} />
+                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeDisabled', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing')} />
                                 <NodesLayer {..._.pick(this.props, 'nodeElement', 'isNodeDisabled')} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }

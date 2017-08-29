@@ -380,7 +380,7 @@ class GraphSection extends React.Component {
             'isNodeDisabled' : GraphSection.isNodeDisabled,
             'nodes' : nodes,
             'edges' : graphData.edges,
-            'columnSpacing' : 120, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
+            'columnSpacing' : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
             'rowSpacingType' : this.state.rowSpacingType
         });
     }
@@ -424,8 +424,8 @@ class GraphSection extends React.Component {
                             </Checkbox>
                         </div>
                         <div className="inline-block show-params-checkbox-container">
-                            <Checkbox checked={this.props.allRuns} onChange={this.onToggleAllRuns} disabled={this.props.loading}>
-                            { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Show All Runs
+                            <Checkbox checked={!this.props.allRuns} onChange={this.onToggleAllRuns} disabled={this.props.loading}>
+                            { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Group Similar Runs
                             </Checkbox>
                         </div>
                         <div className="inline-block">

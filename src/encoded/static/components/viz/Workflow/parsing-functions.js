@@ -108,9 +108,10 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             return expandIONodes(stepOutput, column, stepNode, "output", false);
         }), true);
 
-        // Find __ INPUT __ nodes with same file
+        // Find __ INPUT __ nodes with same file (checks OUTPUT as well, there just shouldn't be any unless a unique file comes out of 2+ steps)
         // if any exist, replace them, re-use instead of adding new, and make edge.
         // also... : move node down in column list somehow
+        var existingMatchedNodes = [];
         outputNodes = _.filter(outputNodes, function(oN){
             for (var i = 0; i < nodes.length; i++){
                 if (nodes[i] && nodes[i].meta && nodes[i].meta.run_data && nodes[i].meta.run_data.file){
@@ -119,7 +120,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         
                         nodes[i].format = oN.format;
                         //nodes[i].name = oN.name || nodes[i].name; //ioNodeNameCombo(nodes[i], oN);
-                        nodes[i].type = 'output';
+                        nodes[i].type = 'output'; // Convert our found input file to an output file, if not already.
                         if (nodes[i].meta && oN.meta && oN.meta.argument_type){
                             nodes[i].meta.argument_type = oN.meta.argument_type;
                         }
@@ -128,12 +129,15 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                             'target' : nodes[i],
                             'capacity' : 'Output',
                         });
+                        existingMatchedNodes.push(nodes[i]);
                         return false;
                     }
                 }
             }
             return true;
         });
+
+        stepNode.outputNodes = _.sortBy(existingMatchedNodes.concat(outputNodes), 'id');
         
         outputNodes.forEach(function(n){
             edges.push({
@@ -154,7 +158,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             id          : inputNodeID(stepInput, readOnly),
             name        : stepInput.name, 
             type        : 'input',
-            inputOf     : inputOfNode,
+            inputOf     : [inputOfNode],
             meta        : _.extend({}, stepInput.meta || {}, _.omit(stepInput, 'required', 'name', 'meta')),
             required    : stepInput.required || false,
         };
@@ -246,7 +250,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     name        : stepInput.name,
                     type        : inputOrOutput + '-group',
                     meta        : _.extend({}, stepInput.meta || {}, _.omit(stepInput, 'required', 'name', 'meta')),
-                    inputOfNode : inputOfNode
+                    inputOf     : [inputOfNode]
                 };
                 groupNode.meta[groupingName] = wfPair[0];
                 m.push(groupNode);
@@ -259,7 +263,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         return expandFilesToIndividualNodes(files);
         
     }
-
+    /*
     function ioNodeNameCombo(nodeAsInputNode, nodeAsOutputNode){
         if (nodeAsOutputNode.name === nodeAsInputNode.name) return nodeAsOutputNode.name;
         return (
@@ -269,6 +273,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             )
         );
     }
+    */
 
     function filterNodesToRelatedIONodes(allNodes, stepName){
         return _.filter(nodes, function(n){
@@ -318,7 +323,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     if (_.find(fullStepInput.source, function(s){
                         // Match source/target (todo: inputOf to array)
                         if (s.name === n.name && n.outputOf && s.step === n.outputOf.name) return true;
-                        if (s.name === n.name && n.inputOf && stepNode.name === n.inputOf.name) return true;
+                        if (s.name === n.name && Array.isArray(n.inputOf) && _.any(n.inputOf, function(nIO){ return stepNode.name === nIO.name; })) return true;
 
                         // Match Groups
                         if (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
@@ -378,7 +383,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     if (!inNode) return;
                     //console.log(n, inNode);
                     _.extend(n, {
-                        'inputOf' : inNode.inputOf,
+                        'inputOf' : _.sortBy( (n.inputOf || []).concat(inNode.inputOf || []), 'id'),
                         'meta' : _.extend(n.meta, inNode.meta),
                         'name' : inNode.name,
                         'id' : inNode.id
@@ -416,6 +421,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             }
 
             //console.log('CREATED', inputNodesCreated);
+
+            // Keep references to incoming nodes on our step.
+            stepNode.inputNodes = _.sortBy(  inputNodesCreated.concat(inputNodesMatched)  , 'id'  );
 
             // Finally, attach edge to all input nodes associated to step input.
             if (inputNodes.length > 0) {
@@ -482,8 +490,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         return true;
                     }
                     if (_.find(fullStepOutput.target, function(t){
-                        if (n.type === 'input' && t.step === n.inputOf.name &&
-                            (t.name === n.name)
+                        if (n.type === 'input' && t.name === n.name &&
+                            _.any(n.inputOf || [], function(nIO){ return nIO.name === t.step; })
                         ) return true;
                         return false;
                     })){
@@ -690,11 +698,66 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         processStepIOPath();
     }
 
-    return {
+    return correctColumnAssignments({
         'nodes' : nodes,
         'edges' : edges
-    };
+    });
 
+}
+
+
+export function correctColumnAssignments(graphData){
+    var { nodes, edges } = graphData;
+    var stepNodes = _.filter(nodes, { 'type' : 'step' });
+    console.log('SN', stepNodes);
+
+    function traceAndCorrectFutureColumn(node, colDifference){
+        if (typeof node.column !== 'number'){
+            console.error('No column number on step', stepNode);
+            return;
+        }
+        node.column += colDifference;
+        var nextNodes = (
+            Array.isArray(node.outputNodes) ? node.outputNodes :
+                Array.isArray(node.inputOf) ? node.inputOf :
+                    []
+        );
+        
+        _.forEach(nextNodes, function(oN){
+            return traceAndCorrectFutureColumn(oN, colDifference);
+        });
+    }
+
+    _.forEach(stepNodes, function(stepNode){
+        if (typeof stepNode.column !== 'number'){
+            console.error('No column number on step', stepNode);
+            return;
+        }
+        if (Array.isArray(stepNode.outputNodes) && stepNode.outputNodes.length > 0){
+
+            var laggingOutputNodes = _.filter(stepNode.outputNodes, function(oN){
+                if (typeof oN.column === 'number' && oN.column <= stepNode.column){
+                    return true;
+                    // !FIX!
+                }
+                return false;
+            });
+
+            _.forEach(laggingOutputNodes, function(loN){
+                var colDifference = Math.abs(stepNode.column - loN.column) + 1;
+                console.log('DIF', colDifference);
+
+                traceAndCorrectFutureColumn(loN, colDifference);
+
+            });
+
+            console.log('LON', laggingOutputNodes);
+
+        }
+
+    });
+
+    return graphData;
 }
 
 
