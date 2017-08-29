@@ -138,7 +138,7 @@ class FileSet(Item):
     item_type = 'file_set'
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
-    embedded = []
+    embedded_list = []
 
 
 @collection(
@@ -155,7 +155,7 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded = ['files_in_set.submitted_by.job_title',
+    embedded_list = ['files_in_set.submitted_by.job_title',
                 'files_in_set.lab.title',
                 'files_in_set.accession',
                 "files_in_set.href",
@@ -178,7 +178,7 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ["award.project",
+    embedded_list = ["award.project",
                 "lab.city",
                 "lab.state",
                 "lab.country",
@@ -464,7 +464,7 @@ class FileFastq(File):
     """Collection for individual fastq files."""
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -509,7 +509,7 @@ class FileFasta(File):
     """Collection for individual fasta files."""
     item_type = 'file_fasta'
     schema = load_schema('encoded:schemas/file_fasta.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -554,7 +554,7 @@ class FileProcessed(File):
     """Collection for individual processed files."""
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -603,7 +603,7 @@ class FileReference(File):
     """Collection for individual reference files."""
     item_type = 'file_reference'
     schema = load_schema('encoded:schemas/file_reference.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
 
 
@@ -618,7 +618,7 @@ class FileCalibration(ItemWithAttachment, File):
     """Collection for individual calibration files."""
     item_type = 'file_calibration'
     schema = load_schema('encoded:schemas/file_calibration.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
 
 

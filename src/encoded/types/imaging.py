@@ -19,4 +19,4 @@ class ImagingPath(Item):
     """Imaging Path class."""
     item_type = 'imaging_path'
     schema = load_schema('encoded:schemas/imaging_path.json')
-    embedded = []
+    embedded_list = []
