@@ -786,7 +786,7 @@ class WorkflowRun(Item):
                 # Gather params (e.g. files) with same workflow_argument_name.
                 # Assume these have been combined correctly unless have differing ordinal number.
                 paramsForTarget = []
-                
+
                 for param in runParams:
                     if (stepOutputTarget['name'] == param.get('workflow_argument_name')) and param.get('value') is not None:
                         paramsForTarget.append(param)
