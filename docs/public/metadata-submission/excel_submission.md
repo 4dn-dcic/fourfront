@@ -164,13 +164,13 @@ The path should be the full path to the supplementary file.
 The Submit4DN package is registered with Pypi so installation is as simple as:
 
 
-    pip3 install submit4dn
+```pip3 install submit4dn```
 
 
 If it is already installed upgrade to the latest version:
 
 
-    pip3 install submit4dn --upgrade
+```pip3 install submit4dn --upgrade```
 
 
 #### Submit4DN Source code
@@ -210,7 +210,7 @@ You will need to generate access keys to submit data.  How to get these is descr
 * Most of your entries in the first submission will be POSTs. To activate posting you need to include the ```--update``` argument to ```import_data```.
 
 
-	```import_data My_metadata.xls --update```
+```import_data My_metadata.xls --update```
 
 
 * If you need to modify an existing item, you can use the patch function. 
@@ -219,7 +219,7 @@ You will need to generate access keys to submit data.  How to get these is descr
 * If you don't use the `--patchall` argument when you run ```import_data``` and an existing entry is encountered, the script will prompt you ‘Do you wish to PATCH this item?’. You will be prompted for every existing item that is found in your workbook. 
 * The ```--patchall``` argument will allow automatic patching of each existing item, bypassing the prompts.
 
-	```import_data My_metadata.xls --patchall```
+```import_data My_metadata.xls --patchall```
 
 #### When your upload is aborted
 
@@ -227,7 +227,7 @@ You will need to generate access keys to submit data.  How to get these is descr
 * When you fix the problem that caused the process to terminate, you can rerun the script using both the ```--patchall``` and ```--update``` arguments. 
 * Those items that had already been posted will be ‘patched’ using the data in the sheet and the items that had not been posted yet will be loaded.
 
-	```import_data My_metadata.xls --patchall --update```
+```import_data My_metadata.xls --patchall --update```
 
 * Functionality that will allow the deletion of all the data in a single field of an existing Item exists - however this can be a potentially dangerous operation.  If you determine that you need this functionality please contact us at the DCIC for more information.
 
@@ -297,4 +297,4 @@ The scripts accepts the following parameters:.
 
 **To get the complete list of relevant sheets in one workbook:**
 
-    get_field_info --type Publication --type Document --type Vendor --type Protocol --type BiosampleCellCulture --type Biosource --type Enzyme --type Construct --type TreatmentChemical --type TreatmentRnai --type Modification --type Biosample --type FileFastq --type FileSet --type IndividualHuman --type IndividualMouse --type ExperimentHiC --type ExperimentCaptureC --type ExperimentRepliseq --type Target --type GenomicRegion --type ExperimentSet --type ExperimentSetReplicate --type Image --comments --outfile AllItems.xls
+    get_field_info --type all --comments --outfile AllItems.xls
