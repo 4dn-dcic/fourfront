@@ -210,7 +210,7 @@ You will need to generate access keys to submit data.  How to get these is descr
 * Most of your entries in the first submission will be POSTs. To activate posting you need to include the ```--update``` argument to ```import_data```.
 
 
-	`import_data My_metadata.xls --update`
+	```import_data My_metadata.xls --update```
 
 
 * If you need to modify an existing item, you can use the patch function. 
@@ -219,7 +219,7 @@ You will need to generate access keys to submit data.  How to get these is descr
 * If you don't use the `--patchall` argument when you run ```import_data``` and an existing entry is encountered, the script will prompt you ‘Do you wish to PATCH this item?’. You will be prompted for every existing item that is found in your workbook. 
 * The ```--patchall``` argument will allow automatic patching of each existing item, bypassing the prompts.
 
-	`import_data My_metadata.xls --patchall`
+	```import_data My_metadata.xls --patchall```
 
 #### When your upload is aborted
 
@@ -227,7 +227,7 @@ You will need to generate access keys to submit data.  How to get these is descr
 * When you fix the problem that caused the process to terminate, you can rerun the script using both the ```--patchall``` and ```--update``` arguments. 
 * Those items that had already been posted will be ‘patched’ using the data in the sheet and the items that had not been posted yet will be loaded.
 
-	`import_data My_metadata.xls --patchall --update`
+	```import_data My_metadata.xls --patchall --update```
 
 * Functionality that will allow the deletion of all the data in a single field of an existing Item exists - however this can be a potentially dangerous operation.  If you determine that you need this functionality please contact us at the DCIC for more information.
 
@@ -259,7 +259,7 @@ The DCIC automatically checks file md5sums to confirm successful upload and to e
 
 **Tip** Upload using ftp is also supported, however the process currently transfers the files to your hard drive, uploads them to our system, and then deletes the copy from your local hard drive.  The files are processed sequentially so you need to have at least the amount of free space on your hard drive as the size of the largest file you wish to upload.  In addition, you must include your ftp login credentials in the ftp url, **which is definitely not a security best practice**.  For these reasons, if at all possible, it is recommended to install the Submit4DN package onto the server hosting the files to be submitted and use import_data as described above.  However, if that is not an option then your ftp urls should be formatted as follows:
 
-    ftp://username:password@hostname/path/to/filename
+```ftp://username:password@hostname/path/to/filename```
 
 
 
