@@ -131,7 +131,7 @@ export default class Edge extends React.Component {
 
             if (nodeXDif > this.props.columnSpacing/* && Math.abs(endPt.y - startPt.y) <= this.props.rowSpacing * 2*/){ // Draw straight line until last section. Length depending on how close together y-axes are (revert to default bezier if far apart).
                 bezierStartPt.x += Math.max( 0,  nodeXDif - (this.props.columnSpacing * (Math.abs(endPt.y - startPt.y) / this.props.rowSpacing * 2))  );
-                path.lineTo(bezierStartPt.x, bezierStartPt.y);
+                //path.lineTo(bezierStartPt.x, bezierStartPt.y);
             }
 
             var bezierXDif = Math.abs(bezierStartPt.x - bezierEndPt.x);

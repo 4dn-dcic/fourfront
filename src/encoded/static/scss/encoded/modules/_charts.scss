@@ -1436,13 +1436,13 @@ $workflow-step-node-lineheight: 18px;
                         }
                         &.node-type-input-group,
                         &.node-type-output-group {
-                            margin-top: - (($workflow-io-node-height * 1.5) / 2);
+                            margin-top: - (($workflow-io-node-height * 1.8) / 2);
                             > .inner {
                                 font-weight: 500;
                                 .node-visible-element {
-                                    height : $workflow-io-node-height * 1.5;
-                                    padding-top: ($workflow-io-node-height * 1.5 - $workflow-io-node-lineheight) / 2;
-                                    padding-bottom: ($workflow-io-node-height * 1.5 - $workflow-io-node-lineheight) / 2;
+                                    height : $workflow-io-node-height * 1.8;
+                                    padding-top: ($workflow-io-node-height * 1.8 - $workflow-io-node-lineheight) / 2;
+                                    padding-bottom: ($workflow-io-node-height * 1.8 - $workflow-io-node-lineheight) / 2;
                                     padding-left: 7px;
                                 }
                             }

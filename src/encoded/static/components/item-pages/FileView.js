@@ -425,7 +425,7 @@ class GraphSection extends React.Component {
                         </div>
                         <div className="inline-block show-params-checkbox-container">
                             <Checkbox checked={!this.props.allRuns} onChange={this.onToggleAllRuns} disabled={this.props.loading}>
-                            { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Group Similar Runs
+                            { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
                             </Checkbox>
                         </div>
                         <div className="inline-block">

@@ -114,6 +114,11 @@ export default class Graph extends React.Component {
                 }
                 return 1;
             }
+
+            function isNodeFileReference(n){
+                return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
+            }
+
             if (node1.type === node2.type){
 
                 if (node1.type === 'output'){
@@ -140,7 +145,21 @@ export default class Graph extends React.Component {
                     }
                 }
 
+                
+
                 if (node1.type === 'input'){
+
+                    if (isNodeFileReference(node1)){
+                        if (isNodeFileReference(node2)) {
+                            //return 0;
+                            //...continue
+                        } else {
+                            return 7;
+                        }
+                    } else if (isNodeFileReference(node2)) {
+                        return -1;
+                    }
+
                     if (Array.isArray(node1.inputOf) && Array.isArray(node2.inputOf) && (node1.inputOf[0] && node1.inputOf[0].name && node2.inputOf[0] && node2.inputOf[0].name)){
 
                         if (node1.inputOf[0].name === node2.inputOf[0].name){

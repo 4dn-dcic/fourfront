@@ -207,7 +207,7 @@ export class WorkflowNodeElement extends React.Component {
                 var len = files.length - 1;
                 return <span className="node-name">
                     { this.icon() }
-                    <b className="text-600">{ files.length - 1 }</b> similar file{ len === 1 ? '' : 's' }...
+                    <b>{ files.length - 1 }</b> similar file{ len === 1 ? '' : 's' }
                 </span>;
             }
         }

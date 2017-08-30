@@ -709,7 +709,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 export function correctColumnAssignments(graphData){
     var { nodes, edges } = graphData;
     var stepNodes = _.filter(nodes, { 'type' : 'step' });
-    console.log('SN', stepNodes);
 
     function traceAndCorrectFutureColumn(node, colDifference){
         if (typeof node.column !== 'number'){
@@ -745,13 +744,9 @@ export function correctColumnAssignments(graphData){
 
             _.forEach(laggingOutputNodes, function(loN){
                 var colDifference = Math.abs(stepNode.column - loN.column) + 1;
-                console.log('DIF', colDifference);
-
                 traceAndCorrectFutureColumn(loN, colDifference);
 
             });
-
-            console.log('LON', laggingOutputNodes);
 
         }
 
