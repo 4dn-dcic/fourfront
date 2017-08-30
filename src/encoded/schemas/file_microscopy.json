@@ -96,6 +96,7 @@
     "file_format_file_extension": {
         "other": "",
         "zip": ".zip",
-        "tiff": ".tiff"
+        "tiff": ".tiff",
+        "ome.tiff": ".ome.tiff"
     }
 }

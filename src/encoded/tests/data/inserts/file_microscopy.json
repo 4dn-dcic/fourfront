@@ -10,7 +10,8 @@
         "status": "uploaded",
         "channel_number": 4,
         "slice_number": 5,
-        "time_frame_number": 1
+        "time_frame_number": 1,
+        "file_type": "z-stack"
     },
     {
         "accession":"4DNFIOTESTM2",
@@ -23,7 +24,8 @@
         "status": "uploaded",
         "channel_number": 4,
         "slice_number": 5,
-        "time_frame_number": 1
+        "time_frame_number": 1,
+        "file_type": "z-stack"
     },
     {
         "accession":"4DNFIOTESTM3",
@@ -36,7 +38,8 @@
         "status": "uploaded",
         "channel_number": 4,
         "slice_number": 5,
-        "time_frame_number": 1
+        "time_frame_number": 1,
+        "file_type": "z-stack"
     },
     {
         "accession":"4DNFIOTESTM4",
@@ -49,6 +52,7 @@
         "status": "uploaded",
         "channel_number": 4,
         "slice_number": 5,
-        "time_frame_number": 1
+        "time_frame_number": 1,
+        "file_type": "z-stack"
     }
 ]
