@@ -22,7 +22,7 @@ class QualityMetricFlag(Item):
 
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
-    embedded = ['quality_metrics.overall_quality_status']
+    embedded_list = ['quality_metrics.overall_quality_status']
 
 
 @abstract_collection(
@@ -37,7 +37,7 @@ class QualityMetric(Item):
     base_types = ['QualityMetric'] + Item.base_types
     item_type = 'quality_metric'
     schema = load_schema('encoded:schemas/quality_metric.json')
-    embedded = []
+    embedded_list = []
 
 
 @collection(
@@ -51,7 +51,7 @@ class QualityMetricFastqc(QualityMetric):
 
     item_type = 'quality_metric_fastqc'
     schema = load_schema('encoded:schemas/quality_metric_fastqc.json')
-    embedded = QualityMetric.embedded
+    embedded_list = QualityMetric.embedded_list
 
 
 @collection(
@@ -65,7 +65,7 @@ class QualityMetricBamqc(QualityMetric):
 
     item_type = 'quality_metric_bamqc'
     schema = load_schema('encoded:schemas/quality_metric_bamqc.json')
-    embedded = QualityMetric.embedded
+    embedded_list = QualityMetric.embedded_list
 
 
 @collection(
@@ -79,4 +79,4 @@ class QualityMetricPairsqc(QualityMetric):
 
     item_type = 'quality_metric_pairsqc'
     schema = load_schema('encoded:schemas/quality_metric_pairsqc.json')
-    embedded = QualityMetric.embedded
+    embedded_list = QualityMetric.embedded_list
