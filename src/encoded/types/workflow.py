@@ -8,6 +8,7 @@ from snovault import (
     calculated_property,
     collection,
     load_schema,
+    CONNECTION
 )
 from .base import (
     Item
@@ -153,6 +154,8 @@ DEFAULT_TRACING_OPTIONS = {
     "track_performance" : False
 }
 
+class WorkflowRunTracingException(Exception):
+    pass
 
 def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options=None):
 
@@ -168,7 +171,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
     steps = [] # Our output
 
 
-    def get_model_by_uuid(uuid, key = None):
+    def get_model_by_uuid(uuid, key = None, skip_check_for_source = False):
         # TODO: Check for hasattr(model, 'source') and raise Exception? (after we have something setup to handle it)
         model = None
         cacheKey = uuid
@@ -180,9 +183,13 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             return model
 
         if key is None:
-            model = request.registry['connection'].storage.get_by_uuid(uuid)
+            model = request.registry[CONNECTION].storage.get_by_uuid(uuid)
         else:
-            model = request.registry['connection'].storage.get_by_unique_key(key, uuid)
+            model = request.registry[CONNECTION].storage.get_by_unique_key(key, uuid)
+
+        if (not hasattr(model, 'source') or not model.source.get('object')):
+            raise WorkflowRunTracingException("Connected Item with ID " + uuid + " not yet indexed.")
+
         uuidCacheModels[cacheKey] = model
         return model
 
@@ -205,19 +212,16 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
         filtered_tuples = []
         filtered_out_tuples = []
         tuples_by_workflow = {}
+
         for workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file in workflow_run_tuples:
             workflow_atid = workflow_run_model_obj.get('workflow')
             if not tuples_by_workflow.get(workflow_atid):
                 tuples_by_workflow[workflow_atid] = []
             tuples_by_workflow[workflow_atid].append((workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file))
 
-        def get_date_created_from_tuple(wfr_tuple):
-            workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file = wfr_tuple
-            return workflow_run_model_obj.get('date_created')
-
         for workflow_atid, wfr_tuples_for_wf in tuples_by_workflow.items():
             # Get most recent workflow
-            sorted_wfr_tuples = sorted(wfr_tuples_for_wf, key=get_date_created_from_tuple)
+            sorted_wfr_tuples = sorted(wfr_tuples_for_wf, key=lambda wfr_tuple: wfr_tuple[2].get('date_created'))
             filtered_tuples.append(sorted_wfr_tuples[0])
             filtered_out_tuples = filtered_out_tuples + sorted_wfr_tuples[1:]
 
@@ -252,13 +256,15 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
 
         for in_file in in_files:
             in_file_uuid = in_file.get('uuid')
+
+            input_file_model = in_file.get('TEMP_MODEL')
+            del in_file['TEMP_MODEL']
+
             if uuidCacheTracedHistory.get(in_file_uuid):
                 sources = sources + uuidCacheTracedHistory[in_file_uuid]
                 continue
 
-            input_file_model = get_model_by_uuid(in_file_uuid)
-
-            if not input_file_model or not hasattr(input_file_model, 'source') or input_file_model.source.get('object') is None:
+            if not input_file_model:
                 continue
 
             input_file_model_obj = input_file_model.source.get('object', {})
@@ -277,7 +283,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             if not workflow_run_uuid or uuidCacheTracedHistory.get(workflow_run_uuid):
                 continue
             workflow_run_model = get_model_by_uuid(workflow_run_uuid)
-            if not workflow_run_model or not hasattr(workflow_run_model, 'source'):
+            if not workflow_run_model:
                 continue
             workflow_run_model_obj = workflow_run_model.source.get('object', {})
             all_workflow_runs.append( (workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file) )
@@ -344,7 +350,7 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
         uuidCacheTracedHistory[last_workflow_run_uuid] = True
         workflow_run_model = get_model_by_uuid(last_workflow_run_uuid)
 
-        if not workflow_run_model or not hasattr(workflow_run_model, 'source'):
+        if not workflow_run_model:
             return
 
         workflow_run_model_obj = workflow_run_model.source.get('object',{})
@@ -403,15 +409,16 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             original_file_in_output = False
             for file_at_id in files:
                 got_item = get_model_by_uuid(get_unique_key_from_at_id(file_at_id), 'accession')
-                if str(got_item.uuid) == original_file_item_uuid:
-                    original_file_in_output = True
-                file_items.append({
-                    'accession' : got_item.properties.get('accession'),
-                    'uuid' : str(got_item.uuid),
-                    'file_format' : got_item.properties.get('file_format'),
-                    'description' : got_item.properties.get('description'),
-                    '@id' : file_at_id
-                })
+                if got_item is not None:
+                    if str(got_item.uuid) == original_file_item_uuid:
+                        original_file_in_output = True
+                    file_items.append({
+                        'accession' : got_item.properties.get('accession'),
+                        'uuid' : str(got_item.uuid),
+                        'file_format' : got_item.properties.get('file_format'),
+                        'description' : got_item.properties.get('description'),
+                        '@id' : file_at_id
+                    })
             step['outputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
                 "target" : targets, # TODO: Trace these maybe (probably not, already too much context shown in graph)
@@ -435,13 +442,15 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
             file_items = []
             for file_at_id in files:
                 got_item = get_model_by_uuid(get_unique_key_from_at_id(file_at_id), 'accession')
-                file_items.append({
-                    'accession' : got_item.properties.get('accession'),
-                    'uuid' : str(got_item.uuid),
-                    'file_format' : got_item.properties.get('file_format'),
-                    'description' : got_item.properties.get('description'),
-                    '@id' : file_at_id
-                })
+                if got_item is not None:
+                    file_items.append({
+                        'accession' : got_item.properties.get('accession'),
+                        'uuid' : str(got_item.uuid),
+                        'file_format' : got_item.properties.get('file_format'),
+                        'description' : got_item.properties.get('description'),
+                        '@id' : file_at_id,
+                        'TEMP_MODEL' : got_item
+                    })
 
             step['inputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?

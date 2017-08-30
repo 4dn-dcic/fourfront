@@ -817,7 +817,7 @@ def load_jin_data(app, access_key_loc=None):
     docsdir = []
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
-                               server="https://testportal.4dnucleome.org")
+                               server="https://mastertest.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
 
 
