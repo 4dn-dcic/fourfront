@@ -710,11 +710,12 @@ export function correctColumnAssignments(graphData){
     var { nodes, edges } = graphData;
     var stepNodes = _.filter(nodes, { 'type' : 'step' });
 
-    function traceAndCorrectFutureColumn(node, colDifference){
+    function traceAndCorrectFutureColumn(node, lastNodeColumn){
         if (typeof node.column !== 'number'){
             console.error('No column number on step', stepNode);
             return;
         }
+        var colDifference = Math.abs(lastNodeColumn - node.column) + 1;
         node.column += colDifference;
         var nextNodes = (
             Array.isArray(node.outputNodes) ? node.outputNodes :
@@ -723,7 +724,7 @@ export function correctColumnAssignments(graphData){
         );
         
         _.forEach(nextNodes, function(oN){
-            return traceAndCorrectFutureColumn(oN, colDifference);
+            return traceAndCorrectFutureColumn(oN, node.column);
         });
     }
 
@@ -743,9 +744,7 @@ export function correctColumnAssignments(graphData){
             });
 
             _.forEach(laggingOutputNodes, function(loN){
-                var colDifference = Math.abs(stepNode.column - loN.column) + 1;
-                traceAndCorrectFutureColumn(loN, colDifference);
-
+                traceAndCorrectFutureColumn(loN, stepNode.column);
             });
 
         }

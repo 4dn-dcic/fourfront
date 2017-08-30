@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { Fade } from 'react-bootstrap';
 import { ItemDetailList } from './ItemDetailList';
 import { ExperimentSetTablesLoaded } from './ExperimentSetTables';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
@@ -319,6 +320,7 @@ class FileDetailBody extends React.Component {
                 })
             }</ol>;
         } else {
+            var fileLoaded = fileUtil.isFileDataComplete(this.state.file);
             var table = null;
             if (
                 this.state.file && Array.isArray(this.state.file.experiments) && this.state.file.experiments.length > 0 &&
@@ -330,20 +332,24 @@ class FileDetailBody extends React.Component {
                 }
             }
             body = (
-                <div>
-                    { table }
-                    { table ? <br/> : null }
-                    <h3 className="tab-section-title">
-                        <span>Details</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <ItemDetailList
-                        context={this.state.file}
-                        schemas={this.props.schemas}
-                        minHeight={this.props.minHeight}
-                        keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
-                    />
-                </div>
+                <Fade in={fileLoaded} transitionAppear>
+                    { fileLoaded ? 
+                    <div>
+                        { table }
+                        { table ? <br/> : null }
+                        <h3 className="tab-section-title">
+                            <span>Details</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider"/>
+                        <ItemDetailList
+                            context={this.state.file}
+                            schemas={this.props.schemas}
+                            minHeight={this.props.minHeight}
+                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                        />
+                    </div>
+                    : <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div> }
+                </Fade>
             );
         }
 
@@ -620,7 +626,7 @@ class AnalysisStepDetailBody extends React.Component {
         var step = this.props.step;
         var software_used = step.software_used;
         var workflow = (step && step.workflow) || null;
-        var wfr = this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr;
+        var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false;
         //var isThereAssociatedSoftware = !!(this.props.step && this.props.step.software_used);
         return(
             <div style={{ minHeight : this.props.minHeight }}>
@@ -638,22 +644,29 @@ class AnalysisStepDetailBody extends React.Component {
                     
                 </div>
                 <hr/>
-                { wfr ?
-                <div>
-                    <h3 className="tab-section-title">
-                        <span>Details</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <ItemDetailList
-                        context={wfr}
-                        schemas={this.props.schemas}
-                        minHeight={this.props.minHeight}
-                        keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
-                    />
-                </div>
-                : typeof this.state.wfr === 'string' ? 
-                <div className="text-center"><i className="icon icon-spin icon-circle-o-notch"/></div>
+                
+                
+                <Fade in={wfr} key="wfr-detail-container">
+                    <div>
+                        <h3 className="tab-section-title">
+                            <span>Details</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider"/>
+                        { wfr ?
+                        <ItemDetailList
+                            context={wfr}
+                            schemas={this.props.schemas}
+                            minHeight={this.props.minHeight}
+                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                        />
+                        : null }
+                    </div>
+                </Fade>
+                { typeof this.state.wfr === 'string' ? 
+                    <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div>
                 : null }
+                
+                
             </div>
         );
     }
@@ -731,7 +744,7 @@ export class WorkflowDetailPane extends React.Component {
         var node = this.props.selectedNode;
         console.log('SELECTED NODE', node);
         if (!node) return (
-            <div className="detail-pane">
+            <div className="detail-pane" style={{ minHeight : this.props.minHeight }}>
                 <h5 className="text-400 text-center" style={{ paddingTop : 7 }}>
                     <small>Select a node above for more detail.</small>
                 </h5>
