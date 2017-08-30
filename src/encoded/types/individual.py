@@ -24,7 +24,7 @@ class Individual(Item):
 
     base_types = ['Individual'] + Item.base_types
     schema = load_schema('encoded:schemas/individual.json')
-    embedded = ['organism.name']
+    embedded_list = ['organism.name']
     name_key = 'accession'
 
 
@@ -40,7 +40,7 @@ class IndividualHuman(Individual):
 
     item_type = 'individual_human'
     schema = load_schema('encoded:schemas/individual_human.json')
-    embedded = Individual.embedded
+    embedded_list = Individual.embedded_list
 
 
 @collection(
@@ -55,4 +55,4 @@ class IndividualMouse(Individual):
 
     item_type = 'individual_mouse'
     schema = load_schema('encoded:schemas/individual_mouse.json')
-    embedded = Individual.embedded + ['mouse_vendor.name']
+    embedded_list = Individual.embedded_list + ['mouse_vendor.name']

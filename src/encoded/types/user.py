@@ -67,7 +67,7 @@ class User(Item):
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
-    embedded = ['lab.awards.project']
+    embedded_list = ['lab.awards.project']
     rev = {
         'access_keys': ('AccessKey', 'user')
     }

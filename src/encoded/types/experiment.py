@@ -27,7 +27,7 @@ class Experiment(Item):
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
-    embedded = ["award.project",
+    embedded_list = ["award.project",
                 "lab.city",
                 "lab.state",
                 "lab.country",
@@ -199,7 +199,7 @@ class ExperimentHiC(Experiment):
 
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme.name"]
+    embedded_list = Experiment.embedded_list + ["digestion_enzyme.name"]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -225,7 +225,7 @@ class ExperimentHiC(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        return self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
 
 
 @collection(
@@ -239,7 +239,7 @@ class ExperimentCaptureC(Experiment):
     """The experiment class for Capture Hi-C experiments."""
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme.name",
+    embedded_list = Experiment.embedded_list + ["digestion_enzyme.name",
                                       "targeted_regions.target.target_summary",
                                       "targeted_regions.oligo_file.href"]
     name_key = 'accession'
@@ -268,7 +268,7 @@ class ExperimentCaptureC(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        return self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
 
 
 @collection(
@@ -282,7 +282,7 @@ class ExperimentRepliseq(Experiment):
     """The experiment class for Repliseq experiments."""
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -308,7 +308,7 @@ class ExperimentRepliseq(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
-        return self.experiment_summary(request, experiment_type, cell_cycle_phase, stage_fraction, biosample)
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, cell_cycle_phase, stage_fraction, biosample))
 
 
 @collection(
@@ -323,7 +323,7 @@ class ExperimentAtacseq(Experiment):
 
     item_type = 'experiment_atacseq'
     schema = load_schema('encoded:schemas/experiment_atacseq.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -345,7 +345,7 @@ class ExperimentAtacseq(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None):
-        return self.experiment_summary(request, experiment_type, biosample)
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
 
 @collection(
@@ -360,7 +360,7 @@ class ExperimentChiapet(Experiment):
 
     item_type = 'experiment_chiapet'
     schema = load_schema('encoded:schemas/experiment_chiapet.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -388,7 +388,7 @@ class ExperimentChiapet(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
-        return self.experiment_summary(request, experiment_type, biosample, target)
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
 
 
 @collection(
@@ -403,7 +403,7 @@ class ExperimentSeq(Experiment):
 
     item_type = 'experiment_seq'
     schema = load_schema('encoded:schemas/experiment_seq.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -431,7 +431,7 @@ class ExperimentSeq(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
-        return self.experiment_summary(request, experiment_type, biosample, target)
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
 
 
 @collection(
@@ -445,7 +445,7 @@ class ExperimentMic(Experiment):
     """The experiment class for Microscopy experiments."""
     item_type = 'experiment_mic'
     schema = load_schema('encoded:schemas/experiment_mic.json')
-    embedded = Experiment.embedded
+    embedded_list = Experiment.embedded_list
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -467,7 +467,7 @@ class ExperimentMic(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None):
-        return self.experiment_summary(request, experiment_type, biosample)
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
 
 @calculated_property(context=Experiment, category='action')

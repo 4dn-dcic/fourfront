@@ -162,7 +162,7 @@ class Publication(Item):
     """Publication class."""
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
-    embedded = ["exp_sets_prod_in_pub.experimentset_type",
+    embedded_list = ["exp_sets_prod_in_pub.experimentset_type",
                 "exp_sets_prod_in_pub.accession",
                 "exp_sets_used_in_pub.experimentset_type",
                 "exp_sets_used_in_pub.accession"]

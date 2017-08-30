@@ -22,7 +22,7 @@ class SopMap(Item):
     item_type = 'sop_map'
     schema = load_schema('encoded:schemas/sop_map.json')
     name_key = 'mapid'
-    embedded = []
+    embedded_list = []
 
     def _update(self, properties, sheets=None):
         delim = '_'
