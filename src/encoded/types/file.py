@@ -622,6 +622,21 @@ class FileCalibration(ItemWithAttachment, File):
     name_key = 'accession'
 
 
+@collection(
+    name='files-microscopy',
+    unique_key='accession',
+    properties={
+        'title': 'Microscopy Files',
+        'description': 'Listing of Microscopy Files',
+    })
+class FileMicroscopy(ItemWithAttachment, File):
+    """Collection for individual microscopy files."""
+    item_type = 'file_microscopy'
+    schema = load_schema('encoded:schemas/file_microscopy.json')
+    embedded = File.embedded
+    name_key = 'accession'
+
+
 @view_config(name='upload', context=File, request_method='GET',
              permission='edit')
 def get_upload(context, request):
