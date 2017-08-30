@@ -66,8 +66,7 @@
              "type": "array",
              "items": {
                  "title": "Source Experiment",
-                 "type": "string",
-                 "linkTo": "Experiment"
+                 "type": "string"
              }
         }
      },
