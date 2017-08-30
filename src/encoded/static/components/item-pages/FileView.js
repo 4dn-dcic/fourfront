@@ -332,7 +332,6 @@ class GraphSection extends React.Component {
         super(props);
         //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.commonGraphProps = this.commonGraphProps.bind(this);
-        this.detailGraph = this.detailGraph.bind(this);
         this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
         this.onToggleReferenceFiles = this.onToggleReferenceFiles.bind(this);
         this.onToggleAllRuns = _.throttle(this.onToggleAllRuns.bind(this), 1000);
@@ -397,17 +396,11 @@ class GraphSection extends React.Component {
         return this.props.onToggleAllRuns();
     }
 
-    detailGraph(){
-        if (!Array.isArray(this.props.steps)) return null;
-        return (
-            <Graph
-                { ...this.commonGraphProps() }
-            />
-        );
-    }
-
     render(){
-
+        var graphProps = null;
+        if (Array.isArray(this.props.steps)){
+            graphProps = this.commonGraphProps();
+        }
         return (
             <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
                 <h3 className="tab-section-title">
@@ -440,7 +433,7 @@ class GraphSection extends React.Component {
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }}>
-                    { this.detailGraph() }
+                    { graphProps ? <Graph { ...graphProps } /> : null }
                 </div>
             </div>
         );

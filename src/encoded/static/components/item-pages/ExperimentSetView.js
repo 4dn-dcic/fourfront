@@ -7,7 +7,7 @@ import { Panel } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide, Filters } from './../util';
 import * as globals from './../globals';
 import ExperimentsTable from './../experiments-table';
-import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView } from './components';
+import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, ProcessedFilesTable, allProcessedFilesFromExperimentSet } from './components';
 import { FacetList, ReduxExpSetFiltersInterface } from './../browse/components';
 
 /**
@@ -53,7 +53,6 @@ export default class ExperimentSetView extends React.Component {
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {
             'selectedFiles': new Set(),
-            'checked' : true,
             'passExperiments' : ExperimentsTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term'),
             'mounted' : false
         };
@@ -88,35 +87,12 @@ export default class ExperimentSetView extends React.Component {
             {
                 tab : <span><i className="icon icon-th icon-fw"/> Experiments</span>,
                 key : 'experiments',
-                content : (
-                    <div className="exp-table-section">
-                        { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ? 
-                        <h3 className="tab-section-title">
-                            <span>Experiments</span>
-                            { Array.isArray(this.state.passExperiments) ? 
-                            <span className="exp-number small right">
-                                <span className="hidden-xs">Showing </span>
-                                { this.state.passExperiments.length } of { this.props.context.experiments_in_set.length }
-                                <span className="hidden-xs"> Experiments</span>
-                            </span>
-                            : null }
-                        </h3>
-                        : null }
-                        <div className="exp-table-container">
-                            <ExperimentsTable
-                                ref="experimentsTable"
-                                experimentSetType={this.props.context.experimentset_type}
-                                expSetFilters={this.props.expSetFilters}
-                                facets={ this.props.facets }
-                                experimentSetAccession={this.props.context.accession || null}
-                                experimentArray={this.props.context.experiments_in_set}
-                                replicateExpsArray={this.props.context.replicate_exps}
-                                keepCounts={false}
-                                columnHeaders={expTableColumnHeaders}
-                            />
-                        </div>
-                    </div>
-                )
+                content : <ExperimentsTableSection {..._.pick(this.props, 'context', 'schemas', 'facets', 'expSetFilters')} {...this.state} />
+            },
+            {
+                tab : <span><i className="icon icon-th icon-fw"/> Processed Files</span>,
+                key : 'processed-files',
+                content : <ProcessedFilesTableSection {..._.pick(this.props, 'context', 'schemas', 'expSetFilters')} {...this.state} />
             },
             AttributionTabView.getTabObject(this.props.context),
             ItemDetailList.getTabObject(this.props.context, this.props.schemas),
@@ -207,6 +183,64 @@ class ExperimentSetHeader extends React.Component {
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
             </ItemHeader.Wrapper>
+        );
+    }
+}
+
+
+class ExperimentsTableSection extends React.Component {
+    render(){
+        /* In addition to built-in headers for experimentSetType defined by ExperimentsTable */
+        var expTableColumnHeaders = [
+            { columnClass: 'file-detail', title : 'File Info'}
+        ];
+
+        if (this.props.context.experimentset_type === 'replicate') {
+            expTableColumnHeaders.unshift({ columnClass: 'file-detail', title : 'File Type'});
+        }
+        return (
+            <div className="exp-table-section">
+                { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ? 
+                <h3 className="tab-section-title">
+                    <span>Experiments</span>
+                    { Array.isArray(this.props.passExperiments) ? 
+                    <span className="exp-number small right">
+                        <span className="hidden-xs">Showing </span>
+                        { this.props.passExperiments.length } of { this.props.context.experiments_in_set.length }
+                        <span className="hidden-xs"> Experiments</span>
+                    </span>
+                    : null }
+                </h3>
+                : null }
+                <div className="exp-table-container">
+                    <ExperimentsTable
+                        ref="experimentsTable"
+                        experimentSetType={this.props.context.experimentset_type}
+                        expSetFilters={this.props.expSetFilters}
+                        facets={ this.props.facets }
+                        experimentSetAccession={this.props.context.accession || null}
+                        experimentArray={this.props.context.experiments_in_set}
+                        replicateExpsArray={this.props.context.replicate_exps}
+                        keepCounts={false}
+                        columnHeaders={expTableColumnHeaders}
+                    />
+                </div>
+            </div>
+        );
+    }
+}
+
+class ProcessedFilesTableSection extends React.Component {
+    render(){
+        var processedFiles = allProcessedFilesFromExperimentSet(this.props.context);
+        return (
+            <div className="processed-files-table-section">
+                <h3 className="tab-section-title">
+                    <span>Processed Files</span>
+                </h3>
+                <hr className="tab-section-title-horiz-divider"/>
+                <ProcessedFilesTable files={processedFiles} />
+            </div>
         );
     }
 }

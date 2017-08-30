@@ -26,3 +26,4 @@ export { AttributionTabView } from './AttributionTabView';
 export { WorkflowDetailPane, MetricsView, ViewMetricButton } from './WorkflowDetailPane';
 export { WorkflowNodeElement } from './WorkflowNodeElement';
 export { FlexibleDescriptionBox, FlexibleCharacterCountBox } from './FlexibleDescriptionBox';
+export { ProcessedFilesTable, allProcessedFilesFromExperiments, allProcessedFilesFromExperimentSet } from './ProcessedFilesTable';

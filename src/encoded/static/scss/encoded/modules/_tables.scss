@@ -1674,7 +1674,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 				padding-left: 10px;
 			}
 			@media screen and (min-width: $screen-md-min){
-				padding-left: 30px;
+				padding-left: 47px;
 			}
 			@media screen and (min-width: $screen-lg-min){
 				padding-left: 47px;
@@ -1691,6 +1691,10 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 					> .inner {
 						height: auto;
 						white-space: normal;
+						@media screen and (min-width: $screen-md-min){
+							padding-left: 47px;
+							padding-right: 0;
+						}
 						.icon-container {
 							padding-top: 8px;
 							padding-bottom: 8px;

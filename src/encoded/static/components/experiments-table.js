@@ -300,7 +300,7 @@ class StackedBlockList extends React.Component {
     }
 
     static defaultProps = {
-        collapseLimit : 5,
+        collapseLimit : 4,
         collapseShow : 3
     }
 
