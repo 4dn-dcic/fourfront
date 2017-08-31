@@ -90,10 +90,10 @@ def audit_replicate_sets_have_replicate_experiments(value, system):
     frame=[
         'replicate_exps',
         'replicate_exps.replicate_exp',
-        'replicate_exps.replicate_exp.files.files',
-        'replicate_exps.replicate_exp.replicate_exp',
-        'replicate_exps.replicate_exp.biosample.biosample',
-        'replicate_exps.replicate_exp.biosample.cell_culture_details.cell_culture_details'
+        'replicate_exps.replicate_exp.files',
+        'replicate_exps.replicate_exp',
+        'replicate_exps.replicate_exp.biosample',
+        'replicate_exps.replicate_exp.biosample.cell_culture_details'
     ]
 )
 def audit_replicate_sets_consistency_check(value, system):
