@@ -73,7 +73,7 @@ export default class Graph extends React.Component {
             'capacity'          : PropTypes.string
         })).isRequired,
         'nodeTitle'         : PropTypes.func,
-        'rowSpacingType'    : PropTypes.oneOf([ 'compact', 'wide' ])
+        'rowSpacingType'    : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ])
     }
 
     static defaultProps = {
@@ -94,8 +94,96 @@ export default class Graph extends React.Component {
             'left' : 20,
             'right' : 20
         },
-        'minimumHeight' : 120,
-        'edgeStyle' : 'bezier'
+        'minimumHeight' : 75,
+        'edgeStyle' : 'bezier',
+        'isNodeCurrentContext' : function(node){
+            return false;
+        },
+        'nodeClassName' : function(node){ return ''; },
+        'nodesInColumnSortFxn' : function(node1, node2){
+            if (node1.type === 'step' && node2.type === 'step'){
+                if (node1.name === node2.name){
+                    return (node1.id < node2.id) ? -2 : 2;
+                }
+                return (node1.name < node2.name) ? -2 : 2;
+            }
+            if (node1.type === 'output' && node2.type === 'input'){
+                if (typeof node1.inputOf !== 'undefined'){
+                    return -4;
+                }
+                return -1;
+            } else if (node1.type === 'input' && node2.type === 'output'){
+                if (typeof node2.inputOf !== 'undefined'){
+                    return 4;
+                }
+                return 1;
+            }
+
+            function isNodeFileReference(n){
+                return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
+            }
+
+            if (node1.type === node2.type){
+
+                if (node1.type === 'output'){
+                    /*
+                    if (typeof node1.inputOf !== 'undefined' && typeof node2.inputOf === 'undefined'){
+                        return -3;
+                    } else if (typeof node1.inputOf === 'undefined' && typeof node2.inputOf !== 'undefined'){
+                        return 3;
+                    }
+                    */
+                    if ((node1.outputOf && node1.outputOf.name && node2.outputOf && node2.outputOf.name)){
+                        if (node1.outputOf.name === node2.outputOf.name){
+                            if (node1.outputOf.id == node2.outputOf.id){
+                                if (typeof node1.inputOf !== 'undefined' && typeof node2.inputOf === 'undefined'){
+                                    return -3;
+                                } else if (typeof node1.inputOf === 'undefined' && typeof node2.inputOf !== 'undefined'){
+                                    return 3;
+                                }
+                                return 0;
+                            }
+                            return node1.outputOf.id < node2.outputOf.id ? -3 : 3;
+                        }
+                        return node1.outputOf.name < node2.outputOf.name ? -3 : 3;
+                    }
+                }
+
+                
+
+                if (node1.type === 'input'){
+
+                    if (isNodeFileReference(node1)){
+                        if (isNodeFileReference(node2)) {
+                            //return 0;
+                            //...continue
+                        } else {
+                            return 7;
+                        }
+                    } else if (isNodeFileReference(node2)) {
+                        return -1;
+                    }
+
+                    if (Array.isArray(node1.inputOf) && Array.isArray(node2.inputOf) && (node1.inputOf[0] && node1.inputOf[0].name && node2.inputOf[0] && node2.inputOf[0].name)){
+
+                        if (node1.inputOf[0].name === node2.inputOf[0].name){
+                            if (node1.inputOf[0].id === node2.inputOf[0].id){
+                                if (node1.name === node2.name){
+                                    return (node1.id < node2.id) ? -2 : 2;
+                                }
+                                return (node1.name < node2.name) ? -2 : 2;
+                            }
+                            return node1.inputOf[0].id < node2.inputOf[0].id ? -3 : 3;
+                        }
+                        return node1.inputOf[0].name < node2.inputOf[0].name ? -1 : 1;
+                    }
+                }
+            }
+
+            //if ((node1.type === 'input' || node1.type === 'output') && (node2.type === 'input' || node2.type === 'output') ){
+            //    return node1.name < node2.name;
+            //}
+        }
     }
 
     constructor(props){
@@ -115,7 +203,6 @@ export default class Graph extends React.Component {
 
     width()  {
         var width = this.props.width;
-        console.log(width, isNaN(width));
         if ((!width || isNaN(width)) && this.state.mounted && !isServerSide()){
             width = this.refs.outerContainer.offsetWidth;
         } else if (!width || isNaN(width)){
@@ -152,20 +239,58 @@ export default class Graph extends React.Component {
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
         _.pairs(_.groupBy(nodes, 'column')).forEach((columnGroup) => {
             var countInCol = columnGroup[1].length;
-            if (countInCol === 1){
-                columnGroup[1][0].y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
-                columnGroup[1][0].nodesInColumn = countInCol;
-            } else if (this.props.rowSpacingType === 'compact') {
-                var padding = Math.max(0, contentHeight - ((countInCol - 1) * this.props.rowSpacing)) / 2;
-                d3.range(countInCol).forEach((i) => {
-                    columnGroup[1][i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
-                    columnGroup[1][i].nodesInColumn = countInCol;
+            
+            // Sort
+
+            var nodesInColumn = columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn);
+            /*
+            var nodesInColumn = _.sortBy(columnGroup[1], function(n){
+                if (n.type === 'input') return n && n.inputOf && n.inputOf.name;
+                if (n.type === 'output') return n && n.outputOf && n.outputOf.name;
+                if (n.type === 'step') return n.name;
+                return null;
+            });
+            */
+
+            var centerNode = function(n){
+                n.y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
+                n.nodesInColumn = countInCol;
+                n.indexInColumn = 0;
+            }.bind(this);
+
+            if (this.props.rowSpacingType === 'compact') {
+                if (countInCol === 1) centerNode(nodesInColumn[0]);
+                else {
+                    var padding = Math.max(0, contentHeight - ((countInCol - 1) * this.props.rowSpacing)) / 2;
+                    d3.range(countInCol).forEach((i) => {
+                        nodesInColumn[i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
+                        nodesInColumn[i].nodesInColumn = countInCol;
+                        nodesInColumn[i].indexInColumn = i;
+                    });
+                }
+            } else if (this.props.rowSpacingType === 'stacked') {
+
+                _.forEach(nodesInColumn, (nodeInCol, idx)=>{
+                    if (!nodeInCol) return;
+                    nodeInCol.y = (this.props.rowSpacing * idx) + (this.props.innerMargin.top + verticalMargin);//num + (this.props.innerMargin.top + verticalMargin);
+                    nodeInCol.nodesInColumn = countInCol;
+                    nodeInCol.indexInColumn = idx;
                 });
+
+            } else if (this.props.rowSpacingType === 'wide') {
+                if (countInCol === 1) centerNode(nodesInColumn[0]);
+                else {
+                    _.forEach(d3.range(0, contentHeight, contentHeight / (countInCol - 1) ).concat([contentHeight]), (num, idx)=>{
+                        var nodeInCol = nodesInColumn[idx];
+                        if (!nodeInCol) return;
+                        nodeInCol.y = num + (this.props.innerMargin.top + verticalMargin);
+                        nodeInCol.nodesInColumn = countInCol;
+                        nodeInCol.indexInColumn = idx;
+                    });
+                }
             } else {
-                _.forEach(d3.range(0, contentHeight, contentHeight / (countInCol - 1) ).concat([contentHeight]), (num, idx)=>{
-                    columnGroup[1][idx].y = num + (this.props.innerMargin.top + verticalMargin);
-                    columnGroup[1][idx].nodesInColumn = countInCol;
-                });
+                console.error("Prop 'rowSpacingType' not valid. Must be ", Graph.propTypes.rowSpacingType);
+                throw new Error("Prop 'rowSpacingType' not valid.");
             }
         });
 
@@ -230,8 +355,8 @@ export default class Graph extends React.Component {
                             onNodeClick={this.props.onNodeClick}
                         >
                             <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer edgeElement={this.props.edgeElement} isNodeDisabled={this.props.isNodeDisabled} edgeStyle={this.props.edgeStyle} />
-                                <NodesLayer nodeElement={this.props.nodeElement} isNodeDisabled={this.props.isNodeDisabled} title={this.props.nodeTitle} />
+                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeDisabled', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing')} />
+                                <NodesLayer {..._.pick(this.props, 'nodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }
                         </StateContainer>

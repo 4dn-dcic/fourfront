@@ -167,21 +167,67 @@ export default class Node extends React.Component {
     }
 
     static isRelated(currentNode, selectedNode) {
+
         if (!selectedNode) return false;
+
+        if (Node.isFromSameWorkflowType(currentNode, selectedNode)) return true;
+
         if (selectedNode.name && currentNode.name) {
-            if (selectedNode.name === currentNode.name) {
+            if (selectedNode.name === currentNode.name || _.any((currentNode.meta.source || []).concat(currentNode.meta.target || []), function(s){ return s.name === selectedNode.name; })) {
                 // Make sure target.step == selectedNode.inputOf.name
-                if (((selectedNode.inputOf && selectedNode.inputOf.name) || 'a') === ((currentNode.inputOf && currentNode.inputOf.name) || 'b')) return true;
-                if (selectedNode.inputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
-                    for (var i = 0; i < currentNode.meta.target.length; i++){
-                        if (typeof selectedNode.inputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.inputOf.name) {
-                            return true;
+                var i;
+                if (currentNode.type === 'input' || currentNode.type === 'output'){
+                    if (((Array.isArray(selectedNode.inputOf) && selectedNode.inputOf[0] && selectedNode.inputOf[0].id) || 'a') === ((Array.isArray(currentNode.inputOf) && currentNode.inputOf[0] && currentNode.inputOf[0].id) || 'b')) return true;
+                    if (Array.isArray(selectedNode.inputOf) && Array.isArray(currentNode.meta.target)){
+                        for (i = 0; i < currentNode.meta.target.length; i++){
+                            if (selectedNode.inputOf[0] && currentNode.meta.target[i].step === selectedNode.inputOf[0].id) {
+                                return true;
+                            }
+                        }
+                    }
+                    // Check related workflow
+                    
+
+                }
+                if (currentNode.type === 'output'){
+                    if (((selectedNode.outputOf && selectedNode.outputOf.id) || 'a') === ((currentNode.outputOf && currentNode.outputOf.id) || 'b')) return true;
+                    if (selectedNode.outputOf !== 'undefined' && Array.isArray(currentNode.meta.source)){
+                        for (i = 0; i < currentNode.meta.source.length; i++){
+                            if (typeof selectedNode.outputOf !== 'undefined' && currentNode.meta.source[i].step === selectedNode.outputOf.id) {
+                                return true;
+                            }
                         }
                     }
                 }
             }
         }
         return false;
+    }
+
+    static isFromSameWorkflowType(currentNode, selectedNode){
+        if (typeof currentNode.meta.workflow === 'string' && typeof selectedNode.meta.workflow === 'string' && selectedNode.meta.workflow === currentNode.meta.workflow){
+            return true;
+        }
+        if (typeof selectedNode.meta.workflow === 'string' && Array.isArray(currentNode.meta.source)){
+            if (_.any(currentNode.meta.source, function(s){ return typeof s.workflow === 'string' && s.workflow === selectedNode.meta.workflow; })){
+                return true;
+            }
+        }
+        if (typeof currentNode.meta.workflow === 'string' && Array.isArray(selectedNode.meta.source)){
+            if (_.any(selectedNode.meta.source, function(s){ return typeof s.workflow === 'string' && s.workflow === currentNode.meta.workflow; })){
+                return true;
+            }
+        }
+        /*
+        if (Array.isArray(currentNode.meta.source) && Array.isArray(selectedNode.meta.source)){
+            if (
+                _.intersection(
+                    _.pluck(_.filter(currentNode.meta.source, function(s){ return (typeof s.workflow === 'string'); }), 'workflow'),
+                    _.pluck(_.filter(selectedNode.meta.source, function(s){ return (typeof s.workflow === 'string'); }), 'workflow')
+                ).length > 0
+            ) return true;
+        }
+        */
     }
 
     static propTypes = {
@@ -213,6 +259,10 @@ export default class Node extends React.Component {
         if      (typeof this.props.className === 'function') className += ' ' + this.props.className(node);
         else if (typeof this.props.className === 'string'  ) className += ' ' + this.props.className;
 
+        if ((typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext(node)) || false){
+            className += ' ' + 'current-context';
+        }
+
         var visibleNode = React.cloneElement(
             this.props.nodeElement,
             _.extend(_.omit(this.props, 'children', 'onMouseEnter', 'onMouseLeave', 'onClick', 'className', 'nodeElement'), {
@@ -225,29 +275,32 @@ export default class Node extends React.Component {
         );
 
         return (
-            <div
-                className={className}
-                data-node-key={node.id || node.name}
-                data-node-type={node.type}
-                data-node-global={node.isGlobal || null}
-                data-node-selected={selected}
-                data-node-related={related}
-                data-node-type-detail={node.format}
-                style={{
-                    'top' : node.y,
-                    'left' : node.x,
-                    'width' : this.props.columnWidth || 100
-                }}
-            >
+            <Fade in transitionAppear>
                 <div
-                    className="inner"
-                    onMouseEnter={this.props.onMouseEnter}
-                    onMouseLeave={this.props.onMouseLeave}
-                    onClick={disabled ? null : this.props.onClick}
+                    className={className}
+                    data-node-key={node.id || node.name}
+                    data-node-type={node.type}
+                    data-node-global={node.isGlobal || null}
+                    data-node-selected={selected}
+                    data-node-related={related}
+                    data-node-type-detail={node.format}
+                    style={{
+                        'top' : node.y,
+                        'left' : node.x,
+                        'width' : this.props.columnWidth || 100,
+                        'zIndex' : 2 + (node.indexInColumn || 0)
+                    }}
                 >
-                    { visibleNode }
+                    <div
+                        className="inner"
+                        onMouseEnter={this.props.onMouseEnter}
+                        onMouseLeave={this.props.onMouseLeave}
+                        onClick={disabled ? null : this.props.onClick}
+                    >
+                        { visibleNode }
+                    </div>
                 </div>
-            </div>
+            </Fade>
         );
     }
 
