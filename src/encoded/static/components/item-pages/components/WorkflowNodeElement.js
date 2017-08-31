@@ -32,7 +32,7 @@ export class WorkflowNodeElement extends React.Component {
     icon(){
         var iconClass;
         if (this.props.node.type === 'input-group' || this.props.node.type === 'output-group'){
-            iconClass = 'files-o';
+            iconClass = 'folder-open';
         } else if (this.props.node.type === 'input' || this.props.node.type === 'output'){
             var formats = this.props.node.format;
             if (typeof formats === 'undefined'){

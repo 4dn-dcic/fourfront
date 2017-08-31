@@ -7,6 +7,7 @@ import * as d3 from 'd3';
 import { console } from './../../util';
 
 import Node from './Node';
+import { traceNodePathAndRun } from './parsing-functions';
 
 
 export default class Edge extends React.Component {
@@ -23,6 +24,26 @@ export default class Edge extends React.Component {
             Node.isRelated(edge.source, selectedNode) ||
             Node.isRelated(edge.target, selectedNode)
         ) && !Edge.isDisabled(edge, isNodeDisabled);
+    }
+
+    static isDistantlyRelated(edge, selectedNode, isNodeDisabled){
+        if (Edge.isDisabled(edge, isNodeDisabled)) return false;
+        if (!selectedNode) return false;
+        if (selectedNode.column < edge.source.column) return false;
+        var selectedInputs = (selectedNode && (selectedNode.inputNodes || (selectedNode.outputOf && [selectedNode.outputOf]))) || null;
+
+        function check(node, prevNode, nextNodes){
+            return Edge.isSelected(edge, node, isNodeDisabled);
+        }
+
+        if (Array.isArray(selectedInputs) && selectedInputs.length > 0){
+            var results = _.flatten(_.map(selectedInputs, (sI)=>{
+                return traceNodePathAndRun(sI, check, 'input', selectedNode);
+            }), false);
+
+            return _.any(results);
+        }
+        return false;
     }
 
     static isDisabled(edge, isNodeDisabled = null){
@@ -51,7 +72,7 @@ export default class Edge extends React.Component {
         if (this.props.pathArrows){
             endOffset -= 10;
         }
-        if (Edge.isSelected(edge, this.props.selectedNode, this.props.isNodeDisabled)){
+        if (Edge.isSelected(edge, this.props.selectedNode, this.props.isNodeDisabled) || Edge.isRelated(edge, this.props.selectedNode, this.props.isNodeDisabled)){
             endOffset -= 2;
         }
         
@@ -207,13 +228,17 @@ export default class Edge extends React.Component {
         var edge = this.props.edge;
         var disabled = Edge.isDisabled(edge, this.props.isNodeDisabled);
         var selected = Edge.isSelected(edge, this.props.selectedNode, disabled);
-        var related = Edge.isRelated(edge, this.props.selectedNode, disabled);
+        var related = false;//Edge.isRelated(edge, this.props.selectedNode, disabled);
+        var isDistantlyRelated = false;
+        if (!related && this.props.selectedNode){
+            isDistantlyRelated = Edge.isDistantlyRelated(edge, this.props.selectedNode, disabled);
+        }
         return (
             <path
                 d={this.generatePathDimension(edge, this.props.edgeStyle, this.props.curveRadius)}
                 className={"edge-path" + (disabled ? ' disabled' : '' )}
                 data-edge-selected={selected}
-                data-edge-related={related}
+                data-edge-related={related || isDistantlyRelated}
                 data-source={edge.source.name}
                 data-target={edge.target.name}
                 markerEnd={this.props.pathArrows ? "url(#pathArrow)" : null}

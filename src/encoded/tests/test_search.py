@@ -147,7 +147,7 @@ def test_search_parameter_name_and_value(workbook, testapp):
 def mboI_dts(testapp, workbook):
     # returns a dictionary of strings of various date and datetimes
     # relative to the creation date of the mboI one object in test inserts
-    from datetime import datetime
+    from datetime import (datetime, timedelta)
     enz = testapp.get('/search/?type=Enzyme&name=MboI').json['@graph'][0]
 
     cdate = enz['date_created']
@@ -162,10 +162,10 @@ def mboI_dts(testapp, workbook):
     return {
         'creationdatetime': ':'.join(str(createdate).replace(' ', '+').split(':')[:-1]),
         'creationdate': str(createdate.date()) + '+00:00',
-        'daybefore': ':'.join(str(createdate.replace(day=(createdate.day - 1))).replace(' ', '+').split(':')[:-1]),
-        'dayafter': ':'.join(str(createdate.replace(day=(createdate.day + 1))).replace(' ', '+').split(':')[:-1]),
-        'hourbefore': ':'.join(str(createdate.replace(hour=(createdate.hour - 1))).replace(' ', '+').split(':')[:-1]),
-        'hourafter': ':'.join(str(createdate.replace(hour=(createdate.hour + 1))).replace(' ', '+').split(':')[:-1])
+        'daybefore': ':'.join(str(createdate - timedelta(days=1)).replace(' ', '+').split(':')[:-1]),
+        'dayafter': ':'.join(str(createdate + timedelta(days=1)).replace(' ', '+').split(':')[:-1]),
+        'hourbefore': ':'.join(str(createdate - timedelta(hours=1)).replace(' ', '+').split(':')[:-1]),
+        'hourafter': ':'.join(str(createdate + timedelta(hours=1)).replace(' ', '+').split(':')[:-1])
     }
 
 
