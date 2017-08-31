@@ -13,7 +13,7 @@ import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } fro
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, doValidAnalysisStepsExist, filterOutParametersFromGraphData, RowSpacingTypeDropdown } from './WorkflowView';
+import { commonGraphPropsFromProps, doValidAnalysisStepsExist, filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
 //import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
@@ -37,30 +37,6 @@ export function filterOutIndirectFilesFromGraphData(graphData){
             deleted[n.id] = true;
             return false;
         }
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
-    });
-    return { nodes, edges };
-}
-
-export function filterOutReferenceFilesFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-
-        if (n && n.meta && n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type'])){
-
-            if (n.meta.run_data.file['@type'].indexOf('FileReference') > -1) {
-                deleted[n.id] = true;
-                return false;
-            }
-
-        }
-
         return true;
     });
     var edges = _.filter(graphData.edges, function(e,i){
@@ -383,17 +359,6 @@ class GraphSection extends React.Component {
             'columnSpacing' : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
             'rowSpacingType' : this.state.rowSpacingType,
             'nodeElement' : <WorkflowNodeElement />,
-            'nodeClassName' : function(node){
-                if (node.meta.run_data && node.meta.run_data.file
-                    && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
-                    && Array.isArray(node.meta.run_data.file['@type'])
-                ){
-                    if (node.meta.run_data.file['@type'].indexOf('FileReference') > -1){
-                        return 'node-item-type-file-reference';
-                    }
-                }
-                return '';
-            },
             'isNodeCurrentContext' : function(node){
                 return (
                     this.props.context && typeof this.props.context.accession === 'string' && node.meta.run_data && node.meta.run_data.file

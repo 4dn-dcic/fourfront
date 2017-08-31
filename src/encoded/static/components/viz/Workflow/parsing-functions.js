@@ -124,6 +124,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         if (nodes[i].meta && oN.meta && oN.meta.argument_type){
                             nodes[i].meta.argument_type = oN.meta.argument_type;
                         }
+                        nodes[i].wasMatchedAsOutputOf = stepNode.id; // For debugging.
                         edges.push({
                             'source' : stepNode,
                             'target' : nodes[i],
@@ -263,17 +264,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         return expandFilesToIndividualNodes(files);
         
     }
-    /*
-    function ioNodeNameCombo(nodeAsInputNode, nodeAsOutputNode){
-        if (nodeAsOutputNode.name === nodeAsInputNode.name) return nodeAsOutputNode.name;
-        return (
-            nodeAsOutputNode.name.indexOf('>') > -1 ? nodeAsOutputNode.name : (
-                ((typeof nodeAsOutputNode.outputOf !== 'undefined' && nodeAsOutputNode.name) || '') +
-                (nodeAsInputNode.name && typeof nodeAsInputNode.inputOf !== 'undefined' ? ((nodeAsOutputNode.name && typeof nodeAsOutputNode.outputOf !== 'undefined' && ' > ') || '') + nodeAsInputNode.name : '' )
-            )
-        );
-    }
-    */
+
+    
 
     function filterNodesToRelatedIONodes(allNodes, stepName){
         return _.filter(nodes, function(n){
@@ -386,7 +378,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         'inputOf' : _.sortBy( (n.inputOf || []).concat(inNode.inputOf || []), 'id'),
                         'meta' : _.extend(n.meta, inNode.meta),
                         'name' : inNode.name,
-                        'id' : inNode.id
+                        'id' : preventDuplicateNodeID(inNode.id, false),
+                        'wasMatchedAsInputOf' : stepNode.id // Used only for debugging.
                         //'name' : n.name || inNode.name //ioNodeNameCombo(inNode, n)
                     });
                 });
