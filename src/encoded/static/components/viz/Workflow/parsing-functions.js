@@ -705,28 +705,50 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
 }
 
+/**
+ * Use this function to run another function on each node recursively along a path of nodes.
+ * See how is used in function correctColumnAssignments.
+ * TODO: Create typedef for node Object.
+ * 
+ * @export
+ * @param {Object}   nextNode               - Current node in path on which fxn is ran on.
+ * @param {function} fxn                    - Function to be ran on each node. Is passed a {Object} 'node', {Object} 'previousNode', and {Object[]} 'nextNodes' positional arguments. previousNode will be null when fxn is executed for first time, unless passed in initially.
+ * @param {string}   [direction='output']   - One of 'output' or 'input'. Which direction to traverse.
+ * @param {any}      [lastNode=null]        - Optionally supply the initial 'last node' to be included.
+ * @param {number}   [depth=0]              - Internal recursion depth.
+ * @returns {Array} Unflattened list of function results.
+ */
+export function traceNodePathAndRun(nextNode, fxn, direction = 'output', lastNode = null, depth = 0){
+    if (typeof fxn !== 'function') return null;
+    var nextNodes = (
+        direction === 'output' ? (
+            Array.isArray(nextNode.outputNodes) ? nextNode.outputNodes :
+                Array.isArray(nextNode.inputOf) ? nextNode.inputOf :
+                    []
+        ) : direction === 'input' ? (
+            Array.isArray(nextNode.inputNodes) ? nextNode.inputNodes :
+                nextNode.outputOf ? [nextNode.outputOf] :
+                    []
+        ) : []
+    );
+    var fxnResult = fxn(nextNode, lastNode, nextNodes);
+    var nextResults = _.map(nextNodes, function(n){ return traceNodePathAndRun(n, fxn, direction, nextNode, depth + 1); });
+    return [fxnResult, nextResults];
+}
+
 
 export function correctColumnAssignments(graphData){
     var { nodes, edges } = graphData;
     var stepNodes = _.filter(nodes, { 'type' : 'step' });
 
-    function traceAndCorrectFutureColumn(node, lastNodeColumn){
-        if (typeof node.column !== 'number'){
-            console.error('No column number on step', stepNode);
+    var colCorrectFxn = function(node, lastNode){
+        if (typeof node.column !== 'number' || typeof lastNode.column !== 'number'){
+            console.error('No column number on one of theses nodes', node, lastNode);
             return;
         }
-        var colDifference = Math.abs(lastNodeColumn - node.column) + 1;
+        var colDifference = Math.abs(lastNode.column - node.column) + 1;
         node.column += colDifference;
-        var nextNodes = (
-            Array.isArray(node.outputNodes) ? node.outputNodes :
-                Array.isArray(node.inputOf) ? node.inputOf :
-                    []
-        );
-        
-        _.forEach(nextNodes, function(oN){
-            return traceAndCorrectFutureColumn(oN, node.column);
-        });
-    }
+    };
 
     _.forEach(stepNodes, function(stepNode){
         if (typeof stepNode.column !== 'number'){
@@ -744,7 +766,7 @@ export function correctColumnAssignments(graphData){
             });
 
             _.forEach(laggingOutputNodes, function(loN){
-                traceAndCorrectFutureColumn(loN, stepNode.column);
+                traceNodePathAndRun(loN, colCorrectFxn, 'output', stepNode);
             });
 
         }
