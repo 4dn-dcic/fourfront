@@ -12,6 +12,7 @@ import {
     defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
     getColumnWidthFromDefinition, HeadersRow, TableRowToggleOpenButton } from './table-commons';
 import { SearchResultDetailPane } from './SearchResultDetailPane';
+import { getTitleStringFromContext } from './../../item-pages/item';
 
 
 
@@ -30,6 +31,34 @@ export class ItemPageTable extends React.Component {
     static defaultProps = {
         'renderDetailPane' : function(result, rowNumber, width){ return <SearchResultDetailPane result={result} />; },
         'constantColumnDefinitions' : null,
+        'columnDefinitionOverrideMap' : {
+            'display_title' : {
+                'render' : function(result, columnDefinition, props, width){
+                    var title = getTitleStringFromContext(result);
+                    var link = object.atIdFromObject(result);
+                    var tooltip;
+                    if (title && (title.length > 20 || width < 100)) tooltip = title;
+                    if (link){
+                        title = <a href={link || '#'}>{ title }</a>;
+                    }
+
+                    var typeTitle = Schemas.getItemTypeTitle(result);
+                    if (typeof typeTitle === 'string'){
+                        typeTitle += ' ';
+                    }
+
+                    return (
+                        <span className={typeTitle ? "has-type-title" : null}>
+                            <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
+                            { typeTitle }
+                            <a href={object.atIdFromObject(result)} className="mono-text text-400">{ title }</a>
+                        </span>
+                    );
+
+                    
+                }
+            }
+        },
         'columns' : {
             "experiments_in_set.experiment_type": "Experiment Type",
             "experiments_in_set.biosample.biosource.individual.organism.name": "Organism",
@@ -138,29 +167,20 @@ class ItemPageTableRow extends React.Component {
         this.setState({ open : !this.state.open });
     }
 
-    renderValue(colDefinition, result){
-        //console.log(colDefinition.field, result);
-        if (colDefinition.field === 'display_title'){
-            //console.log('YUP', colDefinition.field, result);
-            return (
-                <div className={"inner" + (this.state.open ? ' open' : '')}>
-                    <TableRowToggleOpenButton open={this.state.open} onClick={this.toggleOpen} />
-                    { Schemas.getItemTypeTitle(result) }
-                    { ' ' }
-                    <a href={object.atIdFromObject(result)} className="mono-text text-400">{ result.accession }</a>
-                </div>
-            );
-        } else {
-            return (
-                <ResultRowColumnBlockValue
-                    columnDefinition={colDefinition}
-                    key={colDefinition.field}
-                    schemas={this.props.schemas || null}
-                    result={result}
-                    tooltip={true}
-                />
-            );
-        }
+    renderValue(colDefinition, result, columnIndex){
+        return (
+            <ResultRowColumnBlockValue
+                columnDefinition={colDefinition}
+                columnNumber={columnIndex}
+                key={colDefinition.field}
+                schemas={this.props.schemas || null}
+                result={result}
+                tooltip={true}
+                className={colDefinition.field === 'display_title' && this.state.open ? 'open' : null}
+                detailOpen={this.state.open}
+                toggleDetailOpen={this.toggleOpen}
+            />
+        );
     }
 
     renderRowOfColumns(){
@@ -175,7 +195,7 @@ class ItemPageTableRow extends React.Component {
                     _.map(this.props.columnDefinitions, (col, index)=>{
                         return (
                             <div style={{ width : col.width }} className={"column column-for-" + col.field} data-field={col.field}>
-                                { this.renderValue(col, result) }
+                                { this.renderValue(col, result, index) }
                             </div>
                         );
                     })

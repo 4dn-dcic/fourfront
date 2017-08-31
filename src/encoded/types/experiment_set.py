@@ -119,7 +119,7 @@ class ExperimentSet(Item):
                 "processed_files.upload_key",
                 "processed_files.file_format",
                 "processed_files.file_classification",
-                "processed_files.@type",
+                #"processed_files.@type",
                 
                 "experiments_in_set.processed_files.href",
                 "experiments_in_set.processed_files.accession",
@@ -128,7 +128,7 @@ class ExperimentSet(Item):
                 "experiments_in_set.processed_files.upload_key",
                 "experiments_in_set.processed_files.file_format",
                 "experiments_in_set.processed_files.file_classification",
-                "experiments_in_set.processed_files.@type"
+                #"experiments_in_set.processed_files.@type"
                 ]
 
     def _update(self, properties, sheets=None):
