@@ -21,7 +21,8 @@ This page outlines and describes the types of metadata that is requested for bio
 ```biosource``` - **Required**
 
 * The value of this field is a reference to usually one _Biosource_ object whose metadata is submitted separately.
-* This biosource can be a cell line or a tissue that has it's own associated metadata.  **NOTE** The tiered cell lines all have an existing biosource in the database that can be re-used and referenced by it's accession, alias or uuid - while other biosources may require you to submit metadata for them.
+* This biosource can be a cell line or a tissue that has its own associated metadata.
+   * **NOTE**: The tiered cell lines all have an existing biosource in the database that can be re-used and referenced by it's accession, alias or uuid - while other biosources may require you to submit metadata for them.
 * It is possible, though rare, for a single biosample to consist of more than one biosource - eg. pooling of two different cell lines - in these cases you can reference multiple biosources in this field.
 
 ```cell_culture_details``` - **Required only for cultured cell lines**
@@ -30,7 +31,7 @@ This page outlines and describes the types of metadata that is requested for bio
 
 ```modifications``` - Optional
 
-* **Genetic modifications** - this field is used when a Biosample has been genomically modified eg. Crispr modification of a cell line.
+* *Genetic modifications* - this field is used when a Biosample has been genomically modified eg. Crispr modification of a cell line.
 * The value of this field is a list of one or more references to a _Modification_ object whose metadata is submitted separately.
 * Modifications include information on expression or targeting vectors stably transfected to generate Crispr'ed or other genomically modified samples.
 
