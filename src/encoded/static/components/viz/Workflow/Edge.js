@@ -33,7 +33,7 @@ export default class Edge extends React.Component {
         var selectedInputs = (selectedNode && (selectedNode.inputNodes || (selectedNode.outputOf && [selectedNode.outputOf]))) || null;
 
         function check(node, prevNode, nextNodes){
-            return Edge.isSelected(edge, node, isNodeDisabled);
+            return Node.isSelected(edge.target, node);
         }
 
         if (Array.isArray(selectedInputs) && selectedInputs.length > 0){

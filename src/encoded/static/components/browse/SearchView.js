@@ -155,7 +155,8 @@ export class ResultTableHandlersContainer extends React.Component {
                 facet.terms = facet.terms.filter(term => _.contains(facet.restrictions, term.key));
             }
 
-            if (facet.field === 'type'){ // For search page, filter out Item types which are subtypes of an abstract type. Unless are on an abstract type.
+            // For search page, filter out Item types which are subtypes of an abstract type. Unless are on an abstract type.
+            if (facet.field === 'type'){
                 facet = _.clone(facet);
                 var queryParts = url.parse((this.props.searchBase || ''), true).query;
                 if (typeof queryParts.type === 'string') queryParts.type = [queryParts.type];
