@@ -66,7 +66,7 @@ class ExperimentSet(Item):
         'publications_using': ('Publication', 'exp_sets_used_in_pub'),
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
-    embedded = ["award.project",
+    embedded_list = ["award.project",
                 "lab.city",
                 "lab.state",
                 "lab.country",
@@ -98,6 +98,7 @@ class ExperimentSet(Item):
                 "experiments_in_set.files.uuid",
                 "experiments_in_set.files.file_size",
                 "experiments_in_set.files.upload_key",
+                "experiments_in_set.files.md5sum",
                 "experiments_in_set.files.file_format",
                 "experiments_in_set.files.file_classification",
                 "experiments_in_set.files.paired_end",
@@ -183,7 +184,7 @@ class ExperimentSetReplicate(ExperimentSet):
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
-    embedded = ExperimentSet.embedded + [
+    embedded_list = ExperimentSet.embedded_list + [
         "replicate_exps.replicate_exp.accession"
     ]
 

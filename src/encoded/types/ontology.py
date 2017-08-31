@@ -22,7 +22,7 @@ class OntologyTerm(Item):
 
     item_type = 'ontology_term'
     schema = load_schema('encoded:schemas/ontology_term.json')
-    embedded = []
+    embedded_list = []
     name_key = 'term_id'
 
     @calculated_property(schema={
@@ -48,7 +48,7 @@ class Ontology(Item):
 
     item_type = 'ontology'
     schema = load_schema('encoded:schemas/ontology.json')
-    embedded = [
+    embedded_list = [
         'synonym_terms.*',
         'definition_terms.*',
     ]
