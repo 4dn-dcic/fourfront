@@ -240,7 +240,7 @@ def audit_replicate_sets_consistency_check(value, system):
 
 @audit_checker(
     'experiment_set',
-    frame=['award', 'award.project', 'publications_of_set']
+    frame=['award', 'publications_of_set']
 )
 def audit_external_experiment_sets_have_pub(value, system):
     '''
