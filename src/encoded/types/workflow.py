@@ -172,7 +172,6 @@ def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflo
 
 
     def get_model(uuid, key = None):
-        # TODO: Check for hasattr(model, 'source') and raise Exception? (after we have something setup to handle it)
         model = None
         cacheKey = uuid
         if key is not None:
