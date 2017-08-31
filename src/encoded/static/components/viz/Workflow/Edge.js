@@ -49,7 +49,7 @@ export default class Edge extends React.Component {
 
     generatePathDimension(edge, edgeStyle = 'bezier', radius = 12, startOffset = 5, endOffset = -5){
         if (this.props.pathArrows){
-            endOffset -= 8;
+            endOffset -= 10;
         }
         if (Edge.isSelected(edge, this.props.selectedNode, this.props.isNodeDisabled)){
             endOffset -= 2;
@@ -158,6 +158,7 @@ export default class Edge extends React.Component {
                 controlPoints[1].y,// + pathAscend,
                 bezierEndPt.x, endPt.y
             );
+            // Final ledge
             path.lineTo(
                 endPt.x,
                 endPt.y

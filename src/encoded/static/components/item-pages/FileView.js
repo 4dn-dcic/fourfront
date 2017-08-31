@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
 import { object, expFxn, ajax, Schemas, layout, fileUtil } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded } from './components';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import ExperimentsTable from './../experiments-table';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
@@ -381,7 +381,27 @@ class GraphSection extends React.Component {
             'nodes' : nodes,
             'edges' : graphData.edges,
             'columnSpacing' : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
-            'rowSpacingType' : this.state.rowSpacingType
+            'rowSpacingType' : this.state.rowSpacingType,
+            'nodeElement' : <WorkflowNodeElement />,
+            'nodeClassName' : function(node){
+                if (node.meta.run_data && node.meta.run_data.file
+                    && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
+                    && Array.isArray(node.meta.run_data.file['@type'])
+                ){
+                    if (node.meta.run_data.file['@type'].indexOf('FileReference') > -1){
+                        return 'node-item-type-file-reference';
+                    }
+                }
+                return '';
+            },
+            'isNodeCurrentContext' : function(node){
+                return (
+                    this.props.context && typeof this.props.context.accession === 'string' && node.meta.run_data && node.meta.run_data.file
+                    && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
+                    && typeof node.meta.run_data.file.accession === 'string'
+                    && node.meta.run_data.file.accession === this.props.context.accession
+                ) || false;
+            }.bind(this)
         });
     }
 

@@ -177,10 +177,10 @@ export default class Node extends React.Component {
                 // Make sure target.step == selectedNode.inputOf.name
                 var i;
                 if (currentNode.type === 'input' || currentNode.type === 'output'){
-                    if (((selectedNode.inputOf && selectedNode.inputOf.id) || 'a') === ((currentNode.inputOf && currentNode.inputOf.id) || 'b')) return true;
-                    if (selectedNode.inputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
+                    if (((Array.isArray(selectedNode.inputOf) && selectedNode.inputOf[0] && selectedNode.inputOf[0].id) || 'a') === ((Array.isArray(currentNode.inputOf) && currentNode.inputOf[0] && currentNode.inputOf[0].id) || 'b')) return true;
+                    if (Array.isArray(selectedNode.inputOf) && Array.isArray(currentNode.meta.target)){
                         for (i = 0; i < currentNode.meta.target.length; i++){
-                            if (typeof selectedNode.inputOf !== 'undefined' && currentNode.meta.target[i].step === selectedNode.inputOf.id) {
+                            if (selectedNode.inputOf[0] && currentNode.meta.target[i].step === selectedNode.inputOf[0].id) {
                                 return true;
                             }
                         }
@@ -258,6 +258,10 @@ export default class Node extends React.Component {
         if      (disabled)                                   className += ' disabled';
         if      (typeof this.props.className === 'function') className += ' ' + this.props.className(node);
         else if (typeof this.props.className === 'string'  ) className += ' ' + this.props.className;
+
+        if ((typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext(node)) || false){
+            className += ' ' + 'current-context';
+        }
 
         var visibleNode = React.cloneElement(
             this.props.nodeElement,

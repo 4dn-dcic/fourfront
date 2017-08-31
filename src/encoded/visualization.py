@@ -431,5 +431,5 @@ def trace_workflow_runs(context, request):
             [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_outputs', []) ],
             options
         )
-    except Exception as e:
+    except WorkflowRunTracingException as e:
         raise HTTPBadRequest(detail=e.args[0])
