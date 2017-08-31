@@ -3,10 +3,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ItemDetailList, TooltipInfoIconContainer } from './ItemDetailList';
+import { Fade } from 'react-bootstrap';
+import { ItemDetailList } from './ItemDetailList';
+import { ExperimentSetTablesLoaded } from './ExperimentSetTables';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
-import { console, object, layout, ajax, fileUtil } from './../../util';
+import { console, object, layout, ajax, fileUtil, expFxn } from './../../util';
 
 
 export class ViewMetricButton extends React.Component {
@@ -41,71 +43,6 @@ export class ViewMetricButton extends React.Component {
                 <i className="icon icon-fw icon-external-link" style={{ top : 1, position: 'relative' }}/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
-    }
-}
-
-
-export class FileDownloadButton extends React.Component {
-
-    static defaultProps = {
-        'title' : 'Download',
-        'disabled' : false
-    }
-
-    render(){
-        var { href, className, disabled, title, filename } = this.props;
-        return (
-            <a href={ href } className={(className || '') + " btn btn-default btn-info download-button " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
-                <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
-            </a>
-        );
-    }
-}
-
-export class FileDownloadButtonAuto extends React.Component {
-
-    static propTypes = {
-        'result' : PropTypes.shape({
-            'href' : PropTypes.string.isRequired,
-            'filename' : PropTypes.string.isRequired,
-        })
-    }
-
-    static defaultProps = {
-        'canDownloadStatuses' : [
-            'uploaded',
-            'released',
-            'replaced',
-            'in review by project',
-            'released to project'
-        ]
-    }
-
-    canDownload(){
-        var file = this.props.result;
-        if (!file || typeof file !== 'object'){
-            console.error("Incorrect data type");
-            return false;
-        }
-        if (typeof file.status !== 'string'){
-            console.error("No 'status' property on file:", file);
-            return false;
-        }
-
-        if (this.props.canDownloadStatuses.indexOf(file.status) > -1){
-            return true;
-        }
-        return false;
-    }
-
-    render(){
-        var file = this.props.result;
-        var props = {
-            'href' : file.href,
-            'filename' : file.filename,
-            'disabled' : !this.canDownload()
-        };
-        return <FileDownloadButton {...props} {...this.props} />;
     }
 }
 
@@ -186,7 +123,7 @@ class FileDetailBody extends React.Component {
     }
 
     static defaultProps = {
-        'canDownloadStatuses' : FileDownloadButtonAuto.defaultProps.canDownloadStatuses
+        'canDownloadStatuses' : fileUtil.FileDownloadButtonAuto.defaultProps.canDownloadStatuses
     }
 
     constructor(props){
@@ -213,8 +150,10 @@ class FileDetailBody extends React.Component {
         
         if (typeof file === 'string') {
             hrefToRequest = '/files/' + file + '/';
-        } else if (file && typeof file === 'object'){
+        } else if (file && typeof file === 'object' && !Array.isArray(file)){
             if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.atIdFromObject(file);
+        } else if (Array.isArray(file) && this.props.node && this.props.node.meta && this.props.node.meta.workflow){
+            hrefToRequest = this.props.node.meta.workflow;
         }
 
         if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.
@@ -225,7 +164,9 @@ class FileDetailBody extends React.Component {
             }, 'GET', () => {
                 this.setState({ file : null });
             });
+            return true;
         }
+        return false;
     }
 
     doesDescriptionOrNotesExist(){
@@ -233,8 +174,8 @@ class FileDetailBody extends React.Component {
         return !!(file.description || file.notes || false);
     }
 
-    canDownload(){
-        if (this.state.file && typeof this.state.file !== 'string' && this.props.canDownloadStatuses.indexOf(this.state.file.status) > -1){
+    canDownload(fileObj = this.state.file){
+        if (fileObj && !Array.isArray(fileObj) && typeof fileObj !== 'string' && this.props.canDownloadStatuses.indexOf(fileObj.status) > -1){
             return true;
         }
         return false;
@@ -246,9 +187,18 @@ class FileDetailBody extends React.Component {
         var fileTitle;
         var fileTitleFormatted;
         var colClassName = "col-sm-6 col-lg-4";
-        if (typeof file === 'string' || !fileUtil.isFileDataComplete(file)) {
+        //if (typeof file === 'object' && file && !fileUtil.isFileDataComplete(file) && !Array.isArray(file)) {}
+        if (typeof file === 'string') {
             fileTitle = null;
             fileTitleFormatted = <small><i className="icon icon-circle-o-notch icon-spin icon-fw"/></small>;
+        } else if (Array.isArray(this.props.file)) { // Some sort of group
+            fileTitle = 'Workflow';
+            if (file && file.display_title) fileTitle = file.display_title;
+            if (typeof node.meta.workflow === 'string'){
+                fileTitleFormatted = <a href={node.meta.workflow}>{ fileTitle }</a>;
+            } else {
+                fileTitleFormatted = fileTitle;
+            }
         } else {
             fileTitle = getTitleStringFromContext(file);
             if (!this.doesDescriptionOrNotesExist()){
@@ -263,7 +213,12 @@ class FileDetailBody extends React.Component {
                     node.type === 'output' ? 'Generated' :
                         node.type === 'input' ? 'Used' :
                             null
-                    } File
+                    } {
+                        Array.isArray(this.props.file) ?
+                            this.props.file.length + ' total files from' + (file && file.display_title ? ' workflow' : '')
+                            :
+                            'File'
+                    }
                 </span>
                 <h3 className="text-400 text-ellipsis-container node-file-title" title={fileTitle}>
                     { fileTitleFormatted }
@@ -281,7 +236,7 @@ class FileDetailBody extends React.Component {
         var title = file.href ? <span>Download</span> : 'File Name';
         var disabled = !this.canDownload();
         var content = file.href ?
-            <FileDownloadButton title={title} href={file.href} disabled={disabled} filename={file.filename} />
+            <fileUtil.FileDownloadButton title={title} href={file.href} disabled={disabled} filename={file.filename} />
             :
             <span>{ file.filename || file.href }</span>;
 
@@ -300,7 +255,7 @@ class FileDetailBody extends React.Component {
     descriptionBox(){
         var file = this.state.file;
         var gridSize = layout.responsiveGridState();
-        if (!this.doesDescriptionOrNotesExist()) return null;
+        if (!this.doesDescriptionOrNotesExist() || typeof file === 'string' || !fileUtil.isFileDataComplete(file)) return null;
         return (
             <div className="col-xs-12 col-lg-4 box">
                 <span className="text-600">{ file.description ? 'Description' : (file.notes ? 'Notes' : 'Description') }</span>
@@ -338,6 +293,8 @@ class FileDetailBody extends React.Component {
             return null;
         }
 
+        console.log('FILE', this.props.file);
+
         var node = this.props.node;
         var body;
         if (typeof this.state.file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
@@ -356,14 +313,43 @@ class FileDetailBody extends React.Component {
                 });
             });
             body = <MetricsView metrics={metrics} />;
+        } else if (Array.isArray(this.props.file) && typeof this.props.file[0] === 'object' && object.atIdFromObject(this.props.file[0])) {
+            body = <ol>{
+                _.map(this.props.file, function(f){
+                    return <li><a href={object.atIdFromObject(f)}>{ f.display_title || f.accession }</a></li>;
+                })
+            }</ol>;
         } else {
+            var fileLoaded = fileUtil.isFileDataComplete(this.state.file);
+            var table = null;
+            if (
+                this.state.file && Array.isArray(this.state.file.experiments) && this.state.file.experiments.length > 0 &&
+                Array.isArray(this.state.file.experiments[0].experiment_sets)
+            ){
+                var setsByKey = expFxn.experimentSetsFromFile(this.state.file);
+                if (_.keys(setsByKey).length > 0){
+                    table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} />;
+                }
+            }
             body = (
-                <ItemDetailList
-                    context={this.state.file}
-                    schemas={this.props.schemas}
-                    minHeight={this.props.minHeight}
-                    keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
-                />
+                <Fade in={fileLoaded} transitionAppear>
+                    { fileLoaded ? 
+                    <div>
+                        { table }
+                        { table ? <br/> : null }
+                        <h3 className="tab-section-title">
+                            <span>Details</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider"/>
+                        <ItemDetailList
+                            context={this.state.file}
+                            schemas={this.props.schemas}
+                            minHeight={this.props.minHeight}
+                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                        />
+                    </div>
+                    : <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div> }
+                </Fade>
             );
         }
 
@@ -492,10 +478,99 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 
 }
 
+class WorkflowDetailsForWorkflowNodeRow extends React.Component {
+    render(){
+        var workflow = this.props.workflow;
+        var innerContent;
+
+        if (workflow) {
+            var link = object.atIdFromObject(workflow);
+            var title = workflow.display_title || workflow.title || workflow.name;
+            innerContent = <a href={link}>{ title }</a>;
+        } else {
+            innerContent = <em>N/A</em>;
+        }
+
+        var workflowSteps;
+        if (Array.isArray(workflow.workflow_steps) && workflow.workflow_steps.length > 0){
+            workflowSteps = _.map(workflow.workflow_steps, function(wf_step){
+                return (
+                    <a href={wf_step.step}>{ wf_step.step_name }</a>
+                );
+            });
+        } else {
+            workflowSteps = <em>N/A</em>;
+        }
+
+        return (
+            <div className="row">
+
+                <div className="col-sm-6 col-md-4 box">
+                    <span className="text-600">Workflow Name</span>
+                    <h4 className="text-400 text-ellipsis-container">
+                        { innerContent }
+                    </h4>
+                </div>
+
+                <div className="col-sm-6 col-md-4 box steps-in-workflow">
+                    <span className="text-600">Steps in Workflow</span>
+                    <h5 className="text-400 text-ellipsis-container">
+                        { workflowSteps }
+                    </h5>
+                </div>
+
+            </div>
+        );
+    }
+}
+
 class AnalysisStepDetailBody extends React.Component {
 
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.maybeLoadWFR = this.maybeLoadWFR.bind(this);
+        this.state = {
+            wfr : (this.props.step && this.props.step['@id']) || null
+        };
+    }
+
+    componentDidMount(){
+        this.maybeLoadWFR();
+    }
+
+    componentWillReceiveProps(nextProps){
+        if ((nextProps.step && nextProps.step['@id']) || null !== (this.props.step && this.props.step['@id']) || null) {
+            this.setState({ wfr : nextProps.step['@id'] }, this.maybeLoadWFR.bind(this, nextProps.step['@id']));
+        }
+    }
+
+    maybeLoadWFR(wfr = this.state.wfr){
+        var hrefToRequest = null;
+        
+        if (typeof wfr === 'string') {
+            hrefToRequest = wfr;
+        } /*else if (wfr && typeof wfr === 'object' && !Array.isArray(wfr)){
+            if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.atIdFromObject(file);
+        }else if (Array.isArray(file) && this.props.node && this.props.node.meta && this.props.node.meta.workflow){
+            hrefToRequest = this.props.node.meta.workflow;
+        }*/
+
+        if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.
+            ajax.load(hrefToRequest, (res)=>{
+                if (res && typeof res === 'object'){
+                    this.setState({ wfr : res });
+                }
+            }, 'GET', () => {
+                this.setState({ wfr : null });
+            });
+            return true;
+        }
+        return false;
+    }
+
     stepTitleBox(){
-        var { step, context } = this.props;
+        var { step, context, node } = this.props;
         var stepHref = object.atIdFromObject(step) || '/' + step.uuid;
         console.log(object.atIdFromObject(step), object.atIdFromObject(context), step, context);
         var titleString = step.name || step.title || step.display_title || step.uuid;
@@ -510,9 +585,19 @@ class AnalysisStepDetailBody extends React.Component {
         ) : (
             <h3 className="text-400 text-ellipsis-container"><a href={stepHref}>{ titleString }</a></h3>
         );
+
+        var label;
+        if (isStepWorkflow){
+            label = 'Workflow Process';
+        } else if (step && Array.isArray(step['@type']) && step['@type'].indexOf('WorkflowRun') > -1){
+            label = 'Run Name';
+        } else {
+            label = 'Step Name';
+        }
+
         return (
             <div className="col-sm-6 col-md-4 box">
-                <span className="text-600">{ isStepWorkflow ? 'Workflow Process' : 'Step Name'}</span>
+                <span className="text-600">{ label }</span>
                 { content }
             </div>
         );
@@ -538,6 +623,10 @@ class AnalysisStepDetailBody extends React.Component {
 
     render(){
         var node = this.props.node;
+        var step = this.props.step;
+        var software_used = step.software_used;
+        var workflow = (step && step.workflow) || null;
+        var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false;
         //var isThereAssociatedSoftware = !!(this.props.step && this.props.step.software_used);
         return(
             <div style={{ minHeight : this.props.minHeight }}>
@@ -548,10 +637,36 @@ class AnalysisStepDetailBody extends React.Component {
                         { this.purposesBox() }
 
                     </div>
-                    <hr/>
-                    <AnalysisStepSoftwareDetailRow software={this.props.step.software_used}/>
+                    { workflow ? <hr/> : null }
+                    { workflow ? <WorkflowDetailsForWorkflowNodeRow workflow={workflow}/> : null }
+                    { software_used ? <hr/> : null }
+                    { software_used ? <AnalysisStepSoftwareDetailRow software={step.software_used}/> : null }
+                    
                 </div>
                 <hr/>
+                
+                
+                <Fade in={wfr} key="wfr-detail-container">
+                    <div>
+                        <h3 className="tab-section-title">
+                            <span>Details</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider"/>
+                        { wfr ?
+                        <ItemDetailList
+                            context={wfr}
+                            schemas={this.props.schemas}
+                            minHeight={this.props.minHeight}
+                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                        />
+                        : null }
+                    </div>
+                </Fade>
+                { typeof this.state.wfr === 'string' ? 
+                    <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div>
+                : null }
+                
+                
             </div>
         );
     }
@@ -566,7 +681,7 @@ export class WorkflowDetailPane extends React.Component {
     }
 
     static defaultProps = {
-        'minHeight' : 500,
+        'minHeight' : 650,
         'selectedNode' : null,
         'keyTitleDescriptionMap' : {
             '@id' : {
@@ -581,7 +696,7 @@ export class WorkflowDetailPane extends React.Component {
         this.body = this.body.bind(this);
     }
 
-    body(){
+    body(typeTitle){
         var node = this.props.selectedNode;
         
         if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file){
@@ -615,6 +730,7 @@ export class WorkflowDetailPane extends React.Component {
                 <AnalysisStepDetailBody
                     step={node.meta}
                     node={node}
+                    typeTitle={typeTitle}
                     schemas={this.props.schemas}
                     minHeight={this.props.minHeight}
                     context={this.props.context}
@@ -626,8 +742,9 @@ export class WorkflowDetailPane extends React.Component {
 
     render(){
         var node = this.props.selectedNode;
+        console.log('SELECTED NODE', node);
         if (!node) return (
-            <div className="detail-pane">
+            <div className="detail-pane" style={{ minHeight : this.props.minHeight }}>
                 <h5 className="text-400 text-center" style={{ paddingTop : 7 }}>
                     <small>Select a node above for more detail.</small>
                 </h5>
@@ -635,19 +752,24 @@ export class WorkflowDetailPane extends React.Component {
         );
 
         var type;
-        if (node.type === 'step'){
+
+        if ((node.meta && node.meta['@type']) && (node.meta['@type'].indexOf('WorkflowRun') > -1 || node.meta['@type'].indexOf('Workflow'))){
+            type = 'Workflow Run';
+        } else if ((node.meta && node.meta['@type']) && node.meta['@type'].indexOf('Workflow')) {
+            type = 'Workflow';
+        } else if (node.type === 'step'){
             type = 'Analysis Step';
         } else {
             type = node.format || node.type;
         }
 
         return (
-            <div className="detail-pane">
+            <div className="detail-pane" style={{ minHeight : this.props.minHeight }}>
                 <h5 className="text-700 node-type">
                     { type } <i className="icon icon-fw icon-angle-right"/> <span className="text-400">{ node.name }</span>
                 </h5>
                 <div className="detail-pane-body">
-                    { this.body() }
+                    { this.body(type) }
                 </div>
             </div>
         );

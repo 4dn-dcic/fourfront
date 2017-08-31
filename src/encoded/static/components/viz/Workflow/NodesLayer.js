@@ -61,7 +61,8 @@ export default class NodesLayer extends React.Component {
                                 onMouseLeave : p.onNodeMouseLeave && p.onNodeMouseLeave.bind(p.onNodeMouseLeave, node),
                                 onClick : typeof p.onNodeClick === 'function' && p.onNodeClick.bind(p.onNodeClick, node),
                                 key : node.id || node.name || i,
-                                nodeElement : p.nodeElement || null
+                                nodeElement : p.nodeElement || null,
+                                className : p.nodeClassName || null
                             });
                             return <Node {...nodeProps} />;
                         })

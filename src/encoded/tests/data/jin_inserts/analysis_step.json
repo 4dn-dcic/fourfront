@@ -1,0 +1,196 @@
+[
+    {
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "merge_pairs", 
+        "title": "merge_pairs", 
+        "uuid": "e4068c7a-49e5-4c33-afab-9ec90d65faf3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "status": "released", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "version": "13", 
+        "date_created": "2017-05-30T21:43:41.867053+00:00", 
+        "analysis_step_types": [
+            "file merging"
+        ], 
+        "aliases": []
+    }, 
+    {
+        "software_used": "02d636b9-d8dd-4da9-950c-2ca994b23576", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "pairs2hic", 
+        "title": "pairs2hic", 
+        "uuid": "a9d0e56c-49e5-4c33-afab-9ec90d65faf3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "status": "released", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "version": "12", 
+        "date_created": "2017-05-30T23:02:21.808340+00:00", 
+        "analysis_step_types": [
+            "aggregation", 
+            "normalization"
+        ], 
+        "aliases": []
+    }, 
+    {
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a13131", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "FastQC", 
+        "title": "FastQC", 
+        "description": "FastQC QC for fastq files", 
+        "version": "1", 
+        "uuid": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "output_file_info": [
+            {
+                "output_file_format": "zip", 
+                "output_file_type": "QC report"
+            }
+        ], 
+        "schema_version": "1", 
+        "status": "released", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "input_file_info": [
+            {
+                "input_file_format": "fastq", 
+                "input_file_type": "reads"
+            }
+        ], 
+        "date_created": "2017-05-09T07:21:36.805385+00:00", 
+        "analysis_step_types": [
+            "QC calculation"
+        ], 
+        "aliases": []
+    }, 
+    {
+        "software_used": "c91a2c9d-079c-4647-9951-da95f2c9baf1", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "extract-mcool-normvector-for-juicebox", 
+        "title": "extract-mcool-normvector-for-juicebox", 
+        "uuid": "53e7b46f-1d3b-4a16-812f-c79456614bda", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "status": "released", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "version": "2", 
+        "date_created": "2017-07-10T15:03:47.200650+00:00", 
+        "analysis_step_types": [
+            "file format conversion"
+        ], 
+        "aliases": []
+    }, 
+    {
+        "software_used": "02d636b9-d8dd-4da9-950c-2ca994b23555", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "coolerbalance", 
+        "title": "coolerbalance", 
+        "uuid": "ede9938e-49e5-4c33-afab-9ec90d65faf3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "status": "released", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "version": "1", 
+        "date_created": "2017-05-30T23:12:07.452254+00:00", 
+        "analysis_step_types": [
+            "normalization"
+        ], 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "md5", 
+        "title": "md5", 
+        "uuid": "0786554a-49e5-4c33-afab-9ec90d657777", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "schema_version": "1", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "version": "4", 
+        "date_created": "2017-06-23T18:22:28.995284+00:00", 
+        "analysis_step_types": [
+            "QC calculation"
+        ], 
+        "aliases": []
+    }, 
+    {
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23599", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "juicer", 
+        "title": "juicer", 
+        "uuid": "98a6e081-49e5-4c33-afab-9ec90d65dddd", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "status": "released", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "version": "17", 
+        "date_created": "2017-06-23T18:22:28.818343+00:00", 
+        "analysis_step_types": [
+            "alignment", 
+            "filtering"
+        ], 
+        "aliases": []
+    }, 
+    {
+        "software_used": "02d636b9-d8dd-4da9-950c-2ca994b23555", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "cool2mcool", 
+        "title": "cool2mcool", 
+        "uuid": "25e911b4-49e5-4c33-afab-9ec90d65faf3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "status": "released", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "version": "1", 
+        "date_created": "2017-05-30T23:12:14.554128+00:00", 
+        "analysis_step_types": [
+            "file format conversion"
+        ], 
+        "aliases": []
+    }, 
+    {
+        "software_used": "02d636b9-d82d-4da9-950c-2ca994a23547", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "juicer2pairs", 
+        "title": "juicer2pairs", 
+        "uuid": "b1fe75f9-49e5-4c33-afab-9ec90d65faf3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "status": "released", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "version": "1", 
+        "date_created": "2017-05-30T21:43:41.976430+00:00", 
+        "analysis_step_types": [
+            "file format conversion"
+        ], 
+        "aliases": []
+    }, 
+    {
+        "software_used": "02d636b9-d8dd-4da9-950c-2ca994b23555", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "documents": [], 
+        "name": "cooler", 
+        "title": "cooler", 
+        "uuid": "302366fb-49e5-4c33-afab-9ec90d65faf3", 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "schema_version": "1", 
+        "status": "released", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "version": "12", 
+        "date_created": "2017-05-30T23:02:20.633282+00:00", 
+        "analysis_step_types": [
+            "aggregation"
+        ], 
+        "aliases": []
+    }
+]

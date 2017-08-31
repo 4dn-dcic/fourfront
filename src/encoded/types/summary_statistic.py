@@ -22,7 +22,7 @@ class SummaryStatistic(Item):
 
     item_type = 'summary_statistic'
     schema = load_schema('encoded:schemas/summary_statistic.json')
-    embedded = []
+    embedded_list = []
 
 
 @collection(
@@ -36,4 +36,4 @@ class SummaryStatisticHiC(SummaryStatistic):
 
     item_type = 'summary_statistic_hi_c'
     schema = load_schema('encoded:schemas/summary_statistic_hi_c.json')
-    embedded = SummaryStatistic.embedded
+    embedded_list = SummaryStatistic.embedded_list

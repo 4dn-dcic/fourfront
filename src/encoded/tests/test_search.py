@@ -147,7 +147,7 @@ def test_search_parameter_name_and_value(workbook, testapp):
 def mboI_dts(testapp, workbook):
     # returns a dictionary of strings of various date and datetimes
     # relative to the creation date of the mboI one object in test inserts
-    from datetime import datetime
+    from datetime import (datetime, timedelta)
     enz = testapp.get('/search/?type=Enzyme&name=MboI').json['@graph'][0]
 
     cdate = enz['date_created']
@@ -162,10 +162,10 @@ def mboI_dts(testapp, workbook):
     return {
         'creationdatetime': ':'.join(str(createdate).replace(' ', '+').split(':')[:-1]),
         'creationdate': str(createdate.date()) + '+00:00',
-        'daybefore': ':'.join(str(createdate.replace(day=(createdate.day - 1))).replace(' ', '+').split(':')[:-1]),
-        'dayafter': ':'.join(str(createdate.replace(day=(createdate.day + 1))).replace(' ', '+').split(':')[:-1]),
-        'hourbefore': ':'.join(str(createdate.replace(hour=(createdate.hour - 1))).replace(' ', '+').split(':')[:-1]),
-        'hourafter': ':'.join(str(createdate.replace(hour=(createdate.hour + 1))).replace(' ', '+').split(':')[:-1])
+        'daybefore': ':'.join(str(createdate - timedelta(days=1)).replace(' ', '+').split(':')[:-1]),
+        'dayafter': ':'.join(str(createdate + timedelta(days=1)).replace(' ', '+').split(':')[:-1]),
+        'hourbefore': ':'.join(str(createdate - timedelta(hours=1)).replace(' ', '+').split(':')[:-1]),
+        'hourafter': ':'.join(str(createdate + timedelta(hours=1)).replace(' ', '+').split(':')[:-1])
     }
 
 
@@ -271,7 +271,7 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     test_type = 'biosample'
     type_info = registry[TYPES].by_item_type[test_type]
     schema = type_info.schema
-    embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded, schema)
+    embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded_list, schema)
     # we're looking for this specific facet, which is not in the schema
     assert 'treatments.rnai_vendor.display_title' in embeds
     res = testapp.get('/search/?type=Biosample&treatments.rnai_vendor.display_title=Worthington+Biochemical').json

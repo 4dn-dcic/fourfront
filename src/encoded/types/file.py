@@ -39,6 +39,24 @@ log = logging.getLogger(__name__)
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
+file_workflow_run_embeds = [
+    'workflow_run_inputs.input_files.workflow_argument_name',
+    'workflow_run_inputs.input_files.value.filename',
+    'workflow_run_inputs.input_files.value.display_title',
+    'workflow_run_inputs.input_files.value.file_format',
+    'workflow_run_inputs.input_files.value.uuid',
+    'workflow_run_inputs.input_files.value.accession',
+    'workflow_run_inputs.output_files.workflow_argument_name',
+    'workflow_run_inputs.output_files.value.display_title',
+    'workflow_run_inputs.output_files.value.file_format',
+    'workflow_run_inputs.output_files.value.uuid',
+    'workflow_run_inputs.output_files.value.accession',
+    'workflow_run_inputs.output_quality_metrics.name',
+    'workflow_run_inputs.output_quality_metrics.value.uuid'
+]
+
+file_workflow_run_embeds_processed = file_workflow_run_embeds + [ e.replace('workflow_run_inputs.', 'workflow_run_outputs.') for e in file_workflow_run_embeds ]
+
 
 def show_upload_credentials(request=None, context=None, status=None):
     if request is None or status not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
@@ -138,7 +156,7 @@ class FileSet(Item):
     item_type = 'file_set'
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
-    embedded = []
+    embedded_list = []
 
 
 @collection(
@@ -155,7 +173,7 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded = ['files_in_set.submitted_by.job_title',
+    embedded_list = ['files_in_set.submitted_by.job_title',
                 'files_in_set.lab.title',
                 'files_in_set.accession',
                 "files_in_set.href",
@@ -178,7 +196,7 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ["award.project",
+    embedded_list = ["award.project",
                 "lab.city",
                 "lab.state",
                 "lab.country",
@@ -464,7 +482,7 @@ class FileFastq(File):
     """Collection for individual fastq files."""
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list + file_workflow_run_embeds
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -509,7 +527,7 @@ class FileFasta(File):
     """Collection for individual fasta files."""
     item_type = 'file_fasta'
     schema = load_schema('encoded:schemas/file_fasta.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -554,7 +572,7 @@ class FileProcessed(File):
     """Collection for individual processed files."""
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list + file_workflow_run_embeds_processed
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -603,7 +621,7 @@ class FileReference(File):
     """Collection for individual reference files."""
     item_type = 'file_reference'
     schema = load_schema('encoded:schemas/file_reference.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
 
 
@@ -618,7 +636,7 @@ class FileCalibration(ItemWithAttachment, File):
     """Collection for individual calibration files."""
     item_type = 'file_calibration'
     schema = load_schema('encoded:schemas/file_calibration.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
 
 

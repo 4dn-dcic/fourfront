@@ -60,6 +60,15 @@
                 "image",
                 "other"
             ]
+        },
+         "source_experiments": {
+             "title": "Source Experiments",
+             "description": "Experiments that this file is associated with",
+             "type": "array",
+             "items": {
+                 "title": "Source Experiment",
+                 "type": "string"
+             }
         }
      },
      "file_format_file_extension": {

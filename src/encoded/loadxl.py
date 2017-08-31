@@ -561,7 +561,7 @@ PHASE1_PIPELINES = {
         remove_keys('related_files'),
     ],
     'file_processed': [
-        remove_keys('related_files', "workflow_run"),
+        remove_keys('related_files', "workflow_run", "source_experiments"),
     ],
     'file_reference': [
         remove_keys('related_files'),
@@ -623,7 +623,7 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('related_files'),
     ],
     'file_processed': [
-        skip_rows_missing_all_keys('related_files', "workflow_run"),
+        skip_rows_missing_all_keys('related_files', "workflow_run", "source_experiments"),
     ],
     'file_reference': [
         skip_rows_missing_all_keys('related_files'),
@@ -800,6 +800,24 @@ def load_prod_data(app, access_key_loc=None):
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
                                server="https://data.4dnucleome.org")
+    store_keys(app, access_key_loc, keys)
+
+
+def load_jin_data(app, access_key_loc=None):
+    """smth."""
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+
+    from pkg_resources import resource_filename
+    inserts = resource_filename('encoded', 'tests/data/jin_inserts/')
+    docsdir = []
+    load_all(testapp, inserts, docsdir)
+    keys = generate_access_key(testapp, access_key_loc,
+                               server="https://mastertest.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
 
 
