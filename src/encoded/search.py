@@ -435,6 +435,8 @@ def build_query(search, prepared_terms, source_fields):
         if field == 'q':
             query_info['query'] = value
             query_info['lenient'] = True
+            query_info['default_operator'] = 'AND'
+            query_info['default_field'] = '_all'
             break
     if query_info != {}:
         string_query = {'must': {'query_string': query_info}}
@@ -653,8 +655,9 @@ def set_facets(search, facets, final_filters, string_query):
     :param final_filters: Dict of filters which are set for the ES query in set_filters
     :param string_query: Dict holding the query_string used in the search
     """
-    aggs = {}
-    facet_fields = dict(facets).keys() # List of first entry of tuples in facets list.
+    aggs = OrderedDict()
+
+    facet_fields = [facet[0] for facet in facets]
     # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
 
     for field in facet_fields:
