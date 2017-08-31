@@ -1079,7 +1079,7 @@ $small-label-accession-font-size : 0.75rem;
 				position: absolute;
 				top: 10px;
 				width: 100%;
-				text-align: middle;
+				text-align: center;
 				> i.icon {
 					position: relative;
 					display: block;
@@ -1696,10 +1696,14 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							padding-right: 0;
 						}
 						.icon-container {
-							padding-top: 8px;
 							padding-bottom: 8px;
 							cursor: pointer;
 							font-size: 1.25rem;
+						}
+						.has-type-title, &.has-type-title {
+							.icon-container {
+								padding-top: 8px;
+							}
 						}
 						.title-container {
 							padding-right: 0;

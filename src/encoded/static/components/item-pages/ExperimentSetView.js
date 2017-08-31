@@ -7,7 +7,7 @@ import { Panel } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide, Filters } from './../util';
 import * as globals from './../globals';
 import ExperimentsTable from './../experiments-table';
-import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, ProcessedFilesTable, allProcessedFilesFromExperimentSet } from './components';
+import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, ProcessedFilesTableSimple, allProcessedFilesFromExperimentSet } from './components';
 import { FacetList, ReduxExpSetFiltersInterface } from './../browse/components';
 
 /**
@@ -239,7 +239,7 @@ class ProcessedFilesTableSection extends React.Component {
                     <span>Processed Files</span>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                <ProcessedFilesTable files={processedFiles} />
+                <ProcessedFilesTableSimple files={processedFiles} />
             </div>
         );
     }

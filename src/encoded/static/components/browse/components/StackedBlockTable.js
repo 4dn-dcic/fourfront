@@ -4,8 +4,463 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
-import { FacetList, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockListViewMoreButton, StackedBlockNameLabel, StackedBlockTable } from './browse/components';
-import { expFxn, Filters, console, isServerSide, analytics, object } from './util';
+import { FacetList } from './FacetList';
+import { expFxn, Filters, console, isServerSide, analytics, object } from './../../util';
+
+
+
+/**
+ * Label to show at top left of Name block.
+ */
+export class StackedBlockNameLabel extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.copyAccessionButton = this.copyAccessionButton.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.state = {
+            'mounted' : false
+        };
+    }
+
+    componentDidMount(){
+        this.setState({ mounted : true });
+    }
+
+    copyAccessionButton(){
+        if (!this.props.accession) return null;
+        if (!this.state.mounted || isServerSide() || !document || !document.createElement || !document.execCommand) return null;
+
+        function copy(){
+            var textArea = document.createElement('textarea');
+            textArea.style.top = '-100px';
+            textArea.style.left = '-100px';
+            textArea.style.position = 'absolute';
+            textArea.style.width = '5px';
+            textArea.style.height = '5px';
+            textArea.style.padding = 0;
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+
+            // Avoid flash of white box if rendered for any reason.
+            textArea.style.background = 'transparent';
+            textArea.value = this.props.accession;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                var successful = document.execCommand('copy');
+                var msg = successful ? 'successful' : 'unsuccessful';
+                console.log('Copying text command was ' + msg);
+                this.flashEffect();
+                analytics.event('ExperimentsTable', 'Copy', {
+                    'eventLabel' : 'Accession',
+                    'name' : this.props.accession
+                });
+            } catch (err) {
+                console.error('Oops, unable to copy');
+                analytics.event('ExperimentsTable', 'ERROR', {
+                    'eventLabel' : 'Unable to copy accession',
+                    'name' : this.props.accession
+                });
+            }
+        }
+
+        return (
+            <i className="icon icon-fw icon-copy" title="Copy to clipboard" onClick={copy.bind(this)} />
+        );
+    }
+
+    flashEffect(){
+        if (!this.refs || !this.refs.subtitle) return null;
+        this.refs.subtitle.style.transform = 'scale3d(1.2, 1.2, 1.2) translate3d(10%, 0, 0)';
+        setTimeout(()=>{
+            this.refs.subtitle.style.transform = '';
+        }, 100);
+    }
+
+    render(){
+
+        var { title, subtitle, accession, inline, className } = this.props;
+
+        function titleElement(){
+            return React.createElement(
+                inline ? 'span' : 'div',
+                { className : "label-title" },
+                title
+            );
+        }
+
+        function subtitleElement(){
+            if (!accession && !subtitle) return null;
+            return React.createElement(
+                inline ? 'span' : 'div',
+                {
+                    className : "ext" + (accession ? ' is-accession' : ''),
+                    ref : 'subtitle'
+                },
+                <span>
+                    { accession || subtitle } { this.copyAccessionButton() }
+                </span>
+            );
+        }
+
+        var fullClassName = "label-ext-info";
+        if (typeof className === 'string') fullClassName += ' ' + className;
+        if (subtitle !== null) fullClassName += ' has-subtitle';
+
+        return (
+            <div className={fullClassName} ref="labelContainerElement">
+                { titleElement() }
+                { subtitleElement.call(this) }
+            </div>
+        );
+    }
+
+}
+
+/**
+ * Name element to be put inside of StackedBlocks as the first child.
+ */
+export class StackedBlockName extends React.Component {
+
+    static Label = StackedBlockNameLabel
+    
+    static propTypes = {
+        columnClass : PropTypes.string,
+        colWidthStyles : PropTypes.object,
+        label : PropTypes.shape({
+            title : PropTypes.node,
+            subtitle : PropTypes.node,
+            subtitleVisible : PropTypes.bool
+        }),
+        visible : PropTypes.bool
+    }
+
+    static defaultProps = {
+        visible : true
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
+        this.adjustedChildren = this.adjustedChildren.bind(this);
+    }
+
+    getColumnWidthStyle(){
+        if (this.props.colWidthStyles && typeof this.props.colWidthStyles[this.props.columnClass] !== 'undefined'){
+            return this.props.colWidthStyles[this.props.columnClass];
+        }
+
+        if (
+            this.props.expTable &&
+            this.props.expTable.state &&
+            Array.isArray(this.props.expTable.state.columnWidths)
+        ){
+            console.log('2nd IF STATE');
+            var colWidthIndex = _.findIndex(this.props.expTable.columnHeaders(), { 'columnClass' : this.props.columnClass });
+            if (colWidthIndex > -1) return { 'width' : this.props.expTable.state.columnWidths[colWidthIndex] };
+        }
+
+        return null;
+    }
+
+    adjustedChildren(){
+        if (React.Children.count(this.props.children) > 1) return this.props.children;
+        return React.Children.map(this.props.children, function(c){
+            if (c && c.props && typeof c.props.className === 'string' && c.props.className.indexOf('name-title') === -1){
+                return React.cloneElement(c, { className : c.props.className + ' name-title' }, c.props.children);
+            }
+            return c;
+        });
+    }
+
+    render(){
+        if (!this.props.visible) return null;
+        var style = null;
+        var colWidthStyle = this.getColumnWidthStyle();
+        if (colWidthStyle){
+            if (this.props.colStyle) style = _.extend(_.clone(colWidthStyle), this.props.colStyle);
+            else style = _.clone(colWidthStyle);
+        }
+        if (this.props.relativePosition){
+            if (style) style.position = 'relative';
+            else style = { 'position' : 'relative' };
+        }
+        return (
+            <div className={"name col-" + this.props.columnClass} style={style}>
+                { this.props.label ?
+                    <StackedBlockName.Label {..._.extend({}, this.props.label, {
+                        inline : false,
+                        className : this.props.label.subtitleVisible === true ? 'subtitle-visible' : null
+                    })} />
+                    : null }
+                { this.adjustedChildren() }
+            </div>
+        );
+    }
+
+}
+
+/**
+ * Button to toggle collapse/visible of longer StacedkBlockLists. Used in StackedBlockLists.
+ */
+export class StackedBlockListViewMoreButton extends React.Component {
+    
+    static propTypes = {
+        collapsibleChildren : PropTypes.array,
+        collapsed : PropTypes.bool,
+        handleCollapseToggle : PropTypes.func
+        // + those from parent .List
+    }
+
+    constructor(props){
+        super(props);
+        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        this.render = this.render.bind(this);
+    }
+
+    shouldComponentUpdate(nextProps){
+        if (this.props.collapsed !== nextProps.collapsed) return true;
+        if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
+        if (this.props.title !== nextProps.title) return true;
+        if (this.props.showMoreExtTitle !== nextProps.showMoreExtTitle) return true;
+        return false;
+    }
+
+    render(){
+
+        if (this.props.collapsibleChildren.length === 0) return null;
+
+        var collapsedMsg = this.props.collapsed &&
+        (this.props.currentlyCollapsing ?
+            (this.props.currentlyCollapsing === this.props.parentID ? false : true)
+            :
+            true
+        );
+
+        function collapseTitle(){
+            var title;
+            if (collapsedMsg){
+                title = "Show " + this.props.collapsibleChildren.length + " More";
+            } else {
+                title = "Show Less";
+            }
+            if (this.props.title) title += ' ' + this.props.title;
+
+            function extTitle(){
+                if (!this.props.showMoreExtTitle || !collapsedMsg) return null;
+                return <span className="ext text-400"> { this.props.showMoreExtTitle }</span>;
+            }
+
+            return <span>{ title }{ extTitle.call(this) }</span>;
+        }
+
+        return (
+            <div className="view-more-button" onClick={this.props.handleCollapseToggle}>
+                <i className={"icon icon-" + (collapsedMsg ? 'plus': 'minus')}></i>
+                &nbsp; { collapseTitle.call(this) }
+            </div>
+        );
+    }
+}
+
+/**
+ * List which can be put inside a StackedBlock, after a StackedBlockName, and which holds other StackedBlocks.
+ */
+export class StackedBlockList extends React.Component {
+
+    static ViewMoreButton = StackedBlockListViewMoreButton
+
+    static propTypes = {
+        title : PropTypes.string,
+        showMoreExtTitle : PropTypes.string,
+        collapseLimit : PropTypes.number,
+        collapseShow : PropTypes.number,
+        expTable : PropTypes.any
+    }
+
+    static defaultProps = {
+        collapseLimit : 4,
+        collapseShow : 3
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
+        this.adjustedChildren = this.adjustedChildren.bind(this);
+        this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
+        if (Array.isArray(this.props.children) && this.props.children.length > this.props.collapseLimit){
+            this.state = { 'collapsed' : true };
+        }
+    }
+    /*
+    shouldComponentUpdate(nextProps, nextState){
+        if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
+        if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
+        if (this.state === null) return false;
+        if (this.state.collapsed !== nextState.collapsed) return true;
+        return false;
+    }
+    */
+
+    adjustedChildren(){
+        return React.Children.map(this.props.children, (c)=>{
+            //if (c.type.displayName !== 'StackedBlock') return c; // Only add props to StackedBlocks
+            var addedProps = {};
+            if (this.props.parentIDList && !c.props.parentIDList){
+                addedProps.parentIDList = this.props.parentIDList;
+            }
+            if (this.props.currentlyCollapsing && !c.props.currentlyCollapsing){
+                addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
+            }
+            if (this.props.expTable && !c.props.expTable){
+                addedProps.expTable = this.props.expTable;
+            }
+            if (this.props.colWidthStyles && !c.props.colWidthStyles){
+                addedProps.colWidthStyles = this.props.colWidthStyles;
+            }
+            if (this.props.experimentSetType && !c.props.experimentSetType){
+                addedProps.experimentSetType = this.props.experimentSetType;
+            }
+            if (Object.keys(addedProps).length > 0){
+                return React.cloneElement(c, addedProps, c.props.children);
+            }
+            return c;
+        });
+    }
+
+    handleCollapseToggle(){
+        if (this.props.expTable && this.props.expTable.state && !this.props.expTable.state.collapsing){
+            this.props.expTable.setState({
+                'collapsing' : this.props.rootList ? 'root' :
+                    this.props.parentID || this.props.className || true
+            }, ()=>{
+                this.setState({ 'collapsed' : !this.state.collapsed });
+            });
+        } else this.setState({ 'collapsed' : !this.state.collapsed });
+    }
+
+    render(){
+        var children = this.adjustedChildren();
+
+        var className = "s-block-list " + this.props.className;
+        var timeout = 350; // Default
+        if (!Array.isArray(children) || children.length <= this.props.collapseLimit) {
+            // Don't have enough items for collapsible element, return plain list.
+            return <div className={className}>{ children }</div>;
+        }
+
+        var collapsibleChildren = children.slice(this.props.collapseShow);
+        if (collapsibleChildren.length > 18) {
+            className += ' transition-slow';
+            timeout = 1000;
+        } else if (collapsibleChildren.length > 9) {
+            className += ' transition-med';
+            timeout = 500;
+        }
+
+        var transitionFinish = function(){
+            if (this.props.expTable && this.props.expTable.state){
+                this.props.expTable.setState({ 'collapsing' : false });
+            }
+        }.bind(this);
+
+        return (
+            <div className={className} data-count-collapsed={collapsibleChildren.length}>
+                { children.slice(0, this.props.collapseShow) }
+                <Collapse in={!this.state.collapsed} timeout={timeout} onExited={transitionFinish} onEntered={transitionFinish}>
+                    <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>
+                </Collapse>
+                <ExperimentsTable.StackedBlock.List.ViewMoreButton
+                    collapsibleChildren={collapsibleChildren}
+                    collapsed={this.state.collapsed}
+                    handleCollapseToggle={this.handleCollapseToggle}
+                    {...this.props}
+                />
+            </div>
+        );
+    }
+
+}
+
+export class StackedBlock extends React.Component {
+
+    static Name = StackedBlockName
+
+    static List = StackedBlockList
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.adjustedChildren = this.adjustedChildren.bind(this);
+        this.childIDList = new Set();
+    }
+
+    adjustedChildren(){
+        return React.Children.map(this.props.children, (c) => {
+            if (c === null) return null;
+            var addedProps = {};
+
+            if (!c.props.columnClass && this.props.columnClass) addedProps.columnClass = this.props.columnClass;
+            if (!c.props.colWidthStyles && this.props.colWidthStyles) addedProps.colWidthStyles = this.props.colWidthStyles;
+            if (!c.props.label && this.props.label) addedProps.label = this.props.label;
+            if (!c.props.expTable && this.props.expTable) addedProps.expTable = this.props.expTable;
+            if (!c.props.experimentSetType && this.props.experimentSetType) addedProps.experimentSetType = this.props.experimentSetType;
+            if (!c.props.currentlyCollapsing && this.props.currentlyCollapsing) addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
+
+            if (c.props.children){
+                // Grab & save child s-block ids (one level deep)
+                React.Children.forEach(c.props.children, (cc)=>{
+                    if (cc.props && typeof cc.props.id === 'string'){
+                        this.childIDList.add(cc.props.id);
+                    }
+                });
+            }
+            if (this.props.id){
+                // Pass down (and include self in) parent s-block ids to child elements.
+                if (this.props.parentIDList){
+                    addedProps.parentIDList = new Set(this.props.parentIDList);
+                } else {
+                    addedProps.parentIDList = new Set();
+                }
+                addedProps.parentIDList.add(this.props.id);
+                addedProps.parentID = this.props.id;
+            }
+            if (Object.keys(addedProps).length > 0){
+                return React.cloneElement(c, addedProps, c.props.children);
+            } else return c;
+        });
+    }
+
+    render(){
+        var className = this.props.columnClass ? this.props.columnClass + ' ' : '';
+        className += "s-block";
+        if (this.props.hideNameOnHover) className += ' hide-name-on-block-hover';
+        if (typeof this.props.stripe !== 'undefined' && this.props.stripe !== null){
+            if (this.props.stripe === true || this.props.stripe === 'even') className += ' even';
+            else className += ' odd';
+        }
+        if (this.props.currentlyCollapsing){
+            className += ' s-block-list-collapsing collapsing-' + this.props.currentlyCollapsing;
+            if (
+                this.props.currentlyCollapsing === this.props.id ||
+                this.props.currentlyCollapsing === 'root' ||
+                ((this.props.parentIDList instanceof Set) && this.props.parentIDList.has(this.props.currentlyCollapsing)) ||
+                ((this.childIDList instanceof Set) && this.childIDList.has(this.props.currentlyCollapsing))
+            ) className += ' collapsing-child';
+        }
+        return (
+            <div className={className}>
+                { this.adjustedChildren() }
+            </div>
+        );
+    }
+
+}
 
 
 /**
@@ -18,6 +473,136 @@ import { expFxn, Filters, console, isServerSide, analytics, object } from './uti
  * or for a parentController (passed in as a prop) to take over management
  * of "selectedFiles" Set and "checked", for integration with other pages/UI.
  */
+
+
+export class StackedBlockTable extends React.Component {
+
+    static StackedBlock = StackedBlock
+
+    static defaultHeaders = [];
+
+    static propTypes = {
+        'columnHeaders' : PropTypes.arrayOf(PropTypes.shape({
+            'columnClass' : PropTypes.string.isRequired,
+            'className' : PropTypes.string,
+            'title' : PropTypes.string.isRequired,
+            'visibleTitle' : PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
+            'initialWidth' : PropTypes.number.isRequired
+        }))
+    };
+
+    static defaultProps = {
+        'columnHeaders' : [
+            { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
+            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+            { columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
+            { columnClass: 'file',                                      title: 'File',          initialWidth: 125   }
+        ],
+        'width': null,
+        'defaultInitialColumnWidth' : 120
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.getColumnWidths = this.getColumnWidths.bind(this);
+        //this.updateColumnWidths = this.updateColumnWidths.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
+        this.staticColumnHeaders = this.staticColumnHeaders.bind(this);
+        this.customColumnHeaders = this.customColumnHeaders.bind(this);
+        this.columnHeaders = this.columnHeaders.bind(this);
+        this.colWidthStyles = this.colWidthStyles.bind(this);
+        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
+        this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
+        this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
+        this.renderRootStackedBlockListOfBiosamplesWithExperiments = this.renderRootStackedBlockListOfBiosamplesWithExperiments.bind(this);
+        this.renderers.replicate = this.renderers.replicate.bind(this);
+        this.renderers.default = this.renderers.default.bind(this);
+
+
+        this.cache = {
+            oddExpRow : true
+        };
+        var initialState = {
+            columnWidths : null, // set on componentDidMount via updateColumnWidths
+            mounted : false
+        };
+        this.state = initialState;
+    }
+
+    componentDidMount(){
+        this.setState({ 'mounted' : true });
+    }
+
+    componentWillUnmount(){
+        delete this.lastColumnHeaders;
+        delete this.lastColumnWidths;
+        delete this.cache.origColumnWidths;
+    }
+
+    initialColumnWidths(){
+        return _.reduce(this.props.columnHeaders, function(m, colHeading){
+            return m + (colHeading.initialWidth || this.props.defaultInitialColumnWidth);
+        }, 0);
+    }
+
+    getColumnWidths(columnHeaders = null){
+        if (
+            typeof this.props.width !== 'number' && (
+                !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
+            )
+        ){
+            return this.initialColumnWidths();
+        }
+
+        var origColumnWidths;
+        if (!this.cache.origColumnWidths){
+            origColumnWidths = _.map(this.props.columnHeaders, (c) => c.initialWidth || this.props.defaultInitialColumnWidth );
+            this.cache.origColumnWidths = origColumnWidths;
+        } else {
+            origColumnWidths = this.cache.origColumnWidths;
+        }
+
+        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960; // 960 = fallback for tests
+        var totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
+
+        if (totalOrigColsWidth > availableWidth){
+            return null;
+        }
+
+        var scale = (availableWidth / totalOrigColsWidth) || 1;
+        var newColWidths = origColumnWidths.map(function(c){
+            return Math.floor(c * scale);
+        });
+
+        // Adjust first column by few px to fit perfectly.
+        var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v; }, 0);
+        var remainder = availableWidth - totalNewColsWidth;
+        newColWidths[0] += Math.floor(remainder - 0.5);
+
+        return newColWidths;
+    }
+
+    colWidthStyles(columnWidths = this.state.columnWidths, columnHeaders){
+        if (!columnHeaders) columnHeaders = this.props.columnHeaders;
+        var colWidthStyles = _.object(_.map(_.pluck(columnHeaders, 'columnClass'), function(cn){ return [cn, null]; })); // Returns { 'experiment' : null , 'biosample' : null, ... }
+
+        if (Array.isArray(columnWidths)){
+            _.keys(colWidthStyles).forEach((cn) => {
+                colWidthStyles[cn] = {
+                    width : columnWidths[_.findIndex(columnHeaders, { 'columnClass' : cn })]
+                };
+            });
+        }
+
+        return colWidthStyles;
+    }
+
+
+
+
+}
 
 
 export default class ExperimentsTable extends React.Component {
@@ -507,7 +1092,7 @@ export default class ExperimentsTable extends React.Component {
      */
     renderRootStackedBlockListOfBiosamplesWithExperiments(experimentsGroupedByBiosample){
         return (
-            <StackedBlockList
+            <ExperimentsTable.StackedBlock.List
                 className="biosamples"
                 title="Biosamples"
                 children={experimentsGroupedByBiosample.map(this.renderBiosampleStackedBlockOfExperiments)}

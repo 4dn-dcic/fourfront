@@ -12,7 +12,7 @@ import {
     defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
     getColumnWidthFromDefinition, HeadersRow, TableRowToggleOpenButton } from './table-commons';
 import { SearchResultDetailPane } from './SearchResultDetailPane';
-import { getTitleStringFromContext } from './../../item-pages/item';
+import { getTitleStringFromContext, isDisplayTitleAccession } from './../../item-pages/item';
 
 
 
@@ -38,6 +38,7 @@ export class ItemPageTable extends React.Component {
                     var link = object.atIdFromObject(result);
                     var tooltip;
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
+                    var isAnAccession = false;// isDisplayTitleAccession(result, title, false);
                     if (link){
                         title = <a href={link || '#'}>{ title }</a>;
                     }
@@ -51,7 +52,7 @@ export class ItemPageTable extends React.Component {
                         <span className={typeTitle ? "has-type-title" : null}>
                             <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
                             { typeTitle }
-                            <a href={object.atIdFromObject(result)} className="mono-text text-400">{ title }</a>
+                            <a href={object.atIdFromObject(result)} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>
                         </span>
                     );
 

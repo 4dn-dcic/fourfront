@@ -97,10 +97,9 @@ export class ProcessedFilesTableSectionForExperimentSet extends React.Component 
 }
 
 
-export class ProcessedFilesTable extends React.Component {
+export class ProcessedFilesTableSimple extends React.Component {
 
     static propTypes = {
-        'viewingContext'        : PropTypes.oneOf(['experiment_set', 'experiment']),
         'files'                 : PropTypes.arrayOf(PropTypes.shape({
             'accession'             : PropTypes.string.isRequired,
             'display_title'         : PropTypes.string.isRequired,
@@ -116,15 +115,11 @@ export class ProcessedFilesTable extends React.Component {
         }))
     }
 
-    static defaultProps = {
-        'viewingContext' : 'experiment_set'
-    }
-
     render(){
-        var groupsOfFiles = processedFilesFromExperimentSetToGroup(this.props.files, false);
+        //var groupsOfFiles = processedFilesFromExperimentSetToGroup(this.props.files, false);
         
         var reducedFiles = reduceProcessedFilesWithExperimentsAndSets(this.props.files);
-        console.log(groupsOfFiles, reducedFiles);
+        //console.log(groupsOfFiles, reducedFiles);
 
         return (
             <ItemPageTable
@@ -140,7 +135,6 @@ export class ProcessedFilesTable extends React.Component {
                 }}
             />
         );
-        return <div>HI</div>;
     }
 
 }
