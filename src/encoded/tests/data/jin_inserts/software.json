@@ -1,0 +1,109 @@
+[
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "name": "juicebox", 
+        "title": "juicebox_1.6.2-cuda8", 
+        "uuid": "02d636b9-d8dd-4da9-950c-2ca994b23576", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "version": "1.6.2-cuda8", 
+        "software_type": [
+            "aggregator", 
+            "normalizer"
+        ], 
+        "date_created": "2017-05-30T23:01:08.061769+00:00", 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "name": "cooler", 
+        "title": "cooler_0.7.4", 
+        "uuid": "02d636b9-d8dd-4da9-950c-2ca994b23555", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "version": "0.7.4", 
+        "software_type": [
+            "aggregator", 
+            "normalizer"
+        ], 
+        "date_created": "2017-05-30T23:01:06.734702+00:00", 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "name": "juicer", 
+        "title": "juicer_1.5.5", 
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a23599", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "version": "1.5.5", 
+        "software_type": [
+            "aligner", 
+            "filter", 
+            "normalizer"
+        ], 
+        "date_created": "2017-06-23T14:35:33.043271+00:00", 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "name": "pairix", 
+        "title": "pairix_0.1.1", 
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a23547", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "version": "0.1.1", 
+        "software_type": [
+            "file format converter", 
+            "indexer"
+        ], 
+        "date_created": "2017-05-09T07:21:36.648573+00:00", 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "name": "fastqc", 
+        "title": "fastqc_0.11.4", 
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a13131", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "version": "0.11.4", 
+        "software_type": [
+            "quality metric generator"
+        ], 
+        "date_created": "2017-05-30T21:43:41.517466+00:00", 
+        "aliases": []
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "name": "mcool2hic", 
+        "title": "mcool2hic_34b5430e8b9cfd8f01203e0821b68efe4897b18f", 
+        "commit": "34b5430e8b9cfd8f01203e0821b68efe4897b18f", 
+        "uuid": "c91a2c9d-079c-4647-9951-da95f2c9baf1", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "software_type": [
+            "file format converter"
+        ], 
+        "date_created": "2017-07-10T15:03:31.167070+00:00", 
+        "aliases": []
+    }
+]

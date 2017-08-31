@@ -1,0 +1,134 @@
+[
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "modifications": [], 
+        "dbxrefs": [], 
+        "description": "Jin et al Hi-C IMR90 replicate 1 biosample", 
+        "treatments": [], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSRC16SF5", 
+        "biosource": [
+            "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
+        ], 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
+        "alternate_accessions": [], 
+        "date_created": "2017-05-10T18:35:13.008295+00:00", 
+        "uuid": "8b59b84b-2bd9-48a6-b6c1-097ce2d264a2", 
+        "aliases": [
+            "dcic:bs_SRX212172(Jin-BioRep_1)"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "modifications": [], 
+        "dbxrefs": [], 
+        "description": "Jin et al Hi-C IMR90 replicate 5 biosample", 
+        "treatments": [], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSJEHC2OQ", 
+        "biosource": [
+            "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
+        ], 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
+        "alternate_accessions": [], 
+        "date_created": "2017-05-10T18:35:14.236787+00:00", 
+        "uuid": "bf4b204c-cc00-4301-b351-1c73a80b413e", 
+        "aliases": [
+            "dcic:bs_SRX294950(Jin-BioRep_5)"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "modifications": [], 
+        "dbxrefs": [], 
+        "description": "Jin et al Hi-C IMR90 replicate 6 biosample", 
+        "treatments": [], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSTUMX83X", 
+        "biosource": [
+            "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
+        ], 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
+        "alternate_accessions": [], 
+        "date_created": "2017-05-10T18:35:14.531746+00:00", 
+        "uuid": "4cda8936-92ab-4641-aff2-98c3328da7f3", 
+        "aliases": [
+            "dcic:bs_SRX294951(Jin-BioRep_6)"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "modifications": [], 
+        "dbxrefs": [], 
+        "description": "Jin et al Hi-C IMR90 replicate 4 biosample", 
+        "treatments": [], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSRNYG7ER", 
+        "biosource": [
+            "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
+        ], 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
+        "alternate_accessions": [], 
+        "date_created": "2017-05-10T18:35:13.922318+00:00", 
+        "uuid": "1b7729ff-d18f-4fac-b453-065690ee7d71", 
+        "aliases": [
+            "dcic:bs_SRX294949(Jin-BioRep_4)"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "modifications": [], 
+        "dbxrefs": [], 
+        "description": "Jin et al Hi-C IMR90 replicate 2 biosample", 
+        "treatments": [], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBSSQMP6QO", 
+        "biosource": [
+            "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
+        ], 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
+        "alternate_accessions": [], 
+        "date_created": "2017-05-10T18:35:13.318822+00:00", 
+        "uuid": "6b62da1f-80e7-407d-bfa9-20c62f67725d", 
+        "aliases": [
+            "dcic:bs_SRX212173(Jin-BioRep_2)"
+        ]
+    }, 
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "modifications": [], 
+        "dbxrefs": [], 
+        "description": "Jin et al Hi-C IMR90 replicate 3 biosample", 
+        "treatments": [], 
+        "lab": "795847de-20b6-4f8c-ba8d-185215469cbf", 
+        "accession": "4DNBS27WHAQ7", 
+        "biosource": [
+            "26ebb2b1-2902-4446-a25f-9fc6523ed5cf"
+        ], 
+        "schema_version": "1", 
+        "references": [], 
+        "award": "1dbecc95-ec91-4081-a862-c79d18a8d0bd", 
+        "alternate_accessions": [], 
+        "date_created": "2017-05-10T18:35:13.616618+00:00", 
+        "uuid": "9fcd0804-e5e3-4ed2-b1c3-c92084a35e3f", 
+        "aliases": [
+            "dcic:bs_SRX294948(Jin-BioRep_3)"
+        ]
+    }
+]

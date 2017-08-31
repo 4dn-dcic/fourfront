@@ -450,7 +450,7 @@ def build_query(search, prepared_terms, source_fields):
 def set_sort_order(request, search, search_term, types, doc_types, result):
     """
     sets sort order for elasticsearch results
-    example: /search/?type=Biosource&sort_by=display_title
+    example: /search/?type=Biosource&sort=display_title
     will sort by display_title in ascending order. To set descending order,
     use the "-" flag: sort_by=-date_created.
     Sorting is done alphatbetically, case sensitive by default.
@@ -482,7 +482,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
             add_to_sort_dict(rs)
 
     # Otherwise we use a default sort only when there's no text search to be ranked
-    if not sort and search_term == '*':
+    if not sort and (search_term == '*' or not any(search_term)):
         # If searching for a single type, look for sort options in its schema
         if len(doc_types) == 1:
             type_schema = types[doc_types[0]].schema

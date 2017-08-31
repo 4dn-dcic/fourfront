@@ -716,7 +716,7 @@ $small-label-accession-font-size : 0.75rem;
 			> .name:after,
 			> .name > .label-ext-info {
 				position: absolute;
-				font-family: 'Work Sans', sans-serif;
+				font-family: $font-family-sans-serif;
 				left: 0;
 				top: 2px;
 				font-size: 0.625rem;
@@ -979,12 +979,13 @@ $small-label-accession-font-size : 0.75rem;
 									border-bottom-style: dotted;
 								}
 
-								> .s-block-list.files > .s-block.file:last-child {
+								> .s-block-list.files > .s-block.file:last-child:not(:first-child) {
 									border-top: 1px solid transparent;
 								}
 
 								.name.col-file-pair {
 									line-height: 25px;
+									white-space: nowrap;
 								}
 							}
 
@@ -997,10 +998,12 @@ $small-label-accession-font-size : 0.75rem;
 
 								&.single-item .name.col-file {
 									line-height: 55px;
+									white-space: nowrap;
 								}
 
 								&:not(.single-item) .name.col-file {
 									line-height: 20px;
+									white-space: nowrap;
 								}
 
 								.name.col-file > .exp-table-checkbox {

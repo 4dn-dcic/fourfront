@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { itemClass, panel_views } from './../globals';
 import _ from 'underscore';
 import { 
@@ -11,6 +12,7 @@ import {
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Schemas, isServerSide, navigate } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { requestAnimationFrame } from './../viz/utilities';
 import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 
 
@@ -62,7 +64,8 @@ export function commonGraphPropsFromProps(props){
         'href'        : props.href,
         'onNodeClick' : onItemPageNodeClick,
         'detailPane'  : <WorkflowDetailPane schemas={props.schemas} context={props.context} />,
-        'nodeElement' : <WorkflowNodeElement schemas={props.schemas} />
+        'nodeElement' : <WorkflowNodeElement schemas={props.schemas} />,
+        'rowSpacingType' : 'wide'
     };
 }
 
@@ -98,11 +101,10 @@ export function parseAnalysisStepsMixin(){
  * @memberof module:item-pages
  * @extends module:item-pages/DefaultItemView.ItemBaseView
  */
-export class WorkflowView extends React.Component {
+export class WorkflowView extends ItemBaseView {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {
             mounted : false
@@ -134,35 +136,14 @@ export class WorkflowView extends React.Component {
         });
     }
 
-    render() {
-        var schemas = this.props.schemas || {};
+    itemHeader(){
         var context = this.props.context;
-        var ic = itemClass(this.props.context, 'view-detail item-page-container');
-
         return (
-            <div className={ic}>
-
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                    <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
-                    <ItemHeader.MiddleRow />
-                    <ItemHeader.BottomRow />
-                </ItemHeader.Wrapper>
-
-                <br/>
-
-                <div className="row">
-
-                    <div className="col-xs-12 col-md-12 tab-view-container">
-
-                        <TabbedView contents={this.getTabViewContents()} />
-
-                    </div>
-
-                </div>
-
-                <ItemFooterRow context={context} schemas={schemas} />
-
-            </div>
+            <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
+                <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
+                <ItemHeader.MiddleRow />
+                <ItemHeader.BottomRow />
+            </ItemHeader.Wrapper>
         );
     }
 
@@ -188,8 +169,10 @@ export function dropDownMenuMixin(){
         <DropdownButton
             pullRight
             onSelect={(eventKey, evt)=>{
-                if (eventKey === this.state.showChart) return;
-                this.setState({ showChart : eventKey });
+                requestAnimationFrame(()=>{
+                    if (eventKey === this.state.showChart) return;
+                    this.setState({ showChart : eventKey });
+                });
             }}
             title={GraphSection.keyTitleMap[this.state.showChart]}
         >
@@ -213,6 +196,15 @@ export function uiControlsMixin(){
             <div className="inline-block">
                 { dropDownMenuMixin.call(this) }
             </div>
+            {' '}
+            <div className="inline-block">
+                <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
+                    requestAnimationFrame(()=>{
+                        if (eventKey === this.state.rowSpacingType) return;
+                        this.setState({ rowSpacingType : eventKey });
+                    });
+                }}/>
+            </div>
         </div>
     );
 }
@@ -223,6 +215,60 @@ export function graphBodyMixin(){
     if (this.state.showChart === 'basic') return this.basicGraph();
     return null;
 }
+
+
+
+export class RowSpacingTypeDropdown extends React.Component {
+    
+    static propTypes = {
+        'onSelect' : PropTypes.func.isRequired,
+        'currentKey' : Graph.propTypes.rowSpacingType,
+    }
+
+    static rowSpacingTypeTitleMap = {
+        'stacked' : 'Stack Nodes',
+        'compact' : 'Center Nodes',
+        'wide' : 'Spread Nodes'
+    }
+
+    render(){
+
+        var currentKey = this.props.currentKey;
+
+        var stacked = (
+            <MenuItem eventKey='stacked' active={currentKey === 'stacked'}>
+                { RowSpacingTypeDropdown.rowSpacingTypeTitleMap['stacked'] }
+            </MenuItem>
+        );
+    
+        var compact = (
+            <MenuItem eventKey='compact' active={currentKey === 'compact'}>
+                { RowSpacingTypeDropdown.rowSpacingTypeTitleMap['compact'] }
+            </MenuItem>
+        );
+
+        var spread = (
+            <MenuItem eventKey='wide' active={currentKey === 'wide'}>
+                { RowSpacingTypeDropdown.rowSpacingTypeTitleMap['wide'] }
+            </MenuItem>
+        );
+    
+    
+        return (
+            <DropdownButton
+                pullRight
+                onSelect={this.props.onSelect}
+                title={RowSpacingTypeDropdown.rowSpacingTypeTitleMap[currentKey]}
+            >
+                { stacked }{ compact }{ spread }
+            </DropdownButton>
+        );
+    }
+
+}
+
+
+
 
 class GraphSection extends React.Component {
 
@@ -244,12 +290,13 @@ class GraphSection extends React.Component {
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : GraphSection.analysisStepsSet(props.context) ? 'detail' : 'basic',
-            'showParameters' : false
+            'showParameters' : false,
+            'rowSpacingType' : 'wide'
         };
     }
 
     commonGraphProps(){
-        return _.extend(commonGraphPropsFromProps(this.props), this.parseAnalysisSteps());
+        return _.extend(commonGraphPropsFromProps(this.props), this.parseAnalysisSteps(), { 'rowSpacingType' : this.state.rowSpacingType });
     }
 
     basicGraph(){

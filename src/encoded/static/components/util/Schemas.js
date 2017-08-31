@@ -38,6 +38,12 @@ export const itemTypeHierarchy = {
     ],
     'Treatment': [
         'Treatment', 'TreatmentChemical', 'TreatmentRnai'
+    ],
+    'QualityMetric' : [
+        'QualityMetric', 'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc'
+    ],
+    'WorkflowRun' : [
+        'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
     ]
 };
 

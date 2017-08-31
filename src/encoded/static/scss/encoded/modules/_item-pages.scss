@@ -20,7 +20,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 }
 
 .item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
-	font-family: 'Work Sans', sans-serif;
 	font-weight: 300;
 	height: 36px;
 	/* line-height: 36px; */
@@ -132,7 +131,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
     // For the Experiment Summary header
     &.experiment-heading {
-		font-family: 'Work Sans', sans-serif;
 
         h1, h2, h3, h4, h5, h6 {
             line-height: 20px;  // 50px - 20px of vertical padding
@@ -958,6 +956,15 @@ $download-button-width : 100px;
 	*/
 }
 
+/****** Graph Tab Section ******/
+
+.workflow-view-container {
+	.graph-wrapper {
+		opacity : 1;
+		transition: opacity .5s ease-out;
+	}
+}
+
 /****** Graph Detail Pane ******/
 
 .workflow-chart-inner-container {
@@ -1013,6 +1020,21 @@ $download-button-width : 100px;
 					text-align: left;
 					@media screen and (min-width: $screen-sm-min){
 						text-align: right;
+					}
+				}
+
+				&.steps-in-workflow {
+					a:not(:last-child) {
+						//margin-right: 5px;
+						margin-right: 5px;
+						&:after{
+							content: ',';
+							color: #000;
+							text-decoration: none;
+						}
+						&:hover:after {
+							text-decoration: none;
+						}
 					}
 				}
 			}

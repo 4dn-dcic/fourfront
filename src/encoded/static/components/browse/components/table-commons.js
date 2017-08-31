@@ -242,6 +242,7 @@ export function getColumnWidthFromDefinition(columnDefinition, mounted=true){
         var responsiveGridSize;
         if (!mounted || isServerSide()) responsiveGridSize = 'lg';
         else responsiveGridSize = layout.responsiveGridState();
+        if (responsiveGridSize === 'xs') responsiveGridSize = 'sm';
         return widthMap[responsiveGridSize || 'lg'];
     }
     return 250; // Fallback.
@@ -340,7 +341,7 @@ export class HeadersRow extends React.Component {
                 : null}
             >
                 <div className="columns clearfix" style={{ 
-                    'left'  : isSticky ? stickyStyle.left - tableLeftOffset : null,
+                    'left'  : isSticky ? (stickyStyle.left || 0) - (tableLeftOffset || 0) : null,
                     'width' : (stickyStyle && stickyStyle.width) || null
                 }}>
                 {

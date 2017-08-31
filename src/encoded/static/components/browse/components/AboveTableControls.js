@@ -102,7 +102,7 @@ class SelectedFilesDownloadButton extends React.Component {
             'minHeight' : 400,
             'fontFamily' : 'monospace'
         };
-        //var files_download_filename = 'files_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.txt';
+        var meta_download_filename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
         var unreleasedFilesNotice = <p><strong>Note:</strong> Files which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.</p>;
         return (
             <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
@@ -115,12 +115,13 @@ class SelectedFilesDownloadButton extends React.Component {
 
                     <p>Once you have saved the metadata TSV, you will be able to download the files on any machine or server with the following cURL command:</p>
 
-                    <pre>cut -f 1 <b>my_metadata_file.tsv</b> | tail -n +2 | xargs -n 1 curl -O -L</pre>
+                    <pre>cut -f 1 <b>{ meta_download_filename }</b> | tail -n +2 | xargs -n 1 curl -O -L</pre>
 
                     <p><small><strong>N.B.:</strong> Files which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.</small></p>
 
                     <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleObjects())} />
+                        <input type="hidden" name="download_file_name" value={JSON.stringify(meta_download_filename)} />
                         <Button type="submit" name="Download" bsStyle="info" data-tip="Details for each individual file in the 'files.txt' download list below.">
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
                         </Button>

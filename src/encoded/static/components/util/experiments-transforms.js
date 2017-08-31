@@ -401,12 +401,8 @@ export function groupFilesByPairs(files_in_experiment){
                 _.each(file.related_files, function(related){
                     if (pairsObj[related.file && related.file.uuid]) {
                         pairsObj[related.file && related.file.uuid][file.paired_end + ''] = file;
-                    } else {
-                        file.unpaired = true; // Mark file as unpaired
                     }
                 });
-            } else {
-                file.unpaired = true; // Mark file as unpaired
             }
             return pairsObj;
         }, { })
@@ -448,10 +444,30 @@ export function groupFilesByPairsForEachExperiment(experiments, includeFileSets 
                     file_in_pair.from_experiment = exp;
                 });
             });
-            exp = _.extend({}, exp, { 'file_pairs' : file_pairs });
+            exp = _.extend({}, exp, { 'file_pairs' : file_pairs, 'files' : findUnpairedFiles(ensureArray(exp.files)) });
         }
+
+
         return exp;
     });
+}
+
+export function getProcessedFilesFromExperiment(experiment){
+    var r = [];
+    if (Array.isArray(experiment.processed_files)){
+        r = experiment.processed_files.slice(0);
+    }
+    if (Array.isArray(experiment.files) && experiment.files.length > 0){
+        _.forEach(ensureArray(experiment.files), function(f){
+            if (
+                (typeof f.file_classification === 'string' && f.file_classification.slice(0,9).toLowerCase() === 'processed') ||
+                (Array.isArray(f['@type']) && f['@type'][0] === 'FileProcessed')
+            ){
+                r.push(f);
+            }
+        });
+    }
+    return _.uniq(r, false, function(f){ return f.link_id; });
 }
 
 export function flattenFileSetsToFilesIfNoFilesOnExperiment(experiment){
