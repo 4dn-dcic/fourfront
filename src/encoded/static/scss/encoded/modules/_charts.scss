@@ -1407,10 +1407,12 @@ $workflow-step-node-lineheight: 18px;
                                     height : 2px;
                                 }
                             }
+                            // Node whose page we currently are on.
                             &.current-context{
                                 &:before {
-                                    background-color: #b0e885;
-                                    transition: outline-offset .5s;
+                                    //background-color: #b0e885;
+                                    background-color: #ffb3b3;
+                                    transition: outline-offset .5s ease-out;
                                 }
                                 &:not([data-node-selected="true"]):not(:hover){
                                     &:before {
