@@ -15,7 +15,8 @@ from .types.file import File
 from .types.workflow import (
     trace_workflows,
     get_unique_key_from_at_id,
-    DEFAULT_TRACING_OPTIONS
+    DEFAULT_TRACING_OPTIONS,
+    WorkflowRunTracingException
 )
 
 
@@ -410,6 +411,7 @@ def batch_hub(context, request):
              permission='view', context=File) # TODO: In future, expand to Item to accomodate Experiment, ExperimentSet.
 def trace_workflow_runs(context, request):
 
+    # TODO: Figure out best HTTP error response/exception to give in case of not yet indexed.
     file_model = context.model
 
     if not hasattr(file_model, 'source'):
@@ -421,13 +423,13 @@ def trace_workflow_runs(context, request):
     if request.params.get('track_performance'):
         options['track_performance'] = True
 
-    return trace_workflows(
-        str(context.uuid),
-        request,
-        [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_inputs', []) ],
-        [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_outputs', []) ],
-        options
-    )
-
-
-
+    try:
+        return trace_workflows(
+            str(context.uuid),
+            request,
+            [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_inputs', []) ],
+            [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_outputs', []) ],
+            options
+        )
+    except WorkflowRunTracingException as e:
+        raise HTTPBadRequest(detail=e.args[0])

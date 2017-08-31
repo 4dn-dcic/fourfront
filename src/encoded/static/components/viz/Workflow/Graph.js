@@ -94,8 +94,12 @@ export default class Graph extends React.Component {
             'left' : 20,
             'right' : 20
         },
-        'minimumHeight' : 120,
+        'minimumHeight' : 75,
         'edgeStyle' : 'bezier',
+        'isNodeCurrentContext' : function(node){
+            return false;
+        },
+        'nodeClassName' : function(node){ return ''; },
         'nodesInColumnSortFxn' : function(node1, node2){
             if (node1.type === 'step' && node2.type === 'step'){
                 if (node1.name === node2.name){
@@ -351,7 +355,7 @@ export default class Graph extends React.Component {
                         >
                             <ScrollContainer outerHeight={fullHeight}>
                                 <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeDisabled', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing')} />
-                                <NodesLayer {..._.pick(this.props, 'nodeElement', 'isNodeDisabled')} title={this.props.nodeTitle} />
+                                <NodesLayer {..._.pick(this.props, 'nodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }
                         </StateContainer>

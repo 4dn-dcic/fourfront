@@ -1391,7 +1391,7 @@ $workflow-step-node-lineheight: 18px;
                         &.node-type-output {
                             &[data-node-global="true"] {
                                 &:before {
-                                    background-color: #cde2e1;
+                                    background-color: #d5eac3;
                                 }
                                 .workflow-viewing-basic &:after {
                                     content: '';
@@ -1407,11 +1407,28 @@ $workflow-step-node-lineheight: 18px;
                                     height : 2px;
                                 }
                             }
+                            &.current-context{
+                                &:before {
+                                    background-color: #b0e885;
+                                    transition: outline-offset .5s;
+                                }
+                                &:not([data-node-selected="true"]):not(:hover){
+                                    &:before {
+                                        outline-offset: 9px;
+                                        outline-color: rgba(0,0,0,0.75);
+                                        outline-style: dotted;
+                                        outline-width: 1px;
+                                    }
+                                }
+                                .node-name {
+                                    font-weight: 500;
+                                }
+                            }
                         }
                         &.node-type-input {
                             &[data-node-global="true"] {
                                 &:before {
-                                    background-color: #d1cde2;
+                                    background-color: #cdc5f3;
                                 }
                                 &[data-node-type-detail="Workflow Parameter"] {
                                     &:before {
@@ -1433,6 +1450,11 @@ $workflow-step-node-lineheight: 18px;
                                     height: 2px;
                                 }
                             }
+                            &.node-item-type-file-reference {
+                                &:before {
+                                    background-color: #e7e3f9;
+                                }
+                            }
                         }
                         &.node-type-input-group,
                         &.node-type-output-group {
@@ -1447,7 +1469,7 @@ $workflow-step-node-lineheight: 18px;
                                 }
                             }
                             &:before {
-                                background-color: #addedc;
+                                background-color: #b0da8b;
                                 border-radius: 5px;
                             }
                             &:after {
