@@ -177,17 +177,10 @@ export default class Node extends React.Component {
                 // Make sure target.step == selectedNode.inputOf.name
                 var i;
                 if (currentNode.type === 'input' || currentNode.type === 'output'){
-<<<<<<< HEAD
-                    if (((selectedNode.inputOf && selectedNode.inputOf[0] && selectedNode.inputOf[0].id) || 'a') === ((currentNode.inputOf && currentNode.inputOf[0] && currentNode.inputOf[0].id) || 'b')) return true;
-                    if (selectedNode.inputOf !== 'undefined' && Array.isArray(currentNode.meta.target)){
-                        for (i = 0; i < currentNode.meta.target.length; i++){
-                            if (selectedNode.inputOf && selectedNode.inputOf[0] && currentNode.meta.target[i].step === selectedNode.inputOf[0].id) {
-=======
                     if (((Array.isArray(selectedNode.inputOf) && selectedNode.inputOf[0] && selectedNode.inputOf[0].id) || 'a') === ((Array.isArray(currentNode.inputOf) && currentNode.inputOf[0] && currentNode.inputOf[0].id) || 'b')) return true;
                     if (Array.isArray(selectedNode.inputOf) && Array.isArray(currentNode.meta.target)){
                         for (i = 0; i < currentNode.meta.target.length; i++){
                             if (selectedNode.inputOf[0] && currentNode.meta.target[i].step === selectedNode.inputOf[0].id) {
->>>>>>> file_workflowruns
                                 return true;
                             }
                         }
