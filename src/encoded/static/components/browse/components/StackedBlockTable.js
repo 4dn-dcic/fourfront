@@ -6,6 +6,7 @@ import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
 import { expFxn, Filters, console, isServerSide, analytics, object } from './../../util';
+import { requestAnimationFrame } from './../../viz/utilities';
 
 
 
@@ -168,11 +169,45 @@ export class StackedBlockName extends React.Component {
     }
 
     adjustedChildren(){
-        if (React.Children.count(this.props.children) > 1) return this.props.children;
-        return React.Children.map(this.props.children, function(c){
+        return React.Children.map(this.props.children, (c)=>{
+
+            console.log('NAME_CHILD', c, typeof c)
+
+            var addedProps = {};
             if (c && c.props && typeof c.props.className === 'string' && c.props.className.indexOf('name-title') === -1){
-                return React.cloneElement(c, { className : c.props.className + ' name-title' }, c.props.children);
+                addedProps.className = c.props.className + ' name-title';
             }
+
+            if (c && c.type && typeof c.type === 'function'){
+                // Is component, not element.
+                addedProps.stackDepth = this.props.stackDepth;
+                if (this.props.colWidthStyles && !c.props.colWidthStyles){
+                    addedProps.colWidthStyles = this.props.colWidthStyles;
+                }
+                if (this.props.experimentSetType && !c.props.experimentSetType){
+                    addedProps.experimentSetType = this.props.experimentSetType;
+                }
+                if (this.props.experimentSetAccession && !c.props.experimentSetAccession){
+                    addedProps.experimentSetAccession = this.props.experimentSetAccession;
+                }
+                if (this.props.nonFileHeaderCols && !c.props.nonFileHeaderCols){
+                    addedProps.nonFileHeaderCols = this.props.nonFileHeaderCols;
+                }
+                if (this.props.selectedFiles && !c.props.selectedFiles){
+                    addedProps.selectedFiles = this.props.selectedFiles;
+                }
+                if (this.props.columnHeaders && !c.props.columnHeaders){
+                    addedProps.columnHeaders = this.props.columnHeaders;
+                }
+                if (this.props.handleFileCheckboxChange && !c.props.handleFileCheckboxChange){
+                    addedProps.handleFileCheckboxChange = this.props.handleFileCheckboxChange;
+                }
+            }
+            
+            if (_.keys(addedProps).length > 0){
+                return React.cloneElement(c, addedProps, c.props.children);
+            }
+
             return c;
         });
     }
@@ -290,27 +325,23 @@ export class StackedBlockList extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        //this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
         if (Array.isArray(this.props.children) && this.props.children.length > this.props.collapseLimit){
             this.state = { 'collapsed' : true };
         }
     }
-    /*
-    shouldComponentUpdate(nextProps, nextState){
-        if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
-        if (this.props.colWidthStyles !== nextProps.colWidthStyles) return true;
-        if (this.state === null) return false;
-        if (this.state.collapsed !== nextState.collapsed) return true;
-        return false;
-    }
-    */
 
     adjustedChildren(){
         return React.Children.map(this.props.children, (c)=>{
+
+            //console.log('LIST_CHILD', c, typeof c)
+
             //if (c.type.displayName !== 'StackedBlock') return c; // Only add props to StackedBlocks
             var addedProps = {};
+
+            addedProps.stackDepth = this.props.stackDepth + 1;
+
             if (this.props.parentIDList && !c.props.parentIDList){
                 addedProps.parentIDList = this.props.parentIDList;
             }
@@ -326,7 +357,22 @@ export class StackedBlockList extends React.Component {
             if (this.props.experimentSetType && !c.props.experimentSetType){
                 addedProps.experimentSetType = this.props.experimentSetType;
             }
-            if (Object.keys(addedProps).length > 0){
+            if (this.props.experimentSetAccession && !c.props.experimentSetAccession){
+                addedProps.experimentSetAccession = this.props.experimentSetAccession;
+            }
+            if (this.props.nonFileHeaderCols && !c.props.nonFileHeaderCols){
+                addedProps.nonFileHeaderCols = this.props.nonFileHeaderCols;
+            }
+            if (this.props.selectedFiles && !c.props.selectedFiles){
+                addedProps.selectedFiles = this.props.selectedFiles;
+            }
+            if (this.props.columnHeaders && !c.props.columnHeaders){
+                addedProps.columnHeaders = this.props.columnHeaders;
+            }
+            if (this.props.handleFileCheckboxChange && !c.props.handleFileCheckboxChange){
+                addedProps.handleFileCheckboxChange = this.props.handleFileCheckboxChange;
+            }
+            if (_.keys(addedProps).length > 0){
                 return React.cloneElement(c, addedProps, c.props.children);
             }
             return c;
@@ -347,7 +393,7 @@ export class StackedBlockList extends React.Component {
     render(){
         var children = this.adjustedChildren();
 
-        var className = "s-block-list " + this.props.className;
+        var className = "s-block-list " + (this.props.className || '') + (' stack-depth-' + this.props.stackDepth);
         var timeout = 350; // Default
         if (!Array.isArray(children) || children.length <= this.props.collapseLimit) {
             // Don't have enough items for collapsible element, return plain list.
@@ -375,7 +421,7 @@ export class StackedBlockList extends React.Component {
                 <Collapse in={!this.state.collapsed} timeout={timeout} onExited={transitionFinish} onEntered={transitionFinish}>
                     <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>
                 </Collapse>
-                <ExperimentsTable.StackedBlock.List.ViewMoreButton
+                <StackedBlockListViewMoreButton
                     collapsibleChildren={collapsibleChildren}
                     collapsed={this.state.collapsed}
                     handleCollapseToggle={this.handleCollapseToggle}
@@ -405,12 +451,30 @@ export class StackedBlock extends React.Component {
             if (c === null) return null;
             var addedProps = {};
 
+            addedProps.stackDepth = this.props.stackDepth;
+
             if (!c.props.columnClass && this.props.columnClass) addedProps.columnClass = this.props.columnClass;
             if (!c.props.colWidthStyles && this.props.colWidthStyles) addedProps.colWidthStyles = this.props.colWidthStyles;
             if (!c.props.label && this.props.label) addedProps.label = this.props.label;
             if (!c.props.expTable && this.props.expTable) addedProps.expTable = this.props.expTable;
             if (!c.props.experimentSetType && this.props.experimentSetType) addedProps.experimentSetType = this.props.experimentSetType;
             if (!c.props.currentlyCollapsing && this.props.currentlyCollapsing) addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
+
+            if (this.props.selectedFiles && !c.props.selectedFiles){
+                addedProps.selectedFiles = this.props.selectedFiles;
+            }
+            if (this.props.experimentSetAccession && !c.props.experimentSetAccession){
+                addedProps.experimentSetAccession = this.props.experimentSetAccession;
+            }
+            if (this.props.nonFileHeaderCols && !c.props.nonFileHeaderCols){
+                addedProps.nonFileHeaderCols = this.props.nonFileHeaderCols;
+            }
+            if (this.props.columnHeaders && !c.props.columnHeaders){
+                addedProps.columnHeaders = this.props.columnHeaders;
+            }
+            if (this.props.handleFileCheckboxChange && !c.props.handleFileCheckboxChange){
+                addedProps.handleFileCheckboxChange = this.props.handleFileCheckboxChange;
+            }
 
             if (c.props.children){
                 // Grab & save child s-block ids (one level deep)
@@ -438,7 +502,7 @@ export class StackedBlock extends React.Component {
 
     render(){
         var className = this.props.columnClass ? this.props.columnClass + ' ' : '';
-        className += "s-block";
+        className += "s-block"  + (' stack-depth-' + this.props.stackDepth);
         if (this.props.hideNameOnHover) className += ' hide-name-on-block-hover';
         if (typeof this.props.stripe !== 'undefined' && this.props.stripe !== null){
             if (this.props.stripe === true || this.props.stripe === 'even') className += ' even';
@@ -463,730 +527,11 @@ export class StackedBlock extends React.Component {
 }
 
 
-/**
- * To be used within Experiments Set View/Page, or
- * within a collapsible row on the browse page.
- *
- * Shows experiments only, not experiment sets.
- *
- * Allows either table component itself to control state of "selectedFiles"
- * or for a parentController (passed in as a prop) to take over management
- * of "selectedFiles" Set and "checked", for integration with other pages/UI.
- */
 
 
-export class StackedBlockTable extends React.Component {
 
-    static StackedBlock = StackedBlock
-
-    static defaultHeaders = [];
-
-    static propTypes = {
-        'columnHeaders' : PropTypes.arrayOf(PropTypes.shape({
-            'columnClass' : PropTypes.string.isRequired,
-            'className' : PropTypes.string,
-            'title' : PropTypes.string.isRequired,
-            'visibleTitle' : PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
-            'initialWidth' : PropTypes.number.isRequired
-        }))
-    };
-
-    static defaultProps = {
-        'columnHeaders' : [
-            { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
-            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-            { columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',                                      title: 'File',          initialWidth: 125   }
-        ],
-        'width': null,
-        'defaultInitialColumnWidth' : 120
-    }
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-        this.getColumnWidths = this.getColumnWidths.bind(this);
-        //this.updateColumnWidths = this.updateColumnWidths.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.staticColumnHeaders = this.staticColumnHeaders.bind(this);
-        this.customColumnHeaders = this.customColumnHeaders.bind(this);
-        this.columnHeaders = this.columnHeaders.bind(this);
-        this.colWidthStyles = this.colWidthStyles.bind(this);
-        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
-        this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
-        this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
-        this.renderRootStackedBlockListOfBiosamplesWithExperiments = this.renderRootStackedBlockListOfBiosamplesWithExperiments.bind(this);
-        this.renderers.replicate = this.renderers.replicate.bind(this);
-        this.renderers.default = this.renderers.default.bind(this);
-
-
-        this.cache = {
-            oddExpRow : true
-        };
-        var initialState = {
-            columnWidths : null, // set on componentDidMount via updateColumnWidths
-            mounted : false
-        };
-        this.state = initialState;
-    }
-
-    componentDidMount(){
-        this.setState({ 'mounted' : true });
-    }
-
-    componentWillUnmount(){
-        delete this.lastColumnHeaders;
-        delete this.lastColumnWidths;
-        delete this.cache.origColumnWidths;
-    }
-
-    initialColumnWidths(){
-        return _.reduce(this.props.columnHeaders, function(m, colHeading){
-            return m + (colHeading.initialWidth || this.props.defaultInitialColumnWidth);
-        }, 0);
-    }
-
-    getColumnWidths(columnHeaders = null){
-        if (
-            typeof this.props.width !== 'number' && (
-                !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
-            )
-        ){
-            return this.initialColumnWidths();
-        }
-
-        var origColumnWidths;
-        if (!this.cache.origColumnWidths){
-            origColumnWidths = _.map(this.props.columnHeaders, (c) => c.initialWidth || this.props.defaultInitialColumnWidth );
-            this.cache.origColumnWidths = origColumnWidths;
-        } else {
-            origColumnWidths = this.cache.origColumnWidths;
-        }
-
-        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960; // 960 = fallback for tests
-        var totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
-
-        if (totalOrigColsWidth > availableWidth){
-            return null;
-        }
-
-        var scale = (availableWidth / totalOrigColsWidth) || 1;
-        var newColWidths = origColumnWidths.map(function(c){
-            return Math.floor(c * scale);
-        });
-
-        // Adjust first column by few px to fit perfectly.
-        var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v; }, 0);
-        var remainder = availableWidth - totalNewColsWidth;
-        newColWidths[0] += Math.floor(remainder - 0.5);
-
-        return newColWidths;
-    }
-
-    colWidthStyles(columnWidths = this.state.columnWidths, columnHeaders){
-        if (!columnHeaders) columnHeaders = this.props.columnHeaders;
-        var colWidthStyles = _.object(_.map(_.pluck(columnHeaders, 'columnClass'), function(cn){ return [cn, null]; })); // Returns { 'experiment' : null , 'biosample' : null, ... }
-
-        if (Array.isArray(columnWidths)){
-            _.keys(colWidthStyles).forEach((cn) => {
-                colWidthStyles[cn] = {
-                    width : columnWidths[_.findIndex(columnHeaders, { 'columnClass' : cn })]
-                };
-            });
-        }
-
-        return colWidthStyles;
-    }
-
-
-
-
-}
-
-
-export default class ExperimentsTable extends React.Component {
-
-    static StackedBlock = StackedBlock
-
-    static builtInHeaders(expSetType = 'replicate'){
-        switch (expSetType){
-            case 'replicate' :
-                return [
-                    { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample'  },
-                    { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment' },
-                    { columnClass: 'file-pair',                                 title: 'File Pair',     visibleTitle : <i className="icon icon-download"></i> },
-                    { columnClass: 'file',                                      title: 'File'       },
-                ];
-            default:
-                return [
-                    { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample'  },
-                    { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment' },
-                    { columnClass: 'file',                                      title: 'File'       },
-                ];
-        }
-
-    }
-
-    /* Returns undefined if not set */
-    static initialColumnWidths(columnClassName = null, expSetType = 'replicate'){
-        if (expSetType === 'replicate'){
-            // ToDo put into schemas?
-            var widthsByColumnClass = {
-                'biosample' : 115,
-                'experiment' : 145,
-                'file-pair' : 40,
-                'file' : 125,
-                'file-detail' : 100,
-                'default' : 120
-            };
-            // No columnClassName specified.
-            if (columnClassName === null) return widthsByColumnClass;
-            // columnClassName specified and set.
-            else if (columnClassName !== null && typeof widthsByColumnClass[columnClassName] === 'number'){
-                return widthsByColumnClass[columnClassName];
-            }
-            // columnClassName specified but width not configured.
-            else return widthsByColumnClass.default;
-        }
-    }
-
-    /**
-     * Calculate amount of experiments out of provided experiments which match currently-set filters.
-     * Use only for front-end faceting, e.g. on Exp-Set View page where all experiments are provided,
-     * NOT (eventually) for /browse/ page where faceting results will be controlled by back-end.
-     */
-    static getPassedExperiments(
-        allExperiments,
-        filters = null, // aka expSetFilters (available in redux store)
-        getIgnoredFiltersMethod = 'single-term',
-        facets = null,  // Required if want to get ignored filters by missing facet(s).
-        useSet = false  // Return as array instead of set.
-    ){
-        if (!Array.isArray(allExperiments)){
-            // no experiments
-            if (useSet) return new Set();
-            return [];
-        }
-        // TODO: If filters === null then filters = store.getState().expSetFilters ?
-        if (Array.isArray(allExperiments[0].experiments_in_set)){
-            // We got experiment sets, not experiments. Lets fix that (convert to arr of experiments).
-            allExperiments = _.flatten(_.map(allExperiments, function(es){ return es.experiments_in_set; }), true);
-        }
-        if (typeof filters !== 'object' || !filters || Object.keys(filters).length === 0){
-            if (useSet) return new Set(allExperiments);
-            else return allExperiments;
-        }
-        var ignoredFilters = null;
-        if (getIgnoredFiltersMethod === 'missing-facets') {
-            if (Array.isArray(facets) && facets.length > 0) {
-                //if (typeof facets[0].restrictions === 'undefined'){
-                //    // No restrictions added yet. TODO: Grab & include restrictions object.
-                //    facets = FacetList.adjustedFacets(facets);
-                //}
-                ignoredFilters = Filters.findIgnoredFiltersByMissingFacets(facets, filters);
-            }
-        } else if (getIgnoredFiltersMethod === 'single-term') {
-            // Ignore filters if none in current experiment_set match it so that if coming from
-            // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
-            ignoredFilters = Filters.findIgnoredFiltersByStaticTerms(allExperiments, filters);
-        }
-        if (useSet) return Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
-        else return [...Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array
-    }
-    /*
-    static totalExperimentsCount(experimentArray = null){
-        if (!experimentArray) return null;
-        var experimentsCount = 0;
-        var fileSet = new Set();
-        var j;
-        for (var i = 0; i < experimentArray.length; i++){
-            if (experimentArray[i].files && experimentArray[i].files.length > 0){
-                experimentsCount++; // Exclude empty experiments
-                for (j = 0; j < experimentArray[i].files.length; j++){
-                    if (!fileSet.has(experimentArray[i].files[j]['@id'])){
-                        fileSet.add(experimentArray[i].files[j]['@id']);
-                    }
-                }
-            } else if (experimentArray[i].filesets && experimentArray[i].filesets.length > 0){
-                experimentsCount++;
-                for (j = 0; j < experimentArray[i].filesets.length; j++){
-                    for (var k = 0; k < experimentArray[i].filesets[j].files_in_set.length; k++){
-                        if (!fileSet.has(experimentArray[i].filesets[j].files_in_set[k]['@id'])){
-                            fileSet.add(experimentArray[i].filesets[j].files_in_set[k]['@id']);
-                        }
-                    }
-                }
-            } else {
-                console.error("Couldn't find files for experiment - excluding from total count", experimentArray[i]);
-            }
-        }
-        return {
-            'experiments' : experimentsCount,
-            'files' : fileSet.size
-        };
-    }
-    */
-
-    static propTypes = {
-        columnHeaders               : PropTypes.array,
-        experimentArray             : PropTypes.array,
-        passExperiments             : PropTypes.instanceOf(Set),
-        expSetFilters               : PropTypes.object,
-        'selectedFiles'               : PropTypes.object,
-        'experimentSetAccession'    : PropTypes.string.isRequired,
-        'replicateExpsArray'        : PropTypes.arrayOf(PropTypes.shape({
-            'bio_rep_no'                : PropTypes.number.isRequired,
-            'tec_rep_no'                : PropTypes.number.isRequired,
-            'replicate_exp'             : PropTypes.shape({
-                'accession'                 : PropTypes.string,
-                'uuid'                      : PropTypes.string,
-                'link_id'                   : PropTypes.string
-            }).isRequired
-        })).isRequired,
-        keepCounts              : PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
-    }
-
-    static defaultProps = {
-        keepCounts : false,
-        fadeIn : true,
-        width: null,
-        columnHeaders : [
-            { columnClass: 'biosample',     className: 'text-left',     title : 'Biosample'     },
-            { columnClass: 'experiment',    className: 'text-left',     title : 'Experiment'    },
-            { columnClass: 'file-detail',                               title : 'File Info'     }
-        ]
-    }
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-        this.getColumnWidths = this.getColumnWidths.bind(this);
-        //this.updateColumnWidths = this.updateColumnWidths.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.staticColumnHeaders = this.staticColumnHeaders.bind(this);
-        this.customColumnHeaders = this.customColumnHeaders.bind(this);
-        this.columnHeaders = this.columnHeaders.bind(this);
-        this.colWidthStyles = this.colWidthStyles.bind(this);
-        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
-        this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
-        this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
-        this.renderRootStackedBlockListOfBiosamplesWithExperiments = this.renderRootStackedBlockListOfBiosamplesWithExperiments.bind(this);
-        this.renderers.replicate = this.renderers.replicate.bind(this);
-        this.renderers.default = this.renderers.default.bind(this);
-
-
-        this.cache = {
-            oddExpRow : true
-        };
-        var initialState = {
-            columnWidths : null, // set on componentDidMount via updateColumnWidths
-            mounted : false
-        };
-        this.state = initialState;
-    }
-
-    getColumnWidths(columnHeaders = null){
-        if (
-            typeof this.props.width !== 'number' && (
-                !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
-            )
-        ){
-            return ExperimentsTable.initialColumnWidths(null);
-        }
-
-        var origColumnWidths;
-        if (!this.cache.origColumnWidths){
-            origColumnWidths = _.map(columnHeaders || this.columnHeaders(), function(c){
-                return ExperimentsTable.initialColumnWidths(c.columnClass);
-            });
-            this.cache.origColumnWidths = origColumnWidths;
-        } else {
-            origColumnWidths = this.cache.origColumnWidths;
-        }
-
-        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960; // 960 = fallback for tests
-        var totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
-
-        if (totalOrigColsWidth > availableWidth){
-            return null;
-        }
-
-        var scale = (availableWidth / totalOrigColsWidth) || 1;
-        var newColWidths = origColumnWidths.map(function(c){
-            return Math.floor(c * scale);
-        });
-
-        // Adjust first column by few px to fit perfectly.
-        var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v; }, 0);
-        var remainder = availableWidth - totalNewColsWidth;
-        newColWidths[0] += Math.floor(remainder - 0.5);
-
-        return newColWidths;
-    }
-
-    componentDidMount(){
-        this.setState({ 'mounted' : true });
-    }
-
-    componentWillUnmount(){
-        delete this.lastColumnHeaders;
-        delete this.lastColumnWidths;
-        delete this.cache.origColumnWidths;
-    }
-
-    /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
-    staticColumnHeaders(){
-        if (this.cache.staticColumnHeaders) return this.cache.staticColumnHeaders;
-        this.cache.staticColumnHeaders = ExperimentsTable.builtInHeaders(this.props.experimentSetType).map((staticCol) => {
-            return _.extend(
-                _.clone(staticCol),
-                _.findWhere(this.props.columnHeaders, { title : staticCol.title }) || {}
-            );
-        });
-        return this.cache.staticColumnHeaders;
-    }
-
-    /* Any non built-in (for experimentSetType) headers from props.columnHeaders */
-    customColumnHeaders(){
-        if (this.cache.customColumnHeaders) return this.cache.customColumnHeaders;
-        this.cache.customColumnHeaders = this.props.columnHeaders.filter((col) => {
-            return  !_.contains(_.pluck(ExperimentsTable.builtInHeaders(this.props.experimentSetType), 'title'), col.title);
-        });
-        return this.cache.customColumnHeaders;
-    }
-
-    /* Combined top row of headers */
-    columnHeaders(){
-        return this.staticColumnHeaders().concat(this.customColumnHeaders());
-    }
-
-    colWidthStyles(columnWidths = this.state.columnWidths, columnHeaders){
-        if (!columnHeaders) columnHeaders = this.columnHeaders();
-        var colWidthStyles = {
-            'experiment' : null,
-            'biosample' : null,
-            'file-pair' : null,
-            'file' : null,
-            'file-detail' : null
-        };
-
-        if (Array.isArray(columnWidths)){
-            _.keys(colWidthStyles).forEach((cn) => {
-                colWidthStyles[cn] = {
-                    width : columnWidths[_.findIndex(columnHeaders, { 'columnClass' : cn })]
-                };
-            });
-        }
-
-        return colWidthStyles;
-    }
-
-    /**
-     * @param {string|string[]} uuid - String or list of strings (File Item UUID)
-     * @param {Object|Object[]} fileObj - File Item JSON
-     */
-    handleFileCheckboxChange(accessionTripleString, fileObj){
-        if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
-
-        var willSelect;
-        var isMultiples;
-
-        if (Array.isArray(accessionTripleString)){
-            isMultiples = true;
-            willSelect = (typeof this.props.selectedFiles[accessionTripleString[0]] === 'undefined');
-        } else {
-            isMultiples = false;
-            willSelect = (typeof this.props.selectedFiles[accessionTripleString] === 'undefined');
-        }
-
-        if (willSelect){
-            if (isMultiples){
-                this.props.selectFile(_.zip(accessionTripleString, fileObj));
-            } else {
-                this.props.selectFile(accessionTripleString, fileObj);
-            }
-        } else {
-            this.props.unselectFile(accessionTripleString);
-        }
-    }
-
-    renderExperimentBlock(exp,i){
-        this.cache.oddExpRow = !this.cache.oddExpRow;
-        var columnHeaders = this.columnHeaders();
-
-        var contentsClassName = 'files';
-        var contents = [];
-        if (Array.isArray(exp.file_pairs)){
-            contentsClassName = 'file-pairs';
-            contents = contents.concat(exp.file_pairs.map((filePair,j) =>
-                <FilePairBlock
-                    key={j}
-                    selectedFiles={this.props.selectedFiles}
-                    files={filePair}
-                    columnHeaders={columnHeaders}
-                    handleFileCheckboxChange={this.handleFileCheckboxChange}
-                    experiment={exp}
-                    experimentSetAccession={this.props.experimentSetAccession}
-                    label={ exp.file_pairs.length > 1 ?
-                        { title : "Pair " + (j + 1) } : { title : "Pair" }
-                    }
-                />
-            ));
-        }
-        // Add in remaining unpaired files, if any.
-        if (Array.isArray(exp.files) && exp.files.length > 0){
-            contents.push(
-                <StackedBlock
-                    key={object.atIdFromObject(exp)}
-                    hideNameOnHover={false}
-                    columnClass="file-pair"
-                >
-                    { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ?
-                        <StackedBlockName/>
-                    : null }
-                    <StackedBlockList title="Files" className="files">
-                        { exp.files.map((file) =>
-                            <FileEntryBlock
-                                key={object.atIdFromObject(file)}
-                                file={file}
-                                columnHeaders={columnHeaders}
-                                handleFileCheckboxChange={this.handleFileCheckboxChange}
-                                selectedFiles={this.props.selectedFiles}
-                                hideNameOnHover={false}
-                                experiment={exp}
-                                experimentSetAccession={this.props.experimentSetAccession}
-                                isSingleItem={exp.files.length + contents.length < 2 ? true : false}
-                            />
-                        )}
-                    </StackedBlockList>
-                </StackedBlock>
-            );
-        }
-        if (contents.length === 0){
-            /* No Files Exist */
-            contents.push(
-                <StackedBlock
-                    key={object.atIdFromObject(exp)}
-                    hideNameOnHover={false}
-                    columnClass="file-pair"
-                >
-                    { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ?
-                        <StackedBlockName/>
-                    : null }
-                    <StackedBlockList title="Files" className="files">
-                        <FileEntryBlock
-                            file={null}
-                            columnHeaders={columnHeaders}
-                        />
-                    </StackedBlockList>
-                </StackedBlock>
-            );
-        }
-
-        var experimentVisibleName = (
-            exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
-                exp.experiment_type ? exp.experiment_type : exp.accession
-        );
-
-        return (
-            <StackedBlock
-                key={ object.atIdFromObject(exp) || exp.tec_rep_no || i }
-                hideNameOnHover={false}
-                columnClass="experiment"
-                label={{
-                    accession : exp.accession,
-                    title : 'Experiment',
-                    subtitle : experimentVisibleName,
-                    subtitleVisible: true
-                }}
-                stripe={this.cache.oddExpRow}
-                id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || object.atIdFromObject(exp)}
-            >
-                <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
-                    <a href={ object.atIdFromObject(exp) || '#' } className="name-title">{ experimentVisibleName }</a>
-                </StackedBlockName>
-                <StackedBlockList
-                    className={contentsClassName}
-                    title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
-                >
-                    { contents }
-                </StackedBlockList>
-            </StackedBlock>
-        );
-    }
-
-    renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
-        this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
-
-        var visibleBiosampleTitle = (
-            expsWithBiosample[0].biosample.bio_rep_no ?
-                'Bio Replicate ' + expsWithBiosample[0].biosample.bio_rep_no
-                :
-                expsWithBiosample[0].biosample.biosource_summary
-        );
-
-        return (
-            <StackedBlock
-                columnClass="biosample"
-                hideNameOnHover={false}
-                key={object.atIdFromObject(expsWithBiosample[0].biosample)}
-                id={'bio-' + (expsWithBiosample[0].biosample.bio_rep_no || i + 1)}
-                label={{
-                    title : 'Biosample',
-                    subtitle : visibleBiosampleTitle,
-                    subtitleVisible : true,
-                    accession : expsWithBiosample[0].biosample.accession
-                }}
-            >
-                <StackedBlockName
-                    relativePosition={
-                        expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6
-                    }
-                >
-                    <a href={ object.atIdFromObject(expsWithBiosample[0].biosample) || '#' } className="name-title">
-                        { visibleBiosampleTitle }
-                    </a>
-                </StackedBlockName>
-                <StackedBlockList
-                    className="experiments"
-                    title="Experiments"
-                    children={expsWithBiosample.map(this.renderExperimentBlock)}
-                    showMoreExtTitle={
-                        expsWithBiosample.length > 5 ?
-                            'with ' + (
-                                _.all(expsWithBiosample.slice(3), function(exp){
-                                    return exp.file_pairs !== 'undefined';
-                                }) ? /* Do we have filepairs for all exps? */
-                                    _.flatten(_.pluck(expsWithBiosample.slice(3), 'file_pairs'), true).length +
-                                    ' File Pairs'
-                                    :
-                                    expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) + 
-                                    ' Files'
-                            )
-                            :
-                            null
-                    }
-                />
-
-            </StackedBlock>
-        );
-    }
-
-    /**
-     * Here we render nested divs for a 'table' of experiments with shared elements spanning multiple rows,
-     * e.g. an experiment block's height is the combined height of its containing file rows, biosample height
-     * is combined height of its containing experiment rows (experiments that share that biosample).
-     *  ___________________________________________________
-     * |                         File   File Detail Columns|
-     * |             Experiment ___________________________|
-     * |                         File   File Detail Columns|
-     * | Biosample  _______________________________________|
-     * |                         File   File Detail Columns|
-     * |             Experiment ___________________________|
-     * |                         File   File Detail Columns|
-     * |___________________________________________________|
-     *
-     * Much of styling/layouting is defined in CSS.
-     */
-    renderRootStackedBlockListOfBiosamplesWithExperiments(experimentsGroupedByBiosample){
-        return (
-            <ExperimentsTable.StackedBlock.List
-                className="biosamples"
-                title="Biosamples"
-                children={experimentsGroupedByBiosample.map(this.renderBiosampleStackedBlockOfExperiments)}
-                rootList={true}
-                expTable={this}
-                currentlyCollapsing={this.state.collapsing}
-                colWidthStyles={this.colWidthStyles(this.lastColumnWidths || this.getColumnWidths())}
-                showMoreExtTitle={
-                    experimentsGroupedByBiosample.length > 5 ?
-                        'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
-                        :
-                        null
-                }
-            />
-        );
-    }
-
-    renderers = {
-
-        replicate : function(){
-
-            var experimentsGroupedByBiosample = _.compose(
-                this.renderRootStackedBlockListOfBiosamplesWithExperiments,
-                expFxn.groupExperimentsByBiosampleRepNo,
-                expFxn.groupFilesByPairsForEachExperiment,
-                expFxn.combineWithReplicateNumbers
-            );
-
-            return (
-                <div className="body clearfix">
-                    { experimentsGroupedByBiosample(this.props.replicateExpsArray, this.props.experimentArray) }
-                </div>
-            );
-        },
-
-        default : function(){
-            var experimentsGroupedByBiosample = _.compose(
-                this.renderRootStackedBlockListOfBiosamplesWithExperiments,
-                expFxn.groupExperimentsByBiosample,
-                expFxn.flattenFileSetsToFilesIfNoFilesForEachExperiment
-            );
-
-            return (
-                <div className="body clearfix">
-                    { experimentsGroupedByBiosample(this.props.experimentArray) }
-                </div>
-            );
-        }
-    }
-
-    render(){
-
-        // Cache for each render.
-        this.lastColumnHeaders = this.columnHeaders();
-        this.lastColumnWidths = this.getColumnWidths(this.lastColumnHeaders);
-
-        var renderHeaderItem = function(h, i, arr){
-            if (h.visible === false) return null;
-            var visibleTitle = typeof h.visibleTitle !== 'undefined' ? h.visibleTitle : h.title;
-            var style = null;
-            if (Array.isArray(this.lastColumnWidths) && this.lastColumnWidths.length === arr.length){
-                style = { 'width' : this.lastColumnWidths[i] };
-            }
-            return (
-                <div className={"heading-block col-" + h.columnClass + (h.className ? ' ' + h.className : '')} key={'header-' + i} style={style} data-column-class={h.columnClass}>
-                    { visibleTitle }
-                </div>
-            );
-        }.bind(this);
-
-        return (
-            <div className={"expset-experiments" + (this.state.mounted ? ' mounted' : '') + (this.props.fadeIn ? ' fade-in' : '')}>
-                {
-                    !Array.isArray(this.props.experimentArray) ?
-                    <h6 className="text-center text-400"><em>No experiments</em></h6>
-                    :
-                    <div className="headers expset-headers" ref="header">
-                        { this.lastColumnHeaders.map(renderHeaderItem) }
-                    </div>
-                }
-
-                {   !Array.isArray(this.props.experimentArray) ? null :
-                    this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ?
-                        this.renderers[this.props.experimentSetType]() : this.renderers.default()
-                }
-            </div>
-        );
-    }
-
-}
-
-
-class FilePairBlock extends React.Component {
-
+export class FilePairBlock extends React.Component {
+    
     static accessionTriplesFromProps(props){
         var accessionTriples;
         try {
@@ -1200,9 +545,9 @@ class FilePairBlock extends React.Component {
     }
 
     static propTypes = {
-        selectedFiles : PropTypes.object,
-        handleFileCheckboxChange : PropTypes.func,
-        files : PropTypes.array
+        'selectedFiles' : PropTypes.object,
+        'handleFileCheckboxChange' : PropTypes.func,
+        'files' : PropTypes.array
     }
 
     constructor(props){
@@ -1214,6 +559,7 @@ class FilePairBlock extends React.Component {
     }
 
     isChecked(accessionTriples){
+        console.log('SEL', this.props.selectedFiles)
         if (!accessionTriples){
             accessionTriples = FilePairBlock.accessionTriplesFromProps(this.props);
         }
@@ -1230,8 +576,10 @@ class FilePairBlock extends React.Component {
             <FileEntryBlock
                 key={object.atIdFromObject(file)}
                 file={file}
-                columnHeaders={ this.props.columnHeaders }
+                columnHeaders={this.props.columnHeaders}
                 handleFileCheckboxChange={this.props.handleFileCheckboxChange}
+                nonFileHeaderCols={this.props.nonFileHeaderCols}
+                selectedFiles={this.props.selectedFiles}
                 className={null}
                 isSingleItem={this.props.files.length < 2 ? true : false}
                 pairParent={this}
@@ -1311,8 +659,7 @@ class FilePairBlock extends React.Component {
 
 }
 
-
-class FileEntryBlock extends React.Component {
+export class FileEntryBlock extends React.Component {
 
     static accessionTripleFromProps(props){
         var accessionTriple;
@@ -1348,7 +695,7 @@ class FileEntryBlock extends React.Component {
 
         var row = [];
         var cols = _.filter(this.props.columnHeaders, (col)=>{
-            if (_.pluck(ExperimentsTable.builtInHeaders(this.props.experimentSetType), 'columnClass').indexOf(col.columnClass) > -1) return false;
+            if (this.props.nonFileHeaderCols.indexOf(col.columnClass) > -1) return false;
             return true;
         });
         var baseClassName = (this.props.className || '') + " col-file-detail item";
@@ -1494,4 +841,256 @@ class FileEntryBlock extends React.Component {
             </div>
         );
     }
+}
+
+
+
+
+/**
+ * To be used within Experiments Set View/Page, or
+ * within a collapsible row on the browse page.
+ *
+ * Shows experiments only, not experiment sets.
+ *
+ * Allows either table component itself to control state of "selectedFiles"
+ * or for a parentController (passed in as a prop) to take over management
+ * of "selectedFiles" Set and "checked", for integration with other pages/UI.
+ */
+
+
+export class StackedBlockTable extends React.Component {
+
+    static StackedBlock = StackedBlock
+
+    static defaultHeaders = [];
+
+    static propTypes = {
+        'columnHeaders' : PropTypes.arrayOf(PropTypes.shape({
+            'columnClass' : PropTypes.string.isRequired,
+            'className' : PropTypes.string,
+            'title' : PropTypes.string.isRequired,
+            'visibleTitle' : PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
+            'initialWidth' : PropTypes.number.isRequired
+        })),
+        'children' : PropTypes.arrayOf(PropTypes.element)
+    };
+
+    static defaultProps = {
+        'columnHeaders' : [
+            { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
+            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+            { columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
+            { columnClass: 'file',                                      title: 'File',          initialWidth: 125   }
+        ],
+        'width': null,
+        'nonFileHeaderCols' : ['biosample', 'experiment', 'file-pair', 'file'],
+        'defaultInitialColumnWidth' : 120,
+    }
+
+    constructor(props){
+        super(props);
+        this.render = this.render.bind(this);
+        this.initialColumnWidths = this.initialColumnWidths.bind(this);
+        this.getColumnWidths = this.getColumnWidths.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
+        this.adjustedChildren = this.adjustedChildren.bind(this);
+        this.colWidthStyles = this.colWidthStyles.bind(this);
+        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
+
+
+        this.cache = {
+            oddExpRow : true
+        };
+        var initialState = {
+            columnWidths : null, // set on componentDidMount via updateColumnWidths
+            mounted : false
+        };
+        this.state = initialState;
+    }
+
+    componentDidMount(){
+        requestAnimationFrame(()=>{
+            this.setState({ 'mounted' : true });
+        });
+    }
+
+    componentWillUnmount(){
+        delete this.lastColumnWidths;
+        delete this.cache.origColumnWidths;
+    }
+
+    initialColumnWidths(){
+        return _.reduce(this.props.columnHeaders, (m, colHeading)=>{
+            return m + (colHeading.initialWidth || this.props.defaultInitialColumnWidth);
+        }, 0);
+    }
+
+    totalColumnsWidth(origColumnWidths = this.cache.origColumnWidths){
+        return _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
+    }
+
+    getColumnWidths(){
+        if (
+            typeof this.props.width !== 'number' && (
+                !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
+            )
+        ){
+            return this.initialColumnWidths();
+        }
+
+        var origColumnWidths;
+        if (!this.cache.origColumnWidths){
+            origColumnWidths = _.map(this.props.columnHeaders, (c) => c.initialWidth || this.props.defaultInitialColumnWidth );
+            this.cache.origColumnWidths = origColumnWidths;
+        } else {
+            origColumnWidths = this.cache.origColumnWidths;
+        }
+
+        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960; // 960 = fallback for tests
+        var totalOrigColsWidth = this.totalColumnsWidth(origColumnWidths);//_.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
+
+        if (totalOrigColsWidth > availableWidth){
+            return null;
+        }
+
+        var scale = (availableWidth / totalOrigColsWidth) || 1;
+        var newColWidths = origColumnWidths.map(function(c){
+            return Math.floor(c * scale);
+        });
+
+        // Adjust first column by few px to fit perfectly.
+        var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v; }, 0);
+        var remainder = availableWidth - totalNewColsWidth;
+        newColWidths[0] += Math.floor(remainder - 0.5);
+
+        return newColWidths;
+    }
+
+    colWidthStyles(columnWidths = this.state.columnWidths, columnHeaders){
+        if (!columnHeaders) columnHeaders = this.props.columnHeaders;
+        var colWidthStyles = _.object(_.map(_.pluck(columnHeaders, 'columnClass'), function(cn){ return [cn, null]; })); // Returns { 'experiment' : null , 'biosample' : null, ... }
+
+        if (Array.isArray(columnWidths)){
+            _.keys(colWidthStyles).forEach((cn) => {
+                colWidthStyles[cn] = {
+                    width : columnWidths[_.findIndex(columnHeaders, { 'columnClass' : cn })]
+                };
+            });
+        }
+
+        return colWidthStyles;
+    }
+
+    /**
+     * If we have a SelectedFilesController up the parent/ancestor chain that feeds us selectFile, selectedFiles, and unselectFile, this is the handler to use for checkbox stacked blocks.
+     * 
+     * @param {string|string[]} uuid - String or list of strings (File Item UUID)
+     * @param {Object|Object[]} fileObj - File Item JSON
+     * @returns {void} - Nothing.
+     */
+    handleFileCheckboxChange(accessionTripleString, fileObj){
+        if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
+
+        var willSelect;
+        var isMultiples;
+
+        console.log('STRING', accessionTripleString);
+
+        if (Array.isArray(accessionTripleString)){
+            isMultiples = true;
+            willSelect = (typeof this.props.selectedFiles[accessionTripleString[0]] === 'undefined');
+        } else {
+            isMultiples = false;
+            willSelect = (typeof this.props.selectedFiles[accessionTripleString] === 'undefined');
+        }
+
+        if (willSelect){
+            if (isMultiples){
+                this.props.selectFile(_.zip(accessionTripleString, fileObj));
+            } else {
+                this.props.selectFile(accessionTripleString, fileObj);
+            }
+        } else {
+            this.props.unselectFile(accessionTripleString);
+        }
+    }
+
+    adjustedChildren(){
+        return React.Children.map(this.props.children, (c)=>{
+            //if (c.type.displayName !== 'StackedBlock') return c; // Only add props to StackedBlocks
+            var addedProps = {};
+
+            // REQUIRED & PASSED DOWN
+            addedProps.handleFileCheckboxChange = this.handleFileCheckboxChange;
+            addedProps.colWidthStyles = this.colWidthStyles(this.lastColumnWidths || this.getColumnWidths());
+            addedProps.currentlyCollapsing = this.state.collapsing;
+            addedProps.expTable = this;
+            addedProps.stackDepth = 0;
+
+            if (this.props.selectedFiles && !c.props.selectedFiles){
+                addedProps.selectedFiles = this.props.selectedFiles;
+            }
+            if (this.props.columnHeaders && !c.props.columnHeaders){
+                addedProps.columnHeaders = this.props.columnHeaders;
+            }
+            if (this.props.experimentSetAccession && !c.props.experimentSetAccession){
+                addedProps.experimentSetAccession = this.props.experimentSetAccession;
+            }
+            if (this.props.nonFileHeaderCols && !c.props.nonFileHeaderCols){
+                addedProps.nonFileHeaderCols = this.props.nonFileHeaderCols;
+            }
+            
+            if (Object.keys(addedProps).length > 0){
+                return React.cloneElement(c, addedProps, c.props.children);
+            }
+            return c;
+        });
+    }
+
+    render(){
+        
+        // Cache for each render.
+        //this.lastColumnHeaders = this.columnHeaders();
+        this.lastColumnWidths = this.getColumnWidths();
+
+        var renderHeaderItem = function(h, i, arr){
+            if (h.visible === false) return null;
+            var visibleTitle = typeof h.visibleTitle !== 'undefined' ? h.visibleTitle : h.title;
+            var style = null;
+            if (Array.isArray(this.lastColumnWidths) && this.lastColumnWidths.length === arr.length){
+                style = { 'width' : this.lastColumnWidths[i] || h.initialWidth };
+            }
+            return (
+                <div className={"heading-block col-" + h.columnClass + (h.className ? ' ' + h.className : '')} key={'header-' + i} style={style} data-column-class={h.columnClass}>
+                    { visibleTitle }
+                </div>
+            );
+        }.bind(this);
+
+        return (
+            <div className={"stacked-block-table" + (this.state.mounted ? ' mounted' : '') + (this.props.fadeIn ? ' fade-in' : '') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}>
+                {
+                    !this.props.children ?
+                    <h6 className="text-center text-400"><em>No Results</em></h6>
+                    :
+                    <div className="headers expset-headers" ref="header">
+                        { this.props.columnHeaders.map(renderHeaderItem) }
+                    </div>
+                }
+
+                {
+                    this.props.children ?
+                    <div className="body clearfix">
+                        { this.adjustedChildren() }
+                    </div> : null
+                }
+
+            </div>
+        );
+    }
+
+
+
+
 }

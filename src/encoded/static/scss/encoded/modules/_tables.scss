@@ -568,20 +568,21 @@ $open-expset-table-side-border-color : #e4e4e4;
 
 // Column Widths - these are also set & used from JS, but these override.
 // ToDo: Remove and rely exclusively on JS? (Easier testing, no reliance on componentDidMount).
+/*
 $expset-col-biosample : 115px;
 $expset-col-experiment : 145px;
 $expset-col-file-pair : 40px;
 $expset-col-file : 125px;
 $expset-col-file-detail : 100px;
 $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-col-file-pair + $expset-col-file + ($expset-col-file-detail * 2);
-
+*/
 // Block Colors
 $expset-biosample-bg-odd : #f7f9f8;
 $expset-biosample-bg-even : #f8f9f7;
 
 $small-label-accession-font-size : 0.75rem;
 
-.expset-experiments {
+.stacked-block-table {
 
 	position: relative;
 	display: block;
@@ -590,19 +591,20 @@ $small-label-accession-font-size : 0.75rem;
 
 	//@media screen and (min-width: $screen-md-min){
 
-		min-width: $expset-full-width;
+		//min-width: $expset-full-width;
+		min-width: 750px;
 		transition: opacity .35s;
 
 		&.fade-in:not(.mounted){
 			opacity: 0;
 		}
-
+		/*
 		.col-biosample 		{ width: $expset-col-biosample; }
 		.col-experiment 	{ width: $expset-col-experiment; }
 		.col-file-pair	 	{ width: $expset-col-file-pair; }
 		.col-file 			{ width: $expset-col-file; }
 		.col-file-detail 	{ width: $expset-col-file-detail; }
-
+		*/
 		.headers {
 			display: block;
 			text-align: right;
