@@ -36,7 +36,8 @@
         }
     ],
     "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
-    "awsem_job_id": "aleuryvaieuyv"
+    "awsem_job_id": "aleuryvaieuyv",
+    "awsem_app_name": "fastqc-0-11-4-1"
 },{
     "lab":"/labs/4dn-dcic-lab/",
     "award":"/awards/1U01CA200059-01/",
@@ -84,6 +85,7 @@
         }
     ],
     "awsem_job_id":"aieybviaeuyfbvelif",
+    "awsem_app_name": "hi-c-processing-partb",
     "output_files":[
         {
             "type":"Output processed file",

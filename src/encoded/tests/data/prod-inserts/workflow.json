@@ -966,6 +966,8 @@
         }
     ],
     "award": "1U01CA200059-01"
+    "data_type": ["Hi-C"],
+    "category": "merging + matrix generation",
 },
 {
     "title": "Hi-C processing part B revision 6",
@@ -1044,6 +1046,8 @@
             "step_name": "merge_pairs"
         }
     ],
+    "data_type": ["Hi-C"],
+    "category": "merging + matrix generation",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "description": "Hi-C processing part B revision 6",
@@ -1069,6 +1073,8 @@
             "step_name": "juicer2pairs"
         }
     ],
+    "data_type": ["Hi-C"],
+    "category": "alignment + filtering",
     "workflow_type": "Hi-C data analysis",
     "name": "hi-c-processing-parta-juicer/5",
     "uuid": "a9caf6f3-49e5-4c33-afab-9ec90d65faf3",
@@ -1350,7 +1356,9 @@
                 }
             ]
         }
-    ]
+    ],
+    "data_types": ["Hi-C"],
+    "category": "alignment + filtering"
 },
 {
     "title":"Hi-C processing part B revision 24",
@@ -1535,6 +1543,8 @@
             "step_name": "cooler"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "merging + matrix generation",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "accession": "4DNWFSOZLMMB",
@@ -1691,6 +1701,8 @@
             "step_name": "cooler"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "merging + matrix generation",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "accession": "4DNWFP00U73B",
@@ -1753,6 +1765,8 @@
             "step":"11775554-5f85-4d0c-93e4-fa9d7f20d47a"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "format_integration",
     "description": "add-hic-normvector-to-mcool"
 },
 {
@@ -1809,6 +1823,8 @@
             "step":"53e7b46f-1d3b-4a16-812f-c79456614bda"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "data extraction",
     "description": "extract-mcool-normvector-for-juicebox"
 },
 {
@@ -1876,6 +1892,8 @@
             "step":"12ad1dbe-cc44-4968-8a21-d1e5a12d3222"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "normalization",
     "description": "addnormtohic"
 },
 {
@@ -1991,6 +2009,8 @@
     "description": "Hi-C processing partC Revision 6",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
-    "accession": "4DNWF06BPEF2"
+    "accession": "4DNWF06BPEF2",
+    "data_types": ["Hi-C"],
+    "category": "aggregation"
 }
 ]
