@@ -750,6 +750,39 @@ $small-label-accession-font-size : 0.75rem;
 				margin-top: 17px;
 			}
 
+			&.odd {
+				@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(245, 240, 240, 0.4), 0%, 30%);
+
+				&.s-block-list-collapsing.collapsing-child {
+					background : #f6f5f5;
+					background: rgb(255, 252, 250);
+				}
+				&:hover {
+					@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(255, 252, 250, 1), 0%, 12%);
+				}
+				&:not(.collapsing-child) > .file-pairs > .view-more-button {
+					@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
+				}
+			}
+
+			&.even {
+				//background-color: rgba(255, 220, 200, 0.5);
+				@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 250, 250, 0.4), 0%, 30%);
+
+				&.s-block-list-collapsing.collapsing-child {
+					background: #faf9f9;
+					background: rgb(255, 252, 250);
+				}
+
+				&:hover {
+					@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 252, 250, 1), 0%, 12%);
+				}
+
+				&:not(.collapsing-child) > .file-pairs > .view-more-button {
+					@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
+				}
+			}
+
 		}
 
 		//@media screen and (min-width: $screen-md-min){
@@ -851,8 +884,8 @@ $small-label-accession-font-size : 0.75rem;
 		//}
 
 		.s-block > .item {
-			padding: 7px 8px;
-			line-height: 20px;
+			padding: 9px 8px;
+			line-height: 16px;
 			display: inline-block;
 			text-align: center;
 			vertical-align: middle;
@@ -899,9 +932,9 @@ $small-label-accession-font-size : 0.75rem;
 
 				> .name {
 					text-align: center;
-					line-height: 20px;
-					padding-top: 25px;
-					padding-bottom: 25px;
+					line-height: 16px;
+					padding-top: 27px;
+					padding-bottom: 27px;
 					min-height: 70px;
 					&:after {
 						//top: -15px;
@@ -921,39 +954,6 @@ $small-label-accession-font-size : 0.75rem;
 							border-color: rgba(0,0,0,0.5);
 						}
 
-						&.odd {
-							@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(245, 240, 240, 0.4), 0%, 30%);
-
-							&.s-block-list-collapsing.collapsing-child {
-								background : #f6f5f5;
-								background: rgb(255, 252, 250);
-							}
-							&:hover {
-								@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(255, 252, 250, 1), 0%, 12%);
-							}
-							&:not(.collapsing-child) > .file-pairs > .view-more-button {
-								@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
-							}
-						}
-
-						&.even {
-							//background-color: rgba(255, 220, 200, 0.5);
-							@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 250, 250, 0.4), 0%, 30%);
-
-							&.s-block-list-collapsing.collapsing-child {
-								background: #faf9f9;
-								background: rgb(255, 252, 250);
-							}
-
-							&:hover {
-								@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 252, 250, 1), 0%, 12%);
-							}
-
-							&:not(.collapsing-child) > .file-pairs > .view-more-button {
-								@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
-							}
-						}
-
 						> .name {
 							font-weight: 500;
 							line-height: 20px;
@@ -962,7 +962,7 @@ $small-label-accession-font-size : 0.75rem;
 							min-height: 70px;
 						}
 
-
+						/*
 						.files.s-block-list,
 						.file-pairs.s-block-list,
 						.s-block-list.stack-depth-2 {
@@ -1015,10 +1015,65 @@ $small-label-accession-font-size : 0.75rem;
 							}
 
 						}
+						*/
 
 					}
 				}
 			}
+
+			.s-block-list.files,
+			.s-block-list.file-pairs,
+			.s-block-list.stack-depth-2 {
+
+				.s-block.file-pair {
+					&:not(:last-child){
+						border-bottom: 1px solid #888;
+						border-color: rgba(0,0,0,0.5);
+					}
+
+					> .s-block-list.files > .s-block.file:not(:last-child) {
+						border-bottom-style: dotted;
+					}
+
+					> .s-block-list.files > .s-block.file:last-child:not(:first-child) {
+						border-top: 1px solid transparent;
+					}
+
+					.name.col-file-pair {
+						line-height: 25px;
+						white-space: nowrap;
+					}
+				}
+
+				.s-block.file {
+
+					&:not(:last-child){
+						border-bottom: 1px solid #ccc;
+						border-color: rgba(0,0,0,0.2);
+					}
+
+					&.single-item .name.col-file {
+						line-height: 55px;
+						white-space: nowrap;
+					}
+
+					&:not(.single-item) .name.col-file {
+						line-height: 20px;
+						white-space: nowrap;
+					}
+
+					.name.col-file > .exp-table-checkbox {
+						margin-bottom: 0;
+						display: inline-block;
+						margin-right: 2px;
+						vertical-align: middle;
+						margin-top: -3px;
+					}
+
+				}
+
+			}
+
 		}
 	}
 }

@@ -85,18 +85,6 @@ export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
 }
 
 
-export class ProcessedFilesTableSectionForExperiment extends React.Component {
-    
-        
-}
-
-export class ProcessedFilesTableSectionForExperimentSet extends React.Component {
-    
-
-        
-}
-
-
 export class ProcessedFilesTableSimple extends React.Component {
 
     static propTypes = {

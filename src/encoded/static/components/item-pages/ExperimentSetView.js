@@ -4,11 +4,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Panel } from 'react-bootstrap';
-import { ajax, console, DateUtility, object, isServerSide, Filters } from './../util';
+import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn } from './../util';
 import * as globals from './../globals';
-import ExperimentsTable, { ProcessedFilesStackedTable } from './../experiments-table';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, ProcessedFilesTableSimple, allProcessedFilesFromExperimentSet } from './components';
-import { FacetList, ReduxExpSetFiltersInterface } from './../browse/components';
+import { FacetList, ReduxExpSetFiltersInterface, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
 
 /**
  * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
@@ -53,7 +52,7 @@ export default class ExperimentSetView extends React.Component {
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {
             'selectedFiles': new Set(),
-            'passExperiments' : ExperimentsTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term'),
+            'passExperiments' : RawFilesStackedTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term'),
             'mounted' : false
         };
     }
@@ -64,7 +63,7 @@ export default class ExperimentSetView extends React.Component {
         if(this.props.expSetFilters !== nextProps.expSetFilters || this.props.context.experiments_in_set !== nextProps.context.experiments_in_set){
             this.setState({
                 selectedFiles: new Set(),
-                passExperiments : ExperimentsTable.getPassedExperiments(nextProps.context.experiments_in_set, nextProps.expSetFilters, 'single-term')
+                passExperiments : RawFilesStackedTable.getPassedExperiments(nextProps.context.experiments_in_set, nextProps.expSetFilters, 'single-term')
             });
         }
     }
@@ -74,34 +73,55 @@ export default class ExperimentSetView extends React.Component {
     }
 
     getTabViewContents(){
-        /* In addition to built-in headers for experimentSetType defined by ExperimentsTable */
+
+        var context = this.props.context;
+
+        /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
             { columnClass: 'file-detail', title : 'File Info'}
         ];
 
-        if (this.props.context.experimentset_type === 'replicate') {
+        if (context.experimentset_type === 'replicate') {
             expTableColumnHeaders.unshift({ columnClass: 'file-detail', title : 'File Type'});
         }
 
-        return [
+        var processedFiles;
+
+        console.log(expFxn.combineWithReplicateNumbers(context.replicate_exps, context.experiments_in_set));
+        if (Array.isArray(context.replicate_exps) && Array.isArray(context.experiments_in_set)){
+            processedFiles = allProcessedFilesFromExperimentSet(_.extend({}, context, {
+                'experiments_in_set' : expFxn.combineWithReplicateNumbers(context.replicate_exps, context.experiments_in_set)
+            }));
+        } else {
+            processedFiles = allProcessedFilesFromExperimentSet(context);
+        }
+
+        var tabs = [
             {
                 tab : <span><i className="icon icon-th icon-fw"/> Experiments</span>,
                 key : 'experiments',
-                content : <ExperimentsTableSection {..._.pick(this.props, 'context', 'schemas', 'facets', 'expSetFilters')} {...this.state} />
-            },
-            {
+                content : <RawFilesStackedTableSection {..._.pick(this.props, 'context', 'schemas', 'facets', 'expSetFilters')} {...this.state} />
+            }
+        ];
+
+        if (processedFiles && processedFiles.length > 0){
+            tabs.push({
                 tab : <span><i className="icon icon-th icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
-                content : <ProcessedFilesTableSection {..._.pick(this.props, 'context', 'schemas', 'expSetFilters')} {...this.state} />
-            },
-            AttributionTabView.getTabObject(this.props.context),
-            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
-            AuditTabView.getTabObject(this.props.context)
-        ].map((tabObj)=>{ // Common properties
+                content : <ProcessedFilesTableSection processedFiles={processedFiles} {..._.pick(this.props, 'context', 'schemas', 'expSetFilters')} {...this.state} />
+            });
+        }
+
+        return tabs.concat([
+            AttributionTabView.getTabObject(context),
+            ItemDetailList.getTabObject(context, this.props.schemas),
+            AuditTabView.getTabObject(context)
+        ]).map((tabObj)=>{ // Common properties
             return _.extend(tabObj, {
                 'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 650 }
             });
         });
+
     }
 
     render() {
@@ -188,9 +208,9 @@ class ExperimentSetHeader extends React.Component {
 }
 
 
-class ExperimentsTableSection extends React.Component {
+class RawFilesStackedTableSection extends React.Component {
     render(){
-        /* In addition to built-in headers for experimentSetType defined by ExperimentsTable */
+        /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
             { columnClass: 'file-detail', title : 'File Info'}
         ];
@@ -213,7 +233,7 @@ class ExperimentsTableSection extends React.Component {
                 </h3>
                 : null }
                 <div className="exp-table-container">
-                    <ExperimentsTable
+                    <RawFilesStackedTable
                         ref="experimentsTable"
                         experimentSetType={this.props.context.experimentset_type}
                         expSetFilters={this.props.expSetFilters}
@@ -232,19 +252,18 @@ class ExperimentsTableSection extends React.Component {
 
 class ProcessedFilesTableSection extends React.Component {
     render(){
-        var processedFiles = allProcessedFilesFromExperimentSet(this.props.context);
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
                     <span>Processed Files</span>
                 </h3>
-                <hr className="tab-section-title-horiz-divider"/>
                 <ProcessedFilesStackedTable
-                    files={processedFiles}
+                    files={this.props.processedFiles}
                     experimentSetAccession={this.props.context.accession || null}
                     experimentArray={this.props.context.experiments_in_set}
+                    replicateExpsArray={this.props.context.replicate_exps}
                 />
-                <ProcessedFilesTableSimple files={processedFiles} />
+                {/* <ProcessedFilesTableSimple files={processedFiles} /> */}
             </div>
         );
     }

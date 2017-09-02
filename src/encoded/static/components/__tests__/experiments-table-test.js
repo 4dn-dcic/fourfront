@@ -2,7 +2,7 @@
 
 import createReactClass from 'create-react-class';
 
-/** Test ExperimentsTable for Replicate Experiment Set */
+/** Test RawFilesStackedTable for Replicate Experiment Set */
 
 jest.autoMockOff();
 
@@ -12,14 +12,14 @@ jest.dontMock('underscore');
 
 
 describe('Testing experiments-table.js', function() {
-    var React, ExperimentsTable, expFuncs, testExperimentsTable, TestUtils, FetchContext, context, schemas, _, ExperimentsTableWrapper, SelectedFilesController, initiallySelectedFiles;
+    var React, RawFilesStackedTable, expFuncs, testRawFilesStackedTable, TestUtils, FetchContext, context, schemas, _, RawFilesStackedTableWrapper, SelectedFilesController, initiallySelectedFiles;
 
     beforeEach(function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
 
-        ExperimentsTable = require('../experiments-table').default;
+        RawFilesStackedTable = require('./../browse/components').RawFilesStackedTable;
         SelectedFilesController = require('./../browse/components').SelectedFilesController;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
@@ -38,13 +38,13 @@ describe('Testing experiments-table.js', function() {
             //"210a7047-37cc-406d-8246-62fbe3400fc3" : true
         };
 
-        ExperimentsTableWrapper = createReactClass({
+        RawFilesStackedTableWrapper = createReactClass({
 
             render: function() {
                 return (
                     <div>
                         <SelectedFilesController initiallySelectedFiles={initiallySelectedFiles} ref="controller">
-                            <ExperimentsTable
+                            <RawFilesStackedTable
                                 experimentArray={context.experiments_in_set}
                                 experimentSetAccession={context.accession}
                                 replicateExpsArray={context.replicate_exps}
@@ -57,7 +57,7 @@ describe('Testing experiments-table.js', function() {
             }
         });
 
-        testExperimentsTable = TestUtils.renderIntoDocument(<ExperimentsTableWrapper/>);
+        testRawFilesStackedTable = TestUtils.renderIntoDocument(<RawFilesStackedTableWrapper/>);
 
     });
 
@@ -68,7 +68,7 @@ describe('Testing experiments-table.js', function() {
         expect(
             _.intersection(
                 _.map(
-                    ExperimentsTable.builtInHeaders(context.experimentset_type),
+                    RawFilesStackedTable.builtInHeaders(context.experimentset_type),
                     function(h){ return h.visibleTitle || h.title; }
                 ).sort(),
                 checkIfHaveHeaders
@@ -76,8 +76,8 @@ describe('Testing experiments-table.js', function() {
         ).toEqual(checkIfHaveHeaders);
 
         // Then ensure they're rendered.
-        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testExperimentsTable, 'expset-headers');
-        var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');
+        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testRawFilesStackedTable, 'expset-headers');
+        var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
         expect(
             _.intersection(
                 _.pluck(headers, 'innerHTML').sort(),
@@ -87,12 +87,12 @@ describe('Testing experiments-table.js', function() {
     });
 
     it('Header columns have width styles which fit available width', function() {
-        var headers = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');
+        var headers = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
         var availableWidthForTests = 960;
         var orderedHeaderWidths = headers.map(function(h, i){
             var w = parseInt(h.style._values.width); 
             if (Number.isNaN(w)){
-                return ExperimentsTable.initialColumnWidths(h.getAttribute('data-column-class')) || 120;
+                return RawFilesStackedTable.initialColumnWidths(h.getAttribute('data-column-class')) || 120;
             }
             return w;
         });
@@ -105,19 +105,19 @@ describe('Testing experiments-table.js', function() {
     });
 
     it('All child columns/blocks with matching classNames (col-experiment, etc.), match header block widths', function() {
-        var headers = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');
+        var headers = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
         var headerWidths = _.object(
             _.map(headers, function(h, i){
                 var w = parseInt(h.style._values.width);
                 var columnClassName = h.getAttribute('data-column-class');
-                if (Number.isNaN(w)) w = ExperimentsTable.initialColumnWidths(columnClassName) || 120; // Default
+                if (Number.isNaN(w)) w = RawFilesStackedTable.initialColumnWidths(columnClassName) || 120; // Default
                 return [columnClassName, w];
             })
         ); // Returns { 'biosample' : 201, 'experiment' : 253, ... }
 
         console.log('Header Block Widths for test:', headerWidths);
 
-        var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 's-block');
+        var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 's-block');
 
         sBlocks.map(function(sBlock){
             return _.find(sBlock.children, function(child){
@@ -145,7 +145,7 @@ describe('Testing experiments-table.js', function() {
         };
         var foundAll = false;
 
-        var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 's-block');
+        var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 's-block');
         var foundClass;
         for (var i=0; i < sBlocks.length; i++){
             foundClass = _.intersection(sBlocks[i].className.split(' '), Object.keys(found))[0];
@@ -168,7 +168,7 @@ describe('Testing experiments-table.js', function() {
 
     it('Number of experiments & files displayed matches number in test data', function() {
         // Any collapsed s-blocks will still be in DOM but invisible (will be found by scryRenderedDOMComponentsWithClass)
-        var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 's-block');
+        var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 's-block');
 
         expect(
             sBlocks.filter(function(sBlock){
@@ -203,7 +203,7 @@ describe('Testing experiments-table.js', function() {
             else return null;
         }
 
-        var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 's-block');
+        var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 's-block');
         var filePairBlocksWithCheckboxes = sBlocks.filter(function(sBlock){
             return getFilePairCheckboxElement(sBlock) !== null;
         });
@@ -225,12 +225,12 @@ describe('Testing experiments-table.js', function() {
         }
 
         // Ensure we have 5 initially selected file pairs in parentController state (from test def beforeEach)
-        expect(_.keys(initiallySelectedFiles).length).toEqual(_.keys(testExperimentsTable.refs.controller.state.selectedFiles).length);
+        expect(_.keys(initiallySelectedFiles).length).toEqual(_.keys(testRawFilesStackedTable.refs.controller.state.selectedFiles).length);
 
         // Check that the selected file pairs / files in state match checkboxes that are selected.
         function selectedFilesMatchSelectedCheckboxes(stateKeys){
             
-            if (!stateKeys) stateKeys = _.keys(testExperimentsTable.refs.controller.state.selectedFiles).sort();
+            if (!stateKeys) stateKeys = _.keys(testRawFilesStackedTable.refs.controller.state.selectedFiles).sort();
             var fileKeys = _.keys(selectedFilePairBlocksFileUUIDObj(filePairBlocksWithCheckboxes)).sort();
             if (fileKeys.length !== stateKeys.length) return false;
             for (var i = 0; i < fileKeys.length; i++){
@@ -252,7 +252,7 @@ describe('Testing experiments-table.js', function() {
         expect(selectedFilesMatchSelectedCheckboxes()).toBe(true);
 
         // Check some checkboxes RANDOMLYish and compare again.
-        var originalSelectedFiles = _.clone(testExperimentsTable.refs.controller.state.selectedFiles); // copy orig set
+        var originalSelectedFiles = _.clone(testRawFilesStackedTable.refs.controller.state.selectedFiles); // copy orig set
         clickRandomFilePairCheckboxes();
         // Ensure our state has changed in response to edits/clicks.
         expect(
@@ -269,15 +269,15 @@ describe('Testing experiments-table.js', function() {
         }
 
         console.log("Initially selected files:\n", SelectedFilesController.objectToCompleteList(originalSelectedFiles));
-        console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", SelectedFilesController.objectToCompleteList(testExperimentsTable.refs.controller.state.selectedFiles));
+        console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", SelectedFilesController.objectToCompleteList(testRawFilesStackedTable.refs.controller.state.selectedFiles));
 
     });
 
 
     it('Clicking "Show X More Ys" collapse button works', function() {
 
-        var viewMoreButtons = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'view-more-button');
-        var collapsibleSections = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'collapsible-s-block-ext');
+        var viewMoreButtons = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'view-more-button');
+        var collapsibleSections = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'collapsible-s-block-ext');
 
         // Every collapsible section collapsed
         expect(_.every(collapsibleSections, function(c){ return c.className.split(' ').indexOf('in') === -1; })).toBe(true);

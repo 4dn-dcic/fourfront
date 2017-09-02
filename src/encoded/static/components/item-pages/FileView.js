@@ -8,7 +8,6 @@ import * as globals from './../globals';
 import { object, expFxn, ajax, Schemas, layout, fileUtil } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
-import ExperimentsTable from './../experiments-table';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';

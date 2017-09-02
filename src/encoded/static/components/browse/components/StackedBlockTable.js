@@ -55,13 +55,13 @@ export class StackedBlockNameLabel extends React.Component {
                 var msg = successful ? 'successful' : 'unsuccessful';
                 console.log('Copying text command was ' + msg);
                 this.flashEffect();
-                analytics.event('ExperimentsTable', 'Copy', {
+                analytics.event('StackedTable', 'Copy', {
                     'eventLabel' : 'Accession',
                     'name' : this.props.accession
                 });
             } catch (err) {
                 console.error('Oops, unable to copy');
-                analytics.event('ExperimentsTable', 'ERROR', {
+                analytics.event('StackedTable', 'ERROR', {
                     'eventLabel' : 'Unable to copy accession',
                     'name' : this.props.accession
                 });
@@ -129,14 +129,16 @@ export class StackedBlockName extends React.Component {
     static Label = StackedBlockNameLabel
     
     static propTypes = {
-        columnClass : PropTypes.string,
-        colWidthStyles : PropTypes.object,
-        label : PropTypes.shape({
+        'columnClass' : PropTypes.string,
+        'colWidthStyles' : PropTypes.object,
+        'label' : PropTypes.shape({
             title : PropTypes.node,
             subtitle : PropTypes.node,
             subtitleVisible : PropTypes.bool
         }),
-        visible : PropTypes.bool
+        'visible' : PropTypes.bool, // ? forgot
+        'verticalAlign' : PropTypes.string // CSS vertical-align property. Change alignment/positioning if wanted.
+        
     }
 
     static defaultProps = {
@@ -170,8 +172,6 @@ export class StackedBlockName extends React.Component {
 
     adjustedChildren(){
         return React.Children.map(this.props.children, (c)=>{
-
-            console.log('NAME_CHILD', c, typeof c)
 
             var addedProps = {};
             if (c && c.props && typeof c.props.className === 'string' && c.props.className.indexOf('name-title') === -1){
@@ -223,6 +223,10 @@ export class StackedBlockName extends React.Component {
         if (this.props.relativePosition){
             if (style) style.position = 'relative';
             else style = { 'position' : 'relative' };
+        }
+        if (this.props.verticalAlign){
+            if (style) style.verticalAlign = this.props.verticalAlign;
+            else style = { 'verticalAlign' : this.props.verticalAlign };
         }
         return (
             <div className={"name col-" + this.props.columnClass} style={style}>
@@ -314,12 +318,14 @@ export class StackedBlockList extends React.Component {
         showMoreExtTitle : PropTypes.string,
         collapseLimit : PropTypes.number,
         collapseShow : PropTypes.number,
-        expTable : PropTypes.any
+        expTable : PropTypes.any,
+        collapseLongLists : PropTypes.bool.isRequired
     }
 
     static defaultProps = {
         collapseLimit : 4,
-        collapseShow : 3
+        collapseShow : 3,
+        //collapseLongLists : true
     }
 
     constructor(props){
@@ -327,7 +333,7 @@ export class StackedBlockList extends React.Component {
         this.render = this.render.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
-        if (Array.isArray(this.props.children) && this.props.children.length > this.props.collapseLimit){
+        if (this.props.collapseLongLists && Array.isArray(this.props.children) && this.props.children.length > this.props.collapseLimit){
             this.state = { 'collapsed' : true };
         }
     }
@@ -372,6 +378,9 @@ export class StackedBlockList extends React.Component {
             if (this.props.handleFileCheckboxChange && !c.props.handleFileCheckboxChange){
                 addedProps.handleFileCheckboxChange = this.props.handleFileCheckboxChange;
             }
+            if (typeof this.props.collapseLongLists === 'boolean' && typeof c.props.collapseLongLists !== 'boolean'){
+                addedProps.collapseLongLists = this.props.collapseLongLists;
+            }
             if (_.keys(addedProps).length > 0){
                 return React.cloneElement(c, addedProps, c.props.children);
             }
@@ -395,7 +404,7 @@ export class StackedBlockList extends React.Component {
 
         var className = "s-block-list " + (this.props.className || '') + (' stack-depth-' + this.props.stackDepth);
         var timeout = 350; // Default
-        if (!Array.isArray(children) || children.length <= this.props.collapseLimit) {
+        if (!this.props.collapseLongLists || !Array.isArray(children) || children.length <= this.props.collapseLimit) {
             // Don't have enough items for collapsible element, return plain list.
             return <div className={className}>{ children }</div>;
         }
@@ -474,6 +483,9 @@ export class StackedBlock extends React.Component {
             }
             if (this.props.handleFileCheckboxChange && !c.props.handleFileCheckboxChange){
                 addedProps.handleFileCheckboxChange = this.props.handleFileCheckboxChange;
+            }
+            if (typeof this.props.collapseLongLists === 'boolean' && typeof c.props.collapseLongLists !== 'boolean'){
+                addedProps.collapseLongLists = this.props.collapseLongLists;
             }
 
             if (c.props.children){
@@ -559,7 +571,6 @@ export class FilePairBlock extends React.Component {
     }
 
     isChecked(accessionTriples){
-        console.log('SEL', this.props.selectedFiles)
         if (!accessionTriples){
             accessionTriples = FilePairBlock.accessionTriplesFromProps(this.props);
         }
@@ -790,7 +801,7 @@ export class FileEntryBlock extends React.Component {
                 })} />;
             } else if (this.props.type === 'paired-end') {
                 return <StackedBlock.Name.Label {...commonProperties} />;
-                //return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
+                //return RawFilesStackedTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
                 //    //subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
                 //}));
             }
@@ -834,6 +845,10 @@ export class FileEntryBlock extends React.Component {
         var sBlockClassName = "s-block file";
         if (this.props.hideNameOnHover) sBlockClassName += ' hide-name-on-block-hover';
         if (this.props.isSingleItem) sBlockClassName += ' single-item';
+        if (typeof this.props.stripe !== 'undefined' && this.props.stripe !== null){
+            if (this.props.stripe === true || this.props.stripe === 'even') sBlockClassName += ' even';
+            else sBlockClassName += ' odd';
+        }
         return (
             <div className={sBlockClassName}>
                 { this.renderName() }
@@ -869,7 +884,7 @@ export class StackedBlockTable extends React.Component {
             'columnClass' : PropTypes.string.isRequired,
             'className' : PropTypes.string,
             'title' : PropTypes.string.isRequired,
-            'visibleTitle' : PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
+            'visibleTitle' : PropTypes.oneOfType([PropTypes.string, PropTypes.element, PropTypes.func]),
             'initialWidth' : PropTypes.number.isRequired
         })),
         'children' : PropTypes.arrayOf(PropTypes.element)
@@ -1000,8 +1015,6 @@ export class StackedBlockTable extends React.Component {
         var willSelect;
         var isMultiples;
 
-        console.log('STRING', accessionTripleString);
-
         if (Array.isArray(accessionTripleString)){
             isMultiples = true;
             willSelect = (typeof this.props.selectedFiles[accessionTripleString[0]] === 'undefined');
@@ -1045,6 +1058,9 @@ export class StackedBlockTable extends React.Component {
             if (this.props.nonFileHeaderCols && !c.props.nonFileHeaderCols){
                 addedProps.nonFileHeaderCols = this.props.nonFileHeaderCols;
             }
+            if (typeof this.props.collapseLongLists === 'boolean' && typeof c.props.collapseLongLists !== 'boolean'){
+                addedProps.collapseLongLists = this.props.collapseLongLists;
+            }
             
             if (Object.keys(addedProps).length > 0){
                 return React.cloneElement(c, addedProps, c.props.children);
@@ -1063,6 +1079,7 @@ export class StackedBlockTable extends React.Component {
         var renderHeaderItem = function(h, i, arr){
             if (h.visible === false) return null;
             var visibleTitle = typeof h.visibleTitle !== 'undefined' ? h.visibleTitle : h.title;
+            if (typeof visibleTitle === 'function') visibleTitle = visibleTitle(this.props);
             var style = null;
             if (Array.isArray(this.lastColumnWidths) && this.lastColumnWidths.length === arr.length){
                 style = { 'width' : this.lastColumnWidths[i] || h.initialWidth };

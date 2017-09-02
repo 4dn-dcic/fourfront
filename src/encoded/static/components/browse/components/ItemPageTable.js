@@ -6,7 +6,7 @@ import _ from 'underscore';
 import Draggable from 'react-draggable';
 import * as globals from './../../globals';
 import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../util';
-import ExperimentsTable from './../../experiments-table';
+import { RawFilesStackedTable } from './file-tables';
 import {
     ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
     defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
