@@ -40,6 +40,21 @@
             "description": "A short text description of the workflow.",
             "type": "string"
         },
+        "data_types": {
+            "title": "Data types",
+            "description": "Types of the data that the workflow is applied to.",
+            "type": "array",
+            "items": {
+                "title": "Data type",
+                "description": "type of data that the workflow is applied to",
+                "type": "string"
+            } 
+        },
+        "category": {
+            "title": "Category",
+            "description": "A short text description of the workflow's category (e.g. alignment).",
+            "type": "string"
+        },
         "workflow_type": {
             "title": "Workflow Type",
             "type": "string",
