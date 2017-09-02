@@ -6,6 +6,7 @@ import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { FacetList } from './browse/components';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockListViewMoreButton, StackedBlockNameLabel, StackedBlockTable, FileEntryBlock, FilePairBlock } from './browse/components/StackedBlockTable';
+import { allProcessedFilesFromExperiments, allProcessedFilesFromExperimentSet, processedFilesFromExperimentSetToGroup } from './item-pages/components/ProcessedFilesTable';
 import { expFxn, Filters, console, isServerSide, analytics, object } from './util';
 
 
@@ -460,4 +461,121 @@ export default class ExperimentsTable extends React.Component {
 }
 
 
+export class ProcessedFilesStackedTable extends React.Component {
 
+    static propTypes = {
+        'experimentSetAccession' : PropTypes.string.isRequired,
+        'files' : PropTypes.array.isRequired
+    };
+
+    static defaultProps = {
+        'columnHeaders' : [
+            //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
+            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+            //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
+            { columnClass: 'file',                                      title: 'File',          initialWidth: 125   },
+            { columnClass: 'file-detail',                                      title: 'File Type',          initialWidth: 125   }
+        ]
+    };
+
+    renderFileBlocksForExperiment(experimentAccession, filesForExperiment){
+        return _.map(filesForExperiment, (file) =>
+            <FileEntryBlock
+                key={object.atIdFromObject(file)}
+                file={file}
+                hideNameOnHover={false}
+                experimentAccession={experimentAccession}
+                isSingleItem
+            />
+        );
+    }
+
+    renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
+
+        return _.map(_.pairs(filesGroupedByExperimentOrGlobal), (p)=>{
+            var experimentAccession = p[0];
+            var filesForExperiment = p[1];
+            return (
+                <StackedBlock
+                    columnClass="experiment"
+                    hideNameOnHover={false}
+                    key={experimentAccession}
+                    id={'exp-' + experimentAccession}
+                    label={{
+                        title : experimentAccession === 'global' ? 'Multiple Experiments in Set' : 'Experiment',
+                        //subtitle : visibleBiosampleTitle,
+                        subtitleVisible : true,
+                        accession : experimentAccession === 'global' ? this.props.experimentSetAccession : experimentAccession
+                    }}
+                >
+                    <StackedBlockName
+                        //relativePosition={
+                        //    expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6
+                        //}
+                    >
+                        <a href={ object.atIdFromObject({}) || '#' } className="name-title">
+                            { experimentAccession === 'global' ? this.props.experimentSetAccession : experimentAccession /* TODO: DISPLAY_TITLE */ }
+                        </a>
+                    </StackedBlockName>
+                    <StackedBlockList
+                        className="files"
+                        title="Files"
+                        children={ this.renderFileBlocksForExperiment(experimentAccession, filesForExperiment) /*expsWithBiosample.map(this.renderExperimentBlock)*/}
+                        showMoreExtTitle={'more Files'}
+                            
+                    />
+
+                </StackedBlock>
+            );
+
+        });
+
+    }
+
+    render(){
+        //var columnHeaders = this.columnHeaders();
+
+        console.log(this.props.files);
+
+        var groupedFiles = processedFilesFromExperimentSetToGroup(this.props.files); // Contains: { 'experiments' : { 'ACCESSSION1' : [..file_objects..], 'ACCESSION2' : [..file_objects..] }, 'experiment_sets' : { 'ACCESSION1' : [..file_objects..] } }
+
+        console.log(groupedFiles);
+
+        var expSetAccessions = _.keys(groupedFiles.experiment_sets || {});
+        var filesGroupedByExperimentOrGlobal = _.clone(groupedFiles.experiments);
+
+        // This should always be true (or false b.c of 0). It might change to not always be true (> 1). In this case, we should, figure out a different way of handling it. Like an extra stacked block at front for ExpSet.
+        if (expSetAccessions.length === 1){
+            filesGroupedByExperimentOrGlobal.global = groupedFiles.experiment_sets[expSetAccessions[0]];
+        } else {
+            console.error('Theres more than ExpSet for these files - ', expSetAccessions);
+        }
+
+        return (
+            <StackedBlockTable
+                columnHeaders={this.props.columnHeaders}
+                className="expset-experiments"
+                fadeIn
+                selectedFiles={this.props.selectedFiles}
+                selectFile={this.props.selectFile}
+                unselectFile={this.props.unselectFile}
+                experimentSetAccession={this.props.experimentSetAccession}
+            >
+                <StackedBlockList
+                    className="sets"
+                    title="Experiments"
+                    //children={experimentsGroupedByBiosample.map(this.renderBiosampleStackedBlockOfExperiments)}
+                    children={this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal)}
+                    rootList={true}
+                    //showMoreExtTitle={
+                        //experimentsGroupedByBiosample.length > 5 ?
+                        //    'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
+                        //    :
+                        //    null
+                    //}
+                />
+            </StackedBlockTable>
+        );
+    }
+
+}

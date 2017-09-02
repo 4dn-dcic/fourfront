@@ -287,7 +287,6 @@ export class ResultRowColumnBlockValue extends React.Component {
         }
 
         var className = "inner";
-        console.log(columnDefinition.field, this.props.detailOpen);
         if (typeof this.props.className === 'string'){
             className += ' ' + this.props.className;
         }

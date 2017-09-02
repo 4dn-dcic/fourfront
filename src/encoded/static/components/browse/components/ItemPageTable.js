@@ -127,6 +127,7 @@ export class ItemPageTable extends React.Component {
                 { results.map((result, rowIndex)=>{
                     return (
                         <ItemPageTableRow
+                            key={object.atIdFromObject(result) || rowIndex}
                             result={result}
                             width={width}
                             columnDefinitions={columnDefinitions}
@@ -195,7 +196,7 @@ class ItemPageTableRow extends React.Component {
                 {
                     _.map(this.props.columnDefinitions, (col, index)=>{
                         return (
-                            <div style={{ width : col.width }} className={"column column-for-" + col.field} data-field={col.field}>
+                            <div style={{ width : col.width }} className={"column column-for-" + col.field} data-field={col.field} key={col.field || index}>
                                 { this.renderValue(col, result, index) }
                             </div>
                         );

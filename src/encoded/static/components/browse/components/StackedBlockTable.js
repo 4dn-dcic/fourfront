@@ -666,7 +666,7 @@ export class FileEntryBlock extends React.Component {
         try {
             accessionTriple = expFxn.fileToAccessionTriple(props.file, true);
         } catch (e){
-            accessionTriple =  [ props.experimentSetAccession || null, (props.experiment || {}).accession || null, (props.file || {}).accession || null ].join('~');
+            accessionTriple =  [ props.experimentSetAccession || null, props.experimentAccession || (props.experiment || {}).accession || null, (props.file || {}).accession || null ].join('~');
         }
         return accessionTriple;
     }
@@ -890,7 +890,7 @@ export class StackedBlockTable extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.initialColumnWidths = this.initialColumnWidths.bind(this);
+        //this.initialColumnWidths = this.initialColumnWidths.bind(this);
         this.getColumnWidths = this.getColumnWidths.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
@@ -919,15 +919,26 @@ export class StackedBlockTable extends React.Component {
         delete this.lastColumnWidths;
         delete this.cache.origColumnWidths;
     }
-
+    /*
     initialColumnWidths(){
         return _.reduce(this.props.columnHeaders, (m, colHeading)=>{
             return m + (colHeading.initialWidth || this.props.defaultInitialColumnWidth);
         }, 0);
     }
-
+    */
     totalColumnsWidth(origColumnWidths = this.cache.origColumnWidths){
         return _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
+    }
+
+    getOriginalColumnWidths(){
+        var origColumnWidths;
+        if (!this.cache.origColumnWidths){
+            origColumnWidths = _.map(this.props.columnHeaders, (c) => c.initialWidth || this.props.defaultInitialColumnWidth );
+            this.cache.origColumnWidths = origColumnWidths;
+        } else {
+            origColumnWidths = this.cache.origColumnWidths;
+        }
+        return origColumnWidths;
     }
 
     getColumnWidths(){
@@ -936,16 +947,10 @@ export class StackedBlockTable extends React.Component {
                 !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
             )
         ){
-            return this.initialColumnWidths();
+            return this.getOriginalColumnWidths();
         }
 
-        var origColumnWidths;
-        if (!this.cache.origColumnWidths){
-            origColumnWidths = _.map(this.props.columnHeaders, (c) => c.initialWidth || this.props.defaultInitialColumnWidth );
-            this.cache.origColumnWidths = origColumnWidths;
-        } else {
-            origColumnWidths = this.cache.origColumnWidths;
-        }
+        var origColumnWidths = this.getOriginalColumnWidths();
 
         var availableWidth = this.props.width || this.refs.header.offsetWidth || 960; // 960 = fallback for tests
         var totalOrigColsWidth = this.totalColumnsWidth(origColumnWidths);//_.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
@@ -1052,6 +1057,7 @@ export class StackedBlockTable extends React.Component {
         
         // Cache for each render.
         //this.lastColumnHeaders = this.columnHeaders();
+        var minTotalWidth = this.totalColumnsWidth(this.getOriginalColumnWidths());
         this.lastColumnWidths = this.getColumnWidths();
 
         var renderHeaderItem = function(h, i, arr){
@@ -1069,7 +1075,10 @@ export class StackedBlockTable extends React.Component {
         }.bind(this);
 
         return (
-            <div className={"stacked-block-table" + (this.state.mounted ? ' mounted' : '') + (this.props.fadeIn ? ' fade-in' : '') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}>
+            <div
+                className={"stacked-block-table" + (this.state.mounted ? ' mounted' : '') + (this.props.fadeIn ? ' fade-in' : '') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}
+                style={{ minWidth : minTotalWidth }}
+            >
                 {
                     !this.props.children ?
                     <h6 className="text-center text-400"><em>No Results</em></h6>
