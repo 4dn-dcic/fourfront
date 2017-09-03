@@ -93,6 +93,11 @@ module.exports = [
             tls: "empty",
             dns: "empty",
         },
+        externals: [
+            'd3-node',
+            'd3-request',
+            {'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}'}
+        ],
         module: {
             preLoaders: preLoaders,
             loaders: loaders,
