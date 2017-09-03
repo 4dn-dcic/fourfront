@@ -965,9 +965,9 @@
             "step":"0786554a-49e5-4c33-afab-9ec90d65faf3"
         }
     ],
-    "award": "1U01CA200059-01"
+    "award": "1U01CA200059-01",
     "data_type": ["Hi-C"],
-    "category": "merging + matrix generation",
+    "category": "merging + matrix generation"
 },
 {
     "title": "Hi-C processing part B revision 6",
