@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
-import { expFxn, Filters, console, isServerSide, analytics, object } from './../../util';
+import { expFxn, Filters, console, isServerSide, analytics, object, Schemas } from './../../util';
 import { requestAnimationFrame } from './../../viz/utilities';
 
 
@@ -706,27 +706,43 @@ export class FileEntryBlock extends React.Component {
 
         var row = [];
         var cols = _.filter(this.props.columnHeaders, (col)=>{
-            if (this.props.nonFileHeaderCols.indexOf(col.columnClass) > -1) return false;
-            return true;
+            if (col.columnClass === 'file-detail') return true;
+            return false;
+            //if (this.props.nonFileHeaderCols.indexOf(col.columnClass) > -1) return false;
+            //return true;
         });
         var baseClassName = (this.props.className || '') + " col-file-detail item";
-        var baseStyle = this.props.colWidthStyles ? this.props.colWidthStyles['file-detail'] : null;
+        
         for (var i = 0; i < cols.length; i++){
 
-            var className = baseClassName + ' col-' + cols[i].columnClass + ' detail-col-' + i;
-            var title = cols[i].valueTitle || cols[i].title;
+            var col = cols[i];
+            var className = baseClassName + ' col-' + col.columnClass + ' detail-col-' + i;
+            var title = col.valueTitle || col.title;
+            var baseStyle = this.props.colWidthStyles ? this.props.colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
 
             if (!file || !object.atIdFromObject(file)) {
                 row.push(<div key={"file-detail-empty-" + i} className={className} style={baseStyle}></div>);
                 continue;
             }
 
-            if (title == 'File Type'){
+            if (title === 'File Type'){
                 row.push(<div key="file-type" className={className} style={baseStyle}>{file.file_format}</div>);
                 continue;
             }
 
-            if (title == 'File Info'){
+            if (typeof col.field === 'string'){
+                var val = object.getNestedProperty(file, col.field);
+                if (val){
+                    row.push(
+                        <div key={col.field} className={className} style={baseStyle}>
+                            { Schemas.Term.toName(col.field, val) }
+                        </div>
+                    );
+                    continue;
+                }
+            }
+
+            if (title === 'File Info'){
                 if (typeof file.paired_end !== 'undefined') {
                     row.push(<div key="file-info" className={className} style={baseStyle}>
                         Paired end {file.paired_end}
@@ -971,7 +987,7 @@ export class StackedBlockTable extends React.Component {
         var totalOrigColsWidth = this.totalColumnsWidth(origColumnWidths);//_.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
 
         if (totalOrigColsWidth > availableWidth){
-            return null;
+            return origColumnWidths;
         }
 
         var scale = (availableWidth / totalOrigColsWidth) || 1;
@@ -989,12 +1005,17 @@ export class StackedBlockTable extends React.Component {
 
     colWidthStyles(columnWidths = this.state.columnWidths, columnHeaders){
         if (!columnHeaders) columnHeaders = this.props.columnHeaders;
-        var colWidthStyles = _.object(_.map(_.pluck(columnHeaders, 'columnClass'), function(cn){ return [cn, null]; })); // Returns { 'experiment' : null , 'biosample' : null, ... }
+        var colWidthStyles = _.object(
+            _.map(
+                _.map(columnHeaders, function(col){ return col.field || col.columnClass; }),
+                function(cn){ return [cn, null]; }
+            )
+        ); // Returns { 'experiment' : null , 'biosample' : null, ... }
 
         if (Array.isArray(columnWidths)){
             _.keys(colWidthStyles).forEach((cn) => {
                 colWidthStyles[cn] = {
-                    width : columnWidths[_.findIndex(columnHeaders, { 'columnClass' : cn })]
+                    width : columnWidths[_.findIndex(columnHeaders, function(col){ return (col.field || col.columnClass) === cn; })]
                 };
             });
         }
@@ -1072,8 +1093,7 @@ export class StackedBlockTable extends React.Component {
     render(){
         
         // Cache for each render.
-        //this.lastColumnHeaders = this.columnHeaders();
-        var minTotalWidth = this.totalColumnsWidth(this.getOriginalColumnWidths());
+        var minTotalWidth = Math.max(this.props.width || 0, this.totalColumnsWidth(this.getOriginalColumnWidths()));
         this.lastColumnWidths = this.getColumnWidths();
 
         var renderHeaderItem = function(h, i, arr){

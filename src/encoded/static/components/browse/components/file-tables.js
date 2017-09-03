@@ -321,6 +321,8 @@ export class RawFilesStackedTable extends React.Component {
                 </StackedBlockName>
                 <StackedBlockList
                     className={contentsClassName}
+                    collapseLimit={3}
+                    collapseShow={2}
                     title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
                 >
                     { contents }
@@ -365,6 +367,7 @@ export class RawFilesStackedTable extends React.Component {
                     className="experiments"
                     title="Experiments"
                     children={expsWithBiosample.map(this.renderExperimentBlock)}
+                    collapseShow={2}
                     showMoreExtTitle={
                         expsWithBiosample.length > 5 ?
                             'with ' + (
@@ -456,6 +459,7 @@ export class RawFilesStackedTable extends React.Component {
                 unselectFile={this.props.unselectFile}
                 experimentSetAccession={this.props.experimentSetAccession}
                 collapseLongLists={this.props.collapseLongLists}
+                width={this.props.width}
             >
                 {   !Array.isArray(this.props.experimentArray) ? null :
                     this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ?
@@ -480,10 +484,12 @@ export class ProcessedFilesStackedTable extends React.Component {
             //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',                                      title: 'File',          initialWidth: 125   },
-            { columnClass: 'file-detail',                                      title: 'File Type',          initialWidth: 125   }
+            { columnClass: 'file',                                      title: 'File',          initialWidth: 100   },
+            { columnClass: 'file-detail', title: 'File Type', initialWidth: 90 },
+            { columnClass: 'file-detail', title: 'File Size', initialWidth: 60, field : "file_size" }
         ],
-        'collapseLongLists' : true
+        'collapseLongLists' : true,
+        'nonFileHeaderCols' : ['experiment', 'file']
     };
 
     constructor(props){
@@ -509,11 +515,32 @@ export class ProcessedFilesStackedTable extends React.Component {
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
 
-        return _.map(_.pairs(filesGroupedByExperimentOrGlobal), (p)=>{
+        return _.map(_.pairs(filesGroupedByExperimentOrGlobal).sort(function(aP, bP){
+            if (aP[0] === 'global') return -1;
+            if (bP[0] === 'global') return 1;
+            return 0;
+        }), (p)=>{
             var experimentAccession = p[0];
             var filesForExperiment = p[1];
             var experimentObj = _.find(_.pluck(filesForExperiment, 'from_experiment'), function(exp){ return exp && exp.accession && exp.accession === experimentAccession; });
 
+            var nameTitle = (
+                experimentAccession === 'global' ? <b>Multiple</b>
+                : (experimentObj && typeof experimentObj.display_title === 'string' && experimentObj.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession
+            );
+            var nameLink = (experimentAccession !== 'global' && object.atIdFromObject(experimentObj)) || null;
+            var nameBlock = (
+                <StackedBlockName>
+                    { nameLink ?
+                        <a href={nameLink} className="name-title text-500">{ nameTitle }</a>
+                        :
+                        <span className={"name-title" + (nameTitle === this.props.experimentSetAccession ? ' mono-text' : '')}>{ nameTitle }</span>
+                    }
+                    { experimentObj && experimentObj.bio_rep_no && experimentObj.tec_rep_no ?
+                        <div>Bio Rep <b>{ experimentObj.bio_rep_no }</b>, Tec Rep <b>{ experimentObj.tec_rep_no }</b></div>
+                    : <div/> }
+                </StackedBlockName>
+            );
             return (
                 <StackedBlock
                     columnClass="experiment"
@@ -527,15 +554,7 @@ export class ProcessedFilesStackedTable extends React.Component {
                         accession : experimentAccession === 'global' ? this.props.experimentSetAccession : experimentAccession
                     }}
                 >
-                    <StackedBlockName>
-                        { experimentObj && experimentObj.bio_rep_no && experimentObj.tec_rep_no ?
-                            <div>Bio Rep <b>{ experimentObj.bio_rep_no }</b>, Tec Rep <b>{ experimentObj.tec_rep_no }</b></div>
-                        : <div/> }
-                        <a href={ object.atIdFromObject(experimentObj) || '#' } className="name-title">
-                            { experimentAccession === 'global' ? this.props.experimentSetAccession
-                                : (experimentObj && typeof experimentObj.display_title === 'string' && experimentObj.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession }
-                        </a>
-                    </StackedBlockName>
+                    { nameBlock }
                     <StackedBlockList
                         className="files"
                         title="Processed Files"
@@ -575,6 +594,7 @@ export class ProcessedFilesStackedTable extends React.Component {
                 selectFile={this.props.selectFile}
                 unselectFile={this.props.unselectFile}
                 experimentSetAccession={this.props.experimentSetAccession}
+                width={this.props.width}
             >
                 <StackedBlockList
                     className="sets"

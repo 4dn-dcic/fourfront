@@ -608,6 +608,7 @@ $small-label-accession-font-size : 0.75rem;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		//background: #f8f8f8;
+		
 
 		> .heading-block {
 			text-align: center;
@@ -705,7 +706,6 @@ $small-label-accession-font-size : 0.75rem;
 
 				&.col-experiment > .name-title.mono-text {
 					text-shadow: 0 0 0;
-					text-shadow: 0 0 0.125px;
 				}
 			}
 
@@ -908,28 +908,6 @@ $small-label-accession-font-size : 0.75rem;
 					border-bottom: 1px solid #606060;
 				}
 
-				&:nth-child(2n-1){
-					@include gradient-horizontal(rgba(255, 255, 255, 0), $expset-biosample-bg-odd, 0%, 12%);
-					&.s-block-list-collapsing.collapsing-child {
-						background : $expset-biosample-bg-odd;
-						transform: translate3d(0px,0px,0px);
-					}
-					&:not(.collapsing-child) > .experiments > .view-more-button {
-						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
-					}
-				}
-
-				&:nth-child(2n-2){
-					@include gradient-horizontal(rgba(255, 255, 255, 0), $expset-biosample-bg-even, 0%, 12%);
-					&.s-block-list-collapsing.collapsing-child {
-						background : $expset-biosample-bg-even;
-						transform: translate3d(0px,0px,0px);
-					}
-					&:not(.collapsing-child) > .experiments > .view-more-button {
-						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
-					}
-				}
-
 				> .name {
 					text-align: center;
 					line-height: 16px;
@@ -1071,6 +1049,45 @@ $small-label-accession-font-size : 0.75rem;
 					}
 
 				}
+
+			}
+
+			// BG coloring by type + position
+			.s-block.biosample.stack-depth-1 {
+				&:nth-child(2n-1){
+					@include gradient-horizontal(rgba(255, 255, 255, 0), $expset-biosample-bg-odd, 0%, 12%);
+					&.s-block-list-collapsing.collapsing-child {
+						background : $expset-biosample-bg-odd;
+						transform: translate3d(0px,0px,0px);
+					}
+					&:not(.collapsing-child) > .experiments > .view-more-button {
+						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
+					}
+				}
+
+				&:nth-child(2n-2){
+					@include gradient-horizontal(rgba(255, 255, 255, 0), $expset-biosample-bg-even, 0%, 12%);
+					&.s-block-list-collapsing.collapsing-child {
+						background : $expset-biosample-bg-even;
+						transform: translate3d(0px,0px,0px);
+					}
+					&:not(.collapsing-child) > .experiments > .view-more-button {
+						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
+					}
+				}
+			}
+
+			.s-block.experiment.stack-depth-1 {
+
+					@include gradient-horizontal(rgba(255, 255, 255, 0), #f7f8f9, 0%, 12%);
+					&.s-block-list-collapsing.collapsing-child {
+						background : #f7f8f9;
+						transform: translate3d(0px,0px,0px);
+					}
+					&:not(.collapsing-child) > .experiments > .view-more-button {
+						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
+					}
+
 
 			}
 
