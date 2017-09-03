@@ -264,6 +264,8 @@
             "step_name": "hictool_hdf52matrix"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "alignment + filtering + matrix generation",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "description": "GITAR Hi-C data processing pipeline"
@@ -342,6 +344,8 @@
     "workflow_type": "Data QC",
     "workflow_diagram": "",
     "description": "FastQC quality control step for fastq files",
+    "data_types": ["Hi-C","Capture Hi-C", "Repli-seq"],
+    "category": "QC",
     "workflow_steps": [
         {
             "step": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3",
@@ -358,6 +362,8 @@
     "name": "validate",
     "workflow_type": "Data QC",
     "workflow_diagram": "",
+    "data_types": ["Hi-C","Capture Hi-C", "Repli-seq"],
+    "category": "QC",
     "arguments": [
         {
             "workflow_argument_name": "input_file",
@@ -402,6 +408,8 @@
     "name": "md5",
     "workflow_type": "Data QC",
     "workflow_diagram": "",
+    "data_types": ["Hi-C","Capture Hi-C", "Repli-seq"],
+    "category": "QC",
     "app_name": "md5",
     "app_version": "5",
     "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
@@ -589,6 +597,8 @@
             ]
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "alignment + format conversion",
     "description": "Creating a bam and pairs files from a pair of fastq files"
 },
 {
@@ -738,6 +748,8 @@
             ]
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "alignment + format conversion",
     "description": "Creating a bam and pairs files from a pair of fastq files"
 },
 {
