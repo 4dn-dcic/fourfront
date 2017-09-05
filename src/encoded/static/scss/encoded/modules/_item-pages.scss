@@ -825,7 +825,7 @@ $download-button-width : 100px;
 		margin-bottom: 0;
 		margin-top: 2px;
 		font-weight: 600;
-		/* white-space: nowrap; */
+		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		word-break: normal;
@@ -918,9 +918,16 @@ $download-button-width : 100px;
 		user-select: none;
 	}
 
-	.icon.abstract-toggle {
-		cursor : pointer;
-		color : #888;
+	.label-col span {
+		position: relative;
+		.icon.abstract-toggle {
+			cursor : pointer;
+			color : #888;
+			position: absolute;
+			left: -20px;
+			top: 2px;
+		}
+
 	}
 
 	@include icon-container-child();
