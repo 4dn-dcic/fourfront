@@ -25,6 +25,9 @@ $audit-color-warning : #e29302;
 $audit-color-error : #bd0000;
 $audit-color-internal-action: #d0d0d0;
 
+$font-family-sans-serif : "Mada", "Work Sans", Helvetica, Arial, sans-serif;
+$font-family-monospace : "Source Code Pro", Consolas, monospace;
+
 // Pass value with CSS units and get just the value back
 @function strip-units($value) {
     @return $value / ($value * 0 + 1);

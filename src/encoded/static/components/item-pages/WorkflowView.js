@@ -42,6 +42,31 @@ export function filterOutParametersFromGraphData(graphData){
     return { nodes, edges };
 }
 
+
+export function filterOutReferenceFilesFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+
+        if (n && n.meta && n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type'])){
+
+            if (n.meta.run_data.file['@type'].indexOf('FileReference') > -1) {
+                deleted[n.id] = true;
+                return false;
+            }
+
+        }
+
+        return true;
+    });
+    var edges = _.filter(graphData.edges, function(e,i){
+        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
+            return false;
+        }
+        return true;
+    });
+    return { nodes, edges };
+}
+
 /**
  * Pass this to props.onNodeClick for Graph.
  * 
@@ -65,7 +90,21 @@ export function commonGraphPropsFromProps(props){
         'onNodeClick' : onItemPageNodeClick,
         'detailPane'  : <WorkflowDetailPane schemas={props.schemas} context={props.context} />,
         'nodeElement' : <WorkflowNodeElement schemas={props.schemas} />,
-        'rowSpacingType' : 'wide'
+        'rowSpacingType' : 'wide',
+        'nodeClassName' : function(node){
+            var file = (
+                node.meta.run_data && node.meta.run_data.file
+                && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
+                && node.meta.run_data.file
+            );
+
+            if (file && Array.isArray(file['@type'])){
+                if (file['@type'].indexOf('FileReference') > -1){
+                    return 'node-item-type-file-reference';
+                }
+            }
+            return '';
+        },
     };
 }
 
@@ -167,6 +206,7 @@ export function dropDownMenuMixin(){
 
     return (
         <DropdownButton
+            id="detail-granularity-selector"
             pullRight
             onSelect={(eventKey, evt)=>{
                 requestAnimationFrame(()=>{
@@ -256,6 +296,7 @@ export class RowSpacingTypeDropdown extends React.Component {
     
         return (
             <DropdownButton
+                id={this.props.id || "rowspacingtype-select"}
                 pullRight
                 onSelect={this.props.onSelect}
                 title={RowSpacingTypeDropdown.rowSpacingTypeTitleMap[currentKey]}
@@ -296,6 +337,8 @@ class GraphSection extends React.Component {
     }
 
     commonGraphProps(){
+        var graphData = this.parseAnalysisSteps();
+        console.log('NODES', graphData.nodes);
         return _.extend(commonGraphPropsFromProps(this.props), this.parseAnalysisSteps(), { 'rowSpacingType' : this.state.rowSpacingType });
     }
 

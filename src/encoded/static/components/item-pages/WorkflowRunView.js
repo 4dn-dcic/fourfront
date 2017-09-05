@@ -157,7 +157,7 @@ class GraphSection extends React.Component {
         this.state = {
             'showChart' : 'detail',
             'showParameters' : false,
-            'rowSpacingType' : 'stacked'
+            'rowSpacingType' : 'compact'
         };
     }
 

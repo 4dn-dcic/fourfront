@@ -103,7 +103,6 @@ class SelectedFilesDownloadButton extends React.Component {
             'fontFamily' : 'monospace'
         };
         var meta_download_filename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
-        var unreleasedFilesNotice = <p><strong>Note:</strong> Files which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.</p>;
         return (
             <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
                 <Modal.Header closeButton>
@@ -128,16 +127,7 @@ class SelectedFilesDownloadButton extends React.Component {
                         {' '}
                         
                     </form>
-                    {/*
-                    <hr/>
-                    <h5 className="text-500">File URIs</h5>
-                    <div>
-                        <textarea style={textAreaStyle} value={this.state.urls}/>
-                        <Button href={SelectedFilesDownloadButton.encodePlainText(this.state.urls)} bsStyle="primary" onClick={(e)=>{ e.stopPropagation(); }} download={files_download_filename} target="_blank">
-                            <i className="icon icon-fw icon-file-text"/>&nbsp; Save/download this list as 'files.txt'
-                        </Button>
-                    </div>
-                    */}
+
                 </Modal.Body>
             </Modal>
         );
@@ -484,7 +474,7 @@ export class AboveTableControls extends React.Component {
             this.unsetWideLayout();
         }
     }
-
+    
     handleWindowResize(e){
         if (isServerSide() || !document || !document.body) return null;
         if (this.state.layout === 'wide'){
@@ -643,7 +633,7 @@ export class AboveTableControls extends React.Component {
 
         function expandLayoutButton(){
             return (
-                <Button key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
+                <Button bsStyle="secondary" key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
                     <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'arrows-alt' : 'crop')}></i>
                 </Button>
             );

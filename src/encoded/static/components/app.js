@@ -1202,9 +1202,7 @@ export default class App extends React.Component {
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
-                    {/*<link href="https://fonts.googleapis.com/css?family=Work+Sans:200,300,400,500,600,700" rel="stylesheet" />*/}
-                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa" rel="stylesheet"/>
-                    {/*<link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />*/}
+                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
                     <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}></script>

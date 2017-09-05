@@ -6,13 +6,13 @@ import _ from 'underscore';
 import Draggable from 'react-draggable';
 import * as globals from './../../globals';
 import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../util';
-import ExperimentsTable from './../../experiments-table';
+import { RawFilesStackedTable } from './file-tables';
 import {
     ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
     defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
     getColumnWidthFromDefinition, HeadersRow, TableRowToggleOpenButton } from './table-commons';
-import { ExperimentSetDetailPane } from './ExperimentSetDetailPane';
-import { browseTableConstantColumnDefinitions } from './../BrowseView';
+import { SearchResultDetailPane } from './SearchResultDetailPane';
+import { getTitleStringFromContext, isDisplayTitleAccession } from './../../item-pages/item';
 
 
 
@@ -29,10 +29,37 @@ export class ItemPageTable extends React.Component {
     }
 
     static defaultProps = {
-        'renderDetailPane' : function(result, rowNumber, width){ return <DefaultDetailPane result={result} />; },
-        'constantColumnDefinitions' : extendColumnDefinitions([
-            { 'field' : 'display_title' }
-        ], defaultColumnDefinitionMap),
+        'renderDetailPane' : function(result, rowNumber, width){ return <SearchResultDetailPane result={result} />; },
+        'constantColumnDefinitions' : null,
+        'columnDefinitionOverrideMap' : {
+            'display_title' : {
+                'render' : function(result, columnDefinition, props, width){
+                    var title = getTitleStringFromContext(result);
+                    var link = object.atIdFromObject(result);
+                    var tooltip;
+                    if (title && (title.length > 20 || width < 100)) tooltip = title;
+                    var isAnAccession = false;// isDisplayTitleAccession(result, title, false);
+                    if (link){
+                        title = <a href={link || '#'}>{ title }</a>;
+                    }
+
+                    var typeTitle = Schemas.getItemTypeTitle(result);
+                    if (typeof typeTitle === 'string'){
+                        typeTitle += ' ';
+                    }
+
+                    return (
+                        <span className={typeTitle ? "has-type-title" : null}>
+                            <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
+                            { typeTitle }
+                            <a href={object.atIdFromObject(result)} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>
+                        </span>
+                    );
+
+                    
+                }
+            }
+        },
         'columns' : {
             "experiments_in_set.experiment_type": "Experiment Type",
             "experiments_in_set.biosample.biosource.individual.organism.name": "Organism",
@@ -56,6 +83,15 @@ export class ItemPageTable extends React.Component {
         var results = this.props.results;
         var loading = this.props.loading;
 
+        var constantColumnDefinitions = this.props.constantColumnDefinitions;
+        if (!constantColumnDefinitions){
+            constantColumnDefinitions = extendColumnDefinitions([
+                { 'field' : 'display_title' }
+            ], defaultColumnDefinitionMap);
+        }
+
+        console.log(constantColumnDefinitions);
+
         if (loading || !Array.isArray(results)){
             return (
                 <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
@@ -67,7 +103,7 @@ export class ItemPageTable extends React.Component {
         var width = null;
         var columns = null;
 
-        var columnDefinitions = columnsToColumnDefinitions(this.props.columns, this.props.constantColumnDefinitions);
+        var columnDefinitions = columnsToColumnDefinitions(this.props.columns, constantColumnDefinitions);
         if (this.props.columnDefinitionOverrideMap){
             columnDefinitions = extendColumnDefinitions(columnDefinitions, this.props.columnDefinitionOverrideMap);
         }
@@ -91,6 +127,7 @@ export class ItemPageTable extends React.Component {
                 { results.map((result, rowIndex)=>{
                     return (
                         <ItemPageTableRow
+                            key={object.atIdFromObject(result) || rowIndex}
                             result={result}
                             width={width}
                             columnDefinitions={columnDefinitions}
@@ -132,36 +169,20 @@ class ItemPageTableRow extends React.Component {
         this.setState({ open : !this.state.open });
     }
 
-    renderValue(colDefinition, result){
-        if (colDefinition.field === 'display_title'){
-            return (
-                <div className={"inner" + (this.state.open ? ' open' : '')}>
-                    <TableRowToggleOpenButton open={this.state.open} onClick={this.toggleOpen} />
-                    {/*<div className="row">
-                        <div className="col-xs-2 col-sm-3 col-md-2 icon-container">
-                            <i className={"icon icon-fw icon-" + ( this.state.open ? 'minus' : 'plus' )} onClick={this.toggleOpen} />
-                        </div>
-                        */}
-                        {/*<div className="col-xs-10 col-sm-9 col-md-10 title-container">*/}
-                            { Schemas.getItemTypeTitle(result) }
-                            { ' ' }
-                            <a href={object.atIdFromObject(result)} className="mono-text text-400">{ result.accession }</a>
-                        {/*</div>*/}
-
-                    {/*</div>*/}
-                </div>
-            );
-        } else {
-            return (
-                <ResultRowColumnBlockValue
-                    columnDefinition={colDefinition}
-                    key={colDefinition.field}
-                    schemas={this.props.schemas || null}
-                    result={result}
-                    tooltip={true}
-                />
-            );
-        }
+    renderValue(colDefinition, result, columnIndex){
+        return (
+            <ResultRowColumnBlockValue
+                columnDefinition={colDefinition}
+                columnNumber={columnIndex}
+                key={colDefinition.field}
+                schemas={this.props.schemas || null}
+                result={result}
+                tooltip={true}
+                className={colDefinition.field === 'display_title' && this.state.open ? 'open' : null}
+                detailOpen={this.state.open}
+                toggleDetailOpen={this.toggleOpen}
+            />
+        );
     }
 
     renderRowOfColumns(){
@@ -175,8 +196,8 @@ class ItemPageTableRow extends React.Component {
                 {
                     _.map(this.props.columnDefinitions, (col, index)=>{
                         return (
-                            <div style={{ width : col.width }} className={"column column-for-" + col.field} data-field={col.field}>
-                                { this.renderValue(col, result) }
+                            <div style={{ width : col.width }} className={"column column-for-" + col.field} data-field={col.field} key={col.field || index}>
+                                { this.renderValue(col, result, index) }
                             </div>
                         );
                     })
