@@ -295,6 +295,7 @@ export class RowSpacingTypeDropdown extends React.Component {
     
         return (
             <DropdownButton
+                id={this.props.id || "rowspacingtype-select"}
                 pullRight
                 onSelect={this.props.onSelect}
                 title={RowSpacingTypeDropdown.rowSpacingTypeTitleMap[currentKey]}

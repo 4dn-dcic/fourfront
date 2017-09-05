@@ -17,7 +17,7 @@ export default class Matrix extends Component {
 	}
 
 	generateCells(data) {
-		var { setData, cellClass, onClick, onMouseOver, onMouseOut} = this.props;
+		var { setData, cellClass, tooltipDataFor, onClick, onMouseOver, onMouseOut} = this.props;
 		return data.map((col, i) => col.map((cell, j) => {
 			var curData = setData(cell, i, j) // Using i and j to denote col and row respectively
 			var style = this.getCellStyle(curData);
@@ -26,6 +26,7 @@ export default class Matrix extends Component {
 				className={cellClass}
 				data={curData}
 				style={style}
+				tooltipDataFor={tooltipDataFor}
 				onClick={onClick}
 				onMouseOver={onMouseOver}
 				onMouseOut={onMouseOut} />);

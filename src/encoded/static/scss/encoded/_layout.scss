@@ -290,7 +290,7 @@ h3.submission-subtitle {
 
 .mono-text,
 .accession {
-	font-family: consolas, monospace;
+	font-family: $font-family-monospace;
 }
 
 /** This is especially useful for elements with data-tip attribute (for React Tooltip) so that tip is positioned at center. **/

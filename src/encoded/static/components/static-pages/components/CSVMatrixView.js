@@ -117,6 +117,8 @@ export const CSVParsingUtilities = {
                     else if (cellType === 'in submission') numVal = 3;
                     else if (cellType === 'submitted') numVal = 4;
                 }
+
+                var { tooltipContent, hasLinks } = CSVParsingUtilities.generateCellTooltipContent(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options);
                 
                 return {
                     'originalValue' : cellValue,
@@ -125,8 +127,9 @@ export const CSVParsingUtilities = {
                     'column'        : columnIndex,
                     'columnLabel'   : xAxisLabels[columnIndex],
                     'rowLabel'      : yAxisLabels[rowIndex],
-                    'tooltip'       : CSVParsingUtilities.generateCellTooltipContent(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options),
-                    'className'     : 'cellType-' + cellType.split(' ').join('-')
+                    'tooltip'       : tooltipContent,
+                    'className'     : 'cellType-' + cellType.split(' ').join('-'),
+                    'hasLinks'      : hasLinks
                 };
 
             });
@@ -171,13 +174,36 @@ export const CSVParsingUtilities = {
 
         var plannedEstimate;
         if (extraStringShown){
-            plannedEstimate = extraStringShown.match(/(Est: .+;)/g); // Grab substring that fits "Est: ...;"
+            plannedEstimate = extraStringShown.match(/(Est: ([\w\s]+;))/g); // Grab substring that fits "Est: ...;"
             if (plannedEstimate){
                 plannedEstimate = plannedEstimate[0];
                 plannedEstimate = plannedEstimate.replace('Est:', '').replace(';', '').trim();
-                extraStringShown = extraStringShown.replace(/(Est: .+;)/g, '').trim();
+                extraStringShown = extraStringShown.replace(/(Est: ([\w\s]+;))/g, '').trim();
             }
         }
+
+        var links, linksStr, linkTitles = [];
+        if (extraStringShown){
+            links = extraStringShown.match(/(Link: ([^;]+;))/g); // Grab substring that fits "Est: ...;"
+            if (links){
+                links = links.map(function(link,i){
+                    var str = link.replace('Link:', '').replace(';', '').trim();
+                    var title = str.match(/\([\w\s]+\)/g);
+                    if (title){
+                        linkTitles.push(title[0].replace('(', '').replace(')', '').trim() );
+                        str = str.replace(/\([\w\s]+\)/g, '').trim();
+                    } else {
+                        linkTitles.push('Link' + ( links.length > 1 ? ' ' + (i + 1) : ''));
+                    }
+                    return str;
+                });
+                extraStringShown = extraStringShown.replace(/(Link: ([^;]+;))/g, '').trim();
+                linksStr = '<div class="row" style="padding-top: 6px; padding-bottom: 8px;">' + _.map(links, function(link, i){
+                    return '<div class="col-sm-'+ (12 / Math.min(links.length, 4) ) + '"><a class="btn btn-sm btn-block btn-primary" href="' + link + '" target="_blank">'+ linkTitles[i] + '</a></div>'; 
+                }).join(' ') + '</div>';
+            }
+        }
+
 
         if (extraStringShown.length === 0) extraStringShown = null;
 
@@ -195,7 +221,11 @@ export const CSVParsingUtilities = {
         if (extraStringShown){
             tooltipContent += '<hr style="margin: 4px 0; opacity: 0.33;"/><div>' + extraStringShown + '</div>';
         }
-        return tooltipContent;
+
+        if (links){
+            tooltipContent += '<div class="text-center"><hr style="margin: 4px 0; opacity: 0.33;"/>' + linksStr + '</div>';
+        }
+        return { tooltipContent : tooltipContent, hasLinks : !!(links) };
     },
 
     defaultCSVParseOptions: function(){
@@ -292,7 +322,7 @@ export class CSVMatrixView extends MatrixView {
 
         var { grid, title, xAxisLabels, yAxisLabels } = CSVParsingUtilities.CSVStringTo2DArraySet(this.props.csv, options);
 
-        return MatrixView.prototype.render.call(this, 
+        return super.render.call(this, 
             grid,
             xAxisLabels,
             yAxisLabels,

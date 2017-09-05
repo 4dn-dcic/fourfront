@@ -155,7 +155,6 @@ export class WorkflowNodeElement extends React.Component {
         };
 
         if (node.type === 'input-group'){
-            elemProps.className += ' mono-text';
             return <div {...elemProps}>{ this.props.title }</div>;
         }
 
@@ -230,7 +229,7 @@ export class WorkflowNodeElement extends React.Component {
         }
         if (this.doesRunDataFileExist()){
             var file = node.meta.run_data.file;
-            return <span className={"node-name" + (file.accession ? '' : '')}>
+            return <span className={"node-name" + (file.accession ? ' mono-text' : '')}>
                 { this.icon() }
                 { typeof file === 'string' ? node.format.replace('Workflow ', '') : file.accession || file.display_title }
             </span>;
@@ -238,7 +237,7 @@ export class WorkflowNodeElement extends React.Component {
         if (this.doesRunDataValueExist()){
             return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
         }
-        return <span className="node-name mono-text">{ this.icon() }{ this.props.title }</span>;
+        return <span className="node-name">{ this.icon() }{ this.props.title }</span>;
     }
     
     render(){

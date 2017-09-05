@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
-import { object, expFxn, ajax, Schemas, layout, fileUtil } from './../util';
+import { console, object, expFxn, ajax, Schemas, layout, fileUtil } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
@@ -186,7 +186,6 @@ class FileViewOverview extends React.Component {
     render(){
         var { context } = this.props;
 
-        console.log('CONT', context);
         var setsByKey;
         var table = null;
 

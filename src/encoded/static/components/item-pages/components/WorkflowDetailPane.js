@@ -646,7 +646,7 @@ class AnalysisStepDetailBody extends React.Component {
                 <hr/>
                 
                 
-                <Fade in={wfr} key="wfr-detail-container">
+                <Fade in={!!(wfr)} key="wfr-detail-container">
                     <div>
                         <h3 className="tab-section-title">
                             <span>Details</span>
