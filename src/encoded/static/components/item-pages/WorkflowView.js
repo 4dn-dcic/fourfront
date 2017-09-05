@@ -206,6 +206,7 @@ export function dropDownMenuMixin(){
 
     return (
         <DropdownButton
+            id="detail-granularity-selector"
             pullRight
             onSelect={(eventKey, evt)=>{
                 requestAnimationFrame(()=>{

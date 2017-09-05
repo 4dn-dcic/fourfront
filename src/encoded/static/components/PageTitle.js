@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import { getTitleStringFromContext, isDisplayTitleAccession } from './item-pages/item';
-import { object, Schemas, JWT } from './util';
+import { console, object, Schemas, JWT } from './util';
 import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
 

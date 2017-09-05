@@ -762,6 +762,7 @@ class DimensioningContainer extends React.Component {
             var done = false;
 
             // Resize to full width.
+            /*
             if (typeof this.props.fullWidthInitOffset === 'number' && typeof this.props.fullWidthContainerSelectorString === 'string'
                 && !isServerSide() && document && document.body && document.querySelector
             ){
@@ -781,15 +782,15 @@ class DimensioningContainer extends React.Component {
                             }
                             done = true;
                         } else if (distanceToTopOfTable > 5 && distanceToTopOfTable <= this.props.fullWidthInitOffset){
-                            /*
-                            var fullWidthInitOffset = Math.min(this.props.fullWidthInitOffset, tableTopOffset + this.props.stickyHeaderTopOffset);
-                            var difScale = (fullWidthInitOffset - distanceToTopOfTable) / fullWidthInitOffset;
-                            pageTableContainer.style.transition = "margin-left .33s, margin-right .33s";
-                            pageTableContainer.style.marginLeft = pageTableContainer.style.marginRight = -((extraWidth * difScale) / 2) + 'px';
-                            if (this.lastDistanceToTopOfTable !== distanceToTopOfTable || !this.state.isWindowPastTableTop){
-                                this.setState({ 'isWindowPastTableTop' : true });
-                            }
-                            */
+                            
+                            //var fullWidthInitOffset = Math.min(this.props.fullWidthInitOffset, tableTopOffset + this.props.stickyHeaderTopOffset);
+                            //var difScale = (fullWidthInitOffset - distanceToTopOfTable) / fullWidthInitOffset;
+                            //pageTableContainer.style.transition = "margin-left .33s, margin-right .33s";
+                            //pageTableContainer.style.marginLeft = pageTableContainer.style.marginRight = -((extraWidth * difScale) / 2) + 'px';
+                            //if (this.lastDistanceToTopOfTable !== distanceToTopOfTable || !this.state.isWindowPastTableTop){
+                            //    this.setState({ 'isWindowPastTableTop' : true });
+                            //}
+                            
                         } else if (distanceToTopOfTable > this.props.fullWidthInitOffset){
                             pageTableContainer.style.transition = "margin-left .6s, margin-right .6s";
                             pageTableContainer.style.marginLeft = pageTableContainer.style.marginRight = '0px';
@@ -806,6 +807,7 @@ class DimensioningContainer extends React.Component {
                     //console.log('V',scrollTop, tableTopOffset, distanceToTopOfTable);
                 }
             }
+            */
 
             if (!done){
                 var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);

@@ -162,7 +162,6 @@ export class StackedBlockName extends React.Component {
             this.props.expTable.state &&
             Array.isArray(this.props.expTable.state.columnWidths)
         ){
-            console.log('2nd IF STATE');
             var colWidthIndex = _.findIndex(this.props.expTable.columnHeaders(), { 'columnClass' : this.props.columnClass });
             if (colWidthIndex > -1) return { 'width' : this.props.expTable.state.columnWidths[colWidthIndex] };
         }

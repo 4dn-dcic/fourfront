@@ -633,7 +633,7 @@ export class AboveTableControls extends React.Component {
 
         function expandLayoutButton(){
             return (
-                <Button key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
+                <Button bsStyle="info" key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
                     <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'arrows-alt' : 'crop')}></i>
                 </Button>
             );
@@ -651,7 +651,7 @@ export class AboveTableControls extends React.Component {
         return (
             <div className="pull-right right-buttons">
                 { configureColumnsButton.call(this) }
-                {/* expandLayoutButton.call(this) */}
+                { expandLayoutButton.call(this) }
             </div>
         );
 

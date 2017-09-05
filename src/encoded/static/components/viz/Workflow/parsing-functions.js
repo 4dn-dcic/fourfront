@@ -725,6 +725,10 @@ export function traceNodePathAndRun(nextNode, fxn, direction = 'output', lastNod
         ) : []
     );
     var fxnResult = fxn(nextNode, lastNode, nextNodes);
+    if (depth > 1000){
+        console.error("Reached max depth (1000) at node ", nextNode);
+        return [fxnResult, null];
+    }
     var nextResults = _.map(nextNodes, function(n){ return traceNodePathAndRun(n, fxn, direction, nextNode, depth + 1); });
     return [fxnResult, nextResults];
 }
