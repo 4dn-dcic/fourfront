@@ -275,6 +275,11 @@
     "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
+    "cwl_main_filename" : "fastqc-0-11-4-1.9.cwl",
+    "cwl_child_filenames" : ["fastqc-0-11-4.6.cwl"],
+    "app_name" : "fastqc-0-11-4-1",
+    "app_version" : "8",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
     "arguments": [
         {
             "argument_mapping": [
@@ -397,6 +402,11 @@
     "name": "md5",
     "workflow_type": "Data QC",
     "workflow_diagram": "",
+    "app_name": "md5",
+    "app_version": "5",
+    "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
+    "cwl_main_filename": "md5.5.cwl",
+    "cwl_child_filenames": [],
     "arguments": [
         {
             "workflow_argument_name": "input_file",
@@ -1528,6 +1538,162 @@
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "accession": "4DNWFSOZLMMB",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab"
+},
+{
+    "title":"Hi-C processing part B revision 44",
+    "description":"Hi-C processing part B revision 44",
+    "workflow_diagram":"",
+    "lab": "4dn-dcic-lab",
+    "cwl_pointer":"https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.44.cwl",
+    "cwl_main_filename" : "hi-c-processing-partb.44.cwl",
+    "cwl_child_filenames" : ["merge-pairs.30.cwl","pairs2hic.18.cwl","cooler.24.cwl"],
+    "app_name" : "hi-c-processing-partb",
+    "app_version" : "44",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
+    "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
+    "arguments":[
+        {
+            "workflow_argument_name":"chrsizes",
+            "argument_type":"Input file",
+            "argument_format":"chromsizes",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"chromsizes_file",
+                    "step_argument_type":"Input file",
+                    "workflow_step":"pairs2hic"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"input_pairs",
+            "argument_type":"Input file",
+            "argument_format":"pairs",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"input_pairs",
+                    "step_argument_type":"Input file",
+                    "workflow_step":"merge_pairs"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"ncores",
+            "argument_type":"parameter",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"ncores",
+                    "step_argument_type":"parameter",
+                    "workflow_step":"cooler"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"binsize",
+            "argument_type":"parameter",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"binsize",
+                    "step_argument_type":"parameter",
+                    "workflow_step":"cooler"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"min_res",
+            "argument_type":"parameter",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"min_res",
+                    "step_argument_type":"parameter",
+                    "workflow_step":"pairs2hic"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"output_pairs",
+            "argument_type":"Output processed file",
+            "argument_format":"pairs",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"output_pairs",
+                    "step_argument_type":"Output file",
+                    "workflow_step":"merge_pairs"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"out_cool",
+            "argument_type":"Output processed file",
+            "argument_format":"cool",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"out_cool",
+                    "step_argument_type":"Output file",
+                    "workflow_step":"cooler"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"output_hic",
+            "argument_type":"Output processed file",
+            "argument_format":"hic",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"output_hic",
+                    "step_argument_type":"Output file",
+                    "workflow_step":"pairs2hic"
+                }
+            ]
+        },
+        {
+            "argument_mapping":[
+                {
+                    "step_argument_name":"pairs",
+                    "step_argument_type":"Input file or parameter",
+                    "workflow_step":"cooler"
+                },
+                {
+                    "step_argument_name":"output_pairs",
+                    "step_argument_type":"Output file or parameter",
+                    "workflow_step":"merge_pairs"
+                }
+            ]
+        },
+        {
+            "argument_mapping":[
+                {
+                    "step_argument_name":"input_pairs",
+                    "step_argument_type":"Input file or parameter",
+                    "workflow_step":"pairs2hic"
+                },
+                {
+                    "step_argument_name":"output_pairs",
+                    "step_argument_type":"Output file or parameter",
+                    "workflow_step":"merge_pairs"
+                }
+            ]
+        }
+    ],
+    "name": "hi-c-processing-partb/44",
+    "workflow_steps": [
+        {
+            "step": "e4068c7a-49e5-4c33-afab-9ec90d65faf3",
+            "step_name": "merge_pairs"
+        },
+        {
+            "step": "a9d0e56c-49e5-4c33-afab-9ec90d65faf3",
+            "step_name": "pairs2hic"
+        },
+        {
+            "step": "302366fb-49e5-4c33-afab-9ec90d65faf3",
+            "step_name": "cooler"
+        }
+    ],
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "accession": "4DNWFP00U73B",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab"
 },
