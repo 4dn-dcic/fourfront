@@ -280,7 +280,7 @@ class LoadMoreAsYouScroll extends React.Component {
         this.isMounted = this.isMounted.bind(this);
         this.getInitialFrom = this.getInitialFrom.bind(this);
         this.rebuiltHref = this.rebuiltHref.bind(this);
-        this.handleLoad = this.handleLoad.bind(this);
+        this.handleLoad = _.throttle(this.handleLoad.bind(this), 3000);
         //this.handleScrollingStateChange = this.handleScrollingStateChange.bind(this);
         //this.handleScrollExt = this.handleScrollExt.bind(this);
         var state = {
@@ -345,7 +345,14 @@ class LoadMoreAsYouScroll extends React.Component {
         var nextHref = this.rebuiltHref();
         var loadCallback = (function(resp){
             if (resp && resp['@graph'] && resp['@graph'].length > 0){
-                this.props.setResults(this.props.results.slice(0).concat(resp['@graph']));
+                // Check if have same result, if so, refresh all results (something has changed on back-end)
+                var oldKeys = _.map(this.props.results, DimensioningContainer.getKeyForGraphResult);
+                var newKeys = _.map(resp['@graph'], DimensioningContainer.getKeyForGraphResult);
+                if (_.any(oldKeys, function(oK){ return _.contains(newKeys, oK); } )){
+                    navigate('', { 'inPlace' : true, 'dontScrollToTop' : true });
+                } else {
+                    this.props.setResults(this.props.results.slice(0).concat(resp['@graph']));
+                }
                 this.setState({ 'isLoading' : false });
             } else {
                 if (this.state.canLoad){
