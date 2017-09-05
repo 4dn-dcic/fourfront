@@ -65,7 +65,6 @@ ORDER = [
     'analysis_step',
     'workflow',
     'workflow_mapping',
-    'workflow_run',
     'workflow_run_sbg',
     'workflow_run_awsem'
 ]
