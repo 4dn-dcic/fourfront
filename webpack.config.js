@@ -94,8 +94,6 @@ module.exports = [
             dns: "empty",
         },
         externals: [
-            'd3-node',
-            'd3-request',
             {'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}'}
         ],
         module: {
