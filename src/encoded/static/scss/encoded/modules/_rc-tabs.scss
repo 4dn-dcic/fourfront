@@ -517,6 +517,10 @@
   overflow: visible;
 }
 
+
+
+
+
 /***
  *** Extra Things Be Here
  ***/
@@ -591,7 +595,7 @@
 
     &.rc-tabs-tab-disabled {
       color: rgba(255,255,255,0.66) !important;
-      pointer-events: none;
+      //pointer-events: none;
       //cursor: none;
     }
 
@@ -604,7 +608,7 @@
       color: #000;
     }
 
-    &:hover + .rc-tabs-tab:not(.rc-tabs-tab-active) {
+    &:hover:not(.rc-tabs-tab-disabled) + .rc-tabs-tab:not(.rc-tabs-tab-active) {
       border-left-color: transparent;
     }
 
@@ -646,6 +650,22 @@
 
     }
 
+  }
+
+  .rc-tabs-tab-next,
+  .rc-tabs-tab-prev {
+    color: #fff;
+    &.rc-tabs-tab-btn-disabled {
+      opacity: 0.25;
+    }
+    > .rc-tabs-tab-next-icon:before {
+      font-family: FontAwesome;
+      content: "\f105";
+    }
+    > .rc-tabs-tab-prev-icon:before {
+      font-family: FontAwesome;
+      content: "\f104";
+    }
   }
 
 }

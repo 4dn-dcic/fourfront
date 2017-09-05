@@ -40,6 +40,7 @@
                 "hic",
                 "mcool",
                 "normvector_juicerformat",
+                "zip",
                 "other"
             ]
         },
@@ -59,6 +60,15 @@
                 "image",
                 "other"
             ]
+        },
+         "source_experiments": {
+             "title": "Source Experiments",
+             "description": "Experiments that this file is associated with",
+             "type": "array",
+             "items": {
+                 "title": "Source Experiment",
+                 "type": "string"
+             }
         }
      },
      "file_format_file_extension": {
@@ -70,6 +80,7 @@
         "mcool": ".mcool",
         "hic": ".hic",
         "normvector_juicerformat": ".normvector.juicerformat.gz",
+        "zip": ".zip",
         "other": ""
     }
 }

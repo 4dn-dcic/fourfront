@@ -42,7 +42,7 @@ class ResultRowColumnBlock extends React.Component {
         var isDesktopClientside = SearchResultTable.isDesktopClientside();
         var blockWidth;
 
-        if (mounted && isDesktopClientside){
+        if (mounted){
             blockWidth = this.props.headerColumnWidths[this.props.columnNumber] || getColumnWidthFromDefinition(columnDefinition, mounted);
         } else {
             blockWidth = getColumnWidthFromDefinition(columnDefinition, mounted);

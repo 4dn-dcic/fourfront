@@ -1,0 +1,25 @@
+[
+    {
+        "status": "released", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "modifications": [], 
+        "uuid": "26ebb2b1-2902-4446-a25f-9fc6523ed5cf", 
+        "alternate_accessions": [], 
+        "schema_version": "2", 
+        "url": "https://www.atcc.org/Products/All/CCL-186.aspx", 
+        "description": "IMR-90 (CCL-186)", 
+        "biosource_vendor": "7a6f2efe-5be8-4db2-afa8-d82e9b4ad254", 
+        "accession": "4DNSRXXGU3CH", 
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989", 
+        "biosource_type": "immortalized cell line", 
+        "individual": "2fc29bbe-5796-4c28-956e-8d0188f6664b", 
+        "references": [], 
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
+        "cell_line_tier": "Unclassified", 
+        "cell_line": "c45d70f2-980b-4a6c-b762-bb48fdd7913a", 
+        "date_created": "2017-04-09T17:24:20.718751+00:00", 
+        "aliases": [
+            "dcic:IMR90"
+        ]
+    }
+]

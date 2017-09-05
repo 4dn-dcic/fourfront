@@ -1,0 +1,50 @@
+[
+    {
+        "status": "current", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "fax": "", 
+        "phone1": "", 
+        "awards": [
+            "4871e338-b07d-4665-a00a-357648e5bad6", 
+            "1dbecc95-ec91-4081-a862-c79d18a8d0bd"
+        ], 
+        "name": "bing-ren-lab", 
+        "city": "", 
+        "phone2": "", 
+        "country": "", 
+        "institute_name": "", 
+        "schema_version": "1", 
+        "state": "", 
+        "postal_code": "", 
+        "title": "Bing Ren, UCSD", 
+        "address1": "", 
+        "date_created": "2017-04-08T13:01:38.072587+00:00", 
+        "pi": "e3159ffc-a5a9-43a1-8cfa-90b776c39788", 
+        "institute_label": "UCSD", 
+        "uuid": "795847de-20b6-4f8c-ba8d-185215469cbf"
+    }, 
+    {
+        "status": "current", 
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "fax": "000-000-0000", 
+        "phone1": "000-000-0000", 
+        "awards": [
+            "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        ], 
+        "name": "4dn-dcic-lab", 
+        "title": "4DN DCIC Lab, HMS", 
+        "phone2": "000-000-0000", 
+        "country": "USA", 
+        "address2": "10 Schattuck Street", 
+        "institute_name": "Harvard Medical School", 
+        "schema_version": "1", 
+        "state": "MA", 
+        "postal_code": "02115", 
+        "address1": "Biomedical Infomatics", 
+        "date_created": "2017-04-07T19:56:09.652127+00:00", 
+        "pi": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
+        "institute_label": "HMS", 
+        "city": "Boston", 
+        "uuid": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+    }
+]

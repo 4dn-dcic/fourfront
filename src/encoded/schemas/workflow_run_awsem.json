@@ -32,6 +32,10 @@
         "awsem_job_id": {
             "title": "AWESM Job ID",
             "type": "string"
+        },
+        "awsem_app_name": {
+            "title": "AWSEM App Name",
+            "type": "string"
         }
     }
 }

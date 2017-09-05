@@ -1,7 +1,9 @@
 from pyramid.response import Response
 from pyramid.view import view_config
-from snovault import Item
+from pyramid.httpexceptions import HTTPBadRequest
+from snovault import Item as SnowyItem
 from collections import OrderedDict
+from copy import copy
 import cgi
 from urllib.parse import (
     parse_qs,
@@ -9,11 +11,19 @@ from urllib.parse import (
 )
 
 from .search import _ASSEMBLY_MAPPER
+from .types.file import File
+from .types.workflow import (
+    trace_workflows,
+    get_unique_key_from_at_id,
+    DEFAULT_TRACING_OPTIONS,
+    WorkflowRunTracingException
+)
 
 
 def includeme(config):
     config.add_route('batch_hub', '/batch_hub/{search_params}/{txt}')
     config.add_route('batch_hub:trackdb', '/batch_hub/{search_params}/{assembly}/{txt}')
+    config.add_route('trace_workflow_runs', '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
     config.scan(__name__)
 
 
@@ -357,7 +367,7 @@ def generate_batch_hubs(context, request):
         return g_text
 
 
-@view_config(name='hub', context=Item, request_method='GET', permission='view')
+@view_config(name='hub', context=SnowyItem, request_method='GET', permission='view')
 def hub(context, request):
     ''' Creates trackhub on fly for a given experiment '''
 
@@ -394,3 +404,32 @@ def hub(context, request):
 def batch_hub(context, request):
     ''' View for batch track hubs '''
     return Response(generate_batch_hubs(context, request), content_type='text/plain')
+
+
+# TODO: figure out how to make one of those cool /file/ACCESSION/@@download/-like URLs for this.
+@view_config(route_name='trace_workflow_runs', request_method='GET',
+             permission='view', context=File) # TODO: In future, expand to Item to accomodate Experiment, ExperimentSet.
+def trace_workflow_runs(context, request):
+
+    # TODO: Figure out best HTTP error response/exception to give in case of not yet indexed.
+    file_model = context.model
+
+    if not hasattr(file_model, 'source'):
+        raise HTTPBadRequest(detail="File not yet finished indexing.")
+
+    options = copy(DEFAULT_TRACING_OPTIONS)
+    if request.params.get('all_runs'):
+        options['group_similar_workflow_runs'] = False
+    if request.params.get('track_performance'):
+        options['track_performance'] = True
+
+    try:
+        return trace_workflows(
+            str(context.uuid),
+            request,
+            [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_inputs', []) ],
+            [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_outputs', []) ],
+            options
+        )
+    except WorkflowRunTracingException as e:
+        raise HTTPBadRequest(detail=e.args[0])
