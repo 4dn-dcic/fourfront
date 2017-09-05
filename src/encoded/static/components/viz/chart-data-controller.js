@@ -180,7 +180,7 @@ function notifyLoadStartCallbacks(){
 function reFetchContext(){
     console.info('ChartDataController -> Refetch Context Called');
     try {
-        navigate('', { inPlace : true, dontScrollTop: true });
+        navigate('', { inPlace : true, dontScrollToTop: true });
     } catch (e){
         console.warn(e);
         return false;
