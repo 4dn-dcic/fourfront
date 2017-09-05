@@ -36,7 +36,7 @@ def _type_length():
 
 TYPE_LENGTH = _type_length()
 
-INDEX_DATA_TYPES = ['file_fastq', 'workflow_run', 'biosample', 'experiment_set']
+INDEX_DATA_TYPES = ['file_fastq', 'workflow_run_awsem', 'biosample', 'experiment_set']
 
 PUBLIC_COLLECTIONS = [
     'source',
@@ -304,7 +304,13 @@ def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, it
     for item_id in random_ids:
         indexer_testapp.get(item_id + '@@index-data', status=200)
         # previously test_html_pages
-        res = htmltestapp.get(item_id)
+        try:
+            res = htmltestapp.get(item_id)
+        except Exception as e:
+            import pdb
+            pdb.set_trace()
+            print(e)
+            continue
         assert res.body.startswith(b'<!DOCTYPE html>')
 
 
