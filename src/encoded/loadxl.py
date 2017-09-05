@@ -689,6 +689,7 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
         for result in processed_data:
             if result.get('_response') and result.get('_response').status_code not in [200, 201]:
                 exclude_list.append(result['uuid'])
+                print("excluding uuid %s do to error" % result['uuid'])
     if force_return:
         return
 
