@@ -11,7 +11,7 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 
-describe('Testing experiments-table.js', function() {
+describe('Testing RawFilesStackedTable', function() {
     var React, RawFilesStackedTable, expFuncs, testRawFilesStackedTable, TestUtils, FetchContext, context, schemas, _, RawFilesStackedTableWrapper, SelectedFilesController, initiallySelectedFiles;
 
     beforeEach(function() {
@@ -92,7 +92,7 @@ describe('Testing experiments-table.js', function() {
         var orderedHeaderWidths = headers.map(function(h, i){
             var w = parseInt(h.style._values.width); 
             if (Number.isNaN(w)){
-                return RawFilesStackedTable.initialColumnWidths(h.getAttribute('data-column-class')) || 120;
+                return 120;
             }
             return w;
         });
@@ -106,14 +106,12 @@ describe('Testing experiments-table.js', function() {
 
     it('All child columns/blocks with matching classNames (col-experiment, etc.), match header block widths', function() {
         var headers = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
-        var headerWidths = _.object(
-            _.map(headers, function(h, i){
-                var w = parseInt(h.style._values.width);
-                var columnClassName = h.getAttribute('data-column-class');
-                if (Number.isNaN(w)) w = RawFilesStackedTable.initialColumnWidths(columnClassName) || 120; // Default
-                return [columnClassName, w];
-            })
-        ); // Returns { 'biosample' : 201, 'experiment' : 253, ... }
+        var headerWidths = _.map(headers, function(h, i){
+            var w = parseInt(h.style._values.width);
+            var columnClassName = h.getAttribute('data-column-class');
+            if (Number.isNaN(w)) w = 120; // Default
+            return [columnClassName, w];
+        })
 
         console.log('Header Block Widths for test:', headerWidths);
 
@@ -132,7 +130,9 @@ describe('Testing experiments-table.js', function() {
                 nameColumn.className.split(' '),
                 function(c) { return c.indexOf('col-') > -1; }
             ).replace('col-', '');
-            expect(parseInt(nameColumn.style._values.width)).toEqual(headerWidths[colClassName]); // Test for each
+            expect(
+                _.any(headerWidths, function(hw){ return hw[1] === parseInt(nameColumn.style._values.width) && hw[0] === colClassName })
+            ).toEqual(true); // Test for each
         });
 
     });

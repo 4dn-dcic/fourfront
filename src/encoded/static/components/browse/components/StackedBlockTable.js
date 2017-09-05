@@ -921,7 +921,6 @@ export class StackedBlockTable extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        //this.initialColumnWidths = this.initialColumnWidths.bind(this);
         this.getColumnWidths = this.getColumnWidths.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillUnmount = this.componentWillUnmount.bind(this);
@@ -950,13 +949,7 @@ export class StackedBlockTable extends React.Component {
         delete this.lastColumnWidths;
         delete this.cache.origColumnWidths;
     }
-    /*
-    initialColumnWidths(){
-        return _.reduce(this.props.columnHeaders, (m, colHeading)=>{
-            return m + (colHeading.initialWidth || this.props.defaultInitialColumnWidth);
-        }, 0);
-    }
-    */
+    
     totalColumnsWidth(origColumnWidths = this.cache.origColumnWidths){
         return _.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
     }

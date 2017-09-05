@@ -50,29 +50,6 @@ export class RawFilesStackedTable extends React.Component {
 
     }
 
-    /* Returns undefined if not set */
-    static initialColumnWidths(columnClassName = null, expSetType = 'replicate'){
-        if (expSetType === 'replicate'){
-            // ToDo put into schemas?
-            var widthsByColumnClass = {
-                'biosample' : 115,
-                'experiment' : 145,
-                'file-pair' : 40,
-                'file' : 125,
-                'file-detail' : 100,
-                'default' : 120
-            };
-            // No columnClassName specified.
-            if (columnClassName === null) return widthsByColumnClass;
-            // columnClassName specified and set.
-            else if (columnClassName !== null && typeof widthsByColumnClass[columnClassName] === 'number'){
-                return widthsByColumnClass[columnClassName];
-            }
-            // columnClassName specified but width not configured.
-            else return widthsByColumnClass.default;
-        }
-    }
-
     /**
      * Calculate amount of experiments out of provided experiments which match currently-set filters.
      * Use only for front-end faceting, e.g. on Exp-Set View page where all experiments are provided,
