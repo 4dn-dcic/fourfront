@@ -120,7 +120,7 @@ class ExperimentSet(Item):
                 "processed_files.file_format",
                 "processed_files.file_classification",
                 #"processed_files.@type",
-                
+
                 "experiments_in_set.processed_files.href",
                 "experiments_in_set.processed_files.accession",
                 "experiments_in_set.processed_files.uuid",
