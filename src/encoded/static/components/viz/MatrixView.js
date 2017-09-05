@@ -287,7 +287,7 @@ export class MatrixContainer extends React.Component {
                 />
                 <MatrixContainer.YAxis labels={this.props.yAxisLabels} width={this.props.yLabelsWidth} cellSize={this.cellSize()} registerPostUpdateFxn={this.registerPostUpdateFxn} />
                 <div className="matrix-grid-container" style={{ width : Math.min(maxGridWidth, gridWidth) }}>
-                    <Matrix data={_.zip.apply(_, this.props.grid)} setStyle={this.cellStyle} registerPostUpdateFxn={this.registerPostUpdateFxn} />
+                    <Matrix data={_.zip.apply(_, this.props.grid)} setStyle={this.cellStyle} registerPostUpdateFxn={this.registerPostUpdateFxn} tooltipDataFor="matrix-tooltip" />
                 </div>
             </div>
         );
@@ -386,6 +386,7 @@ export default class MatrixView extends React.Component {
                     maxValue={this.props.maxValue || maxValue || MatrixView.findGreatestValueInGrid(grid)}
                     showXAxisTitle={showXAxisTitle}
                 />
+                <ReactTooltip id="matrix-tooltip" class='matrix-tooltip' delayHide={0} effect='solid' offset={{ 'top' : -15, 'left' : 0 }} globalEventOff='click'/>
             </div>
         );
     }

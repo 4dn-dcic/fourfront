@@ -293,8 +293,6 @@ class FileDetailBody extends React.Component {
             return null;
         }
 
-        console.log('FILE', this.props.file);
-
         var node = this.props.node;
         var body;
         if (typeof this.state.file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
@@ -572,7 +570,6 @@ class AnalysisStepDetailBody extends React.Component {
     stepTitleBox(){
         var { step, context, node } = this.props;
         var stepHref = object.atIdFromObject(step) || '/' + step.uuid;
-        console.log(object.atIdFromObject(step), object.atIdFromObject(context), step, context);
         var titleString = step.name || step.title || step.display_title || step.uuid;
 
         var isStepWorkflow = context && (
@@ -646,7 +643,7 @@ class AnalysisStepDetailBody extends React.Component {
                 <hr/>
                 
                 
-                <Fade in={wfr} key="wfr-detail-container">
+                <Fade in={!!(wfr)} key="wfr-detail-container">
                     <div>
                         <h3 className="tab-section-title">
                             <span>Details</span>

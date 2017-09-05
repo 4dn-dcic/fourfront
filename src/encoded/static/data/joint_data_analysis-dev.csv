@@ -1,0 +1,102 @@
+"Data generation plan for 4DN Joint Analysis, 07/06",,,,,
+,,,,,
+,GENOME-WIDE OMICS,,,,
+,Methods,Participating Groups,H1 hESC,H1-differentiated DE,HFFc6
+,Hi-C,Dekker,S Link: https://data.4dnucleome.org/experiment-set-replicates/4DNES2M5JIGV/;,X,S Link: https://data.4dnucleome.org/experiment-set-replicates/4DNES2R6PUEK/;
+,Hi-C,Aiden,X,X,X
+,Micro-C,Dekker,X Est: Early 2018;,,X Est: Early 2018;
+,Hi-C (Cryomilling TCC),Alber/Chen,X Est: Fall 2017;,,X Est: Fall 2017;
+,Hi- C (Photo-cross-linked TCC - PXT),Alber/Chen,X Est: Spring 2018;,,X Est: Spring 2018;
+,GCCP,Alber/Chen,X,,
+,GAM,Pombo (Ren),X Est: End of 2017; small dataset,,
+,Single cell Hi-C,Shendure,X Est: Winter 2017;,,X Est: Fall 2017;
+,PLAC-seq,Ren,X Est: Fall 2017;,X Est: Fall 2017;,X Est: Fall 2017;
+,ChIA-PET,Ruan,X,,X
+,RICh-PET,Ruan,X,,X
+,"ChIP-Seq - H3mods (H3K4me3, H3K4me1, H3K27ac, H3K27me3, H3K36me3)",Yue,X Est: Fall 2017;,X Est: Fall 2017;,X Est: Fall 2017;
+,ChIP-Seq - PolII,Yue,X Est: Fall 2017;,X Est: Fall 2017;,X Est: Fall 2017;
+,RNA-Seq,Yue,X Est: Fall 2017;,X Est: Fall 2017;,X Est: Fall 2017;
+,ATACseq,Dekker,X Est: August 2017;,X Est: Winter 2017;,"XS Est: Aug 2017; Link: https://data.4dnucleome.org/experiment-set-replicates/4DNESGZ9A3FG/; 1st bio rep submitted, second in progress"
+,Repli-seq (E/L) ,Gilbert (Belmont),S Link: (Early) https://data.4dnucleome.org/experiment-set-replicates/4DNES4B7RLAV/; Link: (Late) https://data.4dnucleome.org/experiment-set-replicates/4DNESUJC9Y83/;,X Est: August 2017;,S Link: (Early) https://data.4dnucleome.org/experiment-set-replicates/4DNESCOUGP8R/; Link: (Late) https://data.4dnucleome.org/experiment-set-replicates/4DNESJPG5AS9/;
+,Repli-seq (HiRes multi-fraction),Gilbert (Belmont),X Est: Fall 2017;,,
+,Lamin B DamID,van Steensel(Belmont),X Est: Late Fall 2017;,,X Est: Late Fall 2017;
+,BioNano Irys,Yue,X Est: Fall 2017;,X Est: Fall 2017;,X Est: Fall 2017;
+,NADseq,Kaufman (Dekker),X Est: Spring 2018,,X Est: Spring 2018
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+Locus:,OCT4,,,,
+,Methods,Participating Groups,H1 hESC,H1-differentiated DE,HFFc6
+,FISH,Ren,X,X,X
+,FISH/HiPMAP,Misteli/Finn,X pending feasibility tests in H1,X pending feasibility tests in H1,X
+,CRISPR live cell,Liphardt/Moerner,"X Our goal will be to collect single locus time dynamics data. The generated data will consist of X,Y(t) vectors of length ~1000, sampled on second to minute timescales. For each experiment, we will also be sampling a ""simple"" housekeeping locus (info soon), so for each cell there will be multiple data vectors (e.g. 2 each MUC4 and Simple). OPEN QUESTION - use of Rho/ROCK inhibitor in ""Standard H1"" protocol- we would prefer not use inhibitor since it interfers with cell dynamics. ","X Our goal will be to collect single locus time dynamics data. The generated data will consist of X,Y(t) vectors of length ~1000, sampled on second to minute timescales. For each experiment, we will also be sampling a ""simple"" housekeeping locus (info soon), so for each cell there will be multiple data vectors (e.g. 2 each MUC4 and Simple). OPEN QUESTION - use of Rho/ROCK inhibitor in ""Standard H1"" protocol- we would prefer not use inhibitor since it interfers with cell dynamics. ",
+,PALM,Cisse,,,
+,5C,Dekker,X Est: Dec 2017;,X Est: Dec 2017;,X Est: Dec 2017;
+,4C,Yue,X,X,X
+,Hi-C^2,Aiden,X,,X
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+Locus:,MUC4,,,,
+,Methods,Participating Groups,H1 hESC,H1-differentiated DE,HFFc6
+,FISH,Ren,,,
+,FISH/HiPMAP,Misteli/Finn,X pending feasibility tests in H1,X pending feasibility tests in H1,X
+,CRISPR live cell,Liphardt/Moerner,"X Our goal will be to collect single locus time dynamics data. The generated data will consist of X,Y(t) vectors of length ~1000, sampled on second to minute timescales. For each experiment, we will also be sampling a ""simple"" housekeeping locus (info soon), so for each cell there will be multiple data vectors (e.g. 2 each MUC4 and Simple). OPEN QUESTION - use of Rho/ROCK inhibitor in ""Standard H1"" protocol- we would prefer not use inhibitor since it interfers with cell dynamics. ","X Our goal will be to collect single locus time dynamics data. The generated data will consist of X,Y(t) vectors of length ~1000, sampled on second to minute timescales. For each experiment, we will also be sampling a ""simple"" housekeeping locus (info soon), so for each cell there will be multiple data vectors (e.g. 2 each MUC4 and Simple). OPEN QUESTION - use of Rho/ROCK inhibitor in ""Standard H1"" protocol- we would prefer not use inhibitor since it interfers with cell dynamics. ",
+,PALM,Cisse,,,
+,5C,Dekker,X Est: Dec 2017;,X Est: Dec 2017;,X Est: Dec 2017;
+,4C,Yue,X,X,X
+,Hi-C^2,Aiden,X,,X
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+,,,,,
+Locus:,Beta-actin,,,,
+,Methods,Participating Groups,H1 hESC,H1-differentiated DE,HFFc6
+,FISH,Ren,,,
+,FISH/HiPMAP,Misteli/Finn,X pending feasibility tests in H1,X pending feasibility tests in H1,X
+,CRISPR live cell,Liphardt/Moerner,,,
+,PALM,Cisse,X,,
+,5C,Dekker,X Est: Dec 2017;,X Est: Dec 2017;,X Est: Dec 2017;
+,4C,Yue,X,X,X
+,Hi-C^2,Aiden,X,,X

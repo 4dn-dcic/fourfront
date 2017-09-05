@@ -91,7 +91,7 @@ export class TableRowToggleOpenButton extends React.Component {
     render(){
         return (
             <div className="inline-block toggle-detail-button-container">
-                <button className="toggle-detail-button" onClick={this.props.onClick}>
+                <button className="toggle-detail-button" onClick={this.props.onClick || this.props.toggleDetailOpen}>
                     <div className="icon-container">
                         <i className={"icon icon-fw icon-" + (this.props.open ? 'minus' : 'plus') }/>
                     </div>
@@ -253,6 +253,8 @@ export class ResultRowColumnBlockValue extends React.Component {
 
     static defaultProps = {
         'mounted' : false,
+        'toggleDetailOpen' : function(evt){ console.warn('Triggered props.toggleDetailOpen() but no toggleDetailOpen prop passed to ResultRowColumnValue Component.'); },
+        'shouldComponentUpdateExt' : null
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -260,7 +262,9 @@ export class ResultRowColumnBlockValue extends React.Component {
             nextProps.columnNumber === 0 ||
             nextProps.columnDefinition.field !== this.props.columnDefinition.field ||
             nextProps.schemas !== this.props.schemas ||
-            object.atIdFromObject(nextProps.result) !== object.atIdFromObject(this.props.result)
+            object.atIdFromObject(nextProps.result) !== object.atIdFromObject(this.props.result) ||
+            nextProps.className !== this.props.className ||
+            (typeof nextProps.shouldComponentUpdateExt === 'function' && nextProps.shouldComponentUpdateExt(nextProps, nextState, this.props, this.state))
         ){
             return true;
         }
@@ -281,8 +285,13 @@ export class ResultRowColumnBlockValue extends React.Component {
         } else if (value === null){
             value = <small className="text-300">-</small>;
         }
+
+        var className = "inner";
+        if (typeof this.props.className === 'string'){
+            className += ' ' + this.props.className;
+        }
         return (
-            <div className="inner" data-tip={tooltip}>{ value }</div>
+            <div className={className} data-tip={tooltip}>{ value }</div>
         );
     }
 }

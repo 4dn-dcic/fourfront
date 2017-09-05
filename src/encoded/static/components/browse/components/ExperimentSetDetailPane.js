@@ -5,7 +5,7 @@ import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import ExperimentsTable from './../../experiments-table';
+import { RawFilesStackedTable } from './file-tables';
 import { FlexibleDescriptionBox } from './../../item-pages/components';
 import { expFxn, layout } from './../../util';
 import { defaultColumnBlockRenderFxn, sanitizeOutputValue } from './table-commons';
@@ -76,7 +76,7 @@ export class ExperimentSetDetailPane extends React.Component {
                     </div>
                 </div>
                 <div style={{ overflowX : 'auto', width: this.props.containerWidth ? (this.props.containerWidth - paddingWidth) : null }}>
-                <ExperimentsTable
+                <RawFilesStackedTable
                     key='experiments-table'
                     columnHeaders={[
                         { columnClass: 'file-detail', title : 'File Type'},
@@ -91,6 +91,7 @@ export class ExperimentSetDetailPane extends React.Component {
                     selectedFiles={this.props.selectedFiles}
                     selectFile={this.props.selectFile}
                     unselectFile={this.props.unselectFile}
+                    collapseLongLists
                 />
                 </div>
             </div>

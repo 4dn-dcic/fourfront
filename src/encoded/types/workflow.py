@@ -745,13 +745,16 @@ class WorkflowRun(Item):
                 'input_files.value.file_format',
                 'input_files.value.uuid',
                 'input_files.value.accession',
+                'input_files.value.@type',
                 'output_files.workflow_argument_name',
                 'output_files.*',
                 'output_files.value.file_format',
                 'output_files.value.uuid',
                 'output_files.value.accession',
+                'output_files.value.@type',
                 'output_quality_metrics.name',
                 'output_quality_metrics.value.uuid',
+                'output_quality_metrics.value.@type',
                 #'output_quality_metrics.value'
                 ]
 

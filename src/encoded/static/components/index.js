@@ -34,7 +34,6 @@ require('./navigation');
 require('./submission/submission-view');
 require('./submission/submission-fields');
 require('./inputs');
-require('./experiments-table');
 require('./browse/BrowseView');
 require('./browse/SearchView');
 require('./browse/components');

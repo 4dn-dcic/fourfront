@@ -11,7 +11,8 @@ var App = require('./components');
 var domready = require('domready');
 import * as store from './store';
 var { Provider, connect } = require('react-redux');
-import { JWT, Filters } from './components/util';
+import { convertExpSetFiltersTerms } from './components/util/experiments-filters';
+import * as JWT from './components/util/json-web-token';
 
 
 /** 
@@ -67,7 +68,7 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
             type: _.extend(
                     App.getRenderedProps(document, Object.keys(store.reducers)),
                     // Convert Arrays back to Sets (which don't work well w. JSON.stringify)
-                    { 'expSetFilters' : Filters.convertExpSetFiltersTerms(expSetFiltersPropContainer.expSetFilters, 'set') }
+                    { 'expSetFilters' : convertExpSetFiltersTerms(expSetFiltersPropContainer.expSetFilters, 'set') }
                 )
         });
 

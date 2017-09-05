@@ -93,6 +93,9 @@ module.exports = [
             tls: "empty",
             dns: "empty",
         },
+        externals: [
+            {'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}'}
+        ],
         module: {
             preLoaders: preLoaders,
             loaders: loaders,
