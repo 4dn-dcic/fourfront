@@ -48,7 +48,7 @@ This page outlines and describes the types of metadata that is requested for bio
 
 <span id="cc_meta"></span>
 
-* Protocols used in Biosample Preparation - this is distinct from SOPs and protocol from cell culture_duration
+* Protocols used in Biosample Preparation - this is distinct from SOPs and protocol for cell cultures.
 * example protocol description "Preparation of isolated brain tissue from BALB/c adult mice for chromatin capture experiments"
 * The value of this field is a list of references to a **Protocol** object - an alias or uuid.
 * The **Protocol** object can include an attachment to a pdf document describing the steps of the preparation.
@@ -64,7 +64,7 @@ To maintain consistent data standards and in order to facilitate integrated anal
 
 Certain types of metadata, if not submitted will prevent your data from being flagged “gold standard”. For your data to be considered “gold standard”, you will need to obtain your cells from the approved source and grow them precisely according to the approved SOP and include the following required information:
 
-1. A light microscopic image (DIC or phase contrast) of the cells at the time of harvesting (omics) or under each experimental condition (imaging);
+1. A light microscopy image (DIC or phase contrast) of the cells at the time of harvesting (omics) or under each experimental condition (imaging);
 2. culture start date, culture harvest date, culture duration, passage number and doubling number
 
 Other metadata is strongly encouraged and the exact requirements may vary somewhat depending on the cell type and when the data was produced (i.e. some older experiments can be 'grandfathered' in even if they do not 'pass' all the requirements).
