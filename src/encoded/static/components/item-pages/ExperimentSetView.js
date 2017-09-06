@@ -87,7 +87,6 @@ export default class ExperimentSetView extends React.Component {
 
         var processedFiles;
 
-        console.log(expFxn.combineWithReplicateNumbers(context.replicate_exps, context.experiments_in_set));
         if (Array.isArray(context.replicate_exps) && Array.isArray(context.experiments_in_set)){
             processedFiles = allProcessedFilesFromExperimentSet(_.extend({}, context, {
                 'experiments_in_set' : expFxn.combineWithReplicateNumbers(context.replicate_exps, context.experiments_in_set)
@@ -97,8 +96,7 @@ export default class ExperimentSetView extends React.Component {
         }
 
         var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-        console.log('WIDTH', width);
-        console.dir(this.refs.tabViewContainer);
+
         if (width) width -= 20;
 
         var tabs = [
