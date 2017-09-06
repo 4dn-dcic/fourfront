@@ -22,7 +22,7 @@ This page outlines and describes the types of metadata that is requested for bio
 ```biosource``` - **Required**
 
 * The value of this field is a reference to usually one **Biosource** object whose metadata is submitted separately.
-* This biosource can be a cell line or a tissue that has its own associated metadata.
+* This **Biosource** object refers to a cell line, tissue or primary cell and has its own associated metadata.
    * **NOTE**: The tiered cell lines all have an existing biosource in the database that can be re-used and referenced by it's accession, alias or uuid - while other biosources may require you to submit metadata for them.
 * It is possible, though rare, for a single biosample to consist of more than one biosource - eg. pooling of two different cell lines - in these cases you can reference multiple biosources in this field.
 
@@ -89,7 +89,7 @@ The biosample cell culture metadata fields that can be submitted are described b
 * The date the the cells were most recently thawed and cultured for the submitted experiment
 * Date can be submitted in as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD ((TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).
 * example Date only (most common use case) - "2017-01-01"
-* example Date and Time (uncommonly used) -"2017-01-01T17:00:00+00:00" - note for time hours, minutes, seconds and offset (can be 00 filled) are required
+* example Date and Time (uncommonly used) -"2017-01-01T17:00:00+00:00" - note for time; hours, minutes, seconds and offset are required but may be 00 filled.
 
 ```culture_harvest_date``` - **Required**
 
@@ -121,7 +121,7 @@ The biosample cell culture metadata fields that can be submitted are described b
 
 ```follows_sop``` - **Required**
 
-* Flag to indicate if the 4DN SOP for the specified cell line was followed - options 'Yes' or 'No'
+* Flag to indicate if the 4DN SOP for the specified cell line was followed - options '**Yes**' or '**No**'
 * If a cell line is not one of the 'Tiered' 4DN lines this field should be set to 'No'
 
 ```protocols_additional``` - **Required** if 'follows_sop' is 'No'
