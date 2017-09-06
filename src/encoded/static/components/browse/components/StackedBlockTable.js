@@ -136,6 +136,7 @@ export class StackedBlockName extends React.Component {
             subtitle : PropTypes.node,
             subtitleVisible : PropTypes.bool
         }),
+        'style' : PropTypes.object,
         'visible' : PropTypes.bool, // ? forgot
         'verticalAlign' : PropTypes.string // CSS vertical-align property. Change alignment/positioning if wanted.
         
@@ -226,6 +227,10 @@ export class StackedBlockName extends React.Component {
         if (this.props.verticalAlign){
             if (style) style.verticalAlign = this.props.verticalAlign;
             else style = { 'verticalAlign' : this.props.verticalAlign };
+        }
+        if (this.props.style){
+            if (style) style = _.extend({}, this.props.style, style);
+            else style = _.clone(this.props.style);
         }
         return (
             <div className={"name col-" + this.props.columnClass} style={style}>
@@ -638,10 +643,10 @@ export class FilePairBlock extends React.Component {
             return (
                 <div className="name col-file-pair" style={this.props.colWidthStyles ? _.clone(this.props.colWidthStyles['file-pair']) : null}>
                     { label.call(this) }
-                    <span className="name-title">
+                    <div className="name-title">
                         { this.renderCheckBox() }
                         { this.props.name }
-                    </span>
+                    </div>
                 </div>
             );
         }
@@ -725,20 +730,18 @@ export class FileEntryBlock extends React.Component {
             }
 
             if (title === 'File Type'){
-                row.push(<div key="file-type" className={className} style={baseStyle}>{file.file_format}</div>);
+                row.push(<div key="file-type" className={className} style={baseStyle}>{file.file_format || '-' }</div>);
                 continue;
             }
 
             if (typeof col.field === 'string'){
                 var val = object.getNestedProperty(file, col.field);
-                if (val){
-                    row.push(
-                        <div key={col.field} className={className} style={baseStyle}>
-                            { Schemas.Term.toName(col.field, val) }
-                        </div>
-                    );
-                    continue;
-                }
+                row.push(
+                    <div key={col.field} className={className} style={baseStyle}>
+                        { Schemas.Term.toName(col.field, val) || '-' }
+                    </div>
+                );
+                continue;
             }
 
             if (title === 'File Info'){
@@ -790,7 +793,7 @@ export class FileEntryBlock extends React.Component {
         }
 
         function title(){
-            if (!this.props.file) return <span className="name-title">{ titleString.call(this) }</span>;
+            if (!this.props.file) return <div className="name-title">{ titleString.call(this) }</div>;
             return (
                 <a className="name-title mono-text" href={ object.atIdFromObject(this.props.file) || '#' }>
                     { titleString.call(this) }
