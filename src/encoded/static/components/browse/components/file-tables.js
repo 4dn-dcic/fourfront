@@ -502,20 +502,27 @@ export class ProcessedFilesStackedTable extends React.Component {
             var experimentObj = _.find(_.pluck(filesForExperiment, 'from_experiment'), function(exp){ return exp && exp.accession && exp.accession === experimentAccession; });
 
             var nameTitle = (
-                experimentAccession === 'global' ? <b>Multiple</b>
+                experimentAccession === 'global' ? <div style={{ fontSize : '1.25rem', lineHeight : '16px', height: 16 }} className="text-300">Multiple</div>
                 : (experimentObj && typeof experimentObj.display_title === 'string' && experimentObj.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession
             );
             var nameLink = (experimentAccession !== 'global' && object.atIdFromObject(experimentObj)) || null;
+            var repsExist = experimentObj && experimentObj.bio_rep_no && experimentObj.tec_rep_no;
             var nameBlock = (
-                <StackedBlockName>
+                <StackedBlockName
+                    style={
+                        repsExist ? { paddingTop : 19, paddingBottom: 19 }
+                        : null
+                    }
+                >
+                    { repsExist ?
+                        <div>Bio Rep <b>{ experimentObj.bio_rep_no }</b>, Tec Rep <b>{ experimentObj.tec_rep_no }</b></div>
+                    : <div/> }
                     { nameLink ?
                         <a href={nameLink} className="name-title text-500">{ nameTitle }</a>
                         :
-                        <span className={"name-title" + (nameTitle === this.props.experimentSetAccession ? ' mono-text' : '')}>{ nameTitle }</span>
+                        <div className={"name-title" + (nameTitle === this.props.experimentSetAccession ? ' mono-text' : '')}>{ nameTitle }</div>
                     }
-                    { experimentObj && experimentObj.bio_rep_no && experimentObj.tec_rep_no ?
-                        <div>Bio Rep <b>{ experimentObj.bio_rep_no }</b>, Tec Rep <b>{ experimentObj.tec_rep_no }</b></div>
-                    : <div/> }
+                    
                 </StackedBlockName>
             );
             return (

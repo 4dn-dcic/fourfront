@@ -1371,6 +1371,14 @@ $workflow-step-node-lineheight: 18px;
                                     width: 100%;
                                     > .node-name {
                                         padding-left: 7px;
+                                        &.mono-text {
+                                            transform: translateY(-1px);
+                                            transform: translateY(-0.5px);
+                                            > i.icon {
+                                                transform: translateY(1px);
+                                                transform: translateY(0.5px);
+                                            }
+                                        }
                                     }
                                 }
 
