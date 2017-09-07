@@ -214,7 +214,7 @@ export default class App extends React.Component {
         this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
         this.render = this.render.bind(this);
 
-        console.log('APP FILTERS', Filters.hrefToFilters(props.href));
+        console.log('APP FILTERS', Filters.hrefToFilters(props.href, (props.context && Array.isArray(props.context.filters) && props.context.filters) || null));
 
         this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
 
