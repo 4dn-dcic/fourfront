@@ -55,6 +55,13 @@ export class SelectedFilesController extends React.Component {
             if (typeof nextProps.href === 'string') {
                 if (nextProps.href !== pastProps.href) return true;
             }
+            if (nextProps.context && pastProps.context && nextProps.context !== pastProps.context) {
+                if (Array.isArray(pastProps.context['@graph']) && !Array.isArray(nextProps.context['@graph'])) return true;
+                //if (Array.isArray(pastProps.context['@graph']) && Array.isArray(nextProps.context['@graph'])) {
+                //    var pastGraph = pastProps.context['@graph'];
+                //    var newGraph = nextProps.context['@graph'];
+                //}
+            }
             return false;
         }
     }
@@ -135,6 +142,9 @@ export class SelectedFilesController extends React.Component {
     getFlatList(){ return SelectedFilesController.objectToCompleteList(this.state.selectedFiles); }
 
     render(){
+        if (typeof window !== 'undefined' && window){
+            window.lastSelectedFiles = this.state.selectedFiles;
+        }
         if (!React.isValidElement(this.props.children)) throw new Error('CustomColumnController expects props.children to be a valid React component instance.');
         var propsToPass = _.extend(_.omit(this.props, 'children'), {
             'selectedFiles'         : this.state.selectedFiles,
