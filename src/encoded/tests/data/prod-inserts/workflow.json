@@ -280,8 +280,8 @@
     "cwl_main_filename" : "fastqc-0-11-4-1.cwl",
     "cwl_child_filenames" : ["fastqc-0-11-4.cwl"],
     "app_name" : "fastqc-0-11-4-1",
-    "app_version" : "0.0.4",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
+    "app_version" : "0.0.5",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.5/cwl_awsem/",
     "arguments": [
         {
             "argument_mapping": [
@@ -978,7 +978,7 @@
         }
     ],
     "award": "1U01CA200059-01",
-    "data_type": ["Hi-C"],
+    "data_types": ["Hi-C"],
     "category": "merging + matrix generation"
 },
 {
@@ -1058,7 +1058,7 @@
             "step_name": "merge_pairs"
         }
     ],
-    "data_type": ["Hi-C"],
+    "data_types": ["Hi-C"],
     "category": "merging + matrix generation",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
@@ -1085,7 +1085,7 @@
             "step_name": "juicer2pairs"
         }
     ],
-    "data_type": ["Hi-C"],
+    "data_types": ["Hi-C"],
     "category": "alignment + filtering",
     "workflow_type": "Hi-C data analysis",
     "name": "hi-c-processing-parta-juicer/5",
