@@ -53,19 +53,21 @@ export default class NodesLayer extends React.Component {
         return (
             <div className="nodes-layer-wrapper" style={{ width : Math.max(p.contentWidth, fullWidth), height : fullHeight }}>
                 <div className="nodes-layer" style={{ width : Math.max(p.contentWidth, fullWidth), height : fullHeight }}>
-                    {
-                        NodesLayer.processNodes(this.props.nodes).map(function(node, i){
-                            var nodeProps = _.extend( _.omit(p, 'children', 'nodes'), {
-                                node : node,
-                                onMouseEnter : p.onNodeMouseEnter && p.onNodeMouseEnter.bind(p.onNodeMouseEnter, node),
-                                onMouseLeave : p.onNodeMouseLeave && p.onNodeMouseLeave.bind(p.onNodeMouseLeave, node),
-                                onClick : typeof p.onNodeClick === 'function' && p.onNodeClick.bind(p.onNodeClick, node),
-                                key : node.id || node.name || i,
-                                nodeElement : p.nodeElement || null,
-                                className : p.nodeClassName || null
-                            });
-                            return <Node {...nodeProps} />;
-                        })
+                    {   this.props.scrollContainerWrapperMounted ?
+                            NodesLayer.processNodes(this.props.nodes).map(function(node, i){
+                                var nodeProps = _.extend( _.omit(p, 'children', 'nodes'), {
+                                    node : node,
+                                    onMouseEnter : p.onNodeMouseEnter && p.onNodeMouseEnter.bind(p.onNodeMouseEnter, node),
+                                    onMouseLeave : p.onNodeMouseLeave && p.onNodeMouseLeave.bind(p.onNodeMouseLeave, node),
+                                    onClick : typeof p.onNodeClick === 'function' && p.onNodeClick.bind(p.onNodeClick, node),
+                                    key : node.id || node.name || i,
+                                    nodeElement : p.nodeElement || null,
+                                    className : p.nodeClassName || null
+                                });
+                                return <Node {...nodeProps} />;
+                            })
+                        :
+                        null
                     }
                 </div>
             </div>

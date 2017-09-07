@@ -28,7 +28,7 @@ export class ExperimentSetDetailPane extends React.Component {
         'selectAllFilesInitially' : false,
         'paddingWidth' : 0,
         'additionalDetailFields' : {
-            'Lab': 'lab.title',
+            'Lab': 'lab',
             'Treatments':'experiments_in_set.biosample.treatments_summary',
             'Modifications':'experiments_in_set.biosample.modifications_summary'
         }
@@ -45,6 +45,7 @@ export class ExperimentSetDetailPane extends React.Component {
         }
 
         var processedFiles = expFxn.allProcessedFilesFromExperimentSet(expSet);
+        var rawFilesCount = expFxn.fileCountFromExperimentSet(expSet, false, false);
 
         return (
             <div className="experiment-set-info-wrapper">
@@ -77,10 +78,10 @@ export class ExperimentSetDetailPane extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div style={{ overflowX : 'auto', width: this.props.containerWidth ? (this.props.containerWidth - paddingWidth) : null }}>
-                    <div>
+                <div style={{ overflowX : 'auto', width: this.props.containerWidth ? (this.props.containerWidth - paddingWidth) : null }} className="files-tables-container">
+                    <div className="raw-files-table-section">
                         <h4 className="pane-section-title">
-                            <i className="icon icon-fw icon-leaf"/> Raw files
+                            <i className="icon icon-fw icon-leaf"/> <span className="text-400">{ rawFilesCount }</span> Raw files
                         </h4>
                         <RawFilesStackedTable
                             key='experiments-table'
@@ -101,9 +102,9 @@ export class ExperimentSetDetailPane extends React.Component {
                         />
                     </div>
                     { Array.isArray(processedFiles) && processedFiles.length > 0 ?
-                    <div>
+                    <div className="processed-files-table-section">
                         <h4 className="pane-section-title">
-                            <i className="icon icon-fw icon-microchip"/> Processed Files
+                            <i className="icon icon-fw icon-microchip"/> <span className="text-400">{ processedFiles.length }</span> Processed Files
                         </h4>
                         <ProcessedFilesStackedTable
                             experimentSetAccession={expSet.accession || null}

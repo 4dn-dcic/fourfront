@@ -240,6 +240,21 @@ export default class Node extends React.Component {
         this.isSelected = this.isSelected.bind(this);
     }
 
+    componentDidMount(){
+        if (this.isNodeCurrentContext && this.props.scrollContainerWrapperElement){
+            var scrollWrapper = this.props.scrollContainerWrapperElement;
+            var scrollLeft = scrollWrapper.scrollLeft;
+            var containerWidth = scrollWrapper.offsetWidth || scrollWrapper.clientWidth;
+
+            var nodeXEnd = this.props.node.x + this.props.columnWidth + this.props.columnSpacing;
+
+            if (nodeXEnd > (containerWidth + scrollLeft)){
+                scrollWrapper.scrollLeft = (nodeXEnd - containerWidth);
+            }
+
+        }
+    }
+
     isSelected(){ return Node.isSelected(this.props.node, this.props.selectedNode); }
     isRelated() { return Node.isRelated(this.props.node, this.props.selectedNode); }
 
@@ -259,7 +274,10 @@ export default class Node extends React.Component {
         if      (typeof this.props.className === 'function') className += ' ' + this.props.className(node);
         else if (typeof this.props.className === 'string'  ) className += ' ' + this.props.className;
 
-        if ((typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext(node)) || false){
+
+        // Cache result until next render. For componentDidMount, etc.
+        this.isNodeCurrentContext = (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext(node)) || false;
+        if (this.isNodeCurrentContext){
             className += ' ' + 'current-context';
         }
 

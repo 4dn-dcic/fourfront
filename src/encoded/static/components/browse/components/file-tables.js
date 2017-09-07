@@ -428,7 +428,7 @@ export class RawFilesStackedTable extends React.Component {
         return (
             <StackedBlockTable
                 columnHeaders={columnHeaders}
-                className="expset-experiments"
+                className="expset-raw-files"
                 fadeIn
                 selectedFiles={this.props.selectedFiles}
                 selectFile={this.props.selectFile}
@@ -505,7 +505,7 @@ export class ProcessedFilesStackedTable extends React.Component {
             var experimentObj = _.find(_.pluck(filesForExperiment, 'from_experiment'), function(exp){ return exp && exp.accession && exp.accession === experimentAccession; });
 
             var nameTitle = (
-                experimentAccession === 'global' ? <div style={{ fontSize : '1.25rem', lineHeight : '16px', height: 16 }} className="text-300">Multiple</div>
+                experimentAccession === 'global' ? <div style={{ fontSize : '1.25rem', lineHeight : '16px', height: 16 }} className="text-300">Multiple Experiments</div>
                 : (experimentObj && typeof experimentObj.display_title === 'string' && experimentObj.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession
             );
             var nameLink = (experimentAccession !== 'global' && object.atIdFromObject(experimentObj)) || null;
@@ -575,7 +575,7 @@ export class ProcessedFilesStackedTable extends React.Component {
         return (
             <StackedBlockTable
                 columnHeaders={this.props.columnHeaders}
-                className="expset-experiments"
+                className="expset-processed-files"
                 fadeIn
                 selectedFiles={this.props.selectedFiles}
                 selectFile={this.props.selectFile}

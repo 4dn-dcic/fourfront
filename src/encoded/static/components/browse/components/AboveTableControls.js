@@ -251,7 +251,7 @@ class SelectedFilesFilterByContent extends React.Component {
                 return f[1];
             }),
             'file_type_detailed'
-        )
+        );
     }
 
     static renderBucketButton(fileType, title, clickHandler, files, button_text_prefix = '', fileTypeFilters){
@@ -307,7 +307,6 @@ class SelectedFilesFilterByContent extends React.Component {
         } else {
             fileTypeFilters = fileTypeFilters.slice(0, indexOfNewFilter).concat(fileTypeFilters.slice(indexOfNewFilter + 1));
         }
-        console.log(fileTypeFilters);
         this.props.setFileTypeFilters(fileTypeFilters);
     }
 

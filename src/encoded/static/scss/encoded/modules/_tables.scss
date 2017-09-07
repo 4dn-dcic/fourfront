@@ -485,6 +485,7 @@ $open-expset-table-side-border-color : #e4e4e4;
 		//border-bottom: 1px solid #ccc;
 		position: relative;
 		overflow: hidden;
+		min-height: 104px;
 
 		.addinfo-description-section,
 		.addinfo-properties-section {
@@ -536,6 +537,8 @@ $open-expset-table-side-border-color : #e4e4e4;
 		i.icon {
 			font-size: 0.875rem;
 			margin-right: 3px;
+			position: relative;
+			top: -1px;
 		}
 	}
 
@@ -1103,6 +1106,7 @@ $small-label-accession-font-size : 0.75rem;
 
 		}
 	}
+
 }
 
 /**********************/
@@ -1488,7 +1492,13 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							}
 
 							.experiment-set-info-wrapper {
-								
+
+								.files-tables-container {
+									.raw-files-table-section + .processed-files-table-section {
+										border-top: 1px solid #ccc;
+									}
+								}
+
 							}
 						}
 					}
