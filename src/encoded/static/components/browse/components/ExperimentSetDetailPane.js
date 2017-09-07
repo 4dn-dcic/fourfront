@@ -5,6 +5,7 @@ import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
+import { Collapse } from 'react-bootstrap';
 import { RawFilesStackedTable, ProcessedFilesStackedTable } from './file-tables';
 import { FlexibleDescriptionBox } from './../../item-pages/components';
 import { expFxn, layout } from './../../util';
@@ -32,6 +33,21 @@ export class ExperimentSetDetailPane extends React.Component {
             'Treatments':'experiments_in_set.biosample.treatments_summary',
             'Modifications':'experiments_in_set.biosample.modifications_summary'
         }
+    }
+
+    constructor(props){
+        super(props);
+        this.toggle = this.toggle.bind(this);
+        this.state = {
+            rawFilesOpen : false,
+            processedFilesOpen : false
+        };
+    }
+
+    toggle(property){
+        var state = {};
+        state[property] = !this.state[property];
+        this.setState(state);
     }
 
     render(){
@@ -80,42 +96,52 @@ export class ExperimentSetDetailPane extends React.Component {
                 </div>
                 <div style={{ overflowX : 'auto', width: this.props.containerWidth ? (this.props.containerWidth - paddingWidth) : null }} className="files-tables-container">
                     <div className="raw-files-table-section">
-                        <h4 className="pane-section-title">
+                        <h4 className="pane-section-title" onClick={this.toggle.bind(this, 'rawFilesOpen')}>
+                            <i className={"toggle-open-icon icon icon-fw icon-" + (this.state.rawFilesOpen ? 'minus' : 'plus')} />
                             <i className="icon icon-fw icon-leaf"/> <span className="text-400">{ rawFilesCount }</span> Raw files
                         </h4>
-                        <RawFilesStackedTable
-                            key='experiments-table'
-                            columnHeaders={[
-                                { columnClass: 'file-detail', title : 'File Type'},
-                                { columnClass: 'file-detail', title : 'File Info'}
-                            ]}
-                            experimentSetAccession={expSet.accession || null}
-                            experimentArray={expSet.experiments_in_set}
-                            replicateExpsArray={expSet.replicate_exps}
-                            experimentSetType={expSet.experimentset_type}
-                            width={this.props.containerWidth ? (Math.max(this.props.containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
-                            fadeIn={false}
-                            selectedFiles={this.props.selectedFiles}
-                            selectFile={this.props.selectFile}
-                            unselectFile={this.props.unselectFile}
-                            collapseLongLists
-                        />
+                        <Collapse in={this.state.rawFilesOpen}>
+                            <div>
+                                <RawFilesStackedTable
+                                    key='experiments-table'
+                                    columnHeaders={[
+                                        { columnClass: 'file-detail', title : 'File Type'},
+                                        { columnClass: 'file-detail', title : 'File Info'}
+                                    ]}
+                                    experimentSetAccession={expSet.accession || null}
+                                    experimentArray={expSet.experiments_in_set}
+                                    replicateExpsArray={expSet.replicate_exps}
+                                    experimentSetType={expSet.experimentset_type}
+                                    width={this.props.containerWidth ? (Math.max(this.props.containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
+                                    fadeIn={false}
+                                    selectedFiles={this.props.selectedFiles}
+                                    selectFile={this.props.selectFile}
+                                    unselectFile={this.props.unselectFile}
+                                    collapseLongLists
+                                />
+                            </div>
+                        </Collapse>
                     </div>
                     { Array.isArray(processedFiles) && processedFiles.length > 0 ?
                     <div className="processed-files-table-section">
-                        <h4 className="pane-section-title">
+                        <h4 className="pane-section-title" onClick={this.toggle.bind(this, 'processedFilesOpen')}>
+                            <i className={"toggle-open-icon icon icon-fw icon-" + (this.state.processedFilesOpen ? 'minus' : 'plus')} />
                             <i className="icon icon-fw icon-microchip"/> <span className="text-400">{ processedFiles.length }</span> Processed Files
                         </h4>
-                        <ProcessedFilesStackedTable
-                            experimentSetAccession={expSet.accession || null}
-                            files={processedFiles}
-                            width={this.props.containerWidth ? (Math.max(this.props.containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
-                            fadeIn={false}
-                            selectedFiles={this.props.selectedFiles}
-                            selectFile={this.props.selectFile}
-                            unselectFile={this.props.unselectFile}
-                            collapseLongLists
-                        />
+                        <Collapse in={this.state.processedFilesOpen}>
+                            <div>
+                                <ProcessedFilesStackedTable
+                                    experimentSetAccession={expSet.accession || null}
+                                    files={processedFiles}
+                                    width={this.props.containerWidth ? (Math.max(this.props.containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
+                                    fadeIn={false}
+                                    selectedFiles={this.props.selectedFiles}
+                                    selectFile={this.props.selectFile}
+                                    unselectFile={this.props.unselectFile}
+                                    collapseLongLists
+                                />
+                            </div>
+                        </Collapse>
                     </div>
                     : null }
                 </div>
@@ -124,3 +150,4 @@ export class ExperimentSetDetailPane extends React.Component {
     }
 
 }
+

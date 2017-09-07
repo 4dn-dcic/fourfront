@@ -533,12 +533,28 @@ $open-expset-table-side-border-color : #e4e4e4;
 
 	h4.pane-section-title {
 		font-weight: 300;
-		margin-top: 17px;
+		margin-top: 12px;
+		margin-bottom: 12px;
+		cursor: pointer;
+		
 		i.icon {
 			font-size: 0.875rem;
 			margin-right: 3px;
 			position: relative;
 			top: -1px;
+			&.toggle-open-icon {
+				cursor: pointer;
+				margin-right: 6px;
+				padding: 2px 0;
+				opacity: 0.66;
+			}
+		}
+
+		&:hover {
+			text-shadow: 0 0 0;
+			i.icon.toggle-open-icon {
+				opacity: 1;
+			}
 		}
 	}
 
