@@ -62,8 +62,6 @@ var refs = {
  * @ignore
  */
 var state = {
-    //experiments         : null,
-    //filteredExperiments : null,
     experiment_sets     : null,
     filtered_experiment_sets : null,
     fetching            : false,
