@@ -60,16 +60,16 @@ def audit_biosample_tier1_cell_lines_have_required_cell_culture_properties(value
     if len(value['biosource']) != 1:
         # special case for multi-biosource
         return
-    required = ['culture_duration', 'morphology_image']
+    required = ['culture_duration', 'morphology_image', 'culture_harvest_date']
     missing = []
     if 'cell_culture_details' not in value:
         missing.append('cell_culture_details')
     else:
         cell_cult_info = value['cell_culture_details']
-        if 'passage_number' in cell_cult_info:
-            if cell_cult_info['passage_number'] >= 10:
-                # they need karyotype image so add to required
-                required.append('karyotype_image:karyotype')
+        # if 'passage_number' in cell_cult_info:
+        #    if cell_cult_info['passage_number'] >= 10:
+        #        # they need karyotype image so add to required
+        #        required.append('karyotype')
 
         for prop in required:
             if prop not in cell_cult_info:
@@ -90,7 +90,7 @@ def audit_biosample_tier1_cell_lines_have_required_cell_culture_properties(value
                  '{}'.format(value['biosource'][0]['cell_line']) + \
                  ' linked BiosampleCellCulture is missing required {}'.format(missing)
         yield AuditFailure('missing mandatory metadata', detail,
-                           level='ERROR')
+                           level='WARNING')
     return
 
 
