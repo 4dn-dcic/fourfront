@@ -241,7 +241,11 @@ export default class Node extends React.Component {
     }
 
     componentDidMount(){
-        if (this.isNodeCurrentContext && this.props.scrollContainerWrapperElement){
+        if (
+            this.props.isCurrentContext
+            && (this.props.countInActiveContext === 1 || (this.props.countInActiveContext > 1 && this.props.lastActiveContextNode === this.props.node))
+            && this.props.scrollContainerWrapperElement
+        ){
             var scrollWrapper = this.props.scrollContainerWrapperElement;
             var scrollLeft = scrollWrapper.scrollLeft;
             var containerWidth = scrollWrapper.offsetWidth || scrollWrapper.clientWidth;
@@ -274,10 +278,7 @@ export default class Node extends React.Component {
         if      (typeof this.props.className === 'function') className += ' ' + this.props.className(node);
         else if (typeof this.props.className === 'string'  ) className += ' ' + this.props.className;
 
-
-        // Cache result until next render. For componentDidMount, etc.
-        this.isNodeCurrentContext = (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext(node)) || false;
-        if (this.isNodeCurrentContext){
+        if (this.props.isCurrentContext){
             className += ' ' + 'current-context';
         }
 

@@ -231,14 +231,11 @@ class FileDetailBody extends React.Component {
         var gridSize = layout.responsiveGridState();
         //if (gridSize === 'sm' || gridSize === 'xs') return null;
         var file = this.state.file;
-        if ((!file.href && !file.url)) return <div className="col-sm-4 col-lg-4 box">&nbsp;</div>;
+        //if ((!file.href && !file.url)) return <div className="col-sm-4 col-lg-4 box">&nbsp;</div>;
 
-        var title = file.href ? <span>Download</span> : 'File Name';
-        var disabled = !this.canDownload();
-        var content = file.href ?
-            <fileUtil.FileDownloadButton title={title} href={file.href} disabled={disabled} filename={file.filename} />
-            :
-            <span>{ file.filename || file.href }</span>;
+        var title = <span>Download</span>;
+        var disabled = (!file.href && !file.url) || !this.canDownload();
+        var content = <fileUtil.FileDownloadButton title={title} href={file.href || file.url} disabled={disabled} filename={file.filename} />;
 
         var colClassName = "col-sm-6 col-lg-4";
         if (!this.doesDescriptionOrNotesExist()){
