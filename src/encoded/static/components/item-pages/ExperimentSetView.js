@@ -7,6 +7,7 @@ import { Panel } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout } from './../util';
 import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, ProcessedFilesTableSimple } from './components';
+import { WorkflowRunTracingView, FileViewGraphSection } from './FileView';
 import { FacetList, ReduxExpSetFiltersInterface, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
 
 /**
@@ -27,7 +28,7 @@ import { FacetList, ReduxExpSetFiltersInterface, RawFilesStackedTable, Processed
  * @prop {Object} expSetFilters - Currently-set expSetFilters from Redux store. Used for FacetList.
  * @prop {Object[]} expIncompleteFacets - Facets to aggregate counts for and display in the form of objects containing at least a title and field property.
  */
-export default class ExperimentSetView extends React.Component {
+export default class ExperimentSetView extends WorkflowRunTracingView {
 
     static propTypes = {
         schemas : PropTypes.object,
@@ -50,11 +51,15 @@ export default class ExperimentSetView extends React.Component {
         this.render = this.render.bind(this);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
-        this.state = {
+        var state = {
             'selectedFiles': new Set(),
             'passExperiments' : RawFilesStackedTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term'),
             'mounted' : false
         };
+        if (!this.state) this.state = state;
+        else {
+            _.extend(this.state, state);
+        }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -66,10 +71,6 @@ export default class ExperimentSetView extends React.Component {
                 passExperiments : RawFilesStackedTable.getPassedExperiments(nextProps.context.experiments_in_set, nextProps.expSetFilters, 'single-term')
             });
         }
-    }
-
-    componentDidMount(){
-        this.setState({ 'mounted' : true });
     }
 
     getTabViewContents(){
@@ -114,6 +115,10 @@ export default class ExperimentSetView extends React.Component {
                     {...this.state}
                 />
             });
+
+            if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
+                tabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
+            }
         }
 
         return tabs.concat([

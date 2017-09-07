@@ -49,14 +49,7 @@ export function filterOutIndirectFilesFromGraphData(graphData){
 
 
 
-
-export default class FileView extends ItemBaseView {
-
-    static doesGraphExist(context){
-        return (
-            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
-        );
-    }
+export class WorkflowRunTracingView extends ItemBaseView {
 
     constructor(props){
         super(props);
@@ -109,6 +102,23 @@ export default class FileView extends ItemBaseView {
         });
     }
 
+}
+
+
+
+
+export default class FileView extends WorkflowRunTracingView {
+
+    static doesGraphExist(context){
+        return (
+            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
+        );
+    }
+
+    constructor(props){
+        super(props);
+    }
+
     getTabViewContents(){
 
         var initTabs = [];
@@ -119,31 +129,7 @@ export default class FileView extends ItemBaseView {
         var steps = this.state.steps;
 
         if (FileView.doesGraphExist(context)){
-            var iconClass = "icon icon-fw icon-";
-            var tooltip = null;
-            if (steps === null || this.state.loading){
-                iconClass += 'circle-o-notch icon-spin';
-                tooltip = "Graph is loading";
-            } else if (!Array.isArray(steps) || steps.length === 0) {
-                iconClass += 'times';
-                tooltip = "Graph currently not available for this file. Please check back later.";
-            } else {
-                iconClass += 'code-fork';
-            }
-            initTabs.push({
-                tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
-                key : 'graph',
-                disabled : !Array.isArray(steps) || steps.length === 0,
-                content : <GraphSection
-                    {...this.props}
-                    steps={steps}
-                    mounted={this.state.mounted}
-                    key={"graph-for-" + this.props.context.uuid}
-                    onToggleAllRuns={this.handleToggleAllRuns}
-                    allRuns={this.state.allRuns}
-                    loading={this.state.loading}
-                />
-            });
+            initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
         }
 
         return initTabs.concat(this.getCommonTabs());
@@ -292,7 +278,38 @@ class OverViewBody extends React.Component {
 
 
 
-class GraphSection extends React.Component {
+export class FileViewGraphSection extends React.Component {
+
+    static getTabObject(props, state, onToggleAllRuns){
+        var { loading, steps, mounted, allRuns } = state;
+        var { context } = props;
+
+        var iconClass = "icon icon-fw icon-";
+        var tooltip = null;
+        if (steps === null || loading){
+            iconClass += 'circle-o-notch icon-spin';
+            tooltip = "Graph is loading";
+        } else if (!Array.isArray(steps) || steps.length === 0) {
+            iconClass += 'times';
+            tooltip = "Graph currently not available for this file. Please check back later.";
+        } else {
+            iconClass += 'code-fork';
+        }
+        return {
+            tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
+            key : 'graph',
+            disabled : !Array.isArray(steps) || steps.length === 0,
+            content : <FileViewGraphSection
+                {...props}
+                steps={steps}
+                mounted={mounted}
+                key={"graph-for-" + context.uuid}
+                onToggleAllRuns={onToggleAllRuns}
+                allRuns={allRuns}
+                loading={loading}
+            />
+        };
+    }
 
     static isNodeDisabled(node){
         if (node.type === 'step') return false;
@@ -350,7 +367,7 @@ class GraphSection extends React.Component {
         );
         var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
         return _.extend(commonGraphPropsFromProps(this.props), {
-            'isNodeDisabled' : GraphSection.isNodeDisabled,
+            'isNodeDisabled' : FileViewGraphSection.isNodeDisabled,
             'nodes' : nodes,
             'edges' : graphData.edges,
             'columnSpacing' : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,

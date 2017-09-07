@@ -1,7 +1,13 @@
 from pyramid.response import Response
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPBadRequest
-from snovault import Item as SnowyItem
+from pyramid.httpexceptions import (
+    HTTPBadRequest,
+    HTTPNoContent
+)
+from snovault import (
+    CONNECTION,
+    Item as SnowyItem
+)
 from collections import OrderedDict
 from copy import copy
 import cgi
@@ -11,7 +17,8 @@ from urllib.parse import (
 )
 
 from .search import _ASSEMBLY_MAPPER
-from .types.file import File
+#from .types.file import File
+from .types.base import Item
 from .types.workflow import (
     trace_workflows,
     get_unique_key_from_at_id,
@@ -407,15 +414,10 @@ def batch_hub(context, request):
 
 
 # TODO: figure out how to make one of those cool /file/ACCESSION/@@download/-like URLs for this.
-@view_config(route_name='trace_workflow_runs', request_method='GET',
-             permission='view', context=File) # TODO: In future, expand to Item to accomodate Experiment, ExperimentSet.
+@view_config(route_name='trace_workflow_runs', request_method='GET', permission='view', context=Item)
 def trace_workflow_runs(context, request):
 
-    # TODO: Figure out best HTTP error response/exception to give in case of not yet indexed.
-    file_model = context.model
-
-    if not hasattr(file_model, 'source'):
-        raise HTTPBadRequest(detail="File not yet finished indexing.")
+    print('\n\n\n', context, '\n\n', dir(context), context.jsonld_type())
 
     options = copy(DEFAULT_TRACING_OPTIONS)
     if request.params.get('all_runs'):
@@ -423,13 +425,42 @@ def trace_workflow_runs(context, request):
     if request.params.get('track_performance'):
         options['track_performance'] = True
 
-    try:
-        return trace_workflows(
-            str(context.uuid),
-            request,
-            [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_inputs', []) ],
-            [ get_unique_key_from_at_id(wfr) for wfr in file_model.source.get('object', {}).get('workflow_run_outputs', []) ],
-            options
-        )
-    except WorkflowRunTracingException as e:
-        raise HTTPBadRequest(detail=e.args[0])
+    itemTypes = context.jsonld_type()
+    item_model = context.model
+
+    if not hasattr(item_model, 'source') or item_model.source.get('object') is None:
+        raise HTTPBadRequest(detail="Item not yet finished indexing.")
+
+    item_model_obj = item_model.source.get('object', {})
+
+    if 'File' in itemTypes:
+        try:
+            return trace_workflows(
+                [item_model_obj],
+                request,
+                options
+            )
+        except WorkflowRunTracingException as e:
+            raise HTTPBadRequest(detail=e.args[0])
+
+    elif 'ExperimentSet' in itemTypes:
+        processed_file_atids_to_trace = item_model_obj.get('processed_files') # @ids
+        processed_files_to_trace = []
+        for file_at_id in processed_file_atids_to_trace:
+            file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))
+            if not hasattr(file_model, 'source') or file_model.source.get('object') is None:
+                raise HTTPBadRequest(detail="At least 1 Processed File in ExperimentSet not done indexing yet.")
+            processed_files_to_trace.append( file_model.source.get('object', {}) )
+        #processed_files_to_trace.reverse()
+
+        try:
+            return trace_workflows(
+                processed_files_to_trace,
+                request,
+                options
+            )
+        except WorkflowRunTracingException as e:
+            raise HTTPBadRequest(detail=e.args[0])
+
+    else:
+        raise HTTPBadRequest(detail="This type of Item is not traceable: " + ', '.join(itemTypes))
