@@ -147,6 +147,11 @@
             "type": "string",
             "linkTo": "Workflow"
         },
+        "app_name": {
+            "title": "AppName",
+            "description": "The name of the App used by the workflow.",
+            "type": "string"
+        },
         "run_status": {
             "title": "Run Status",
             "type": "string",
