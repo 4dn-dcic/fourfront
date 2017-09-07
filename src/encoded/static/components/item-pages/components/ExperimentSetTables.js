@@ -35,7 +35,7 @@ export class ExperimentSetTables extends React.Component {
                 <ItemPageTable
                     results={experiment_sets}
                     renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
-                        'xs' : 0, 'sm' : 10, 'md' : 30, 'lg' : 47
+                        'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47
                     }} />}
                     columns={{
                         "number_of_experiments" : "Exps",

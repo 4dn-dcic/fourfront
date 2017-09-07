@@ -16,7 +16,7 @@ function getActiveTabIndex(tabs){
 
 describe('Testing ExperimentSetView', function() {
     var sinon, server, React, TestUtils;
-    var expFuncs, context, schemas, _, ExperimentSetView, testView, ExperimentsTable;
+    var expFuncs, context, schemas, _, ExperimentSetView, testView, RawFilesStackedTable;
 
     beforeAll(function() {
         React = require('react');
@@ -37,7 +37,7 @@ describe('Testing ExperimentSetView', function() {
         );
 
         ExperimentSetView = require('../item-pages/ExperimentSetView').default;
-        ExperimentsTable = require('../experiments-table').default;
+        RawFilesStackedTable = require('../browse/components').RawFilesStackedTable;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
@@ -56,14 +56,14 @@ describe('Testing ExperimentSetView', function() {
         return;
     });
     
-    it('Same first test from ExperimentsTable; test to ensure we have table.', function() {
+    it('Same first test from RawFilesStackedTable; test to ensure we have table.', function() {
         var checkIfHaveHeaders = ['Experiment', 'Biosample', 'File'].sort(); // Sort b/c indices matter
         
         // Check if built-in header definitions match headers to be checked in rendered table.
         expect(
             _.intersection(
                 _.map(
-                    ExperimentsTable.builtInHeaders(context.experimentset_type),
+                    RawFilesStackedTable.builtInHeaders(context.experimentset_type),
                     function(h){ return h.visibleTitle || h.title; }
                 ).sort(),
                 checkIfHaveHeaders
@@ -72,7 +72,7 @@ describe('Testing ExperimentSetView', function() {
 
         // Then ensure they're rendered.
         var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testView, 'expset-headers');
-        var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'heading-block');
+        var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
         expect(
             _.intersection(
                 _.pluck(headers, 'innerHTML').sort(),

@@ -165,7 +165,7 @@
             "type": "string",
             "enum": [
                 "SBG",
-                "Tibanna"
+                "AWSEM"
             ]
         },
         "run_url": {

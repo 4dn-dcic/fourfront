@@ -34,7 +34,9 @@ export class TabbedView extends React.Component {
     }
 
     render(){
-        if (!Array.isArray(this.props.contents)) {
+        var contents = this.props.contents;
+        if (typeof contents === 'function') contents = contents();
+        if (!Array.isArray(contents)) {
             return null;
         }
         var tabsProps = {
@@ -49,14 +51,14 @@ export class TabbedView extends React.Component {
             'destroyInactiveTabPane': this.props.destroyInactiveTabPane
         };
         if (this.props.activeKey) tabsProps.activeKey = this.props.activeKey;
-        var defaultActiveTab = _.findWhere(this.props.contents, { 'isDefault' : true });
+        var defaultActiveTab = _.findWhere(contents, { 'isDefault' : true });
         if (typeof defaultActiveTab !== 'undefined' && typeof defaultActiveTab.key !== 'undefined'){
             tabsProps.defaultActiveKey = defaultActiveTab.key;
         }
         return (
             <Tabs {...tabsProps} >
                 {
-                    this.props.contents.map(function(t){
+                    contents.map(function(t){
                         return (
                             <Tabs.TabPane
                                 key={t.key || t.tab || t.title}

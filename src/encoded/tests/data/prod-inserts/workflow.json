@@ -264,6 +264,8 @@
             "step_name": "hictool_hdf52matrix"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "alignment + filtering + matrix generation",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "description": "GITAR Hi-C data processing pipeline"
@@ -275,11 +277,11 @@
     "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
-    "cwl_main_filename" : "fastqc-0-11-4-1.9.cwl",
-    "cwl_child_filenames" : ["fastqc-0-11-4.6.cwl"],
+    "cwl_main_filename" : "fastqc-0-11-4-1.cwl",
+    "cwl_child_filenames" : ["fastqc-0-11-4.cwl"],
     "app_name" : "fastqc-0-11-4-1",
-    "app_version" : "8",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
+    "app_version" : "0.0.4",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
     "arguments": [
         {
             "argument_mapping": [
@@ -342,6 +344,8 @@
     "workflow_type": "Data QC",
     "workflow_diagram": "",
     "description": "FastQC quality control step for fastq files",
+    "data_types": ["Hi-C","Capture Hi-C", "Repli-seq"],
+    "category": "QC",
     "workflow_steps": [
         {
             "step": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3",
@@ -358,6 +362,8 @@
     "name": "validate",
     "workflow_type": "Data QC",
     "workflow_diagram": "",
+    "data_types": ["Hi-C","Capture Hi-C", "Repli-seq"],
+    "category": "QC",
     "arguments": [
         {
             "workflow_argument_name": "input_file",
@@ -402,10 +408,12 @@
     "name": "md5",
     "workflow_type": "Data QC",
     "workflow_diagram": "",
+    "data_types": ["Hi-C","Capture Hi-C", "Repli-seq"],
+    "category": "QC",
     "app_name": "md5",
-    "app_version": "5",
-    "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
-    "cwl_main_filename": "md5.5.cwl",
+    "app_version": "0.0.4",
+    "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
+    "cwl_main_filename": "md5.cwl",
     "cwl_child_filenames": [],
     "arguments": [
         {
@@ -589,6 +597,8 @@
             ]
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "alignment + format conversion",
     "description": "Creating a bam and pairs files from a pair of fastq files"
 },
 {
@@ -738,6 +748,8 @@
             ]
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "alignment + format conversion",
     "description": "Creating a bam and pairs files from a pair of fastq files"
 },
 {
@@ -965,7 +977,9 @@
             "step":"0786554a-49e5-4c33-afab-9ec90d65faf3"
         }
     ],
-    "award": "1U01CA200059-01"
+    "award": "1U01CA200059-01",
+    "data_type": ["Hi-C"],
+    "category": "merging + matrix generation"
 },
 {
     "title": "Hi-C processing part B revision 6",
@@ -1044,6 +1058,8 @@
             "step_name": "merge_pairs"
         }
     ],
+    "data_type": ["Hi-C"],
+    "category": "merging + matrix generation",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "description": "Hi-C processing part B revision 6",
@@ -1069,6 +1085,8 @@
             "step_name": "juicer2pairs"
         }
     ],
+    "data_type": ["Hi-C"],
+    "category": "alignment + filtering",
     "workflow_type": "Hi-C data analysis",
     "name": "hi-c-processing-parta-juicer/5",
     "uuid": "a9caf6f3-49e5-4c33-afab-9ec90d65faf3",
@@ -1350,7 +1368,9 @@
                 }
             ]
         }
-    ]
+    ],
+    "data_types": ["Hi-C"],
+    "category": "alignment + filtering"
 },
 {
     "title":"Hi-C processing part B revision 24",
@@ -1535,6 +1555,8 @@
             "step_name": "cooler"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "merging + matrix generation",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "accession": "4DNWFSOZLMMB",
@@ -1546,12 +1568,12 @@
     "description":"Hi-C processing part B revision 44",
     "workflow_diagram":"",
     "lab": "4dn-dcic-lab",
-    "cwl_pointer":"https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.44.cwl",
-    "cwl_main_filename" : "hi-c-processing-partb.44.cwl",
-    "cwl_child_filenames" : ["merge-pairs.30.cwl","pairs2hic.18.cwl","cooler.24.cwl"],
+    "cwl_pointer":"https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_sbg/hi-c-processing-partb.44.cwl",
+    "cwl_main_filename" : "hi-c-processing-partb.cwl",
+    "cwl_child_filenames" : ["merge-pairs.cwl","pairs2hic.cwl","cooler.cwl"],
     "app_name" : "hi-c-processing-partb",
-    "app_version" : "44",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_awsem/",
+    "app_version" : "0.0.4",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
     "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
     "arguments":[
         {
@@ -1691,6 +1713,8 @@
             "step_name": "cooler"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "merging + matrix generation",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "accession": "4DNWFP00U73B",
@@ -1753,6 +1777,8 @@
             "step":"11775554-5f85-4d0c-93e4-fa9d7f20d47a"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "format_integration",
     "description": "add-hic-normvector-to-mcool"
 },
 {
@@ -1809,6 +1835,8 @@
             "step":"53e7b46f-1d3b-4a16-812f-c79456614bda"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "data extraction",
     "description": "extract-mcool-normvector-for-juicebox"
 },
 {
@@ -1876,6 +1904,8 @@
             "step":"12ad1dbe-cc44-4968-8a21-d1e5a12d3222"
         }
     ],
+    "data_types": ["Hi-C"],
+    "category": "normalization",
     "description": "addnormtohic"
 },
 {
@@ -1991,6 +2021,8 @@
     "description": "Hi-C processing partC Revision 6",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
-    "accession": "4DNWF06BPEF2"
+    "accession": "4DNWF06BPEF2",
+    "data_types": ["Hi-C"],
+    "category": "aggregation"
 }
 ]

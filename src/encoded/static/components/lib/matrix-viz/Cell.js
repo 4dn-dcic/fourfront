@@ -35,7 +35,7 @@ class Cell extends Component {
 	}
 	
 	render() {
-		var {data, style, className} = this.props;
+		var {data, style, className, tooltipDataFor} = this.props;
 		var divProps = {
 			'className' 	: className,
 			'style' 		: style,
@@ -51,6 +51,13 @@ class Cell extends Component {
 		if (typeof data.tooltip !== 'undefined'){
 			divProps['data-tip'] = data.tooltip;
 			divProps['data-html'] = true;
+			divProps['data-event-off'] = 'click';
+			if (typeof tooltipDataFor === 'string'){
+				divProps['data-for'] = tooltipDataFor;
+			}
+			if (typeof data.hasLinks === 'boolean' && data.hasLinks){
+				divProps['data-class'] = "has-links-or-buttons";
+			}
 		}
 		if (typeof data.content !== 'undefined'){
 			divProps.children = data.content;
