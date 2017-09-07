@@ -301,7 +301,7 @@ export class UIControlsWrapper extends React.Component {
 
     render(){
 
-        if (!this.props.experiments) return null;
+        if (!this.props.experiment_sets) return null;
         
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
@@ -358,9 +358,9 @@ export class UIControlsWrapper extends React.Component {
                         { this.renderGroupByFieldDropdown(contextualView) }
                         <div className="legend-container" style={{ height : legendContainerHeight }}>
                             <AggregatedLegend
-                                experiments={this.props.experiments}
+                                experiment_sets={this.props.experiment_sets}
+                                filtered_experiment_sets={this.props.filtered_experiment_sets}
                                 height={legendContainerHeight}
-                                filteredExperiments={this.props.filteredExperiments}
                                 fields={this.state.fields}
                                 showType={this.state.showState}
                                 aggregateType={this.state.aggregateType}
@@ -462,10 +462,9 @@ class AggregatedLegend extends React.Component {
     render(){
 
         var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
-            (!this.props.experiments || !this.props.fields[1] ? null :
+            (!this.props.experiment_sets || !this.props.fields[1] ? null :
                 Legend.aggregegateBarPlotData(
-                    this.props.showType === 'filtered' ? (this.props.filteredExperiments || this.props.experiments) :
-                        this.props.experiments,
+                    expFxn.listAllExperimentsFromExperimentSets( this.props.showType === 'filtered' ? (this.props.filtered_experiment_sets || this.props.experiment_sets) : this.props.experiment_sets),
                     [this.props.fields[1]]
                 )
             ),

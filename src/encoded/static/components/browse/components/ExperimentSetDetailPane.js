@@ -5,7 +5,7 @@ import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { RawFilesStackedTable } from './file-tables';
+import { RawFilesStackedTable, ProcessedFilesStackedTable } from './file-tables';
 import { FlexibleDescriptionBox } from './../../item-pages/components';
 import { expFxn, layout } from './../../util';
 import { defaultColumnBlockRenderFxn, sanitizeOutputValue } from './table-commons';
@@ -44,6 +44,8 @@ export class ExperimentSetDetailPane extends React.Component {
             paddingWidth = this.props.paddingWidthMap[rgs] || paddingWidth;
         }
 
+        var processedFiles = expFxn.allProcessedFilesFromExperimentSet(expSet);
+
         return (
             <div className="experiment-set-info-wrapper">
                 <div className="expset-addinfo">
@@ -76,23 +78,45 @@ export class ExperimentSetDetailPane extends React.Component {
                     </div>
                 </div>
                 <div style={{ overflowX : 'auto', width: this.props.containerWidth ? (this.props.containerWidth - paddingWidth) : null }}>
-                <RawFilesStackedTable
-                    key='experiments-table'
-                    columnHeaders={[
-                        { columnClass: 'file-detail', title : 'File Type'},
-                        { columnClass: 'file-detail', title : 'File Info'}
-                    ]}
-                    experimentSetAccession={expSet.accession || null}
-                    experimentArray={expSet.experiments_in_set}
-                    replicateExpsArray={expSet.replicate_exps}
-                    experimentSetType={expSet.experimentset_type}
-                    width={this.props.containerWidth ? (Math.max(this.props.containerWidth - paddingWidth, 500) /* account for padding of pane */) : null}
-                    fadeIn={false}
-                    selectedFiles={this.props.selectedFiles}
-                    selectFile={this.props.selectFile}
-                    unselectFile={this.props.unselectFile}
-                    collapseLongLists
-                />
+                    <div>
+                        <h4 className="pane-section-title">
+                            <i className="icon icon-fw icon-leaf"/> Raw files
+                        </h4>
+                        <RawFilesStackedTable
+                            key='experiments-table'
+                            columnHeaders={[
+                                { columnClass: 'file-detail', title : 'File Type'},
+                                { columnClass: 'file-detail', title : 'File Info'}
+                            ]}
+                            experimentSetAccession={expSet.accession || null}
+                            experimentArray={expSet.experiments_in_set}
+                            replicateExpsArray={expSet.replicate_exps}
+                            experimentSetType={expSet.experimentset_type}
+                            width={this.props.containerWidth ? (Math.max(this.props.containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
+                            fadeIn={false}
+                            selectedFiles={this.props.selectedFiles}
+                            selectFile={this.props.selectFile}
+                            unselectFile={this.props.unselectFile}
+                            collapseLongLists
+                        />
+                    </div>
+                    { Array.isArray(processedFiles) && processedFiles.length > 0 ?
+                    <div>
+                        <h4 className="pane-section-title">
+                            <i className="icon icon-fw icon-microchip"/> Processed Files
+                        </h4>
+                        <ProcessedFilesStackedTable
+                            experimentSetAccession={expSet.accession || null}
+                            files={processedFiles}
+                            width={this.props.containerWidth ? (Math.max(this.props.containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
+                            fadeIn={false}
+                            selectedFiles={this.props.selectedFiles}
+                            selectFile={this.props.selectFile}
+                            unselectFile={this.props.unselectFile}
+                            collapseLongLists
+                        />
+                    </div>
+                    : null }
                 </div>
             </div>
         );

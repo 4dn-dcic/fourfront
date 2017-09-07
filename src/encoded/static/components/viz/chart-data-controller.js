@@ -36,6 +36,10 @@ var refs = {
         'experiments_in_set.files.accession',
         'experiments_in_set.files.file_type_detailed',
         'experiments_in_set.filesets.files_in_set.accession',
+        'experiments_in_set.processed_files.accession',
+        'processed_files.accession',
+        'experiments_in_set.processed_files.file_type_detailed',
+        'processed_files.file_type_detailed',
         //'experiments_in_set.biosample.description',
         //'experiments_in_set.biosample.modifications_summary_short',
         'experiments_in_set.biosample.biosource_summary', // AKA Biosource
@@ -51,15 +55,17 @@ var refs = {
 
 /**
  * Contains "state" of ChartDataController. Some of these are deprecated and will be removed.
- * The most important ones are experiments and filteredExperiments.
+ * The most important ones are experiment_sets and filtered_experiment_sets.
  * 
  * @type {Object}
  * @private
  * @ignore
  */
 var state = {
-    experiments         : null,
-    filteredExperiments : null,
+    //experiments         : null,
+    //filteredExperiments : null,
+    experiment_sets     : null,
+    filtered_experiment_sets : null,
     fetching            : false,
 
     chartFieldsHierarchy: [
@@ -231,7 +237,7 @@ var isWindowActive = false;
 
 /**
  * Use this React component to wrap individual charts and provide them with source of experiments data via
- * their props.experiments and props.filteredExperiments. Also provides props.expSetFilters from redux store.
+ * their props.experiment_sets and props.filtered_experiment_sets. Also provides props.expSetFilters from redux store.
  * 
  * @class Provider
  * @type {Component}
@@ -286,7 +292,7 @@ class Provider extends React.Component {
     }
 
     /**
-     * Sets 'experiments' and 'filteredExperiments' props on props.children.
+     * Sets 'experiment_sets' and 'filtered_experiment_sets' props on props.children.
      * 
      * @returns {JSX.Element} Cloned & adjusted props.children.
      * @memberof module:viz/chart-data-controller.Provider
@@ -295,10 +301,10 @@ class Provider extends React.Component {
      */
     render(){
         var childChartProps = _.extend({}, this.props.children.props);
-        childChartProps.experiments = state.experiments;
-        childChartProps.filteredExperiments = state.filteredExperiments;
+
+        childChartProps.experiment_sets = state.experiment_sets;
+        childChartProps.filtered_experiment_sets = state.filtered_experiment_sets;
         childChartProps.expSetFilters = refs.expSetFilters;
-        
 
         return React.cloneElement(this.props.children, childChartProps);
     }
@@ -384,7 +390,7 @@ export const ChartDataController = {
 
             resyncInterval = setInterval(function(){
                 if (!isWindowActive) return;
-                console.info('Resyncing experiments & filteredExperiments for ChartDataController.');
+                console.info('Resyncing experiment_sets & filtered_experiment_sets for ChartDataController.');
                 ChartDataController.sync(null, { 'fromInterval' : true, 'fromSync' : true });
             }, resync);
 
@@ -436,7 +442,7 @@ export const ChartDataController = {
      * @public
      * @static
      * @param {string} uniqueID - ID given alongside initially-registered callback.
-     * @returns {undefined}
+     * @returns {void}
      */
     unregisterUpdateCallback : function(uniqueID){
         if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
@@ -495,17 +501,17 @@ export const ChartDataController = {
      */
     setState : function(updatedState = {}, callback = null, opts = {}){
 
-        var allExpsChanged = ChartDataController.checkIfExperimentArraysDiffer(updatedState.experiments, state.experiments);
-        var allOrFilteredExpsChanged = allExpsChanged || ChartDataController.checkIfExperimentArraysDiffer(updatedState.filteredExperiments, state.filteredExperiments);
+        var allChanged = ChartDataController.checkIfExperimentArraysDiffer(updatedState.experiment_sets, state.experiment_sets);
+        var allOrFilteredChanged = allChanged || ChartDataController.checkIfExperimentArraysDiffer(updatedState.filtered_experiment_sets, state.filtered_experiment_sets);
 
         _.extend(state, updatedState);
 
-        if (allOrFilteredExpsChanged){
+        if (allOrFilteredChanged){
             ChartDataController.updateStats();
             notifyUpdateCallbacks();
         }
 
-        if (allExpsChanged && isInitialLoadComplete && opts.fromInterval){
+        if (allChanged && isInitialLoadComplete && opts.fromInterval){
             // Update browse page results or w/e.
             reFetchContext();
         }
@@ -527,7 +533,7 @@ export const ChartDataController = {
         if (!isInitialized) throw Error("Not initialized.");
         lastTimeSyncCalled = Date.now();
         if (!syncOpts.fromSync) syncOpts.fromSync = true;
-        ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback, syncOpts);
+        ChartDataController.fetchUnfilteredAndFilteredExperimentSets(null, callback, syncOpts);
     },
 
     /**
@@ -541,10 +547,10 @@ export const ChartDataController = {
      * @returns {void} Nothing
      */
     handleUpdatedFilters : function(expSetFilters, callback){
-        if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiments)){
-            ChartDataController.setState({ filteredExperiments : null }, callback);
+        if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiment_sets)){
+            ChartDataController.setState({ filtered_experiment_sets : null }, callback);
         } else {
-            ChartDataController.fetchAndSetFilteredExperiments(callback);
+            ChartDataController.fetchAndSetFilteredExperimentSets(callback);
         }
     },
 
@@ -591,7 +597,7 @@ export const ChartDataController = {
 
         var current, total;
 
-        function getCounts(exps){
+        function getCountsFromExps(exps){
             var expSets = _.reduce(exps, function(m,exp){
                 if (exp.experiment_sets) return new Set([...m, ..._.pluck(exp.experiment_sets, 'accession')]);
                 return m;
@@ -603,6 +609,14 @@ export const ChartDataController = {
             };
         }
 
+        function getCountsFromExpSets(expSets){
+            return {
+                'experiment_sets' : expSets.length,
+                'experiments' : _.reduce(expSets, function(m,v){ return m + (v.experiments_in_set || []).length; }, 0),
+                'files' : _.reduce(expSets, function(m,v){ return (expFxn.allFilesFromExperimentSet(v, true) || []).length + m; }, 0)
+            };
+        }
+
         function genNullCounts(){
             return {
                 'experiment_sets' : null,
@@ -611,14 +625,14 @@ export const ChartDataController = {
             };
         }
 
-        if (state.filteredExperiments !== null){
-            current = getCounts(state.filteredExperiments);
+        if (state.filtered_experiment_sets !== null){
+            current = getCountsFromExpSets(state.filtered_experiment_sets);
         } else {
             current = genNullCounts();
         }
 
-        if (state.experiments !== null){
-            total = getCounts(state.experiments);
+        if (state.experiment_sets !== null){
+            total = getCountsFromExpSets(state.experiment_sets);
         } else {
             total = genNullCounts();
         }
@@ -637,7 +651,7 @@ export const ChartDataController = {
      * @param {function} [callback] - Optional callback function to call after setting updated state.
      * @returns {void} Nothing
      */
-    fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null, opts = {}){
+    fetchUnfilteredAndFilteredExperimentSets : function(reduxStoreState = null, callback = null, opts = {}){
         if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
             reduxStoreState = refs.store.getState();
         }
@@ -648,13 +662,13 @@ export const ChartDataController = {
         }
 
         var filtersSet = _.keys(reduxStoreState.expSetFilters).length > 0;
-        var experiments = null,
-            filteredExperiments = null;
+        var experiment_sets = null,
+            filtered_experiment_sets = null;
 
         var cb = _.after(filtersSet ? 2 : 1, function(){
             ChartDataController.setState({
-                'experiments' : experiments,
-                'filteredExperiments' : filteredExperiments
+                'experiment_sets' : experiment_sets,
+                'filtered_experiment_sets' : filtered_experiment_sets
             }, callback, opts);
 
         });
@@ -669,7 +683,7 @@ export const ChartDataController = {
         ajax.load(
             allExpsHref,
             function(allExpsContext){
-                experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
+                experiment_sets = allExpsContext['@graph'];
                 cb();
             }, 'GET', function(errResp){
                 opts.error = true;
@@ -678,7 +692,7 @@ export const ChartDataController = {
                 // Reload/navigation will also receive 403 and then trigger JWT unset, logged out alert, & refresh.
                 if (errResp && typeof errResp === 'object'){
                     if (typeof errResp.total === 'number' && errResp.total > 0){
-                        experiments = expFxn.listAllExperimentsFromExperimentSets(errResp['@graph']);
+                        experiment_sets = errResp['@graph'];
                     }
                     //if (errResp.code === 403 || errResp.total === 0){
                     //    console.warn('403 or 404 Error, refetching.');
@@ -694,7 +708,7 @@ export const ChartDataController = {
             ajax.load(
                 filteredExpsHref,
                 function(filteredContext){
-                    filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
+                    filtered_experiment_sets = filteredContext['@graph'];
                     cb();
                 }, 'GET', function(){
                     cb();
@@ -705,7 +719,7 @@ export const ChartDataController = {
     },
 
     /**
-     * Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get all experiments.
+     * Like ChartDataController.fetchUnfilteredAndFilteredExperimentSets(), but only to get all experiments.
      * Not actually used, but could be, for something.
      * 
      * @memberof module:viz/chart-data-controller
@@ -714,20 +728,20 @@ export const ChartDataController = {
      * @param {function} [callback] - Optional callback function.
      * @returns {void} Nothing
      */
-    fetchAndSetUnfilteredExperiments : function(callback = null, opts = {}){
+    fetchAndSetUnfilteredExperimentSets : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
         ajax.load(
             refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(allExpsContext){
                 ChartDataController.setState({
-                    'experiments' : expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph'])
+                    'experiment_sets' : allExpsContext['@graph']
                 }, callback, opts);
             }
         );
     },
 
     /**
-     * Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get filtered/selected experiments according to expSetFilters from Redux store.
+     * Like ChartDataController.fetchUnfilteredAndFilteredExperimentSets(), but only to get filtered/selected experiments according to expSetFilters from Redux store.
      * 
      * @memberof module:viz/chart-data-controller
      * @private
@@ -735,13 +749,13 @@ export const ChartDataController = {
      * @param {function} [callback] - Optional callback function.
      * @returns {void} Nothing
      */
-    fetchAndSetFilteredExperiments : function(callback = null, opts = {}){
+    fetchAndSetFilteredExperimentSets : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
         ajax.load(
             ChartDataController.getFilteredContextHref() + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(filteredContext){
                 ChartDataController.setState({
-                    'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
+                    'filtered_experiment_sets' : filteredContext['@graph']
                 }, callback, opts);
             },
             'GET',

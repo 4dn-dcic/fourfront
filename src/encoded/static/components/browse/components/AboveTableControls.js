@@ -143,7 +143,7 @@ class SelectedFilesDownloadButton extends React.Component {
 
         return (
             <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "secondary" : "primary"}>
-                <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
+                <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> Selected Files</span>
                 { this.renderModal(countSelectedFiles) }
             </Button>
         );
@@ -177,12 +177,26 @@ class SelectAllFilesButton extends React.Component {
         if (typeof this.props.selectFile !== 'function'){
             throw new Error("No 'selectFiles' function prop passed to SelectedFilesController.");
         }
-        var funcToUse = isAllSelected ? this.props.selectFile : this.props.unselectFile;
+
+        var allFiles = this.props.allFiles.slice(0);
+        // Some processed files may not have a 'from_experiment' property (redundant check temp), so we put in a dummy one to be able to generate a unique selector.
+        allFiles = _.map(allFiles, function(file){
+            if (typeof file.from_experiment === 'undefined'){
+                return _.extend({}, file, {
+                    'from_experiment' : {
+                        'accession' : "NONE",
+                        'from_experiment_set' : file.from_experiment_set
+                    }
+                });
+            }
+            return file;
+        });
+
         this.setState({ 'selecting' : true }, () => vizUtil.requestAnimationFrame(()=>{
             if (!isAllSelected){
-                this.props.selectFile(_.zip(expFxn.filesToAccessionTriples(this.props.allFiles, true), this.props.allFiles));
+                this.props.selectFile(_.zip(expFxn.filesToAccessionTriples(allFiles, true), allFiles));
             } else {
-                this.props.unselectFile(expFxn.filesToAccessionTriples(this.props.allFiles, true));
+                this.props.unselectFile(expFxn.filesToAccessionTriples(allFiles, true));
             }
             
             this.setState({ 'selecting' : false });
@@ -223,7 +237,6 @@ class SelectedFilesFilterByContent extends React.Component {
 
             if (typeof fileTypeDetail === 'undefined' || fileTypeDetail === 'other' || fileTypeDetail === 'undefined'){
                 title = "Other";
-                console.log(fileTypeDetail, files);
             } else {
                 title = Schemas.Term.toName('files.file_type_detailed', fileTypeDetail);
             }
@@ -355,11 +368,12 @@ class SelectedFilesControls extends React.Component {
     }    
 
     render(){
-        var exps = this.props.filteredExperiments || this.props.experiments;
-        var totalFilesCount = exps ? expFxn.fileCountFromExperiments(exps, this.props.includeFileSets) : 0;
+        //var exps = this.props.filteredExperiments || this.props.experiments;
+        var exp_sets = this.props.filtered_experiment_sets || this.props.experiment_sets;
+        var totalFilesCount = exp_sets ? _.reduce(exp_sets, (m,v) => expFxn.fileCountFromExperimentSet(v, this.props.includeProcessedFiles, this.props.includeFileSets) + m, 0) : 0;
         var allFiles = [];
-        if (exps){
-            allFiles =  expFxn.allFilesFromExperiments(exps, this.props.includeFileSets);
+        if (exp_sets){
+            allFiles = _.reduce(exp_sets, (m,v) => m.concat(expFxn.allFilesFromExperimentSet(v, this.props.includeProcessedFiles)), []);
         }
 
         // TODO:
@@ -406,7 +420,8 @@ export class AboveTableControls extends React.Component {
 
     static defaultProps = {
         'showSelectedFileCount' : false,
-        'showTotalResults' : false
+        'showTotalResults' : false,
+        'includeProcessedFiles' : true
     }
 
     constructor(props){
@@ -589,6 +604,8 @@ export class AboveTableControls extends React.Component {
                             currentFileTypeFilters={this.state.fileTypeFilters}
                             setFileTypeFilters={this.setFileTypeFilters}
                             closeButtonClickHandler={this.handleOpenToggle.bind(this, false)}
+                            includeFileSets={this.props.includeFileSets}
+                            includeProcessedFiles={this.props.includeProcessedFiles}
                         />
                     </div>
                 </Collapse>
@@ -610,6 +627,8 @@ export class AboveTableControls extends React.Component {
                         currentFileTypeFilters={this.state.fileTypeFilters}
                         setFileTypeFilters={this.setFileTypeFilters}
                         currentOpenPanel={this.state.open}
+                        includeFileSets={this.props.includeFileSets}
+                        includeProcessedFiles={this.props.includeProcessedFiles}
                     />
                 </ChartDataController.Provider>
             );

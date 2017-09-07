@@ -745,12 +745,12 @@ var MosaicChart = createReactClass({
         return !!(
             nextProps.doManualTransitions && (
                 (
-                    nextProps.experiments &&
-                    nextProps.experiments !== pastProps.experiments &&
-                    !_.isEqual(nextProps.experiments, pastProps.experiments)
+                    nextProps.experiment_sets &&
+                    nextProps.experiment_sets !== pastProps.experiment_sets &&
+                    !_.isEqual(nextProps.experiment_sets, pastProps.experiment_sets)
                 ) || (
-                    nextProps.filteredExperiments !== pastProps.filteredExperiments &&
-                    !_.isEqual(nextProps.filteredExperiments, pastProps.filteredExperiments)
+                    nextProps.filtered_experiment_sets !== pastProps.filtered_experiment_sets &&
+                    !_.isEqual(nextProps.filtered_experiment_sets, pastProps.filtered_experiment_sets)
                 )
             )
         );
@@ -921,8 +921,8 @@ var MosaicChart = createReactClass({
 
         this.root = MosaicChart.sortAndSizeTreeDataD3(
             MosaicChart.transformDataForChart(
-                this.props.experiments,
-                this.props.filteredExperiments,
+                expFxn.listAllExperimentsFromExperimentSets(this.props.experiment_sets),
+                this.props.filtered_experiment_sets ? expFxn.listAllExperimentsFromExperimentSets(this.props.filtered_experiment_sets) : null,
                 this.props.fields,
                 this.props.maxFieldDepthIndex
             )
@@ -1212,7 +1212,7 @@ var MosaicChart = createReactClass({
             <div
                 className={
                     "chart-container chart-container-sunburst" + 
-                    (this.props.experiments === null && !this.props.fallbackToSampleData ? ' no-data' : '') +
+                    (this.props.experiment_sets === null && !this.props.fallbackToSampleData ? ' no-data' : '') +
                     (this.props.fetching ? ' fetching' : '')
                 }
                 id={this.props.id}

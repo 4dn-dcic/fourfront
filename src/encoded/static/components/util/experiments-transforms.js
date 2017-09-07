@@ -28,10 +28,24 @@ export function listEmptyExperiments(experiments){
  * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {number} - Count of files from all experiments.
  */
-export function fileCountFromExperiments(experiments, includeFileSets = false){
-    return _.reduce(experiments.map(function(exp, i){ return fileCount(exp, includeFileSets); }), function(r,expFileCount,i){
+export function fileCountFromExperiments(experiments, includeProcessedFiles = false, includeFileSets = false){
+    return _.reduce(_.map(experiments, function(exp, i){
+        return fileCount(exp, includeProcessedFiles, includeFileSets);
+    }), function(r,expFileCount,i){
         return r + expFileCount;
     }, 0);
+}
+
+/**
+ * @param   {Object} experiment_set - ExpSet Item context
+ * @returns {number} - Count of files from all experiments.
+ */
+export function fileCountFromExperimentSet(experiment_set, includeProcessedFiles = false, includeFileSets = false){
+    var initialCountFromSet = 0;
+    if (includeProcessedFiles){
+        initialCountFromSet += ensureArray(experiment_set.processed_files).length;
+    }
+    return initialCountFromSet + fileCountFromExperiments(ensureArray(experiment_set.experiments_in_set), includeProcessedFiles, includeFileSets);
 }
 
 
@@ -59,10 +73,10 @@ export function listAllUnpairedFiles(experiments, includeFileSets = false){
  * @param {Object[]} List of experiments with at least a 'files' property.
  * @returns {Object[]} List of all files gathered from experiments list.
  */
-export function allFilesFromExperiments(experiments, includeFileSets = false, uniqify = false){
+export function allFilesFromExperiments(experiments, includeProcessedFiles = false, includeFileSets = false, uniqify = false){
     var files = _.sortBy(
         _.flatten(
-            _.map(ensureArray(experiments), function(exp){ return allFilesFromExperiment(exp, includeFileSets); }),
+            _.map(ensureArray(experiments), function(exp){ return allFilesFromExperiment(exp, includeProcessedFiles, includeFileSets); }),
             true
         ),
         'accession'
@@ -75,13 +89,17 @@ export function allFilesFromExperiments(experiments, includeFileSets = false, un
 }
 
 export function fileToAccessionTriple(file, toString = false){
-    if (typeof file.from_experiment === 'undefined') throw new Error("No 'from_experiment' property set on this file.");
-    if (typeof file.from_experiment.accession !== 'string') throw new Error("No 'from_experiment.accession' property set on this file.");
-    if (typeof file.from_experiment.from_experiment_set === 'undefined') throw new Error("No 'from_experiment.from_experiment_set' property set on this file.");
-    if (typeof file.from_experiment.from_experiment_set.accession !== 'string') throw new Error("No 'from_experiment.from_experiment_set.accession' property set on this file.");
     if (typeof file.accession !== 'string') throw new Error("No 'accession' property set on this file.");
+    if (typeof file.from_experiment === 'undefined') throw new Error("No 'from_experiment' property set on this file. " + (file.accession));
+    if (typeof file.from_experiment.accession !== 'string') throw new Error("No 'from_experiment.accession' property set on this file. " + (file.accession));
+    if (typeof file.from_experiment.from_experiment_set === 'undefined') throw new Error("No 'from_experiment.from_experiment_set' property set on this file. " + (file.accession));
+    if (typeof file.from_experiment.from_experiment_set.accession !== 'string') throw new Error("No 'from_experiment.from_experiment_set.accession' property set on this file. " + (file.accession));
 
-    var triple = [ file.from_experiment.from_experiment_set.accession, file.from_experiment.accession, file.accession ];
+    var triple = [
+        file.from_experiment.from_experiment_set.accession,
+        file.from_experiment.accession,
+        file.accession
+    ];
 
     if (toString === true){
         return triple.join('~');
@@ -238,6 +256,112 @@ export function experimentSetsFromFile(file){
 }
 
 
+
+/**** **** **** **** **** **** **** **** ****
+ **** Processed Files -related Functions ****
+ **** **** **** **** **** **** **** **** ****/
+
+
+export function allProcessedFilesFromExperiments(experiments){
+    return _.reduce(experiments || [], function(m, exp){
+        var processed_files_for_exp = _.map(exp.processed_files || [], function(pF){
+            pF = _.clone(pF);
+            pF.from_experiment = exp;
+            return pF;
+        });
+
+        //m[exp.accession] = exp.processed_files || [];
+        return m.concat(processed_files_for_exp);
+    }, []);
+}
+
+export function allProcessedFilesFromExperimentSet(experiment_set){
+
+    // Add in Exp Bio & Tec Rep Nos, if available.
+    if (Array.isArray(experiment_set.replicate_exps) && Array.isArray(experiment_set.experiments_in_set)){
+        experiment_set = _.extend({}, experiment_set, {
+            'experiments_in_set' : combineWithReplicateNumbers(experiment_set.replicate_exps, experiment_set.experiments_in_set)
+        });
+    }
+
+    return _.map(experiment_set.processed_files || [], function(pF){
+        pF = _.clone(pF);
+        pF.from_experiment_set = experiment_set;
+        if (typeof pF.from_experiment === 'undefined') {
+            pF.from_experiment = {
+                // Extend w/ dummy experiment to make accession triples with (these will have NONE in place of (middle) exp accession).
+                'accession' : "NONE",
+                'from_experiment_set' : pF.from_experiment_set
+            };
+        }
+        return pF;
+    }).concat(
+        allProcessedFilesFromExperiments(
+            _.map(ensureArray(experiment_set.experiments_in_set), function(exp){
+                if (typeof exp.from_experiment_set === 'undefined'){
+                    return _.extend({}, exp, { 'from_experiment_set' : experiment_set });
+                }
+                return exp;
+            })
+        )
+    );
+}
+
+export function processedFilesFromExperimentSetToGroup(processed_files, combined = false){
+
+    var byES = {};
+    var byE  = {};
+    _.forEach(processed_files, function(pF){
+        if (typeof pF.from_experiment !== 'undefined' && typeof pF.from_experiment.accession === 'string' && pF.from_experiment.accession !== "NONE"){
+            if (!Array.isArray(byE[pF.from_experiment.accession])){
+                byE[pF.from_experiment.accession] = [];
+            }
+            byE[pF.from_experiment.accession].push(pF);
+        } else if (typeof pF.from_experiment_set !== 'undefined' && typeof pF.from_experiment_set.accession === 'string'){
+            if (!Array.isArray(byES[pF.from_experiment_set.accession])){
+                byES[pF.from_experiment_set.accession] = [];
+            }
+            byES[pF.from_experiment_set.accession].push(pF);
+        }
+    });
+
+    if (!combined){
+        return {
+            'experiments' : byE,
+            'experiment_sets' : byES
+        };
+    } else {
+        return _.extend(byE, byES);
+    }
+
+}
+
+export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
+    var expsAndSetsByFileAccession =_.reduce(processed_files, function(m, pF){
+        if (typeof pF.from_experiment !== 'undefined' && !Array.isArray(pF.from_experiment)){
+            if (!Array.isArray(m.from_experiments[pF.accession])) m.from_experiments[pF.accession] = [];
+            m.from_experiments[pF.accession].push(pF.from_experiment);
+        } else if (typeof pF.from_experiment_set !== 'undefined' && !Array.isArray(pF.from_experiment_set)) {
+            if (!Array.isArray(m.from_experiment_sets[pF.accession])) m.from_experiment_sets[pF.accession] = [];
+            m.from_experiment_sets[pF.accession].push(pF.from_experiment_set);
+        }
+        return m;
+    }, { 'from_experiments' : {}, 'from_experiment_sets' : {} } );
+    return _.map(
+        _.uniq(processed_files, false, function(pF){ return pF.accession; }),
+        function(pF){
+            pF = _.clone(pF);
+            if (expsAndSetsByFileAccession.from_experiments[pF.accession]){
+                pF.from_experiments = expsAndSetsByFileAccession.from_experiments[pF.accession];
+            }
+            if (expsAndSetsByFileAccession.from_experiment_sets[pF.accession]){
+                pF.from_experiment_sets = expsAndSetsByFileAccession.from_experiment_sets[pF.accession];
+            }
+            return pF;
+        }
+    );
+}
+
 /*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *
  * Partial Funcs (probably don't use these unless composing a function) *
  *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -316,10 +440,13 @@ export function findExperimentInSetWithFileAccession(experiments_in_set, file_ac
     });
 }
 
-export function fileCount(experiment, includeFileSets = false){
+export function fileCount(experiment, includeProcessedFiles = false, includeFileSets = false){
     var count = 0;
     if (Array.isArray(experiment.files)) {
         count += experiment.files.length;
+    }
+    if (includeProcessedFiles && Array.isArray(experiment.processed_files)) {
+        count += experiment.processed_files.length;
     }
     if (includeFileSets && Array.isArray(experiment.filesets)) {
         count += _.reduce(experiment.filesets, function(r,fs){
@@ -340,10 +467,13 @@ export function allFilesFromFileSetsInExperiment(experiment){
     return [];
 }
 
-export function allFilesFromExperiment(experiment, includeFileSets = false){
+export function allFilesFromExperiment(experiment, includeProcessedFiles = false, includeFileSets = false){
     var allFiles = ensureArray(experiment.files);
     if (includeFileSets){
         allFiles = allFiles.concat(allFilesFromFileSetsInExperiment(experiment));
+    }
+    if (includeProcessedFiles){
+        allFiles = allFiles.concat(allProcessedFilesFromExperiments([experiment]));
     }
     return _.map(allFiles, function(origFile){
         var file = _.clone(origFile);
@@ -352,12 +482,17 @@ export function allFilesFromExperiment(experiment, includeFileSets = false){
     });
 }
 
-export function allFilesFromExperimentSet(expSet){
+export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false){
 
     function add(memo, file){
         if (typeof file.accession === 'undefined' || _.pluck(memo, 'accession').indexOf(file.accession) === -1){
             memo.push(file);
         }
+    }
+
+    var processedFiles = [];
+    if (includeProcessedFiles){
+        processedFiles = reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet));
     }
 
     return _.reduce(allPairsSetsAndFilesFromExperimentSet(expSet), function(m, f){
@@ -367,7 +502,7 @@ export function allFilesFromExperimentSet(expSet){
             add(m, f);
         }
         return m;
-    }, []);
+    }, processedFiles);
 }
 
 /**
@@ -452,6 +587,9 @@ export function groupFilesByPairsForEachExperiment(experiments, includeFileSets 
     });
 }
 
+/**
+ * @deprecated
+ */
 export function getProcessedFilesFromExperiment(experiment){
     var r = [];
     if (Array.isArray(experiment.processed_files)){

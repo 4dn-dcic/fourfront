@@ -472,6 +472,7 @@ $open-expset-table-side-border-color : #e4e4e4;
 }
 
 
+/** Experiment Set Detail Pane **/
 
 .experiment-set-info-wrapper {
 
@@ -526,6 +527,15 @@ $open-expset-table-side-border-color : #e4e4e4;
 
 		.expset-addinfo-val {
 			padding-right: 25px;
+		}
+	}
+
+	h4.pane-section-title {
+		font-weight: 300;
+		margin-top: 17px;
+		i.icon {
+			font-size: 0.875rem;
+			margin-right: 3px;
 		}
 	}
 

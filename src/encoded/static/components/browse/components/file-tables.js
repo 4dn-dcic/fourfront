@@ -6,7 +6,6 @@ import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock } from './StackedBlockTable';
-import { allProcessedFilesFromExperiments, allProcessedFilesFromExperimentSet, processedFilesFromExperimentSetToGroup } from './../../item-pages/components/ProcessedFilesTable';
 import { expFxn, Filters, console, isServerSide, analytics, object } from './../../util';
 
 
@@ -474,6 +473,10 @@ export class ProcessedFilesStackedTable extends React.Component {
         this.oddExpRow = false;
     }
 
+    componentWillUpdate(nextProps, nextState){
+        this.oddExpRow = false;
+    }
+
     renderFileBlocksForExperiment(experimentAccession, filesForExperiment, experimentObj){
         return _.map(filesForExperiment, (file) => {
             this.oddExpRow = !this.oddExpRow;
@@ -482,7 +485,7 @@ export class ProcessedFilesStackedTable extends React.Component {
                     key={object.atIdFromObject(file)}
                     file={file}
                     hideNameOnHover={false}
-                    experimentAccession={experimentAccession}
+                    experimentAccession={experimentAccession === 'global' ? 'NONE' : experimentAccession}
                     isSingleItem={filesForExperiment.length === 1}
                     stripe={this.oddExpRow}
                 />
@@ -557,7 +560,7 @@ export class ProcessedFilesStackedTable extends React.Component {
     render(){
 
         // Contains: { 'experiments' : { 'ACCESSSION1' : [..file_objects..], 'ACCESSION2' : [..file_objects..] }, 'experiment_sets' : { 'ACCESSION1' : [..file_objects..] } }
-        var groupedFiles = processedFilesFromExperimentSetToGroup(this.props.files);
+        var groupedFiles = expFxn.processedFilesFromExperimentSetToGroup(this.props.files);
 
         var expSetAccessions = _.keys(groupedFiles.experiment_sets || {});
         var filesGroupedByExperimentOrGlobal = _.clone(groupedFiles.experiments);
@@ -566,7 +569,7 @@ export class ProcessedFilesStackedTable extends React.Component {
         if (expSetAccessions.length === 1){
             filesGroupedByExperimentOrGlobal.global = groupedFiles.experiment_sets[expSetAccessions[0]];
         } else {
-            console.error('Theres more than ExpSet for these files - ', expSetAccessions);
+            console.error('Theres more than 1 ExpSet for these files/sets - ', expSetAccessions, groupedFiles);
         }
 
         return (
@@ -579,6 +582,7 @@ export class ProcessedFilesStackedTable extends React.Component {
                 unselectFile={this.props.unselectFile}
                 experimentSetAccession={this.props.experimentSetAccession}
                 width={this.props.width}
+                collapseLongLists={this.props.collapseLongLists}
             >
                 <StackedBlockList
                     className="sets"
