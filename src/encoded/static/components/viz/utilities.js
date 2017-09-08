@@ -1,10 +1,9 @@
 'use strict';
 
-/** @ignore */
-var React = require('react');
-var _ = require('underscore');
-var d3 = require('d3');
-var { console, isServerSide } = require('./../util');
+import React from 'react';
+import _ from 'underscore';
+import * as d3 from 'd3';
+import { console, isServerSide } from './../util';
 
 /**
  * Utility functions for aiding with visualizations.

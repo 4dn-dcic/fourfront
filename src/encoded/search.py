@@ -155,7 +155,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
 
 @view_config(route_name='browse', request_method='GET', permission='search')
-def browse(context, request, search_type=None, return_generator=False):
+def browse(context, request, search_type='ExperimentSetReplicate', return_generator=False):
     """
     Simply use search results for browse view
     """
@@ -435,6 +435,8 @@ def build_query(search, prepared_terms, source_fields):
         if field == 'q':
             query_info['query'] = value
             query_info['lenient'] = True
+            query_info['default_operator'] = 'AND'
+            query_info['default_field'] = '_all'
             break
     if query_info != {}:
         string_query = {'must': {'query_string': query_info}}
@@ -448,7 +450,7 @@ def build_query(search, prepared_terms, source_fields):
 def set_sort_order(request, search, search_term, types, doc_types, result):
     """
     sets sort order for elasticsearch results
-    example: /search/?type=Biosource&sort_by=display_title
+    example: /search/?type=Biosource&sort=display_title
     will sort by display_title in ascending order. To set descending order,
     use the "-" flag: sort_by=-date_created.
     Sorting is done alphatbetically, case sensitive by default.
@@ -480,7 +482,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
             add_to_sort_dict(rs)
 
     # Otherwise we use a default sort only when there's no text search to be ranked
-    if not sort and search_term == '*':
+    if not sort and (search_term == '*' or not any(search_term)):
         # If searching for a single type, look for sort options in its schema
         if len(doc_types) == 1:
             type_schema = types[doc_types[0]].schema
@@ -653,8 +655,9 @@ def set_facets(search, facets, final_filters, string_query):
     :param final_filters: Dict of filters which are set for the ES query in set_filters
     :param string_query: Dict holding the query_string used in the search
     """
-    aggs = {}
-    facet_fields = dict(facets).keys() # List of first entry of tuples in facets list.
+    aggs = OrderedDict()
+
+    facet_fields = [facet[0] for facet in facets]
     # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
 
     for field in facet_fields:

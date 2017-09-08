@@ -42,7 +42,7 @@ class ResultRowColumnBlock extends React.Component {
         var isDesktopClientside = SearchResultTable.isDesktopClientside();
         var blockWidth;
 
-        if (mounted && isDesktopClientside){
+        if (mounted){
             blockWidth = this.props.headerColumnWidths[this.props.columnNumber] || getColumnWidthFromDefinition(columnDefinition, mounted);
         } else {
             blockWidth = getColumnWidthFromDefinition(columnDefinition, mounted);
@@ -280,9 +280,9 @@ class LoadMoreAsYouScroll extends React.Component {
         this.isMounted = this.isMounted.bind(this);
         this.getInitialFrom = this.getInitialFrom.bind(this);
         this.rebuiltHref = this.rebuiltHref.bind(this);
-        this.handleLoad = this.handleLoad.bind(this);
-        this.handleScrollingStateChange = this.handleScrollingStateChange.bind(this);
-        this.handleScrollExt = this.handleScrollExt.bind(this);
+        this.handleLoad = _.throttle(this.handleLoad.bind(this), 3000);
+        //this.handleScrollingStateChange = this.handleScrollingStateChange.bind(this);
+        //this.handleScrollExt = this.handleScrollExt.bind(this);
         var state = {
             'isLoading' : false,
             'canLoad' : true
@@ -296,19 +296,20 @@ class LoadMoreAsYouScroll extends React.Component {
 
     componentDidMount(){
         if (typeof this.state.mounted === 'boolean') this.setState({ 'mounted' : true });
-        window.addEventListener('scroll', this.handleScrollExt);
+        //window.addEventListener('scroll', this.handleScrollExt);
     }
-
+    /*
     componentWillUnmount(){
         window.removeEventListener('scroll', this.handleScrollExt);
     }
-
+    */
+    /*
     handleScrollExt(){
         if (typeof this.props.onVerticalScroll === 'function'){
             return this.props.onVerticalScroll.apply(this.props.onVerticalScroll, arguments);
         }
     }
-
+    */
     componentWillReceiveProps(nextProps){
         if (!this.state.canLoad && (nextProps.href !== this.props.href || (typeof nextProps.totalExpected === 'number' && this.props.totalExpected !== nextProps.totalExpected))){
             this.setState({ 'canLoad' : true });
@@ -344,7 +345,14 @@ class LoadMoreAsYouScroll extends React.Component {
         var nextHref = this.rebuiltHref();
         var loadCallback = (function(resp){
             if (resp && resp['@graph'] && resp['@graph'].length > 0){
-                this.props.setResults(this.props.results.slice(0).concat(resp['@graph']));
+                // Check if have same result, if so, refresh all results (something has changed on back-end)
+                var oldKeys = _.map(this.props.results, DimensioningContainer.getKeyForGraphResult);
+                var newKeys = _.map(resp['@graph'], DimensioningContainer.getKeyForGraphResult);
+                if (_.any(oldKeys, function(oK){ return _.contains(newKeys, oK); } )){
+                    navigate('', { 'inPlace' : true, 'dontScrollToTop' : true });
+                } else {
+                    this.props.setResults(this.props.results.slice(0).concat(resp['@graph']));
+                }
                 this.setState({ 'isLoading' : false });
             } else {
                 if (this.state.canLoad){
@@ -360,7 +368,7 @@ class LoadMoreAsYouScroll extends React.Component {
             ajax.load(nextHref, loadCallback, 'GET', loadCallback);
         });
     }
-
+    /*
     handleScrollingStateChange(isScrolling){
         //vizUtil.requestAnimationFrame(()=>{
             //if (isScrolling && !this.lastIsScrolling){
@@ -373,7 +381,7 @@ class LoadMoreAsYouScroll extends React.Component {
             //this.lastIsScrolling = !!(isScrolling);
         //});
     }
-
+    */
     render(){
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
         var elementHeight = _.keys(this.props.openDetailPanes).length === 0 ? this.props.rowHeight : this.props.children.map((c) => {
@@ -421,11 +429,11 @@ class ShadowBorderLayer extends React.Component {
         'horizontalScrollRateOnEdgeBUtton' : 10
     }
 
-    static isWindowPastTableTop(tableContainerElement){
+    static isWindowPastTableTop(tableContainerElement, windowHeight = null, scrollTop = null, tableTopOffset = null){
         if (isServerSide()) return false;
-        var windowHeight = window.innerHeight;
-        var scrollTop = document && document.body && document.body.scrollTop;
-        var tableTopOffset = layout.getElementOffset(tableContainerElement).top;
+        if (!windowHeight)      windowHeight    = window.innerHeight;
+        if (!scrollTop)         scrollTop       = document && document.body && document.body.scrollTop;
+        if (!tableTopOffset)    tableTopOffset  = layout.getElementOffset(tableContainerElement).top;
         if (windowHeight / 2 + scrollTop > tableTopOffset){
             return true;
         }
@@ -633,7 +641,7 @@ class DimensioningContainer extends React.Component {
         this.toggleDetailPaneOpen = _.throttle(this.toggleDetailPaneOpen.bind(this), 500);
         this.setDetailHeight = this.setDetailHeight.bind(this);
         this.onHorizontalScroll = this.onHorizontalScroll.bind(this);
-        this.onVerticalScroll = _.throttle(this.onVerticalScroll.bind(this), 350);
+        this.onVerticalScroll = _.throttle(this.onVerticalScroll.bind(this), 200);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
         this.setResults = this.setResults.bind(this);
         this.render = this.render.bind(this);
@@ -651,7 +659,10 @@ class DimensioningContainer extends React.Component {
 
     componentDidMount(){
         var state = { 'mounted' : true };
+
+
         if (!isServerSide()){
+
             if (this.refs.innerContainer){
                 var fullRowWidth = ResultRow.fullRowWidth(this.props.columnDefinitions, this.state.mounted, []);
                 if (this.refs.innerContainer.offsetWidth < fullRowWidth){
@@ -661,10 +672,17 @@ class DimensioningContainer extends React.Component {
             } else {
                 state.widths = DimensioningContainer.findAndDecreaseColumnWidths(this.props.columnDefinitions);
             }
+
+            window.addEventListener('scroll', this.onVerticalScroll);
             
         }
+
         this.lastResponsiveGridSize = layout.responsiveGridState();
         this.setState(state);
+    }
+
+    componentWillUnmount(){
+        window.removeEventListener('scroll', this.onVerticalScroll);
     }
 
     componentWillReceiveProps(nextProps){
@@ -702,7 +720,9 @@ class DimensioningContainer extends React.Component {
     }
 
     componentDidUpdate(pastProps, pastState){
-        if (pastState.results.length !== this.state.results.length) ReactTooltip.rebuild();
+        if (pastState.results.length !== this.state.results.length){
+            ReactTooltip.rebuild();
+        }
     }
 
     toggleDetailPaneOpen(rowKey, cb = null){
@@ -735,12 +755,78 @@ class DimensioningContainer extends React.Component {
     onVerticalScroll(e){
         if (!document || !window || !this.refs.innerContainer) return null;
 
-        var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer);
-        if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
-            vizUtil.requestAnimationFrame(()=>{
-                this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
-            });
-        }
+        
+
+        //vizUtil.requestAnimationFrame(()=>{
+
+            var windowHeight    = window.innerHeight;
+            var scrollTop       = document && document.body && document.body.scrollTop;
+            var tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
+    
+            //var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
+
+
+            var done = false;
+
+            // Resize to full width.
+            /*
+            if (typeof this.props.fullWidthInitOffset === 'number' && typeof this.props.fullWidthContainerSelectorString === 'string'
+                && !isServerSide() && document && document.body && document.querySelector
+            ){
+                var bodyWidth = document.body.offsetWidth || window.innerWidth;
+                if (bodyWidth > 1200) {
+                    var extraWidth = bodyWidth - 1180;
+                    var distanceToTopOfTable = tableTopOffset - scrollTop + this.props.stickyHeaderTopOffset;
+                    var pageTableContainer = document.querySelector(this.props.fullWidthContainerSelectorString);
+                    if (pageTableContainer){
+                        if (distanceToTopOfTable <= 5){
+                            pageTableContainer.style.transition = "none";
+                            pageTableContainer.style.marginLeft = pageTableContainer.style.marginRight = -(extraWidth / 2) + 'px';
+                            if (this.lastDistanceToTopOfTable !== distanceToTopOfTable || !this.state.isWindowPastTableTop){
+                                vizUtil.requestAnimationFrame(()=>{
+                                    this.setState({ 'isWindowPastTableTop' : true });
+                                });
+                            }
+                            done = true;
+                        } else if (distanceToTopOfTable > 5 && distanceToTopOfTable <= this.props.fullWidthInitOffset){
+                            
+                            //var fullWidthInitOffset = Math.min(this.props.fullWidthInitOffset, tableTopOffset + this.props.stickyHeaderTopOffset);
+                            //var difScale = (fullWidthInitOffset - distanceToTopOfTable) / fullWidthInitOffset;
+                            //pageTableContainer.style.transition = "margin-left .33s, margin-right .33s";
+                            //pageTableContainer.style.marginLeft = pageTableContainer.style.marginRight = -((extraWidth * difScale) / 2) + 'px';
+                            //if (this.lastDistanceToTopOfTable !== distanceToTopOfTable || !this.state.isWindowPastTableTop){
+                            //    this.setState({ 'isWindowPastTableTop' : true });
+                            //}
+                            
+                        } else if (distanceToTopOfTable > this.props.fullWidthInitOffset){
+                            pageTableContainer.style.transition = "margin-left .6s, margin-right .6s";
+                            pageTableContainer.style.marginLeft = pageTableContainer.style.marginRight = '0px';
+                            if ((this.lastDistanceToTopOfTable <= this.props.fullWidthInitOffset) || this.state.isWindowPastTableTop){
+                                vizUtil.requestAnimationFrame(()=>{
+                                    this.setState({ 'isWindowPastTableTop' : false });
+                                });
+                            }
+                            done = true;
+                        }
+                        this.lastDistanceToTopOfTable = distanceToTopOfTable;
+                        
+                    }
+                    //console.log('V',scrollTop, tableTopOffset, distanceToTopOfTable);
+                }
+            }
+            */
+
+            if (!done){
+                var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
+                if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
+                    this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
+                }
+            }
+
+
+        //});
+
+        
     }
 
     getTableLeftOffset(){
@@ -862,7 +948,7 @@ class DimensioningContainer extends React.Component {
                                     openDetailPanes={this.state.openDetailPanes}
                                     rowHeight={this.props.rowHeight}
                                     innerContainerElem={this.refs && this.refs.innerContainer}
-                                    onVerticalScroll={this.onVerticalScroll}
+                                    //onVerticalScroll={this.onVerticalScroll}
                                     totalExpected={this.props.totalExpected}
                                 >
                                 { this.renderResults(fullRowWidth, tableContainerWidth, tableContainerScrollLeft, headerColumnWidthsFilled) }
@@ -920,7 +1006,7 @@ export class SearchResultTable extends React.Component {
         'hiddenColumns' : PropTypes.arrayOf(PropTypes.string),
         'renderDetailPane' : PropTypes.func,
         'columnDefinitionOverrideMap' : PropTypes.object,
-        'totalExpected' : PropTypes.number
+        'totalExpected' : PropTypes.number,
     }
 
     static defaultProps = {
@@ -939,7 +1025,9 @@ export class SearchResultTable extends React.Component {
         'hiddenColumns' : null,
         'limit' : 25,
         'rowHeight' : 47,
-        'stickyHeaderTopOffset' : -40
+        'stickyHeaderTopOffset' : -40,
+        'fullWidthInitOffset' : 60,
+        'fullWidthContainerSelectorString' : '.browse-page-container'
     }
 
     /**

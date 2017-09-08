@@ -3,25 +3,148 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
-import { object, expFxn, ajax, Schemas, layout } from './../util';
-import { FormattedInfoBlock, TabbedView, FileDownloadButton, FileDownloadButtonAuto } from './components';
+import { console, object, expFxn, ajax, Schemas, layout, fileUtil } from './../util';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
-import ExperimentsTable from './../experiments-table';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { requestAnimationFrame } from './../viz/utilities';
+import { commonGraphPropsFromProps, doValidAnalysisStepsExist, filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, RowSpacingTypeDropdown } from './WorkflowView';
+import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
+//import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
+//import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
+
+
+
+export function allFilesForWorkflowRunsMappedByUUID(items){
+    return _.reduce(items, function(m, workflowRun){
+        return _.extend(m, allFilesForWorkflowRunMappedByUUID(workflowRun));
+    }, {});
+}
+
+
+export function filterOutIndirectFilesFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+        if (n.type === 'input' || n.type === 'output'){
+            if (n && n.meta && n.meta.in_path === true){
+                return true;
+            }
+            deleted[n.id] = true;
+            return false;
+        }
+        return true;
+    });
+    var edges = _.filter(graphData.edges, function(e,i){
+        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
+            return false;
+        }
+        return true;
+    });
+    return { nodes, edges };
+}
+
 
 
 
 export default class FileView extends ItemBaseView {
 
+    static doesGraphExist(context){
+        return (
+            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
+        );
+    }
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
+        //var steps = dummy_analysis_steps;
+        var steps = null;
+        this.state = {
+            'mounted' : false,
+            'steps' : steps,
+            'allRuns' : false,
+            'loading' : false
+        };
+    }
+
+    componentDidMount(){
+        var state = { 'mounted' : true };
+        if (!this.state.steps){
+            state.loading = true;
+            this.loadGraphSteps();
+        }
+        this.setState(state);
+    }
+
+    loadGraphSteps(force = false, cb = null){
+        if (typeof this.props.context.uuid !== 'string') return;
+        if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
+
+        var callback = function(r){
+            requestAnimationFrame(()=>{
+                if (Array.isArray(r) && r.length > 0){
+                    this.setState({ 'steps' : r, 'loading' : false }, cb);
+                } else {
+                    this.setState({ 'steps' : 'ERROR', 'loading' : false }, cb);
+                }
+            });
+        }.bind(this);
+
+        var tracingHref = '/trace_workflow_run_steps/' + this.props.context.uuid + '/';
+        if (this.state.allRuns === true){
+            tracingHref += '?all_runs=True';
+        }
+
+        ajax.load(tracingHref, callback, 'GET', callback);
+    }
+
+    handleToggleAllRuns(){
+        this.setState({ 'allRuns' : !this.state.allRuns, 'loading' : true }, ()=>{
+            this.loadGraphSteps(true);
+        });
+    }
+
     getTabViewContents(){
 
         var initTabs = [];
+        var context = this.props.context;
 
-        //if (Array.isArray(this.props.context.experiments)){
-        initTabs.push(FileViewOverview.getTabObject(this.props.context, this.props.schemas));
-        //}
+        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas));
+        
+        var steps = this.state.steps;
+
+        if (FileView.doesGraphExist(context)){
+            var iconClass = "icon icon-fw icon-";
+            var tooltip = null;
+            if (steps === null || this.state.loading){
+                iconClass += 'circle-o-notch icon-spin';
+                tooltip = "Graph is loading";
+            } else if (!Array.isArray(steps) || steps.length === 0) {
+                iconClass += 'times';
+                tooltip = "Graph currently not available for this file. Please check back later.";
+            } else {
+                iconClass += 'code-fork';
+            }
+            initTabs.push({
+                tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
+                key : 'graph',
+                disabled : !Array.isArray(steps) || steps.length === 0,
+                content : <GraphSection
+                    {...this.props}
+                    steps={steps}
+                    mounted={this.state.mounted}
+                    key={"graph-for-" + this.props.context.uuid}
+                    onToggleAllRuns={this.handleToggleAllRuns}
+                    allRuns={this.state.allRuns}
+                    loading={this.state.loading}
+                />
+            });
+        }
 
         return initTabs.concat(this.getCommonTabs());
     }
@@ -50,11 +173,6 @@ class FileViewOverview extends React.Component {
         };
     }
 
-    static isExperimentSetCompleteEnough(expSet){
-        // TODO
-        return false;
-    }
-
     static propTypes = {
         'context' : PropTypes.shape({
             'experiments' : PropTypes.arrayOf(PropTypes.shape({
@@ -65,79 +183,22 @@ class FileViewOverview extends React.Component {
         }).isRequired
     }
 
-    constructor(props){
-        super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-
-        // Get ExpSets from this file, check if are complete (have bio_rep_no, etc.), and use if so; otherwise, save 'this.experiment_set_uris' to be picked up by componentDidMount and fetched.
-        var experiment_sets_obj = expFxn.experimentSetsFromFile(props.context);
-        var experiment_sets = _.values(expFxn.experimentSetsFromFile(props.context));
-        var experiment_sets_for_state = null;
-
-        if (Array.isArray(experiment_sets) && experiment_sets.length > 0 && FileViewOverview.isExperimentSetCompleteEnough(experiment_sets[0])){
-            experiment_sets_for_state = experiment_sets;
-        } else {
-            this.experiment_set_uris = _.keys(experiment_sets_obj);
-        }
-
-        this.state = {
-            'experiment_sets' : experiment_sets_for_state,
-            'current_es_index' : false
-        };
-    }
-
-    componentDidMount(){
-        var newState = {};
-
-        var onFinishLoad = null;
-
-        if (Array.isArray(this.experiment_set_uris) && this.experiment_set_uris.length > 0){
-
-            onFinishLoad = _.after(this.experiment_set_uris.length, function(){
-                this.setState({ 'loading' : false });
-            }.bind(this));
-
-            newState.loading = true;
-            _.forEach(this.experiment_set_uris, (uri)=>{
-                ajax.load(uri, (r)=>{
-                    var currentExpSets = (this.state.experiment_sets || []).slice(0);
-                    currentExpSets.push(r);
-                    this.setState({ experiment_sets : currentExpSets });
-                    onFinishLoad();
-                }, 'GET', onFinishLoad);
-            });
-        }
-        
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
-    }
-
-    componentWillUnmount(){
-        delete this.experiment_set_uris;
-    }
-
     render(){
         var { context } = this.props;
 
-        var expSetsTable;
-        if (this.state.loading || this.state.experiment_sets){
-            expSetsTable = (
-                <layout.WindowResizeUpdateTrigger>
-                    <FileViewExperimentSetTables
-                        loading={this.state.loading}
-                        experiment_sets={this.state.experiment_sets}
-                    />
-                </layout.WindowResizeUpdateTrigger>
-            );
-        }
+        var setsByKey;
+        var table = null;
 
+        if (context && context.experiments) setsByKey = expFxn.experimentSetsFromFile(context);
+
+        if (_.keys(setsByKey).length > 0){
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} />;
+        }
 
         return (
             <div>
                 <OverViewBody result={context} schemas={this.props.schemas} />
-                { expSetsTable }
+                { table }
             </div>
         );
 
@@ -167,7 +228,7 @@ class OverViewBody extends React.Component {
     render(){
         var file = this.props.result;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), file);
-        console.log(tips);
+
         return (
             <div className="row">
                 <div className="col-md-9 col-xs-12">
@@ -193,21 +254,10 @@ class OverViewBody extends React.Component {
                             <div className="inner">
                                 <object.TooltipInfoIconContainerAuto result={file} property={'file_classification'} tips={tips} elementType="h5" fallbackTitle="General Classification" />
                                 <div>
-                                    { Schemas.Term.toName('file_classification', file.file_classification) }
+                                    { file.file_classification ? Schemas.Term.toName('file_classification', file.file_classification) : 'Unknown/Other' }
                                 </div>
                             </div>
                         </div>
-
-                        { file.notes ?
-                        <div className="col-sm-12">
-                            <div className="inner">
-                                <object.TooltipInfoIconContainerAuto result={file} property={'notes'} tips={tips} elementType="h5" fallbackTitle="Notes" />
-                                <div>
-                                    { file.notes }
-                                </div>
-                            </div>
-                        </div>
-                        : null }
 
                         { Array.isArray(file.related_files) && file.related_files.length > 0 ?
                         <div className="col-sm-12">
@@ -226,7 +276,7 @@ class OverViewBody extends React.Component {
                 </div>
                 <div className="col-md-3 col-xs-12">
                     <div className="file-download-container">
-                        <FileDownloadButtonAuto result={file} />
+                        <fileUtil.FileDownloadButtonAuto result={file} />
                         { file.file_size && typeof file.file_size === 'number' ?
                         <h6 className="text-400">
                             <i className="icon icon-fw icon-hdd-o" /> { Schemas.Term.toName('file_size', file.file_size) }
@@ -242,46 +292,136 @@ class OverViewBody extends React.Component {
 
 
 
+class GraphSection extends React.Component {
 
-class FileViewExperimentSetTables extends React.Component {
+    static isNodeDisabled(node){
+        if (node.type === 'step') return false;
+        if (node && node.meta && node.meta.run_data){
+            return false;
+        }
+        return true;
+    }
 
-    render(){
-        var experiment_sets = this.props.experiment_sets;
-        var loading = this.props.loading;
+    constructor(props){
+        super(props);
+        //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+        this.commonGraphProps = this.commonGraphProps.bind(this);
+        this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
+        this.onToggleReferenceFiles = this.onToggleReferenceFiles.bind(this);
+        this.onToggleAllRuns = _.throttle(this.onToggleAllRuns.bind(this), 1000);
+        this.render = this.render.bind(this);
+        this.state = {
+            'showChart' : 'detail',
+            'showIndirectFiles' : false,
+            'showReferenceFiles' : false,
+            'rowSpacingType' : 'stacked'
+        };
+    }
+    /*
+    componentWillReceiveProps(nextProps){
+        if (nextProps.allRuns !== this.props.allRuns){
+            if (nextProps.allRuns && this.state.rowSpacingType !== 'stacked') {
+                this.setState({ 'rowSpacingType' : 'stacked' });
+            }
+            else if (!nextProps.allRuns && this.state.rowSpacingType !== 'wide') {
+                this.setState({ 'rowSpacingType' : 'wide' });
+            }
+        }
+    }
+    */
+    commonGraphProps(){
 
-        if (this.props.loading || !Array.isArray(experiment_sets)){
-            return (
-                <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
-                    <i className="icon icon-fw icon-spin icon-circle-o-notch"/>
-                </div>
-            );
+        var steps = this.props.steps;
+        
+        var graphData = parseAnalysisSteps(this.props.steps);
+        if (!this.state.showParameters){
+            graphData = filterOutParametersFromGraphData(graphData);
         }
 
-        
+        //var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
+        if (!this.state.showIndirectFiles){
+            graphData = filterOutIndirectFilesFromGraphData(graphData);
+        }
+        if (!this.state.showReferenceFiles){
+            graphData = filterOutReferenceFilesFromGraphData(graphData);
+        }
+        var fileMap = allFilesForWorkflowRunsMappedByUUID(
+            (this.props.context.workflow_run_outputs || []).concat(this.props.context.workflow_run_inputs || [])
+        );
+        var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
+        return _.extend(commonGraphPropsFromProps(this.props), {
+            'isNodeDisabled' : GraphSection.isNodeDisabled,
+            'nodes' : nodes,
+            'edges' : graphData.edges,
+            'columnSpacing' : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
+            'rowSpacingType' : this.state.rowSpacingType,
+            'nodeElement' : <WorkflowNodeElement />,
+            'isNodeCurrentContext' : function(node){
+                return (
+                    this.props.context && typeof this.props.context.accession === 'string' && node.meta.run_data && node.meta.run_data.file
+                    && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
+                    && typeof node.meta.run_data.file.accession === 'string'
+                    && node.meta.run_data.file.accession === this.props.context.accession
+                ) || false;
+            }.bind(this)
+        });
+    }
 
-        
+    onToggleIndirectFiles(){
+        this.setState({ showIndirectFiles : !this.state.showIndirectFiles });
+    }
+
+    onToggleReferenceFiles(){
+        this.setState({ showReferenceFiles : !this.state.showReferenceFiles });
+    }
+
+    onToggleAllRuns(){
+        return this.props.onToggleAllRuns();
+    }
+
+    render(){
+        var graphProps = null;
+        if (Array.isArray(this.props.steps)){
+            graphProps = this.commonGraphProps();
+        }
         return (
-            <div className="file-part-of-experiment-sets-container" ref="experimentSetsContainer">
+            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
                 <h3 className="tab-section-title">
-                    <span>In Experiment Sets</span>
+                    <span>Graph</span>
+                    <div className="workflow-view-controls-container">
+                        <div className="inline-block show-params-checkbox-container">
+                            <Checkbox checked={this.state.showReferenceFiles} onChange={this.onToggleReferenceFiles}>
+                                Show Reference Files
+                            </Checkbox>
+                        </div>
+                        <div className="inline-block show-params-checkbox-container">
+                            <Checkbox checked={this.state.showIndirectFiles} onChange={this.onToggleIndirectFiles}>
+                                Show More Context
+                            </Checkbox>
+                        </div>
+                        <div className="inline-block show-params-checkbox-container">
+                            <Checkbox checked={!this.props.allRuns} onChange={this.onToggleAllRuns} disabled={this.props.loading}>
+                            { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
+                            </Checkbox>
+                        </div>
+                        <div className="inline-block">
+                            <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
+                                requestAnimationFrame(()=>{
+                                    if (eventKey === this.state.rowSpacingType) return;
+                                    this.setState({ rowSpacingType : eventKey });
+                                });
+                            }}/>
+                        </div>
+                    </div>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                <ItemPageTable
-                    results={experiment_sets}
-                    renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
-                        'xs' : 0, 'sm' : 10, 'md' : 30, 'lg' : 47
-                    }} />}
-                    columns={{
-                        "number_of_experiments" : "Exps",
-                        "experiments_in_set.experiment_type": "Experiment Type",
-                        "experiments_in_set.biosample.biosource.individual.organism.name": "Organism",
-                        "experiments_in_set.biosample.biosource_summary": "Biosource Summary",
-                        "experiments_in_set.digestion_enzyme.name": "Enzyme",
-                        "experiments_in_set.biosample.modifications_summary": "Modifications",
-                        "experiments_in_set.biosample.treatments_summary": "Treatments"
-                    }}
-                />
+                <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }}>
+                    { graphProps ? <Graph { ...graphProps } /> : null }
+                </div>
             </div>
         );
+
     }
+
 }
+

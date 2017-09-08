@@ -79,14 +79,17 @@
         }
     },
     "facets": {
+        "award.project": {
+            "title": "Project"
+        },
+        "publications_of_set.display_title": {
+            "title": "Publication"
+        },
         "experimentset_type": {
             "title": "Set Type"
         },
         "experiments_in_set.experiment_type": {
             "title": "Experiment Type"
-        },
-        "award.project": {
-            "title": "Project"
         },
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"
@@ -108,9 +111,6 @@
         },
         "lab.title": {
             "title": "Lab"
-        },
-        "publications_of_set.display_title": {
-            "title": "Publication"
         }
     },
     "columns": {

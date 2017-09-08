@@ -26,9 +26,7 @@
             "type": "string",
             "enum": [
                 "GRCh38",
-                "GRCh37",
-                "GRCm38",
-                "MGSCv37"
+                "GRCm38"
             ]
         },
         "chromosome": {

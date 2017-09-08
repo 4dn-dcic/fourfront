@@ -9,6 +9,7 @@
 
 require('./lib');
 require('./util');
+require('./viz/utilities');
 require('./app');
 require('./collection');
 require('./footer');
@@ -34,7 +35,6 @@ require('./navigation');
 require('./submission/submission-view');
 require('./submission/submission-fields');
 require('./inputs');
-require('./experiments-table');
 require('./browse/BrowseView');
 require('./browse/SearchView');
 require('./browse/components');

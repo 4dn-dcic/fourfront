@@ -111,3 +111,11 @@ $tooltip-color: desaturate(lighten(#0a253d,30%),30%);
     }
 
 }
+
+.__react_component_tooltip.has-links-or-buttons {
+    pointer-events: all !important;
+    &:hover {
+        visibility: visible;
+        opacity: 1;
+    }
+}

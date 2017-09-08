@@ -12,7 +12,7 @@ export class WorkflowNodeElement extends React.Component {
 
     static propTypes = {
         'node' : PropTypes.object.isRequired,
-        'title': PropTypes.string.isRequired,
+        'title': PropTypes.string,
         'disabled' : PropTypes.bool,
         'selected' : PropTypes.bool,
         'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
@@ -21,7 +21,10 @@ export class WorkflowNodeElement extends React.Component {
 
     doesRunDataFileExist(){
         var node = this.props.node;
-        return (node.meta && node.meta.run_data && node.meta.run_data.file/* && typeof node.meta.run_data.file.display_title === 'string'*/);
+        return (
+            node.meta && node.meta.run_data && node.meta.run_data.file
+            && typeof node.meta.run_data.file['@id'] === 'string'
+            /* && typeof node.meta.run_data.file.display_title === 'string'*/);
     }
 
     doesRunDataValueExist(){
@@ -31,7 +34,9 @@ export class WorkflowNodeElement extends React.Component {
     
     icon(){
         var iconClass;
-        if (this.props.node.type === 'input' || this.props.node.type === 'output'){
+        if (this.props.node.type === 'input-group' || this.props.node.type === 'output-group'){
+            iconClass = 'folder-open';
+        } else if (this.props.node.type === 'input' || this.props.node.type === 'output'){
             var formats = this.props.node.format;
             if (typeof formats === 'undefined'){
                 iconClass = 'question';
@@ -142,23 +147,37 @@ export class WorkflowNodeElement extends React.Component {
 
     aboveNodeTitle(){
 
+        var node = this.props.node;
+
         var elemProps = {
             'style' : { 'maxWidth' : this.props.columnWidth },
             'className' : "text-ellipsis-container above-node-title"
         };
 
+        if (node.type === 'input-group'){
+            return <div {...elemProps}>{ this.props.title }</div>;
+        }
+
+        // If WorkflowRun & Workflow w/ steps w/ name
+        if (node.type === 'step' && node.meta.workflow
+            && Array.isArray(node.meta.workflow.workflow_steps)
+            && node.meta.workflow.workflow_steps.length > 0
+            && typeof node.meta.workflow.workflow_steps[0].step_name === 'string'
+        ){
+            //elemProps.className += ' mono-text';
+            return <div {...elemProps}>{ _.pluck(node.meta.workflow.workflow_steps, 'step_name').join(', ') }</div>;
+        }
+
+        // If File
         if (this.doesRunDataFileExist()){
+            if (typeof node.meta.run_data.file.file_format === 'string' && node.meta.run_data.file.file_format !== 'other'){
+                return <div {...elemProps}>{ node.meta.run_data.file.file_format }</div>;
+            }
             elemProps.className += ' mono-text';
             return <div {...elemProps}>{ this.props.title }</div>;
         }
 
-        if (this.doesRunDataValueExist()){
-            elemProps.className += ' mono-text';
-            return <div {...elemProps}>{ this.props.title }</div>;
-        }
-
-        var node = this.props.node;
-        if (
+        if ( // If Analysis Step
             node.type === 'step' && node.meta.uuid &&
             Array.isArray(node.meta.analysis_step_types) &&
             node.meta.analysis_step_types.length > 0
@@ -182,9 +201,16 @@ export class WorkflowNodeElement extends React.Component {
 
         var node = this.props.node;
 
+        /*
+        if (node.meta && typeof node.meta.argument_type === 'string') {
+            return <div {...elemProps}><span className="lighter">{ node.meta.argument_type }</span></div>;
+        }
+        */
+        /*
         if (node.meta && typeof node.meta.argument_format === 'string') {
             return <div {...elemProps}><span className="lighter"><span className="text-500">Format: </span>{ node.meta.argument_format }</span></div>;
         }
+        */
 
         if (node.type === 'step' && node.meta && node.meta.software_used && node.meta.software_used.title){
             if (typeof node.meta.software_used.name === 'string' && typeof node.meta.software_used.version === 'string'){
@@ -197,17 +223,28 @@ export class WorkflowNodeElement extends React.Component {
     }
 
     nodeTitle(){
+        var node = this.props.node;
+        if (node.type === 'input-group'){
+            var files = node.meta.run_data.file;
+            if (Array.isArray(files)){
+                var len = files.length - 1;
+                return <span className="node-name">
+                    { this.icon() }
+                    <b>{ files.length - 1 }</b> similar file{ len === 1 ? '' : 's' }
+                </span>;
+            }
+        }
         if (this.doesRunDataFileExist()){
-            var file = this.props.node.meta.run_data.file;
-            return <span className="node-name">
+            var file = node.meta.run_data.file;
+            return <span className={"node-name" + (file.accession ? ' mono-text' : '')}>
                 { this.icon() }
-                { typeof file === 'string' ? this.props.node.format.replace('Workflow ', '') : file.accession || file.display_title }
+                { typeof file === 'string' ? node.format.replace('Workflow ', '') : file.accession || file.display_title }
             </span>;
         }
         if (this.doesRunDataValueExist()){
-            return <span className="node-name mono-text">{ this.icon() }{ this.props.node.meta.run_data.value }</span>;
+            return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
         }
-        return <span className="node-name mono-text">{ this.icon() }{ this.props.title }</span>;
+        return <span className="node-name">{ this.icon() }{ this.props.title }</span>;
     }
     
     render(){

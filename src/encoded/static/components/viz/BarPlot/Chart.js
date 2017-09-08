@@ -16,7 +16,7 @@ import { PopoverViewContainer } from './ViewContainer';
  * Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally. 
  *
  * @param {Object[]} fields - Array of fields (i.e. from props.fields) which contain counts by term and total added through @see aggregationFxn.genChartData().
- * @param {Object} fields.terms - Object keyed by possible term for field, with value being count of term occurences in [props.]experiments passed to genChartData.
+ * @param {Object} fields.terms - Object keyed by possible term for field, with value being count of term occurences in [props.]experiment_sets passed to genChartData.
  * @param {number} fields.total - Count of total experiments for which this field is applicable.
  * @param {number} [availWidth=400] - Available width, in pixels, for chart.
  * @param {number} [availHeight=400] - Available width, in pixels, for chart.
@@ -138,14 +138,14 @@ export function genChartBarDims(
  * Contains chart and labels only -- no controls.
  * To add controls, wrap the chart in BarPlotChart.UIControlsWrapper, which will feed its state as props to BarPlotChart and has UI components
  * for adjusting its state to select Charting options.
- * Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiments and props.filteredExperiments.
+ * Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiment_sets and props.filtered_experiment_sets.
  * 
  * @type {Component}
  * @see module:viz/chart-data-controller.Provider
  * @see module:viz/BarPlot.UIControlsWrapper
  * 
- * @prop {Object[]} experiments - List of all experiments, with at least fields needed to aggregate by embedded.
- * @prop {Object[]} filteredExperiments - List of selected experiments, with at least fields needed to aggregate by embedded.
+ * @prop {Object[]} experiment_sets - List of all expsets, with at least fields needed to aggregate by embedded.
+ * @prop {Object[]} filtered_experiment_sets - List of selected expsets, with at least fields needed to aggregate by embedded.
  * @prop {Object[]} fields - List of at least one field objects, each containing at least 'field' property in object-dot-notation.
  * @prop {string} fields.field - Field, in <code>object.dot.notation</code>.
  * @prop {string} fields.name - Name of field.
@@ -160,9 +160,9 @@ export class Chart extends React.Component {
         //return false;
         return !!(
             pastProps.showType !== nextProps.showType ||
-            !_.isEqual(pastProps.experiments, nextProps.experiments) ||
+            !_.isEqual(pastProps.experiment_sets, nextProps.experiment_sets) ||
             pastProps.height !== nextProps.height ||
-            !_.isEqual(pastProps.filteredExperiments, nextProps.filteredExperiments)
+            !_.isEqual(pastProps.filtered_experiment_sets, nextProps.filtered_experiment_sets)
         );
     }
 
@@ -184,8 +184,8 @@ export class Chart extends React.Component {
     }
 
     static propTypes = {
-        'experiments'   : PropTypes.array,
-        'filteredExperiments' : PropTypes.array,
+        'experiment_sets'   : PropTypes.array,
+        'filtered_experiment_sets' : PropTypes.array,
         'fields'        : PropTypes.array,
         'styleOptions'  : PropTypes.shape({
             'gap'           : PropTypes.number,
@@ -321,6 +321,7 @@ export class Chart extends React.Component {
     }
 
     /**
+     * DEPRECATED!!
      * Used to help generate "highlighted" selected bars against the output of this: the "all experiments" bars silhoutte.
      * Used conditionally in BarPlotChart.render to render clones of the BarChart behind the primary bars,
      * using 'all experiments' data instead of the 'filtered' or 'selected' experiments.
@@ -374,9 +375,9 @@ export class Chart extends React.Component {
 
     genChartData(){
         return genChartData( // Get counts by term per field.
-            (
+            expFxn.listAllExperimentsFromExperimentSets(
                 this.props.showType === 'all' ?
-                this.props.experiments : this.props.filteredExperiments || this.props.experiments
+                this.props.experiment_sets : this.props.filtered_experiment_sets || this.props.experiment_sets
             ),
             this.props.fields,
             this.props.aggregateType,
@@ -477,10 +478,10 @@ export class Chart extends React.Component {
     }
 
     /** 
-     * Parses props.experiments and/or props.filterExperiments, depending on props.showType, aggregates experiments into fields,
+     * Parses props.experiment_sets and/or props.filtered_experiment_sets, depending on props.showType, aggregates experiments into fields,
      * generates data for chart bars, and then draws and returns chart wrapped in a div React element.
      * 
-     * @returns {React.Element} - Chart markup wrapped in a div.
+     * @returns {JSX.Element} - Chart markup wrapped in a div.
      */
     render(){
         if (this.state.mounted === false) return <div ref="container"></div>;

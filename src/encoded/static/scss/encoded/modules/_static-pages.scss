@@ -4,7 +4,7 @@
 ***********************************************************/
 
 .fourDN-header{
-	font-family: 'Work Sans', sans-serif;
+	font-family: $font-family-sans-serif;
 	font-weight: 300;
 	margin-bottom: 20px;
 	margin-top: 20px;
@@ -45,35 +45,35 @@ h5.fourDN-header {
 }
 
 .fourDN-section{
-	font-family: 'Work Sans', sans-serif;
-	padding-bottom: 10px;
-	margin-top: 20px;
-}
-
-.announcement {
-	font-family: 'Work Sans', sans-serif;
 	padding-bottom: 10px;
 	margin-top: 20px;
 
-	.announcement-title {
-		font-weight: 300;
-		font-size: 1.35rem;
-		border-bottom: 2px solid #168369;
-		padding-bottom: 5px;
-		margin-bottom: 5px;
-	}
+	&.announcement {
+		padding-bottom: 10px;
+		margin-top: 20px;
 
-	.announcement-subtitle {
-		color: #b3b3b3;
-		font-weight: 400;
-		font-size: 0.925rem;
-	}
+		.announcement-title {
+			font-weight: 300;
+			font-size: 1.35rem;
+			border-bottom: 2px solid #168369;
+			padding-bottom: 5px;
+			margin-bottom: 5px;
+		}
 
-	.announcement-content {
-		margin-top: 10px;
-		font-size: 1.25rem;
+		.announcement-subtitle {
+			color: #b3b3b3;
+			font-weight: 400;
+			font-size: 0.925rem;
+		}
+
+		.announcement-content {
+			margin-top: 10px;
+			font-size: 1.25rem;
+		}
 	}
 }
+
+
 
 .fourDN-section-toggle{
 	color: #999999;
@@ -92,7 +92,6 @@ h5.fourDN-header {
 
 
 .fourDN-content{
-	font-family: 'Yrsa', serif;
 	line-height: 130%;
 	font-size: 1.375rem;
 
@@ -634,7 +633,6 @@ h5.fourDN-header {
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
 	.section-joint-anlysis-data-legend {
-		font-family: "Work Sans",Helvetica,Arial,sans-serif;
 		font-size: 1rem;
 		> .col-sm-3 {
 			text-align: center;

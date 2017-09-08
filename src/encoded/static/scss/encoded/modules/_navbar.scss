@@ -547,7 +547,7 @@ $navbar-transition-easing: ease-out;
 
 // Drop down styles when window is constrained
 .navbar-nav {
-    font-family: 'Work Sans', sans-serif;
+    font-family: $font-family-sans-serif;
     margin-left: 20px;
     margin-right: 20px;
     margin-top: 0;//($navbar-full-height - $navbar-small-height) / 2;

@@ -102,8 +102,7 @@ class SelectedFilesDownloadButton extends React.Component {
             'minHeight' : 400,
             'fontFamily' : 'monospace'
         };
-        //var files_download_filename = 'files_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.txt';
-        var unreleasedFilesNotice = <p><strong>Note:</strong> Files which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.</p>;
+        var meta_download_filename = 'metadata_' + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
         return (
             <Modal show={true} onHide={()=>{ this.setState({ 'modalOpen' : false }); }}>
                 <Modal.Header closeButton>
@@ -115,28 +114,20 @@ class SelectedFilesDownloadButton extends React.Component {
 
                     <p>Once you have saved the metadata TSV, you will be able to download the files on any machine or server with the following cURL command:</p>
 
-                    <pre>cut -f 1 <b>my_metadata_file.tsv</b> | tail -n +2 | xargs -n 1 curl -O -L</pre>
+                    <pre>cut -f 1 <b>{ meta_download_filename }</b> | tail -n +2 | xargs -n 1 curl -O -L</pre>
 
                     <p><small><strong>N.B.:</strong> Files which do not have a status of "released" cannot be downloaded via cURL and must be downloaded directly through the website.</small></p>
 
                     <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleObjects())} />
+                        <input type="hidden" name="download_file_name" value={JSON.stringify(meta_download_filename)} />
                         <Button type="submit" name="Download" bsStyle="info" data-tip="Details for each individual file in the 'files.txt' download list below.">
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
                         </Button>
                         {' '}
                         
                     </form>
-                    {/*
-                    <hr/>
-                    <h5 className="text-500">File URIs</h5>
-                    <div>
-                        <textarea style={textAreaStyle} value={this.state.urls}/>
-                        <Button href={SelectedFilesDownloadButton.encodePlainText(this.state.urls)} bsStyle="primary" onClick={(e)=>{ e.stopPropagation(); }} download={files_download_filename} target="_blank">
-                            <i className="icon icon-fw icon-file-text"/>&nbsp; Save/download this list as 'files.txt'
-                        </Button>
-                    </div>
-                    */}
+
                 </Modal.Body>
             </Modal>
         );
@@ -152,7 +143,7 @@ class SelectedFilesDownloadButton extends React.Component {
 
         return (
             <Button key="download" onClick={this.handleClick} disabled={disabled} bsStyle={disabled ? "secondary" : "primary"}>
-                <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> / { this.props.totalFilesCount } Selected Files</span>
+                <i className="icon icon-download icon-fw"/> Download { countSelectedFiles }<span className="text-400"> Selected Files</span>
                 { this.renderModal(countSelectedFiles) }
             </Button>
         );
@@ -186,12 +177,26 @@ class SelectAllFilesButton extends React.Component {
         if (typeof this.props.selectFile !== 'function'){
             throw new Error("No 'selectFiles' function prop passed to SelectedFilesController.");
         }
-        var funcToUse = isAllSelected ? this.props.selectFile : this.props.unselectFile;
+
+        var allFiles = this.props.allFiles.slice(0);
+        // Some processed files may not have a 'from_experiment' property (redundant check temp), so we put in a dummy one to be able to generate a unique selector.
+        allFiles = _.map(allFiles, function(file){
+            if (typeof file.from_experiment === 'undefined'){
+                return _.extend({}, file, {
+                    'from_experiment' : {
+                        'accession' : "NONE",
+                        'from_experiment_set' : file.from_experiment_set
+                    }
+                });
+            }
+            return file;
+        });
+
         this.setState({ 'selecting' : true }, () => vizUtil.requestAnimationFrame(()=>{
             if (!isAllSelected){
-                this.props.selectFile(_.zip(expFxn.filesToAccessionTriples(this.props.allFiles, true), this.props.allFiles));
+                this.props.selectFile(_.zip(expFxn.filesToAccessionTriples(allFiles, true), allFiles));
             } else {
-                this.props.unselectFile(expFxn.filesToAccessionTriples(this.props.allFiles, true));
+                this.props.unselectFile(expFxn.filesToAccessionTriples(allFiles, true));
             }
             
             this.setState({ 'selecting' : false });
@@ -232,7 +237,6 @@ class SelectedFilesFilterByContent extends React.Component {
 
             if (typeof fileTypeDetail === 'undefined' || fileTypeDetail === 'other' || fileTypeDetail === 'undefined'){
                 title = "Other";
-                console.log(fileTypeDetail, files);
             } else {
                 title = Schemas.Term.toName('files.file_type_detailed', fileTypeDetail);
             }
@@ -247,7 +251,7 @@ class SelectedFilesFilterByContent extends React.Component {
                 return f[1];
             }),
             'file_type_detailed'
-        )
+        );
     }
 
     static renderBucketButton(fileType, title, clickHandler, files, button_text_prefix = '', fileTypeFilters){
@@ -303,7 +307,6 @@ class SelectedFilesFilterByContent extends React.Component {
         } else {
             fileTypeFilters = fileTypeFilters.slice(0, indexOfNewFilter).concat(fileTypeFilters.slice(indexOfNewFilter + 1));
         }
-        console.log(fileTypeFilters);
         this.props.setFileTypeFilters(fileTypeFilters);
     }
 
@@ -364,11 +367,12 @@ class SelectedFilesControls extends React.Component {
     }    
 
     render(){
-        var exps = this.props.filteredExperiments || this.props.experiments;
-        var totalFilesCount = exps ? expFxn.fileCountFromExperiments(exps, this.props.includeFileSets) : 0;
+        //var exps = this.props.filteredExperiments || this.props.experiments;
+        var exp_sets = this.props.filtered_experiment_sets || this.props.experiment_sets;
+        var totalFilesCount = exp_sets ? _.reduce(exp_sets, (m,v) => expFxn.fileCountFromExperimentSet(v, this.props.includeProcessedFiles, this.props.includeFileSets) + m, 0) : 0;
         var allFiles = [];
-        if (exps){
-            allFiles =  expFxn.allFilesFromExperiments(exps, this.props.includeFileSets);
+        if (exp_sets){
+            allFiles = _.reduce(exp_sets, (m,v) => m.concat(expFxn.allFilesFromExperimentSet(v, this.props.includeProcessedFiles)), []);
         }
 
         // TODO:
@@ -415,7 +419,8 @@ export class AboveTableControls extends React.Component {
 
     static defaultProps = {
         'showSelectedFileCount' : false,
-        'showTotalResults' : false
+        'showTotalResults' : false,
+        'includeProcessedFiles' : true
     }
 
     constructor(props){
@@ -483,7 +488,7 @@ export class AboveTableControls extends React.Component {
             this.unsetWideLayout();
         }
     }
-
+    
     handleWindowResize(e){
         if (isServerSide() || !document || !document.body) return null;
         if (this.state.layout === 'wide'){
@@ -598,6 +603,8 @@ export class AboveTableControls extends React.Component {
                             currentFileTypeFilters={this.state.fileTypeFilters}
                             setFileTypeFilters={this.setFileTypeFilters}
                             closeButtonClickHandler={this.handleOpenToggle.bind(this, false)}
+                            includeFileSets={this.props.includeFileSets}
+                            includeProcessedFiles={this.props.includeProcessedFiles}
                         />
                     </div>
                 </Collapse>
@@ -619,6 +626,8 @@ export class AboveTableControls extends React.Component {
                         currentFileTypeFilters={this.state.fileTypeFilters}
                         setFileTypeFilters={this.setFileTypeFilters}
                         currentOpenPanel={this.state.open}
+                        includeFileSets={this.props.includeFileSets}
+                        includeProcessedFiles={this.props.includeProcessedFiles}
                     />
                 </ChartDataController.Provider>
             );
@@ -642,7 +651,7 @@ export class AboveTableControls extends React.Component {
 
         function expandLayoutButton(){
             return (
-                <Button key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
+                <Button bsStyle="secondary" key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
                     <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'arrows-alt' : 'crop')}></i>
                 </Button>
             );
