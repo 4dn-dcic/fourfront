@@ -455,9 +455,6 @@ def trace_workflow_runs(context, request):
 
         processed_file_atids_to_trace_from_experiment_set = item_model_obj.get('processed_files') # @ids
 
-
-        print('\n\n\n', processed_file_atids_to_trace_from_experiments, '\n\n', processed_file_atids_to_trace_from_experiment_set)
-
         processed_files_to_trace = []
         for file_at_id in processed_file_atids_to_trace_from_experiments + processed_file_atids_to_trace_from_experiment_set:
             file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))

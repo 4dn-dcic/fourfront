@@ -359,12 +359,10 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     if outfile['uuid'] == current_file_model_object['uuid']:
                         output['meta']['in_path'] = True
                         runs_current_file_goes_to = current_file_model_object.get('workflow_run_inputs', [])
-                        print('\n\nCFILE', current_file_model_object.get('@id'), runs_current_file_goes_to)
                         for run_at_id in runs_current_file_goes_to:
                             target_workflow_run_uuid = get_unique_key_from_at_id(run_at_id)
                             target_workflow_run_model = get_model(target_workflow_run_uuid).source.get('object')
                             input_files_by_argument_name = group_files_by_workflow_argument_name(target_workflow_run_model.get('input_files', []))
-                            print('\n\nCFILE2', input_files_by_argument_name, '\n\n', current_file_model_object.get('@id'))
                             for argument_name, input_files_for_arg in input_files_by_argument_name.items():
                                 input_files_for_arg_atids = [ f.get('value') for f in input_files_for_arg ]
                                 if current_file_model_object.get('@id') in input_files_for_arg_atids:
