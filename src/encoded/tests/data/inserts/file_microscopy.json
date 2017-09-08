@@ -1,0 +1,58 @@
+[
+    {
+        "accession":"4DNFIOTESTM1",
+        "description": "Template Microscopy File01",
+        "lab": "4dn-dcic-lab",
+        "file_format": "ome.tiff",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "uuid": "47e82a90-49e5-4c33-afab-9ec90d65fab9",
+        "status": "uploaded",
+        "channel_number": 4,
+        "slice_number": 5,
+        "time_frame_number": 1,
+        "file_type": "z-stack"
+    },
+    {
+        "accession":"4DNFIOTESTM2",
+        "description": "Template Microscopy File02",
+        "lab": "4dn-dcic-lab",
+        "file_format": "ome.tiff",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "uuid": "47e82a90-49e5-4c33-afab-9ec90d65fcd9",
+        "status": "uploaded",
+        "channel_number": 4,
+        "slice_number": 5,
+        "time_frame_number": 1,
+        "file_type": "z-stack"
+    },
+    {
+        "accession":"4DNFIOTESTM3",
+        "description": "Template Microscopy File03",
+        "lab": "4dn-dcic-lab",
+        "file_format": "ome.tiff",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "uuid": "47e82a90-49e5-4c33-afab-9ec90d65fef9",
+        "status": "uploaded",
+        "channel_number": 4,
+        "slice_number": 5,
+        "time_frame_number": 1,
+        "file_type": "z-stack"
+    },
+    {
+        "accession":"4DNFIOTESTM4",
+        "description": "Template Microscopy File04",
+        "lab": "4dn-dcic-lab",
+        "file_format": "ome.tiff",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "uuid": "47e82a90-49e5-4c33-afab-9ec90d65fdd9",
+        "status": "uploaded",
+        "channel_number": 4,
+        "slice_number": 5,
+        "time_frame_number": 1,
+        "file_type": "z-stack"
+    }
+]

@@ -155,7 +155,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
 
 @view_config(route_name='browse', request_method='GET', permission='search')
-def browse(context, request, search_type=None, return_generator=False):
+def browse(context, request, search_type='ExperimentSetReplicate', return_generator=False):
     """
     Simply use search results for browse view
     """
