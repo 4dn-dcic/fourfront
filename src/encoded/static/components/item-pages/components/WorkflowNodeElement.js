@@ -201,9 +201,16 @@ export class WorkflowNodeElement extends React.Component {
 
         var node = this.props.node;
 
+        /*
+        if (node.meta && typeof node.meta.argument_type === 'string') {
+            return <div {...elemProps}><span className="lighter">{ node.meta.argument_type }</span></div>;
+        }
+        */
+        /*
         if (node.meta && typeof node.meta.argument_format === 'string') {
             return <div {...elemProps}><span className="lighter"><span className="text-500">Format: </span>{ node.meta.argument_format }</span></div>;
         }
+        */
 
         if (node.type === 'step' && node.meta && node.meta.software_used && node.meta.software_used.title){
             if (typeof node.meta.software_used.name === 'string' && typeof node.meta.software_used.version === 'string'){

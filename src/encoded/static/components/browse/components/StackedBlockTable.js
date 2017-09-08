@@ -289,7 +289,7 @@ export class StackedBlockListViewMoreButton extends React.Component {
             if (collapsedMsg){
                 title = "Show " + this.props.collapsibleChildren.length + " More";
             } else {
-                title = "Show Less";
+                title = "Show Fewer";
             }
             if (this.props.title) title += ' ' + this.props.title;
 
