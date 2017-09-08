@@ -444,14 +444,27 @@ def trace_workflow_runs(context, request):
             raise HTTPBadRequest(detail=e.args[0])
 
     elif 'ExperimentSet' in itemTypes:
-        processed_file_atids_to_trace = item_model_obj.get('processed_files') # @ids
+
+        processed_file_atids_to_trace_from_experiments = []
+        for exp_atid in item_model_obj.get('experiments_in_set', []):
+            experiment_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(exp_atid))
+            if not hasattr(experiment_model, 'source') or experiment_model.source.get('object') is None:
+                raise HTTPBadRequest(detail="Item not yet finished indexing.")
+            processed_file_atids_to_trace_from_experiments = processed_file_atids_to_trace_from_experiments + experiment_model.source.get('object', {}).get('processed_files', [])
+
+
+        processed_file_atids_to_trace_from_experiment_set = item_model_obj.get('processed_files') # @ids
+
+
+        print('\n\n\n', processed_file_atids_to_trace_from_experiments, '\n\n', processed_file_atids_to_trace_from_experiment_set)
+
         processed_files_to_trace = []
-        for file_at_id in processed_file_atids_to_trace:
+        for file_at_id in processed_file_atids_to_trace_from_experiments + processed_file_atids_to_trace_from_experiment_set:
             file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))
             if not hasattr(file_model, 'source') or file_model.source.get('object') is None:
                 raise HTTPBadRequest(detail="At least 1 Processed File in ExperimentSet not done indexing yet.")
             processed_files_to_trace.append( file_model.source.get('object', {}) )
-        #processed_files_to_trace.reverse()
+        processed_files_to_trace.reverse()
 
         try:
             return trace_workflows(

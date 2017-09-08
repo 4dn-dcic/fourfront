@@ -736,9 +736,8 @@ export function traceNodePathAndRun(nextNode, fxn, direction = 'output', lastNod
 
 export function correctColumnAssignments(graphData){
     var { nodes, edges } = graphData;
-    var stepNodes = _.filter(nodes, { 'type' : 'step' });
 
-    var colCorrectFxn = function(node, lastNode){
+    var colCorrectFxn = function(node, lastNode, nextNodes){
         if (typeof node.column !== 'number' || typeof lastNode.column !== 'number'){
             console.error('No column number on one of theses nodes', node, lastNode);
             return;
@@ -747,15 +746,17 @@ export function correctColumnAssignments(graphData){
         node.column += colDifference;
     };
 
-    _.forEach(stepNodes, function(stepNode){
-        if (typeof stepNode.column !== 'number'){
-            console.error('No column number on step', stepNode);
+    _.forEach(nodes, function(node){
+        if (typeof node.column !== 'number'){
+            console.error('No column number on node', node);
             return;
         }
-        if (Array.isArray(stepNode.outputNodes) && stepNode.outputNodes.length > 0){
 
-            var laggingOutputNodes = _.filter(stepNode.outputNodes, function(oN){
-                if (typeof oN.column === 'number' && oN.column <= stepNode.column){
+        // Case: Step Node
+        if (Array.isArray(node.outputNodes) && node.outputNodes.length > 0){
+
+            var laggingOutputNodes = _.filter(node.outputNodes, function(oN){
+                if (typeof oN.column === 'number' && oN.column <= node.column){
                     return true;
                     // !FIX!
                 }
@@ -763,7 +764,24 @@ export function correctColumnAssignments(graphData){
             });
 
             _.forEach(laggingOutputNodes, function(loN){
-                traceNodePathAndRun(loN, colCorrectFxn, 'output', stepNode);
+                traceNodePathAndRun(loN, colCorrectFxn, 'output', node);
+            });
+
+        }
+
+        // Case: IO Node
+        if (Array.isArray(node.inputOf) && node.inputOf.length > 0){
+
+            var laggingStepNodes = _.filter(node.inputOf, function(sN){
+                if (typeof sN.column === 'number' && sN.column <= node.column){
+                    return true;
+                    // !FIX!
+                }
+                return false;
+            });
+
+            _.forEach(laggingStepNodes, function(lsN){
+                traceNodePathAndRun(lsN, colCorrectFxn, 'output', node);
             });
 
         }

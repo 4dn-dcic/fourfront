@@ -319,6 +319,15 @@ export class FileViewGraphSection extends React.Component {
         return true;
     }
 
+    static isNodeCurrentContext(node, context){
+        return (
+            context && typeof context.accession === 'string' && node.meta.run_data && node.meta.run_data.file
+            && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
+            && typeof node.meta.run_data.file.accession === 'string'
+            && node.meta.run_data.file.accession === context.accession
+        ) || false;
+    }
+
     constructor(props){
         super(props);
         //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
@@ -373,14 +382,8 @@ export class FileViewGraphSection extends React.Component {
             'columnSpacing' : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
             'rowSpacingType' : this.state.rowSpacingType,
             'nodeElement' : <WorkflowNodeElement />,
-            'isNodeCurrentContext' : function(node){
-                return (
-                    this.props.context && typeof this.props.context.accession === 'string' && node.meta.run_data && node.meta.run_data.file
-                    && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
-                    && typeof node.meta.run_data.file.accession === 'string'
-                    && node.meta.run_data.file.accession === this.props.context.accession
-                ) || false;
-            }.bind(this)
+            'isNodeCurrentContext' : (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext) || (node => FileViewGraphSection.isNodeCurrentContext(node, this.props.context))
+
         });
     }
 
