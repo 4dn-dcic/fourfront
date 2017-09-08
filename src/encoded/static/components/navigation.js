@@ -307,6 +307,7 @@ class SearchBar extends React.Component{
             <form className="navbar-form navbar-right" action="/search/">
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
                     ref="q" name="q" defaultValue={searchQuery} key={searchQuery} />
+                <input id="type-select" type="hidden" ref="type" name="type" value="ExperimentSetReplicate"/>
             </form>
         );
     }
