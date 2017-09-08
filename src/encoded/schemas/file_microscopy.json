@@ -92,7 +92,7 @@
         },
         "filename": {
             "title": "Microscopy Files (Zip/TIFF)",
-            "description": "Single zipped file with microscopy files, or a sigle TIFF file"
+            "description": "Single zipped file with microscopy files, or a single TIFF file"
         }
     },
     "file_format_file_extension": {
