@@ -18,7 +18,6 @@
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/documents" },
-        { "$ref": "mixins.json#/library"},
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "experiment.json#/properties"}
     ],
