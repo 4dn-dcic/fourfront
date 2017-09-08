@@ -40,7 +40,9 @@
             "enum": [
                 "zip",
                 "tiff",
-                "ome.tiff"
+                "ome.tiff",
+                "flex",
+                "other"
             ]
         },
         "file_type": {
@@ -97,6 +99,8 @@
         "other": "",
         "zip": ".zip",
         "tiff": ".tiff",
-        "ome.tiff": ".ome.tiff"
+        "ome.tiff": ".ome.tiff",
+        "flex": ".flex",
+        "other": ""
     }
 }
