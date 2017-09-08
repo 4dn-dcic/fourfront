@@ -15,7 +15,7 @@ def user_w_lab(testapp, lab):
     res = testapp.post_json('/user', item)
     return testapp.get(res.location).json
 
-def test_user_subscriptions(submitter, admin, user_w_lab):
+def test_user_subscriptions(submitter, admin, user_w_lab, lab):
     # submitter has submits_for but no lab
     assert 'submits_for' in submitter
     assert len(submitter['subscriptions']) == 1
@@ -23,7 +23,7 @@ def test_user_subscriptions(submitter, admin, user_w_lab):
     # user_w_lab has lab but no submits_for
     assert 'lab' in user_w_lab
     assert len(user_w_lab['subscriptions']) == 1
-    assert user_w_lab['subscriptions'][0]['title'] == 'My lab'
+    assert user_w_lab['subscriptions'][0]['title'] == lab['title']
     # admin has no submits_for and no lab, thus should have no subscriptions
     assert 'lab' not in admin
     assert admin['submits_for'] == []
@@ -37,7 +37,7 @@ def test_subscriptions_dont_duplicate_on_update(registry, lab, user_w_lab):
         'last_name': 'McUser',
         'email': 'user@mcuser.org',
         'status': 'current',
-        'subscriptions': [{'url': '?lab.link_id=~labs~encode-lab~&sort=-date_created', 'title': 'My lab'}]
+        'subscriptions': [{'url': '?lab.link_id=~labs~encode-lab~&sort=-date_created', 'title': 'ENCODE lab'}]
     }
     test_user = User.create(registry, None, user_data)
     assert len(test_user.properties['subscriptions']) == 1

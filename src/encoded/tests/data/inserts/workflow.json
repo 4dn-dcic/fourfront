@@ -280,8 +280,8 @@
     "cwl_main_filename" : "fastqc-0-11-4-1.cwl",
     "cwl_child_filenames" : ["fastqc-0-11-4.cwl"],
     "app_name" : "fastqc-0-11-4-1",
-    "app_version" : "0.0.4",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
     "arguments": [
         {
             "argument_mapping": [
@@ -1572,8 +1572,8 @@
     "cwl_main_filename" : "hi-c-processing-partb.cwl",
     "cwl_child_filenames" : ["merge-pairs.cwl","pairs2hic.cwl","cooler.cwl"],
     "app_name" : "hi-c-processing-partb",
-    "app_version" : "0.0.4",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
     "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
     "arguments":[
         {

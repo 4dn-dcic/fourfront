@@ -54,7 +54,7 @@ export default class Graph extends React.Component {
             'type'              : PropTypes.string.isRequired,
             'id'                : PropTypes.string,  // Optional unique ID if node names might be same.
             'outputOf'          : PropTypes.object,  // Unused currently
-            'inputOf'           : PropTypes.object,  // Unused currently
+            'inputOf'           : PropTypes.arrayOf(PropTypes.object),  // Unused currently
             'description'       : PropTypes.string,
             'meta'              : PropTypes.oneOfType([
                 PropTypes.object,

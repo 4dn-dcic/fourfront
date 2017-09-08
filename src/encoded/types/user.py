@@ -123,33 +123,36 @@ class User(Item):
         my_uuid = self.uuid.__str__()
         needs_sub = True
         needs_lab = True
+        lab_id = properties.get('lab')
+        if lab_id:
+            lab_obj = self.collection.get(lab_id)
+            lab_props = lab_obj.properties
+            lab_title = lab_props.get('title')
+        else:
+            lab_obj = lab_props = lab_title = None
         curr_subs = properties['subscriptions'] if 'subscriptions' in properties else []
         for sub in curr_subs:
             if 'title' in sub:
                 if sub['title'] == 'My submissions':
                     needs_sub = False
-                if sub['title'] == 'My lab':
+                if sub['title'] == lab_title:
                     needs_sub = False
         if needs_sub and 'submits_for' in properties and len(properties['submits_for']) > 0:
-            if my_uuid:
-                submission_creds = {}
-                submission_creds['url'] = '?submitted_by.link_id=~users~' + my_uuid + '~&sort=-date_created'
-                submission_creds['title'] = 'My submissions'
-                curr_subs.append(submission_creds)
-        if needs_lab and 'lab' in properties:
-            lab_obj = self.collection.get(properties['lab'])
-            if lab_obj:
-                lab_props = lab_obj.properties
-                if 'name' in lab_props:
-                    lab_id = lab_props['name']
-                elif 'uuid' in lab_props:
-                    lab_id = lab_props['uuid']
-                else:
-                    lab_id = lab_props['title']
-                submission_creds2 = {}
-                submission_creds2['url'] = '?lab.link_id=~labs~' + lab_id + '~&sort=-date_created'
-                submission_creds2['title'] = 'My lab'
-                curr_subs.append(submission_creds2)
+            submission_creds = {}
+            submission_creds['url'] = '?submitted_by.link_id=~users~' + my_uuid + '~&sort=-date_created'
+            submission_creds['title'] = 'My submissions'
+            curr_subs.append(submission_creds)
+        if needs_lab and lab_obj is not None:
+            if 'name' in lab_props:
+                lab_id = lab_props['name']
+            elif 'uuid' in lab_props:
+                lab_id = lab_props['uuid']
+            else:
+                lab_id = lab_props['title']
+            submission_creds2 = {}
+            submission_creds2['url'] = '?lab.link_id=~labs~' + lab_id + '~&sort=-date_created'
+            submission_creds2['title'] = lab_title
+            curr_subs.append(submission_creds2)
         if len(curr_subs) > 0 and (needs_sub or needs_lab):
             properties['subscriptions'] = curr_subs
         super(User, self)._update(properties, sheets)

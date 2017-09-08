@@ -472,6 +472,7 @@ $open-expset-table-side-border-color : #e4e4e4;
 }
 
 
+/** Experiment Set Detail Pane **/
 
 .experiment-set-info-wrapper {
 
@@ -484,6 +485,7 @@ $open-expset-table-side-border-color : #e4e4e4;
 		//border-bottom: 1px solid #ccc;
 		position: relative;
 		overflow: hidden;
+		min-height: 104px;
 
 		.addinfo-description-section,
 		.addinfo-properties-section {
@@ -526,6 +528,33 @@ $open-expset-table-side-border-color : #e4e4e4;
 
 		.expset-addinfo-val {
 			padding-right: 25px;
+		}
+	}
+
+	h4.pane-section-title {
+		font-weight: 300;
+		margin-top: 12px;
+		margin-bottom: 12px;
+		cursor: pointer;
+		
+		i.icon {
+			font-size: 0.875rem;
+			margin-right: 3px;
+			position: relative;
+			top: -1px;
+			&.toggle-open-icon {
+				cursor: pointer;
+				margin-right: 6px;
+				padding: 2px 0;
+				opacity: 0.66;
+			}
+		}
+
+		&:hover {
+			text-shadow: 0 0 0;
+			i.icon.toggle-open-icon {
+				opacity: 1;
+			}
 		}
 	}
 
@@ -1093,6 +1122,7 @@ $small-label-accession-font-size : 0.75rem;
 
 		}
 	}
+
 }
 
 /**********************/
@@ -1478,7 +1508,13 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							}
 
 							.experiment-set-info-wrapper {
-								
+
+								.files-tables-container {
+									.raw-files-table-section + .processed-files-table-section {
+										border-top: 1px solid #ccc;
+									}
+								}
+
 							}
 						}
 					}

@@ -9,6 +9,7 @@
 
 require('./lib');
 require('./util');
+require('./viz/utilities');
 require('./app');
 require('./collection');
 require('./footer');

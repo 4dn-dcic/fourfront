@@ -367,7 +367,7 @@ class Stat extends React.Component {
 
     static defaultProps = {
         'value' : 0,
-        'label' : 'Experiments',
+        'longLabel' : 'Experiments',
         'classNameID': 'experiments',
         'id' : null
     }
@@ -408,7 +408,7 @@ class Stat extends React.Component {
         }
         
         return (
-            <a href={href} data-tip={"View all currently-filtered " + this.props.label}>{ this.props.shortLabel }</a>
+            <a href={href} data-tip={"View all currently-filtered " + this.props.longLabel}>{ this.props.shortLabel }</a>
         );
     }
 

@@ -5,7 +5,7 @@
  * 
  * @module viz/BarPlot
  * @example
- * <caption>Example usage to aggregate and visualize 'experiments' and 'filteredExperiments' passed as props from ChartDataController.Provider.</caption>
+ * <caption>Example usage to aggregate and visualize 'experiment_sets' and 'filtered_experiment_sets' passed as props from ChartDataController.Provider.</caption>
  * <ChartDataController.Provider id="barplot1">
  *     <BarPlot.UIControlsWrapper legend chartHeight={height}>
  *         <BarPlot.Aggregator>

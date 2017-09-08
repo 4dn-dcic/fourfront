@@ -100,13 +100,6 @@
             "type": "string",
             "linkTo": "Image"
         },
-        "karyotype_image": {
-            "title": "Karyotype Image",
-            "description": "Image of the karyotype of potentially genomically unstable lines",
-            "comment":"If passage number is more then 10, please supply a karyotype image, or karyotype information from sequencing data.",
-            "type": "string",
-            "linkTo": "Image"
-        },
         "karyotype": {
             "title": "Karyotype Description",
             "description": "Chromosome count and any noted rearrangements or copy number variation",

@@ -22,6 +22,7 @@ def tier1_cell_culture(testapp, image, lab, award):
     '''
     item = {
         'culture_start_date': '2016-01-01',
+        'culture_harvest_date': '2016-01-03',
         'culture_duration': 2,
         'passage_number': 1,
         'morphology_image': image['@id'],
@@ -54,23 +55,27 @@ def tier1_biosample_no_cld(testapp, biosample_data):
 @pytest.fixture
 def tier1_biosample_missing_cld_required(testapp, biosample_data, cell_culture):
     biosample_data['cell_culture_details'] = cell_culture['@id']
-    print(biosample_data)
     return testapp.post_json('/biosample', biosample_data).json['@graph'][0]
 
 
-@pytest.fixture
-def tier1_biosample_10_passages_no_image(testapp, biosample_data, tier1_cell_culture):
-    testapp.patch_json(tier1_cell_culture['@id'], {'passage_number': 10}, status=200)
-    biosample_data['cell_culture_details'] = tier1_cell_culture['@id']
-    return testapp.post_json('/biosample', biosample_data).json['@graph'][0]
+def test_audit_tier1_biosample_cld_has_required_no_audit(testapp, tier1_biosample):
+    res = testapp.get(tier1_biosample['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
+
+# @pytest.fixture
+# def tier1_biosample_10_passages_no_image(testapp, biosample_data, tier1_cell_culture):
+#    testapp.patch_json(tier1_cell_culture['@id'], {'passage_number': 10}, status=200)
+#    biosample_data['cell_culture_details'] = tier1_cell_culture['@id']
+#    return testapp.post_json('/biosample', biosample_data).json['@graph'][0]
 
 
-@pytest.fixture
-def tier1_biosample_10_passages_w_image(testapp, biosample_data, tier1_cell_culture, image):
-    testapp.patch_json(tier1_cell_culture['@id'], {'passage_number': 10}, status=200)
-    testapp.patch_json(tier1_cell_culture['@id'], {'karyotype_image': image['@id']}, status=200)
-    biosample_data['cell_culture_details'] = tier1_cell_culture['@id']
-    return testapp.post_json('/biosample', biosample_data).json['@graph'][0]
+# @pytest.fixture
+# def tier1_biosample_10_passages_w_image(testapp, biosample_data, tier1_cell_culture, image):
+#    testapp.patch_json(tier1_cell_culture['@id'], {'passage_number': 10}, status=200)
+#    # testapp.patch_json(tier1_cell_culture['@id'], {'karyotype_image': image['@id']}, status=200)
+#    biosample_data['cell_culture_details'] = tier1_cell_culture['@id']
+#    return testapp.post_json('/biosample', biosample_data).json['@graph'][0]
 
 
 def test_audit_biosample_no_audit_if_no_cell_line(testapp, tissue_biosample):
@@ -92,19 +97,19 @@ def test_audit_biosample_tier1_cell_line_missing_required(testapp, tier1_biosamp
     assert any(error['category'] == 'missing mandatory metadata' for error in errors)
 
 
-def test_audit_biosample_tier1_cell_line_has_required(testapp, tier1_biosample):
-    res = testapp.get(tier1_biosample['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
+# def test_audit_biosample_tier1_cell_line_has_required(testapp, tier1_biosample):
+#    res = testapp.get(tier1_biosample['@id'] + '/@@audit-self')
+#    errors = res.json['audit']
+#    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
 
 
-def test_audit_biosample_tier1_cell_line_10_passages_has_karyotype(testapp, tier1_biosample_10_passages_w_image):
-    res = testapp.get(tier1_biosample_10_passages_w_image['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
+# def test_audit_biosample_tier1_cell_line_10_passages_has_karyotype(testapp, tier1_biosample_10_passages_w_image):
+#    res = testapp.get(tier1_biosample_10_passages_w_image['@id'] + '/@@audit-self')
+#    errors = res.json['audit']
+#    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
 
 
-def test_audit_biosample_tier1_cell_line_10_passages_no_karyotype(testapp, tier1_biosample_10_passages_no_image):
-    res = testapp.get(tier1_biosample_10_passages_no_image['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert any(error['category'] == 'missing mandatory metadata' for error in errors)
+# def test_audit_biosample_tier1_cell_line_10_passages_no_karyotype(testapp, tier1_biosample_10_passages_no_image):
+#    res = testapp.get(tier1_biosample_10_passages_no_image['@id'] + '/@@audit-self')
+#    errors = res.json['audit']
+#    assert any(error['category'] == 'missing mandatory metadata' for error in errors)
