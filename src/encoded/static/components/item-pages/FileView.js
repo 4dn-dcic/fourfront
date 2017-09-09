@@ -75,8 +75,11 @@ export class WorkflowRunTracingView extends ItemBaseView {
     }
 
     loadGraphSteps(force = false, cb = null){
-        if (typeof this.props.context.uuid !== 'string') return;
+        var context = this.props.context;
+        if (typeof context.uuid !== 'string') return;
         if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
+        if (!force && Array.isArray(context['@type']) && _.contains(context['@type'], 'ExperimentSet')
+            && (!Array.isArray(context.processed_files) || context.processed_files.length === 0)  ) return;
 
         var callback = function(r){
             requestAnimationFrame(()=>{

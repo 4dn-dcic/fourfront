@@ -453,7 +453,7 @@ def trace_workflow_runs(context, request):
             processed_file_atids_to_trace_from_experiments = processed_file_atids_to_trace_from_experiments + experiment_model.source.get('object', {}).get('processed_files', [])
 
 
-        processed_file_atids_to_trace_from_experiment_set = item_model_obj.get('processed_files') # @ids
+        processed_file_atids_to_trace_from_experiment_set = item_model_obj.get('processed_files', []) # @ids
 
         processed_files_to_trace = []
         for file_at_id in processed_file_atids_to_trace_from_experiments + processed_file_atids_to_trace_from_experiment_set:

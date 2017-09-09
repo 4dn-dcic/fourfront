@@ -69,9 +69,18 @@ export function listFromTips(tips){
  * @return {*} - Value corresponding to propertyName.
  */
 export function getNestedProperty(object, propertyName, suppressNotFoundError = false){
-
+    var errorMsg;
     if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
-    if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName "' + propertyName + '" in objectutils.getNestedProperty.');
+    if (!Array.isArray(propertyName)){
+        errorMsg = 'Using improper propertyName "' + propertyName + '" in object.getNestedProperty.';
+        console.error(errorMsg);
+        return null;
+    }
+    if (!object || typeof object !== 'object'){
+        errorMsg = 'Not valid object.';
+        console.error(errorMsg);
+        return null;
+    }
     try {
         return (function findNestedValue(currentNode, fieldHierarchyLevels, level = 0){
             if (level === fieldHierarchyLevels.length) return currentNode;
@@ -95,7 +104,8 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
             }
         })(object, propertyName);
     } catch (e) {
-        if (!suppressNotFoundError) console.warn('Could not get ' + propertyName.join('.') + ' from nested object.');
+        errorMsg = 'Could not get ' + propertyName.join('.') + ' from nested object.';
+        if (!suppressNotFoundError) console.warn(errorMsg);
         return null;
     }
 
