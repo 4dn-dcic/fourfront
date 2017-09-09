@@ -367,6 +367,8 @@ export class FileViewGraphSection extends React.Component {
             graphData = filterOutParametersFromGraphData(graphData);
         }
 
+        this.anyGroupNodesExist = !this.props.allRuns && _.any(graphData.nodes, function(n){ return n.type === 'input-group' || n.type === 'output-group'; });
+
         //var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
         if (!this.state.showIndirectFiles){
             graphData = filterOutIndirectFilesFromGraphData(graphData);
@@ -407,6 +409,7 @@ export class FileViewGraphSection extends React.Component {
         if (Array.isArray(this.props.steps)){
             graphProps = this.commonGraphProps();
         }
+        var isAllRunsCheckboxDisabled = this.props.loading || (!this.props.allRuns && !this.anyGroupNodesExist ? true : false);
         return (
             <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
                 <h3 className="tab-section-title">
@@ -422,11 +425,13 @@ export class FileViewGraphSection extends React.Component {
                                 Show More Context
                             </Checkbox>
                         </div>
+                        { typeof this.props.allRuns === 'boolean' ? 
                         <div className="inline-block show-params-checkbox-container">
-                            <Checkbox checked={!this.props.allRuns} onChange={this.onToggleAllRuns} disabled={this.props.loading}>
+                            <Checkbox checked={!this.props.allRuns && !isAllRunsCheckboxDisabled} onChange={this.onToggleAllRuns} disabled={isAllRunsCheckboxDisabled}>
                             { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
                             </Checkbox>
                         </div>
+                        : null }
                         <div className="inline-block">
                             <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
                                 requestAnimationFrame(()=>{
