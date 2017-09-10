@@ -164,7 +164,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     '''
     Trace a set of files according to supplied options.
 
-    :param original_file_set_to_trace: Must be a list of DICTIONARIES. If have Item instances, grab their model.source['object'] or similar. Each dict should have at minimum: 
+    :param original_file_set_to_trace: Must be a list of DICTIONARIES. If have Item instances, grab their model.source['object'] or similar. Each dict should have at minimum:
         - uuid, workflow_run_inputs, workflow_run_outputs
     :param request: Request instance.
     '''
@@ -446,9 +446,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         # Add Output Files, 1-level deep max (maybe change in future)
         output_files_by_argument_name = group_files_by_workflow_argument_name(workflow_run_model_obj.get('output_files', []))
         for argument_name, output_files_for_arg in output_files_by_argument_name.items():
-            
-            targets = [{ "name" : argument_name, "type" : "Workflow Output File" }]
-
             files = [ f.get('value') for f in output_files_for_arg ]
             file_items = []
             original_file_in_output = False
@@ -467,7 +464,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     })
             step['outputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
-                "target" : targets, # TODO: Trace these maybe (probably not, already too much context shown in graph)
+                "target" : [{ "name" : argument_name, "type" : "Workflow Output File" }],
                 "meta" : {
                     "argument_type" : "Output File",
                     "in_path" : original_file_in_output
@@ -537,7 +534,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
     for original_file in original_file_set_to_trace:
         file_item_output_of_workflow_run_uuids = [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_outputs', []) ]
-        file_item_input_of_workflow_run_uuids = [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_inputs', []) ]
+        #file_item_input_of_workflow_run_uuids = [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_inputs', []) ]
         if 'history' in options.get('trace_direction', ['history']):
             if uuidCacheTracedHistory.get(original_file['uuid']) is None:
                 trace_history(file_item_output_of_workflow_run_uuids, original_file)
