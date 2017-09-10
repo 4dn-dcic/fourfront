@@ -231,7 +231,7 @@ export class UIControlsWrapper extends React.Component {
 
     renderShowTypeDropdown(contextualView){
         if (contextualView === 'home') return null;
-        console.log('FF', Filters.searchQueryStringFromHref(this.props.href), this.props.href);
+        // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
         var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(this.props.href);
         return (
             <div className="show-type-change-section">

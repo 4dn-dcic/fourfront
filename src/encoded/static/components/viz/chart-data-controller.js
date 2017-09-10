@@ -803,7 +803,7 @@ export const ChartDataController = {
             if (!expSetFilters) expSetFilters = storeState.expSetFilters;
             if (!href)          href = storeState.href;
         }
-        console.log('OPTS', opts);
+        // TODO: MAYBE REMOVE SEARCHQUERY WHEN SWITCH SEARCH FROM /BROWSE/
         var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(href);
         return Filters.filtersToHref(expSetFilters, href, 0, 'experiments_in_set.accession', false, '/browse/') + (searchQuery ? '&q=' + searchQuery : '');
     },
