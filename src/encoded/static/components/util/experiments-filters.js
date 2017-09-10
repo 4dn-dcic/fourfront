@@ -425,9 +425,12 @@ export function searchQueryStringFromHref(href){
     if (!href) return null;
     if (typeof href !== 'string') return null;
     var searchQueryString = null;
-    var searchQueryMatch = href.match(/(\?|&)(q)(=)[\w\s]+/);
+    var searchQueryMatch = href.match(/(\?|&)(q)(=)[\w\s\+\-\%]+/);
     if (searchQueryMatch){
-        searchQueryString = searchQueryMatch[0].replace(searchQueryMatch.slice(1).join(''), '');
+        searchQueryString = searchQueryMatch[0].replace(searchQueryMatch.slice(1).join(''), '').replace('+', ' ');
+        if (decodeURIComponent){
+            searchQueryString = decodeURIComponent(searchQueryString);
+        }
     }
     return searchQueryString;
 }
