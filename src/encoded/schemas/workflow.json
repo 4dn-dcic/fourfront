@@ -125,7 +125,7 @@
                         "title": "secondary file formats",
                         "description": "formats for secondary files",
                         "type": "array",
-                        "iems": {
+                        "items": {
                              "title": "secondary_file_format",
                              "description": "formats for secondary file",
                              "type": "string"
