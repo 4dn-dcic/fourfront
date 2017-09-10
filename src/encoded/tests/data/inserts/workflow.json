@@ -2024,5 +2024,94 @@
     "accession": "4DNWF06BPEF2",
     "data_types": ["Hi-C"],
     "category": "aggregation"
+},
+{
+    "title": "Alignment for Hi-C using bwa-mem",
+    "uuid": "0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
+    "accession": "4DNWFZOGJEI4",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "name": "bwa-mem",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "cwl_pointer": "",
+    "workflow_steps": [
+        {
+            "step_name":"bwa-mem",
+            "step":"02d636b9-d82d-4da9-950c-2ca994a73514"
+        }
+    ],
+    "arguments": [
+        {
+            "workflow_argument_name": "fastq1",
+            "argument_type": "Input file",
+            "argument_format": "fastq",
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa-mem",
+                    "step_argument_name": "fastq1",
+                    "step_argument_type": "Input file"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name": "fastq2",
+            "argument_type": "Input file",
+            "argument_format": "fastq",
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa-mem",
+                    "step_argument_name": "fastq2",
+                    "step_argument_type": "Input file"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name": "bwa_index",
+            "argument_type": "Input file",
+            "argument_format": "bwaIndex",
+            "description": "",
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa-mem",
+                    "step_argument_name": "bwa_index",
+                    "step_argument_type": "Input file"
+                }
+            ]
+        },
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa-mem",
+                    "step_argument_name": "nThreads",
+                    "step_argument_type": "parameter"
+                }
+            ],
+            "workflow_argument_name": "nThreads",
+            "argument_type": "parameter"
+        },
+        {
+            "workflow_argument_name": "out_bam",
+            "argument_type": "Output processed file",
+            "argument_format": "bam",
+            "argument_mapping": [
+                {
+                    "workflow_step": "bwa-mem",
+                    "step_argument_name": "out_bam",
+                    "step_argument_type": "Output file"
+                }
+            ]
+        }
+    ],
+    "data_types": ["Hi-C"],
+    "category": "alignment",
+    "cwl_main_filename" : "bwa-mem.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "bwa-mem",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "description": "Creating a lossless alignment bam file from a pair of fastq files"
 }
 ]
