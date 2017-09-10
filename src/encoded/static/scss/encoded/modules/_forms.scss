@@ -28,6 +28,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 
 // Navbar search
 .navbar-form.navbar-right {
+	position: relative;
 	#navbar-search {
 		font-size: 1em;
 		width: 140px;
@@ -56,7 +57,35 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 				@include transition(width 0.3s ease-out);
 			}
 		}
-		
+	}
+	i.reset-button {
+		position: absolute;
+		top: 50%;
+		margin-top: -8px;
+		right: 18px;
+		opacity: 0.33;
+		cursor: pointer;
+		&:hover {
+			opacity: 1;
+		}
+		@media (max-width: $screen-xs-max) {
+			right: 32px;
+		}
+	}
+	&:not(.has-query){
+		&:after{
+			content : "\f002";
+			font-family: FontAwesome, "Font Awesome";
+			line-height: 14px;
+			position: absolute;
+			top: 50%;
+			margin-top: -8px;
+			right: 18px;
+			opacity: 0.25;
+			@media (max-width: $screen-xs-max) {
+				right: 32px;
+			}
+		}
 	}
 	@media (max-width: $screen-xs-max) {
 		padding-left : 25px;

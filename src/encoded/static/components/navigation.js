@@ -7,8 +7,9 @@ import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-boot
 import _ from 'underscore';
 import Login from './login';
 import * as store from '../store';
-import { JWT, console, layout, isServerSide } from './util';
+import { JWT, console, layout, isServerSide, navigate, Filters } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
+import { ChartDataController } from './viz/chart-data-controller';
 import TestWarning from './testwarning';
 import { productionHost } from './globals';
 
@@ -303,11 +304,24 @@ class SearchBar extends React.Component{
     render() {
         var id = url.parse(this.props.href, true);
         var searchQuery = id.query['q'] || '';
+        var resetIconButton = null;
+        if (searchQuery){
+            delete id.query['q'];
+            var resetHref = id.protocol + '//' + id.host + id.pathname + (_.keys(id.query).length > 0 ? '?' + _.map(_.pairs(id.query), p => p[0]+'='+p[1] ).join('&') : '' );
+            resetIconButton = <i className="reset-button icon icon-close" onClick={navigate.bind(navigate, resetHref)}/>;
+        }
         return (
-            <form className="navbar-form navbar-right" action="/search/">
+            <form
+                className={"navbar-form navbar-right" + (searchQuery ? ' has-query' : '')}
+                action="/browse/"
+                //onSubmit={ChartDataController.sync.bind(ChartDataController.sync, null, { searchQuery : (this.refs && this.refs.q && this.refs.q.value) || null })}
+                method="GET"
+            >
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
                     ref="q" name="q" defaultValue={searchQuery} key={searchQuery} />
-                <input id="type-select" type="hidden" ref="type" name="type" value="ExperimentSetReplicate"/>
+                {resetIconButton}
+                <input id="type-select" type="hidden" name="type" value="ExperimentSetReplicate"/>
+                <input id="expset-type-select" type="hidden" name="experimentset_type" value="replicate"/>
             </form>
         );
     }
