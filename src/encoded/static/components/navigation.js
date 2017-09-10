@@ -302,10 +302,22 @@ class SearchBar extends React.Component{
         this.toggleSearchAllItems = this.toggleSearchAllItems.bind(this);
         this.onSearchInputChange = this.onSearchInputChange.bind(this);
         this.onResetSearch = this.onResetSearch.bind(this);
+        this.onSearchInputBlur = this.onSearchInputBlur.bind(this);
+        var initialQuery = '';
+        if (props.href){
+            var id = url.parse(this.props.href, true);
+            if (id.query['q'] && id.query['q'].length > 0){
+                initialQuery = id.query['q'];
+            }
+        }
         this.state = {
             searchAllItems : false,
-            typedSearchQuery : ''
+            typedSearchQuery : initialQuery
         };
+    }
+
+    hasInput(typedSearchQuery = this.state.typedSearchQuery){
+        return (typedSearchQuery && typeof typedSearchQuery === 'string' && typedSearchQuery.length > 0) || false;
     }
 
     toggleSearchAllItems(){
@@ -313,11 +325,21 @@ class SearchBar extends React.Component{
     }
 
     onSearchInputChange(e){
-        var state = { typedSearchQuery : e.target.value };
-        if (!state.typedSearchQuery || state.typedSearchQuery.length === 0) {
+        var newValue = e.target.value;
+        var state = { typedSearchQuery : newValue };
+        if (!this.hasInput(newValue)) {
             state.searchAllItems = false;
         }
         this.setState(state);
+    }
+
+    onSearchInputBlur(e){
+        var lastValue = this.state.typedSearchQuery;
+        console.log('LH', this.lastSearchQueryFromHref);
+        if (!this.hasInput(lastValue) && this.hasInput(this.lastSearchQueryFromHref)) {
+            this.setState({ typedSearchQuery : this.lastSearchQueryFromHref });
+        }
+        
     }
 
     onResetSearch (e){
@@ -334,6 +356,7 @@ class SearchBar extends React.Component{
         var id = url.parse(this.props.href, true);
         var searchAllItems = this.state.searchAllItems;
         var searchQueryFromHref = id.query['q'] || '';
+        this.lastSearchQueryFromHref = searchQueryFromHref;
         var resetIconButton = null;
 
         if (searchQueryFromHref){
@@ -342,13 +365,13 @@ class SearchBar extends React.Component{
         
         return (
             <form
-                className={"navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (this.state.typedSearchQuery ? ' has-input' : '')}
+                className={"navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (this.hasInput() ? ' has-input' : '')}
                 action={searchAllItems ? "/search/" : "/browse/" }
                 method="GET"
             >
-                <Checkbox className="toggle-all-items-search" on={searchAllItems} onChange={this.toggleSearchAllItems}>&nbsp; All Items</Checkbox>
+                <Checkbox className="toggle-all-items-search" checked={this.state.searchAllItems} onChange={this.toggleSearchAllItems}>&nbsp; All Items</Checkbox>
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
-                    ref="q" name="q" value={this.state.typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" />
+                    ref="q" name="q" value={this.state.typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
                 {resetIconButton}
                 <input id="type-select" type="hidden" name="type" value={searchAllItems ? "Item" : "ExperimentSetReplicate"}/>
                 { !searchAllItems ? <input id="expset-type-select" type="hidden" name="experimentset_type" value="replicate"/> : null }
