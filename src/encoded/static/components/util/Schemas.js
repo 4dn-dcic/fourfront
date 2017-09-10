@@ -2,6 +2,7 @@
 
 import _ from 'underscore';
 import url from 'url';
+import React from 'react';
 import { atIdFromObject } from './object';
 
 let cachedSchemas = null;
@@ -49,7 +50,16 @@ export const itemTypeHierarchy = {
 
 export const Term = {
 
-    toName : function(field, term){
+    toName : function(field, term, allowJSXOutput = false){
+
+        if (allowJSXOutput && typeof term !== 'string' && term){
+            // Object, probably an item.
+            var atId = atIdFromObject(term);
+            if (atId && term.display_title) {
+                return (<a href={atId}>{ term.display_title }</a>);
+            }
+        }
+
         var name = null;
 
         switch (field) {

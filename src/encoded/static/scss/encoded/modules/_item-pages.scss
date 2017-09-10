@@ -955,6 +955,26 @@ $download-button-width : 100px;
 
 }
 
+/************** OverviewBody ***********/
+
+.item-page-container {
+	.rc-tabs-content {
+		
+		.overview-blocks {
+			> div {
+				> .inner {
+					padding: 15px 0 10px;
+					h5 {
+						margin-top: 0;
+						margin-bottom: 5px;
+						font-weight: 500;
+					}
+				}
+			}
+		}
+	}
+}
+
 /************** Experiments Set View **************/
 
 .exp-table-section {
@@ -1129,19 +1149,6 @@ $download-button-width : 100px;
 .item-page-container.type-File {
 
 	.rc-tabs-content {
-
-		.overview-blocks {
-			> div {
-				> .inner {
-					padding: 15px 0 10px;
-					h5 {
-						margin-top: 0;
-						margin-bottom: 5px;
-						font-weight: 500;
-					}
-				}
-			}
-		}
 
 		 .file-download-container {
 

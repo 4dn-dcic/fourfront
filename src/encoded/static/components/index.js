@@ -22,6 +22,7 @@ require('./submissions');
 require('./item-pages/item');
 require('./item-pages/DefaultItemView');
 require('./item-pages/ExperimentSetView');
+require('./item-pages/ExperimentView');
 require('./item-pages/FileSetCalibrationView');
 require('./item-pages/HealthView');
 require('./item-pages/UserView');

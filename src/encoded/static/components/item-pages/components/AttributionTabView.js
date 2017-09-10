@@ -7,6 +7,7 @@ import ReactTooltip from 'react-tooltip';
 import { FormattedInfoBlock } from './FormattedInfoBlock';
 import { Publications } from './Publications';
 import { object } from './../../util';
+import { ItemFooterRow } from './ItemFooterRow';
 
 export class AttributionTabView extends React.Component {
 
@@ -237,6 +238,9 @@ export class AttributionTabView extends React.Component {
 
                     </div>
 
+                </div>
+                <div className="col-sm-12">
+                    <ItemFooterRow context={this.props.context} schemas={this.props.schemas} />
                 </div>
             </div>
         );

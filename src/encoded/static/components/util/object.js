@@ -194,9 +194,9 @@ export function singleTreatment(treatment) {
 
 export class TooltipInfoIconContainer extends React.Component {
     render(){
-        var { elementType, title, tooltip } = this.props;
+        var { elementType, title, tooltip, className } = this.props;
         return React.createElement(elementType || 'div', {
-            'className' : "tooltip-info-container"
+            'className' : "tooltip-info-container" + (typeof className === 'string' ? ' ' + className : '')
         }, (
             <span>{ title }&nbsp;{ typeof tooltip === 'string' ?
                 <i data-tip={tooltip} className="icon icon-info-circle"/>

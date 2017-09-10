@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Panel } from 'react-bootstrap';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout } from './../util';
 import * as globals from './../globals';
-import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, ProcessedFilesTableSimple } from './components';
+import { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView, AttributionTabView, SimpleFilesTable } from './components';
 import { WorkflowRunTracingView, FileViewGraphSection } from './FileView';
 import { FacetList, ReduxExpSetFiltersInterface, RawFilesStackedTable, ProcessedFilesStackedTable } from './../browse/components';
 
@@ -108,7 +108,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
-                content : <ProcessedFilesTableSection
+                content : <ProcessedFilesStackedTableSection
                     processedFiles={processedFiles}
                     width={width}
                     {..._.pick(this.props, 'context', 'schemas', 'expSetFilters')}
@@ -234,7 +234,7 @@ class ExperimentSetHeader extends React.Component {
 }
 
 
-class RawFilesStackedTableSection extends React.Component {
+export class RawFilesStackedTableSection extends React.Component {
     render(){
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
@@ -282,22 +282,21 @@ class RawFilesStackedTableSection extends React.Component {
     }
 }
 
-class ProcessedFilesTableSection extends React.Component {
+export class ProcessedFilesStackedTableSection extends React.Component {
     render(){
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ this.props.processedFiles.length }</span> Processed Files</span>
                 </h3>
-                    <ProcessedFilesStackedTable
-                        files={this.props.processedFiles}
-                        width={this.props.width}
-                        experimentSetAccession={this.props.context.accession || null}
-                        experimentArray={this.props.context.experiments_in_set}
-                        replicateExpsArray={this.props.context.replicate_exps}
-                        collapseLongLists={false}
-                    />
-                {/* <ProcessedFilesTableSimple files={processedFiles} /> */}
+                <ProcessedFilesStackedTable
+                    files={this.props.processedFiles}
+                    width={this.props.width}
+                    experimentSetAccession={this.props.context.accession || null}
+                    experimentArray={this.props.context.experiments_in_set}
+                    replicateExpsArray={this.props.context.replicate_exps}
+                    collapseLongLists={false}
+                />
             </div>
         );
     }

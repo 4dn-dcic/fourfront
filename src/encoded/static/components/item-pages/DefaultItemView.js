@@ -87,7 +87,7 @@ export class ItemBaseView extends React.Component {
 
                 <br/>
 
-                <ItemFooterRow context={context} schemas={schemas} />
+                {/*<ItemFooterRow context={context} schemas={schemas} />*/}
 
             </div>
         );

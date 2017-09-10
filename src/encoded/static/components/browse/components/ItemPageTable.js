@@ -51,14 +51,14 @@ export class ItemPageTable extends React.Component {
                     return (
                         <span className={typeTitle ? "has-type-title" : null}>
                             <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
-                            { typeTitle }
+                            { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
                             <a href={object.atIdFromObject(result)} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>
                         </span>
                     );
 
                     
                 }
-            }
+            },
         },
         'columns' : {
             "experiments_in_set.experiment_type": "Experiment Type",
@@ -89,8 +89,6 @@ export class ItemPageTable extends React.Component {
                 { 'field' : 'display_title' }
             ], defaultColumnDefinitionMap);
         }
-
-        console.log(constantColumnDefinitions);
 
         if (loading || !Array.isArray(results)){
             return (
