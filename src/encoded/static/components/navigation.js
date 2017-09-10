@@ -305,15 +305,21 @@ class SearchBar extends React.Component{
         this.onSearchInputBlur = this.onSearchInputBlur.bind(this);
         var initialQuery = '';
         if (props.href){
-            var id = url.parse(this.props.href, true);
-            if (id.query['q'] && id.query['q'].length > 0){
-                initialQuery = id.query['q'];
-            }
+            initialQuery = Filters.searchQueryStringFromHref(props.href) || '';
         }
         this.state = {
             searchAllItems : false,
             typedSearchQuery : initialQuery
         };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.href !== this.props.href){
+            var query = Filters.searchQueryStringFromHref(nextProps.href) || '';
+            if (query !== this.state.typedSearchQuery){
+                this.setState({ typedSearchQuery : query });
+            }
+        }
     }
 
     hasInput(typedSearchQuery = this.state.typedSearchQuery){
@@ -334,10 +340,9 @@ class SearchBar extends React.Component{
     }
 
     onSearchInputBlur(e){
-        var lastValue = this.state.typedSearchQuery;
-        console.log('LH', this.lastSearchQueryFromHref);
-        if (!this.hasInput(lastValue) && this.hasInput(this.lastSearchQueryFromHref)) {
-            this.setState({ typedSearchQuery : this.lastSearchQueryFromHref });
+        var lastQuery = Filters.searchQueryStringFromHref(this.props.href);
+        if (this.hasInput(lastQuery) && !this.hasInput(this.state.typedSearchQuery)) {
+            this.setState({ typedSearchQuery : lastQuery });
         }
         
     }
@@ -356,7 +361,6 @@ class SearchBar extends React.Component{
         var id = url.parse(this.props.href, true);
         var searchAllItems = this.state.searchAllItems;
         var searchQueryFromHref = id.query['q'] || '';
-        this.lastSearchQueryFromHref = searchQueryFromHref;
         var resetIconButton = null;
 
         if (searchQueryFromHref){
