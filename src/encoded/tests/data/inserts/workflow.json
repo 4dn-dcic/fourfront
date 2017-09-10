@@ -1722,6 +1722,19 @@
             ]
         },
         {
+            "workflow_argument_name":"output_pairs",
+            "is_primary": false,
+            "argument_type":"Output processed file",
+            "argument_format":"pairs_px2",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"output_pairs",
+                    "step_argument_type":"Output file",
+                    "workflow_step":"merge_pairs"
+                }
+            ]
+        },
+        {
             "workflow_argument_name":"out_cool",
             "is_primary": true,
             "argument_type":"Output processed file",
