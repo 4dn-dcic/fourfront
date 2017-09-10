@@ -50,7 +50,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		#navbar-search {
 			margin-top: -4px;
 			font-size: 1em;
-			margin-left: 15px;
+			margin-left: 12px;
 			border: 1px solid rgba(125,125,125,0.5);
 		}
 		&.has-input #navbar-search,
@@ -97,6 +97,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	.checkbox.toggle-all-items-search {
 		display: none;
 		line-height: 40px;
+		font-size: 0.875rem;
 	}
 	@media (min-width: $screen-sm-min) {
 		&.has-query,
