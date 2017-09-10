@@ -31,7 +31,7 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "enum": [
+            "suggested_enum": [
                 "bam",
                 "bai",
                 "pairs",
@@ -47,7 +47,7 @@
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "enum": [
+            "suggested_enum": [
                 "read pairs",
                 "alignments",
                 "unfiltered alignments",
