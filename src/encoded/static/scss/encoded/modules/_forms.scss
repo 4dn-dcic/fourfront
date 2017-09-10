@@ -45,17 +45,20 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			width: 100%;
 			display: block;
 		}
-		@media (min-width: $screen-sm-min) {
+	}
+	@media (min-width: $screen-sm-min) {
+		#navbar-search {
 			margin-top: -4px;
 			font-size: 1em;
-			margin-left: 30px;
+			margin-left: 15px;
 			border: 1px solid rgba(125,125,125,0.5);
-			&:focus {
-				width: 300px;
-				color: rgba(0,0,0,1.0);
-				border-color: rgba(125,125,125,1.0);
-				@include transition(width 0.3s ease-out);
-			}
+		}
+		&.has-input #navbar-search,
+		#navbar-search:focus {
+			width: 300px;
+			color: rgba(0,0,0,1.0);
+			border-color: rgba(125,125,125,1.0);
+			@include transition(width 0.3s ease-out);
 		}
 	}
 	i.reset-button {
@@ -90,6 +93,19 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	@media (max-width: $screen-xs-max) {
 		padding-left : 25px;
 		padding-right: 25px;
+	}
+	.checkbox.toggle-all-items-search {
+		display: none;
+		line-height: 40px;
+	}
+	@media (min-width: $screen-sm-min) {
+		&.has-query,
+		&.has-input {
+			.checkbox.toggle-all-items-search {
+				display: inline-block;
+				margin-left: 30px;
+			}
+		}
 	}
 }
 

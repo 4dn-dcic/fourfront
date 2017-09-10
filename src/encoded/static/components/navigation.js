@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
+import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem, Checkbox } from 'react-bootstrap';
 import _ from 'underscore';
 import Login from './login';
 import * as store from '../store';
@@ -299,29 +299,59 @@ class SearchBar extends React.Component{
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.toggleSearchAllItems = this.toggleSearchAllItems.bind(this);
+        this.onSearchInputChange = this.onSearchInputChange.bind(this);
+        this.onResetSearch = this.onResetSearch.bind(this);
+        this.state = {
+            searchAllItems : false,
+            typedSearchQuery : ''
+        };
+    }
+
+    toggleSearchAllItems(){
+        this.setState({ searchAllItems : !this.state.searchAllItems });
+    }
+
+    onSearchInputChange(e){
+        var state = { typedSearchQuery : e.target.value };
+        if (!state.typedSearchQuery || state.typedSearchQuery.length === 0) {
+            state.searchAllItems = false;
+        }
+        this.setState(state);
+    }
+
+    onResetSearch (e){
+        var id = url.parse(this.props.href, true);
+        delete id.query['q'];
+        var resetHref = id.protocol + '//' + id.host + id.pathname + (_.keys(id.query).length > 0 ? '?' + _.map(_.pairs(id.query), p => p[0]+'='+p[1] ).join('&') : '' );
+        this.setState({
+            searchAllItems : false,
+            typedSearchQuery : ''
+        }, navigate.bind(navigate, resetHref));
     }
 
     render() {
         var id = url.parse(this.props.href, true);
-        var searchQuery = id.query['q'] || '';
+        var searchAllItems = this.state.searchAllItems;
+        var searchQueryFromHref = id.query['q'] || '';
         var resetIconButton = null;
-        if (searchQuery){
-            delete id.query['q'];
-            var resetHref = id.protocol + '//' + id.host + id.pathname + (_.keys(id.query).length > 0 ? '?' + _.map(_.pairs(id.query), p => p[0]+'='+p[1] ).join('&') : '' );
-            resetIconButton = <i className="reset-button icon icon-close" onClick={navigate.bind(navigate, resetHref)}/>;
+
+        if (searchQueryFromHref){
+            resetIconButton = <i className="reset-button icon icon-close" onClick={this.onResetSearch}/>;
         }
+        
         return (
             <form
-                className={"navbar-form navbar-right" + (searchQuery ? ' has-query' : '')}
-                action="/browse/"
-                //onSubmit={ChartDataController.sync.bind(ChartDataController.sync, null, { searchQuery : (this.refs && this.refs.q && this.refs.q.value) || null })}
+                className={"navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (this.state.typedSearchQuery ? ' has-input' : '')}
+                action={searchAllItems ? "/search/" : "/browse/" }
                 method="GET"
             >
+                <Checkbox className="toggle-all-items-search" on={searchAllItems} onChange={this.toggleSearchAllItems}>&nbsp; All Items</Checkbox>
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
-                    ref="q" name="q" defaultValue={searchQuery} key={searchQuery} />
+                    ref="q" name="q" value={this.state.typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" />
                 {resetIconButton}
-                <input id="type-select" type="hidden" name="type" value="ExperimentSetReplicate"/>
-                <input id="expset-type-select" type="hidden" name="experimentset_type" value="replicate"/>
+                <input id="type-select" type="hidden" name="type" value={searchAllItems ? "Item" : "ExperimentSetReplicate"}/>
+                { !searchAllItems ? <input id="expset-type-select" type="hidden" name="experimentset_type" value="replicate"/> : null }
             </form>
         );
     }
