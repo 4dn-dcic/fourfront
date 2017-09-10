@@ -60,6 +60,7 @@ export class ExperimentSetTables extends React.Component {
                         "experiments_in_set.biosample.modifications_summary": "Modifications",
                         "experiments_in_set.biosample.treatments_summary": "Treatments"
                     }}
+                    width={this.props.width}
                 />
             </div>
         );
@@ -139,6 +140,7 @@ export class ExperimentSetTablesLoaded extends React.Component {
                     loading={this.state.loading}
                     experiment_sets={this.state.experiment_sets}
                     sortFxn={this.props.sortFxn}
+                    width={this.props.width}
                 />
             </layout.WindowResizeUpdateTrigger>
         );

@@ -28,16 +28,14 @@ export default class ExperimentView extends WorkflowRunTracingView {
         super(props);
     }
 
-    getFilesTabs(){
+    getFilesTabs(width){
         var context = this.props.context;
         
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
         ];
 
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-
-        if (width) width -= 20;
+        
 
         var tabs = [];
 
@@ -49,7 +47,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
                 content : <RawFilesTableSection
                     rawFiles={context.files}
                     width={width}
-                    {..._.pick(this.props, 'context', 'schemas', 'facets', 'expSetFilters')}
+                    {..._.pick(this.props, 'context', 'schemas')}
                     {...this.state}
                 />
             });
@@ -64,7 +62,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
                 content : <ProcessedFilesTableSection
                     processedFiles={context.processed_files}
                     width={width}
-                    {..._.pick(this.props, 'context', 'schemas', 'expSetFilters')}
+                    {..._.pick(this.props, 'context', 'schemas')}
                     {...this.state}
                 />
             });
@@ -78,14 +76,31 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
         var initTabs = [];
         var context = this.props.context;
+        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
+        if (width) width -= 20;
 
-        initTabs.push(ExperimentViewOverview.getTabObject(context, this.props.schemas));
+        initTabs.push(ExperimentViewOverview.getTabObject(context, this.props.schemas, width));
 
-        //if (FileView.doesGraphExist(context)){
-        //    initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
-        //}
+        
+        if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
+            initTabs.push(FileViewGraphSection.getTabObject(
+                _.extend({}, this.props, {
+                    'isNodeCurrentContext' : function(node){
+                        if (!context) return false;
+                        if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
+                        if (Array.isArray(node.meta.run_data.file)) return false;
+                        if (typeof node.meta.run_data.file.accession !== 'string') return false;
+                        if (!context.processed_files || !Array.isArray(context.processed_files) || context.processed_files === 0) return false;
+                        if (_.contains(_.pluck(context.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
+                        return false;
+                    }.bind(this)
+                }),
+                this.state,
+                this.handleToggleAllRuns
+            ));
+        }
 
-        return initTabs.concat(this.getFilesTabs()).concat(this.getCommonTabs());
+        return initTabs.concat(this.getFilesTabs(width)).concat(this.getCommonTabs());
     }
 
 }
@@ -95,7 +110,7 @@ globals.panel_views.register(ExperimentView, 'Experiment');
 
 class ExperimentViewOverview extends React.Component {
 
-    static getTabObject(context, schemas){
+    static getTabObject(context, schemas, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'experiments-info',
@@ -106,7 +121,7 @@ class ExperimentViewOverview extends React.Component {
                         <span>Overview</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <ExperimentViewOverview context={context} schemas={schemas} />
+                    <ExperimentViewOverview context={context} schemas={schemas} width={width} />
                 </div>
             )
         };
@@ -121,7 +136,7 @@ class ExperimentViewOverview extends React.Component {
     }
 
     render(){
-        var { context } = this.props;
+        var { context, width } = this.props;
 
         var setsByKey = null;
         var table = null;
@@ -131,7 +146,7 @@ class ExperimentViewOverview extends React.Component {
         }
 
         if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} />;
         }
 
         return (
@@ -171,16 +186,16 @@ class OverViewBody extends React.Component {
                 <div className="col-md-12 col-xs-12">
                     <div className="row overview-blocks">
 
-                        <div className="col-sm-4 col-lg-3">
+                        <div className="col-xs-6 col-md-3">
                             <OverViewBodyItem {...{ exp, tips }} property='experiment_type' fallbackTitle="Experiment Type" />
                         </div>
-                        <div className="col-sm-4 col-lg-3">
+                        <div className="col-xs-6 col-md-3">
                             <OverViewBodyItem {...{ exp, tips }} property='biosample' fallbackTitle="Biosample" />
                         </div>
-                        <div className="col-sm-4 col-lg-3">
+                        <div className="col-xs-6 col-md-3">
                             <OverViewBodyItem {...{ exp, tips }} property='digestion_enzyme' fallbackTitle="Digestion Enzyme" />
                         </div>
-                        <div className="col-sm-4 col-lg-3">
+                        <div className="col-xs-6 col-md-3">
                             <OverViewBodyItem {...{ exp, tips }} property='follows_sop' fallbackTitle="Follows SOP" />
                         </div>
 
@@ -232,13 +247,8 @@ export class RawFilesTableSection extends React.Component {
                         schemas={this.props.schemas}
                         columns={columns}
                         columnDefinitionOverrideMap={columnDefinitionOverrideMap}
-                        //width={this.props.width}
-                        //experimentSetAccession={this.props.context.accession || null}
-                        //experimentArray={this.props.context.experiments_in_set}
-                        //replicateExpsArray={this.props.context.replicate_exps}
-                        //collapseLongLists={false}
+                        width={this.props.width}
                     />
-                {/* <ProcessedFilesTableSimple files={processedFiles} /> */}
             </div>
         );
     }
@@ -255,13 +265,8 @@ export class ProcessedFilesTableSection extends React.Component {
                     <SimpleFilesTableLoaded
                         files={processedFiles}
                         schemas={this.props.schemas}
-                        //width={this.props.width}
-                        //experimentSetAccession={this.props.context.accession || null}
-                        //experimentArray={this.props.context.experiments_in_set}
-                        //replicateExpsArray={this.props.context.replicate_exps}
-                        //collapseLongLists={false}
+                        width={this.props.width}
                     />
-                {/* <ProcessedFilesTableSimple files={processedFiles} /> */}
             </div>
         );
     }

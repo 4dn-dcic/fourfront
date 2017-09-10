@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil } from './../util';
+import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
@@ -127,7 +127,10 @@ export default class FileView extends WorkflowRunTracingView {
         var initTabs = [];
         var context = this.props.context;
 
-        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas));
+        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
+        if (width) width -= 20;
+
+        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
         
         var steps = this.state.steps;
 
@@ -145,7 +148,7 @@ globals.panel_views.register(FileView, 'File');
 
 class FileViewOverview extends React.Component {
 
-    static getTabObject(context, schemas){
+    static getTabObject(context, schemas, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'experiments-info',
@@ -156,7 +159,7 @@ class FileViewOverview extends React.Component {
                         <span>Overview</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview context={context} schemas={schemas} />
+                    <FileViewOverview context={context} schemas={schemas} width={width} />
                 </div>
             )
         };
@@ -181,7 +184,7 @@ class FileViewOverview extends React.Component {
         if (context && context.experiments) setsByKey = expFxn.experimentSetsFromFile(context);
 
         if (_.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} />;
         }
 
         return (

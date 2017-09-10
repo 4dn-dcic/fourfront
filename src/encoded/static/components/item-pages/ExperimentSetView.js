@@ -190,9 +190,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9" ref="tabViewContainer">
-                    <layout.WindowResizeUpdateTrigger>
-                        <TabbedView contents={this.getTabViewContents} />
-                    </layout.WindowResizeUpdateTrigger>
+                        <layout.WindowResizeUpdateTrigger>
+                            <TabbedView contents={this.getTabViewContents} />
+                        </layout.WindowResizeUpdateTrigger>
                     </div>
 
                 </div>

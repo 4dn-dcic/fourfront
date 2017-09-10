@@ -4,7 +4,7 @@ import React from 'react';
 import { panel_views, itemClass } from './../globals';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
-import { console, object, DateUtility, Filters } from './../util';
+import { console, object, DateUtility, Filters, layout } from './../util';
 
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
@@ -77,9 +77,11 @@ export class ItemBaseView extends React.Component {
 
                 <div className="row">
 
-                    <div className="col-xs-12 col-md-12 tab-view-container">
+                    <div className="col-xs-12 col-md-12 tab-view-container" ref="tabViewContainer">
 
-                        <TabbedView contents={this.getTabViewContents()} />
+                        <layout.WindowResizeUpdateTrigger>
+                            <TabbedView contents={this.getTabViewContents} />
+                        </layout.WindowResizeUpdateTrigger>
 
                     </div>
 

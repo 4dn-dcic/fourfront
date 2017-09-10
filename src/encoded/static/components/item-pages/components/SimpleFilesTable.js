@@ -51,6 +51,7 @@ export class SimpleFilesTable extends React.Component {
                 schemas={this.props.schemas}
                 columns={this.props.columns}
                 columnDefinitionOverrideMap={this.props.columnDefinitionOverrideMap}
+                width={this.props.width}
             />
         );
     }
@@ -136,6 +137,7 @@ export class SimpleFilesTableLoaded extends React.Component {
                     sortFxn={this.props.sortFxn}
                     columns={this.props.columns}
                     columnDefinitionOverrideMap={this.props.columnDefinitionOverrideMap}
+                    width={this.props.width}
                 />
             </layout.WindowResizeUpdateTrigger>
         );

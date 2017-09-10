@@ -472,5 +472,26 @@ def trace_workflow_runs(context, request):
         except WorkflowRunTracingException as e:
             raise HTTPBadRequest(detail=e.args[0])
 
+    elif 'Experiment' in itemTypes:
+
+        processed_file_atids_to_trace_from_experiment = item_model_obj.get('processed_files', []) # @ids
+
+        processed_files_to_trace = []
+        for file_at_id in processed_file_atids_to_trace_from_experiment:
+            file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))
+            if not hasattr(file_model, 'source') or file_model.source.get('object') is None:
+                raise HTTPBadRequest(detail="At least 1 Processed File in ExperimentSet not done indexing yet.")
+            processed_files_to_trace.append( file_model.source.get('object', {}) )
+        processed_files_to_trace.reverse()
+
+        try:
+            return trace_workflows(
+                processed_files_to_trace,
+                request,
+                options
+            )
+        except WorkflowRunTracingException as e:
+            raise HTTPBadRequest(detail=e.args[0])
+
     else:
         raise HTTPBadRequest(detail="This type of Item is not traceable: " + ', '.join(itemTypes))

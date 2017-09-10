@@ -98,7 +98,7 @@ export class ItemPageTable extends React.Component {
             );
         }
 
-        var width = null;
+        var width = this.props.width;
         var columns = null;
 
         var columnDefinitions = columnsToColumnDefinitions(this.props.columns, constantColumnDefinitions);
@@ -106,7 +106,7 @@ export class ItemPageTable extends React.Component {
             columnDefinitions = extendColumnDefinitions(columnDefinitions, this.props.columnDefinitionOverrideMap);
         }
 
-        if (this.refs && this.refs.tableContainer && this.refs.tableContainer.offsetWidth){
+        if (!width && this.refs && this.refs.tableContainer && this.refs.tableContainer.offsetWidth){
             width = this.refs.tableContainer.offsetWidth;
         }
 
@@ -115,7 +115,6 @@ export class ItemPageTable extends React.Component {
         }
 
         var responsiveGridState = layout.responsiveGridState();
-
         
         return (
             <div className="item-page-table-container clearfix" ref="tableContainer">
