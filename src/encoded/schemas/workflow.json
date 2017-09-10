@@ -121,6 +121,16 @@
                         "description": "Name of the argument of the workflow.",
                         "type": "string"
                     },
+                    "secondary_file_formats": {
+                        "title": "secondary file formats",
+                        "description": "formats for secondary files",
+                        "type": "array",
+                        "items": {
+                             "title": "secondary_file_format",
+                             "description": "formats for secondary file",
+                             "type": "string"
+                        }
+                    },
                     "is_primaryfile": {
                         "title": "Is Primary File",
                         "description": "Flag indicating whether the argument is a primary or secondary file. Not applicable for types other than Input file and Output processed file.",
@@ -136,7 +146,7 @@
                         "title": "Type",
                         "description": "Argument Type",
                         "type": "string",
-                        "enum" : [
+                        "suggested_enum" : [
                             "Input file",
                             "Output processed file",
                             "Output QC file",
@@ -145,12 +155,12 @@
                             "NA"
                         ]
                     },
-					"argument_cardinality":{
-						"title": "Cardinality",
-						"description": "Number of items in the argument, or N for dynamic number.",
-						"type": "string",
-					    "default": "1"
-					},
+                    "argument_cardinality":{
+                       "title": "Cardinality",
+                       "description": "Number of items in the argument, or N for dynamic number.",
+                       "type": "string",
+                       "default": "1"
+                    },
                     "argument_format":{
                         "title": "Format",
                         "description": "Argument Format",
