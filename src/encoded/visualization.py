@@ -1,8 +1,7 @@
 from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
-    HTTPBadRequest,
-    HTTPNoContent
+    HTTPBadRequest
 )
 from snovault import (
     CONNECTION,
@@ -416,8 +415,6 @@ def batch_hub(context, request):
 # TODO: figure out how to make one of those cool /file/ACCESSION/@@download/-like URLs for this.
 @view_config(route_name='trace_workflow_runs', request_method='GET', permission='view', context=Item)
 def trace_workflow_runs(context, request):
-
-    print('\n\n\n', context, '\n\n', dir(context), context.jsonld_type())
 
     options = copy(DEFAULT_TRACING_OPTIONS)
     if request.params.get('all_runs'):

@@ -427,7 +427,7 @@ export function searchQueryStringFromHref(href){
     var searchQueryString = null;
     var searchQueryMatch = href.match(/(\?|&)(q)(=)[\w\s\+\-\%]+/);
     if (searchQueryMatch){
-        searchQueryString = searchQueryMatch[0].replace(searchQueryMatch.slice(1).join(''), '').replace('+', ' ');
+        searchQueryString = searchQueryMatch[0].replace(searchQueryMatch.slice(1).join(''), '').replace(/\+/g, ' ');
         if (decodeURIComponent){
             searchQueryString = decodeURIComponent(searchQueryString);
         }
