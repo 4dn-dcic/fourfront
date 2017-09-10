@@ -15,6 +15,7 @@
                 }
             ],
             "workflow_argument_name": "input_fastq2",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -26,6 +27,7 @@
                 }
             ],
             "workflow_argument_name": "input_fastq1",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -37,6 +39,7 @@
                 }
             ],
             "workflow_argument_name": "bowtie_index",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -48,6 +51,7 @@
                 }
             ],
             "workflow_argument_name": "RE_bed",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -59,6 +63,7 @@
                 }
             ],
             "workflow_argument_name": "chrlen_file",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -92,6 +97,7 @@
                 }
             ],
             "workflow_argument_name": "sorted_bam_pe",
+            "is_primary": true,
             "argument_type": "Output processed file"
         },
         {
@@ -103,6 +109,7 @@
                 }
             ],
             "workflow_argument_name": "HiC_project_object_hdf5",
+            "is_primary": true,
             "argument_type": "Output processed file"
         },
         {
@@ -114,6 +121,7 @@
                 }
             ],
             "workflow_argument_name": "HiC_distance_function_hdf5",
+            "is_primary": true,
             "argument_type": "Output processed file"
         },
         {
@@ -125,6 +133,7 @@
                 }
             ],
             "workflow_argument_name": "normalized_fend_contact_matrix",
+            "is_primary": true,
             "argument_type": "Output processed file"
         },
         {
@@ -136,6 +145,7 @@
                 }
             ],
             "workflow_argument_name": "normalized_enrich_contact_matrix",
+            "is_primary": true,
             "argument_type": "Output processed file"
         },
         {
@@ -147,6 +157,7 @@
                 }
             ],
             "workflow_argument_name": "expected_enrich_contact_matrix",
+            "is_primary": true,
             "argument_type": "Output processed file"
         },
         {
@@ -158,6 +169,7 @@
                 }
             ],
             "workflow_argument_name": "observed_contact_matrix",
+            "is_primary": true,
             "argument_type": "Output processed file"
         },
         {
@@ -169,6 +181,7 @@
                 }
             ],
             "workflow_argument_name": "expected_fend_contact_matrix",
+            "is_primary": true,
             "argument_type": "Output processed file"
         },
         {
@@ -230,6 +243,7 @@
                 }
             ],
             "workflow_argument_name": "HiC_norm_binning_hdf5",
+            "is_primary": true,
             "argument_type": "Output processed file"
         },
         {
@@ -246,6 +260,7 @@
                 }
             ],
             "workflow_argument_name": "HiC_data_object_hdf5",
+            "is_primary": true,
             "argument_type": "Output processed file"
         }
     ],
@@ -292,6 +307,7 @@
                 }
             ],
             "workflow_argument_name": "limits_file",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -304,6 +320,7 @@
             ],
             "workflow_argument_name": "input_fastq",
             "argument_format": "fastq",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -315,6 +332,7 @@
                 }
             ],
             "workflow_argument_name": "contaminants_file",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -326,6 +344,7 @@
                 }
             ],
             "workflow_argument_name": "adapters_file",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -337,6 +356,7 @@
                 }
             ],
             "workflow_argument_name": "report_zip",
+            "is_primary": true,
             "argument_type": "Output QC file"
         }
     ],
@@ -367,6 +387,7 @@
     "arguments": [
         {
             "workflow_argument_name": "input_file",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "fastq",
             "argument_mapping": [
@@ -380,6 +401,7 @@
         },
         {
             "workflow_argument_name": "report",
+            "is_primary": true,
             "argument_type": "Output report file",
             "argument_mapping": [
                 {
@@ -418,6 +440,7 @@
     "arguments": [
         {
             "workflow_argument_name": "input_file",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "fastq",
             "argument_mapping": [
@@ -431,6 +454,7 @@
         },
         {
             "workflow_argument_name": "report",
+            "is_primary": true,
             "argument_type": "Output report file",
             "argument_mapping": [
                 {
@@ -477,6 +501,7 @@
     "arguments": [
         {
             "workflow_argument_name": "fastq1",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "fastq",
             "description": "",
@@ -490,6 +515,7 @@
         },
         {
             "workflow_argument_name": "fastq2",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "fastq",
             "description": "",
@@ -503,6 +529,7 @@
         },
         {
             "workflow_argument_name": "bwa_index",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "bwaIndex",
             "description": "",
@@ -527,6 +554,7 @@
         },
         {
             "workflow_argument_name": "out_sorted_bam",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "bam",
             "description": "",
@@ -559,6 +587,7 @@
         },
         {
             "workflow_argument_name": "out_sorted_bam_index",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "bai",
             "description": "",
@@ -572,6 +601,7 @@
         },
         {
             "workflow_argument_name": "out_pairs",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "pairs",
             "description": "",
@@ -585,6 +615,7 @@
         },
         {
             "workflow_argument_name": "out_pairs_index",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "pairs_px2",
             "description": "",
@@ -628,6 +659,7 @@
     "arguments": [
         {
             "workflow_argument_name": "fastq1",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "fastq",
             "description": "",
@@ -641,6 +673,7 @@
         },
         {
             "workflow_argument_name": "fastq2",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "fastq",
             "description": "",
@@ -654,6 +687,7 @@
         },
         {
             "workflow_argument_name": "bwa_index",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "bwaIndex",
             "description": "",
@@ -678,6 +712,7 @@
         },
         {
             "workflow_argument_name": "out_sorted_bam",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "bam",
             "description": "",
@@ -710,6 +745,7 @@
         },
         {
             "workflow_argument_name": "out_sorted_bam_index",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "bai",
             "description": "",
@@ -723,6 +759,7 @@
         },
         {
             "workflow_argument_name": "out_pairs",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "pairs",
             "description": "",
@@ -736,6 +773,7 @@
         },
         {
             "workflow_argument_name": "out_pairs_index",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "pairs_px2",
             "description": "",
@@ -762,6 +800,7 @@
     "arguments":[
         {
             "workflow_argument_name":"chrsizes",
+            "is_primary": true,
             "argument_type":"Input file",
             "argument_format":"chromsizes",
             "argument_mapping":[
@@ -774,6 +813,7 @@
         },
         {
             "workflow_argument_name":"input_pairs",
+            "is_primary": true,
             "argument_type":"Input file",
             "argument_format":"pairs",
             "argument_mapping":[
@@ -786,6 +826,7 @@
         },
         {
             "workflow_argument_name":"input_pairs_index",
+            "is_primary": true,
             "argument_type":"Input file",
             "argument_format":"pairs",
             "argument_mapping":[
@@ -842,6 +883,7 @@
         },
         {
             "workflow_argument_name":"output_pairs_index",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"pairs_px2",
             "argument_mapping":[
@@ -854,6 +896,7 @@
         },
         {
             "workflow_argument_name":"output_pairs",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"pairs",
             "argument_mapping":[
@@ -866,6 +909,7 @@
         },
         {
             "workflow_argument_name":"out_cool",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"cool",
             "argument_mapping":[
@@ -878,6 +922,7 @@
         },
         {
             "workflow_argument_name":"output_hic",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"hic",
             "argument_mapping":[
@@ -890,6 +935,7 @@
         },
         {
             "workflow_argument_name":"out_mcool",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"mcool",
             "argument_mapping":[
@@ -997,6 +1043,7 @@
             "workflow_argument_name": "input_pairs_index",
             "argument_format": "pairs_px2",
             "description": "",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -1010,6 +1057,7 @@
             "workflow_argument_name": "input_pairs",
             "argument_format": "pairs",
             "description": "",
+            "is_primary": true,
             "argument_type": "Input file"
         },
         {
@@ -1032,6 +1080,7 @@
                     "step_argument_type": "Output file"
                 }
             ],
+            "is_primary": true,
             "argument_type": "Output processed file",
             "workflow_argument_name": "output_pairs_index",
             "description": "",
@@ -1046,6 +1095,7 @@
                 }
             ],
             "workflow_argument_name": "output_pairs",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "description": "",
             "argument_format": "pairs"
@@ -1093,6 +1143,7 @@
     "arguments": [
         {
             "argument_format": "fastq",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1105,6 +1156,7 @@
         },
         {
             "argument_format": "fastq",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1117,6 +1169,7 @@
         },
         {
             "argument_format": "bwaIndex",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1129,6 +1182,7 @@
         },
         {
             "argument_format": "chromsizes",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1141,6 +1195,7 @@
         },
         {
             "argument_format": "reference_fasta",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1153,6 +1208,7 @@
         },
         {
             "argument_format": "juicer_format_restriction_site_file",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1176,6 +1232,7 @@
         },
         {
             "argument_format": "pairs",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_mapping": [
                 {
@@ -1188,6 +1245,7 @@
         },
         {
             "argument_format": "pairs_px2",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_mapping": [
                 {
@@ -1238,6 +1296,7 @@
     "arguments": [
         {
             "argument_format": "fastq",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1250,6 +1309,7 @@
         },
         {
             "argument_format": "fastq",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1262,6 +1322,7 @@
         },
         {
             "argument_format": "bwaIndex",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1274,6 +1335,7 @@
         },
         {
             "argument_format": "chromsizes",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1286,6 +1348,7 @@
         },
         {
             "argument_format": "reference_fasta",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1298,6 +1361,7 @@
         },
         {
             "argument_format": "juicer_format_restriction_site_file",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_mapping": [
                 {
@@ -1332,6 +1396,7 @@
         },
         {
             "argument_format": "pairs",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_mapping": [
                 {
@@ -1344,6 +1409,7 @@
         },
         {
             "argument_format": "pairs_px2",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_mapping": [
                 {
@@ -1382,6 +1448,7 @@
     "arguments":[
         {
             "workflow_argument_name":"chrsizes",
+            "is_primary": true,
             "argument_type":"Input file",
             "argument_format":"chromsizes",
             "argument_mapping":[
@@ -1394,6 +1461,7 @@
         },
         {
             "workflow_argument_name":"input_pairs",
+            "is_primary": true,
             "argument_type":"Input file",
             "argument_format":"pairs",
             "argument_mapping":[
@@ -1406,6 +1474,7 @@
         },
         {
             "workflow_argument_name":"input_pairs_index",
+            "is_primary": true,
             "argument_type":"Input file",
             "argument_format":"pairs",
             "argument_mapping":[
@@ -1451,6 +1520,7 @@
         },
         {
             "workflow_argument_name":"output_pairs_index",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"pairs_px2",
             "argument_mapping":[
@@ -1463,6 +1533,7 @@
         },
         {
             "workflow_argument_name":"output_pairs",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"pairs",
             "argument_mapping":[
@@ -1475,6 +1546,7 @@
         },
         {
             "workflow_argument_name":"out_cool",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"cool",
             "argument_mapping":[
@@ -1487,6 +1559,7 @@
         },
         {
             "workflow_argument_name":"output_hic",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"hic",
             "argument_mapping":[
@@ -1578,6 +1651,7 @@
     "arguments":[
         {
             "workflow_argument_name":"chrsizes",
+            "is_primary": true,
             "argument_type":"Input file",
             "argument_format":"chromsizes",
             "argument_mapping":[
@@ -1590,6 +1664,7 @@
         },
         {
             "workflow_argument_name":"input_pairs",
+            "is_primary": true,
             "argument_type":"Input file",
             "argument_format":"pairs",
             "argument_mapping":[
@@ -1635,6 +1710,7 @@
         },
         {
             "workflow_argument_name":"output_pairs",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"pairs",
             "argument_mapping":[
@@ -1647,6 +1723,7 @@
         },
         {
             "workflow_argument_name":"out_cool",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"cool",
             "argument_mapping":[
@@ -1659,6 +1736,7 @@
         },
         {
             "workflow_argument_name":"output_hic",
+            "is_primary": true,
             "argument_type":"Output processed file",
             "argument_format":"hic",
             "argument_mapping":[
@@ -1733,6 +1811,7 @@
     "arguments": [
         {
             "workflow_argument_name": "input_hic",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "hic",
             "argument_mapping": [
@@ -1746,6 +1825,7 @@
         },
         {
             "workflow_argument_name": "input_mcool",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "mcool",
             "argument_mapping": [
@@ -1759,6 +1839,7 @@
         },
         {
             "workflow_argument_name": "output_mcool",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "mcool",
             "argument_mapping": [
@@ -1793,6 +1874,7 @@
     "arguments": [
         {
             "workflow_argument_name": "input_mcool",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "mcool",
             "argument_mapping": [
@@ -1817,6 +1899,7 @@
         },
         {
             "workflow_argument_name": "output_normvector",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "normvector_juicerformat",
             "argument_mapping": [
@@ -1851,6 +1934,7 @@
     "arguments": [
         {
             "workflow_argument_name": "input_hic",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "hic",
             "argument_mapping": [
@@ -1886,6 +1970,7 @@
         },
         {
             "workflow_argument_name": "output_hic",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "hic",
             "argument_mapping": [
@@ -1922,6 +2007,7 @@
             ], 
             "workflow_argument_name": "input_cool", 
             "argument_format": "cool",
+            "is_primary": true,
             "argument_type": "Input file"
         }, 
         {
@@ -1934,6 +2020,7 @@
             ], 
             "workflow_argument_name": "input_hic", 
             "argument_format": "hic",
+            "is_primary": true,
             "argument_type": "Input file"
         }, 
         {
@@ -1957,6 +2044,7 @@
             ], 
             "workflow_argument_name": "output_mcool", 
             "argument_format": "mcool",
+            "is_primary": true,
             "argument_type": "Output processed file"
         }, 
         {
@@ -1969,6 +2057,7 @@
             ], 
             "workflow_argument_name": "output_normvector", 
             "argument_format": "normvector_juicerformat",
+            "is_primary": true,
             "argument_type": "Output processed file"
         }, 
         {
@@ -2044,6 +2133,7 @@
     "arguments": [
         {
             "workflow_argument_name": "fastq1",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "fastq",
             "description": "",
@@ -2057,6 +2147,7 @@
         },
         {
             "workflow_argument_name": "fastq2",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "fastq",
             "description": "",
@@ -2070,6 +2161,7 @@
         },
         {
             "workflow_argument_name": "bwa_index",
+            "is_primary": true,
             "argument_type": "Input file",
             "argument_format": "bwaIndex",
             "description": "",
@@ -2094,6 +2186,7 @@
         },
         {
             "workflow_argument_name": "out_bam",
+            "is_primary": true,
             "argument_type": "Output processed file",
             "argument_format": "bam",
             "argument_mapping": [
