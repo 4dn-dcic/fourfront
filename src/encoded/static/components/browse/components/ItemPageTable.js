@@ -24,8 +24,9 @@ export class ItemPageTable extends React.Component {
             'display_title' : PropTypes.string.isRequired
         })).isRequired,
         'loading' : PropTypes.bool,
-        'renderDetailPane' : PropTypes.func
-        
+        'renderDetailPane' : PropTypes.func,
+        'defaultOpenIndices' : PropTypes.arrayOf(PropTypes.number),
+        'defaultOpenIds' : PropTypes.arrayOf(PropTypes.string)        
     }
 
     static defaultProps = {
@@ -122,15 +123,20 @@ export class ItemPageTable extends React.Component {
                     <HeadersRow mounted columnDefinitions={columnDefinitions} />
                 : null }
                 { results.map((result, rowIndex)=>{
+                    var atId = object.atIdFromObject(result);
                     return (
                         <ItemPageTableRow
-                            key={object.atIdFromObject(result) || rowIndex}
+                            key={atId || rowIndex}
                             result={result}
                             width={width}
                             columnDefinitions={columnDefinitions}
                             renderDetailPane={this.props.renderDetailPane}
                             rowNumber={rowIndex}
                             responsiveGridState={responsiveGridState}
+                            defaultOpen={
+                                (Array.isArray(this.props.defaultOpenIndices) && _.contains(this.props.defaultOpenIndices, rowIndex))
+                                || (atId && Array.isArray(this.props.defaultOpenIds) && _.contains(this.props.defaultOpenIds, atId))
+                            }
                         />
                     );     
                 }) }
@@ -159,7 +165,7 @@ class ItemPageTableRow extends React.Component {
     constructor(props){
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
-        this.state = { 'open' : false };
+        this.state = { 'open' : props.defaultOpen || false };
     }
 
     toggleOpen(){

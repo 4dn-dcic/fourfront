@@ -52,6 +52,7 @@ export class SimpleFilesTable extends React.Component {
                 columns={this.props.columns}
                 columnDefinitionOverrideMap={this.props.columnDefinitionOverrideMap}
                 width={this.props.width}
+                loading={this.props.loading && (!reducedFiles || !reducedFiles.length)}
             />
         );
     }
@@ -127,7 +128,7 @@ export class SimpleFilesTableLoaded extends React.Component {
 
     render(){
         if (this.state.loading){
-            return <span>'loading'</span>;
+            //return <span>'loading'</span>;
         }
         return (
             <layout.WindowResizeUpdateTrigger>

@@ -61,6 +61,8 @@ export class ExperimentSetTables extends React.Component {
                         "experiments_in_set.biosample.treatments_summary": "Treatments"
                     }}
                     width={this.props.width}
+                    defaultOpenIndices={this.props.defaultOpenIndices}
+                    defaultOpenIds={this.props.defaultOpenIds}
                 />
             </div>
         );
@@ -141,6 +143,8 @@ export class ExperimentSetTablesLoaded extends React.Component {
                     experiment_sets={this.state.experiment_sets}
                     sortFxn={this.props.sortFxn}
                     width={this.props.width}
+                    defaultOpenIndices={this.props.defaultOpenIndices}
+                    defaultOpenIds={this.props.defaultOpenIds}
                 />
             </layout.WindowResizeUpdateTrigger>
         );

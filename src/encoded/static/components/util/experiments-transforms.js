@@ -337,7 +337,7 @@ export function processedFilesFromExperimentSetToGroup(processed_files, combined
 }
 
 export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
-    var expsAndSetsByFileAccession =_.reduce(processed_files, function(m, pF){
+    var expsAndSetsByFileAccession =_.reduce(ensureArray(processed_files), function(m, pF){
         if (typeof pF.from_experiment !== 'undefined' && !Array.isArray(pF.from_experiment)){
             if (!Array.isArray(m.from_experiments[pF.accession])) m.from_experiments[pF.accession] = [];
             m.from_experiments[pF.accession].push(pF.from_experiment);
@@ -348,7 +348,7 @@ export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
         return m;
     }, { 'from_experiments' : {}, 'from_experiment_sets' : {} } );
     return _.map(
-        _.uniq(processed_files, false, function(pF){ return pF.accession; }),
+        _.uniq(ensureArray(processed_files), false, function(pF){ return pF.accession; }),
         function(pF){
             pF = _.clone(pF);
             if (expsAndSetsByFileAccession.from_experiments[pF.accession]){

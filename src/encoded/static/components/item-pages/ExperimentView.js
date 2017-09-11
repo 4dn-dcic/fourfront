@@ -146,7 +146,7 @@ class ExperimentViewOverview extends React.Component {
         }
 
         if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} defaultOpenIndices={[0]} />;
         }
 
         return (
@@ -162,12 +162,12 @@ class ExperimentViewOverview extends React.Component {
 
 class OverViewBodyItem extends React.Component {
     render(){
-        var { exp, tips, fallbackTitle, property } = this.props;
+        var { exp, tips, fallbackTitle, property, fallbackValue } = this.props;
         return (
             <div className="inner">
                 <object.TooltipInfoIconContainerAuto result={exp} property={property} tips={tips} elementType="h5" fallbackTitle={fallbackTitle} />
                 <div>
-                    { Schemas.Term.toName(property, exp[property], true) || 'None' }
+                    { Schemas.Term.toName(property, object.getNestedProperty(exp, property), true) || fallbackValue || 'None' }
                 </div>
             </div>
         );
@@ -180,6 +180,17 @@ class OverViewBody extends React.Component {
     render(){
         var exp = this.props.result;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp);
+        var tipsForBiosample = object.tipsFromSchema(this.props.schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, exp.biosample));
+        var biosources = object.getNestedProperty(exp, 'biosample.biosource');
+        if (Array.isArray(biosources) && biosources.length > 0 && biosources[0].display_title && object.atIdFromObject(biosources[0])){
+            biosources = _.map(_.uniq(biosources, false, function(b){ return object.atIdFromObject(b); }), function(b){
+                var link = <a href={object.atIdFromObject(b)}>{ b.display_title }</a>;
+                if (biosources.length > 1){
+                    return <li>{ link }</li>;
+                }
+                return link;
+            });
+        } else biosources = null;
 
         return (
             <div className="row">
@@ -189,14 +200,40 @@ class OverViewBody extends React.Component {
                         <div className="col-xs-6 col-md-3">
                             <OverViewBodyItem {...{ exp, tips }} property='experiment_type' fallbackTitle="Experiment Type" />
                         </div>
+
+                        <div className="col-xs-6 col-md-3">
+                            <OverViewBodyItem {...{ exp, tips }} property='follows_sop' fallbackTitle="Follows SOP" fallbackValue="No" />
+                        </div>
+
                         <div className="col-xs-6 col-md-3">
                             <OverViewBodyItem {...{ exp, tips }} property='biosample' fallbackTitle="Biosample" />
                         </div>
+
                         <div className="col-xs-6 col-md-3">
                             <OverViewBodyItem {...{ exp, tips }} property='digestion_enzyme' fallbackTitle="Digestion Enzyme" />
                         </div>
+
                         <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem {...{ exp, tips }} property='follows_sop' fallbackTitle="Follows SOP" />
+                            <OverViewBodyItem {...{ exp, tipsForBiosample }} property='modifications_summary' fallbackTitle="Biosample Modifications" />
+                        </div>
+
+                        <div className="col-xs-6 col-md-3">
+                            <OverViewBodyItem {...{ exp, tipsForBiosample }} property='treatments_summary' fallbackTitle="Biosample Treatments" />
+                        </div>
+
+                        
+
+                        <div className="col-xs-6 col-md-3">
+                            <div className="inner">
+                                <object.TooltipInfoIconContainerAuto
+                                    result={exp}
+                                    fallbackTitle={"Biosample Biosource" + (biosources && biosources.length > 1 ? 's' : '')}
+                                    property='biosource'
+                                    tips={tipsForBiosample}
+                                    elementType="h5"
+                                />
+                                { biosources ? (biosources.length > 1 ? <ol>{ biosources }</ol> : biosources) : 'None' }
+                            </div>
                         </div>
 
 
@@ -219,9 +256,9 @@ export class RawFilesTableSection extends React.Component {
         columnDefinitionOverrideMap['related_files'] = {
             'minColumnWidth' : 120,
             'render' : function(result, columnDefinition, props, width){
-                var related_files = _.map(result.related_files, function(fContainer, i){
+                var related_files = _.map(_.filter(result.related_files, function(rF){ return rF.file && object.atIdFromObject(rF.file); }), function(fContainer, i){
                     var link = object.atIdFromObject(fContainer.file);
-                    var title = fContainer.file.display_title;
+                    var title = typeof fContainer.file.accession === 'string' ? <span className="mono-text">{fContainer.file.accession}</span> : fContainer.file.display_title;
                     return <span key={link || i}>{ fContainer.relationship_type } { link ? <a href={link}>{ title }</a> : title }</span>;
                 });
                 return related_files;
@@ -242,13 +279,14 @@ export class RawFilesTableSection extends React.Component {
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ rawFiles.length }</span> Raw File{ rawFiles.length === 1 ? '' : 's' }</span>
                 </h3>
-                    <SimpleFilesTableLoaded
-                        files={rawFiles}
-                        schemas={this.props.schemas}
-                        columns={columns}
-                        columnDefinitionOverrideMap={columnDefinitionOverrideMap}
-                        width={this.props.width}
-                    />
+                <hr className="tab-section-title-horiz-divider"/>
+                <SimpleFilesTableLoaded
+                    files={rawFiles}
+                    schemas={this.props.schemas}
+                    columns={columns}
+                    columnDefinitionOverrideMap={columnDefinitionOverrideMap}
+                    width={this.props.width}
+                />
             </div>
         );
     }
@@ -262,11 +300,12 @@ export class ProcessedFilesTableSection extends React.Component {
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ processedFiles.length }</span> Processed File{ processedFiles.length === 1 ? '' : 's' }</span>
                 </h3>
-                    <SimpleFilesTableLoaded
-                        files={processedFiles}
-                        schemas={this.props.schemas}
-                        width={this.props.width}
-                    />
+                <hr className="tab-section-title-horiz-divider"/>
+                <SimpleFilesTableLoaded
+                    files={processedFiles}
+                    schemas={this.props.schemas}
+                    width={this.props.width}
+                />
             </div>
         );
     }
