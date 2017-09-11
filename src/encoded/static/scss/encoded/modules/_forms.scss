@@ -46,7 +46,14 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			display: block;
 		}
 	}
+	@media (max-width: $screen-sm-max) {
+		line-height: normal;
+		padding-top: 15px;
+		padding-bottom: 15px;
+		border-top: 1px solid #ccc;
+	}
 	@media (min-width: $screen-sm-min) {
+		margin-left: -20px;
 		#navbar-search {
 			margin-top: 0px;
 			font-size: 1em;
@@ -61,7 +68,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			@include transition(width 0.3s ease-out);
 		}
 	}
-	@media (min-width: $screen-md-min) {
+	@media (min-width: $screen-lg-min) {
 		&.has-input #navbar-search,
 		#navbar-search:focus {
 			width: 300px;
@@ -90,7 +97,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			line-height: 14px;
 			position: absolute;
 			top: 50%;
-			margin-top: -10px;
+			margin-top: -11px;
 			right: 12px;
 			opacity: 0.25;
 			border: none;
@@ -105,18 +112,21 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	@media (max-width: $screen-xs-max) {
 		padding-left : 25px;
 		padding-right: 25px;
-		#search-item-type-selector {
+	}
+	.dropdown.btn-group {
+		@media (max-width: $screen-xs-max) {
 			display: none;
 		}
-	}
-	#search-item-type-selector {
-		//display: none;
-		border-radius: 3px;
-		padding: 4px 10px;
-		.caret {
-			margin-left: 2px;
+		#search-item-type-selector {
+			//display: none;
+			border-radius: 3px;
+			padding: 4px 10px;
+			.caret {
+				margin-left: 2px;
+			}
 		}
 	}
+	
 	.dropdown:not(.open) #search-item-type-selector:not(:hover):not(:active):not(.active){
 		background-color: transparent;
 		border-color: #ddd;
