@@ -193,12 +193,16 @@ def health_check(config):
         db_es_compare = OrderedDict()
         all_collections = list(request.registry[COLLECTIONS].by_item_type.keys())
         for collection in all_collections:
-            db_count, es_count, _ = get_db_es_counts_and_db_uuids(request, es, collection)
+            compare_entry = OrderedDict()
+            db_count, es_count, _, diff_uuids = get_db_es_counts_and_db_uuids(request, es, collection)
             warn_str = build_warn_string(db_count, es_count)
+            coll_key = '< WARNING > ' + collection + ' < WARNING >' if warn_str else collection
             db_total += db_count
             es_total += es_count
-            db_es_compare[collection] = ("DB: %s   ES: %s %s" %
+            compare_entry['Counts'] = ("DB: %s   ES: %s %s" %
                             (str(db_count), str(es_count), warn_str))
+            compare_entry['DB/ES diff'] = {'UUIDS': diff_uuids}
+            db_es_compare[coll_key] = compare_entry
         warn_str = build_warn_string(db_total, es_total)
         db_es_total = ("DB: %s   ES: %s %s" %
                             (str(db_total), str(es_total), warn_str))
@@ -234,9 +238,9 @@ def health_check(config):
 
 def build_warn_string(db_count, es_count):
     if db_count > es_count:
-        warn_str = '  < WARNING: DB has %s more items >' % (str(db_count - es_count))
+        warn_str = '  < DB has %s more items >' % (str(db_count - es_count))
     elif db_count < es_count:
-        warn_str = '  < WARNING: ES has %s more items >' % (str(es_count - db_count))
+        warn_str = '  < ES has %s more items >' % (str(es_count - db_count))
     else:
         warn_str = ''
     return warn_str
