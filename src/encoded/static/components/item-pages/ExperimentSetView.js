@@ -238,7 +238,8 @@ export class RawFilesStackedTableSection extends React.Component {
     render(){
         /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
         var expTableColumnHeaders = [
-            { columnClass: 'file-detail', title : 'File Info'}
+            { columnClass: 'file-detail', title: 'File Info'},
+            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ];
 
         if (this.props.context.experimentset_type === 'replicate') {
@@ -254,13 +255,13 @@ export class RawFilesStackedTableSection extends React.Component {
                 { expSetCount ? 
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ fileCount }</span> Raw Files</span>
-                    { Array.isArray(this.props.passExperiments) ? 
+                    {/* Array.isArray(this.props.passExperiments) ? 
                     <span className="exp-number small right">
                         <span className="hidden-xs">Showing </span>
                         { this.props.passExperiments.length } of { expSetCount }
                         <span className="hidden-xs"> Experiments</span>
                     </span>
-                    : null }
+                    : null */}
                 </h3>
                 : null }
                 <div className="exp-table-container">
