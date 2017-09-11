@@ -251,11 +251,12 @@ class ControlsAndResults extends React.Component {
         var columnDefinitionOverrides = {};
 
         // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
+        // Also add the popLink/target=_blank functionality to links
         if (typeof this.props.selectCallback === 'function'){
             columnDefinitionOverrides['display_title'] = {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
-                    var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(result, columnDefinition, props, width);
+                    var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(result, columnDefinition, props, width, true);
                     var newChildren = currentTitleBlock.props.children.slice(0);
                     newChildren.unshift(
                         <div className="select-button-container" onClick={(e)=>{
@@ -268,6 +269,12 @@ class ControlsAndResults extends React.Component {
                         </div>
                     );
                     return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
+                }
+            };
+            columnDefinitionOverrides['lab.display_title'] = {
+                'render' : function(result, columnDefinition, props, width){
+                    var newRender = SearchResultTable.defaultColumnDefinitionMap['lab.display_title'].render(result, columnDefinition, props, width, true);
+                    return newRender;
                 }
             };
         }
