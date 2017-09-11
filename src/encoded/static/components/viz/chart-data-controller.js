@@ -769,6 +769,9 @@ export const ChartDataController = {
             'GET',
             function(){
                 // Fallback (no results or lost connection)
+                ChartDataController.setState({
+                    'filtered_experiment_sets' : null
+                }, callback, opts);
                 if (typeof callback === 'function') callback();
             }
         );

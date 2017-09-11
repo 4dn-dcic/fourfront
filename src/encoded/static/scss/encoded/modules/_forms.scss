@@ -48,23 +48,29 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	}
 	@media (min-width: $screen-sm-min) {
 		#navbar-search {
-			margin-top: -4px;
+			margin-top: 0px;
 			font-size: 1em;
-			margin-left: 12px;
+			margin-left: 5px;
 			border: 1px solid rgba(125,125,125,0.5);
 		}
 		&.has-input #navbar-search,
 		#navbar-search:focus {
-			width: 300px;
+			width: 180px;
 			color: rgba(0,0,0,1.0);
 			border-color: rgba(125,125,125,1.0);
 			@include transition(width 0.3s ease-out);
 		}
 	}
+	@media (min-width: $screen-md-min) {
+		&.has-input #navbar-search,
+		#navbar-search:focus {
+			width: 300px;
+		}
+	}
 	i.reset-button {
 		position: absolute;
 		top: 50%;
-		margin-top: -8px;
+		margin-top: -7px;
 		right: 18px;
 		opacity: 0.33;
 		cursor: pointer;
@@ -75,16 +81,22 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			right: 32px;
 		}
 	}
+	.search-icon-button {
+		display: none;
+	}
 	&:not(.has-query){
-		&:after{
-			content : "\f002";
-			font-family: FontAwesome, "Font Awesome";
+		.search-icon-button {
+			display: block;
 			line-height: 14px;
 			position: absolute;
 			top: 50%;
-			margin-top: -8px;
-			right: 18px;
+			margin-top: -10px;
+			right: 12px;
 			opacity: 0.25;
+			border: none;
+			background: none;
+			padding: 4px 4px 2px;
+
 			@media (max-width: $screen-xs-max) {
 				right: 32px;
 			}
@@ -93,18 +105,28 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	@media (max-width: $screen-xs-max) {
 		padding-left : 25px;
 		padding-right: 25px;
+		#search-item-type-selector {
+			display: none;
+		}
 	}
-	.checkbox.toggle-all-items-search {
-		display: none;
-		line-height: 40px;
-		font-size: 0.875rem;
+	#search-item-type-selector {
+		//display: none;
+		border-radius: 3px;
+		padding: 4px 10px;
+		.caret {
+			margin-left: 2px;
+		}
+	}
+	.dropdown:not(.open) #search-item-type-selector:not(:hover):not(:active):not(.active){
+		background-color: transparent;
+		border-color: #ddd;
 	}
 	@media (min-width: $screen-sm-min) {
 		&.has-query,
 		&.has-input {
-			.checkbox.toggle-all-items-search {
+			#search-item-type-selector {
 				display: inline-block;
-				margin-left: 30px;
+				margin-left: 0px;
 			}
 		}
 	}

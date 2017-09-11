@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
+import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';

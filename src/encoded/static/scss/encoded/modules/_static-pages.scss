@@ -115,6 +115,13 @@ h5.fourDN-header {
 
 }
 
+.help-entry.static-section-entry {
+	// Revert eventually & adjust HTML of static pages, then style up.
+	.fourDN-content{
+		font-family: $font-family-serif;
+	}
+}
+
 .fourDN-content-panel{
 	margin-top: 0px !important;
 }
