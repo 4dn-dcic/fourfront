@@ -55,7 +55,7 @@ file_workflow_run_embeds = [
     'workflow_run_inputs.output_quality_metrics.value.uuid'
 ]
 
-file_workflow_run_embeds_processed = file_workflow_run_embeds + [ e.replace('workflow_run_inputs.', 'workflow_run_outputs.') for e in file_workflow_run_embeds ]
+file_workflow_run_embeds_processed = file_workflow_run_embeds + [e.replace('workflow_run_inputs.', 'workflow_run_outputs.') for e in file_workflow_run_embeds]
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -174,14 +174,14 @@ class FileSetCalibration(FileSet):
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
     embedded_list = ['files_in_set.submitted_by.job_title',
-                'files_in_set.lab.title',
-                'files_in_set.accession',
-                "files_in_set.href",
-                "files_in_set.file_size",
-                "files_in_set.upload_key",
-                "files_in_set.file_format",
-                "files_in_set.file_classification"
-                ]
+                     'files_in_set.lab.title',
+                     'files_in_set.accession',
+                     "files_in_set.href",
+                     "files_in_set.file_size",
+                     "files_in_set.upload_key",
+                     "files_in_set.file_format",
+                     "files_in_set.file_classification"
+                     ]
 
 
 @abstract_collection(
@@ -220,7 +220,7 @@ class File(Item):
                 'related_files.file.accession']
     name_key = 'accession'
     rev = {
-        'experiments': ('Experiment', 'files')
+        'experiments': ('Experiment', 'files'),
     }
 
 
@@ -577,6 +577,8 @@ class FileProcessed(File):
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+        'experiments': ('Experiment', 'processed_files'),
+        'experiment_sets': ('ExperimentSet', 'processed_files')
     })
 
     @classmethod
@@ -608,6 +610,19 @@ class FileProcessed(File):
     })
     def workflow_run_outputs(self, request):
         return self.rev_link_atids(request, "workflow_run_outputs")
+
+    @calculated_property(schema={
+        "title": "Experiment Sets",
+        "description": "All Experiment Sets that this file belongs to",
+        "type": "array",
+        "items": {
+            "title": "Experiment Set",
+            "type": "string",
+            "linkTo": "ExperimentSet"
+        }
+    })
+    def experiment_sets(self, request):
+        return self.rev_link_atids(request, "experiment_sets")
 
 
 @collection(

@@ -333,7 +333,7 @@ def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq_
 
 def test_workflowrun_output_rev_link(testapp, fastq_json, workflow_run_json):
     res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
-    workflow_run_json['output_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    workflow_run_json['output_files'] = [{'workflow_argument_name': 'test', 'value': res['@id']}]
     res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
 
     new_file = testapp.get(res['@id']).json
@@ -342,12 +342,64 @@ def test_workflowrun_output_rev_link(testapp, fastq_json, workflow_run_json):
 
 def test_workflowrun_input_rev_link(testapp, fastq_json, workflow_run_json):
     res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
-    workflow_run_json['input_files'] = [{'workflow_argument_name':'test', 'value':res['@id']}]
+    workflow_run_json['input_files'] = [{'workflow_argument_name': 'test', 'value': res['@id']}]
     res2 = testapp.post_json('/workflow_run_sbg', workflow_run_json).json['@graph'][0]
 
     new_file = testapp.get(res['@id']).json
     assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
 
+
+def test_experiment_rev_link_on_files(testapp, fastq_json, experiment_data):
+    res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
+    experiment_data['files'] = [res['@id']]
+    res2 = testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
+
+    new_file = testapp.get(res['@id']).json
+    assert new_file['experiments'][0]['@id'] == res2['@id']
+
+
+def test_experiment_rev_link_on_processedfiles(testapp, proc_file_json, experiment_data):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [res['@id']]
+    res2 = testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
+
+    new_file = testapp.get(res['@id']).json
+    assert new_file['experiments'][0]['@id'] == res2['@id']
+
+
+def test_no_experiment_rev_link_on_file_processed_in_files_field(
+        testapp, proc_file_json, experiment_data):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['files'] = [res['@id']]
+    res2 = testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
+
+    new_file = testapp.get(res['@id']).json
+    assert not new_file['experiments']
+
+
+def test_experiment_set_rev_link_on_processedfiles(testapp, proc_file_json, rep_set_data):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    rep_set_data['processed_files'] = [res['@id']]
+    res2 = testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+
+    new_file = testapp.get(res['@id']).json
+    assert new_file['experiment_sets'][0]['@id'] == res2['@id']
+
+
+def test_no_experiment_set_rev_link_on_raw_file(testapp, fastq_json, experiment_data, rep_set_data):
+    res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
+    experiment_data['files'] = [res['@id']]
+    res2 = testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
+    rep_set_data['replicate_exps'] = [
+        {'replicate_exp': res2['@id'],
+         'bio_rep_no': 1,
+         'tec_rep_no': 1
+         }]
+    res3 = testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+
+    new_file = testapp.get(res['@id']).json
+    assert new_file['experiments'][0]['@id'] == res2['@id']
+    assert 'experiment_sets' not in new_file
 
 
 def test_force_beanstalk_env(mocker):
