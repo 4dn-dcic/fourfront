@@ -60,6 +60,7 @@
             "items": {
                 "title": "Imaging path",
                 "type": "object",
+                "additionalProperties": false,
                 "properties":{
                     "path":{
                         "title": "Imaging Path",
