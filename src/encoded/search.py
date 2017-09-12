@@ -28,7 +28,7 @@ sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?
 @view_config(route_name='search', request_method='GET', permission='search')
 def search(context, request, search_type=None, return_generator=False, forced_type='Search'):
     """
-    Search view connects to ElasticSearch and returns the results
+    Search view connects to ElasticSearch and returns the results.
     """
     types = request.registry[TYPES]
     search_base = normalize_query(request, search_type)
@@ -460,6 +460,10 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     """
     sort = OrderedDict()
     result_sort = OrderedDict()
+    if len(doc_types) == 1:
+        type_schema = types[doc_types[0]].schema
+    else:
+        type_schema = None
 
     def add_to_sort_dict(requested_sort):
         if requested_sort.startswith('-'):
@@ -468,12 +472,32 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
         else:
             name = requested_sort
             order = 'asc'
+        sort_schema = type_schema.get('properties', {}).get(name) if type_schema else None
+        if sort_schema:
+            sort_type = sort_schema.get('type')
+        else:
+            sort_type = 'string'
 
-        sort['embedded.' + name + '.lower_case_sort.keyword'] = result_sort[name] = {
-            'order': order,
-            'unmapped_type': 'keyword',
-            'missing': '_last'
-        }
+        # ES type != schema types
+        if sort_type == 'integer':
+            sort['embedded.' + name] = result_sort[name] = {
+                'order': order,
+                'unmapped_type': 'long',
+                'missing': '_last'
+            }
+        elif sort_type == 'number':
+            sort['embedded.' + name] = result_sort[name] = {
+                'order': order,
+                'unmapped_type': 'float',
+                'missing': '_last'
+            }
+        else:
+            # fallback case, applies to all string type:string fields
+            sort['embedded.' + name + '.lower_case_sort.keyword'] = result_sort[name] = {
+                'order': order,
+                'unmapped_type': 'keyword',
+                'missing': '_last'
+            }
 
     # Prefer sort order specified in request, if any
     requested_sorts = request.params.getall('sort')
@@ -484,8 +508,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     # Otherwise we use a default sort only when there's no text search to be ranked
     if not sort and (search_term == '*' or not any(search_term)):
         # If searching for a single type, look for sort options in its schema
-        if len(doc_types) == 1:
-            type_schema = types[doc_types[0]].schema
+        if type_schema:
             if 'sort_by' in type_schema:
                 for k, v in type_schema['sort_by'].items():
                     # Should always sort on raw field rather than analyzed field
