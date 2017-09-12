@@ -181,9 +181,13 @@ class FileViewOverview extends React.Component {
         var setsByKey;
         var table = null;
 
-        if (context && context.experiments) setsByKey = expFxn.experimentSetsFromFile(context);
+        if (context && (
+            (Array.isArray(context.experiments) && context.experiments.length > 0) || (Array.isArray(context.experiment_sets) && context.experiment_sets.length > 0)
+        )){
+            setsByKey = expFxn.experimentSetsFromFile(context);
+        }
 
-        if (_.keys(setsByKey).length > 0){
+        if (setsByKey && _.keys(setsByKey).length > 0){
             table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} />;
         }
 
