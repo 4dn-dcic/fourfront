@@ -115,6 +115,13 @@ h5.fourDN-header {
 
 }
 
+.help-entry.static-section-entry {
+	// Revert eventually & adjust HTML of static pages, then style up.
+	.fourDN-content{
+		font-family: $font-family-serif;
+	}
+}
+
 .fourDN-content-panel{
 	margin-top: 0px !important;
 }
@@ -609,10 +616,10 @@ h5.fourDN-header {
 		background-color: #53a74e !important;
 	}
 	div.rm-cell.cellType-planned, div.color-patch.cellType-planned {
-		background-color: rgba(143, 143, 169, 0.5) !important;
+		background-color: rgba(191, 191, 191, 0.5) !important;
 	}
 	div.rm-cell.cellType-in-submission, div.color-patch.cellType-in-submission {
-		background-color: rgba(143, 143, 169, 0.5) !important;
+		background-color: rgba(191, 191, 191, 0.5) !important;
 		overflow: hidden;
 		&:before {
 			content: '';

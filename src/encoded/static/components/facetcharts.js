@@ -91,7 +91,8 @@ export class FacetCharts extends React.Component {
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
                     setTimeout(() => this.setState(newState), 100);
                 },
-                60 * 1000 // 1min auto-refresh
+                60 * 1000, // 1min auto-refresh,
+                this.props.href // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
             );
         } else {
             if (this.props.debug) console.log('Mounted FacetCharts');
@@ -111,6 +112,7 @@ export class FacetCharts extends React.Component {
         if (this.props.debug) console.log('FacetChart next props & state:', nextProps, nextState);
 
         if (
+            this.props.href !== nextProps.href || // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
             this.props.schemas !== nextProps.schemas ||
             !_.isEqual(this.props.schemas, nextProps.schemas) ||
             this.show(nextProps) !== this.show(this.props) ||

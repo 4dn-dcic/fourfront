@@ -2,7 +2,31 @@
     "pages" : {
 
         "home"  : true,
-        "about" : true,
+        "about" : {
+            "title": "About",
+            "directory" : "/src/encoded/static/data/about",
+            "sections"  : [
+                {
+                    "filename" : "introduction.html",
+                    "title": "Introduction"
+                },
+                {
+                    "filename" : "dcic.html",
+                    "title": "Team & Contact"
+                },
+                {
+                    "filename" : "acknowledgements.html",
+                    "title": null
+                },
+                {
+                    "filename" : "funding.html",
+                    "title": null
+                }
+            ],
+            "table-of-contents" : {
+                "enabled" : false
+            }
+        },
 
 
 

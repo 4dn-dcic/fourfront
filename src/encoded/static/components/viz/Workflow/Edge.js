@@ -75,6 +75,12 @@ export default class Edge extends React.Component {
         if (Edge.isSelected(edge, this.props.selectedNode, this.props.isNodeDisabled) || Edge.isRelated(edge, this.props.selectedNode, this.props.isNodeDisabled)){
             endOffset -= 2;
         }
+        if (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext(edge.source)){
+            startOffset += 5;
+        }
+        if (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext(edge.target)){
+            endOffset -= 5;
+        }
         
         var startPt = {
             x : edge.source.x + this.props.columnWidth + startOffset,
