@@ -77,7 +77,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	i.reset-button {
 		position: absolute;
 		top: 50%;
-		margin-top: -7px;
+		margin-top: -6px;
 		right: 18px;
 		opacity: 0.33;
 		cursor: pointer;
@@ -118,7 +118,8 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			display: none;
 		}
 		#search-item-type-selector {
-			//display: none;
+			display: inline-block;
+			z-index: -1000;
 			border-radius: 3px;
 			padding: 4px 10px;
 			.caret {
@@ -134,9 +135,12 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	@media (min-width: $screen-sm-min) {
 		&.has-query,
 		&.has-input {
-			#search-item-type-selector {
-				display: inline-block;
-				margin-left: 0px;
+			.dropdown.btn-group {
+				#search-item-type-selector {
+					display: inline-block;
+					margin-left: 0px;
+					z-index: 1;
+				}
 			}
 		}
 	}
