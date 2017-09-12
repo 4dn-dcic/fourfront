@@ -211,6 +211,13 @@ export function groupExperimentsIntoExperimentSets(experiments){
     return expSets;
 }
 
+export function experimentsFromExperimentSet(experiment_set){
+    return _.map(
+        ensureArray(experiment_set.experiments_in_set),
+        function(exp){ return _.extend({ 'from_experiment_set' : experiment_set }, exp); }
+    );
+}
+
 
 /** @return Object with experiment accessions as keys, from input array of experiments. */
 export function convertToObjectKeyedByAccession(experiments, keepExpObject = true){

@@ -49,10 +49,8 @@ export class Aggregator extends React.Component {
             ) && Array.isArray(nextProps.filtered_experiment_sets)
         ){
             state.aggregatedFilteredData = aggregationFxn.genChartData(
-                expFxn.listAllExperimentsFromExperimentSets(nextProps.filtered_experiment_sets),
+                nextProps.filtered_experiment_sets,
                 nextProps.fields,
-                nextProps.aggregateType,
-                'experiments',
                 nextProps.useOnlyPopulatedFields
             );
         }
@@ -63,10 +61,8 @@ export class Aggregator extends React.Component {
             doFieldsDiffer
         ){
             state.aggregatedData = aggregationFxn.genChartData(
-                expFxn.listAllExperimentsFromExperimentSets(nextProps.experiment_sets),
+                nextProps.experiment_sets,
                 nextProps.fields,
-                nextProps.aggregateType,
-                'experiments',
                 nextProps.useOnlyPopulatedFields
             );
         }

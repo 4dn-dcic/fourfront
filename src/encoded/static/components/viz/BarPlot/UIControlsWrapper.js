@@ -468,7 +468,7 @@ class AggregatedLegend extends React.Component {
         var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
             (!this.props.experiment_sets || !this.props.fields[1] ? null :
                 Legend.aggregegateBarPlotData(
-                    expFxn.listAllExperimentsFromExperimentSets( this.props.showType === 'filtered' ? (this.props.filtered_experiment_sets || this.props.experiment_sets) : this.props.experiment_sets),
+                    this.props.showType === 'filtered' ? (this.props.filtered_experiment_sets || this.props.experiment_sets) : this.props.experiment_sets,
                     [this.props.fields[1]]
                 )
             ),
