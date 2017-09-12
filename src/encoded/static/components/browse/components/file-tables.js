@@ -153,7 +153,8 @@ export class RawFilesStackedTable extends React.Component {
         columnHeaders : [
             { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-            { columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   }
+            { columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   },
+            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ]
     }
 
@@ -462,7 +463,7 @@ export class ProcessedFilesStackedTable extends React.Component {
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
             { columnClass: 'file',                                      title: 'File',          initialWidth: 100   },
             { columnClass: 'file-detail', title: 'File Type', initialWidth: 90 },
-            { columnClass: 'file-detail', title: 'File Size', initialWidth: 60, field : "file_size" }
+            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file']

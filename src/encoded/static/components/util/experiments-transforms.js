@@ -211,6 +211,13 @@ export function groupExperimentsIntoExperimentSets(experiments){
     return expSets;
 }
 
+export function experimentsFromExperimentSet(experiment_set){
+    return _.map(
+        ensureArray(experiment_set.experiments_in_set),
+        function(exp){ return _.extend({ 'from_experiment_set' : experiment_set }, exp); }
+    );
+}
+
 
 /** @return Object with experiment accessions as keys, from input array of experiments. */
 export function convertToObjectKeyedByAccession(experiments, keepExpObject = true){
@@ -227,32 +234,43 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
  * @returns {Object} Object with ExperimentSet @ids as keys and their JSON as values.
  */
 export function experimentSetsFromFile(file){
-    if (!Array.isArray(file.experiments)) return null;
-    return _.reduce(file.experiments, function(sets, exp){
 
-        var expSetsFromExp = _.reduce(exp.experiment_sets || [], function(m, expSet){
+    return _.extend(
+
+        _.reduce(ensureArray(file.experiment_sets), function(m, expSet){ // ExpSets by @id, no 'experiments_in_set' added.
             var id = atIdFromObject(expSet);
             if (id && typeof m[id] === 'undefined'){
-                m[id] = _.extend({ 'experiments_in_set' : [exp] }, expSet);
-            } else {
-                if (Array.isArray(m[id].experiments_in_set) && _.pluck(m[id].experiments_in_set, 'link_id').indexOf(expSet.link_id) === -1){
-                    m[id].experiments_in_set.push(expSet);
-                }
+                m[id] = _.clone(expSet);
             }
             return m;
-        }, {});
+        }, {}),
 
-        _.keys(expSetsFromExp).forEach(function(es_id){
-            if (typeof sets[es_id] !== 'undefined'){
-                sets[es_id].experiments_in_set = (sets[es_id].experiments_in_set || []).concat(expSetsFromExp[es_id].experiments_in_set);
-            } else {
-                sets[es_id] = expSetsFromExp[es_id];
-            }
-        });
-
-        return sets;
-
-    }, {});
+        _.reduce(ensureArray(file.experiments), function(sets, exp){ // ExpSets by @id from file.experiment, with 'experiments_in_set' added.
+            
+            var expSetsFromExp = _.reduce(exp.experiment_sets || [], function(m, expSet){
+                var id = atIdFromObject(expSet);
+                if (id && typeof m[id] === 'undefined'){
+                    m[id] = _.extend({ 'experiments_in_set' : [exp] }, expSet);
+                } else {
+                    if (Array.isArray(m[id].experiments_in_set) && _.pluck(m[id].experiments_in_set, 'link_id').indexOf(expSet.link_id) === -1){
+                        m[id].experiments_in_set.push(expSet);
+                    }
+                }
+                return m;
+            }, {});
+    
+            _.keys(expSetsFromExp).forEach(function(es_id){
+                if (typeof sets[es_id] !== 'undefined'){
+                    sets[es_id].experiments_in_set = (sets[es_id].experiments_in_set || []).concat(expSetsFromExp[es_id].experiments_in_set);
+                } else {
+                    sets[es_id] = expSetsFromExp[es_id];
+                }
+            });
+    
+            return sets;
+    
+        }, {})
+    );
 }
 
 
@@ -337,7 +355,7 @@ export function processedFilesFromExperimentSetToGroup(processed_files, combined
 }
 
 export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
-    var expsAndSetsByFileAccession =_.reduce(processed_files, function(m, pF){
+    var expsAndSetsByFileAccession =_.reduce(ensureArray(processed_files), function(m, pF){
         if (typeof pF.from_experiment !== 'undefined' && !Array.isArray(pF.from_experiment)){
             if (!Array.isArray(m.from_experiments[pF.accession])) m.from_experiments[pF.accession] = [];
             m.from_experiments[pF.accession].push(pF.from_experiment);
@@ -348,7 +366,7 @@ export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
         return m;
     }, { 'from_experiments' : {}, 'from_experiment_sets' : {} } );
     return _.map(
-        _.uniq(processed_files, false, function(pF){ return pF.accession; }),
+        _.uniq(ensureArray(processed_files), false, function(pF){ return pF.accession; }),
         function(pF){
             pF = _.clone(pF);
             if (expsAndSetsByFileAccession.from_experiments[pF.accession]){

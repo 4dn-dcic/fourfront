@@ -32,20 +32,16 @@ import { console, object, expFxn } from './../../util';
  * @public
  * @param {Array} experiments - List of experiments which are to be aggregated or counted by their term(s).
  * @param {Array} fields - List of fields containing at least 'field' property (as object-dot-notated string).
- * @param {string} [aggregate="experiments"] - What to aggregate. Can be 'experiments', 'experiment_sets', or 'files'.
- * @param {string} [experimentsOrSets="experiments"] - Deprecated. Whether chart is fed experiments or experiment_sets.
  * @param {boolean} [useOnlyPopulatedFields=false] - If true, will try to only select fields which have multiple terms to visualize.
  * 
  * @returns {Array} - Array of fields, now containing term counts per field. One field (either the first or first populated) will have a childField with partitioned terms.
  */
 export function genChartData(
-    experiments = [],
+    experiment_sets = [],
     fields = [{ 'name' : 'Biosample' , field : 'experiments_in_set.biosample.biosource_summary' }],
-    aggregate = 'experiments', // No longer needed.
-    experimentsOrSets = 'experiments',
     useOnlyPopulatedFields = false
 ){
-    //aggregate='experiments';
+
     // Since we not looking for populated fields, only keep track of first two fields provided.
     fields = !useOnlyPopulatedFields ? fields.slice(0,2) : fields.slice(0);
 
@@ -59,10 +55,10 @@ export function genChartData(
         });
     });
 
-    aggregateByType(fields, experiments);
+    aggregateByType(fields, experiment_sets); // First-level (x-axis) fields.
 
     if (fields.length === 1) return fields;
-    return partitionFields(fields, experiments, useOnlyPopulatedFields);
+    return partitionFields(fields, experiment_sets, useOnlyPopulatedFields); // Partition them into bar components (counts will override).
 }
 
 
@@ -80,7 +76,6 @@ export function getNestedExpSetPropertyFromExperiment(experiment, property, supp
     } else {
         return object.getNestedProperty(experiment.from_experiment_set, property, suppressNotFoundError);
     }
-
 }
 
 
@@ -90,20 +85,16 @@ export function getNestedExpSetPropertyFromExperiment(experiment, property, supp
  * @static
  * @ignore
  */
-function aggregateByType(fields, experiments){
+function aggregateByType(fields, experiment_sets){
 
-    // Experiments
-    experiments.forEach(function(exp){
-        getTermsForFieldsFromExperiment(fields,exp).forEach(function(fieldTermPair, i){
-            if (fields[i].field !== fieldTermPair[0]) throw new Error("This shouldn't happen");
-            countFieldTerm(fields[i], fieldTermPair[1], true, 'experiments');
-        });
-    });
-      
+    
+
     // Experiment Sets
     _.forEach(
-        expFxn.groupExperimentsIntoExperimentSets(experiments), // = [ [set1exp1, set1exp2, set1exp3], [set2exp1, set2exp2, ...], ...]
-        function(expsInSet){
+        expFxn.ensureArray(experiment_sets),
+        function(experiment_set){
+
+            var expsInSet = expFxn.experimentsFromExperimentSet(experiment_set);
 
             fields.forEach(function(currField){
                 // Add +1 for each unique term that the ExpSet (aka one of its experiments) matches.
@@ -130,18 +121,32 @@ function aggregateByType(fields, experiments){
                 });
             });
             */
+
+            // Experiments
+            expsInSet.forEach(function(exp){
+                getTermsForFieldsFromExperiment(fields,exp).forEach(function(fieldTermPair, i){
+                    if (fields[i].field !== fieldTermPair[0]) throw new Error("This shouldn't happen");
+                    countFieldTerm(fields[i], fieldTermPair[1], true, 'experiments');
+                });
+            });
+
+            // Raw Files, Exp Processed Files
+            expsInSet.forEach(function(exp){
+                // [[field0Id, term], [field1Id, term], ...] . forEach( -->
+                getTermsForFieldsFromExperiment(fields,exp).forEach(function(fieldTermPair, i){
+                    countFieldTerm(fields[i], fieldTermPair[1], true, 'files', expFxn.fileCount(exp, true));
+                });
+            });
+
+            // ExpSet Processed Files
+            if (Array.isArray(experiment_set.processed_files)){
+                getTermsForFieldsFromExperimentSet(fields, experiment_set).forEach(function(fieldTermPair, i){
+                    countFieldTerm(fields[i], fieldTermPair[1], true, 'files', experiment_set.processed_files.length);
+                });
+            }
         
         }
     );
-
-    // Files
-    experiments.forEach(function(exp){
-        // [[field0Id, term], [field1Id, term], ...] . forEach( -->
-        getTermsForFieldsFromExperiment(fields,exp).forEach(function(fieldTermPair, i){
-            if (fields[i].field !== fieldTermPair[0]) throw new Error("This shouldn't happen");
-            countFieldTerm(fields[i], fieldTermPair[1], true, 'files', expFxn.fileCount(exp));
-        });
-    });
 
 }
 
@@ -195,7 +200,7 @@ export function getUniqueMatchedTermsFromExpsInSetWhereFieldIsTerm(experiments_i
  * @param {string} aggregate - Deprecated. What to aggregate by.
  * @param {boolean} [useOnlyPopulatedFields=false] - Whether to search for populated fields or not.
  */
-function partitionFields(fields, experiments, useOnlyPopulatedFields = false){
+function partitionFields(fields, experiment_sets, useOnlyPopulatedFields = false){
     var topIndex, nextIndex;
     if (!Array.isArray(fields) || fields.length < 2) throw new Error("Need at least 2 fields.");
     if (useOnlyPopulatedFields){
@@ -210,7 +215,7 @@ function partitionFields(fields, experiments, useOnlyPopulatedFields = false){
         nextIndex = 1;
     }
     fields[topIndex].childField = fields[nextIndex];
-    return combinedFieldTermsForExperiments(fields, experiments);
+    return combinedFieldTermsForExperimentSets(fields, experiment_sets);
 }
 
 
@@ -271,8 +276,6 @@ export function doFieldsDiffer(fields1, fields2){
 
 
 /**
- * @static
- * @public
  * @param {Array} fields - List of field objects.
  * @param {Object} exp - Experiment to get terms (field values) from to pair with fields.
  * @returns {Array} Array of pairs containing field key (index 0) and term (index 1) 
@@ -283,12 +286,23 @@ export function getTermsForFieldsFromExperiment(fields, exp){
     });
 }
 
+/**
+ * @param {Array} fields - List of field objects.
+ * @param {Object} exp - Experiment to get terms (field values) from to pair with fields.
+ * @returns {Array} Array of pairs containing field key (index 0) and term (index 1) 
+ */
+export function getTermsForFieldsFromExperimentSet(fields, expSet){
+    return fields.map(function(f){
+        return [ f.field, object.getNestedProperty(expSet, f.field, true) ];
+    });
+}
+
 
 /**
  * @static
  * @ignore
  */
-function combinedFieldTermsForExperiments(fields, experiments){
+function combinedFieldTermsForExperimentSets(fields, experiment_sets){
     var field;
     var fieldIndex;
     if (Array.isArray(fields)){ // Fields can be array or single field object.
@@ -308,24 +322,15 @@ function combinedFieldTermsForExperiments(fields, experiments){
         };
     }
 
-    field.terms = _(field.terms).chain()
-        .clone()
-        .pairs()
-        .map(function(term){
-            var termField = {
-                'field' : field.childField.field, 
-                'cachedTotal' : term[1],
-                'total' : createZeroCountTermObj(),
-                'term' : term[0],
-                'terms' : {} 
-            };
-            return [
-                term[0],
-                termField
-            ];
-        })
-        .object()
-        .value();
+    field.terms = _.object(_.map(_.pairs(_.clone(field.terms)), function(term){ // Convert term vals from counts to child-fields
+        return [ term[0], {
+            'field' : field.childField.field, 
+            'cachedTotal' : term[1],
+            'total' : createZeroCountTermObj(),
+            'term' : term[0],
+            'terms' : {} 
+        }];
+    }));
 
     function aggregateExpAndFilesFromExp(exp){
 
@@ -344,17 +349,19 @@ function combinedFieldTermsForExperiments(fields, experiments){
         if (!nextLevelFieldTerm) nextLevelFieldTerm = "None";
 
         // Files
-        countFieldTerm(field.terms[topLevelFieldTerm], nextLevelFieldTerm, true, 'files', expFxn.fileCount(exp));
+        var fileCountFromExps = expFxn.fileCount(exp, true);
+        countFieldTerm(field.terms[topLevelFieldTerm], nextLevelFieldTerm, true, 'files', expFxn.fileCount(exp, true));
+
         // Experiments
         countFieldTerm(field.terms[topLevelFieldTerm], nextLevelFieldTerm, true, 'experiments', 1);
     }
 
-    // Aggregate files & experiments for child (subdivision) field
-    experiments.forEach(aggregateExpAndFilesFromExp);
-
-    // Aggregate experiment sets for child (subdivision) field
+    // Aggregate experiment sets, exps, files for child (subdivision) field
     // [ [set1exp1, set1exp2, set1exp3], [set2exp1, set2exp2, ...], ...].forEach
-    _.values(expFxn.groupExperimentsIntoExperimentSets(experiments)).forEach(function(expsInSet){
+    expFxn.ensureArray(experiment_sets).forEach(function(experiment_set){
+
+        var expsInSet = expFxn.experimentsFromExperimentSet(experiment_set);
+
         var topLevelFieldTerms = _.uniq(getUniqueMatchedTermsFromExpsInSet(
             expsInSet,
             field.field
@@ -381,10 +388,20 @@ function combinedFieldTermsForExperiments(fields, experiments){
             
             nextLevelFieldTerms.forEach(function(term){
                 countFieldTerm(field.terms[tlft], term, true, 'experiment_sets', 1);
+
+                // ExpSet Processed Files
+                if (Array.isArray(experiment_set.processed_files) && experiment_set.processed_files.length > 0){
+                    var fileCountFromExps = experiment_set.processed_files.length;
+                    countFieldTerm(field.terms[tlft], term, true, 'files', experiment_set.processed_files.length);
+                }
+
             });
 
         });
-    
+
+        // Experiments, Raw Files
+        expsInSet.forEach(aggregateExpAndFilesFromExp);
+
     });
 
     if (Array.isArray(fields)){

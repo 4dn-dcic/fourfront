@@ -413,7 +413,26 @@ function getBaseHref(currentHref = '/browse/', hrefPath = null){
         else baseQuery.push(['type', urlParts.query.type]);
     }
 
+    var searchQuery = searchQueryStringFromHref(currentHref);
+    if (searchQuery) {
+        baseQuery.push([ 'q', searchQuery ]);
+    }
+
     return baseHref + (baseQuery.length > 0 ? '?' + baseQuery.map(function(queryPair){ return queryPair[0] + '=' + queryPair[1]; }).join('&') : '');
+}
+
+export function searchQueryStringFromHref(href){
+    if (!href) return null;
+    if (typeof href !== 'string') return null;
+    var searchQueryString = null;
+    var searchQueryMatch = href.match(/(\?|&)(q)(=)[\w\s\+\-\%]+/);
+    if (searchQueryMatch){
+        searchQueryString = searchQueryMatch[0].replace(searchQueryMatch.slice(1).join(''), '').replace(/\+/g, ' ');
+        if (decodeURIComponent){
+            searchQueryString = decodeURIComponent(searchQueryString);
+        }
+    }
+    return searchQueryString;
 }
 
 
