@@ -156,10 +156,15 @@ export default class BuildField extends React.Component{
         var cannot_delete = ['filename'];
         var showDelete = false;
         // don't show delet button unless:
-        // 1. not in hardcoded cannot delete list AND 2. has a value (non-null)
-        // AND 3. is not an object or non-empty array element (individual values get deleted)
-        if(!_.contains(cannot_delete, this.props.field) && this.props.value !== null && this.props.fieldType !== 'array'){
+        // not in hardcoded cannot delete list AND is not an object or
+        // non-empty array element (individual values get deleted)
+        if(!_.contains(cannot_delete, this.props.field) && this.props.fieldType !== 'array'){
             showDelete = true;
+        }
+
+        // if there is no value in the field and non-array, hide delete button
+        if(this.props.value === null && !this.props.isArray){
+            showDelete = false;
         }
 
         var rowClassName = "row facet" + (this.state.dropdownOpen ? ' active-submission-row' : '');
