@@ -202,6 +202,11 @@ input[type="date"] {
     font-weight: normal;
     cursor: pointer;
   }
+  &.disabled {
+    label {
+      cursor: not-allowed;
+    }
+  }
 }
 .radio input[type="radio"],
 .radio-inline input[type="radio"],

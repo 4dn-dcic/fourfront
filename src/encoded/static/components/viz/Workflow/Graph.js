@@ -354,7 +354,7 @@ export default class Graph extends React.Component {
                             onNodeClick={this.props.onNodeClick}
                         >
                             <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeDisabled', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing')} />
+                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing')} />
                                 <NodesLayer {..._.pick(this.props, 'nodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }
