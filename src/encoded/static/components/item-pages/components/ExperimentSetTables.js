@@ -11,7 +11,17 @@ export class ExperimentSetTables extends React.Component {
 
     static propTypes = {
         'experiment_sets' : PropTypes.array.isRequired,
-        'loading' : PropTypes.bool
+        'loading' : PropTypes.bool,
+        'sortFxn' : PropTypes.func
+    }
+    
+    static defaultProps = {
+        'sortFxn' : function(expSetA, expSetB){
+            if (!Array.isArray(expSetA['@type']) || !Array.isArray(expSetB['@type'])) return 0;
+            if (expSetA['@type'].indexOf('ExperimentSetReplicate') > -1) return -1;
+            if (expSetB['@type'].indexOf('ExperimentSetReplicate') > -1) return 1;
+            return 0;
+        }
     }
 
     render(){
@@ -24,6 +34,10 @@ export class ExperimentSetTables extends React.Component {
                     <i className="icon icon-fw icon-spin icon-circle-o-notch"/>
                 </div>
             );
+        }
+
+        if (typeof this.props.sortFxn === 'function'){
+            experiment_sets = experiment_sets.sort(this.props.sortFxn);
         }
         
         return (
@@ -46,6 +60,9 @@ export class ExperimentSetTables extends React.Component {
                         "experiments_in_set.biosample.modifications_summary": "Modifications",
                         "experiments_in_set.biosample.treatments_summary": "Treatments"
                     }}
+                    width={this.props.width}
+                    defaultOpenIndices={this.props.defaultOpenIndices}
+                    defaultOpenIds={this.props.defaultOpenIds}
                 />
             </div>
         );
@@ -55,8 +72,9 @@ export class ExperimentSetTables extends React.Component {
 export class ExperimentSetTablesLoaded extends React.Component {
 
     static propTypes = {
-        'children' : PropTypes.element.isRequired,
-        'experimentSetObject' : PropTypes.object.isRequired
+        //'children' : PropTypes.element.isRequired,
+        'experimentSetObject' : PropTypes.object.isRequired,
+        'sortFxn' : PropTypes.func
     }
 
     static isExperimentSetCompleteEnough(expSet){
@@ -123,6 +141,10 @@ export class ExperimentSetTablesLoaded extends React.Component {
                 <ExperimentSetTables
                     loading={this.state.loading}
                     experiment_sets={this.state.experiment_sets}
+                    sortFxn={this.props.sortFxn}
+                    width={this.props.width}
+                    defaultOpenIndices={this.props.defaultOpenIndices}
+                    defaultOpenIds={this.props.defaultOpenIds}
                 />
             </layout.WindowResizeUpdateTrigger>
         );

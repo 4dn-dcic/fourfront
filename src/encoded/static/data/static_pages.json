@@ -2,9 +2,27 @@
     "pages" : {
 
         "home"  : true,
-        "about" : true,
-
-
+        "about" : {
+            "title": "About",
+            "directory" : "/src/encoded/static/data/about",
+            "sections"  : [
+                {
+                    "filename" : "introduction.html",
+                    "title": null
+                },
+                {
+                    "filename" : "dcic.html",
+                    "title": "Team"
+                },
+                {
+                    "filename" : "acknowledgements.html",
+                    "title": "Acknowledgements"
+                }
+            ],
+            "table-of-contents" : {
+                "enabled" : false
+            }
+        },
 
         "help"  : {
             "title": "Introduction to 4DN Metadata",
