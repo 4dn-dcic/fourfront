@@ -297,28 +297,30 @@ export function filtersToHref(expSetFilters, currentHref, page = null, sortColum
  * @param {string}   href              A URL or path containing query at end in form of ?...&field.name=term1&field2.name=term2[...]
  * @param {Object[]} [contextFilters]  Collection of objects from (props.)context.filters or context.facets which have a 'field' property to cross-ref and check if URL query args are facets.
  * @param {string}   [contextFilters.field]
+ * @returns {Object} Shape of { field : Set([...terms]) }
  */
 export function hrefToFilters(href, contextFilters = null){
-    return _(url.parse(href, true).query).chain()
-        .pairs() // Object to [key, val] pairs.
-        .filter(function(queryPair){ // Get only facet fields query args.
+    if (!navigate.isBrowseHref(href)) return {};
+    return _.object(_.map(
+        _.filter(
+            _.pairs(url.parse(href, true).query),
+            function(queryPair){
+                if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
+                
+                if (Array.isArray(contextFilters) && typeof _.findWhere(contextFilters,  {'field' : queryPair[0]}) !== 'undefined'){
+                    return true; // See if in context.filters, if is available.
+                }
 
-            if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
-
-            if (Array.isArray(contextFilters) && typeof _.findWhere(contextFilters,  {'field' : queryPair[0]}) !== 'undefined'){
-                return true; // See if in context.filters, if is available.
+                // These happen to all start w/ 'experiments_in_set.' currently. Woops not anymore.
+                if (queryPair[0].indexOf('experiments_in_set.') > -1) return true;
+                return false;
             }
-
-            // These happen to all start w/ 'experiments_in_set.' currently. Woops not anymore.
-            if (queryPair[0].indexOf('experiments_in_set.') > -1) return true;
-            return false;
-        })
-        .map(function(queryPair){ // Convert term(s) to Sets
+        ),
+        function(queryPair){
             if (Array.isArray(queryPair[1])) return [  queryPair[0], new Set(queryPair[1])  ];
             else return [  queryPair[0], new Set([queryPair[1]])  ];
-        })
-        .object() // Pairs back to object. We have expSetFilters now.
-        .value();
+        }
+    ));
 }
 
 
