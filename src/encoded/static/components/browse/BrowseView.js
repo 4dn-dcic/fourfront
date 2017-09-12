@@ -393,11 +393,11 @@ export default class BrowseView extends React.Component {
         var searchBase = url.parse(this.props.href).search || '';
 
         // browse is only for experiment sets
-        if(searchBase.indexOf('?type=ExperimentSetReplicate') === -1){
+        if(searchBase.indexOf('type=ExperimentSetReplicate') === -1){
             return(
                 <div className="error-page">
                     <h4>
-                        <a href='/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0'>
+                        <a href='/browse/?type=ExperimentSetReplicate'>
                             Only experiment sets may be browsed.
                         </a>
                     </h4>

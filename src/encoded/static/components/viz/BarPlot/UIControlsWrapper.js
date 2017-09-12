@@ -82,15 +82,17 @@ export class UIControlsWrapper extends React.Component {
 
     componentWillReceiveProps(nextProps){
         if (
-            this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters) &&
-            !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters) && (
+            // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+            this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) &&
+            !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) && (
                 this.state.showState === 'all'
             )
         ){
             this.setState({ 'showState' : 'filtered' });
         } else if (
-            this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters) &&
-            !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters) && (
+            // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+            this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) &&
+            !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) && (
                 this.state.showState === 'filtered'
             )
         ){
@@ -98,8 +100,9 @@ export class UIControlsWrapper extends React.Component {
         }
     }
 
-    filterObjExistsAndNoFiltersSelected(expSetFilters = this.props.expSetFilters){
-        return Filters.filterObjExistsAndNoFiltersSelected(expSetFilters);
+    // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+    filterObjExistsAndNoFiltersSelected(expSetFilters = this.props.expSetFilters, href = this.props.href){
+        return Filters.filterObjExistsAndNoFiltersSelected(expSetFilters) && !Filters.searchQueryStringFromHref(href);
     }
 
     titleMap(key = null, fromDropdown = false){
@@ -228,7 +231,8 @@ export class UIControlsWrapper extends React.Component {
 
     renderShowTypeDropdown(contextualView){
         if (contextualView === 'home') return null;
-        var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected();
+        // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+        var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(this.props.href);
         return (
             <div className="show-type-change-section">
                 <h6 className="dropdown-heading">Show</h6>
@@ -464,7 +468,7 @@ class AggregatedLegend extends React.Component {
         var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
             (!this.props.experiment_sets || !this.props.fields[1] ? null :
                 Legend.aggregegateBarPlotData(
-                    expFxn.listAllExperimentsFromExperimentSets( this.props.showType === 'filtered' ? (this.props.filtered_experiment_sets || this.props.experiment_sets) : this.props.experiment_sets),
+                    this.props.showType === 'filtered' ? (this.props.filtered_experiment_sets || this.props.experiment_sets) : this.props.experiment_sets,
                     [this.props.fields[1]]
                 )
             ),

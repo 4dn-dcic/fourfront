@@ -24,8 +24,9 @@ export class ItemPageTable extends React.Component {
             'display_title' : PropTypes.string.isRequired
         })).isRequired,
         'loading' : PropTypes.bool,
-        'renderDetailPane' : PropTypes.func
-        
+        'renderDetailPane' : PropTypes.func,
+        'defaultOpenIndices' : PropTypes.arrayOf(PropTypes.number),
+        'defaultOpenIds' : PropTypes.arrayOf(PropTypes.string)        
     }
 
     static defaultProps = {
@@ -51,14 +52,14 @@ export class ItemPageTable extends React.Component {
                     return (
                         <span className={typeTitle ? "has-type-title" : null}>
                             <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
-                            { typeTitle }
+                            { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
                             <a href={object.atIdFromObject(result)} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>
                         </span>
                     );
 
                     
                 }
-            }
+            },
         },
         'columns' : {
             "experiments_in_set.experiment_type": "Experiment Type",
@@ -90,8 +91,6 @@ export class ItemPageTable extends React.Component {
             ], defaultColumnDefinitionMap);
         }
 
-        console.log(constantColumnDefinitions);
-
         if (loading || !Array.isArray(results)){
             return (
                 <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
@@ -100,7 +99,7 @@ export class ItemPageTable extends React.Component {
             );
         }
 
-        var width = null;
+        var width = this.props.width;
         var columns = null;
 
         var columnDefinitions = columnsToColumnDefinitions(this.props.columns, constantColumnDefinitions);
@@ -108,7 +107,7 @@ export class ItemPageTable extends React.Component {
             columnDefinitions = extendColumnDefinitions(columnDefinitions, this.props.columnDefinitionOverrideMap);
         }
 
-        if (this.refs && this.refs.tableContainer && this.refs.tableContainer.offsetWidth){
+        if (!width && this.refs && this.refs.tableContainer && this.refs.tableContainer.offsetWidth){
             width = this.refs.tableContainer.offsetWidth;
         }
 
@@ -117,7 +116,6 @@ export class ItemPageTable extends React.Component {
         }
 
         var responsiveGridState = layout.responsiveGridState();
-
         
         return (
             <div className="item-page-table-container clearfix" ref="tableContainer">
@@ -125,15 +123,20 @@ export class ItemPageTable extends React.Component {
                     <HeadersRow mounted columnDefinitions={columnDefinitions} />
                 : null }
                 { results.map((result, rowIndex)=>{
+                    var atId = object.atIdFromObject(result);
                     return (
                         <ItemPageTableRow
-                            key={object.atIdFromObject(result) || rowIndex}
+                            key={atId || rowIndex}
                             result={result}
                             width={width}
                             columnDefinitions={columnDefinitions}
                             renderDetailPane={this.props.renderDetailPane}
                             rowNumber={rowIndex}
                             responsiveGridState={responsiveGridState}
+                            defaultOpen={
+                                (Array.isArray(this.props.defaultOpenIndices) && _.contains(this.props.defaultOpenIndices, rowIndex))
+                                || (atId && Array.isArray(this.props.defaultOpenIds) && _.contains(this.props.defaultOpenIds, atId))
+                            }
                         />
                     );     
                 }) }
@@ -162,7 +165,7 @@ class ItemPageTableRow extends React.Component {
     constructor(props){
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
-        this.state = { 'open' : false };
+        this.state = { 'open' : props.defaultOpen || false };
     }
 
     toggleOpen(){

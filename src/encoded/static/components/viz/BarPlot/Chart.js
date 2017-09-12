@@ -343,8 +343,6 @@ export class Chart extends React.Component {
             genChartData( // Get counts by term per field.
                 this.props.experiments,
                 this.props.fields,
-                this.props.aggregateType,
-                'experiments',
                 this.props.useOnlyPopulatedFields
             ),
             width,
@@ -375,13 +373,8 @@ export class Chart extends React.Component {
 
     genChartData(){
         return genChartData( // Get counts by term per field.
-            expFxn.listAllExperimentsFromExperimentSets(
-                this.props.showType === 'all' ?
-                this.props.experiment_sets : this.props.filtered_experiment_sets || this.props.experiment_sets
-            ),
+            this.props.showType === 'all' ? this.props.experiment_sets : this.props.filtered_experiment_sets || this.props.experiment_sets,
             this.props.fields,
-            this.props.aggregateType,
-            'experiments',
             this.props.useOnlyPopulatedFields
         );
     }
