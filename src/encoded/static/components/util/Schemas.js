@@ -3,7 +3,7 @@
 import _ from 'underscore';
 import url from 'url';
 import React from 'react';
-import { atIdFromObject } from './object';
+import { linkFromItem } from './object';
 
 let cachedSchemas = null;
 
@@ -52,12 +52,9 @@ export const Term = {
 
     toName : function(field, term, allowJSXOutput = false){
 
-        if (allowJSXOutput && typeof term !== 'string' && term){
+        if (allowJSXOutput && typeof term !== 'string' && term && typeof term === 'object'){
             // Object, probably an item.
-            var atId = atIdFromObject(term);
-            if (atId && term.display_title) {
-                return (<a href={atId}>{ term.display_title }</a>);
-            }
+            return linkFromItem(term);
         }
 
         var name = null;

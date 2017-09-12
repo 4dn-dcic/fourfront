@@ -210,7 +210,7 @@ class OverViewBody extends React.Component {
 
             return (
                 <li className="related-file">
-                    { rf.relationship_type } { object.linkFromItem(rf.file) }
+                    { rf.relationship_type } &nbsp;-&nbsp; { object.linkFromItem(rf.file) }
                 </li>
             );
         });

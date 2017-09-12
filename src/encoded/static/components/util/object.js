@@ -22,13 +22,17 @@ export function atIdFromObject(o){
 
 export function linkFromItem(item, propertyForTitle = 'display_title', elementProps){
     var href = atIdFromObject(item);
-    if (!href){
+    var title = item[propertyForTitle] || item.display_title || item.title || item.name;
+    if (!href || !title){
+        if (item && typeof item === 'object' && typeof item.error === 'string'){
+            return <em>{ item.error }</em>;
+        }
         // Uh oh, probably not an Item
         console.error("Could not get atId for Item", item);
         return null;
     }
     return (
-        <a href={href} {...elementProps}>{ item[propertyForTitle] || item.display_title || item.title || item.name }</a>
+        <a href={href} {...elementProps}>{ title }</a>
     );
 }
 
