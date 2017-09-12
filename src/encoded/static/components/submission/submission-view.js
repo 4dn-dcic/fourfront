@@ -1546,6 +1546,22 @@ class IndividualObjectView extends React.Component{
     }
 
     /*
+    Exit out of the selection process and clean up state
+    */
+    selectCancel = () => {
+        this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
+        this.setState({
+            'selectType': null,
+            'selectData': null,
+            'selectQuery': null,
+            'selectField': null,
+            'selectLink': null,
+            'selectArrayIdx': null
+        });
+        this.props.setSubmissionState('fullScreen', false);
+    }
+
+    /*
     Given a field, use the schema to generate the sufficient information to
     make a BuildField component for that field. Different fields are returned
     for roundOne and roundTwo.
@@ -1701,6 +1717,14 @@ class IndividualObjectView extends React.Component{
             <div>
                 <Fade in={selecting} transitionAppear={true}>
                     <div>
+                        <div>
+                            {selecting ?
+                                <Button style={{'marginBottom':'-50px'}} bsStyle="danger" onClick={this.selectCancel}>
+                                    {'Cancel selection'}
+                                </Button>
+                                : null
+                            }
+                        </div>
                         {selecting ?
                             <Search {...this.props}
                                 context={this.state.selectData}
@@ -1830,7 +1854,7 @@ class WarningBanner extends React.Component {
             'paddingBottom': '5px',
             'color': '#8b8b8b'
         };
-        var textBody = 'Please note: do not navigate away from, refresh or close this page while submitting. Doing so will result in your work being lost. The submission process is under active development and features may change.';
+        var textBody = 'Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. The submission process is under active development and features may change.';
         return(
             <h5 style={style}>
                 {textBody}
