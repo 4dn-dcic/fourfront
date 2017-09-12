@@ -8,27 +8,21 @@
             "sections"  : [
                 {
                     "filename" : "introduction.html",
-                    "title": "Introduction"
+                    "title": null
                 },
                 {
                     "filename" : "dcic.html",
-                    "title": "Team & Contact"
+                    "title": "Team"
                 },
                 {
                     "filename" : "acknowledgements.html",
-                    "title": null
-                },
-                {
-                    "filename" : "funding.html",
-                    "title": null
+                    "title": "Acknowledgements"
                 }
             ],
             "table-of-contents" : {
                 "enabled" : false
             }
         },
-
-
 
         "help"  : {
             "title": "Introduction to 4DN Metadata",
