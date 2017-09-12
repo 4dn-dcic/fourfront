@@ -472,7 +472,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
         else:
             name = requested_sort
             order = 'asc'
-        sort_schema = type_schema.get('properties', {}).get(name)
+        sort_schema = type_schema.get('properties', {}).get(name) if type_schema else None
         if sort_schema:
             sort_type = sort_schema.get('type')
         else:
