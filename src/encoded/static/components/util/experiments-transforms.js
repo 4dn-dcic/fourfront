@@ -234,32 +234,43 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
  * @returns {Object} Object with ExperimentSet @ids as keys and their JSON as values.
  */
 export function experimentSetsFromFile(file){
-    if (!Array.isArray(file.experiments)) return null;
-    return _.reduce(file.experiments, function(sets, exp){
 
-        var expSetsFromExp = _.reduce(exp.experiment_sets || [], function(m, expSet){
+    return _.extend(
+
+        _.reduce(ensureArray(file.experiment_sets), function(m, expSet){ // ExpSets by @id, no 'experiments_in_set' added.
             var id = atIdFromObject(expSet);
             if (id && typeof m[id] === 'undefined'){
-                m[id] = _.extend({ 'experiments_in_set' : [exp] }, expSet);
-            } else {
-                if (Array.isArray(m[id].experiments_in_set) && _.pluck(m[id].experiments_in_set, 'link_id').indexOf(expSet.link_id) === -1){
-                    m[id].experiments_in_set.push(expSet);
-                }
+                m[id] = _.clone(expSet);
             }
             return m;
-        }, {});
+        }, {}),
 
-        _.keys(expSetsFromExp).forEach(function(es_id){
-            if (typeof sets[es_id] !== 'undefined'){
-                sets[es_id].experiments_in_set = (sets[es_id].experiments_in_set || []).concat(expSetsFromExp[es_id].experiments_in_set);
-            } else {
-                sets[es_id] = expSetsFromExp[es_id];
-            }
-        });
-
-        return sets;
-
-    }, {});
+        _.reduce(ensureArray(file.experiments), function(sets, exp){ // ExpSets by @id from file.experiment, with 'experiments_in_set' added.
+            
+            var expSetsFromExp = _.reduce(exp.experiment_sets || [], function(m, expSet){
+                var id = atIdFromObject(expSet);
+                if (id && typeof m[id] === 'undefined'){
+                    m[id] = _.extend({ 'experiments_in_set' : [exp] }, expSet);
+                } else {
+                    if (Array.isArray(m[id].experiments_in_set) && _.pluck(m[id].experiments_in_set, 'link_id').indexOf(expSet.link_id) === -1){
+                        m[id].experiments_in_set.push(expSet);
+                    }
+                }
+                return m;
+            }, {});
+    
+            _.keys(expSetsFromExp).forEach(function(es_id){
+                if (typeof sets[es_id] !== 'undefined'){
+                    sets[es_id].experiments_in_set = (sets[es_id].experiments_in_set || []).concat(expSetsFromExp[es_id].experiments_in_set);
+                } else {
+                    sets[es_id] = expSetsFromExp[es_id];
+                }
+            });
+    
+            return sets;
+    
+        }, {})
+    );
 }
 
 
