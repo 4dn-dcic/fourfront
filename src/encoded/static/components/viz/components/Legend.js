@@ -213,12 +213,10 @@ export class Legend extends React.Component {
     static Term = Term
     static Field = Field
 
-    static aggregegateBarPlotData(experiments, fields){
+    static aggregegateBarPlotData(experiment_sets, fields){
         return barAggrFxn.genChartData(
-            experiments,
+            experiment_sets,
             fields,
-            null,
-            'experiments',
             false
         );
     }

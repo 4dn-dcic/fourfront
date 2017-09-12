@@ -3,9 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
+import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil } from './../util';
+import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
@@ -49,14 +49,7 @@ export function filterOutIndirectFilesFromGraphData(graphData){
 
 
 
-
-export default class FileView extends ItemBaseView {
-
-    static doesGraphExist(context){
-        return (
-            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
-        );
-    }
+export class WorkflowRunTracingView extends ItemBaseView {
 
     constructor(props){
         super(props);
@@ -82,8 +75,11 @@ export default class FileView extends ItemBaseView {
     }
 
     loadGraphSteps(force = false, cb = null){
-        if (typeof this.props.context.uuid !== 'string') return;
+        var context = this.props.context;
+        if (typeof context.uuid !== 'string') return;
         if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
+        if (!force && Array.isArray(context['@type']) && _.contains(context['@type'], 'ExperimentSet')
+            && (!Array.isArray(context.processed_files) || context.processed_files.length === 0)  ) return;
 
         var callback = function(r){
             requestAnimationFrame(()=>{
@@ -109,41 +105,37 @@ export default class FileView extends ItemBaseView {
         });
     }
 
+}
+
+
+
+
+export default class FileView extends WorkflowRunTracingView {
+
+    static doesGraphExist(context){
+        return (
+            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
+        );
+    }
+
+    constructor(props){
+        super(props);
+    }
+
     getTabViewContents(){
 
         var initTabs = [];
         var context = this.props.context;
 
-        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas));
+        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
+        if (width) width -= 20;
+
+        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
         
         var steps = this.state.steps;
 
         if (FileView.doesGraphExist(context)){
-            var iconClass = "icon icon-fw icon-";
-            var tooltip = null;
-            if (steps === null || this.state.loading){
-                iconClass += 'circle-o-notch icon-spin';
-                tooltip = "Graph is loading";
-            } else if (!Array.isArray(steps) || steps.length === 0) {
-                iconClass += 'times';
-                tooltip = "Graph currently not available for this file. Please check back later.";
-            } else {
-                iconClass += 'code-fork';
-            }
-            initTabs.push({
-                tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
-                key : 'graph',
-                disabled : !Array.isArray(steps) || steps.length === 0,
-                content : <GraphSection
-                    {...this.props}
-                    steps={steps}
-                    mounted={this.state.mounted}
-                    key={"graph-for-" + this.props.context.uuid}
-                    onToggleAllRuns={this.handleToggleAllRuns}
-                    allRuns={this.state.allRuns}
-                    loading={this.state.loading}
-                />
-            });
+            initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
         }
 
         return initTabs.concat(this.getCommonTabs());
@@ -156,7 +148,7 @@ globals.panel_views.register(FileView, 'File');
 
 class FileViewOverview extends React.Component {
 
-    static getTabObject(context, schemas){
+    static getTabObject(context, schemas, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'experiments-info',
@@ -167,7 +159,7 @@ class FileViewOverview extends React.Component {
                         <span>Overview</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview context={context} schemas={schemas} />
+                    <FileViewOverview context={context} schemas={schemas} width={width} />
                 </div>
             )
         };
@@ -192,7 +184,7 @@ class FileViewOverview extends React.Component {
         if (context && context.experiments) setsByKey = expFxn.experimentSetsFromFile(context);
 
         if (_.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} />;
         }
 
         return (
@@ -218,7 +210,7 @@ class OverViewBody extends React.Component {
 
             return (
                 <li className="related-file">
-                    { rf.relationship_type } { object.linkFromItem(rf.file) }
+                    { rf.relationship_type } &nbsp;-&nbsp; { object.linkFromItem(rf.file) }
                 </li>
             );
         });
@@ -292,7 +284,38 @@ class OverViewBody extends React.Component {
 
 
 
-class GraphSection extends React.Component {
+export class FileViewGraphSection extends React.Component {
+
+    static getTabObject(props, state, onToggleAllRuns){
+        var { loading, steps, mounted, allRuns } = state;
+        var { context } = props;
+
+        var iconClass = "icon icon-fw icon-";
+        var tooltip = null;
+        if (steps === null || loading){
+            iconClass += 'circle-o-notch icon-spin';
+            tooltip = "Graph is loading";
+        } else if (!Array.isArray(steps) || steps.length === 0) {
+            iconClass += 'times';
+            tooltip = "Graph currently not available for this file. Please check back later.";
+        } else {
+            iconClass += 'code-fork';
+        }
+        return {
+            tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
+            key : 'graph',
+            disabled : !Array.isArray(steps) || steps.length === 0,
+            content : <FileViewGraphSection
+                {...props}
+                steps={steps}
+                mounted={mounted}
+                key={"graph-for-" + context.uuid}
+                onToggleAllRuns={onToggleAllRuns}
+                allRuns={allRuns}
+                loading={loading}
+            />
+        };
+    }
 
     static isNodeDisabled(node){
         if (node.type === 'step') return false;
@@ -300,6 +323,15 @@ class GraphSection extends React.Component {
             return false;
         }
         return true;
+    }
+
+    static isNodeCurrentContext(node, context){
+        return (
+            context && typeof context.accession === 'string' && node.meta.run_data && node.meta.run_data.file
+            && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
+            && typeof node.meta.run_data.file.accession === 'string'
+            && node.meta.run_data.file.accession === context.accession
+        ) || false;
     }
 
     constructor(props){
@@ -338,6 +370,8 @@ class GraphSection extends React.Component {
             graphData = filterOutParametersFromGraphData(graphData);
         }
 
+        this.anyGroupNodesExist = !this.props.allRuns && _.any(graphData.nodes, function(n){ return n.type === 'input-group' || n.type === 'output-group'; });
+
         //var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
         if (!this.state.showIndirectFiles){
             graphData = filterOutIndirectFilesFromGraphData(graphData);
@@ -350,20 +384,14 @@ class GraphSection extends React.Component {
         );
         var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
         return _.extend(commonGraphPropsFromProps(this.props), {
-            'isNodeDisabled' : GraphSection.isNodeDisabled,
+            'isNodeDisabled' : FileViewGraphSection.isNodeDisabled,
             'nodes' : nodes,
             'edges' : graphData.edges,
             'columnSpacing' : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
             'rowSpacingType' : this.state.rowSpacingType,
             'nodeElement' : <WorkflowNodeElement />,
-            'isNodeCurrentContext' : function(node){
-                return (
-                    this.props.context && typeof this.props.context.accession === 'string' && node.meta.run_data && node.meta.run_data.file
-                    && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
-                    && typeof node.meta.run_data.file.accession === 'string'
-                    && node.meta.run_data.file.accession === this.props.context.accession
-                ) || false;
-            }.bind(this)
+            'isNodeCurrentContext' : (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext) || (node => FileViewGraphSection.isNodeCurrentContext(node, this.props.context))
+
         });
     }
 
@@ -384,6 +412,7 @@ class GraphSection extends React.Component {
         if (Array.isArray(this.props.steps)){
             graphProps = this.commonGraphProps();
         }
+        var isAllRunsCheckboxDisabled = this.props.loading || (!this.props.allRuns && !this.anyGroupNodesExist ? true : false);
         return (
             <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
                 <h3 className="tab-section-title">
@@ -399,11 +428,13 @@ class GraphSection extends React.Component {
                                 Show More Context
                             </Checkbox>
                         </div>
+                        { typeof this.props.allRuns === 'boolean' ? 
                         <div className="inline-block show-params-checkbox-container">
-                            <Checkbox checked={!this.props.allRuns} onChange={this.onToggleAllRuns} disabled={this.props.loading}>
+                            <Checkbox checked={!this.props.allRuns && !isAllRunsCheckboxDisabled} onChange={this.onToggleAllRuns} disabled={isAllRunsCheckboxDisabled}>
                             { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
                             </Checkbox>
                         </div>
+                        : null }
                         <div className="inline-block">
                             <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
                                 requestAnimationFrame(()=>{

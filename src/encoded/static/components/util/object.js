@@ -22,13 +22,17 @@ export function atIdFromObject(o){
 
 export function linkFromItem(item, propertyForTitle = 'display_title', elementProps){
     var href = atIdFromObject(item);
-    if (!href){
+    var title = item[propertyForTitle] || item.display_title || item.title || item.name;
+    if (!href || !title){
+        if (item && typeof item === 'object' && typeof item.error === 'string'){
+            return <em>{ item.error }</em>;
+        }
         // Uh oh, probably not an Item
         console.error("Could not get atId for Item", item);
         return null;
     }
     return (
-        <a href={href} {...elementProps}>{ item[propertyForTitle] || item.display_title || item.title || item.name }</a>
+        <a href={href} {...elementProps}>{ title }</a>
     );
 }
 
@@ -69,9 +73,18 @@ export function listFromTips(tips){
  * @return {*} - Value corresponding to propertyName.
  */
 export function getNestedProperty(object, propertyName, suppressNotFoundError = false){
-
+    var errorMsg;
     if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
-    if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName "' + propertyName + '" in objectutils.getNestedProperty.');
+    if (!Array.isArray(propertyName)){
+        errorMsg = 'Using improper propertyName "' + propertyName + '" in object.getNestedProperty.';
+        console.error(errorMsg);
+        return null;
+    }
+    if (!object || typeof object !== 'object'){
+        errorMsg = 'Not valid object.';
+        console.error(errorMsg);
+        return null;
+    }
     try {
         return (function findNestedValue(currentNode, fieldHierarchyLevels, level = 0){
             if (level === fieldHierarchyLevels.length) return currentNode;
@@ -95,7 +108,8 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
             }
         })(object, propertyName);
     } catch (e) {
-        if (!suppressNotFoundError) console.warn('Could not get ' + propertyName.join('.') + ' from nested object.');
+        errorMsg = 'Could not get ' + propertyName.join('.') + ' from nested object.';
+        if (!suppressNotFoundError) console.warn(errorMsg);
         return null;
     }
 
@@ -184,9 +198,9 @@ export function singleTreatment(treatment) {
 
 export class TooltipInfoIconContainer extends React.Component {
     render(){
-        var { elementType, title, tooltip } = this.props;
+        var { elementType, title, tooltip, className } = this.props;
         return React.createElement(elementType || 'div', {
-            'className' : "tooltip-info-container"
+            'className' : "tooltip-info-container" + (typeof className === 'string' ? ' ' + className : '')
         }, (
             <span>{ title }&nbsp;{ typeof tooltip === 'string' ?
                 <i data-tip={tooltip} className="icon icon-info-circle"/>
