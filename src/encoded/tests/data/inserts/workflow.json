@@ -2114,5 +2114,74 @@
     "app_version" : "dev",
     "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
     "description": "Creating a lossless alignment bam file from a pair of fastq files"
-}
+},
+{
+    "cwl_pointer": "", 
+    "uuid": "65586d4b-1e3b-4b31-891e-11f48c816545",
+    "arguments": [
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "pairsam-parse-sort", 
+                    "step_argument_name": "bam", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "bam", 
+            "argument_format": "bam",
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "pairsam-parse-sort", 
+                    "step_argument_name": "chromsize", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "chromsize", 
+            "argument_format": "chromsize",
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "pairsam-parse-sort", 
+                    "step_argument_name": "nThreads", 
+                    "step_argument_type": "parameter"
+                }
+            ], 
+            "workflow_argument_name": "nThreads", 
+            "argument_type": "parameter"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "pairsam-parse-sort", 
+                    "step_argument_name": "out_pairsam", 
+                    "step_argument_type": "Output file"
+                }
+            ], 
+            "workflow_argument_name": "out_pairsam", 
+            "argument_format": "pairsam",
+            "argument_type": "Output processed file"
+        } 
+    ], 
+    "title": "Parsing and Sorting for Hi-C using pairsamtools", 
+    "name": "pairsam-parse-sort", 
+    "workflow_steps": [
+        {
+            "step": "9a30285a-d224-4ced-bde5-c26ba3af9325",
+            "step_name": "pairsam-parse-sort"
+        } 
+    ], 
+    "workflow_type": "Hi-C data analysis", 
+    "workflow_diagram": "", 
+    "description": "Parsing and Sorting for Hi-C using pairsamtools",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "accession": "4DNWF37VHW0F",
+    "data_types": ["Hi-C"],
+    "category": "annotation+sorting"
+},
 ]
