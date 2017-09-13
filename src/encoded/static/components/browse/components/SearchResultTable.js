@@ -112,7 +112,7 @@ class ResultDetail extends React.Component{
         return (
             <div className={"result-table-detail-container" + (this.props.open || this.state.closing ? ' open' : ' closed')}>
                 { this.props.open ?
-                
+
                     <div className="result-table-detail" ref="detail" style={{
                         'width' : this.props.tableContainerWidth,
                         'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
@@ -206,7 +206,7 @@ class ResultRow extends React.Component {
         }
     }
     */
-    
+
     toggleDetailOpen(){
         this.props.toggleDetailPaneOpen(this.props['data-key']);
     }
@@ -315,7 +315,7 @@ class LoadMoreAsYouScroll extends React.Component {
             this.setState({ 'canLoad' : true });
         }
     }
-    
+
     isMounted(){
         if (typeof this.props.mounted === 'boolean') return this.props.mounted;
         return this.state.mounted;
@@ -341,7 +341,7 @@ class LoadMoreAsYouScroll extends React.Component {
     }
 
     handleLoad(e,p,t){
-        
+
         var nextHref = this.rebuiltHref();
         var loadCallback = (function(resp){
             if (resp && resp['@graph'] && resp['@graph'].length > 0){
@@ -565,7 +565,7 @@ class ShadowBorderLayer extends React.Component {
         return (
             <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass(edges) + this.tallDimensionClass() + (this.props.isWindowPastTableTop ? ' fixed-position-arrows' : '')}>
                 { this.edgeScrollButtonLeft(edges.left) }{ this.edgeScrollButtonRight(edges.right) }
-            </div>    
+            </div>
         );
     }
 }
@@ -607,7 +607,7 @@ class DimensioningContainer extends React.Component {
             var w = DimensioningContainer.findLargestBlockWidth(colDef.field);
             if (typeof w !== 'number') return 0;
             if (w < colDef.widthMap.lg) return w + padding;
-            return 0; 
+            return 0;
         });
     }
 
@@ -654,7 +654,7 @@ class DimensioningContainer extends React.Component {
             'isWindowPastTableTop' : false,
             'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview.
         };
-        
+
     }
 
     componentDidMount(){
@@ -674,7 +674,7 @@ class DimensioningContainer extends React.Component {
             }
 
             window.addEventListener('scroll', this.onVerticalScroll);
-            
+
         }
 
         this.lastResponsiveGridSize = layout.responsiveGridState();
@@ -714,7 +714,7 @@ class DimensioningContainer extends React.Component {
                         this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
                     });
                 });
-                
+
             }
         }
     }
@@ -755,14 +755,14 @@ class DimensioningContainer extends React.Component {
     onVerticalScroll(e){
         if (!document || !window || !this.refs.innerContainer) return null;
 
-        
+
 
         //vizUtil.requestAnimationFrame(()=>{
 
             var windowHeight    = window.innerHeight;
             var scrollTop       = document && document.body && document.body.scrollTop;
             var tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
-    
+
             //var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
 
 
@@ -789,7 +789,7 @@ class DimensioningContainer extends React.Component {
                             }
                             done = true;
                         } else if (distanceToTopOfTable > 5 && distanceToTopOfTable <= this.props.fullWidthInitOffset){
-                            
+
                             //var fullWidthInitOffset = Math.min(this.props.fullWidthInitOffset, tableTopOffset + this.props.stickyHeaderTopOffset);
                             //var difScale = (fullWidthInitOffset - distanceToTopOfTable) / fullWidthInitOffset;
                             //pageTableContainer.style.transition = "margin-left .33s, margin-right .33s";
@@ -797,7 +797,7 @@ class DimensioningContainer extends React.Component {
                             //if (this.lastDistanceToTopOfTable !== distanceToTopOfTable || !this.state.isWindowPastTableTop){
                             //    this.setState({ 'isWindowPastTableTop' : true });
                             //}
-                            
+
                         } else if (distanceToTopOfTable > this.props.fullWidthInitOffset){
                             pageTableContainer.style.transition = "margin-left .6s, margin-right .6s";
                             pageTableContainer.style.marginLeft = pageTableContainer.style.marginRight = '0px';
@@ -809,7 +809,7 @@ class DimensioningContainer extends React.Component {
                             done = true;
                         }
                         this.lastDistanceToTopOfTable = distanceToTopOfTable;
-                        
+
                     }
                     //console.log('V',scrollTop, tableTopOffset, distanceToTopOfTable);
                 }
@@ -826,7 +826,7 @@ class DimensioningContainer extends React.Component {
 
         //});
 
-        
+
     }
 
     getTableLeftOffset(){
@@ -911,7 +911,7 @@ class DimensioningContainer extends React.Component {
                     <div className="search-results-container">
                         <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
-                                
+
                                 {
                                     <Sticky topOffset={stickyHeaderTopOffset} >{
                                         ({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}) =>
@@ -934,7 +934,7 @@ class DimensioningContainer extends React.Component {
                                             isSticky={isSticky}
                                         />
                                     }</Sticky>
-                                
+
                                 }
                                 <LoadMoreAsYouScroll
                                     results={this.state.results}
@@ -973,7 +973,7 @@ class DimensioningContainer extends React.Component {
 
 /**
  * Reusable table for displaying search results according to column definitions.
- * 
+ *
  * @export
  * @class SearchResultTable
  * @prop {Object[]}         results             Results as returned from back-end, e.g. props.context['@graph'].
@@ -983,7 +983,7 @@ class DimensioningContainer extends React.Component {
  * @prop {string[]}         [hiddenColumns]     Keys of columns to remove from final columnDefinitions before rendering. Useful for hiding constantColumnDefinitions in response to some state.
  * @prop {function}         [renderDetailPane]  An instance of a React component which will receive prop 'result'.
  * @prop {Object}           [columnDefinitionOverrideMap]  - Extend constant and default column-derived column definitions, by column definition field key.
- * 
+ *
  * @prop {string}           sortColumn          Current sort column, as fed by SortController.
  * @prop {boolean}          sortReverse         Whether current sort column is reversed, as fed by SortController.
  * @prop {function}         sortBy              Callback function for performing a sort, acceping 'sortColumn' and 'sortReverse' as params. As fed by SortController.
@@ -1032,7 +1032,7 @@ export class SearchResultTable extends React.Component {
 
     /**
      * Grab loaded results.
-     * 
+     *
      * @returns {Object[]|null} JSON list of all loaded results.
      */
     getLoadedResults(){
