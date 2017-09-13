@@ -686,11 +686,28 @@ class S3FileInput extends React.Component{
     handleChange = (e) => {
         var req_type = null;
         var file = e.target.files[0];
+        // get the current context and overall schema for the file object
+        var currContext = this.props.getCurrContext();
+        var currSchema = this.props.getCurrSchema();
+        var schema_extensions = object.getNestedProperty(currSchema, ['file_format_file_extension'], true);
+        var extension;
+        // find the extension the file should have
+        if(currContext.file_format in schema_extensions){
+            extension = schema_extensions[currContext.file_format];
+        }else{
+            alert('Internal file extension conflict.');
+            return;
+        }
         // file was not chosen
         if(!file){
             return;
         }else{
             var filename = file.name ? file.name : "unknown";
+            // check extension
+            if(!filename.endsWith(extension)){
+                alert('File extension error! Please enter a file of type: ' + extension);
+                return;
+            }
             this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.linkType, this.props.arrayIdx);
             // calling modifyFile changes the 'file' state of top level component
             this.modifyFile(file);

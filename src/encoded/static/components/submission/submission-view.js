@@ -1435,6 +1435,20 @@ class IndividualObjectView extends React.Component{
     }
 
     /*
+    Simple function, return the currContext. Used in BuildField
+    */
+    getCurrContext = () => {
+        return this.props.currContext;
+    }
+
+    /*
+    Simple function, return the current schema. Used in BuildField
+    */
+    getCurrSchema = () => {
+        return this.props.schemas[this.props.currType];
+    }
+
+    /*
     Use ajax to get the display_title for an existing object. Use that to kicks
     of the addExistingObj process; if a title can't be found, use the object
     path as a fallback.
@@ -1665,6 +1679,8 @@ class IndividualObjectView extends React.Component{
                 linkType={linked}
                 isLinked={isLinked}
                 selectObj={this.selectObj}
+                getCurrContext={this.getCurrContext}
+                getCurrSchema={this.getCurrSchema}
                 title={fieldTitle}
                 arrayIdx={null}
                 edit={this.props.edit}
