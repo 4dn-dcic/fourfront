@@ -2140,7 +2140,7 @@
                 }
             ], 
             "workflow_argument_name": "chromsize", 
-            "argument_format": "chromsize",
+            "argument_format": "chromsizes",
             "argument_type": "Input file"
         }, 
         {
@@ -2183,5 +2183,5 @@
     "accession": "4DNWF37VHW0F",
     "data_types": ["Hi-C"],
     "category": "annotation+sorting"
-},
+}
 ]
