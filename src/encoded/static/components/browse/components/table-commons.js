@@ -24,7 +24,7 @@ export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
 /**
  * Default value rendering function.
  * Uses columnDefinition field (column key) to get nested property value from result and display it.
- * 
+ *
  * @param {Object} result - JSON object representing row data.
  * @param {any} columnDefinition - Object with column definition data - field, title, widthMap, render function (self)
  * @param {any} props - Props passed down from SearchResultTable/ResultRowColumnBlock instance
@@ -53,7 +53,7 @@ export function defaultColumnBlockRenderFxn(result: Object, columnDefinition: Ob
  * Ensure we have a valid React element to render.
  * If not, try to detect if Item object, and generate link.
  * Else, let exception bubble up.
- * 
+ *
  * @static
  * @param {any} value
  */
@@ -108,15 +108,19 @@ export const defaultColumnDefinitionMap = {
         'title' : "Title",
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
-        'render' : function(result: Object, columnDefinition: Object, props: Object, width: number){
+        'render' : function(result: Object, columnDefinition: Object, props: Object, width: number, popLink = false){
             var title = getTitleStringFromContext(result);
             var link = object.atIdFromObject(result);
             var tooltip;
             if (title && (title.length > 20 || width < 100)) tooltip = title;
             if (link){
-                title = <a href={link || '#'}>{ title }</a>;
+                if (popLink){
+                    title = <a href={link || '#'} target="_blank">{ title }</a>;
+                }else{
+                    title = <a href={link || '#'}>{ title }</a>;
+                }
             }
-            
+
             return (
                 <span>
                     <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
@@ -135,10 +139,15 @@ export const defaultColumnDefinitionMap = {
     'lab.display_title' : {
         'title' : "Lab",
         'widthMap' : {'lg' : 220, 'md' : 200, 'sm' : 180},
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function(result, columnDefinition, props, width, popLink = false){
             var labItem = result.lab;
             if (!labItem) return null;
-            var labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
+            var labLink;
+            if (popLink){
+                labLink = <a href={object.atIdFromObject(labItem)} target='_blank'>{ labItem.display_title }</a>;
+            }else{
+                labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
+            }
 
             if (!result.submitted_by || !result.submitted_by.display_title){
                 return labLink;
@@ -184,7 +193,7 @@ export const defaultColumnDefinitionMap = {
 
 /**
  * Convert a map of field:title to list of column definitions, setting defaults.
- * 
+ *
  * @param {Object.<string>} columns         Map of field names to field/column titles, as returned from back-end.
  * @param {Object[]} constantDefinitions    Preset list of column definitions, each containing at least 'field' and 'title'.
  * @param {Object} defaultWidthMap          Map of responsive grid states (lg, md, sm) to pixel number sizes.
@@ -225,14 +234,14 @@ export function columnDefinitionsToScaledColumnDefinitions(columnDefinitions){
 
 /**
  * Determine the typical column width, given current browser width. Defaults to large width if server-side.
- * 
+ *
  * @param {Object} columnDefinition - JSON of column definition, should have widthMap or width or baseWidth.
  * @param {Object} columnDefinition.widthMap - Map of integer sizes to use at 'lg', 'md', or 'sm' sizes.
  * @param {boolean} [mounted=true]  - Whether component calling this function is mounted. If false, uses 'lg' to align with server-side render.
  * @returns {string|number}         - Width for div column block to be used at current screen/browser size.
  */
 export function getColumnWidthFromDefinition(columnDefinition, mounted=true){
-    
+
     var w = columnDefinition.width || columnDefinition.baseWidth || null;
     if (typeof w === 'number'){
         return w;
@@ -349,7 +358,7 @@ export class HeadersRow extends React.Component {
                 isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
                 : null}
             >
-                <div className="columns clearfix" style={{ 
+                <div className="columns clearfix" style={{
                     'left'  : isSticky ? (stickyStyle.left || 0) - (tableLeftOffset || 0) : null,
                     'width' : (stickyStyle && stickyStyle.width) || null
                 }}>

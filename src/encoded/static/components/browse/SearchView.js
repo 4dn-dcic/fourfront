@@ -223,7 +223,7 @@ class ControlsAndResults extends React.Component {
         var batch_hub_disabled = total > batchHubLimit;
         var filters = context['filters'];
         var show_link;
-
+        var submission_facet_list = false;
         var facets = this.props.facets;
 
         // get type of this object for getSchemaProperty (if type="Item", no tooltips)
@@ -251,23 +251,32 @@ class ControlsAndResults extends React.Component {
         var columnDefinitionOverrides = {};
 
         // Render out button and add to title render output for "Select" if we have a props.selectCallback from submission view
+        // Also add the popLink/target=_blank functionality to links
         if (typeof this.props.selectCallback === 'function'){
+            // this will hide data type facet for submissions view
+            submission_facet_list = true;
             columnDefinitionOverrides['display_title'] = {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
-                    var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(result, columnDefinition, props, width);
+                    var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(result, columnDefinition, props, width, true);
                     var newChildren = currentTitleBlock.props.children.slice(0);
                     newChildren.unshift(
                         <div className="select-button-container" onClick={(e)=>{
                             e.preventDefault();
                             this.props.selectCallback(object.atIdFromObject(result));
                         }}>
-                            <button className="select-button btn-primary" onClick={props.toggleDetailOpen}>
+                            <button className="select-button" onClick={props.toggleDetailOpen}>
                                 <i className="icon icon-fw icon-check"/>
                             </button>
                         </div>
                     );
                     return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
+                }
+            };
+            columnDefinitionOverrides['lab.display_title'] = {
+                'render' : function(result, columnDefinition, props, width){
+                    var newRender = SearchResultTable.defaultColumnDefinitionMap['lab.display_title'].render(result, columnDefinition, props, width, true);
+                    return newRender;
                 }
             };
         }
@@ -321,6 +330,7 @@ class ControlsAndResults extends React.Component {
                                 }
                                 this.props.navigate(clearFiltersURL, {});
                             }}
+                            submissionFacetList={submission_facet_list}
                         />
                 </div> : null}
                     <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>

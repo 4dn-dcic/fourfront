@@ -96,7 +96,8 @@ if __name__ == "__main__":
             print("I don't have a message")
         if "tibanna-deploy" in msg:
             deploy()
-        elif os.environ.get("tibanna_deploy") == "True":
+        elif os.environ.get("tibanna_deploy", False):
+            print("Deploying to environment %s" % os.environ.get("tibanna-deploy"))
             deploy()
         else:
             print("not deploying you didn't say the magic words...")
