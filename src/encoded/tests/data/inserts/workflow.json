@@ -2182,6 +2182,11 @@
     "lab": "4dn-dcic-lab",
     "accession": "4DNWF37VHW0F",
     "data_types": ["Hi-C"],
-    "category": "annotation+sorting"
+    "category": "annotation+sorting",
+    "cwl_main_filename" : "pairsam-parse-sort.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "pairsam-parse-sort",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/"
 }
 ]
