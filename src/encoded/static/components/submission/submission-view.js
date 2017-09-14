@@ -971,11 +971,11 @@ export default class SubmissionView extends React.Component{
                             finalizedContext.submitted_by = me_data.link_id.replace(/~/g, "/");
                         }
                     }
-                }else{ // use info of person creating/cloning
-                    if(currSchema.properties.award){
+                }else{ // use info of person creating/cloning unless values present
+                    if(currSchema.properties.award && !('award' in finalizedContext)){
                         finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
                     }
-                    if(currSchema.properties.lab){
+                    if(currSchema.properties.lab && !('lab' in finalizedContext)){
                         finalizedContext.lab = lab;
                     }
                 }
