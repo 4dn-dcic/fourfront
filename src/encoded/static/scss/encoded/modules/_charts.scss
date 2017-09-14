@@ -1801,6 +1801,10 @@ $workflow-step-node-lineheight: 18px;
                 //background-color: #cfdcd3;
                 background-color: #5e776b;
             }
+            &.multiple-sets {
+                box-shadow: -3px 3px 0px #444;
+                transform: translate(1px, -1px) scale(0.925);
+            }
         }
 
         .block-container-group {
@@ -1898,19 +1902,21 @@ $workflow-step-node-lineheight: 18px;
                 }
                 > .close-button {
                     position: absolute;
-                    width: 20px;
+                    width: 27px;
                     text-align: center;
                     z-index: 10;
                     top: 0;
                     bottom: 0;
                     cursor: pointer;
+                    background: #f7f7f7;
                     > i.icon {
                         position: absolute;
                         height: 20px;
-                        width: 20px;
+                        width: 27px;
                         line-height: 24px;
                         top: 50%;
                         margin-top: -10px;
+                        left: 0;
                     }
                 }
             }

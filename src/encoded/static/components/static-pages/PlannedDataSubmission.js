@@ -14,6 +14,15 @@ import ReactTooltip from 'react-tooltip';
 
 
 
+/**************
+ * 
+ * TODO LATER: 
+ * Move these utility functions to (probably) util/object.js, since they are generic transforms of JSON lists of objects and should be re-used if possible (rather than new ones created later).
+ * 
+ ************/
+
+
+
 export function groupByMultiple(objList, propertiesList){
 
     var maxDepth = (propertiesList || []).length - 1;
@@ -217,7 +226,11 @@ export class StackedBlockVisual extends React.Component {
             var isMultipleClass = '';
 
             if (Array.isArray(data)) {
-                isMultipleClass = 'multiple-sets';
+                if (data.length > 1) { 
+                    isMultipleClass = 'multiple-sets';
+                } else {
+                    isMultipleClass = 'single-set';
+                }
                 if (_.any(data, checkDataObjForProduction)) statusClass = 'production';
             } else if (data && checkDataObjForProduction(data)) {
                 isMultipleClass = 'single-set';
@@ -554,8 +567,6 @@ export class StackedBlockGroupedRow extends React.Component {
                         }), function(block){ return block !== null; })];
                 }));
 
-                console.log('CHILDREDS', allChildBlocks, blocksByColumnGroup);
-
                 columnKeys = _.keys(blocksByColumnGroup);
                 if (Array.isArray(props.headerColumnsOrder)){
                     columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, props.headerColumnsOrder);
@@ -563,12 +574,10 @@ export class StackedBlockGroupedRow extends React.Component {
 
                 inner = _.keys(blocksByColumnGroup).map(function(k){
                     var blocksForGroup = blocksByColumnGroup[k];
-                    console.log('1', k, blocksForGroup);
                     // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
                     if (typeof props.columnSubGrouping === 'string'){
                         blocksForGroup = _.pairs(_.groupBy(blocksForGroup, props.columnSubGrouping));
                     }
-                    console.log('2', k, blocksForGroup);
                     return (
                         <div
                             className="block-container-group"
