@@ -971,11 +971,11 @@ export default class SubmissionView extends React.Component{
                             finalizedContext.submitted_by = me_data.link_id.replace(/~/g, "/");
                         }
                     }
-                }else{ // use info of person creating/cloning
-                    if(currSchema.properties.award){
+                }else{ // use info of person creating/cloning unless values present
+                    if(currSchema.properties.award && !('award' in finalizedContext)){
                         finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
                     }
-                    if(currSchema.properties.lab){
+                    if(currSchema.properties.lab && !('lab' in finalizedContext)){
                         finalizedContext.lab = lab;
                     }
                 }
@@ -1435,6 +1435,20 @@ class IndividualObjectView extends React.Component{
     }
 
     /*
+    Simple function, return the currContext. Used in BuildField
+    */
+    getCurrContext = () => {
+        return this.props.currContext;
+    }
+
+    /*
+    Simple function, return the current schema. Used in BuildField
+    */
+    getCurrSchema = () => {
+        return this.props.schemas[this.props.currType];
+    }
+
+    /*
     Use ajax to get the display_title for an existing object. Use that to kicks
     of the addExistingObj process; if a title can't be found, use the object
     path as a fallback.
@@ -1665,6 +1679,8 @@ class IndividualObjectView extends React.Component{
                 linkType={linked}
                 isLinked={isLinked}
                 selectObj={this.selectObj}
+                getCurrContext={this.getCurrContext}
+                getCurrSchema={this.getCurrSchema}
                 title={fieldTitle}
                 arrayIdx={null}
                 edit={this.props.edit}
