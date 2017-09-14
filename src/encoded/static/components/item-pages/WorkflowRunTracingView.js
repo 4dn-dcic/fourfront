@@ -122,8 +122,15 @@ export class WorkflowRunTracingView extends ItemBaseView {
         var context = this.props.context;
         if (typeof context.uuid !== 'string') return;
         if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
-        if (!force && Array.isArray(context['@type']) && _.contains(context['@type'], 'ExperimentSet')
-            && (!Array.isArray(context.processed_files) || context.processed_files.length === 0)  ) return;
+        if (
+            !force && (
+                Array.isArray(context['@type']) && _.contains(context['@type'], 'ExperimentSet') // If ExpSet or Exp, don't do if no processed files
+                && (!Array.isArray(context.processed_files) || context.processed_files.length === 0)
+            ) || (
+                Array.isArray(context['@type']) && _.contains(context['@type'], 'File') // If File, don't do if not output of a workflow_run.
+                && (!(Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0))
+            )
+        ) return;
 
         var callback = function(r){
             requestAnimationFrame(()=>{

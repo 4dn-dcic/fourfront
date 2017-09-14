@@ -22,6 +22,7 @@ import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData,
 
 export default class FileView extends WorkflowRunTracingView {
 
+    /* TODO : Move to WorkflowRunTracingView, DRY up re: WorkflowRunTracingView.loadGraphSteps() */
     static doesGraphExist(context){
         return (
             (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
