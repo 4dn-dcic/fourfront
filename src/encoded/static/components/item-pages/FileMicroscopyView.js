@@ -81,7 +81,7 @@ class FileMicroscopyViewOverview extends React.Component {
         }
 
         if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} defaultOpenIndices={[0]} />;
         }
 
         return (
