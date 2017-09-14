@@ -26,7 +26,6 @@ from snovault.schema_utils import validate_request
 from snovault.crud_views import collection_add
 from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_page
-from past.builtins import basestring
 
 
 ONLY_ADMIN_VIEW_DETAILS = [
