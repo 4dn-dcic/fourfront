@@ -151,11 +151,7 @@ export default class PlannedSubmissionsPage extends React.Component {
 
                         var tips = StackedBlockVisual.defaultProps.blockTooltipContents(filteredData, groupingTitle, groupingPropertyTitle, props);
                         
-
-                        
-
-                        
-                        if (Array.isArray(data)){
+                        if (Array.isArray(data) && data.length > 1){
 
                             var moreData = _.reduce(filteredData, function(m, o){
                                 for (var i = 0; i < keysToShow.length; i++){
@@ -328,13 +324,13 @@ export class StackedBlockVisual extends React.Component {
 
             out += '<div class="row">';
 
-            out += '<div class="col-sm-6">';
+            out += '<div class="col-xs-6">';
             out += '<div class="text-500 text-ellipsis-container text-right">' + ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') + '</div>';
             out += '</div>';
 
             if (val){
                 
-                out += '<div class="col-sm-6">';
+                out += '<div class="col-xs-6">';
                 out += ' ';
                 if (boldIt) out += '<b>';
                 out += val;
@@ -572,7 +568,7 @@ export class StackedBlockGroupedRow extends React.Component {
                     columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, props.headerColumnsOrder);
                 }
 
-                inner = _.keys(blocksByColumnGroup).map(function(k){
+                inner = columnKeys.map(function(k){
                     var blocksForGroup = blocksByColumnGroup[k];
                     // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
                     if (typeof props.columnSubGrouping === 'string'){

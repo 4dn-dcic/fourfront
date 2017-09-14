@@ -1805,6 +1805,9 @@ $workflow-step-node-lineheight: 18px;
                 box-shadow: -3px 3px 0px #444;
                 transform: translate(1px, -1px) scale(0.925);
             }
+            @media screen and (max-width: $screen-xs-min){
+                width : 100% !important;
+            }
         }
 
         .block-container-group {
@@ -1879,9 +1882,11 @@ $workflow-step-node-lineheight: 18px;
 
             > .row {
                 > div {
-                    float: none !important;
-                    display: inline-block;
-                    vertical-align: middle;
+                    @media screen and (min-width: $screen-sm-min){
+                        float: none !important;
+                        display: inline-block;
+                        vertical-align: middle;
+                    }
 
                 }
             }
@@ -1917,6 +1922,16 @@ $workflow-step-node-lineheight: 18px;
                         top: 50%;
                         margin-top: -10px;
                         left: 0;
+                    }
+                    @media screen and (max-width: $screen-xs-min){
+                        position: relative;
+                        height: 30px;
+                        line-height: 34px;
+                        float: left;
+                        margin-right: 10px;
+                        > i.icon {
+                            position: relative;
+                        }
                     }
                 }
             }

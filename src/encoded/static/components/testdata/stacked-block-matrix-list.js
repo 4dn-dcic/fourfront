@@ -202,7 +202,7 @@ export const list = [
       "in_production_stage_standardized_protocol": "no",
       "important_to_be_made_available": "yes",
       "reference_publication": "Manuscript to be submitted in 2017",
-      "experiments_expected_2017": "203",
+      "experiments_expected_2017": "20",
       "experiments_expected_2020": "NA",
       "raw_files_size": "0.5",
       "raw_files_widely_useful": "no",
