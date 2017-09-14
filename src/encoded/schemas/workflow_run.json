@@ -182,6 +182,9 @@
     "facets" : {
         "workflow.title": {
             "title": "Workflow"
+        },
+        "run_status": {
+            "title": "Run Status"
         }
     }
 }
