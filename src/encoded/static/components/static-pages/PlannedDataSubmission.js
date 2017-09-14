@@ -92,7 +92,8 @@ export default class PlannedSubmissionsPage extends React.Component {
     render() {
         var c = this.props.context.content; // Content
         var groupingProperties = ['grant_type', 'center_name',  'lab_name'];
-        var columnGrouping = 'experiment_category';
+        var columnGrouping = 'experiment_category',
+            columnSubGrouping = 'experiment_type';
         var headerColumnsOrder = [
             'Hi-C',
             'ChIA-PET',
@@ -128,6 +129,57 @@ export default class PlannedSubmissionsPage extends React.Component {
                     groupingProperties={groupingProperties}
                     columnGrouping={columnGrouping}
                     headerColumnsOrder={headerColumnsOrder}
+                    columnSubGrouping={columnSubGrouping}
+                    blockTooltipContents={function(data, groupingTitle, groupingPropertyTitle, props){
+
+                        var keysToShow = ['center_name', 'lab_name', 'experiments_expected_2017', 'experiments_expected_2020', 'in_production_stage_standardized_protocol', 'additional_comments'];
+                        var filteredData = data;
+                        if (!Array.isArray(data)){
+                            filteredData = _.pick(data, ...keysToShow);
+                        } else {
+                            filteredData = _.map(data, function(o){ return _.pick(o, ...keysToShow); });
+                        }
+
+                        var tips = StackedBlockVisual.defaultProps.blockTooltipContents(filteredData, groupingTitle, groupingPropertyTitle, props);
+                        
+
+                        
+
+                        
+                        if (Array.isArray(data)){
+
+                            var moreData = _.reduce(filteredData, function(m, o){
+                                for (var i = 0; i < keysToShow.length; i++){
+                                    if (m[keysToShow[i]] === null){
+                                        m[keysToShow[i]] = new Set();
+                                    }
+                                    m[keysToShow[i]].add(o[keysToShow[i]]);
+                                }
+                                return m;
+                            }, _.object(_.zip(keysToShow, [].fill.call({ length : keysToShow.length }, null, 0, keysToShow.length))) );
+
+                            _.forEach(_.keys(moreData), function(k){
+                                if (k === 'additional_comments'){
+                                    delete moreData[k]; // Don't show when multiple, too long.
+                                    return;
+                                }
+                                moreData[k] = Array.from(moreData[k]);
+                                if (moreData[k].length === 0){
+                                    delete moreData[k];
+                                } else if (moreData[k].length > 1){
+                                    moreData[k] = '<span class="text-300">(' + moreData[k].length + ')</span> ' + moreData[k].join(', ');
+                                } else {
+                                    moreData[k] = moreData[k][0];
+                                }
+                            });
+
+                            tips += StackedBlockVisual.writeTipPropertiesFromJSONObject(moreData, props);
+
+                        }
+                        
+                        return tips;
+
+                    }}
                 />
             </Wrapper>
         );
@@ -160,56 +212,32 @@ export class StackedBlockVisual extends React.Component {
                 }
                 return false;
             }
+
+            var statusClass = '';
+            var isMultipleClass = '';
+
             if (Array.isArray(data)) {
-                if (_.any(data, checkDataObjForProduction)) return 'production';
+                isMultipleClass = 'multiple-sets';
+                if (_.any(data, checkDataObjForProduction)) statusClass = 'production';
             } else if (data && checkDataObjForProduction(data)) {
-                return 'production';
+                isMultipleClass = 'single-set';
+                statusClass = 'production';
             }
 
-            return 'test';
+            return [statusClass, isMultipleClass].join(' ');
         },
         'blockTooltipContents' : function(data, groupingTitle, groupingPropertyTitle, props){
-
-            function printProperties(d){
-                var out = '';
-
-                _.forEach(_.keys(d), function(property){
-                    var val = d[property];
-                    if (!val) return;
-
-                    var boldIt = (
-                        (props.groupingProperties && props.groupingProperties.indexOf(property) > -1) ||
-                        (props.columnGrouping && props.columnGrouping === property)
-                    );
-
-                    out += '<div class="row">';
-
-                    out += '<div class="col-sm-6">';
-                    out += '<div class="text-500 text-ellipsis-container text-right">' + ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') + '</div>';
-                    out += '</div>';
-
-                    if (val){
-                        
-                        out += '<div class="col-sm-6">';
-                        out += ' ';
-                        if (boldIt) out += '<b>';
-                        out += val;
-                        if (boldIt) out += '</b>';
-                        out += '</div>';
-                    }
-
-                    out += '</div>';
-                });
-
-                return out;
-            }
 
 
             var tip = null;
 
             if (Array.isArray(data) && data.length === 1) data = data[0];
             
-            if (groupingPropertyTitle){
+            if (props.title){
+                tip = '<h5 style="min-width: 300px;">';
+                tip += props.title;
+                tip += '</h5>';
+            } else if (groupingPropertyTitle){
                 tip = '<h5>';
                 tip += '<span class="text-300">' + groupingPropertyTitle + (groupingTitle ? ':' : '') + '</span>';
                 if (groupingTitle) tip += ' ' + groupingTitle;
@@ -225,8 +253,8 @@ export class StackedBlockVisual extends React.Component {
                 } else {
                     tip = '';
                 }
-                tip += '<div style="style="min-width: 300px;">';
-                tip += printProperties(_.omit(data, 'index'));
+                tip += '<div style="min-width: 300px;">';
+                tip += StackedBlockVisual.writeTipPropertiesFromJSONObject(_.omit(data, 'index'), props);
                 tip += '</div>';
             } else {
                 if (tip && tip.length > 0){
@@ -271,6 +299,40 @@ export class StackedBlockVisual extends React.Component {
 
     static minColumnWidth(props){
         return (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
+    }
+
+    static writeTipPropertiesFromJSONObject(d, props){
+        var out = '';
+
+        _.forEach(_.keys(d), function(property){
+            var val = d[property];
+            if (!val) return;
+
+            var boldIt = (
+                (props.groupingProperties && props.groupingProperties.indexOf(property) > -1) ||
+                (props.columnGrouping && props.columnGrouping === property)
+            );
+
+            out += '<div class="row">';
+
+            out += '<div class="col-sm-6">';
+            out += '<div class="text-500 text-ellipsis-container text-right">' + ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') + '</div>';
+            out += '</div>';
+
+            if (val){
+                
+                out += '<div class="col-sm-6">';
+                out += ' ';
+                if (boldIt) out += '<b>';
+                out += val;
+                if (boldIt) out += '</b>';
+                out += '</div>';
+            }
+
+            out += '</div>';
+        });
+
+        return out;
     }
 
     constructor(props){
@@ -321,18 +383,8 @@ export class StackedBlockVisual extends React.Component {
         this.setState({ 'mounted' : false });
     }
 
-    /*
-    toggleGroupingOpen(id, open){
-        if (typeof id !== 'string') return;
-        if (typeof open !== 'boolean'){
-            open = !this.state['open_' + id];
-        }
-        var newState = {};
-        newState['open_' + id] = open;
-        this.setState(newState);
-    }
-    */
     render(){
+        
         return (
             <div className="stacked-block-viz-container" ref="container">
                 { this.renderContents(this.refs && this.refs.container && this.refs.container.offsetWidth) }
@@ -400,62 +452,152 @@ export class StackedBlockGroupedRow extends React.Component {
 
     static collapsedChildBlocks(data, props, widthAvailable){
 
-        var allChildBlocksPerChildGroup = Array.isArray(data) ? 
-        _.map(data, function(d){ return [null, d]; })
-        : _.map(
-            _.pairs(data),
-            function(pair){
+        var allChildBlocksPerChildGroup = null;
+        var allChildBlocks = null;
+
+        if (Array.isArray(data)){
+            allChildBlocks = data;
+        } else {
+            allChildBlocks = StackedBlockGroupedRow.flattenChildBlocks(data);
+        }
+        
+        if (typeof props.columnSubGrouping !== 'string') {
+            allChildBlocksPerChildGroup = _.map(_.pairs(data), function(pair){
                 return [pair[0], StackedBlockGroupedRow.flattenChildBlocks(pair[1])];
-            }
-        );
+            });
+        }
+        
         var commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
             'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
             'blockTooltipContents', 'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping');
 
         var inner = null;
         var groupedDataIndicesPairs = (props.groupedDataIndices && _.pairs(props.groupedDataIndices)) || [];
-        if (groupedDataIndicesPairs.length > 1){
 
-            var blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function(pair){
-                var listOfIndicesForGroup = pair[1];
-                return [
-                    pair[0],
-                    _.filter(_.map(allChildBlocksPerChildGroup, function(cPair){
-                        if (Array.isArray(cPair[1])){
-                            var res = _.filter(cPair[1], function(cBlock){ return listOfIndicesForGroup.indexOf(cBlock.index) > -1; });
-                            if (res.length > 0) return [cPair[0], res];
-                            if (res.length === 0) return null;
-                        } else {
-                            if (listOfIndicesForGroup.indexOf(cPair[1].index) > -1){
-                                return [cPair[0], [cPair[1]]];
+        /*if (Array.isArray(data)){
+            inner = allChildBlocksPerChildGroup.map(function(pair){
+                return (
+                    <StackedBlock {...commonProps} data={pair[1]} title={pair[0]} />
+                );
+            });
+        } else */
+        if (groupedDataIndicesPairs.length > 1){ // If columns exist, distribute these blocks by column! Otherwise (else statement @ end) we'll probably just stack em left-to-right.
+
+            var blocksByColumnGroup, columnKeys, widthPerColumn = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
+
+            if (allChildBlocksPerChildGroup){
+                // Generate block per each child or child group when nothing else to regroup by.
+
+                blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function(pair){
+                    var listOfIndicesForGroup = pair[1];
+                    return [
+                        pair[0],
+                        _.filter(_.map(allChildBlocksPerChildGroup, function(cPair){
+                            if (Array.isArray(cPair[1])){
+                                var res = _.filter(cPair[1], function(cBlock){ return listOfIndicesForGroup.indexOf(cBlock.index) > -1; });
+                                if (res.length > 0) return [cPair[0], res];
+                                if (res.length === 0) return null;
+                            } else {
+                                if (listOfIndicesForGroup.indexOf(cPair[1].index) > -1){
+                                    return [cPair[0], [cPair[1]]];
+                                } else {
+                                    return null;
+                                }
+                            }
+                        }), function(block){ return block !== null; })];
+                }));
+
+                columnKeys = _.keys(blocksByColumnGroup);
+                if (Array.isArray(props.headerColumnsOrder)){
+                    columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, props.headerColumnsOrder);
+                }
+
+                inner = columnKeys.map(function(k){
+                    return (
+                        <div
+                            className="block-container-group"
+                            style={{ 
+                                width : widthPerColumn,
+                                minHeight : props.blockHeight + (props.blockVerticalSpacing),
+                                paddingLeft : props.blockHorizontalSpacing,
+                                paddingRight : props.blockHorizontalSpacing,
+                                paddingTop : props.blockVerticalSpacing
+                            }}
+                            key={k}
+                            data-group-key={k}
+                        >
+                            { blocksByColumnGroup[k].map((pairs)=> <StackedBlock {...commonProps} data={pairs[1]} title={pairs[0]} /> ) }
+                        </div>
+                    );
+                });
+            } else {
+
+                blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function(pair){
+                    var listOfIndicesForGroup = pair[1];
+                    return [
+                        pair[0],
+                        _.filter(_.map(allChildBlocks, function(blockData){
+                            /*
+                            if (Array.isArray(blockData)){
+                                var res = _.filter(cPair[1], function(cBlock){ return listOfIndicesForGroup.indexOf(cBlock.index) > -1; });
+                                if (res.length > 0) return [cPair[0], res];
+                                if (res.length === 0) return null;
+                            } else {
+                            */
+                            if (listOfIndicesForGroup.indexOf(blockData.index) > -1){
+                                return blockData;
                             } else {
                                 return null;
                             }
-                        }
-                    }), function(block){ return block !== null; })];
-            }));
+                            //}
 
-            var widthPerColumn = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
+                        }), function(block){ return block !== null; })];
+                }));
 
-            var columnKeys = _.keys(blocksByColumnGroup);
-            if (Array.isArray(props.headerColumnsOrder)){
-                columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, props.headerColumnsOrder);
+                console.log('CHILDREDS', allChildBlocks, blocksByColumnGroup);
+
+                columnKeys = _.keys(blocksByColumnGroup);
+                if (Array.isArray(props.headerColumnsOrder)){
+                    columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, props.headerColumnsOrder);
+                }
+
+                inner = _.keys(blocksByColumnGroup).map(function(k){
+                    var blocksForGroup = blocksByColumnGroup[k];
+                    console.log('1', k, blocksForGroup);
+                    // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
+                    if (typeof props.columnSubGrouping === 'string'){
+                        blocksForGroup = _.pairs(_.groupBy(blocksForGroup, props.columnSubGrouping));
+                    }
+                    console.log('2', k, blocksForGroup);
+                    return (
+                        <div
+                            className="block-container-group"
+                            style={{ 
+                                width : widthPerColumn,
+                                minHeight : props.blockHeight + (props.blockVerticalSpacing),
+                                paddingLeft : props.blockHorizontalSpacing,
+                                paddingRight : props.blockHorizontalSpacing,
+                                paddingTop : props.blockVerticalSpacing
+                            }}
+                            key={k}
+                            data-group-key={k}
+                        >
+                            { blocksForGroup.map(function(blockData){
+                                var title = k;
+                                if (Array.isArray(blockData)) {
+                                    // We have columnSubGrouping so these are -pairs- of (0) columnSubGrouping val, (1) blocks
+                                    title = ((props.titleMap && props.titleMap[props.columnSubGrouping] && '<span class="text-300">' + props.titleMap[props.columnSubGrouping] + '<i class="icon icon-fw icon-angle-right"></i></span>') || '') + blockData[0];
+                                    blockData = blockData[1];
+                                }
+                                return <StackedBlock key={title} {...commonProps} data={blockData} title={title} />;
+                            }) }
+                        </div>
+                    );
+                });
+
             }
-
-            inner = columnKeys.map(function(k){
-                return (
-                    <div
-                        className="block-container-group"
-                        style={{ width : widthPerColumn, minHeight : props.blockHeight + (props.blockVerticalSpacing), paddingLeft : props.blockHorizontalSpacing, paddingTop : props.blockVerticalSpacing }}
-                        key={k}
-                        data-group-key={k}
-                    >
-                        { blocksByColumnGroup[k].map((pairs)=> <StackedBlock {...commonProps} data={pairs[1]} title={pairs[0]} /> ) }
-                    </div>
-                );
-            });
         } else {
-            inner = allChildBlocksPerChildGroup.map((pair)=> <StackedBlock {...commonProps} data={pair[1]} title={pair[0]} /> );
+            inner = allChildBlocks.map((pair)=> <StackedBlock {...commonProps} data={pair[1]} title={pair[0]} /> );
         }
 
 
@@ -466,70 +608,11 @@ export class StackedBlockGroupedRow extends React.Component {
         );
     }
 
-    /*
-    static openChildBlocks(data, props){
-
-        var allChildBlocksPerChildGroup = _.map(
-            _.pairs(data),
-            function(pair){
-                return [pair[0], StackedBlockGroupedRow.flattenChildBlocks(pair[1])];
-            }
-        );
-
-        var children = _.pairs(data);
-
-        var childRows = _.map(children, function(pair){
-            return StackedBlockGroupedRow.collapsedChildBlocks(pair[1], _.extend({}, props, { 'depth' : props.depth + 1 }));
-        });
-
-        // Empty row first for parent group title
-        return [<div className="blocks-container" style={{ 'height' : props.blockHeight + props.blockVerticalSpacing }}/>].concat(childRows);
-
-    }
-    */
-
     constructor(props){
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
         this.state = { 'open' : false };
     }
-    
-    /*
-    propertyId(){
-        if (this.props.depth === 0){
-            return this.props.group;
-        }
-    }
-
-    isOpen(){
-        return !!(this.props.parentState['open_' + this.propertyId()]);
-    }
-    
-    childBlocksOpen(){
-        return StackedBlockGroupedRow.openChildBlocks(this.props.data, this.props);
-    }
-
-    renderBlocks(){
-        return !this.isOpen() ? this.childBlocksCollapsed() : this.childBlocksOpen();
-    }
-    
-    childLabels(){
-        if (Array.isArray(this.props.data)) return null;
-        if (!this.isOpen()) return null;
-        var { data, blockHeight, blockVerticalSpacing, blockHorizontalSpacing, depth, titleMap, blockClassName } = this.props;
-        return _.map(_.keys(data), function(title){
-            var style = {
-                'height' : blockHeight + blockVerticalSpacing
-            };
-            var className = "label-for-grouping depth-" + (depth + 1);
-            return (
-                <div style={style} className={className}>
-                    { title }
-                </div>
-            );
-        });
-    }
-    */
 
     childBlocksCollapsed(widthAvailable = null){
         return StackedBlockGroupedRow.collapsedChildBlocks(this.props.data, this.props, widthAvailable);
@@ -655,7 +738,7 @@ export class StackedBlock extends React.Component {
             'height' : blockHeight,
             'width' : blockHeight,
             "lineHeight" : blockHeight + 'px',
-            'marginRight' : blockHorizontalSpacing,
+            //'marginRight' : blockHorizontalSpacing,
             'marginBottom' : blockVerticalSpacing
         };
 
