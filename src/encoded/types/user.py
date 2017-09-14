@@ -105,10 +105,8 @@ class User(Item):
         if not request.has_permission('view_details'):
             return []
         key_coll = self.registry['collections']['AccessKey']
-        uuids = [uuid for uuid in key_coll]
         # need to handle both esstorage and db storage results
-        if len(uuids) > 0 and not isinstance(uuids[0], basestring):
-            uuids = [uuid.__str__() for uuid in uuids]
+        uuids = [str(uuid) for uuid in key_coll]
         acc_keys = [request.embed('/', uuid, '@@object')
                 for uuid in paths_filtered_by_status(request, uuids)]
         my_keys = [acc_key for acc_key in acc_keys if acc_key['user'] == request.path]
