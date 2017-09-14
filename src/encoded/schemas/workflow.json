@@ -165,11 +165,12 @@
                         "title": "Format",
                         "description": "Argument Format",
                         "type": "string",
-                        "enum" : [
+                        "suggested_enum" : [
                             "fastq",
                             "bam",
                             "bai",
                             "pairs",
+                            "pairsam",
                             "pairs_px2",
                             "cool",
                             "mcool",

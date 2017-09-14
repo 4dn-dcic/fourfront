@@ -30,8 +30,7 @@ export class ExperimentSetDetailPane extends React.Component {
         'paddingWidth' : 0,
         'additionalDetailFields' : {
             'Lab': 'lab',
-            'Treatments':'experiments_in_set.biosample.treatments_summary',
-            'Modifications':'experiments_in_set.biosample.modifications_summary'
+            'Publication': 'produced_in_pub',
         }
     }
 
