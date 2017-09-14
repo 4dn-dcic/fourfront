@@ -91,7 +91,7 @@ export default class PlannedSubmissionsPage extends React.Component {
      */
     render() {
         var c = this.props.context.content; // Content
-        var groupingProperties = ['grant_type', 'lab_name',  'lab_pi'];
+        var groupingProperties = ['grant_type', 'center_name',  'lab_name'];
         var columnGrouping = 'experiment_category';
         var headerColumnsOrder = [
             'Hi-C',
@@ -106,10 +106,24 @@ export default class PlannedSubmissionsPage extends React.Component {
             'proteomics'
         ];
 
+        
+
+        // Filter out properties from objects which we don't want to be shown in tooltip.
+        var keysToInclude = [
+            'grant_type','center_name', 'lab_name',
+            'experiment_category', 'experiment_type', 'data_type',
+            'reference_publication', 'experiments_expected_2017', 'experiments_expected_2020', 'additional_comments', 'in_production_stage_standardized_protocol',
+        ];
+
+        var listOfObjectsToVisualize = _.map(plansData.list, function(o){
+            return _.pick(o, ...keysToInclude);
+        });
+
+
         return ( 
             <Wrapper>
                 <StackedBlockVisual
-                    data={plansData.list}
+                    data={listOfObjectsToVisualize}
                     titleMap={plansData.titleMap}
                     groupingProperties={groupingProperties}
                     columnGrouping={columnGrouping}
@@ -128,7 +142,7 @@ globals.content_views.register(PlannedSubmissionsPage, 'Planned-submissionsPage'
 export class StackedBlockVisual extends React.Component {
 
     static defaultProps = {
-        'groupingProperties' : ['grant_type', 'lab_name',  'lab_pi'],
+        'groupingProperties' : ['grant_type', 'center_name',  'lab_name'],
         'columnGrouping' : null,
         'blockHeight' : 35,
         'blockVerticalSpacing' : 5,
@@ -158,6 +172,7 @@ export class StackedBlockVisual extends React.Component {
 
             function printProperties(d){
                 var out = '';
+
                 _.forEach(_.keys(d), function(property){
                     var val = d[property];
                     if (!val) return;
@@ -169,13 +184,13 @@ export class StackedBlockVisual extends React.Component {
 
                     out += '<div class="row">';
 
-                    out += '<div class="col-sm-4">';
-                    out += '<span class="text-500">' + ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') + '</span>';
+                    out += '<div class="col-sm-6">';
+                    out += '<div class="text-500 text-ellipsis-container text-right">' + ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') + '</div>';
                     out += '</div>';
 
                     if (val){
                         
-                        out += '<div class="col-sm-8">';
+                        out += '<div class="col-sm-6">';
                         out += ' ';
                         if (boldIt) out += '<b>';
                         out += val;
@@ -185,6 +200,7 @@ export class StackedBlockVisual extends React.Component {
 
                     out += '</div>';
                 });
+
                 return out;
             }
 
@@ -209,7 +225,9 @@ export class StackedBlockVisual extends React.Component {
                 } else {
                     tip = '';
                 }
+                tip += '<div style="style="min-width: 300px;">';
                 tip += printProperties(_.omit(data, 'index'));
+                tip += '</div>';
             } else {
                 if (tip && tip.length > 0){
                     tip += '<hr class="mb-1 mt-1"/>';
@@ -593,6 +611,12 @@ export class StackedBlockGroupedRow extends React.Component {
                         }
                     </div>
                 </div>
+
+                { isOpen && toggleIcon && depth > 0 ?
+                <div className="close-button" onClick={this.toggleOpen}>
+                    { toggleIcon }
+                </div>
+                : null }
 
                 <div className="child-blocks">
                     { isOpen && !Array.isArray(data) ? _.keys(data).map((k)=> <StackedBlockGroupedRow {...this.props} data={data[k]} key={k} group={k} depth={depth + 1} widthAvailable={widthAvailable} /> ) : null }
