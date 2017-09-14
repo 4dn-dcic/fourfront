@@ -68,9 +68,6 @@ class User(Item):
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
     embedded_list = ['lab.awards.project']
-    rev = {
-        'access_keys': ('AccessKey', 'user')
-    }
 
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
@@ -107,9 +104,10 @@ class User(Item):
     def access_keys(self, request):
         if not request.has_permission('view_details'):
             return
-        atids = self.rev_link_atids(request, "access_keys")
-        acc_keys = [request.embed('/', atid, '@@object')
-                for atid in paths_filtered_by_status(request, atids)]
+        key_coll = self.registry['collections']['AccessKey']
+        uuids = [uuid for uuid in key_coll]
+        acc_keys = [request.embed('/', uuid, '@@object')
+                for uuid in paths_filtered_by_status(request, uuids)]
         if acc_keys:
             return [key for key in acc_keys if key['status'] not in ('deleted', 'replaced')]
         else:
