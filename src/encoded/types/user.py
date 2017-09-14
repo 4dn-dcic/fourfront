@@ -26,6 +26,7 @@ from snovault.schema_utils import validate_request
 from snovault.crud_views import collection_add
 from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_page
+from past.builtins import basestring
 
 
 ONLY_ADMIN_VIEW_DETAILS = [
@@ -66,7 +67,6 @@ class User(Item):
 
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
-    # Avoid access_keys reverse link so editing access keys does not reindex content.
     embedded_list = ['lab.awards.project']
 
     STATUS_ACL = {
@@ -103,9 +103,12 @@ class User(Item):
     }, category='page')
     def access_keys(self, request):
         if not request.has_permission('view_details'):
-            return
+            return []
         key_coll = self.registry['collections']['AccessKey']
         uuids = [uuid for uuid in key_coll]
+        # need to handle both esstorage and db storage results
+        if len(uuids) > 0 and not isinstance(uuids[0], basestring):
+            uuids = [uuid.__str__() for uuid in uuids]
         acc_keys = [request.embed('/', uuid, '@@object')
                 for uuid in paths_filtered_by_status(request, uuids)]
         my_keys = [acc_key for acc_key in acc_keys if acc_key['user'] == request.path]
