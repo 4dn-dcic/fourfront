@@ -337,7 +337,7 @@ export function getGoogleAnalyticsTrackingData(key = null){
 
 function shouldTrack(){
     // 1. Ensure we're initialized
-    if (isServerSide() || typeof window.ga === 'undefined') {
+    if (!state || isServerSide() || typeof window.ga === 'undefined') {
         console.error("Google Analytics is not initialized. Fine if this appears in a test.");
         return false;
     }
