@@ -546,20 +546,11 @@ export class StackedBlockGroupedRow extends React.Component {
                     return [
                         pair[0],
                         _.filter(_.map(allChildBlocks, function(blockData){
-                            /*
-                            if (Array.isArray(blockData)){
-                                var res = _.filter(cPair[1], function(cBlock){ return listOfIndicesForGroup.indexOf(cBlock.index) > -1; });
-                                if (res.length > 0) return [cPair[0], res];
-                                if (res.length === 0) return null;
-                            } else {
-                            */
                             if (listOfIndicesForGroup.indexOf(blockData.index) > -1){
                                 return blockData;
                             } else {
                                 return null;
                             }
-                            //}
-
                         }), function(block){ return block !== null; })];
                 }));
 
@@ -570,8 +561,9 @@ export class StackedBlockGroupedRow extends React.Component {
 
                 inner = columnKeys.map(function(k){
                     var blocksForGroup = blocksByColumnGroup[k];
+                    
                     // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
-                    if (typeof props.columnSubGrouping === 'string'){
+                    if (typeof props.columnSubGrouping === 'string' && props.depth < (props.groupingProperties.length - 1)){
                         blocksForGroup = _.pairs(_.groupBy(blocksForGroup, props.columnSubGrouping));
                     }
                     return (
@@ -587,14 +579,16 @@ export class StackedBlockGroupedRow extends React.Component {
                             key={k}
                             data-group-key={k}
                         >
-                            { blocksForGroup.map(function(blockData){
+                            { blocksForGroup.map(function(blockData, i){
                                 var title = k;
                                 if (Array.isArray(blockData)) {
                                     // We have columnSubGrouping so these are -pairs- of (0) columnSubGrouping val, (1) blocks
                                     title = ((props.titleMap && props.titleMap[props.columnSubGrouping] && '<span class="text-300">' + props.titleMap[props.columnSubGrouping] + '<i class="icon icon-fw icon-angle-right"></i></span>') || '') + blockData[0];
                                     blockData = blockData[1];
+                                } else if (typeof props.columnSubGrouping === 'string') {
+                                    title = ((props.titleMap && props.titleMap[props.columnSubGrouping] && '<span class="text-300">' + props.titleMap[props.columnSubGrouping] + '<i class="icon icon-fw icon-angle-right"></i></span>') || '') + object.getNestedProperty(blockData, props.columnSubGrouping);
                                 }
-                                return <StackedBlock key={title} {...commonProps} data={blockData} title={title} />;
+                                return <StackedBlock key={i} {...commonProps} data={blockData} title={title} />;
                             }) }
                         </div>
                     );
