@@ -114,30 +114,33 @@ export function registerPageView(href = null, context = {}, currentExpSetFilters
         });
 
         var newPathName = null;
-
-        // Remove Accession, UUID, and Name from URL and save it to 'name' dimension instead.
-        if (typeof context.accession === 'string' && pathParts[1] === context.accession){
-            // We gots an accessionable Item. Lets remove its Accession from the path to get nicer Behavior Flows in GA.
-            // And let product tracking / Shopping Behavior handle Item details.
-            pathParts[1] = 'accession';
-            newPathName = '/' + pathParts.join('/') + '/';
-            opts[GADimensionMap.name] = context.accession;
-        } else if (
-            (context.last_name && context.first_name) || (context['@type'] && context['@type'].indexOf('User') > -1) &&
-            (pathParts[0] === 'users' && (context.uuid && pathParts[1] === context.uuid))
-        ){
-            // Save User name.
-            pathParts[1] = 'uuid';
-            newPathName = '/' + pathParts.join('/') + '/';
-            opts[GADimensionMap.name] = context.title || context.uuid;
-        } else if (typeof context.uuid === 'string' && pathParts[1] === context.uuid){
-            pathParts[1] = 'uuid';
-            newPathName = '/' + pathParts.join('/') + '/';
-            opts[GADimensionMap.name] = context.display_title || context.uuid;
-        } else if (typeof context.name === 'string' && pathParts[1] === context.name){
-            pathParts[1] = 'name';
-            newPathName = '/' + pathParts.join('/') + '/';
-            opts[GADimensionMap.name] = context.display_title || context.name;
+        if (pathParts[1] && typeof pathParts[1] === 'string'){
+            // Remove Accession, UUID, and Name from URL and save it to 'name' dimension instead.
+            if ( (typeof context.accession === 'string' && pathParts[1] === context.accession) || object.isAccessionRegex(pathParts[1]) ){
+                // We gots an accessionable Item. Lets remove its Accession from the path to get nicer Behavior Flows in GA.
+                // And let product tracking / Shopping Behavior handle Item details.
+                pathParts[1] = 'accession';
+                newPathName = '/' + pathParts.join('/') + '/';
+                opts[GADimensionMap.name] = context.accession || pathParts[1];
+            } else if (
+                (context.last_name && context.first_name) || (context['@type'] && context['@type'].indexOf('User') > -1) &&
+                (pathParts[0] === 'users' && (context.uuid && pathParts[1] === context.uuid))
+            ){
+                // Save User name.
+                pathParts[1] = 'uuid';
+                newPathName = '/' + pathParts.join('/') + '/';
+                opts[GADimensionMap.name] = context.title || context.uuid;
+            } else if (typeof context.uuid === 'string' && pathParts[1] === context.uuid){
+                pathParts[1] = 'uuid';
+                newPathName = '/' + pathParts.join('/') + '/';
+                opts[GADimensionMap.name] = context.display_title || context.uuid;
+            } else if (typeof context.name === 'string' && pathParts[1] === context.name){
+                pathParts[1] = 'name';
+                newPathName = '/' + pathParts.join('/') + '/';
+                opts[GADimensionMap.name] = context.display_title || context.name;
+            } else {
+                newPathName = pathName;
+            }
         } else {
             newPathName = pathName;
         }
