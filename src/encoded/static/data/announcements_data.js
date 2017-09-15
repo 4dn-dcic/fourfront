@@ -10,7 +10,7 @@ html elements can ONLY be embedded in the content section.
 *******************/
 export const announcements = [
     {
-        "title":"Published in Nature",
+        "title":"Published in Nature Journal",
         "author":"DCIC Staff",
         "date":"9/13/2017",
         "content":"The 4D Nucleome project is published in <a href=\"http://www.nature.com/nature/journal/v549/n7671/full/nature23884.html?foxtrotcallback=true\" target=\"_blank\">Nature</a> today. If you use any <a href=\"/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN\">4DN data</a>, a more extensive data release and use policy will be available soon."
