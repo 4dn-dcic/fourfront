@@ -52,6 +52,7 @@ export class ExperimentSetDetailPane extends React.Component {
     render(){
         var expSet = this.props.result;
         var addInfo = this.props.additionalDetailFields;
+        var addInfoKeys = _.keys(addInfo);
 
         var paddingWidth = this.props.paddingWidth || 0;
         if (this.props.paddingWidthMap){
@@ -67,17 +68,17 @@ export class ExperimentSetDetailPane extends React.Component {
                 <div className="expset-addinfo">
                     <div className="row">
                         <div className="col-md-6 addinfo-description-section">
-                            <label className="text-500 description-label">Description</label>
+                            {/* <label className="text-500 description-label">Description</label> */}
                             <FlexibleDescriptionBox
                                 description={ expSet.description }
                                 fitTo="self"
                                 textClassName="text-medium"
                                 dimensions={null}
-                                linesOfText={3}
+                                linesOfText={Math.max(1, addInfoKeys.length)}
                             />
                         </div>
                         <div className="col-md-6 addinfo-properties-section">
-                        { _.keys(addInfo).map(function(title){
+                        { addInfoKeys.map(function(title){
                             var value = sanitizeOutputValue(defaultColumnBlockRenderFxn(expSet, { 'field' : addInfo[title] }, null, 0)); // Uses object.getNestedProperty, pretty prints JSX. Replaces value probe stuff.
                             return (
                                 <div className="row expset-addinfo-row clearfix" key={title}>

@@ -90,6 +90,21 @@
             "title": "Metadata Document",
             "description": "Document (PDF/DOC/TXT) with information about the files"
         },
+        "thumbnail": {
+            "type": "string",
+            "title": "Thumbnail",
+            "description": "link to thumbnail image"
+        },
+        "omerolink": {
+            "type": "string",
+            "title": "OMERO Link",
+            "description": "link to Omero"
+        },
+        "imageid": {
+            "type": "string",
+            "title": "Image ID",
+            "description": "ID of image on Omero"
+        },
         "filename": {
             "title": "Microscopy Files (Zip/TIFF)",
             "description": "Single zipped file with microscopy files, or a single TIFF file"
