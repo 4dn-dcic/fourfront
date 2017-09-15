@@ -2347,6 +2347,7 @@
             "workflow_argument_name":"dedup_pairs",
             "argument_type":"Output processed file",
             "argument_format":"pairs",
+            "secondary_file_formats": ["pairs_px2"],
             "argument_mapping":[
                 {
                     "step_argument_name":"dedup_pairs",
