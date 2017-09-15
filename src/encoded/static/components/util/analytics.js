@@ -152,6 +152,9 @@ export function registerPageView(href = null, context = {}, currentExpSetFilters
      * @returns {boolean|Object|Object[]} Representation of what was tracked, or false if nothing was.
      */
     function registerProductView(){
+        
+        if (!shouldTrack()) return false;
+
         if (state.enhancedEcommercePlugin !== true){
             console.warn("Enhanced ECommerce is not enabled. Will -not- register product views.");
             return false;
