@@ -58,12 +58,16 @@ h5.fourDN-header {
 			border-bottom: 2px solid #168369;
 			padding-bottom: 5px;
 			margin-bottom: 5px;
+			i.icon.icon-minus,
+			i.icon.icon-plus {
+				margin-right: 5px;
+			}
 		}
 
 		.announcement-subtitle {
-			color: #b3b3b3;
+			color: #999;
 			font-weight: 400;
-			font-size: 0.925rem;
+			font-size: 0.9rem;
 		}
 
 		.announcement-content {
@@ -76,7 +80,7 @@ h5.fourDN-header {
 
 
 .fourDN-section-toggle{
-	color: #999999;
+	color: #555;
 	text-decoration: none !important;
 	&:hover,
 	&:focus {
@@ -85,7 +89,7 @@ h5.fourDN-header {
 }
 
 .fourDN-section-info{
-	color: #b3b3b3 !important;
+	color: #999 !important;
 	font-weight: 300;
 	font-size: 1.2em;
 }

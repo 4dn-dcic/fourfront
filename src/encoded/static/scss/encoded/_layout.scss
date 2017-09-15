@@ -101,12 +101,18 @@ h1.page-title {
 	&.top-of-page {
 		margin-top: 36px;
 		margin-bottom: 3px;
-
+		
 		body[data-pathname="/"] &,
-		body[data-pathname="/home"] & {
-			font-size: 3.2rem;
-			line-height: 58px;
+		body[data-pathname="/home"] &,
+		&.home-page-title {
+			height: 64px;
+			margin-bottom: -3px;
+
+			.subtitle {
+				font-size: 1.7rem;
+			}
 		}
+		
 	}
 
 	.row > & {
