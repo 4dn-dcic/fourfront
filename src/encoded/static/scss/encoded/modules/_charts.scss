@@ -1797,9 +1797,11 @@ $workflow-step-node-lineheight: 18px;
             border: 1px solid transparent;
             color: #fff;
             &.production {
+                /*
                 border-color: transparent;
                 //background-color: #cfdcd3;
                 background-color: #5e776b;
+                */
             }
             &.multiple-sets {
                 box-shadow: -3px 3px 0px #444;
