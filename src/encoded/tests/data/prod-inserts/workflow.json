@@ -2182,6 +2182,205 @@
     "lab": "4dn-dcic-lab",
     "accession": "4DNWF37VHW0F",
     "data_types": ["Hi-C"],
-    "category": "annotation+sorting"
+    "category": "annotation+sorting",
+    "cwl_main_filename" : "pairsam-parse-sort.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "pairsam-parse-sort",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/"
+},
+{
+    "title":"Merging for Hi-C using pairsamtools",
+    "description":"Merging for Hi-C using pairsamtools",
+    "workflow_diagram":"",
+    "lab": "4dn-dcic-lab",
+    "cwl_pointer":"",
+    "cwl_main_filename" : "pairsam-merge.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "pairsam-merge",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "uuid":"af8908bf-fdcb-40be-8bca-f1a49226bd20",
+    "arguments":[
+        {
+            "workflow_argument_name":"input_pairsams",
+            "argument_type":"Input file",
+            "argument_format":"pairsam",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"input_pairsams",
+                    "step_argument_type":"Input file",
+                    "workflow_step":"pairsam-merge"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"nThreads",
+            "argument_type":"parameter",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"nThreads",
+                    "step_argument_type":"parameter",
+                    "workflow_step":"pairsam-merge"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"merged_pairsam",
+            "argument_type":"Output processed file",
+            "argument_format":"pairsam",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"merged_pairsam",
+                    "step_argument_type":"Output file",
+                    "workflow_step":"pairsam-merge"
+                }
+            ]
+        }
+    ],
+    "name": "pairsam-merge",
+    "workflow_steps": [
+        {
+            "step": "ddb3d267-0289-48bd-afd2-1505ad8977a6",
+            "step_name": "pairsam-merge"
+        }
+    ],
+    "data_types": ["Hi-C"],
+    "category": "merging",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "accession": "4DNWF3YV81HS",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab"
+},
+{
+    "title":"Duplicate Marking for Hi-C using pairsamtools",
+    "description":"Duplicate Marking for Hi-C using pairsamtools",
+    "workflow_diagram":"",
+    "lab": "4dn-dcic-lab",
+    "cwl_pointer":"",
+    "cwl_main_filename" : "pairsam-markasdup.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "pairsam-markasdup",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "uuid":"a18978fa-7e78-488f-8e6b-bfb6f63b8861",
+    "arguments":[
+        {
+            "workflow_argument_name":"input_pairsams",
+            "argument_type":"Input file",
+            "argument_format":"pairsam",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"input_pairsams",
+                    "step_argument_type":"Input file",
+                    "workflow_step":"pairsam-markasdup"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"out_markedpairsam",
+            "argument_type":"Output processed file",
+            "argument_format":"pairsam",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"out_markedpairsam",
+                    "step_argument_type":"Output file",
+                    "workflow_step":"pairsam-markasdup"
+                }
+            ]
+        }
+    ],
+    "name": "pairsam-markasdup",
+    "workflow_steps": [
+        {
+            "step": "7c06be8b-7510-44e0-83ec-72cc32f5d759",
+            "step_name": "pairsam-markasdup"
+        }
+    ],
+    "data_types": ["Hi-C"],
+    "category": "annotating",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "accession": "4DNWF1Y7DN3H",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab"
+},
+{
+    "title":"Filtering for Hi-C using pairsamtools",
+    "description":"Filtering for Hi-C using pairsamtools",
+    "workflow_diagram":"",
+    "lab": "4dn-dcic-lab",
+    "cwl_pointer":"",
+    "cwl_main_filename" : "pairsam-filter.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "pairsam-filter",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "uuid":"3758e00c-2035-43c6-b783-bb92afe57c99",
+    "arguments":[
+        {
+            "workflow_argument_name":"input_pairsam",
+            "argument_type":"Input file",
+            "argument_format":"pairsam",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"input_pairsam",
+                    "step_argument_type":"Input file",
+                    "workflow_step":"pairsam-filter"
+                }
+            ]
+        },
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "pairsam-filter", 
+                    "step_argument_name": "chromsize", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "chromsize", 
+            "argument_format": "chromsizes",
+            "argument_type": "Input file"
+        }, 
+        {
+            "workflow_argument_name":"dedup_pairs",
+            "argument_type":"Output processed file",
+            "argument_format":"pairs",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"dedup_pairs",
+                    "step_argument_type":"Output file",
+                    "workflow_step":"pairsam-filter"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"lossless_bamfile",
+            "argument_type":"Output processed file",
+            "argument_format":"bam",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"lossless_bamfile",
+                    "step_argument_type":"Output file",
+                    "workflow_step":"pairsam-filter"
+                }
+            ]
+        }
+    ],
+    "name": "pairsam-filter",
+    "workflow_steps": [
+        {
+            "step": "78708866-f965-4d85-9d01-577a03f51a12",
+            "step_name": "pairsam-filter"
+        }
+    ],
+    "data_types": ["Hi-C"],
+    "category": "filtering",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "accession": "4DNWF38VH15",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab"
 }
 ]
