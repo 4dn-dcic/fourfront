@@ -15,7 +15,7 @@ import SubmissionView from './submission/submission-view';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
@@ -536,7 +536,14 @@ export default class App extends React.Component {
         // through the navigate method.
         if (this.historyEnabled) {
             event.preventDefault();
-            navigate(href, navOpts);
+            navigate(href, navOpts, ()=>{
+                var hrefParts = url.parse(href);
+                var hrefHash = hrefParts.hash;
+                if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1){
+                    hrefHash = hrefHash.slice(1); // Strip out '#'
+                    setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
+                }
+            });
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
             }

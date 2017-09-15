@@ -138,7 +138,7 @@ export const list = [
     {
       "grant_type": "NOFIC",
       "center_name": "Belmont",
-      "lab_name": "David GIlbert",
+      "lab_name": "David Gilbert",
       "data_type": "omics",
       "experiment_category": "other omics",
       "experiment_type": "repli-seq",

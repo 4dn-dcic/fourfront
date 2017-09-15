@@ -10,10 +10,10 @@ html elements can ONLY be embedded in the content section.
 *******************/
 export const announcements = [
     {
-        "title":"The 4D Nucleome Paper Published",
+        "title":"The 4D Nucleome Perspective is Published",
         "author":"DCIC Staff",
         "date":"9/13/2017",
-        "content":"The 4D Nucleome project is published in <a href=\"http://www.nature.com/nature/journal/v549/n7671/full/nature23884.html?foxtrotcallback=true\" target=\"_blank\">Nature</a> today. If you use any <a href=\"/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN\">4DN data</a>, please cite this paper. A more extensive data release and use policy will be available soon."
+        "content":"The 4D Nucleome Project perspective paper is online in <a href=\"http://www.nature.com/nature/journal/v549/n7671/full/nature23884.html?foxtrotcallback=true\" target=\"_blank\"><em>Nature</em></a> today. If you use any <a href=\"/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN\">4DN data</a>, please cite this paper. A more extensive data release and use policy will be available soon."
     },
     {
         "title":"Reference Repli-seq Data Released",
