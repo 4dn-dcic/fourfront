@@ -12,9 +12,9 @@ import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } fro
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, doValidAnalysisStepsExist, filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, RowSpacingTypeDropdown } from './WorkflowView';
+import { RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import { WorkflowRunTracingView, FileViewGraphSection } from './FileView';
+import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 
 export default class ExperimentView extends WorkflowRunTracingView {
 
