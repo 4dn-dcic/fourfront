@@ -83,10 +83,10 @@ export class Announcements extends React.Component {
 
         return (
             <div className={this.props.className} id={this.props.id}>{
-                collapsible ? (
-                    [<PartialList open={this.state.open} collapsible={collapsible.map(createAnnouncement)} persistent={persistent.map(createAnnouncement)}/>,
-                    <Button bsSize="sm" className="pull-right" onClick={this.toggleOpen} bsStyle="default">{ !this.state.open ? 'See ' + (collapsible.length) + ' More' : 'Hide' }</Button>]
-                    ) : announcements.map(createAnnouncement)
+                collapsible ? [
+                    <PartialList key="list" open={this.state.open} collapsible={collapsible.map(createAnnouncement)} persistent={persistent.map(createAnnouncement)}/>,
+                    <Button key="button" bsSize="sm" className="pull-right" onClick={this.toggleOpen} bsStyle="default">{ !this.state.open ? 'See ' + (collapsible.length) + ' More' : 'Hide' }</Button>
+                ] : announcements.map(createAnnouncement)
             }</div>
         );
     }
