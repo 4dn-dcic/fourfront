@@ -17,7 +17,7 @@ class Announcement extends React.Component {
         super(props);
         this.handleToggle = this.handleToggle.bind(this);
         this.render = this.render.bind(this);
-        this.state = { active : true };
+        this.state = { active : props.index > 2 ? false : true };
     }
 
     handleToggle(e) {
@@ -55,7 +55,7 @@ class Announcement extends React.Component {
             <div className="fourDN-section announcement">
                 <div className="fourDN-section-title announcement-title">
                     <a className="fourDN-section-toggle" href="#" onClick={this.handleToggle}>
-                        {icon} {title}
+                        {icon} <span dangerouslySetInnerHTML={{__html: title}}/>
                     </a>
                 </div>
                 <div className="fourDN-section-info announcement-subtitle">{subtitle}</div>
@@ -81,9 +81,9 @@ export class Announcements extends React.Component {
     render(){
         return (
             <div className={this.props.className} id={this.props.id}>{
-                announcements_data.map(function(announce){
+                announcements_data.map(function(announce, idx){
                     return (
-                        <Announcement key={announce.title} content={announce} icon={announcements_data.length > 3 ? true : false} />
+                        <Announcement key={announce.title} index={idx} content={announce} icon={announcements_data.length > 3 ? true : false} />
                     );
                 })
             }</div>
