@@ -14,58 +14,9 @@ import { console, object, DateUtility, Schemas, isServerSide, navigate } from '.
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
+import { filterOutParametersFromGraphData } from './WorkflowRunTracingView';
 
 
-/**
- * For when "Show Parameters" UI setting === false.
- * 
- * @param {Object}      graphData 
- * @param {Object[]}    graphData.nodes
- * @param {Object[]}    graphData.edges
- * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
- */
-export function filterOutParametersFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-        if (n.type === 'input' && n.format === 'Workflow Parameter') {
-            deleted[n.id] = true;
-            return false;
-        }
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
-    });
-    return { nodes, edges };
-}
-
-
-export function filterOutReferenceFilesFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-
-        if (n && n.meta && n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type'])){
-
-            if (n.meta.run_data.file['@type'].indexOf('FileReference') > -1) {
-                deleted[n.id] = true;
-                return false;
-            }
-
-        }
-
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
-    });
-    return { nodes, edges };
-}
 
 /**
  * Pass this to props.onNodeClick for Graph.

@@ -31,6 +31,7 @@ require('./item-pages/WorkflowView');
 require('./item-pages/SchemaView');
 require('./item-pages/FallbackView');
 require('./item-pages/FileView');
+require('./item-pages/FileMicroscopyView');
 require('./statuslabel');
 require('./navigation');
 require('./submission/submission-view');

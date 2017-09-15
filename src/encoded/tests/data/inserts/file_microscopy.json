@@ -11,7 +11,10 @@
         "channel_number": 4,
         "slice_number": 5,
         "time_frame_number": 1,
-        "file_type": "z-stack"
+        "file_type": "z-stack",
+		"imageid": "478243",
+		"thumbnail": "https://omero.hms.harvard.edu/webgateway/render_thumbnail/478122/100/",
+		"omerolink": "https://omero.hms.harvard.edu/pathviewer/vanilla-viewer/478122"
     },
     {
         "accession":"4DNFIOTESTM2",
