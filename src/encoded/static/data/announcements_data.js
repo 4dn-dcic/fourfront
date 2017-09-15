@@ -8,7 +8,7 @@ This can be done like so: <a href=\"YOUR PATH HERE\">YOUR TEXT HERE</a>
 Escaping the in quotations with \ in the <a> tags is crucial. Please note that
 html elements can ONLY be embedded in the content section.
 *******************/
-var announcements = module.exports = [
+export const announcements = [
     {
         "title":"Published in Nature",
         "author":"DCIC Staff",

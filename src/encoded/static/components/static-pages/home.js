@@ -74,6 +74,8 @@ export default class HomePage extends React.Component {
        
         return (
             <div className="home-content-area">
+
+                
                 <div className="row">
 
                     <div className="col-md-6 col-xs-12">

@@ -1,36 +1,24 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var { console } = require('./../../util');
-var store = require('../../../store');
-var globals = require('./../../globals');
-var announcements_data = require('../../../data/announcements_data');
-var Collapse = require('react-bootstrap').Collapse;
+import React from 'react';
+import _ from 'underscore';
+import { console } from './../../util';
+import { store } from '../../../store';
+import * as globals from './../../globals';
+import { announcements } from '../../../data/announcements_data';
+import { Collapse, Button } from 'react-bootstrap';
+import { PartialList } from './../../item-pages/components';
 
 /**
  * A single Announcement block/view.
  */
 class Announcement extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.handleToggle = this.handleToggle.bind(this);
-        this.render = this.render.bind(this);
-        this.state = { active : props.index > 2 ? false : true };
-    }
-
-    handleToggle(e) {
-        e.preventDefault();
-        this.setState({active: !this.state.active});
-    }
-
     render() {
         var title = this.props.content.title || "";
         var author = this.props.content.author || "";
         var date = this.props.content.date || "";
         var content = this.props.content.content || "";
-        var active = this.state.active;
         var subtitle;
         if (author && date){
             subtitle = "Posted by " + author + " | " + date;
@@ -42,28 +30,15 @@ class Announcement extends React.Component {
             subtitle = "";
         }
 
-        var icon = null;
-        if (this.props.icon){
-            if (this.props.icon === true){
-                icon = <i className={"icon text-small icon-" + (this.state.active ? 'minus' : 'plus')}></i>;
-            } else {
-                icon = this.props.icon; // Custom icon maybe for future
-            }
-        }
-
         return (
             <div className="fourDN-section announcement">
                 <div className="fourDN-section-title announcement-title">
-                    <a className="fourDN-section-toggle" href="#" onClick={this.handleToggle}>
-                        {icon} <span dangerouslySetInnerHTML={{__html: title}}/>
-                    </a>
+                        <span dangerouslySetInnerHTML={{__html: title}}/>
                 </div>
                 <div className="fourDN-section-info announcement-subtitle">{subtitle}</div>
-                <Collapse in={this.state.active}>
-                    <div className="fourDN-content announcement-content">
-                        <p dangerouslySetInnerHTML={{__html: content}}></p>
-                    </div>
-                </Collapse>
+                <div className="fourDN-content announcement-content">
+                    <p dangerouslySetInnerHTML={{__html: content}}></p>
+                </div>
             </div>
         );
     }
@@ -78,14 +53,40 @@ class Announcement extends React.Component {
  * @prop {string} id - Outer <div> element's id attribute.
  */
 export class Announcements extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.toggleOpen = this.toggleOpen.bind(this);
+        this.state = {
+            'open' : false
+        };
+    }
+
+    toggleOpen(){
+        this.setState({ 'open' : !this.state.open });
+    }
+
     render(){
+
+        var persistent, collapsible = null;
+
+        function createAnnouncement(announce, idx){
+            return <Announcement key={announce.title} index={idx} content={announce} icon={collapsible ? true : false} />;
+        }
+
+        if (announcements.length > 3) {
+            persistent = announcements.slice(0,3);
+            collapsible = announcements.slice(3);
+        } else {
+            persistent = announcements;
+        }
+
         return (
             <div className={this.props.className} id={this.props.id}>{
-                announcements_data.map(function(announce, idx){
-                    return (
-                        <Announcement key={announce.title} index={idx} content={announce} icon={announcements_data.length > 3 ? true : false} />
-                    );
-                })
+                collapsible ? (
+                    [<PartialList open={this.state.open} collapsible={collapsible.map(createAnnouncement)} persistent={persistent.map(createAnnouncement)}/>,
+                    <Button bsSize="sm" className="pull-right" onClick={this.toggleOpen} bsStyle="default">{ !this.state.open ? 'See ' + (collapsible.length) + ' More' : 'Hide' }</Button>]
+                    ) : announcements.map(createAnnouncement)
             }</div>
         );
     }
