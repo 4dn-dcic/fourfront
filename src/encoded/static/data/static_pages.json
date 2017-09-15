@@ -348,6 +348,37 @@
                     }
                 }
             ]
+        },
+
+
+        "planned-submissions" : {
+            "title" : "Planned Data Submission"
+        },
+
+        "planned-submissions-matrix"  : {
+            "title"     : "Planned Data Submission",
+            "directory" : "/src/encoded/static/data",
+            "sections"  : [
+                {
+                    "id" : "legend",
+                    "title" : null,
+                    "filename" : "joint_data_analysis-legend.html"
+                },
+                {
+                    "id" : "nofic-matrix-1",
+                    "filename" : "dense_format.csv",
+                    "title" : null,
+                    "options" : {
+                        "yaxisCols" : [2,3],
+                        "xaxisRows" : [2,3],
+                        "titleCell" : [2,3],
+                        "skipRows"  : [],
+                        "startCell" : [4,4],
+                        "yaxisTitle" : "Lab",
+                        "xaxisTitle" : "Experiment Type"
+                    }
+                }
+            ]
         }
 
     }

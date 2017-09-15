@@ -17,6 +17,7 @@ require('./globals');
 require('./static-pages/static-page-base');
 require('./static-pages/home');
 require('./static-pages/help');
+require('./static-pages/PlannedDataSubmission');
 require('./submissions');
 require('./item-pages/item');
 require('./item-pages/DefaultItemView');

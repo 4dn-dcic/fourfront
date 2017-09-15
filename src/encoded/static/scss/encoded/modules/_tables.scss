@@ -485,11 +485,11 @@ $open-expset-table-side-border-color : #e4e4e4;
 		//border-bottom: 1px solid #ccc;
 		position: relative;
 		overflow: hidden;
-		min-height: 104px;
+		min-height: 62px; //104px;
 
 		.addinfo-description-section,
 		.addinfo-properties-section {
-			padding-top: 15px;
+			padding-top: 12px;
 			padding-bottom: 8px;
 			position: static;
 		}
