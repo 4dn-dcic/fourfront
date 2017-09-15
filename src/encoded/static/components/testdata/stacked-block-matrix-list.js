@@ -138,7 +138,7 @@ export const list = [
     {
       "grant_type": "NOFIC",
       "center_name": "Belmont",
-      "lab_name": "David GIlbert",
+      "lab_name": "David Gilbert",
       "data_type": "omics",
       "experiment_category": "other omics",
       "experiment_type": "repli-seq",
@@ -439,6 +439,7 @@ export const list = [
       "dockerized_software_exists": "yes",
       "additional_comments": ""
     },
+    /*
     {
       "grant_type": "Imaging",
       "center_name": "Bewersdorf",
@@ -458,6 +459,7 @@ export const list = [
       "dockerized_software_exists": "",
       "additional_comments": "* http://python-microscopy.org/doc/metadata.html, http://python-microscopy.org/doc/SampleDB.html, http://python-microscopy.org/doc/DataFormats.html  Development data: data which will be generated while developing the system but will become obsolete by final proof-of-concept data for publication"
     },
+    */
     {
       "grant_type": "Imaging",
       "center_name": "Bewersdorf",
@@ -477,6 +479,7 @@ export const list = [
       "dockerized_software_exists": "we will submit the processed files",
       "additional_comments": "Proof-of-concept data: final data used to prove in a publication that the microscope works; data needs to be made available to the public to meet publication requirements"
     },
+    /*
     {
       "grant_type": "Imaging",
       "center_name": "Bewersdorf",
@@ -496,6 +499,7 @@ export const list = [
       "dockerized_software_exists": "we will submit the processed files",
       "additional_comments": "Production phase data: biological data recorded with our finished microscope"
     },
+    */
     {
       "grant_type": "Imaging",
       "center_name": "Long",
