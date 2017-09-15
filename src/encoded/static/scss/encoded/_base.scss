@@ -52,6 +52,39 @@ $font-family-monospace      : "Source Code Pro", Consolas, monospace;
 }
 
 
+@mixin planned-submitted-cell-styles {
+	&.cellType-submitted {
+		background-color: #53a74e !important;
+	}
+	&.cellType-planned {
+		background-color: rgba(191, 191, 191, 0.5) !important;
+	}
+	&.cellType-in-submission {
+		background-color: rgba(191, 191, 191, 0.5) !important;
+		overflow: hidden;
+		&:before {
+			content: '';
+			display: block;
+			width: 150%;
+			height: 150%;
+			background-color: #53a74e;
+			transform: rotate3d(0,0,1, 45deg) translate3d(-74%, 0px, 0px);
+		}
+	}
+	&.cellType-none {
+		background-color: transparent !important;
+	}
+}
+
+
+
+
+
+
+
+
+
+
 /* BASE STYLES */
 /* Note: most base styles handled by Bootstrap, with variable settings in bootstrap/_variables.scss */
 

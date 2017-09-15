@@ -49,7 +49,8 @@ var refs = {
         'experiments_in_set.lab.title',
         'experiments_in_set.biosample.biosource.individual.organism.name',
         'experiments_in_set.digestion_enzyme.name',
-        'award.project'
+        'award.project',
+        'lab.title'
     ],
     expSetFilters : null,
 };

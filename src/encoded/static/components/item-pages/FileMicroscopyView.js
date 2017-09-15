@@ -3,31 +3,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Checkbox } from 'react-bootstrap';
+import { Checkbox, Thumbnail } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
-import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
-//import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
-//import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
+import FileView from './FileView';
 
 
 
-export default class FileView extends WorkflowRunTracingView {
-
-    /* TODO : Move to WorkflowRunTracingView, DRY up re: WorkflowRunTracingView.loadGraphSteps() */
-    static doesGraphExist(context){
-        return (
-            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
-        );
-    }
+export default class FileMicroscopyView extends WorkflowRunTracingView {
 
     getTabViewContents(){
 
@@ -37,23 +25,21 @@ export default class FileView extends WorkflowRunTracingView {
         var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
         if (width) width -= 20;
 
-        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
-        
-        var steps = this.state.steps;
+        initTabs.push(FileMicroscopyViewOverview.getTabObject(context, this.props.schemas, width));
 
         if (FileView.doesGraphExist(context)){
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
         }
-
+        
         return initTabs.concat(this.getCommonTabs());
     }
 
 }
 
-globals.panel_views.register(FileView, 'File');
+globals.panel_views.register(FileMicroscopyView, 'FileMicroscopy');
 
 
-class FileViewOverview extends React.Component {
+class FileMicroscopyViewOverview extends React.Component {
 
     static getTabObject(context, schemas, width){
         return {
@@ -66,7 +52,7 @@ class FileViewOverview extends React.Component {
                         <span>Overview</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview context={context} schemas={schemas} width={width} />
+                    <FileMicroscopyViewOverview context={context} schemas={schemas} width={width} />
                 </div>
             )
         };
@@ -137,6 +123,8 @@ class OverViewBody extends React.Component {
                 <div className="col-md-9 col-xs-12">
                     <div className="row overview-blocks">
 
+                        
+
                         <div className="col-sm-4 col-lg-4">
                             <div className="inner">
                                 <object.TooltipInfoIconContainerAuto result={file} property={'file_format'} tips={tips} elementType="h5" fallbackTitle="File Format" />
@@ -147,7 +135,7 @@ class OverViewBody extends React.Component {
                         </div>
                         <div className="col-sm-4 col-lg-4">
                             <div className="inner">
-                                <object.TooltipInfoIconContainerAuto result={file} property={'file_type'} tips={tips} elementType="h5" fallbackTitle="File Type" />
+                                <object.TooltipInfoIconContainerAuto result={file} property="file_type" tips={tips} elementType="h5" fallbackTitle="File Type" />
                                 <div>
                                     { Schemas.Term.toName('file_type', file.file_type) || 'Unknown/Other'}
                                 </div>
@@ -161,17 +149,15 @@ class OverViewBody extends React.Component {
                                 </div>
                             </div>
                         </div>
-
-                        { Array.isArray(file.related_files) && file.related_files.length > 0 ?
-                        <div className="col-sm-12">
+                        { file.thumbnail ?
+                        <div className="col-sm-4 col-lg-4">
                             <div className="inner">
-                                <object.TooltipInfoIconContainerAuto result={file} property={'related_files'} tips={tips} elementType="h5" fallbackTitle="Related Files" />
-                                <ul>
-                                    { this.relatedFiles() }
-                                </ul>
+                                <object.TooltipInfoIconContainerAuto result={file} property="thumbnail" tips={tips} elementType="h5" fallbackTitle="Thumbnail" />
+                                  <Thumbnail href={ file.omerolink } className="inline-block" alt="thumbnail" target="_blank" src= { file.thumbnail } />
                             </div>
                         </div>
                         : null }
+                        
 
 
                     </div>
@@ -192,6 +178,4 @@ class OverViewBody extends React.Component {
 
     }
 }
-
-
 
