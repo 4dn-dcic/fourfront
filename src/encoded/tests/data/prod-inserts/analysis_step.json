@@ -248,5 +248,15 @@
         "analysis_step_types":[ "merging" ],
         "award":"1U01CA200059-01",
         "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"pairsam-filter",
+        "uuid":"78708866-f965-4d85-9d01-577a03f51a12",
+        "version":"2",
+        "software_used":"c9bf856d-0356-4a8e-8141-2fea6a0ac550",
+        "name":"pairsamtools",
+        "analysis_step_types":[ "filtering" ],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
     }
 ]
