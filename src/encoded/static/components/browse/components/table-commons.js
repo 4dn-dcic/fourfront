@@ -10,7 +10,6 @@ import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import Draggable from 'react-draggable';
-import Infinite from './../../lib/react-infinite/src/react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';

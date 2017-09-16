@@ -323,23 +323,49 @@ h5.fourDN-header {
 }
 
 .homepage-links-row {
-	
-	.link-block {
-		width: 25%;
-		float: left;
-		text-align: center;
-		font-weight: 500;
-		padding: 4px 8px;
-		//border-left: 1px solid #ddd;
 
-		&:not(:first-child){
-			border-left: 1px solid #eee;
+	.links-wrapper {
+
+		display: flex;
+
+		.link-block {
+			
+			> a {
+				background: #f8f8f8;
+				padding: 10px 8px;
+				display: block;
+				/* text-align: center; */
+				font-weight: 400;
+				height: 100%;
+				border: 1px solid rgba(0,0,0,0.05);
+				/*
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				*/
+
+				&:hover {
+					background-color: #f4f4f4;
+				}
+
+				> span {
+					display: inline-block;
+					vertical-align: middle;
+				}
+			}
+			
+			
+			&:not(:first-child){
+				border-left: 1px solid #eee;
+			}
+			
+			/*
+			&:last-child {
+				border-right: 1px solid #ddd;
+			}
+			*/
 		}
-		/*
-		&:last-child {
-			border-right: 1px solid #ddd;
-		}
-		*/
+
 	}
 
 }
