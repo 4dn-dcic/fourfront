@@ -543,6 +543,10 @@ export default class App extends React.Component {
                     hrefHash = hrefHash.slice(1); // Strip out '#'
                     setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
                 }
+                if (hrefParts.pathname.indexOf('/browse/') > -1){
+                    var filters = Filters.hrefToFilters(href, null, false);
+                    Filters.saveChangedFilters(filters, false);
+                }
             });
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();

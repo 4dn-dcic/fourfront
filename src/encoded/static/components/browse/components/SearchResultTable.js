@@ -9,7 +9,8 @@ import _ from 'underscore';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
-import Infinite from './../../lib/react-infinite/src/react-infinite';
+//import Infinite from './../../lib/react-infinite/src/react-infinite';
+import Infinite from 'react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
@@ -92,18 +93,23 @@ class ResultDetail extends React.Component{
 
     constructor(props){
         super(props);
+        this.setDetailHeightFromPane = this.setDetailHeightFromPane.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'closing' : false };
+    }
+
+    setDetailHeightFromPane(){
+        setTimeout(()=>{
+            var detailHeight = parseInt(this.refs.detail.offsetHeight);
+            if (isNaN(detailHeight)) detailHeight = 0;
+            this.props.setDetailHeight(detailHeight);
+        }, 10);
     }
 
     componentDidUpdate(pastProps, pastState){
         if (pastProps.open !== this.props.open){
             if (this.props.open && typeof this.props.setDetailHeight === 'function'){
-                setTimeout(()=>{
-                    var detailHeight = parseInt(this.refs.detail.offsetHeight) + 10;
-                    if (isNaN(detailHeight)) detailHeight = 0;
-                    this.props.setDetailHeight(detailHeight);
-                }, 0);
+                this.setDetailHeightFromPane();
             }
         }
     }
@@ -117,7 +123,7 @@ class ResultDetail extends React.Component{
                         'width' : this.props.tableContainerWidth,
                         'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
                     }}>
-                        { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth) }
+                        { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth, this.setDetailHeightFromPane) }
                         { this.props.tableContainerScrollLeft && this.props.tableContainerScrollLeft > 10 ?
                             <div className="close-button-container text-center" onClick={this.props.toggleDetailOpen}>
                                 <i className="icon icon-angle-up"/>
@@ -271,7 +277,8 @@ class LoadMoreAsYouScroll extends React.Component {
 
     static defaultProps = {
         'limit' : 25,
-        'debouncePointerEvents' : 150
+        'debouncePointerEvents' : 150,
+        'openRowHeight' : 56
     }
 
     constructor(props){
@@ -386,7 +393,8 @@ class LoadMoreAsYouScroll extends React.Component {
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
         var elementHeight = _.keys(this.props.openDetailPanes).length === 0 ? this.props.rowHeight : this.props.children.map((c) => {
             if (typeof this.props.openDetailPanes[c.props['data-key']] === 'number'){
-                return this.props.openDetailPanes[c.props['data-key']];
+                //console.log('height', this.props.openDetailPanes[c.props['data-key']], this.props.rowHeight, 2 + this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight);
+                return this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight + 2;
             }
             return this.props.rowHeight;
         });
@@ -726,7 +734,7 @@ class DimensioningContainer extends React.Component {
     }
 
     toggleDetailPaneOpen(rowKey, cb = null){
-        setTimeout(() => {
+        //setTimeout(() => {
             var openDetailPanes = _.clone(this.state.openDetailPanes);
             if (openDetailPanes[rowKey]){
                 delete openDetailPanes[rowKey];
@@ -734,7 +742,7 @@ class DimensioningContainer extends React.Component {
                 openDetailPanes[rowKey] = true;
             }
             this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
-        }, 0);
+        //}, 0);
     }
 
     setDetailHeight(rowKey, height, cb){
