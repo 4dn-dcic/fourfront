@@ -248,7 +248,7 @@ class ResultTableContainer extends React.Component {
                     <SearchResultTable
                         results={results}
                         columns={this.props.context.columns || {}}
-                        renderDetailPane={(result, rowNumber, containerWidth)=>
+                        renderDetailPane={(result, rowNumber, containerWidth, toggleExpandCallback)=>
                             <ExperimentSetDetailPane
                                 result={result}
                                 containerWidth={containerWidth}
@@ -256,6 +256,7 @@ class ResultTableContainer extends React.Component {
                                 selectedFiles={this.props.selectedFiles}
                                 selectFile={this.props.selectFile}
                                 unselectFile={this.props.unselectFile}
+                                toggleExpandCallback={toggleExpandCallback}
                                 paddingWidth={47}
                             />
                         }

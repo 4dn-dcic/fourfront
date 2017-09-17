@@ -245,7 +245,7 @@ export class FlexibleDescriptionBox extends React.Component {
         this.descriptionHeight = tcw.containerHeight + dims.paddingHeight; // Account for padding, border.
         this.descriptionWidth = containerWidth;
 
-        console.log('HEIGHT', this.descriptionHeight);
+        //console.log('HEIGHT', this.descriptionHeight);
 
         // If we want more than 1 line, calculate if descriptionheight / lineheight > linesWanted.
         if (typeof this.props.linesOfText === 'number' && this.props.linesOfText > 1 && typeof this.props.lineHeight === 'number'){

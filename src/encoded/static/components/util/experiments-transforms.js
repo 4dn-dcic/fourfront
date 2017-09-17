@@ -2,7 +2,9 @@
 
 import _ from 'underscore';
 import { atIdFromObject } from './object';
-//import patchedConsoleInstance from './patched-console';
+import patchedConsoleInstance from './patched-console';
+
+var console = patchedConsoleInstance;
 
 /**
  * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set.
@@ -43,7 +45,7 @@ export function fileCountFromExperiments(experiments, includeProcessedFiles = fa
 export function fileCountFromExperimentSet(experiment_set, includeProcessedFiles = false, includeFileSets = false){
     var initialCountFromSet = 0;
     if (includeProcessedFiles){
-        initialCountFromSet += ensureArray(experiment_set.processed_files).length;
+        initialCountFromSet += (experiment_set && Array.isArray(experiment_set.processed_files) && experiment_set.processed_files.length) || 0;
     }
     return initialCountFromSet + fileCountFromExperiments(ensureArray(experiment_set.experiments_in_set), includeProcessedFiles, includeFileSets);
 }

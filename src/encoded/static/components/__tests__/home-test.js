@@ -65,9 +65,9 @@ describe('Testing home.js', function() {
     });
     */
 
-    it('has welcome, announcements, and links headers', function() {
+    it('has welcome, announcements headers', function() {
         var newsHeaders = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-header");
-        expect(newsHeaders.length).toEqual(3);
+        expect(newsHeaders.length).toEqual(2);
     });
 
 });
