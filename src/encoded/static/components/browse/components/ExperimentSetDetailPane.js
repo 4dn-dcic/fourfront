@@ -46,7 +46,7 @@ export class ExperimentSetDetailPane extends React.Component {
     componentDidUpdate(pastProps, pastState){
         if ((pastState.rawFilesOpen !== this.state.rawFilesOpen) || (pastState.processedFilesOpen !== this.state.processedFilesOpen)){
             if (typeof this.props.toggleExpandCallback === 'function'){
-                //setTimeout(this.props.toggleExpandCallback, 500); // Delay to allow <Collapse> height transition to finish.
+                setTimeout(this.props.toggleExpandCallback, 500); // Delay to allow <Collapse> height transition to finish.
             }
         }
     }

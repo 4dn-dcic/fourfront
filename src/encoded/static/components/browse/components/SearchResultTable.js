@@ -393,7 +393,7 @@ class LoadMoreAsYouScroll extends React.Component {
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
         var elementHeight = _.keys(this.props.openDetailPanes).length === 0 ? this.props.rowHeight : this.props.children.map((c) => {
             if (typeof this.props.openDetailPanes[c.props['data-key']] === 'number'){
-                console.log('height', this.props.openDetailPanes[c.props['data-key']], this.props.rowHeight, 2 + this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight);
+                //console.log('height', this.props.openDetailPanes[c.props['data-key']], this.props.rowHeight, 2 + this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight);
                 return this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight + 2;
             }
             return this.props.rowHeight;
