@@ -42,7 +42,8 @@ export class ExperimentSetDetailPane extends React.Component {
             'processedFilesOpen' : false
         };
     }
-
+    
+    /*
     componentDidUpdate(pastProps, pastState){
         if ((pastState.rawFilesOpen !== this.state.rawFilesOpen) || (pastState.processedFilesOpen !== this.state.processedFilesOpen)){
             if (typeof this.props.toggleExpandCallback === 'function'){
@@ -50,6 +51,7 @@ export class ExperimentSetDetailPane extends React.Component {
             }
         }
     }
+    */
 
     toggle(property){
         var state = {};
