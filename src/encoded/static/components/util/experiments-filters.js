@@ -289,6 +289,12 @@ export function filtersToHref(expSetFilters, currentHref, page = null, sortColum
     return urlString;
 }
 
+export const NON_FILTER_URL_PARAMS = [ // Taken from search.py
+    'limit', 'y.limit', 'x.limit', 'mode',
+    'format', 'frame', 'datastore', 'field', 'region', 'genome',
+    'sort', 'from', 'referrer', 'q', 'before', 'after'
+];
+
 
 /**
  * Parse href to return an expSetFilters object, the opposite of @see filtersToHref.
@@ -299,12 +305,13 @@ export function filtersToHref(expSetFilters, currentHref, page = null, sortColum
  * @param {string}   [contextFilters.field]
  * @returns {Object} Shape of { field : Set([...terms]) }
  */
-export function hrefToFilters(href, contextFilters = null){
+export function hrefToFilters(href, contextFilters = null, checkContextFilters = true){
     if (!navigate.isBrowseHref(href)) return {};
     return _.object(_.map(
         _.filter(
             _.pairs(url.parse(href, true).query),
             function(queryPair){
+                if (NON_FILTER_URL_PARAMS.indexOf(queryPair[0]) > -1) return false;
                 if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
                 
                 if (Array.isArray(contextFilters) && typeof _.findWhere(contextFilters,  {'field' : queryPair[0]}) !== 'undefined'){
@@ -312,7 +319,7 @@ export function hrefToFilters(href, contextFilters = null){
                 }
 
                 // These happen to all start w/ 'experiments_in_set.' currently. Woops not anymore.
-                if (queryPair[0].indexOf('experiments_in_set.') > -1) return true;
+                if (!checkContextFilters || queryPair[0].indexOf('experiments_in_set.') > -1) return true;
                 return false;
             }
         ),
