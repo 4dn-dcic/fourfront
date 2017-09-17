@@ -2449,5 +2449,60 @@
     "accession": "4DNWZJ2G671",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab"
+},
+{
+    "title":"Patching pairs file for Hi-C using pairsamtools",
+    "description":"Patching pairs file for Hi-C using pairsamtools",
+    "workflow_diagram":"",
+    "lab": "4dn-dcic-lab",
+    "cwl_pointer":"",
+    "cwl_main_filename" : "pairs-patch.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "pairs-patch",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "uuid":"7e5dcad0-d8da-4286-9253-a779d5310a49",
+    "arguments":[
+        {
+            "workflow_argument_name":"input_pairs",
+            "argument_type":"Input file",
+            "argument_format":"pairs",
+            "argument_mapping":[
+                {
+                    "step_argument_name":"input_pairs",
+                    "step_argument_type":"Input file",
+                    "workflow_step":"pairs-patch"
+                }
+            ]
+        },
+        {
+            "workflow_argument_name":"out_pairs",
+            "argument_type":"Output processed file",
+            "argument_format":"pairs",
+            "secondary_file_formats": ["pairs_px2"],
+            "argument_mapping":[
+                {
+                    "step_argument_name":"out_pairs",
+                    "step_argument_type":"Output file",
+                    "workflow_step":"pairs-patch"
+                }
+            ]
+        }
+    ],
+    "name": "pairs-patch",
+    "workflow_steps": [
+        {
+            "step": "99bb38e0-c7a7-4e22-b452-3934462ce90a",
+            "step_name": "pairs-patch"
+        }
+    ],
+    "data_types": ["Hi-C"],
+    "category": "format conversion",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "accession": "4DNWZJ2G671",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab"
 }
 ]
+
