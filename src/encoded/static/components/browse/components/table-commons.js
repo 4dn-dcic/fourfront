@@ -172,7 +172,7 @@ export const defaultColumnDefinitionMap = {
     },
     'number_of_experiments' : {
         'title' : '# of Experiments',
-        'widthMap' : {'lg' : 75, 'md' : 75, 'sm' : 50},
+        'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50},
         //'render' : function(result, columnDefinition, props, width){
         //    if (!Array.isArray(result.experiments_in_set)) return null;
         //    return result.experiments_in_set.length;
@@ -180,7 +180,9 @@ export const defaultColumnDefinitionMap = {
     },
     'number_of_files' : {
         'title' : '# of Files',
-        'widthMap' : {'lg' : 75, 'md' : 75, 'sm' : 50}
+        'widthMap' : {'lg' : 60, 'md' : 50, 'sm' : 50},
+        'noSort' : true
+
     },
     'experiments_in_set.experiment_type' : {
         'title' : 'Experiment Type',

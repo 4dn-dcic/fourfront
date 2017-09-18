@@ -94,22 +94,25 @@ class ResultDetail extends React.Component{
     constructor(props){
         super(props);
         this.setDetailHeightFromPane = this.setDetailHeightFromPane.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        //this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'closing' : false };
     }
 
-    setDetailHeightFromPane(){
-        setTimeout(()=>{
-            var detailHeight = parseInt(this.refs.detail.offsetHeight);
-            if (isNaN(detailHeight)) detailHeight = 0;
-            this.props.setDetailHeight(detailHeight);
-        }, 10);
+    setDetailHeightFromPane(height = null){
+        if (typeof height !== 'number'){
+            height = this.refs.detail && parseInt(this.refs.detail.offsetHeight);
+            if (!this.firstFoundHeight && height && !isNaN(height)) this.firstFoundHeight = height;
+        }
+        if (isNaN(height) || typeof height !== 'number') height = this.firstFoundHeight || 1;
+        this.props.setDetailHeight(height);
     }
 
     componentDidUpdate(pastProps, pastState){
         if (pastProps.open !== this.props.open){
             if (this.props.open && typeof this.props.setDetailHeight === 'function'){
-                this.setDetailHeightFromPane();
+                setTimeout(this.setDetailHeightFromPane, 10);
             }
         }
     }
@@ -393,7 +396,7 @@ class LoadMoreAsYouScroll extends React.Component {
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
         var elementHeight = _.keys(this.props.openDetailPanes).length === 0 ? this.props.rowHeight : this.props.children.map((c) => {
             if (typeof this.props.openDetailPanes[c.props['data-key']] === 'number'){
-                //console.log('height', this.props.openDetailPanes[c.props['data-key']], this.props.rowHeight, 2 + this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight);
+                console.log('height', this.props.openDetailPanes[c.props['data-key']], this.props.rowHeight, 2 + this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight);
                 return this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight + 2;
             }
             return this.props.rowHeight;

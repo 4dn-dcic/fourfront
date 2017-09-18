@@ -3750,3 +3750,3756 @@ export const PARTIALLY_RELEASED_PROCESSED_FILES = [
         ]
     }
 ];
+
+// Taken from https://data.4dnucleome.org/experiment-set-replicates/4DNESLLTENG9/ @ 09/18/2017 - 3:42pm EST
+export const MORE_PARTIALLY_RELEASED_PROCESSED_FILES = [
+    {
+        "uuid":"bcd80455-3ef8-49a1-b482-03f0f599ec7f",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"47885e0b-3ee6-4b1a-bd6e-83b3703e25e1",
+                        "step":"pairsam-parse-sort run 2017-09-14 16:12:22.571926",
+                        "name":"out_pairsam",
+                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
+                    },
+                    {
+                        "type":"Input File Group",
+                        "for_file":"8712ba70-2998-4189-b9f7-fca94560e9c0",
+                        "step":"pairsam-parse-sort run 2017-09-14 17:53:41.819548",
+                        "grouped_by":"workflow",
+                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
+                    },
+                    {
+                        "type":"Input File Group",
+                        "for_file":"c47230b6-fd44-4c38-85fd-82417353a1bd",
+                        "step":"pairsam-parse-sort run 2017-09-14 17:54:21.378824",
+                        "grouped_by":"workflow",
+                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
+                    },
+                    {
+                        "type":"Input File Group",
+                        "for_file":"e3dd6672-88d5-406a-ab7e-40f8d5da5575",
+                        "step":"pairsam-parse-sort run 2017-09-14 17:54:30.723991",
+                        "grouped_by":"workflow",
+                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
+                    }
+                ],
+                "name":"input_pairsams",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        },
+                        {
+                            "ordinal":2
+                        },
+                        {
+                            "ordinal":3
+                        },
+                        {
+                            "ordinal":4
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"47885e0b-3ee6-4b1a-bd6e-83b3703e25e1",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIXS6FIZF/",
+                            "filename":null,
+                            "accession":"4DNFIXS6FIZF",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        },
+                        {
+                            "uuid":"8712ba70-2998-4189-b9f7-fca94560e9c0",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIX43F7DZ/",
+                            "filename":null,
+                            "accession":"4DNFIX43F7DZ",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        },
+                        {
+                            "uuid":"c47230b6-fd44-4c38-85fd-82417353a1bd",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIMHJHSET/",
+                            "filename":null,
+                            "accession":"4DNFIMHJHSET",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        },
+                        {
+                            "uuid":"e3dd6672-88d5-406a-ab7e-40f8d5da5575",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFILG6ZOD8/",
+                            "filename":null,
+                            "accession":"4DNFILG6ZOD8",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"pairsam-merge run 2017-09-15 17:42:11.508423",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-15T17:42:12.419282+00:00",
+            "status":"in review by lab",
+            "@id":"/workflow-runs-awsem/bcd80455-3ef8-49a1-b482-03f0f599ec7f/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/ddb3d267-0289-48bd-afd2-1505ad8977a6/",
+                        "step_name":"pairsam-merge"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Merging for Hi-C using pairsamtools - 4DNWF3YV81HS",
+                "accession":"4DNWF3YV81HS",
+                "uuid":"af8908bf-fdcb-40be-8bca-f1a49226bd20",
+                "@id":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"merged_pairsam"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
+                        "step":"pairsam-markasdup run 2017-09-15 20:28:36.478373",
+                        "name":"input_pairsams"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
+                        "step":"pairsam-markasdup run 2017-09-15 20:30:41.338993",
+                        "name":"input_pairsam"
+                    }
+                ],
+                "name":"merged_pairsam",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".sam.pairs.gz",
+                            "extra_files":[
+
+                            ],
+                            "format":"pairsam",
+                            "upload_key":"56eeded7-770e-4eae-b385-6cd8591f6fd4/4DNFILGKQ9CG.sam.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
+                            "file_format":"pairsam",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFILGKQ9CG",
+                            "@id":"/files-processed/4DNFILGKQ9CG/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"6afadc89-c382-4d1b-9c1f-49858f811831",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
+                        "step":"pairsam-merge run 2017-09-15 17:42:11.508423",
+                        "name":"merged_pairsam",
+                        "workflow":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/"
+                    }
+                ],
+                "name":"input_pairsam",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"56eeded7-770e-4eae-b385-6cd8591f6fd4",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFILGKQ9CG/",
+                            "filename":null,
+                            "accession":"4DNFILGKQ9CG",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"pairsam-markasdup run 2017-09-15 20:30:41.338993",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-15T20:30:42.213596+00:00",
+            "status":"in review by lab",
+            "@id":"/workflow-runs-awsem/6afadc89-c382-4d1b-9c1f-49858f811831/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/7c06be8b-7510-44e0-83ec-72cc32f5d759/",
+                        "step_name":"pairsam-markasdup"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Duplicate Marking for Hi-C using pairsamtools - 4DNWF1Y7DN3H",
+                "accession":"4DNWF1Y7DN3H",
+                "uuid":"a18978fa-7e78-488f-8e6b-bfb6f63b8861",
+                "@id":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"out_markedpairsam"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"8740663b-e8da-410d-a9f8-e8fcca793f95",
+                        "step":"pairsam-filter run 2017-09-15 23:18:43.041704",
+                        "name":"input_pairsam"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"8740663b-e8da-410d-a9f8-e8fcca793f95",
+                        "step":"pairsam-filter run 2017-09-16 00:10:37.256759",
+                        "name":"input_pairsam"
+                    }
+                ],
+                "name":"out_markedpairsam",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".sam.pairs.gz",
+                            "extra_files":[
+
+                            ],
+                            "format":"pairsam",
+                            "upload_key":"8740663b-e8da-410d-a9f8-e8fcca793f95/4DNFIXZW3HLF.sam.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"8740663b-e8da-410d-a9f8-e8fcca793f95",
+                            "file_format":"pairsam",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFIXZW3HLF",
+                            "@id":"/files-processed/4DNFIXZW3HLF/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"f4e711a1-1780-4b64-ae41-caf33fc802c3",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"8740663b-e8da-410d-a9f8-e8fcca793f95",
+                        "step":"pairsam-markasdup run 2017-09-15 20:30:41.338993",
+                        "name":"out_markedpairsam",
+                        "workflow":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/"
+                    }
+                ],
+                "name":"input_pairsam",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"8740663b-e8da-410d-a9f8-e8fcca793f95",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIXZW3HLF/",
+                            "filename":null,
+                            "accession":"4DNFIXZW3HLF",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "name":"chromsize",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_format":"chromsizes",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "accession":"4DNFI823LSII",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"pairsam-filter run 2017-09-16 00:10:37.256759",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-16T00:10:38.139452+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/f4e711a1-1780-4b64-ae41-caf33fc802c3/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/78708866-f965-4d85-9d01-577a03f51a12/",
+                        "step_name":"pairsam-filter"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Filtering for Hi-C using pairsamtools - 4DNWF38VH15",
+                "accession":"4DNWF38VH15",
+                "uuid":"3758e00c-2035-43c6-b783-bb92afe57c99",
+                "@id":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"dedup_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 06:36:54.980439",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 12:52:16.188292",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 12:40:05.680786",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 12:43:16.063061",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 13:03:41.936676",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 17:41:47.023163",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 17:40:06.178384",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 17:43:29.363523",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 17:49:15.303843",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 18:10:26.979572",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"addfragtopairs run 2017-09-16 18:59:17.399707",
+                        "name":"input_pairs"
+                    }
+                ],
+                "name":"dedup_pairs",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".pairs.gz",
+                            "extra_files":[
+
+                            ],
+                            "format":"pairs",
+                            "upload_key":"1cb152c4-0e7a-431d-b148-b7e23eabca6e/4DNFICOBX8XY.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                            "file_format":"pairs",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFICOBX8XY",
+                            "@id":"/files-processed/4DNFICOBX8XY/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"lossless_bamfile"
+                    }
+                ],
+                "name":"lossless_bamfile",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".bam",
+                            "extra_files":[
+
+                            ],
+                            "format":"bam",
+                            "upload_key":"3e71a0ae-2f61-490a-adc8-25d30bad1a2c/4DNFIBDQQU1B.bam"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"3e71a0ae-2f61-490a-adc8-25d30bad1a2c",
+                            "file_format":"bam",
+                            "file_type":"alignment",
+                            "accession":"4DNFIBDQQU1B",
+                            "@id":"/files-processed/4DNFIBDQQU1B/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"7fa7dd02-ee88-43d3-8208-2daa4482e6f3",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                        "step":"pairsam-filter run 2017-09-16 00:10:37.256759",
+                        "name":"dedup_pairs",
+                        "workflow":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/"
+                    }
+                ],
+                "name":"input_pairs",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"1cb152c4-0e7a-431d-b148-b7e23eabca6e",
+                            "file_format":"pairs",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFICOBX8XY/",
+                            "filename":null,
+                            "accession":"4DNFICOBX8XY",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
+                        "name":"restriction_file"
+                    }
+                ],
+                "name":"restriction_file",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
+                            "file_format":"juicer_format_restriction_site_file",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823MBKE/",
+                            "filename":"GRCh38_HindIII_new.txt",
+                            "accession":"4DNFI823MBKE",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"addfragtopairs run 2017-09-16 18:59:17.399707",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-16T18:59:18.593796+00:00",
+            "status":"in review by lab",
+            "@id":"/workflow-runs-awsem/7fa7dd02-ee88-43d3-8208-2daa4482e6f3/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/e6843cbd-1de7-41fe-99c4-481c10f21d07/",
+                        "step_name":"addfragtopairs"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Adding restriction fragment information for Hi-C using pairsamtools - 4DNWZJ2G671",
+                "accession":"4DNWZJ2G671",
+                "uuid":"ef125750-8df2-418e-a1ee-402285f9dd93",
+                "@id":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"out_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:30:41.169153",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:32:48.239377",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:35:03.320784",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:36:03.758593",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:42:13.332548",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:44:58.848283",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:47:08.099808",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:48:31.758438",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:50:15.598177",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:37:18.798745",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:40:45.920184",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:52:16.518046",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:00:20.262051",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:02:18.046058",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:03:46.298438",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:07:54.385333",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-17 11:25:43.106767",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"pairs-patch run 2017-09-17 16:17:54.117168",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:08:37.399176",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:09:34.459070",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:11:03.520632",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:12:29.820949",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:15:31.645764",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-17 11:26:38.913455",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:10:31.498627",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:13:42.447938",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:14:57.699478",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-17 11:17:12.251003",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-17 11:28:31.143029",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:08:15.449719",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:22:34.669395",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:06:00.159619",
+                        "name":"input_pairs"
+                    }
+                ],
+                "name":"out_pairs",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extra_files":[
+                                {
+                                    "uuid":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                                    "file_format":"pairs_px2",
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/69931af1-44a8-4eeb-bf2a-42a08967b49a/@@download/4DNFI6BIN9DA.pairs.gz.px2",
+                                    "filename":"4DNFI6BIN9DA",
+                                    "accession":"4DNFI6BIN9DA",
+                                    "upload_key":"69931af1-44a8-4eeb-bf2a-42a08967b49a/4DNFI6BIN9DA.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "extension":".pairs.gz",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "format":"pairs",
+                            "upload_key":"69931af1-44a8-4eeb-bf2a-42a08967b49a/4DNFI6BIN9DA.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                            "file_format":"pairs",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFI6BIN9DA",
+                            "@id":"/files-processed/4DNFI6BIN9DA/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"8705ce63-513c-4910-bead-8772fdefc276",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                        "step":"addfragtopairs run 2017-09-16 18:59:17.399707",
+                        "name":"out_pairs",
+                        "workflow":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/"
+                    }
+                ],
+                "name":"input_pairs",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"69931af1-44a8-4eeb-bf2a-42a08967b49a",
+                            "file_format":"pairs",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFI6BIN9DA/",
+                            "filename":null,
+                            "accession":"4DNFI6BIN9DA",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"pairs-patch run 2017-09-17 16:17:54.117168",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-17T16:17:54.973245+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/8705ce63-513c-4910-bead-8772fdefc276/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/99bb38e0-c7a7-4e22-b452-3934462ce90a/",
+                        "step_name":"pairs-patch"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Patching pairs file for Hi-C using pairsamtools - 4DNWZH36VU2",
+                "accession":"4DNWZH36VU2",
+                "uuid":"7e5dcad0-d8da-4286-9253-a779d5310a49",
+                "@id":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"out_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:53:31.636138",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:58:36.346739",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "step":"hi-c-processing-partb run 2017-09-17 20:04:23.123639",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:44:40.775799",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "step":"hi-c-processing-partb run 2017-09-17 19:27:36.797149",
+                        "name":"input_pairs"
+                    }
+                ],
+                "name":"out_pairs",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extra_files":[
+                                {
+                                    "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                                    "file_format":"pairs_px2",
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/a9554821-af87-489d-bba6-f58d4286a2a3/@@download/4DNFICYJ9FOU.pairs.gz.px2",
+                                    "filename":"4DNFICYJ9FOU",
+                                    "accession":"4DNFICYJ9FOU",
+                                    "upload_key":"a9554821-af87-489d-bba6-f58d4286a2a3/4DNFICYJ9FOU.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "extension":".pairs.gz",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "format":"pairs",
+                            "upload_key":"a9554821-af87-489d-bba6-f58d4286a2a3/4DNFICYJ9FOU.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                            "file_format":"pairs",
+                            "file_type":"contact list",
+                            "accession":"4DNFICYJ9FOU",
+                            "@id":"/files-processed/4DNFICYJ9FOU/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"33db8da4-c689-4ae1-a47a-22e8fc39eeb2",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc",
+                        "step":"pairsam-parse-sort run 2017-09-14 17:54:37.332192",
+                        "name":"out_pairsam",
+                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
+                    },
+                    {
+                        "type":"Input File Group",
+                        "for_file":"df45891e-4341-4233-baf2-d296c7e08abe",
+                        "step":"pairsam-parse-sort run 2017-09-14 17:54:42.439084",
+                        "grouped_by":"workflow",
+                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
+                    },
+                    {
+                        "type":"Input File Group",
+                        "for_file":"be6daffe-094d-4758-b138-20f0e8080987",
+                        "step":"pairsam-parse-sort run 2017-09-14 17:54:47.780382",
+                        "grouped_by":"workflow",
+                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
+                    },
+                    {
+                        "type":"Input File Group",
+                        "for_file":"f3310aa9-d947-40f5-8e65-9cbe24386187",
+                        "step":"pairsam-parse-sort run 2017-09-14 20:21:10.272849",
+                        "grouped_by":"workflow",
+                        "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
+                    }
+                ],
+                "name":"input_pairsams",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        },
+                        {
+                            "ordinal":2
+                        },
+                        {
+                            "ordinal":3
+                        },
+                        {
+                            "ordinal":4
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIUWMF9A1/",
+                            "filename":null,
+                            "accession":"4DNFIUWMF9A1",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        },
+                        {
+                            "uuid":"df45891e-4341-4233-baf2-d296c7e08abe",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIYOVMUJU/",
+                            "filename":null,
+                            "accession":"4DNFIYOVMUJU",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        },
+                        {
+                            "uuid":"be6daffe-094d-4758-b138-20f0e8080987",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFI4W2MRIY/",
+                            "filename":null,
+                            "accession":"4DNFI4W2MRIY",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        },
+                        {
+                            "uuid":"f3310aa9-d947-40f5-8e65-9cbe24386187",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIOKIESM4/",
+                            "filename":null,
+                            "accession":"4DNFIOKIESM4",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"pairsam-merge run 2017-09-15 17:42:17.814966",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-15T17:42:18.662548+00:00",
+            "status":"in review by lab",
+            "@id":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/ddb3d267-0289-48bd-afd2-1505ad8977a6/",
+                        "step_name":"pairsam-merge"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Merging for Hi-C using pairsamtools - 4DNWF3YV81HS",
+                "accession":"4DNWF3YV81HS",
+                "uuid":"af8908bf-fdcb-40be-8bca-f1a49226bd20",
+                "@id":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"merged_pairsam"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
+                        "step":"pairsam-markasdup run 2017-09-15 20:28:42.315188",
+                        "name":"input_pairsams"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
+                        "step":"pairsam-markasdup run 2017-09-15 20:30:47.997521",
+                        "name":"input_pairsam"
+                    }
+                ],
+                "name":"merged_pairsam",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".sam.pairs.gz",
+                            "extra_files":[
+
+                            ],
+                            "format":"pairsam",
+                            "upload_key":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e/4DNFIEDB5C3N.sam.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
+                            "file_format":"pairsam",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFIEDB5C3N",
+                            "@id":"/files-processed/4DNFIEDB5C3N/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"e42511cf-a65a-471c-8189-d44bcbf0f6e9",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
+                        "step":"pairsam-merge run 2017-09-15 17:42:17.814966",
+                        "name":"merged_pairsam",
+                        "workflow":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/"
+                    }
+                ],
+                "name":"input_pairsam",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIEDB5C3N/",
+                            "filename":null,
+                            "accession":"4DNFIEDB5C3N",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"pairsam-markasdup run 2017-09-15 20:30:47.997521",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-15T20:30:48.933917+00:00",
+            "status":"in review by lab",
+            "@id":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/7c06be8b-7510-44e0-83ec-72cc32f5d759/",
+                        "step_name":"pairsam-markasdup"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Duplicate Marking for Hi-C using pairsamtools - 4DNWF1Y7DN3H",
+                "accession":"4DNWF1Y7DN3H",
+                "uuid":"a18978fa-7e78-488f-8e6b-bfb6f63b8861",
+                "@id":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"out_markedpairsam"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"c08b165e-8fc0-46af-8211-d363f7def6dc",
+                        "step":"pairsam-filter run 2017-09-16 00:10:42.865657",
+                        "name":"input_pairsam"
+                    }
+                ],
+                "name":"out_markedpairsam",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".sam.pairs.gz",
+                            "extra_files":[
+
+                            ],
+                            "format":"pairsam",
+                            "upload_key":"c08b165e-8fc0-46af-8211-d363f7def6dc/4DNFIQAOXKIE.sam.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"c08b165e-8fc0-46af-8211-d363f7def6dc",
+                            "file_format":"pairsam",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFIQAOXKIE",
+                            "@id":"/files-processed/4DNFIQAOXKIE/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"b2fc0880-62be-460e-b854-d87a58c6665a",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"c08b165e-8fc0-46af-8211-d363f7def6dc",
+                        "step":"pairsam-markasdup run 2017-09-15 20:30:47.997521",
+                        "name":"out_markedpairsam",
+                        "workflow":"/workflows/a18978fa-7e78-488f-8e6b-bfb6f63b8861/"
+                    }
+                ],
+                "name":"input_pairsam",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"c08b165e-8fc0-46af-8211-d363f7def6dc",
+                            "file_format":"pairsam",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIQAOXKIE/",
+                            "filename":null,
+                            "accession":"4DNFIQAOXKIE",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "name":"chromsize",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_format":"chromsizes",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "accession":"4DNFI823LSII",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"pairsam-filter run 2017-09-16 00:10:42.865657",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-16T00:10:43.881118+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/b2fc0880-62be-460e-b854-d87a58c6665a/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/78708866-f965-4d85-9d01-577a03f51a12/",
+                        "step_name":"pairsam-filter"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Filtering for Hi-C using pairsamtools - 4DNWF38VH15",
+                "accession":"4DNWF38VH15",
+                "uuid":"3758e00c-2035-43c6-b783-bb92afe57c99",
+                "@id":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"dedup_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 06:37:00.522517",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 12:43:22.792334",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 12:52:22.610248",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 12:38:05.242959",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 13:03:48.467162",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 17:41:53.342405",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 17:39:35.317009",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 17:43:24.062800",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 18:10:31.828943",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 17:49:11.523410",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"addfragtopairs run 2017-09-16 19:00:35.005961",
+                        "name":"input_pairs"
+                    }
+                ],
+                "name":"dedup_pairs",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".pairs.gz",
+                            "extra_files":[
+
+                            ],
+                            "format":"pairs",
+                            "upload_key":"aa3303ce-b7e4-43ce-b4f2-5262252fc383/4DNFIUYTV61P.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                            "file_format":"pairs",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFIUYTV61P",
+                            "@id":"/files-processed/4DNFIUYTV61P/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"lossless_bamfile"
+                    }
+                ],
+                "name":"lossless_bamfile",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".bam",
+                            "extra_files":[
+
+                            ],
+                            "format":"bam",
+                            "upload_key":"267d5500-3b62-42c2-bb5b-aa29e01f1942/4DNFIVZL95G8.bam"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"267d5500-3b62-42c2-bb5b-aa29e01f1942",
+                            "file_format":"bam",
+                            "file_type":"alignment",
+                            "accession":"4DNFIVZL95G8",
+                            "@id":"/files-processed/4DNFIVZL95G8/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"aff1f384-9509-405f-a45e-199ef0197d8a",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                        "step":"pairsam-filter run 2017-09-16 00:10:42.865657",
+                        "name":"dedup_pairs",
+                        "workflow":"/workflows/3758e00c-2035-43c6-b783-bb92afe57c99/"
+                    }
+                ],
+                "name":"input_pairs",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
+                            "file_format":"pairs",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIUYTV61P/",
+                            "filename":null,
+                            "accession":"4DNFIUYTV61P",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
+                        "name":"restriction_file"
+                    }
+                ],
+                "name":"restriction_file",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"595763c6-58d3-4ec4-8f04-3dbb88ed4736",
+                            "file_format":"juicer_format_restriction_site_file",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823MBKE/",
+                            "filename":"GRCh38_HindIII_new.txt",
+                            "accession":"4DNFI823MBKE",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"addfragtopairs run 2017-09-16 19:00:35.005961",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-16T19:00:35.851375+00:00",
+            "status":"in review by lab",
+            "@id":"/workflow-runs-awsem/aff1f384-9509-405f-a45e-199ef0197d8a/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/e6843cbd-1de7-41fe-99c4-481c10f21d07/",
+                        "step_name":"addfragtopairs"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Adding restriction fragment information for Hi-C using pairsamtools - 4DNWZJ2G671",
+                "accession":"4DNWZJ2G671",
+                "uuid":"ef125750-8df2-418e-a1ee-402285f9dd93",
+                "@id":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"out_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:30:41.169153",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:32:48.239377",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:35:03.320784",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:36:03.758593",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:42:13.332548",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:44:58.848283",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:47:08.099808",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:48:31.758438",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:50:15.598177",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:37:18.798745",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:40:45.920184",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 21:52:16.518046",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:00:20.262051",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:02:18.046058",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:03:46.298438",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:07:54.385333",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-17 11:25:43.106767",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:08:37.399176",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:09:34.459070",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:11:03.520632",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:12:29.820949",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:15:31.645764",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-17 11:26:38.913455",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:10:31.498627",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:13:42.447938",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-16 22:14:57.699478",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-17 11:17:12.251003",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-17 11:28:31.143029",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:06:06.500899",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:08:22.318537",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"pairs-patch run 2017-09-17 16:18:00.793815",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:22:41.836612",
+                        "name":"input_pairs"
+                    }
+                ],
+                "name":"out_pairs",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extra_files":[
+                                {
+                                    "uuid":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                                    "file_format":"pairs_px2",
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/7f10fb06-a2bf-4385-9f2b-81c96438b009/@@download/4DNFIN4DMXPR.pairs.gz.px2",
+                                    "filename":"4DNFIN4DMXPR",
+                                    "accession":"4DNFIN4DMXPR",
+                                    "upload_key":"7f10fb06-a2bf-4385-9f2b-81c96438b009/4DNFIN4DMXPR.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "extension":".pairs.gz",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "format":"pairs",
+                            "upload_key":"7f10fb06-a2bf-4385-9f2b-81c96438b009/4DNFIN4DMXPR.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                            "file_format":"pairs",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFIN4DMXPR",
+                            "@id":"/files-processed/4DNFIN4DMXPR/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                        "step":"addfragtopairs run 2017-09-16 19:00:35.005961",
+                        "name":"out_pairs",
+                        "workflow":"/workflows/ef125750-8df2-418e-a1ee-402285f9dd93/"
+                    }
+                ],
+                "name":"input_pairs",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"7f10fb06-a2bf-4385-9f2b-81c96438b009",
+                            "file_format":"pairs",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIN4DMXPR/",
+                            "filename":null,
+                            "accession":"4DNFIN4DMXPR",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"pairs-patch run 2017-09-17 16:18:00.793815",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-17T16:18:01.690699+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/3c3eee6a-5e44-40a3-9cb6-c00cb9a9e5cb/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/99bb38e0-c7a7-4e22-b452-3934462ce90a/",
+                        "step_name":"pairs-patch"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Patching pairs file for Hi-C using pairsamtools - 4DNWZH36VU2",
+                "accession":"4DNWZH36VU2",
+                "uuid":"7e5dcad0-d8da-4286-9253-a779d5310a49",
+                "@id":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"out_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:44:47.957985",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:58:36.346739",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "step":"hi-c-processing-partb run 2017-09-17 20:04:23.123639",
+                        "name":"input_pairs"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:53:38.477317",
+                        "name":"input_pairs"
+                    }
+                ],
+                "name":"out_pairs",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extra_files":[
+                                {
+                                    "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
+                                    "file_format":"pairs_px2",
+                                    "href":"/817f3faa-0573-45c0-8230-02ec19de6544/@@download/4DNFI1ZLO9D7.pairs.gz.px2",
+                                    "accession":"4DNFI1ZLO9D7",
+                                    "status":"to be uploaded by workflow",
+                                    "filename":"4DNFI1ZLO9D7",
+                                    "upload_key":"817f3faa-0573-45c0-8230-02ec19de6544/4DNFI1ZLO9D7.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "extension":".pairs.gz",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "format":"pairs",
+                            "upload_key":"817f3faa-0573-45c0-8230-02ec19de6544/4DNFI1ZLO9D7.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
+                            "file_format":"pairs",
+                            "file_type":"contact list",
+                            "accession":"4DNFI1ZLO9D7",
+                            "@id":"/files-processed/4DNFI1ZLO9D7/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"704785bc-2020-44eb-b530-114522601672",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "step":"pairs-patch run 2017-09-17 16:17:54.117168",
+                        "name":"out_pairs",
+                        "workflow":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/"
+                    },
+                    {
+                        "type":"Output file",
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "step":"pairs-patch run 2017-09-17 16:18:00.793815",
+                        "name":"out_pairs",
+                        "workflow":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/"
+                    }
+                ],
+                "name":"input_pairs",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        },
+                        {
+                            "ordinal":2
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                            "file_format":"pairs",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "@id":"/files-processed/4DNFICYJ9FOU/",
+                            "filename":null,
+                            "accession":"4DNFICYJ9FOU",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"contact list"
+                        },
+                        {
+                            "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
+                            "file_format":"pairs",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "@id":"/files-processed/4DNFI1ZLO9D7/",
+                            "filename":null,
+                            "accession":"4DNFI1ZLO9D7",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"contact list"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chrsizes"
+                    }
+                ],
+                "name":"chrsizes",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_format":"chromsizes",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "accession":"4DNFI823LSII",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"hi-c-processing-partb run 2017-09-17 20:04:23.123639",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-17T20:04:24.035814+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/704785bc-2020-44eb-b530-114522601672/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"merge_pairs"
+                    },
+                    {
+                        "step":"/analysis-steps/a9d0e56c-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"pairs2hic"
+                    },
+                    {
+                        "step":"/analysis-steps/302366fb-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"cooler"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Hi-C processing part B revision 44 - 4DNWFP00U73B",
+                "accession":"4DNWFP00U73B",
+                "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
+                "@id":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":false,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_pairs"
+                    }
+                ],
+                "name":"output_pairs",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extra_files":[
+                                {
+                                    "uuid":"4d065df0-0164-4a17-818d-a64d0359cc69",
+                                    "file_format":"pairs_px2",
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/4d065df0-0164-4a17-818d-a64d0359cc69/@@download/4DNFIJHZGGD6.pairs.gz.px2",
+                                    "filename":"4DNFIJHZGGD6",
+                                    "accession":"4DNFIJHZGGD6",
+                                    "upload_key":"4d065df0-0164-4a17-818d-a64d0359cc69/4DNFIJHZGGD6.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "extension":".pairs.gz",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "format":"pairs",
+                            "upload_key":"4d065df0-0164-4a17-818d-a64d0359cc69/4DNFIJHZGGD6.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"4d065df0-0164-4a17-818d-a64d0359cc69",
+                            "file_format":"pairs",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFIJHZGGD6",
+                            "@id":"/files-processed/4DNFIJHZGGD6/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"out_cool"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
+                        "step":"hi-c-processing-partc run 2017-09-18 04:18:43.908568",
+                        "name":"input_cool"
+                    }
+                ],
+                "name":"out_cool",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".cool",
+                            "extra_files":[
+
+                            ],
+                            "format":"cool",
+                            "upload_key":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56/4DNFI8HILY6S.cool"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
+                            "file_format":"cool",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFI8HILY6S",
+                            "@id":"/files-processed/4DNFI8HILY6S/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_hic"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
+                        "step":"hi-c-processing-partc run 2017-09-18 04:18:43.908568",
+                        "name":"input_hic"
+                    }
+                ],
+                "name":"output_hic",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".hic",
+                            "extra_files":[
+
+                            ],
+                            "format":"hic",
+                            "upload_key":"63b30fae-880d-4bd0-87b2-7c99262ea4a7/4DNFI2ZSVKS3.hic"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
+                            "file_format":"hic",
+                            "file_type":"contact matrix",
+                            "accession":"4DNFI2ZSVKS3",
+                            "@id":"/files-processed/4DNFI2ZSVKS3/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"44d7db19-f679-4e13-9e63-f6ace5d0d3ab",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
+                        "step":"hi-c-processing-partb run 2017-09-17 20:04:23.123639",
+                        "name":"out_cool",
+                        "workflow":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/"
+                    }
+                ],
+                "name":"input_cool",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"31f99d9d-5991-44c9-b8a3-3e36c6b94d56",
+                            "file_format":"cool",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFI8HILY6S/",
+                            "filename":null,
+                            "accession":"4DNFI8HILY6S",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
+                        "name":"input_hic"
+                    }
+                ],
+                "name":"input_hic",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"63b30fae-880d-4bd0-87b2-7c99262ea4a7",
+                            "file_format":"hic",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "@id":"/files-processed/4DNFI2ZSVKS3/",
+                            "filename":null,
+                            "accession":"4DNFI2ZSVKS3",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"contact matrix"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "name":"chromsize",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_format":"chromsizes",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "accession":"4DNFI823LSII",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"hi-c-processing-partc run 2017-09-18 04:18:43.908568",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-18T04:18:44.781547+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/44d7db19-f679-4e13-9e63-f6ace5d0d3ab/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/25e911b4-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"cool2mcool"
+                    },
+                    {
+                        "step":"/analysis-steps/53e7b46f-1d3b-4a16-812f-c79456614bda/",
+                        "step_name":"extract_mcool_normvector_for_juicebox"
+                    },
+                    {
+                        "step":"/analysis-steps/11775554-5f85-4d0c-93e4-fa9d7f20d47a/",
+                        "step_name":"add_hic_normvector_to_mcool"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
+                "accession":"4DNWF06BPEF2",
+                "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3",
+                "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_mcool"
+                    }
+                ],
+                "name":"output_mcool",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".mcool",
+                            "extra_files":[
+
+                            ],
+                            "format":"mcool",
+                            "upload_key":"27284dc8-d38c-483f-b0a1-a13d4f247db9/4DNFI4OBPEAV.mcool"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"27284dc8-d38c-483f-b0a1-a13d4f247db9",
+                            "file_format":"mcool",
+                            "file_type":"contact matrix",
+                            "accession":"4DNFI4OBPEAV",
+                            "@id":"/files-processed/4DNFI4OBPEAV/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_normvector"
+                    }
+                ],
+                "name":"output_normvector",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".normvector.juicerformat.gz",
+                            "extra_files":[
+
+                            ],
+                            "format":"normvector_juicerformat",
+                            "upload_key":"1a1b2788-28a9-4c5f-bbd7-e419cca21dca/4DNFI75V1UJB.normvector.juicerformat.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"1a1b2788-28a9-4c5f-bbd7-e419cca21dca",
+                            "file_format":"normvector_juicerformat",
+                            "file_type":"juicebox norm vector",
+                            "accession":"4DNFI75V1UJB",
+                            "@id":"/files-processed/4DNFI75V1UJB/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"adebfa13-9f9d-4b3a-abf8-754b1d74c2f2",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"817f3faa-0573-45c0-8230-02ec19de6544",
+                        "step":"pairs-patch run 2017-09-17 16:18:00.793815",
+                        "name":"out_pairs",
+                        "workflow":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/"
+                    }
+                ],
+                "name":"input_pairs",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"817f3faa-0573-45c0-8230-02ec19de6544",
+                            "file_format":"pairs",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "@id":"/files-processed/4DNFI1ZLO9D7/",
+                            "accession":"4DNFI1ZLO9D7"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chrsizes"
+                    }
+                ],
+                "name":"chrsizes",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_format":"chromsizes",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "accession":"4DNFI823LSII",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"hi-c-processing-partb run 2017-09-17 18:53:38.477317",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-17T18:53:39.403185+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/adebfa13-9f9d-4b3a-abf8-754b1d74c2f2/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"merge_pairs"
+                    },
+                    {
+                        "step":"/analysis-steps/a9d0e56c-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"pairs2hic"
+                    },
+                    {
+                        "step":"/analysis-steps/302366fb-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"cooler"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Hi-C processing part B revision 44 - 4DNWFP00U73B",
+                "accession":"4DNWFP00U73B",
+                "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
+                "@id":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":false,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_pairs"
+                    }
+                ],
+                "name":"output_pairs",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extra_files":[
+                                {
+                                    "uuid":"aeee6285-0250-498f-bfdf-fd48c44728ed",
+                                    "file_format":"pairs_px2",
+                                    "href":"/aeee6285-0250-498f-bfdf-fd48c44728ed/@@download/4DNFIUJGSOOU.pairs.gz.px2",
+                                    "accession":"4DNFIUJGSOOU",
+                                    "status":"to be uploaded by workflow",
+                                    "filename":"4DNFIUJGSOOU",
+                                    "upload_key":"aeee6285-0250-498f-bfdf-fd48c44728ed/4DNFIUJGSOOU.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "extension":".pairs.gz",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "format":"pairs",
+                            "upload_key":"aeee6285-0250-498f-bfdf-fd48c44728ed/4DNFIUJGSOOU.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"aeee6285-0250-498f-bfdf-fd48c44728ed",
+                            "file_format":"pairs",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFIUJGSOOU",
+                            "@id":"/files-processed/4DNFIUJGSOOU/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"out_cool"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                        "step":"hi-c-processing-partc run 2017-09-17 22:55:01.750747",
+                        "name":"input_cool"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                        "step":"hi-c-processing-partc run 2017-09-17 23:03:59.469397",
+                        "name":"input_cool"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                        "step":"hi-c-processing-partc run 2017-09-17 23:10:05.939762",
+                        "name":"input_cool"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                        "step":"hi-c-processing-partc run 2017-09-17 23:18:52.509294",
+                        "name":"input_cool"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                        "step":"hi-c-processing-partc run 2017-09-18 00:08:39.630886",
+                        "name":"input_cool"
+                    }
+                ],
+                "name":"out_cool",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".cool",
+                            "extra_files":[
+
+                            ],
+                            "format":"cool",
+                            "upload_key":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a/4DNFIV9E8JGV.cool"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                            "file_format":"cool",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFIV9E8JGV",
+                            "@id":"/files-processed/4DNFIV9E8JGV/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_hic"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                        "step":"hi-c-processing-partc run 2017-09-17 22:55:01.750747",
+                        "name":"input_hic"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                        "step":"hi-c-processing-partc run 2017-09-17 23:03:59.469397",
+                        "name":"input_hic"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                        "step":"hi-c-processing-partc run 2017-09-17 23:10:05.939762",
+                        "name":"input_hic"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                        "step":"hi-c-processing-partc run 2017-09-17 23:18:52.509294",
+                        "name":"input_hic"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                        "step":"hi-c-processing-partc run 2017-09-18 00:08:39.630886",
+                        "name":"input_hic"
+                    }
+                ],
+                "name":"output_hic",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".hic",
+                            "extra_files":[
+
+                            ],
+                            "format":"hic",
+                            "upload_key":"66d0d60d-1ee4-4564-b625-7188025b85ea/4DNFI95Q7FEU.hic"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                            "file_format":"hic",
+                            "file_type":"contact matrix",
+                            "accession":"4DNFI95Q7FEU",
+                            "@id":"/files-processed/4DNFI95Q7FEU/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                        "step":"hi-c-processing-partb run 2017-09-17 18:53:38.477317",
+                        "name":"out_cool",
+                        "workflow":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/"
+                    }
+                ],
+                "name":"input_cool",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"5b1dd671-a8ce-4a5f-aa11-9447cdde164a",
+                            "file_format":"cool",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIV9E8JGV/",
+                            "filename":null,
+                            "accession":"4DNFIV9E8JGV",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                        "name":"input_hic"
+                    }
+                ],
+                "name":"input_hic",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"66d0d60d-1ee4-4564-b625-7188025b85ea",
+                            "file_format":"hic",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "@id":"/files-processed/4DNFI95Q7FEU/",
+                            "filename":null,
+                            "accession":"4DNFI95Q7FEU",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"contact matrix"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "name":"chromsize",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_format":"chromsizes",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "accession":"4DNFI823LSII",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"hi-c-processing-partc run 2017-09-18 00:08:39.630886",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-18T00:08:40.558099+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/e737f3f3-ddd8-40b3-9d80-52ebf1f3d1f3/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/25e911b4-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"cool2mcool"
+                    },
+                    {
+                        "step":"/analysis-steps/53e7b46f-1d3b-4a16-812f-c79456614bda/",
+                        "step_name":"extract_mcool_normvector_for_juicebox"
+                    },
+                    {
+                        "step":"/analysis-steps/11775554-5f85-4d0c-93e4-fa9d7f20d47a/",
+                        "step_name":"add_hic_normvector_to_mcool"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
+                "accession":"4DNWF06BPEF2",
+                "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3",
+                "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_mcool"
+                    }
+                ],
+                "name":"output_mcool",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".mcool",
+                            "extra_files":[
+
+                            ],
+                            "format":"mcool",
+                            "upload_key":"b414e1ec-797f-4225-abb4-9ad5468c3b7d/4DNFIV6HB4VT.mcool"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"b414e1ec-797f-4225-abb4-9ad5468c3b7d",
+                            "file_format":"mcool",
+                            "file_type":"contact matrix",
+                            "accession":"4DNFIV6HB4VT",
+                            "@id":"/files-processed/4DNFIV6HB4VT/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_normvector"
+                    }
+                ],
+                "name":"output_normvector",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".normvector.juicerformat.gz",
+                            "extra_files":[
+
+                            ],
+                            "format":"normvector_juicerformat",
+                            "upload_key":"67eb9c0a-c34d-42d5-ba1b-504f5b90c99f/4DNFIQ1PICV9.normvector.juicerformat.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"67eb9c0a-c34d-42d5-ba1b-504f5b90c99f",
+                            "file_format":"normvector_juicerformat",
+                            "file_type":"juicebox norm vector",
+                            "accession":"4DNFIQ1PICV9",
+                            "@id":"/files-processed/4DNFIQ1PICV9/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"a917dc3f-4dcd-4434-af97-ef57fe242e37",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                        "step":"pairs-patch run 2017-09-17 16:17:54.117168",
+                        "name":"out_pairs",
+                        "workflow":"/workflows/7e5dcad0-d8da-4286-9253-a779d5310a49/"
+                    }
+                ],
+                "name":"input_pairs",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"a9554821-af87-489d-bba6-f58d4286a2a3",
+                            "file_format":"pairs",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "@id":"/files-processed/4DNFICYJ9FOU/",
+                            "accession":"4DNFICYJ9FOU"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chrsizes"
+                    }
+                ],
+                "name":"chrsizes",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_format":"chromsizes",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "accession":"4DNFI823LSII",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"hi-c-processing-partb run 2017-09-17 19:27:36.797149",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-17T19:27:37.675275+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/a917dc3f-4dcd-4434-af97-ef57fe242e37/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"merge_pairs"
+                    },
+                    {
+                        "step":"/analysis-steps/a9d0e56c-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"pairs2hic"
+                    },
+                    {
+                        "step":"/analysis-steps/302366fb-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"cooler"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"Hi-C processing part B revision 44 - 4DNWFP00U73B",
+                "accession":"4DNWFP00U73B",
+                "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
+                "@id":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":false,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_pairs"
+                    }
+                ],
+                "name":"output_pairs",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extra_files":[
+                                {
+                                    "uuid":"76bb4d49-f791-4136-b392-e6a01e58b2c2",
+                                    "file_format":"pairs_px2",
+                                    "status":"to be uploaded by workflow",
+                                    "href":"/76bb4d49-f791-4136-b392-e6a01e58b2c2/@@download/4DNFI7DYQJ7I.pairs.gz.px2",
+                                    "filename":"4DNFI7DYQJ7I",
+                                    "accession":"4DNFI7DYQJ7I",
+                                    "upload_key":"76bb4d49-f791-4136-b392-e6a01e58b2c2/4DNFI7DYQJ7I.pairs.gz.px2"
+                                }
+                            ],
+                            "secondary_file_extensions":[
+                                ".pairs.gz.px2"
+                            ],
+                            "extension":".pairs.gz",
+                            "secondary_file_formats":[
+                                "pairs_px2"
+                            ],
+                            "format":"pairs",
+                            "upload_key":"76bb4d49-f791-4136-b392-e6a01e58b2c2/4DNFI7DYQJ7I.pairs.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"76bb4d49-f791-4136-b392-e6a01e58b2c2",
+                            "file_format":"pairs",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFI7DYQJ7I",
+                            "@id":"/files-processed/4DNFI7DYQJ7I/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"out_cool"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"290ea431-e0d9-408d-be81-a8e585bd4660",
+                        "step":"hi-c-processing-partc run 2017-09-17 23:33:53.390847",
+                        "name":"input_cool"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"290ea431-e0d9-408d-be81-a8e585bd4660",
+                        "step":"hi-c-processing-partc run 2017-09-18 00:08:53.081319",
+                        "name":"input_cool"
+                    }
+                ],
+                "name":"out_cool",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".cool",
+                            "extra_files":[
+
+                            ],
+                            "format":"cool",
+                            "upload_key":"290ea431-e0d9-408d-be81-a8e585bd4660/4DNFIW8XBC3M.cool"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"290ea431-e0d9-408d-be81-a8e585bd4660",
+                            "file_format":"cool",
+                            "file_type":"intermediate file",
+                            "accession":"4DNFIW8XBC3M",
+                            "@id":"/files-processed/4DNFIW8XBC3M/",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_hic"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
+                        "step":"hi-c-processing-partc run 2017-09-17 23:33:53.390847",
+                        "name":"input_hic"
+                    },
+                    {
+                        "type":"Input file",
+                        "for_file":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
+                        "step":"hi-c-processing-partc run 2017-09-18 00:08:53.081319",
+                        "name":"input_hic"
+                    }
+                ],
+                "name":"output_hic",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".hic",
+                            "extra_files":[
+
+                            ],
+                            "format":"hic",
+                            "upload_key":"265b3dbe-f1d2-4cae-957f-23f71a2c6638/4DNFI86NV3M3.hic"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
+                            "file_format":"hic",
+                            "file_type":"contact matrix",
+                            "accession":"4DNFI86NV3M3",
+                            "@id":"/files-processed/4DNFI86NV3M3/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "uuid":"a6b459e4-c9b2-45c3-8912-38af6c59ea3b",
+        "inputs":[
+            {
+                "source":[
+                    {
+                        "type":"Output file",
+                        "for_file":"290ea431-e0d9-408d-be81-a8e585bd4660",
+                        "step":"hi-c-processing-partb run 2017-09-17 19:27:36.797149",
+                        "name":"out_cool",
+                        "workflow":"/workflows/d9e9c966-56d9-47e8-ae21-47f94a1af417/"
+                    }
+                ],
+                "name":"input_cool",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"290ea431-e0d9-408d-be81-a8e585bd4660",
+                            "file_format":"cool",
+                            "description":"This is an intermediate file in the HiC processing pipeline. NOTE: This file may be removed without notice.",
+                            "@id":"/files-processed/4DNFIW8XBC3M/",
+                            "filename":null,
+                            "accession":"4DNFIW8XBC3M",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"intermediate file"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
+                        "name":"input_hic"
+                    }
+                ],
+                "name":"input_hic",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"265b3dbe-f1d2-4cae-957f-23f71a2c6638",
+                            "file_format":"hic",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org.",
+                            "@id":"/files-processed/4DNFI86NV3M3/",
+                            "filename":null,
+                            "accession":"4DNFI86NV3M3",
+                            "@type":[
+                                "FileProcessed",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":"contact matrix"
+                        }
+                    ]
+                }
+            },
+            {
+                "source":[
+                    {
+                        "type":"Workflow Input File",
+                        "for_file":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                        "name":"chromsize"
+                    }
+                ],
+                "name":"chromsize",
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Input File"
+                },
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "ordinal":1
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
+                            "file_format":"chromsizes",
+                            "description":null,
+                            "@id":"/files-reference/4DNFI823LSII/",
+                            "filename":"hg38.mainonly.chrom.sizes",
+                            "accession":"4DNFI823LSII",
+                            "@type":[
+                                "FileReference",
+                                "File",
+                                "Item"
+                            ],
+                            "file_type":null
+                        }
+                    ]
+                }
+            }
+        ],
+        "name":"hi-c-processing-partc run 2017-09-18 00:08:53.081319",
+        "analysis_step_types":[
+            "Hi-C data analysis"
+        ],
+        "meta":{
+            "@type":[
+                "WorkflowRunAwsem",
+                "WorkflowRun",
+                "Item"
+            ],
+            "date_created":"2017-09-18T00:08:53.959871+00:00",
+            "status":"released",
+            "@id":"/workflow-runs-awsem/a6b459e4-c9b2-45c3-8912-38af6c59ea3b/",
+            "workflow":{
+                "workflow_type":"Hi-C data analysis",
+                "workflow_steps":[
+                    {
+                        "step":"/analysis-steps/25e911b4-49e5-4c33-afab-9ec90d65faf3/",
+                        "step_name":"cool2mcool"
+                    },
+                    {
+                        "step":"/analysis-steps/53e7b46f-1d3b-4a16-812f-c79456614bda/",
+                        "step_name":"extract_mcool_normvector_for_juicebox"
+                    },
+                    {
+                        "step":"/analysis-steps/11775554-5f85-4d0c-93e4-fa9d7f20d47a/",
+                        "step_name":"add_hic_normvector_to_mcool"
+                    }
+                ],
+                "@type":[
+                    "Workflow",
+                    "Item"
+                ],
+                "display_title":"hi-c-processing-partc/6 - 4DNWF06BPEF2",
+                "accession":"4DNWF06BPEF2",
+                "uuid":"c6480905-49e5-4c33-afab-9ec90d65faf3",
+                "@id":"/workflows/c6480905-49e5-4c33-afab-9ec90d65faf3/"
+            }
+        },
+        "outputs":[
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_mcool"
+                    }
+                ],
+                "name":"output_mcool",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".mcool",
+                            "extra_files":[
+
+                            ],
+                            "format":"mcool",
+                            "upload_key":"941b4d2b-899d-4f1c-9f6a-c9f6a3401a18/4DNFII7498B3.mcool"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"941b4d2b-899d-4f1c-9f6a-c9f6a3401a18",
+                            "file_format":"mcool",
+                            "file_type":"contact matrix",
+                            "accession":"4DNFII7498B3",
+                            "@id":"/files-processed/4DNFII7498B3/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            },
+            {
+                "meta":{
+                    "in_path":true,
+                    "argument_type":"Output File"
+                },
+                "target":[
+                    {
+                        "type":"Workflow Output File",
+                        "name":"output_normvector"
+                    }
+                ],
+                "name":"output_normvector",
+                "run_data":{
+                    "type":"input",
+                    "meta":[
+                        {
+                            "type":"Output processed file",
+                            "extension":".normvector.juicerformat.gz",
+                            "extra_files":[
+
+                            ],
+                            "format":"normvector_juicerformat",
+                            "upload_key":"f108ebb3-8693-491a-88a0-d3e2163d9966/4DNFIDWULZXP.normvector.juicerformat.gz"
+                        }
+                    ],
+                    "file":[
+                        {
+                            "uuid":"f108ebb3-8693-491a-88a0-d3e2163d9966",
+                            "file_format":"normvector_juicerformat",
+                            "file_type":"juicebox norm vector",
+                            "accession":"4DNFIDWULZXP",
+                            "@id":"/files-processed/4DNFIDWULZXP/",
+                            "description":"This is an output of the current Hi-C processing pipeline draft. NOTE: The pipeline is under development and the file may be superseded. If you use this file, please check back later to confirm its validity. Report any issues to support@4dnucleome.org."
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+];
