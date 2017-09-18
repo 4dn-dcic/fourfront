@@ -178,6 +178,10 @@ export const defaultColumnDefinitionMap = {
         //    return result.experiments_in_set.length;
         //}
     },
+    'number_of_files' : {
+        'title' : '# of Files',
+        'widthMap' : {'lg' : 75, 'md' : 75, 'sm' : 50}
+    },
     'experiments_in_set.experiment_type' : {
         'title' : 'Experiment Type',
         'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120}

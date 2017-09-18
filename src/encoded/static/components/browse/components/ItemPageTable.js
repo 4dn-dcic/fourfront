@@ -263,3 +263,100 @@ class ItemPageTableRow extends React.Component {
 
 
 
+export class ItemPageTableLoader extends React.Component {
+
+    static propTypes = {
+        'children' : PropTypes.element.isRequired,
+        'itemsObject' : PropTypes.object.isRequired,
+        'sortFxn' : PropTypes.func,
+        'isItemCompleteEnough' : PropTypes.func.isRequired
+    }
+
+    static defaultProps = {
+        'isItemCompleteEnough' : function(item){
+            return false;
+        }
+    }
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
+
+        // Get ExpSets from this file, check if are complete (have bio_rep_no, etc.), and use if so; otherwise, save 'this.experiment_set_uris' to be picked up by componentDidMount and fetched.
+        var items_obj = props.itemsObject;
+        var items = _.values(items_obj);
+        var items_for_state = null;
+
+        if (Array.isArray(items) && items.length > 0 && props.isItemCompleteEnough(items[0])){
+            items_for_state = items;
+        } else {
+            this.item_uris = _.keys(items_obj);
+        }
+
+        this.state = {
+            'items' : items_for_state,
+            'current_item_index' : false
+        };
+    }
+
+    componentDidMount(){
+        var newState = {};
+
+        var onFinishLoad = null;
+
+        if (Array.isArray(this.item_uris) && this.item_uris.length > 0){
+
+            onFinishLoad = _.after(this.item_uris.length, function(){
+                this.setState({ 'loading' : false });
+            }.bind(this));
+
+            newState.loading = true;
+            _.forEach(this.item_uris, (uri)=>{
+                ajax.load(uri, (r)=>{
+                    var currentItems = (this.state.items || []).slice(0);
+                    currentItems.push(r);
+                    this.setState({ items : currentItems });
+                    onFinishLoad();
+                }, 'GET', onFinishLoad);
+            });
+        }
+        
+        if (_.keys(newState).length > 0){
+            this.setState(newState);
+        }
+    }
+
+    componentWillUnmount(){
+        delete this.item_uris;
+    }
+
+    render(){
+        var clonedChild = React.cloneElement(this.props.children, _.extend({}, this.props, { 'loading' : this.state.loading, 'results' : this.state.items }) );
+        return (
+            <layout.WindowResizeUpdateTrigger>
+                { clonedChild }
+            </layout.WindowResizeUpdateTrigger>
+        );
+    }
+
+}
+
+/**
+ * TODO: Once/if /search/ accepts POST JSON requests, we can do one single request to get all Items by @id from /search/ instead of multiple AJAX requests.
+ * This will be the component to handle it (convert this.item_uris to one /search/ URI, override componentDidMount etc.)
+ * 
+ * Could then automatically detect in ItemPageLoader if length of @ids requested is > 20 or some random number, and auto use this component instead.
+ * 
+ * @export
+ * @class ItemPageTableBatchLoader
+ * @extends {ItemPageTableLoader}
+ */
+export class ItemPageTableBatchLoader extends ItemPageTableLoader {
+    constructor(props){
+        super(props);
+        if (this.item_uris){
+            console.log('TEST', this.item_uris);
+        }
+    }
+}
