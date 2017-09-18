@@ -66,14 +66,14 @@
 	}
 }
 
-/* top padding for small & large screens re: fixed nav */
-#content {
-    padding-top: 0px;
 
-    @media (min-width: $navbar-fixed-breakpoint) {
-        padding-top: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
+#content {
+
+	padding-top: 0px;
+	
+	@media (min-width: $navbar-fixed-breakpoint) {
 		padding-bottom: 20px;
-    }
+	}
 
 	> .alerts {
 		margin-top: 20px;
@@ -83,6 +83,36 @@
 	}
 
 }
+
+/* top padding for small & large screens re: fixed nav */
+#pre-content-placeholder {
+	display: none;
+	height: 0px;
+
+	@media (min-width: $navbar-fixed-breakpoint) {
+		display: block;
+		height: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
+	}
+}
+
+/****** Custom Sizing for Browse Pages *******/
+/*
+body[data-pathname="/browse/"]{ 
+
+	#content.container {
+		width: auto;
+		padding-left: 30px;
+		padding-right: 30px;
+		transition: width 0s 1s;
+	}
+
+	#top-nav>nav.navbar-main>.container {
+		width: auto;
+		padding-left: 30px;
+		padding-right: 30px;
+	}
+}
+*/
 
 
 /***********************************************************
@@ -100,7 +130,7 @@ h1.page-title {
 
 	&.top-of-page {
 		margin-top: 36px;
-		margin-bottom: 3px;
+		margin-bottom: 0px;
 		
 		body[data-pathname="/"] &,
 		body[data-pathname="/home"] &,
