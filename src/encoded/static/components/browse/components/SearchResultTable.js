@@ -14,7 +14,7 @@ import Infinite from 'react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
-import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
+import { console, isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import {
     defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap,
@@ -396,7 +396,7 @@ class LoadMoreAsYouScroll extends React.Component {
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
         var elementHeight = _.keys(this.props.openDetailPanes).length === 0 ? this.props.rowHeight : this.props.children.map((c) => {
             if (typeof this.props.openDetailPanes[c.props['data-key']] === 'number'){
-                console.log('height', this.props.openDetailPanes[c.props['data-key']], this.props.rowHeight, 2 + this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight);
+                //console.log('height', this.props.openDetailPanes[c.props['data-key']], this.props.rowHeight, 2 + this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight);
                 return this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight + 2;
             }
             return this.props.rowHeight;
