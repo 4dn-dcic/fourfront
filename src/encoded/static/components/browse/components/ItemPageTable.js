@@ -41,7 +41,7 @@ export class ItemPageTable extends React.Component {
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
                     var isAnAccession = false;// isDisplayTitleAccession(result, title, false);
                     if (link){
-                        title = <a href={link || '#'}>{ title }</a>;
+                        title = <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>;
                     }
 
                     var typeTitle = Schemas.getItemTypeTitle(result);
@@ -49,11 +49,16 @@ export class ItemPageTable extends React.Component {
                         typeTitle += ' ';
                     }
 
+                    var toggleButton = null;
+                    if (typeof props.renderDetailPane === 'function'){
+                        toggleButton = <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />;
+                    }
+
                     return (
-                        <span className={typeTitle ? "has-type-title" : null}>
-                            <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
+                        <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
+                            { toggleButton }
                             { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
-                            <a href={object.atIdFromObject(result)} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>
+                            { title }
                         </span>
                     );
 
@@ -120,7 +125,7 @@ export class ItemPageTable extends React.Component {
         return (
             <div className="item-page-table-container clearfix" ref="tableContainer">
                 { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ? 
-                    <HeadersRow mounted columnDefinitions={columnDefinitions} />
+                    <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={this.props.renderDetailPane} />
                 : null }
                 { results.map((result, rowIndex)=>{
                     var atId = object.atIdFromObject(result);
@@ -184,6 +189,7 @@ class ItemPageTableRow extends React.Component {
                 className={colDefinition.field === 'display_title' && this.state.open ? 'open' : null}
                 detailOpen={this.state.open}
                 toggleDetailOpen={this.toggleOpen}
+                renderDetailPane={this.props.renderDetailPane}
             />
         );
     }
@@ -195,7 +201,7 @@ class ItemPageTableRow extends React.Component {
         }
         var result = this.props.result;
         return (
-            <div className="table-row clearfix">
+            <div className={"table-row clearfix" + (typeof this.props.renderDetailPane !== 'function' ? ' no-detail-pane' : '')}>
                 {
                     _.map(this.props.columnDefinitions, (col, index)=>{
                         return (
@@ -251,7 +257,7 @@ class ItemPageTableRow extends React.Component {
         return (
             <div className="item-page-table-row-container">
                 { this.props.responsiveGridState === 'xs' || this.props.responsiveGridState === 'sm' ? this.renderRowOfBlocks() : this.renderRowOfColumns() }
-                { this.state.open ?
+                { this.state.open && typeof this.props.renderDetailPane === 'function' ?
                     <div className="inner-wrapper">
                         { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.width, this.props) }
                     </div>

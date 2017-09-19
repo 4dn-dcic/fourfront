@@ -940,6 +940,7 @@ class DimensioningContainer extends React.Component {
                                             rowHeight={this.props.rowHeight}
                                             results={this.state.results}
                                             stickyHeaderTopOffset={stickyHeaderTopOffset}
+                                            renderDetailPane={this.props.renderDetailPane}
 
                                             stickyStyle={style}
                                             isSticky={isSticky}
