@@ -120,7 +120,7 @@ export class ItemPageTable extends React.Component {
             columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(width, columnDefinitionsToScaledColumnDefinitions(columnDefinitions));
         }
 
-        var responsiveGridState = layout.responsiveGridState();
+        var responsiveGridState = (this.state.mounted && layout.responsiveGridState()) || 'lg';
         
         return (
             <div className="item-page-table-container clearfix" ref="tableContainer">

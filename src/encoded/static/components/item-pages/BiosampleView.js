@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
+import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
 import { FormattedInfoBlock } from './components';
 import { ItemBaseView, OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
@@ -101,10 +101,13 @@ export class BiosourcesTable extends React.Component {
                         }
                     }
                     var title = indv.display_title;
+                    var organism = null;
                     if (indv.organism && indv.organism.name && typeof indv.organism.name === 'string' && title.indexOf(indv.organism.name) === -1){
-                        title = Schemas.Term.capitalizeSentence(indv.organism.name);
+                        organism = Schemas.Term.capitalizeSentence(indv.organism.name);
                     }
-                    return <span>{ sex } <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title }</a></span>;
+                    return <span>{ sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
+                        <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title }</a>
+                    </span>;
                 }
             }
         }, ItemPageTable.defaultProps.columnDefinitionOverrideMap)
@@ -161,25 +164,22 @@ class BiosampleViewOverview extends React.Component {
 
         var table = null;
 
-        if (this.state.mounted){
-
-            if (Array.isArray(context.biosource) && context.biosource.length > 0){
-                table = (
-                    <div>
-                        <h3 className="tab-section-title">
-                            <span>Biosources</span>
-                        </h3>
-                        <BiosourcesTable biosources={context.biosource} width={width} />
-                    </div>
-                );
-            }
-
+        if (Array.isArray(context.biosource) && context.biosource.length > 0){
+            table = (
+                <div>
+                    <h3 className="tab-section-title">
+                        <span>Biosources</span>
+                    </h3>
+                    <BiosourcesTable biosources={context.biosource} width={this.state.mounted? width : 1140} />
+                </div>
+            );
         }
 
         return (
             <div>
                 <OverViewBody result={context} schemas={this.props.schemas} />
                 { table }
+                <CellCultureInfoBody result={context} schemas={this.props.schemas} />
             </div>
         );
 
@@ -193,7 +193,8 @@ class OverViewBody extends React.Component {
     render(){
         var result = this.props.result;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), result);
-
+        var cell_culture = result.cell_culture_details;
+        var tipsForCellCulture = object.tipsFromSchema(this.props.schemas || Schemas.get(), cell_culture);
 
         return (
             <div className="row">
@@ -201,17 +202,72 @@ class OverViewBody extends React.Component {
                     <div className="row overview-blocks">
 
                         <div className="col-xs-6 col-md-4">
-                            <OverViewBodyItem {...{ result, tips }} property='modifications' fallbackTitle="Biosample Modifications" />
+                            <OverViewBodyItem {...{ result, tips }} property='modifications' fallbackTitle="Stable Genomic Modifications" />
                         </div>
 
                         <div className="col-xs-6 col-md-4">
-                            <OverViewBodyItem {...{ result, tips }} property='treatments' fallbackTitle="Biosample Treatment" titleRenderFxn={(field, treatment)=>{
+                            <OverViewBodyItem {...{ result, tips }} property='treatments' fallbackTitle="Treatment" titleRenderFxn={(field, treatment)=>{
                                 return <div><a href={object.atIdFromObject(treatment)}>{ treatment.display_title }</a><div>({ treatment.treatment_type })</div></div>;
                             }} />
                         </div>
 
                         <div className="col-xs-6 col-md-4">
-                            <OverViewBodyItem {...{ result, tips }} property='biosample_protocols' fallbackTitle="Protocols" />
+                            <OverViewBodyItem {...{ result, tips }} property='biosample_protocols' fallbackTitle="Biosample Protocols" />
+                        </div>
+
+                        
+
+
+                    </div>
+
+                </div>
+
+            </div>
+        );
+
+    }
+}
+
+class CellCultureInfoBody extends React.Component {
+
+    render(){
+        var result = this.props.result;
+        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), result);
+        var cell_culture = result.cell_culture_details;
+        var tipsForCellCulture = object.tipsFromSchema(this.props.schemas || Schemas.get(), cell_culture);
+
+        return (
+            <div className="row">
+                <div className="col-md-12 col-xs-12">
+                    <br/>
+                    <h3 className="tab-section-title">
+                        <span>Cell Culture</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                </div>
+                <div className="col-md-12 col-xs-12">
+                    <div className="row overview-blocks">
+
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem {...{ result, tips }} property='cell_culture_details' fallbackTitle="Cell Culture Information" />
+                        </div>
+
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='description' fallbackTitle="Description" />
+                        </div>
+
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='synchronization_stage' fallbackTitle="Synchronization Stage" />
+                        </div>
+
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='culture_duration' fallbackTitle="Total Days in Culture" />
+                        </div>
+
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='culture_start_date' fallbackTitle="Culture Start Date" titleRenderFxn={(field, value)=>{
+                                return <DateUtility.LocalizedTime timestamp={cell_culture.ulture_start_date}/>;
+                            }} />
                         </div>
 
 
