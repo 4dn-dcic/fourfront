@@ -11,6 +11,11 @@ import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 
+// Testing / Dummy data
+//import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
+//import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
+import { MORE_PARTIALLY_RELEASED_PROCESSED_FILES } from './../testdata/traced_workflow_runs/replicate-4DNESLLTENG9';
+
 
 export function allFilesForWorkflowRunsMappedByUUID(items){
     return _.reduce(items, function(m, workflowRun){
@@ -99,8 +104,8 @@ export class WorkflowRunTracingView extends ItemBaseView {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
-        //var steps = dummy_analysis_steps;
-        var steps = null;
+        var steps = MORE_PARTIALLY_RELEASED_PROCESSED_FILES;
+        //var steps = null;
         this.state = {
             'mounted' : false,
             'steps' : steps,
