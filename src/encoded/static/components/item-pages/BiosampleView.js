@@ -193,8 +193,6 @@ class OverViewBody extends React.Component {
     render(){
         var result = this.props.result;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), result);
-        var cell_culture = result.cell_culture_details;
-        var tipsForCellCulture = object.tipsFromSchema(this.props.schemas || Schemas.get(), cell_culture);
 
         return (
             <div className="row">
@@ -234,6 +232,9 @@ class CellCultureInfoBody extends React.Component {
         var result = this.props.result;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), result);
         var cell_culture = result.cell_culture_details;
+
+        if (!cell_culture || !object.atIdFromObject(cell_culture) || !Array.isArray(cell_culture['@type'])) return null;
+
         var tipsForCellCulture = object.tipsFromSchema(this.props.schemas || Schemas.get(), cell_culture);
 
         return (
