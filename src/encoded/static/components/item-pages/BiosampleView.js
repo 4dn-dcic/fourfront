@@ -203,13 +203,14 @@ class OverViewBody extends React.Component {
                             <OverViewBodyItem {...{ result, tips }} property='modifications' fallbackTitle="Stable Genomic Modifications" />
                         </div>
 
-                        { Array.isArray(result.treatments) && result.treatments.length > 0 ?
-                            <div className="col-xs-6 col-md-4">
-                                <OverViewBodyItem {...{ result, tips }} property='treatments' fallbackTitle="Treatment" titleRenderFxn={function(field, treatment){
-                                    return <div><a href={object.atIdFromObject(treatment)}>{ treatment.display_title }</a><div>({ treatment.treatment_type })</div></div>;
-                                }} />
-                            </div>
-                        : null }
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem {...{ result, tips }} property='treatments' fallbackTitle="Treatment" titleRenderFxn={function(field, treatment){
+                                if (!treatment || !treatment.display_title || !object.atIdFromObject(treatment)){
+                                    return treatment || 'None';
+                                }
+                                return <div><a href={object.atIdFromObject(treatment)}>{ treatment.display_title }</a><div>({ treatment.treatment_type })</div></div>;
+                            }} />
+                        </div>
 
                         <div className="col-xs-6 col-md-4">
                             <OverViewBodyItem {...{ result, tips }} property='biosample_protocols' fallbackTitle="Biosample Protocols" />
