@@ -41,7 +41,7 @@ export class ItemPageTable extends React.Component {
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
                     var isAnAccession = false;// isDisplayTitleAccession(result, title, false);
                     if (link){
-                        title = <a href={link || '#'}>{ title }</a>;
+                        title = <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>;
                     }
 
                     var typeTitle = Schemas.getItemTypeTitle(result);
@@ -49,11 +49,16 @@ export class ItemPageTable extends React.Component {
                         typeTitle += ' ';
                     }
 
+                    var toggleButton = null;
+                    if (typeof props.renderDetailPane === 'function'){
+                        toggleButton = <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />;
+                    }
+
                     return (
-                        <span className={typeTitle ? "has-type-title" : null}>
-                            <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
+                        <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
+                            { toggleButton }
                             { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
-                            <a href={object.atIdFromObject(result)} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>
+                            { title }
                         </span>
                     );
 
@@ -115,12 +120,12 @@ export class ItemPageTable extends React.Component {
             columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(width, columnDefinitionsToScaledColumnDefinitions(columnDefinitions));
         }
 
-        var responsiveGridState = layout.responsiveGridState();
+        var responsiveGridState = (this.state.mounted && layout.responsiveGridState()) || 'lg';
         
         return (
             <div className="item-page-table-container clearfix" ref="tableContainer">
                 { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ? 
-                    <HeadersRow mounted columnDefinitions={columnDefinitions} />
+                    <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={this.props.renderDetailPane} />
                 : null }
                 { results.map((result, rowIndex)=>{
                     var atId = object.atIdFromObject(result);
@@ -184,6 +189,7 @@ class ItemPageTableRow extends React.Component {
                 className={colDefinition.field === 'display_title' && this.state.open ? 'open' : null}
                 detailOpen={this.state.open}
                 toggleDetailOpen={this.toggleOpen}
+                renderDetailPane={this.props.renderDetailPane}
             />
         );
     }
@@ -195,7 +201,7 @@ class ItemPageTableRow extends React.Component {
         }
         var result = this.props.result;
         return (
-            <div className="table-row clearfix">
+            <div className={"table-row clearfix" + (typeof this.props.renderDetailPane !== 'function' ? ' no-detail-pane' : '')}>
                 {
                     _.map(this.props.columnDefinitions, (col, index)=>{
                         return (
@@ -251,7 +257,7 @@ class ItemPageTableRow extends React.Component {
         return (
             <div className="item-page-table-row-container">
                 { this.props.responsiveGridState === 'xs' || this.props.responsiveGridState === 'sm' ? this.renderRowOfBlocks() : this.renderRowOfColumns() }
-                { this.state.open ?
+                { this.state.open && typeof this.props.renderDetailPane === 'function' ?
                     <div className="inner-wrapper">
                         { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.width, this.props) }
                     </div>
@@ -263,3 +269,100 @@ class ItemPageTableRow extends React.Component {
 
 
 
+export class ItemPageTableLoader extends React.Component {
+
+    static propTypes = {
+        'children' : PropTypes.element.isRequired,
+        'itemsObject' : PropTypes.object.isRequired,
+        'sortFxn' : PropTypes.func,
+        'isItemCompleteEnough' : PropTypes.func.isRequired
+    }
+
+    static defaultProps = {
+        'isItemCompleteEnough' : function(item){
+            return false;
+        }
+    }
+
+    constructor(props){
+        super(props);
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
+
+        // Get ExpSets from this file, check if are complete (have bio_rep_no, etc.), and use if so; otherwise, save 'this.experiment_set_uris' to be picked up by componentDidMount and fetched.
+        var items_obj = props.itemsObject;
+        var items = _.values(items_obj);
+        var items_for_state = null;
+
+        if (Array.isArray(items) && items.length > 0 && props.isItemCompleteEnough(items[0])){
+            items_for_state = items;
+        } else {
+            this.item_uris = _.keys(items_obj);
+        }
+
+        this.state = {
+            'items' : items_for_state,
+            'current_item_index' : false
+        };
+    }
+
+    componentDidMount(){
+        var newState = {};
+
+        var onFinishLoad = null;
+
+        if (Array.isArray(this.item_uris) && this.item_uris.length > 0){
+
+            onFinishLoad = _.after(this.item_uris.length, function(){
+                this.setState({ 'loading' : false });
+            }.bind(this));
+
+            newState.loading = true;
+            _.forEach(this.item_uris, (uri)=>{
+                ajax.load(uri, (r)=>{
+                    var currentItems = (this.state.items || []).slice(0);
+                    currentItems.push(r);
+                    this.setState({ items : currentItems });
+                    onFinishLoad();
+                }, 'GET', onFinishLoad);
+            });
+        }
+        
+        if (_.keys(newState).length > 0){
+            this.setState(newState);
+        }
+    }
+
+    componentWillUnmount(){
+        delete this.item_uris;
+    }
+
+    render(){
+        var clonedChild = React.cloneElement(this.props.children, _.extend({}, this.props, { 'loading' : this.state.loading, 'results' : this.state.items }) );
+        return (
+            <layout.WindowResizeUpdateTrigger>
+                { clonedChild }
+            </layout.WindowResizeUpdateTrigger>
+        );
+    }
+
+}
+
+/**
+ * TODO: Once/if /search/ accepts POST JSON requests, we can do one single request to get all Items by @id from /search/ instead of multiple AJAX requests.
+ * This will be the component to handle it (convert this.item_uris to one /search/ URI, override componentDidMount etc.)
+ * 
+ * Could then automatically detect in ItemPageLoader if length of @ids requested is > 20 or some random number, and auto use this component instead.
+ * 
+ * @export
+ * @class ItemPageTableBatchLoader
+ * @extends {ItemPageTableLoader}
+ */
+export class ItemPageTableBatchLoader extends ItemPageTableLoader {
+    constructor(props){
+        super(props);
+        if (this.item_uris){
+            console.log('TEST', this.item_uris);
+        }
+    }
+}

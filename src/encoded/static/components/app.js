@@ -1253,8 +1253,11 @@ export default class App extends React.Component {
                                     ref="navigation"
                                     schemas={this.state.schemas}
                                 />
-                                <div id="content" className="container">
+                                <div id="pre-content-placeholder"/>
+                                <div id="page-title-container" className="container">
                                     <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
+                                </div>
+                                <div id="facet-charts-container" className="container">
                                     <FacetCharts
                                         href={this.props.href}
                                         context={this.props.context}
@@ -1264,6 +1267,8 @@ export default class App extends React.Component {
                                         schemas={this.state.schemas}
                                         session={this.state.session}
                                     />
+                                </div>
+                                <div id="content" className="container">
                                     <Alerts alerts={this.props.alerts} />
                                     { content }
                                 </div>

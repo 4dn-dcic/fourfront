@@ -32,6 +32,7 @@ require('./item-pages/SchemaView');
 require('./item-pages/FallbackView');
 require('./item-pages/FileView');
 require('./item-pages/FileMicroscopyView');
+require('./item-pages/BiosampleView');
 require('./statuslabel');
 require('./navigation');
 require('./submission/submission-view');

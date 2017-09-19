@@ -3,14 +3,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ItemPageTable } from './../../browse/components/ItemPageTable';
+import { ItemPageTable, ItemPageTableLoader } from './../../browse/components/ItemPageTable';
 import { ajax, console, layout, expFxn, object } from './../../util';
 
 
 export class SimpleFilesTable extends React.Component {
 
     static propTypes = {
-        'files'                 : PropTypes.arrayOf(PropTypes.shape({
+        'results'                 : PropTypes.arrayOf(PropTypes.shape({
             'accession'             : PropTypes.string.isRequired,
             'display_title'         : PropTypes.string.isRequired,
             'link_id'               : PropTypes.string.isRequired,
@@ -40,7 +40,7 @@ export class SimpleFilesTable extends React.Component {
     }
 
     render(){
-        var reducedFiles = expFxn.reduceProcessedFilesWithExperimentsAndSets(this.props.files);
+        var reducedFiles = expFxn.reduceProcessedFilesWithExperimentsAndSets(this.props.results);
 
         return (
             <ItemPageTable
@@ -59,6 +59,7 @@ export class SimpleFilesTable extends React.Component {
 
 }
 
+
 export class SimpleFilesTableLoaded extends React.Component {
     
     static propTypes = {
@@ -66,81 +67,32 @@ export class SimpleFilesTableLoaded extends React.Component {
         'sortFxn' : PropTypes.func
     }
 
-    static isFileCompleteEnough(expSet){
-        // TODO
-        return false;
-    }
-
     static defaultProps = {
         'columns' : SimpleFilesTable.defaultProps.columns,
         'columnDefinitionOverrideMap' : SimpleFilesTable.defaultProps.columnDefinitionOverrideMap
     }
 
-    constructor(props){
-        super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-
-        // Get ExpSets from this file, check if are complete (have bio_rep_no, etc.), and use if so; otherwise, save 'this.experiment_set_uris' to be picked up by componentDidMount and fetched.
-        var files = this.props.files;
-        var filesForState = null;
-
-        if (Array.isArray(files) && files.length > 0 && SimpleFilesTableLoaded.isFileCompleteEnough(files[0])){
-            filesForState = files;
-        } else {
-            this.file_uris = _.map(files, object.atIdFromObject);
-        }
-
-        this.state = {
-            'files' : filesForState
-        };
-    }
-
-    componentDidMount(){
-        var newState = {};
-
-        var onFinishLoad = null;
-
-        if (Array.isArray(this.file_uris) && this.file_uris.length > 0){
-
-            onFinishLoad = _.after(this.file_uris.length, function(){
-                this.setState({ 'loading' : false });
-            }.bind(this));
-
-            newState.loading = true;
-            _.forEach(this.file_uris, (uri)=>{
-                ajax.load(uri, (r)=>{
-                    var currentFiles = (this.state.files || []).slice(0);
-                    currentFiles.push(r);
-                    this.setState({ files : currentFiles }, onFinishLoad);
-                }, 'GET', onFinishLoad);
-            });
-        }
-        
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
-    }
-
-    componentWillUnmount(){
-        delete this.file_uris;
+    static isFileCompleteEnough(expSet){
+        // TODO
+        return false;
     }
 
     render(){
-        if (this.state.loading){
-            //return <span>'loading'</span>;
-        }
+        var filesObj = _.object(_.zip(
+            _.map(this.props.files, object.atIdFromObject),
+            this.props.files
+        ));
         return (
-            <layout.WindowResizeUpdateTrigger>
+            <ItemPageTableLoader itemsObject={filesObj} isItemCompleteEnough={SimpleFilesTableLoaded.isFileCompleteEnough}>
                 <SimpleFilesTable
-                    loading={this.state.loading}
-                    files={this.state.files}
                     sortFxn={this.props.sortFxn}
+                    width={this.props.width}
+                    defaultOpenIndices={this.props.defaultOpenIndices}
+                    defaultOpenIds={this.props.defaultOpenIds}
                     columns={this.props.columns}
                     columnDefinitionOverrideMap={this.props.columnDefinitionOverrideMap}
-                    width={this.props.width}
                 />
-            </layout.WindowResizeUpdateTrigger>
+            </ItemPageTableLoader>
         );
     }
 }

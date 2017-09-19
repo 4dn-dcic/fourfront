@@ -14,7 +14,7 @@ import Infinite from 'react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
-import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
+import { console, isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import {
     defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap,
@@ -94,22 +94,25 @@ class ResultDetail extends React.Component{
     constructor(props){
         super(props);
         this.setDetailHeightFromPane = this.setDetailHeightFromPane.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        //this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'closing' : false };
     }
 
-    setDetailHeightFromPane(){
-        setTimeout(()=>{
-            var detailHeight = parseInt(this.refs.detail.offsetHeight);
-            if (isNaN(detailHeight)) detailHeight = 0;
-            this.props.setDetailHeight(detailHeight);
-        }, 10);
+    setDetailHeightFromPane(height = null){
+        if (typeof height !== 'number'){
+            height = this.refs.detail && parseInt(this.refs.detail.offsetHeight);
+            if (!this.firstFoundHeight && height && !isNaN(height)) this.firstFoundHeight = height;
+        }
+        if (isNaN(height) || typeof height !== 'number') height = this.firstFoundHeight || 1;
+        this.props.setDetailHeight(height);
     }
 
     componentDidUpdate(pastProps, pastState){
         if (pastProps.open !== this.props.open){
             if (this.props.open && typeof this.props.setDetailHeight === 'function'){
-                this.setDetailHeightFromPane();
+                setTimeout(this.setDetailHeightFromPane, 10);
             }
         }
     }
@@ -937,6 +940,7 @@ class DimensioningContainer extends React.Component {
                                             rowHeight={this.props.rowHeight}
                                             results={this.state.results}
                                             stickyHeaderTopOffset={stickyHeaderTopOffset}
+                                            renderDetailPane={this.props.renderDetailPane}
 
                                             stickyStyle={style}
                                             isSticky={isSticky}

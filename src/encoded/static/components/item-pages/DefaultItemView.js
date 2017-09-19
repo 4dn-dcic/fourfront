@@ -4,7 +4,7 @@ import React from 'react';
 import { panel_views, itemClass } from './../globals';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
-import { console, object, DateUtility, Filters, layout } from './../util';
+import { console, object, DateUtility, Filters, layout, Schemas } from './../util';
 
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
@@ -122,3 +122,68 @@ export default class DefaultItemView extends ItemBaseView {
 }
 
 panel_views.register(DefaultItemView, 'Item');
+
+
+
+/** Helper Components */
+
+
+export class OverViewBodyItem extends React.Component {
+
+    static createList(items, property, titleRenderFxn){
+        if (Array.isArray(items) && items.length > 0 && items[0].display_title && object.atIdFromObject(items[0])){
+            items = _.map(_.uniq(items, false, function(b){ return object.atIdFromObject(b); }), function(b){
+                var link = null;
+                if (typeof titleRenderFxn === 'function' && titleRenderFxn !== Schemas.Term.toName){
+                    link = titleRenderFxn(property, b, true);
+                } else { 
+                    link = <a href={object.atIdFromObject(b)}>{ b.display_title }</a>;
+                }
+                if (items.length > 1){
+                    return <li>{ link }</li>;
+                }
+                return link;
+            });
+        } else if (Array.isArray(items) && items.length > 1){
+            items = _.map(items, function(b){
+                return <li>{ titleRenderFxn(property, b, true) }</li>;
+            });
+        } else if (Array.isArray(items) && items.length === 1){
+            items = titleRenderFxn(property, items[0], true);
+        }
+        return items;
+    }
+
+    static defaultProps = {
+        'titleRenderFxn' : Schemas.Term.toName
+    }
+
+    render(){
+        var { result, property, fallbackValue, fallbackTitle, titleRenderFxn } = this.props;
+
+        var resultPropertyValue = OverViewBodyItem.createList(object.getNestedProperty(result, property), property, titleRenderFxn);
+
+        if (Array.isArray(resultPropertyValue)){
+            return (
+                <div className="inner">
+                    <object.TooltipInfoIconContainerAuto
+                        {..._.pick(this.props, 'result', 'property', 'tips', 'schemas')}
+                        fallbackTitle={fallbackTitle + (resultPropertyValue && resultPropertyValue.length > 1 ? 's' : '')}
+                        elementType="h5"
+                    />
+                    { resultPropertyValue ? ( resultPropertyValue.length > 1 ? <ol>{ resultPropertyValue }</ol> : resultPropertyValue ) : 'None' }
+                </div>
+            );
+        }
+
+        return (
+            <div className="inner">
+                <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'property', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" />
+                <div>
+                    { titleRenderFxn(property, resultPropertyValue, true) || fallbackValue || 'None' }
+                </div>
+            </div>
+        );
+    }
+}
+
