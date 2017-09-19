@@ -166,7 +166,7 @@ class BiosampleViewOverview extends React.Component {
 
         if (Array.isArray(context.biosource) && context.biosource.length > 0){
             table = (
-                <div>
+                <div className="mt-3">
                     <h3 className="tab-section-title">
                         <span>Biosources</span>
                     </h3>
@@ -178,8 +178,8 @@ class BiosampleViewOverview extends React.Component {
         return (
             <div>
                 <OverViewBody result={context} schemas={this.props.schemas} />
-                { table }
                 <CellCultureInfoBody result={context} schemas={this.props.schemas} />
+                { table }
             </div>
         );
 
@@ -240,7 +240,6 @@ class CellCultureInfoBody extends React.Component {
         return (
             <div className="row">
                 <div className="col-md-12 col-xs-12">
-                    <br/>
                     <h3 className="tab-section-title">
                         <span>Cell Culture</span>
                     </h3>
