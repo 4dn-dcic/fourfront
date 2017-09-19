@@ -842,7 +842,7 @@ class WorkflowRun(Item):
             :param runParams: List Step inputs or outputs, such as 'input_files', 'output_files', 'quality_metric', or 'parameters'.
             :returns: True if found and added run_data property to analysis_step.input or analysis_step.output (param inputOrOutput).
             '''
-            if 'Workflow' in stepOutputTarget.get('type', 'Workflow'):
+            if 'Workflow' in stepOutputTarget.get('type', ''): # Make sure is global target or source
 
                 # Gather params (e.g. files) with same workflow_argument_name.
                 # Assume these have been combined correctly unless have differing ordinal number.
