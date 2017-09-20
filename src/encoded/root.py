@@ -55,18 +55,12 @@ def listFilesInInDirectory(dirLocation):
 
 def static_pages(config):
     '''Setup static routes & content from static files (HTML or Markdown)'''
-
     try:
         contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
         pageLocations = json.loads(get_local_file_contents("static_pages.json", "/static/data", contentFilesLocation + "/static/data")).get('pages', {})
     except Exception as e:
         print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
 
-
-    config.add_route(
-        'static-page',
-        '/{page:(' + '|'.join( map(escape, pageLocations.keys() )) + ')}'
-    )
 
     def static_page(request):
 
@@ -165,7 +159,22 @@ def static_pages(config):
 
         return responseDict
 
-    config.add_view(static_page, route_name='static-page')
+    # protected pages hardcode
+    protected = {'planned-submissions': True}
+    for num, key in enumerate(pageLocations.keys()):
+        if protected.get(key, False):
+            config.add_route(
+                'static-page' + str(num),
+                '/{page:' + escape(key) + '}',
+                effective_principals=Authenticated,
+            )
+        else:
+            config.add_route(
+                'static-page' + str(num),
+                '/{page:' + escape(key) + '}',
+            )
+
+        config.add_view(static_page, route_name='static-page' + str(num))
 
 
 def health_check(config):
