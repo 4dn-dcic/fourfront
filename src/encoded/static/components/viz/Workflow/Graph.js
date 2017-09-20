@@ -126,8 +126,8 @@ export default class Graph extends React.Component {
             }
 
             function compareNodeOutputOf(n1, n2){
-                var n1OutputOf = n1.type === 'step' ? n1.inputNodes && n1.inputNodes.length > 0 && n1.inputNodes[0] : n1.outputOf;
-                var n2OutputOf = n2.type === 'step' ? n2.inputNodes && n2.inputNodes.length > 0 && n2.inputNodes[0] : n2.outputOf;
+                var n1OutputOf = n1.type === 'step' ? (n1.inputNodes && n1.inputNodes.length > 0 && _.find(n1.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n1.outputOf;
+                var n2OutputOf = n2.type === 'step' ? (n2.inputNodes && n2.inputNodes.length > 0 && _.find(n2.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n2.outputOf;
                 if ((n1OutputOf && typeof n1OutputOf.indexInColumn === 'number' && n2OutputOf && typeof n2OutputOf.indexInColumn === 'number')){
                     if (n1OutputOf.column === n2OutputOf.column){
                         if (n1OutputOf.indexInColumn < n2OutputOf.indexInColumn) return -1;
@@ -158,8 +158,21 @@ export default class Graph extends React.Component {
             var ioResult;
 
             if (node1.type === 'step' && node2.type === 'step'){
-                //ioResult = compareNodeOutputOf(node1, node2);
-                //if (ioResult !== 0) return ioResult;
+                if (node1.inputNodes && !node2.inputNodes) return -1;
+                if (!node1.inputNodes && node2.inputNodes) return 1;
+                if (node1.inputNodes && node2.inputNodes){
+                    var n1input = _.find(node1.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; }) || null;
+                    var n2input = _.find(node2.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; }) || null;
+                    if (n1input && !n2input) return -1;
+                    if (!n1input && n2input) return 1;
+                    if (n1input && n2input){
+                        if (n1input.column === n2input.column){
+                            console.log('TEST');
+                            if (n1input.indexInColumn < n2input.indexInColumn) return -1;
+                            if (n1input.indexInColumn > n2input.indexInColumn) return 1;
+                        }
+                    }
+                }
                 if (node1.name === node2.name){
                     if (node1.id === node2.id) return 0;
                     return (node1.id < node2.id) ? -2 : 2;
