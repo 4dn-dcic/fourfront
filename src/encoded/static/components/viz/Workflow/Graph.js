@@ -101,8 +101,67 @@ export default class Graph extends React.Component {
         },
         'nodeClassName' : function(node){ return ''; },
         'nodesInColumnSortFxn' : function(node1, node2){
+            
+            function isNodeFileReference(n){
+                return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
+            }
+
+            function compareNodeInputOf(n1, n2){
+                var n1InputOf = n1.type === 'step' ? n1.outputNodes : n1.inputOf;
+                var n2InputOf = n2.type === 'step' ? n2.outputNodes : n2.inputOf;
+                if (Array.isArray(n1InputOf) && Array.isArray(n2InputOf) && (n1InputOf[0] && n1InputOf[0].name && n2InputOf[0] && n2InputOf[0].name)){
+                    
+                    if (n1InputOf[0].name === n2InputOf[0].name){
+                        if (n1InputOf[0].id === n2InputOf[0].id){
+                            if (n1.name === n2.name){
+                                return (n1.id < n2.id) ? -2 : 2;
+                            }
+                            return (n1.name < n2.name) ? -2 : 2;
+                        }
+                        return n1InputOf[0].id < n2InputOf[0].id ? -3 : 3;
+                    }
+                    return n1InputOf[0].name < n2InputOf[0].name ? -1 : 1;
+                }
+                return 0;
+            }
+
+            function compareNodeOutputOf(n1, n2){
+                var n1OutputOf = n1.type === 'step' ? n1.inputNodes && n1.inputNodes.length > 0 && n1.inputNodes[0] : n1.outputOf;
+                var n2OutputOf = n2.type === 'step' ? n2.inputNodes && n2.inputNodes.length > 0 && n2.inputNodes[0] : n2.outputOf;
+                if ((n1OutputOf && typeof n1OutputOf.indexInColumn === 'number' && n2OutputOf && typeof n2OutputOf.indexInColumn === 'number')){
+                    if (n1OutputOf.column === n2OutputOf.column){
+                        if (n1OutputOf.indexInColumn < n2OutputOf.indexInColumn) return -1;
+                        if (n1OutputOf.indexInColumn > n2OutputOf.indexInColumn) return 1;
+                    }
+                }
+                if ((n1OutputOf && n1OutputOf.name && n2OutputOf && n2OutputOf.name)){
+                    if (n1OutputOf.name === n2OutputOf.name){
+                        if (n1OutputOf.id === n2OutputOf.id){
+                            
+                            if (typeof n1.inputOf !== 'undefined' && typeof n2.inputOf === 'undefined'){
+                                return -3;
+                            } else if (typeof n1.inputOf === 'undefined' && typeof n2.inputOf !== 'undefined'){
+                                return 3;
+                            }
+                            if (n1.name < n2.name) return -1;
+                            if (n1.name > n2.name) return 1;
+                            return 0;//compareNodeInputOf(n1, n2);
+                            
+                        }
+                        return n1OutputOf.id < n2OutputOf.id ? -3 : 3;
+                    }
+                    return n1OutputOf.name < n2OutputOf.name ? -3 : 3;
+                }
+                return 0;
+            }
+
+            var ioResult;
+
             if (node1.type === 'step' && node2.type === 'step'){
+                //ioResult = compareNodeOutputOf(node1, node2);
+                //if (ioResult !== 0) return ioResult;
                 if (node1.name === node2.name){
+                    if (node1.id === node2.id) return 0;
                     return (node1.id < node2.id) ? -2 : 2;
                 }
                 return (node1.name < node2.name) ? -2 : 2;
@@ -119,10 +178,6 @@ export default class Graph extends React.Component {
                 return 1;
             }
 
-            function isNodeFileReference(n){
-                return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
-            }
-
             if (node1.type === node2.type){
 
                 if (node1.type === 'output'){
@@ -133,20 +188,15 @@ export default class Graph extends React.Component {
                         return 3;
                     }
                     */
-                    if ((node1.outputOf && node1.outputOf.name && node2.outputOf && node2.outputOf.name)){
-                        if (node1.outputOf.name === node2.outputOf.name){
-                            if (node1.outputOf.id == node2.outputOf.id){
-                                if (typeof node1.inputOf !== 'undefined' && typeof node2.inputOf === 'undefined'){
-                                    return -3;
-                                } else if (typeof node1.inputOf === 'undefined' && typeof node2.inputOf !== 'undefined'){
-                                    return 3;
-                                }
-                                return 0;
-                            }
-                            return node1.outputOf.id < node2.outputOf.id ? -3 : 3;
-                        }
-                        return node1.outputOf.name < node2.outputOf.name ? -3 : 3;
-                    }
+                    
+                    //ioResult = compareNodeInputOf(node1, node2);
+                    //if (ioResult !== 0) return ioResult;
+                    ioResult = compareNodeOutputOf(node1, node2);
+                    //if (ioResult !== 0) return ioResult;
+                    //return compareNodeInputOf(node1, node2);
+                    //ioResult = compareNodeInputOf(node1, node2);
+                    //if (ioResult !== 0) return ioResult;
+                    return ioResult;
                 }
 
                 
@@ -164,19 +214,10 @@ export default class Graph extends React.Component {
                         return -1;
                     }
 
-                    if (Array.isArray(node1.inputOf) && Array.isArray(node2.inputOf) && (node1.inputOf[0] && node1.inputOf[0].name && node2.inputOf[0] && node2.inputOf[0].name)){
-
-                        if (node1.inputOf[0].name === node2.inputOf[0].name){
-                            if (node1.inputOf[0].id === node2.inputOf[0].id){
-                                if (node1.name === node2.name){
-                                    return (node1.id < node2.id) ? -2 : 2;
-                                }
-                                return (node1.name < node2.name) ? -2 : 2;
-                            }
-                            return node1.inputOf[0].id < node2.inputOf[0].id ? -3 : 3;
-                        }
-                        return node1.inputOf[0].name < node2.inputOf[0].name ? -1 : 1;
-                    }
+                    //ioResult = compareNodeInputOf(node1, node2);
+                    //if (ioResult !== 0) return ioResult;
+                    ioResult = compareNodeInputOf(node1, node2);
+                    if (ioResult !== 0) return ioResult;
                 }
             }
 

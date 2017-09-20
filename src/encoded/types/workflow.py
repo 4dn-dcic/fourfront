@@ -60,13 +60,17 @@ workflow_analysis_steps_schema = {
                             "type" : "object",
                             "properties" : {
                                 "file" : {
-                                    "type" : "string",
-                                    "title" : "File",
-                                    # "linkTo" : "File"
+                                    "type" : "array",
+                                    "title" : "File(s)",
+                                    "description" : "File(s) for this step input argument.",
+                                    "items" : {
+                                        "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
+                                    }
                                 },
-                                "value" : {
+                                "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
                                     "title" : "Value",
-                                    "type" : "string"
+                                    "type" : "string",
+                                    "description" : "Value used for this output argument."
                                 },
                                 "type" : {
                                     "type" : "string",
@@ -104,13 +108,17 @@ workflow_analysis_steps_schema = {
                             "type" : "object",
                             "properties" : {
                                 "file" : {
-                                    "type" : "string",
-                                    "title" : "File",
-                                    # "linkTo" : "File"
+                                    "type" : "array",
+                                    "title" : "File(s)",
+                                    "description" : "File(s) for this step output argument.",
+                                    "items" : {
+                                        "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
+                                    }
                                 },
-                                "value" : {
+                                "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
                                     "title" : "Value",
-                                    "type" : "string"
+                                    "type" : "string",
+                                    "description" : "Value used for this output argument."
                                 },
                                 "type" : {
                                     "type" : "string",
@@ -131,6 +139,7 @@ workflow_analysis_steps_schema = {
                 "title" : "Step Name",
                 "type" : "string"
             },
+            # This 
             "analysis_step_types" : {
                 "title" : "Step Purposes",
                 "type" : "array",
