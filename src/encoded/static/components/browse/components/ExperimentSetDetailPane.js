@@ -36,12 +36,22 @@ export class ExperimentSetDetailPane extends React.Component {
 
     constructor(props){
         super(props);
-        this.toggle = this.toggle.bind(this);
+        this.toggle = _.throttle(this.toggle.bind(this), 500, { 'trailing' : false });
         this.state = {
-            rawFilesOpen : false,
-            processedFilesOpen : false
+            'rawFilesOpen' : false,
+            'processedFilesOpen' : false
         };
     }
+    
+    /*
+    componentDidUpdate(pastProps, pastState){
+        if ((pastState.rawFilesOpen !== this.state.rawFilesOpen) || (pastState.processedFilesOpen !== this.state.processedFilesOpen)){
+            if (typeof this.props.toggleExpandCallback === 'function'){
+                setTimeout(this.props.toggleExpandCallback, 500); // Delay to allow <Collapse> height transition to finish.
+            }
+        }
+    }
+    */
 
     toggle(property){
         var state = {};

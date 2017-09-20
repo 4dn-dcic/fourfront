@@ -82,6 +82,7 @@ export const Term = {
         }
 
         switch (standardizedFieldKey) {
+            case 'biosource.biosource_type':
             case 'biosample.biosource.individual.organism.name':
                 name = Term.capitalize(term);
                 break;

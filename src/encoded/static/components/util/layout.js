@@ -242,7 +242,7 @@ export function verticalCenterOffset(innerElem, extraHeight = 0, outerElem = nul
  * @param {string|number|HTMLElement} to - Where to scroll to.
  * @param {number} duration - How long should take.
  */
-export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 100, callback = null){
+export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 72, callback = null){
 
     if (!document || !document.body) return null;
 

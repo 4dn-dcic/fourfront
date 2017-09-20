@@ -24,6 +24,7 @@ export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'display_title', },
     { 'field' : 'experiments_in_set.experiment_type', },
     { 'field' : 'number_of_experiments', },
+    { 'field' : 'number_of_files', },
     { 'field' : 'lab.display_title', },
     { 'field' : 'date_created',  },
     { 'field' : 'status',  }
@@ -86,7 +87,45 @@ class ResultTableContainer extends React.Component {
                 'title' : "Exp Type"
             },
             'number_of_experiments' : {
-                'title' : "Exps"
+                'title' : "Exps",
+                'render' : function(expSet, columnDefinition, props, width){
+                    var number_of_experiments = parseInt(expSet.number_of_experiments);
+                    
+                    if (isNaN(number_of_experiments) || !number_of_experiments){
+                        number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
+                    }
+                    if (!number_of_experiments){
+                        number_of_experiments = 0;
+                    }
+
+                    
+                    return <span>{ number_of_experiments }</span>;
+                }
+            },
+            'number_of_files' : {
+                'title' : "Files",
+                'render' : function(expSet, columnDefinition, props, width){
+
+                    var number_of_files = parseInt(expSet.number_of_files); // Doesn't exist yet at time of writing
+                    
+                    if (isNaN(number_of_files) || !number_of_files){
+                        var number_of_experiments = parseInt(expSet.number_of_experiments);
+                        if (isNaN(number_of_experiments) || !number_of_experiments){
+                            number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
+                        }
+                        if (number_of_experiments || Array.isArray(expSet.processed_files)){
+                            number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, true);
+                        } else {
+                            number_of_files = 0;
+                        }
+                        
+                    }
+                    if (!number_of_files){
+                        number_of_files = 0;
+                    }
+                    
+                    return <span>{ number_of_files }</span>;
+                }
             }
         },
         'constantHiddenColumns' : ['experimentset_type']
@@ -248,7 +287,7 @@ class ResultTableContainer extends React.Component {
                     <SearchResultTable
                         results={results}
                         columns={this.props.context.columns || {}}
-                        renderDetailPane={(result, rowNumber, containerWidth)=>
+                        renderDetailPane={(result, rowNumber, containerWidth, toggleExpandCallback)=>
                             <ExperimentSetDetailPane
                                 result={result}
                                 containerWidth={containerWidth}
@@ -256,6 +295,7 @@ class ResultTableContainer extends React.Component {
                                 selectedFiles={this.props.selectedFiles}
                                 selectFile={this.props.selectFile}
                                 unselectFile={this.props.unselectFile}
+                                toggleExpandCallback={toggleExpandCallback}
                                 paddingWidth={47}
                             />
                         }
@@ -289,7 +329,7 @@ class ControlsAndResults extends React.Component {
 
     render(){
 
-        var defaultHiddenColumns = ['lab.display_title', 'date_created', 'status'];
+        var defaultHiddenColumns = ['lab.display_title', 'date_created', 'status', 'number_of_files'];
         /*
         var hiddenColumns = [];
         // Hide columns by default which have same value for all items.

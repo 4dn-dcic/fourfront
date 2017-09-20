@@ -10,7 +10,6 @@ import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import Draggable from 'react-draggable';
-import Infinite from './../../lib/react-infinite/src/react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
@@ -173,11 +172,17 @@ export const defaultColumnDefinitionMap = {
     },
     'number_of_experiments' : {
         'title' : '# of Experiments',
-        'widthMap' : {'lg' : 75, 'md' : 75, 'sm' : 50},
+        'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50},
         //'render' : function(result, columnDefinition, props, width){
         //    if (!Array.isArray(result.experiments_in_set)) return null;
         //    return result.experiments_in_set.length;
         //}
+    },
+    'number_of_files' : {
+        'title' : '# of Files',
+        'widthMap' : {'lg' : 60, 'md' : 50, 'sm' : 50},
+        'noSort' : true
+
     },
     'experiments_in_set.experiment_type' : {
         'title' : 'Experiment Type',
@@ -351,10 +356,10 @@ export class HeadersRow extends React.Component {
     }
 
     render(){
-        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset } = this.props;
+        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset, renderDetailPane } = this.props;
         var isAdjustable = this.props.headerColumnWidths && this.state.widths;
         return (
-            <div className={"search-headers-row" + (isAdjustable ? '' : ' non-adjustable') + (isSticky ? ' stickied' : '')} style={
+            <div className={"search-headers-row" + (isAdjustable ? '' : ' non-adjustable') + (isSticky ? ' stickied' : '') + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')} style={
                 isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
                 : null}
             >

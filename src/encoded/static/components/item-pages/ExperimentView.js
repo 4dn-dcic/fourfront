@@ -7,7 +7,7 @@ import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, SimpleFilesTableLoaded } from './components';
-import { ItemBaseView } from './DefaultItemView';
+import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
@@ -160,20 +160,6 @@ class ExperimentViewOverview extends React.Component {
 
 }
 
-class OverViewBodyItem extends React.Component {
-    render(){
-        var { exp, tips, fallbackTitle, property, fallbackValue } = this.props;
-        return (
-            <div className="inner">
-                <object.TooltipInfoIconContainerAuto result={exp} property={property} tips={tips} elementType="h5" fallbackTitle={fallbackTitle} />
-                <div>
-                    { Schemas.Term.toName(property, object.getNestedProperty(exp, property), true) || fallbackValue || 'None' }
-                </div>
-            </div>
-        );
-    }
-}
-
 class OverViewBody extends React.Component {
 
 
@@ -181,16 +167,7 @@ class OverViewBody extends React.Component {
         var exp = this.props.result;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp);
         var tipsForBiosample = object.tipsFromSchema(this.props.schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, exp.biosample));
-        var biosources = object.getNestedProperty(exp, 'biosample.biosource');
-        if (Array.isArray(biosources) && biosources.length > 0 && biosources[0].display_title && object.atIdFromObject(biosources[0])){
-            biosources = _.map(_.uniq(biosources, false, function(b){ return object.atIdFromObject(b); }), function(b){
-                var link = <a href={object.atIdFromObject(b)}>{ b.display_title }</a>;
-                if (biosources.length > 1){
-                    return <li>{ link }</li>;
-                }
-                return link;
-            });
-        } else biosources = null;
+        var biosources = OverViewBodyItem.createList(exp, 'biosample.biosource');
 
         return (
             <div className="row">
@@ -198,42 +175,31 @@ class OverViewBody extends React.Component {
                     <div className="row overview-blocks">
 
                         <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem {...{ exp, tips }} property='experiment_type' fallbackTitle="Experiment Type" />
+                            <OverViewBodyItem tips={tips} result={exp} property='experiment_type' fallbackTitle="Experiment Type" />
                         </div>
 
                         <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem {...{ exp, tips }} property='follows_sop' fallbackTitle="Follows SOP" fallbackValue="No" />
+                            <OverViewBodyItem tips={tips} result={exp} property='follows_sop' fallbackTitle="Follows SOP" fallbackValue="No" />
                         </div>
 
                         <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem {...{ exp, tips }} property='biosample' fallbackTitle="Biosample" />
+                            <OverViewBodyItem tips={tips} result={exp} property='biosample' fallbackTitle="Biosample" />
                         </div>
 
                         <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem {...{ exp, tips }} property='digestion_enzyme' fallbackTitle="Digestion Enzyme" />
+                            <OverViewBodyItem tips={tips} result={exp} property='digestion_enzyme' fallbackTitle="Digestion Enzyme" />
                         </div>
 
                         <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem {...{ exp, tipsForBiosample }} property='modifications_summary' fallbackTitle="Biosample Modifications" />
+                            <OverViewBodyItem tips={tipsForBiosample} result={exp.biosample} property='modifications_summary' fallbackTitle="Biosample Modifications" />
                         </div>
 
                         <div className="col-xs-6 col-md-3">
-                            <OverViewBodyItem {...{ exp, tipsForBiosample }} property='treatments_summary' fallbackTitle="Biosample Treatments" />
+                            <OverViewBodyItem tips={tipsForBiosample} result={exp.biosample} property='treatments_summary' fallbackTitle="Biosample Treatments" />
                         </div>
 
-                        
-
                         <div className="col-xs-6 col-md-3">
-                            <div className="inner">
-                                <object.TooltipInfoIconContainerAuto
-                                    result={exp}
-                                    fallbackTitle={"Biosample Biosource" + (biosources && biosources.length > 1 ? 's' : '')}
-                                    property='biosource'
-                                    tips={tipsForBiosample}
-                                    elementType="h5"
-                                />
-                                { biosources ? (biosources.length > 1 ? <ol>{ biosources }</ol> : biosources) : 'None' }
-                            </div>
+                            <OverViewBodyItem tips={tipsForBiosample} result={exp.biosample} property='biosource' fallbackTitle="Biosample Biosource" />
                         </div>
 
 

@@ -543,6 +543,10 @@ export default class App extends React.Component {
                     hrefHash = hrefHash.slice(1); // Strip out '#'
                     setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
                 }
+                if (hrefParts.pathname.indexOf('/browse/') > -1){
+                    var filters = Filters.hrefToFilters(href, null, false);
+                    Filters.saveChangedFilters(filters, false);
+                }
             });
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
@@ -1249,8 +1253,11 @@ export default class App extends React.Component {
                                     ref="navigation"
                                     schemas={this.state.schemas}
                                 />
-                                <div id="content" className="container">
+                                <div id="pre-content-placeholder"/>
+                                <div id="page-title-container" className="container">
                                     <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
+                                </div>
+                                <div id="facet-charts-container" className="container">
                                     <FacetCharts
                                         href={this.props.href}
                                         context={this.props.context}
@@ -1260,6 +1267,8 @@ export default class App extends React.Component {
                                         schemas={this.state.schemas}
                                         session={this.state.session}
                                     />
+                                </div>
+                                <div id="content" className="container">
                                     <Alerts alerts={this.props.alerts} />
                                     { content }
                                 </div>
