@@ -73,12 +73,13 @@ export function doValidAnalysisStepsExist(steps){
     return true;
 }
 
-export function parseAnalysisStepsMixin(){
+export function parseAnalysisStepsMixin(context = null){
+    if (!context) context = this.props.context;
     var graphData = (
         this.state.showChart === 'basic' ?
-            parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context)
+            parseBasicIOAnalysisSteps(context.analysis_steps, context)
             :
-            parseAnalysisSteps(this.props.context.analysis_steps)
+            parseAnalysisSteps(context.analysis_steps)
     );
     if (this.state.showParameters) return graphData;
     else return filterOutParametersFromGraphData(graphData);

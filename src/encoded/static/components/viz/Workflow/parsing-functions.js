@@ -742,8 +742,12 @@ export function correctColumnAssignments(graphData){
             console.error('No column number on one of theses nodes', node, lastNode);
             return;
         }
-        var colDifference = Math.abs(lastNode.column - node.column) + 1;
-        node.column += colDifference;
+        var currentColDifference = node.column - lastNode.column;
+        if (currentColDifference < 1){
+            var colDifferenceToAdd = Math.abs(lastNode.column - node.column) + 1;
+            node.column += colDifferenceToAdd;
+        }
+        
     };
 
     _.forEach(nodes, function(node){
