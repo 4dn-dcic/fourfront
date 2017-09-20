@@ -167,7 +167,6 @@ export default class Graph extends React.Component {
                     if (!n1input && n2input) return 1;
                     if (n1input && n2input){
                         if (n1input.column === n2input.column){
-                            console.log('TEST');
                             if (n1input.indexInColumn < n2input.indexInColumn) return -1;
                             if (n1input.indexInColumn > n2input.indexInColumn) return 1;
                         }

@@ -43,6 +43,11 @@ workflow_analysis_steps_schema = {
                             "title" : "Input Name",
                             "type" : "string"
                         },
+                        "meta" : {
+                            "type" : "object",
+                            "title" : "Additional metadata for input argument",
+                            "description" : "Additional info that might be relavent to the input argument itself, such as argument_cardinality."
+                        },
                         "source" : {
                             "title" : "Source Step",
                             "description" : "Where this input file came from.",
@@ -66,6 +71,11 @@ workflow_analysis_steps_schema = {
                                     "items" : {
                                         "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
                                     }
+                                },
+                                "meta" : {
+                                    "type" : "array",
+                                    "title" : "Additional metadata for input file(s)",
+                                    "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal."
                                 },
                                 "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
                                     "title" : "Value",
@@ -91,6 +101,11 @@ workflow_analysis_steps_schema = {
                             "title" : "Output Name",
                             "type" : "string"
                         },
+                        "meta" : {
+                            "type" : "object",
+                            "title" : "Additional metadata for output argument",
+                            "description" : "Additional info that might be relavent to the output argument itself, such as argument_cardinality."
+                        },
                         "target" : {
                             "title" : "Target Step",
                             "description" : "Where this output file should go next.",
@@ -115,6 +130,11 @@ workflow_analysis_steps_schema = {
                                         "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
                                     }
                                 },
+                                "meta" : {
+                                    "type" : "array",
+                                    "title" : "Additional metadata for output file(s)",
+                                    "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal."
+                                },
                                 "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
                                     "title" : "Value",
                                     "type" : "string",
@@ -129,22 +149,33 @@ workflow_analysis_steps_schema = {
                     }
                 }
             },
-            "software_used": {
-                "title": "Software Used",
-                "description": "Reference to Software Used",
-                "type": "string",
-                "linkTo" : "Software"
-            },
             "name" : {
                 "title" : "Step Name",
                 "type" : "string"
             },
-            # This 
             "analysis_step_types" : {
                 "title" : "Step Purposes",
                 "type" : "array",
                 "items" : {
                     "type" : "string"
+                }
+            },
+            "meta" : {
+                "type" : "object",
+                "title" : "Step Metadata",
+                "description" : "Various properties which might be a subset of the Item represented by this step, e.g. uuid, @type, workflow, etc.",
+                "additionalProperties" : True,
+                "properties" : {
+                    "software_used": {
+                        "title": "Software Used",
+                        "description": "Reference to Software Used",
+                        "type": "string",
+                        "linkTo" : "Software"
+                    },
+                    "@id" : {
+                        "title" : "Unique identifier of Item in database represented by this step node. Either an AnalysisStep or a WorkflowRun.",
+                        "type" : "string"
+                    }
                 }
             }
         }
