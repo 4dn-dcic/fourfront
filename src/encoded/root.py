@@ -160,17 +160,17 @@ def static_pages(config):
         return responseDict
 
     # Add 'effective_principals' kwarg if page definition has permissions.
-    for num, key in enumerate(pageLocations.keys()):
+    for key in pageLocations.keys():
         principals = None # Should this be a list instd of None and then we just + to it when encounter in config JSON?
         if isinstance(pageLocations[key], dict) and isinstance(pageLocations[key].get('effective_principals'), list):
             principals = pageLocations[key]['effective_principals']
         config.add_route(
-            'static-page' + str(num),
+            'static-page-' + escape(key),
             '/{page:' + escape(key) + '}',
             effective_principals=principals,
         )
 
-        config.add_view(static_page, route_name='static-page' + str(num))
+        config.add_view(static_page, route_name='static-page-' + escape(key))
 
 
 def health_check(config):

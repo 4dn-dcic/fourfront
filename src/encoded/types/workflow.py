@@ -149,8 +149,8 @@ def get_unique_key_from_at_id(at_id):
     return at_id_parts[2]
 
 DEFAULT_TRACING_OPTIONS = {
-    'max_depth_history' : 6,
-    'max_depth_future' : 6,
+    'max_depth_history' : 9,
+    'max_depth_future' : 9,
     "group_similar_workflow_runs" : True,
     "track_performance" : False,
     "trace_direction" : ["history"]
