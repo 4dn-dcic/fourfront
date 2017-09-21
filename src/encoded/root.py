@@ -159,20 +159,19 @@ def static_pages(config):
 
         return responseDict
 
-    # protected pages hardcode
-    protected = {'planned-submissions': True}
+    # Add 'effective_principals' kwarg if page definition has permissions.
     for num, key in enumerate(pageLocations.keys()):
-        if protected.get(key, False):
-            config.add_route(
-                'static-page' + str(num),
-                '/{page:' + escape(key) + '}',
-                effective_principals=Authenticated,
-            )
-        else:
-            config.add_route(
-                'static-page' + str(num),
-                '/{page:' + escape(key) + '}',
-            )
+        effective_principals=None # Should this be a list instd of None and then we just + to it when encounter in config JSON?
+        if isinstance(pageLocations[key], dict) and isinstance(pageLocations[key].get('permissions'), list):
+            if 'Authenticated' in pageLocations[key]['permissions']:
+                effective_principals = Authenticated
+            elif 'Deny' in pageLocations[key]['permissions']:
+                effective_principals = Deny
+        config.add_route(
+            'static-page' + str(num),
+            '/{page:' + escape(key) + '}',
+            effective_principals=effective_principals,
+        )
 
         config.add_view(static_page, route_name='static-page' + str(num))
 
