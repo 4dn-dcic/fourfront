@@ -39,7 +39,7 @@ The section content will be the raw contents of the file located at `pages["help
 If do not include "directory" property, it will default to `src/encoded/static/data/<section-route-name>`.
 
 ## No Content
-At minimum, can set the value of a route key as `true`, e.g., `"help/submitting" : true`, instead of an object with sections and Table of Contents config as in example above. Doing this will deliver a relatively empty JSON object from the back-end for that route. Use this if are planning on doing all content presentation from the front-end, e.g. in case of the Home page.
+At minimum, can set the value of a route key as `true`, e.g., `"help/submitting" : true`, instead of an object with sections and Table of Contents config as in example above. Doing this will deliver a relatively empty JSON object from the back-end for that route. It will have "content" sections in the ?format=JSON for any pages in directory default directory `src/encoded/static/data/<section-route-name>`, but as plaintext instead of objects with properties (incl. 'content'). Use this if are planning on doing all content presentation from the front-end, e.g. in case of the more custom/unique Home or Planned Submissions pages.
 
 ## HTML Content
 For HTML files/filenames (filename with .html extension) defined in a "sections" list property of the route key's value object, no further parsing is performed for table of contents (aside from including top link, if `...["table-of-contents"]["include-top-link"] == true` & showing the table of contents if `...["enabled"] == true`). HTML content is simply inserted into sections of the page (under its section title, if any set), along with corresponding entries for the sections in Table of Contents. First-level ToC links navigate you in-page to top of section.
@@ -60,7 +60,7 @@ Sometimes, you may want to put some dynamic element onto a static page, but don'
 
 The placeholder string should look like this (displayed in context of section definition):
 
-```javascript
+```json
 ... {
     "filename" : "carousel-place-holder",
     "content" : "placeholder: <SlideCarousel />"
@@ -68,6 +68,29 @@ The placeholder string should look like this (displayed in context of section de
 ```
 
 It will be the word "placeholder", followed by a colon, followed by any string you want -- though React JSX syntax is reccommended for clarity. On the front-end, in the view or template React component which handles that particular static page route, there must exist a function named *`replacePlaceHolder(placeholderString)`*. This function will accept the string after `placeholder:`, with spaces removed, and should return a valid JSX element. For clarity, it is suggested to have the placeholder string be the same as the React/JSX component output of that function for that string. Having replacePlaceHolder() allows us to avoid security risks inherent in calling 'eval(...)'.
+
+# Permissions
+
+You may define `effective_principals` per page route. To do this, add property `effective_principals` property to root level of path/page configuration as a *list* of system-identifiable principals.
+Example: 
+```json
+"planned-submissions" : {
+    "title" : "Planned Data Submission",
+    "effective_principals" : ["system.Authenticated"],
+    "sections"  : [ .... ]
+},
+```
+Examples of effective_principals options include the following: 
+- `system.Authenticated`
+- `system.Everyone`
+- `viewing_groups.4DN`
+- `group.admin`
+- `group.submitter`
+- `lab.some-lab-uuid`
+- `award.some-award-uuid`
+- `submits_for.some-lab-uuid`
+- `auth0.someone@gmail.com`
+- `userid.some-users-identification-weqddw3`, etc.
 
 # Adding Static Pages to Portal Navigation Menu/Bar
 
