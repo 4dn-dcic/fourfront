@@ -162,8 +162,8 @@ def static_pages(config):
     # Add 'effective_principals' kwarg if page definition has permissions.
     for num, key in enumerate(pageLocations.keys()):
         principals = None # Should this be a list instd of None and then we just + to it when encounter in config JSON?
-        if isinstance(pageLocations[key], dict) and isinstance(pageLocations[key].get('permissions'), list):
-            principals = pageLocations[key]['permissions']
+        if isinstance(pageLocations[key], dict) and isinstance(pageLocations[key].get('effective_principals'), list):
+            principals = pageLocations[key]['effective_principals']
         config.add_route(
             'static-page' + str(num),
             '/{page:' + escape(key) + '}',

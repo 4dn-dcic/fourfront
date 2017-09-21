@@ -666,7 +666,7 @@
 
         "planned-submissions" : {
             "title" : "Planned Data Submission",
-            "permissions" : ["system.Authenticated"]
+            "effective_principals" : ["system.Authenticated"]
         },
 
         "planned-submissions-matrix"  : {
