@@ -1014,6 +1014,38 @@ $download-button-width : 100px;
 		opacity : 1;
 		transition: opacity .5s ease-out;
 	}
+
+	// Full Screen Styling
+	&.full-screen-view {
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		z-index: 10000;
+		background: #fff;
+		overflow-y: auto;
+
+		> .tab-section-title {
+			padding-left: 20px;
+			padding-right: 20px;
+		}
+
+		> .graph-wrapper {
+			//position: absolute;
+			//top: 68px;
+			padding-left: 20px;
+			padding-right: 20px;
+			//bottom: 0;
+			//left: 0;
+			//right: 0;
+			//overflow-y: auto;
+		}
+
+		.scroll-container-wrapper {
+
+		}
+	}
 }
 
 /****** Graph Detail Pane ******/

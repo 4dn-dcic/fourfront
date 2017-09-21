@@ -115,6 +115,16 @@ body[data-pathname="/browse/"]{
 */
 
 
+/*************** BODY STYLES RE: FULL-SCREEN THINGS ***************/
+
+body.is-full-screen {
+	overflow: hidden;
+	&::-webkit-scrollbar { 
+		display: none; 
+	}
+}
+
+
 /***********************************************************
 		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
 ************************************************************/
