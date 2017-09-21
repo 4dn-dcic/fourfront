@@ -1099,9 +1099,9 @@ export default class App extends React.Component {
         // check error status
         var status;
         var route = currRoute[currRoute.length-1];
-        
+
         var isPlannedSubmissionsPage = href_url.pathname.indexOf('/planned-submissions') > -1; // TEMP EXTRA CHECK WHILE STATIC_PAGES RETURN 404 (vs 403)
-        if (context.code && (context.code === 403 || isPlannedSubmissionsPage)){
+        if (context.code && (context.code === 403 || (isPlannedSubmissionsPage && context.code === 404))){
             if (isPlannedSubmissionsPage){
                 status = 'forbidden';
             } else if (context.title && (context.title.toLowerCase() === 'login failure' || context.title === 'No Access')){
