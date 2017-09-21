@@ -28,13 +28,28 @@ export default class ErrorPage extends React.Component {
         }else if(this.props.status === 'not_found'){
             errorMessage = <h3>The page you've requested does not exist. {homelink} to the homepage.</h3>;
         }else if(this.props.status === 'forbidden'){
-            errorMessage = <h3>Access was denied to this resource. If you have an account, try logging in. {homelink} to the homepage.</h3>;
+            return <HTTPForbiddenView/>;
         }else{
             errorMessage = <h3>The page you've requested does not exist or you have found an error. {homelink} to the homepage.</h3>;
         }
         return(
-            <div className="error-page">
+            <div className="error-page text-center">
                 {errorMessage}
+            </div>
+        );
+    }
+}
+
+export class HTTPForbiddenView extends React.Component {
+    render(){
+        return (
+            <div className="error-page text-left">
+                <h2 className="text-400">Access was denied to this resource.</h2>
+                <div className="content fourDN-content">
+                    <p>
+                    If you have an account, please try logging in or return to the <a href="/">homepage</a>. <br/> For instructions on how to set up an account, please visit the help page for <a href="/help/account-creation">Creating an Account</a>.
+                    </p>
+                </div>
             </div>
         );
     }

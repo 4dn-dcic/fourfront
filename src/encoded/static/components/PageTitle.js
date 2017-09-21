@@ -40,6 +40,14 @@ var TITLE_PATHNAME_MAP = {
             }
             return getTitleStringFromContext(context);
         }
+    },
+    '/planned-submissions' : {
+        'title' : function(pathName, context){
+            if (context.status === 'error' && context.code && (context.code === 404 || context.code === 403)){
+                return 'Forbidden';
+            }
+            return getTitleStringFromContext(context);
+        }
     }
 };
 

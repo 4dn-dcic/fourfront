@@ -427,7 +427,7 @@ export default class BrowseView extends React.Component {
 
         // no results found!
         if(context.total === 0 && context.notification){
-            return <div className="error-page"><h4>{context.notification}</h4></div>;
+            return <div className="error-page text-center"><h4>{context.notification}</h4></div>;
         }
         var results = context['@graph'];
         var searchBase = url.parse(this.props.href).search || '';
@@ -435,7 +435,7 @@ export default class BrowseView extends React.Component {
         // browse is only for experiment sets
         if(searchBase.indexOf('type=ExperimentSetReplicate') === -1){
             return(
-                <div className="error-page">
+                <div className="error-page text-center">
                     <h4>
                         <a href='/browse/?type=ExperimentSetReplicate'>
                             Only experiment sets may be browsed.
