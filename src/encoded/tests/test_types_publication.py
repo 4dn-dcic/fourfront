@@ -56,7 +56,7 @@ def test_update_publication_doi_biorxiv(testapp, publication_doi_biorxiv):
     assert publication_doi_biorxiv['title'][:50] == 'Designing Robustness to Temperature in a Feedforwa'
     assert publication_doi_biorxiv['abstract'][:50] == 'Incoherent feedforward loops represent important b'
     assert publication_doi_biorxiv['authors'] == ['Shaunak Sen', 'Jongmin Kim', 'Richard M. Murray']
-    assert publication_doi_biorxiv['url'] == 'http://www.biorxiv.org/content/early/2013/11/07/000091'
+    assert publication_doi_biorxiv['url'] == 'https://www.biorxiv.org/content/early/2013/11/07/000091'
     assert publication_doi_biorxiv['journal'] == 'bioRxiv'
 
 

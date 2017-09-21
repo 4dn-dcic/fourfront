@@ -55,18 +55,12 @@ def listFilesInInDirectory(dirLocation):
 
 def static_pages(config):
     '''Setup static routes & content from static files (HTML or Markdown)'''
-
     try:
         contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
         pageLocations = json.loads(get_local_file_contents("static_pages.json", "/static/data", contentFilesLocation + "/static/data")).get('pages', {})
     except Exception as e:
         print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
 
-
-    config.add_route(
-        'static-page',
-        '/{page:(' + '|'.join( map(escape, pageLocations.keys() )) + ')}'
-    )
 
     def static_page(request):
 
@@ -165,7 +159,18 @@ def static_pages(config):
 
         return responseDict
 
-    config.add_view(static_page, route_name='static-page')
+    # Add 'effective_principals' kwarg if page definition has permissions.
+    for num, key in enumerate(pageLocations.keys()):
+        principals = None # Should this be a list instd of None and then we just + to it when encounter in config JSON?
+        if isinstance(pageLocations[key], dict) and isinstance(pageLocations[key].get('effective_principals'), list):
+            principals = pageLocations[key]['effective_principals']
+        config.add_route(
+            'static-page' + str(num),
+            '/{page:' + escape(key) + '}',
+            effective_principals=principals,
+        )
+
+        config.add_view(static_page, route_name='static-page' + str(num))
 
 
 def health_check(config):
