@@ -1099,19 +1099,22 @@ export default class App extends React.Component {
         // check error status
         var status;
         var route = currRoute[currRoute.length-1];
-
-        if(context.code && context.code == 404){
-            // check to ensure we're not looking at a static page
-            if(route != 'help' && route != 'about' && route != 'home' && route != 'submissions'){
-                status = 'not_found';
-            }
-        }else if(context.code && context.code == 403){
-            if(context.title && (context.title.toLowerCase() == 'login failure' || context.title == 'No Access')){
+        
+        var isPlannedSubmissionsPage = href_url.pathname.indexOf('/planned-submissions') > -1; // TEMP EXTRA CHECK WHILE STATIC_PAGES RETURN 404 (vs 403)
+        if (context.code && (context.code === 403 || isPlannedSubmissionsPage)){
+            if (isPlannedSubmissionsPage){
+                status = 'forbidden';
+            } else if (context.title && (context.title.toLowerCase() === 'login failure' || context.title === 'No Access')){
                 status = 'invalid_login';
-            }else if(context.title && context.title == 'Forbidden'){
+            } else if (context.title && context.title === 'Forbidden'){
                 status = 'forbidden';
             }
-        }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+        } else if (context.code && context.code === 404){
+            // check to ensure we're not looking at a static page
+            if (route != 'help' && route != 'about' && route !== 'home' && route !== 'submissions'){
+                status = 'not_found';
+            }
+        } else if (route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
