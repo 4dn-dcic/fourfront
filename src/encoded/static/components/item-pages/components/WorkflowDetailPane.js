@@ -675,7 +675,7 @@ export class WorkflowDetailPane extends React.Component {
     }
 
     static defaultProps = {
-        'minHeight' : 650,
+        'minHeight' : 800,
         'selectedNode' : null,
         'keyTitleDescriptionMap' : {
             '@id' : {
