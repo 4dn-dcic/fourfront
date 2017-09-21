@@ -665,7 +665,8 @@
 
 
         "planned-submissions" : {
-            "title" : "Planned Data Submission"
+            "title" : "Planned Data Submission",
+            "permissions" : ["system.Authenticated"]
         },
 
         "planned-submissions-matrix"  : {

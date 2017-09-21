@@ -161,16 +161,13 @@ def static_pages(config):
 
     # Add 'effective_principals' kwarg if page definition has permissions.
     for num, key in enumerate(pageLocations.keys()):
-        effective_principals=None # Should this be a list instd of None and then we just + to it when encounter in config JSON?
+        principals = None # Should this be a list instd of None and then we just + to it when encounter in config JSON?
         if isinstance(pageLocations[key], dict) and isinstance(pageLocations[key].get('permissions'), list):
-            if 'Authenticated' in pageLocations[key]['permissions']:
-                effective_principals = Authenticated
-            elif 'Deny' in pageLocations[key]['permissions']:
-                effective_principals = Deny
+            principals = pageLocations[key]['permissions']
         config.add_route(
             'static-page' + str(num),
             '/{page:' + escape(key) + '}',
-            effective_principals=effective_principals,
+            effective_principals=principals,
         )
 
         config.add_view(static_page, route_name='static-page' + str(num))
