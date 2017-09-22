@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas } from './../util';
+import { console, object, expFxn, ajax, Schemas, layout } from './../util';
 import { WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
@@ -360,18 +360,7 @@ export class FileViewGraphSection extends React.Component {
     onToggleFullScreenView(){
         requestAnimationFrame(()=>{
             var willBeFullscreen = !this.state.fullscreenViewEnabled;
-            var bodyElement = (window && document && document.body) || null;
-
-            if (bodyElement){
-                if (willBeFullscreen){
-                    bodyElement.className += ' is-full-screen';
-                    //bodyElement.style.overflow = 'hidden';
-                } else {
-                    //bodyElement.style.overflow = '';
-                    bodyElement.className = bodyElement.className.replace(' is-full-screen', '');
-                }
-            }
-
+            layout.toggleBodyClass('is-full-screen', willBeFullscreen);
             this.setState({ 'fullscreenViewEnabled' : willBeFullscreen }, ()=>{
                 ReactTooltip.rebuild();
             });

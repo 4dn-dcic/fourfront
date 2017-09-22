@@ -8,6 +8,7 @@ import _ from 'underscore';
 import Login from './login';
 import * as store from '../store';
 import { JWT, console, layout, isServerSide, navigate, Filters } from './util';
+import { requestAnimationFrame } from './viz/utilities';
 import QuickInfoBar from './viz/QuickInfoBar';
 import { ChartDataController } from './viz/chart-data-controller';
 import TestWarning from './testwarning';
@@ -141,35 +142,28 @@ export default class Navigation extends React.Component {
             if (!this.state.navInitialized){
                 stateChange.navInitialized = true;
             }
-
-            var scrollVector = document.body.scrollTop - lastScrollTop;
-            lastScrollTop = document.body.scrollTop;
+            var currentScrollTop = document.body.scrollTop;
+            var scrollVector = currentScrollTop - lastScrollTop;
+            lastScrollTop = currentScrollTop;
 
             if (
                 ['xs','sm'].indexOf(layout.responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
                 (
-                    (document.body.scrollTop > 20 && scrollVector >= 0) ||
-                    (document.body.scrollTop > 80)
+                    (currentScrollTop > 20 && scrollVector >= 0) ||
+                    (currentScrollTop > 80)
                 )
             ){
                 if (!this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = true;
-                    this.setState(stateChange, function(){
-                        if (document.body.className.indexOf(' scrolled-past-top') === -1) document.body.className += ' scrolled-past-top';
-                    });
+                    this.setState(stateChange, requestAnimationFrame.bind(requestAnimationFrame, layout.toggleBodyClass.bind(layout, 'scrolled-past-top', true, document.body)));
                 }
-                if (document.body.scrollTop > 80 && document.body.className.indexOf(' scrolled-past-80') === -1){
-                    document.body.className += ' scrolled-past-80';
+                if (currentScrollTop > 80){
+                    requestAnimationFrame(layout.toggleBodyClass.bind(layout, 'scrolled-past-80', true, document.body));
                 }
             } else {
                 if (this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = false;
-                    this.setState(stateChange, function(){
-                        if (document.body.className.indexOf(' scrolled-past-top') !== -1){
-                            var newClassName = document.body.className.replace(' scrolled-past-top', '').replace(' scrolled-past-80','');
-                            document.body.className = newClassName;
-                        }
-                    });
+                    this.setState(stateChange, requestAnimationFrame.bind(requestAnimationFrame, layout.toggleBodyClass.bind(layout, ['scrolled-past-80', 'scrolled-past-top'], false, document.body)));
                 }
             }
         }

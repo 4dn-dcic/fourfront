@@ -284,6 +284,43 @@ export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 72, cal
     }
 }
 
+export function toggleBodyClass(className, toggleTo = null, bodyElement = null){
+
+    bodyElement = bodyElement || (window && document && document.body) || null;
+    
+    var allClasses = (Array.isArray(className) ? className : (typeof className === 'string' ? allClasses = className.split(' ') : null ));
+    if (!className) {
+        throw new Error('Invalid className supplied. Must be a string or array.');
+    }
+    
+    if (bodyElement){
+        var bodyClasses = bodyElement.className.split(' ');
+
+        _.forEach(allClasses, function(classToToggle, i){
+            var willSet;
+            if (typeof toggleTo === 'boolean'){
+                willSet = toggleTo;
+            } else if (Array.isArray(toggleTo) && typeof toggleTo[i] === 'boolean'){
+                willSet = toggleTo[i];
+            } else {
+                willSet = bodyClasses.indexOf(classToToggle) === -1;
+            }
+            if (willSet){
+                bodyClasses.push(classToToggle);
+                bodyClasses = _.uniq(bodyClasses);
+            } else {
+                var indexToRemove = bodyClasses.indexOf(classToToggle);
+                if (indexToRemove > -1){
+                    bodyClasses = _.uniq(bodyClasses.slice(0, indexToRemove).concat(bodyClasses.slice(indexToRemove + 1)));
+                }
+            }
+        });
+        
+        bodyElement.className = bodyClasses.length > 0 ? (bodyClasses.length === 1 ? bodyClasses[0] : bodyClasses.join(' ')) : null;
+    }
+
+}
+
 
 
 /**

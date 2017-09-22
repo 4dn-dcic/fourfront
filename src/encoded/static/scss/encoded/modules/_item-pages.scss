@@ -1040,6 +1040,19 @@ $download-button-width : 100px;
 			//left: 0;
 			//right: 0;
 			//overflow-y: auto;
+
+			.detail-pane {
+				margin: 0 auto;
+				@media (min-width: $screen-sm-min) {
+					max-width: $container-sm;
+				}
+				@media (min-width: $screen-md-min) {
+					max-width: $container-md;
+				}
+				@media (min-width: $screen-lg-min) {
+					max-width: $container-lg;
+				}
+			}
 		}
 
 		.scroll-container-wrapper {
