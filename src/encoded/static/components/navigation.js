@@ -155,21 +155,21 @@ export default class Navigation extends React.Component {
             ){
                 if (!this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = true;
-                    this.setState(stateChange, requestAnimationFrame.bind(requestAnimationFrame, layout.toggleBodyClass.bind(layout, 'scrolled-past-top', true, document.body)));
+                    this.setState(stateChange, layout.toggleBodyClass.bind(layout, 'scrolled-past-top', true, document.body));
                 }
                 if (currentScrollTop > 80){
-                    requestAnimationFrame(layout.toggleBodyClass.bind(layout, 'scrolled-past-80', true, document.body));
+                    layout.toggleBodyClass('scrolled-past-80', true, document.body);
                 }
             } else {
                 if (this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = false;
-                    this.setState(stateChange, requestAnimationFrame.bind(requestAnimationFrame, layout.toggleBodyClass.bind(layout, ['scrolled-past-80', 'scrolled-past-top'], false, document.body)));
+                    this.setState(stateChange, layout.toggleBodyClass.bind(layout, ['scrolled-past-80', 'scrolled-past-top'], false, document.body));
                 }
             }
         }
 
         // We add as property of class instance so we can remove event listener on unmount, for example.
-        this.throttledScrollHandler = _.throttle(handleScroll.bind(this), 10);
+        this.throttledScrollHandler = _.throttle(requestAnimationFrame.bind(requestAnimationFrame, handleScroll.bind(this)), 10);
 
         // Save logo/brand element's 'full width' before any height transitions.
         // Ideally wait until logo/brand image has loaded before doing so.

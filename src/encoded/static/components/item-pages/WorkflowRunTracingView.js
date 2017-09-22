@@ -292,6 +292,12 @@ export class FileViewGraphSection extends React.Component {
             'fullscreenViewEnabled' : false
         };
     }
+
+    componentWillUnmount(){
+        if (this.state.fullscreenViewEnabled){
+            layout.toggleBodyClass('is-full-screen', false);
+        }
+    }
     /*
     componentWillReceiveProps(nextProps){
         if (nextProps.allRuns !== this.props.allRuns){
@@ -380,7 +386,7 @@ export class FileViewGraphSection extends React.Component {
                     <span>Graph</span>
                     <TracedGraphSectionControls
                         {...this.state}
-                        {..._.pick(this.props, 'allRuns', 'toggleAllRuns', 'loading')}
+                        {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'loading')}
                         onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles} onSetRowSpacingType={this.onSetRowSpacingType}
                         onToggleFullScreenView={this.onToggleFullScreenView}
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled}

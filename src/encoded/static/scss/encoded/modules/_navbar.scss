@@ -39,7 +39,9 @@ $navbar-transition-easing: ease-out;
                     border-color $navbar-transition-length */;
             }
 
-            .navbar-container.scrolled-past-top & {
+            .navbar-container.scrolled-past-top &,
+            //body.scrolled-past-top .navbar-container &,
+            body.is-full-screen .navbar-container & {
                 height: $navbar-small-height;
                 line-height: $navbar-small-height;
                 //border-color: #d4d4d4;
@@ -312,7 +314,9 @@ $navbar-transition-easing: ease-out;
     @media (min-width: $navbar-fixed-breakpoint) {
         position: fixed;
 
-        .navbar-container.nav-initialized.navbar-container.scrolled-past-top & {
+        .navbar-container.nav-initialized.scrolled-past-top &,
+        //body.scrolled-past-top .navbar-container.nav-initialized &,
+        body.is-full-screen .navbar-container & {
             border-color: #d4d4d4;
             box-shadow: 0 0 3px rgba(0,0,0,0.2);
         }

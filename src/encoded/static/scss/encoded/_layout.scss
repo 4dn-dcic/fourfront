@@ -122,6 +122,9 @@ body.is-full-screen {
 	&::-webkit-scrollbar { 
 		display: none; 
 	}
+	#top-nav > .test-warning {
+		display: none;
+	}
 }
 
 
@@ -145,8 +148,10 @@ h1.page-title {
 		body[data-pathname="/"] &,
 		body[data-pathname="/home"] &,
 		&.home-page-title {
-			height: 64px;
-			margin-bottom: -3px;
+			@media screen and (min-width: $screen-sm-min){
+				height: 64px;
+				margin-bottom: -3px;
+			}
 
 			.subtitle {
 				font-size: 1.7rem;
