@@ -204,11 +204,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             return (s.type === groupTypeToCheck && typeof s.for_file === 'string');
         });
 
-        
-
         if (groupSources.length > 0){
-            
-            
 
             var groups = _.reduce(groupSources, function(m,v){
                 if (typeof m[v.grouped_by] === 'undefined'){
