@@ -128,6 +128,7 @@ export default class Graph extends React.Component {
             function compareNodeOutputOf(n1, n2){
                 var n1OutputOf = n1.type === 'step' ? (n1.inputNodes && n1.inputNodes.length > 0 && _.find(n1.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n1.outputOf;
                 var n2OutputOf = n2.type === 'step' ? (n2.inputNodes && n2.inputNodes.length > 0 && _.find(n2.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n2.outputOf;
+
                 if ((n1OutputOf && typeof n1OutputOf.indexInColumn === 'number' && n2OutputOf && typeof n2OutputOf.indexInColumn === 'number')){
                     if (n1OutputOf.column === n2OutputOf.column){
                         if (n1OutputOf.indexInColumn < n2OutputOf.indexInColumn) return -1;
@@ -190,6 +191,13 @@ export default class Graph extends React.Component {
                 return 1;
             }
 
+            // Groups go to bottom always. For now.
+            if (node1.type === 'input-group' && node2.type !== 'input-group'){
+                return 1;
+            } else if (node1.type !== 'input-group' && node2.type === 'input-group'){
+                return -1;
+            }
+
             if (node1.type === node2.type){
 
                 if (node1.type === 'output'){
@@ -236,6 +244,33 @@ export default class Graph extends React.Component {
             //if ((node1.type === 'input' || node1.type === 'output') && (node2.type === 'input' || node2.type === 'output') ){
             //    return node1.name < node2.name;
             //}
+        },
+        'nodesInColumnPostSortFxn' : function(nodesInColumn, columnNumber){
+            var groupNodes = _.filter(nodesInColumn, { 'type' : 'input-group' });
+            if (groupNodes.length > 0){
+                _.forEach(groupNodes, function(gN){
+                    var relatedFileSource = _.find(gN.meta.source, function(s){ var typeToCheck = s.type.toLowerCase(); return typeToCheck === 'input file' || typeToCheck === 'output file'; });
+                    var relatedFileNode = relatedFileSource && _.find(nodesInColumn, function(n){
+                        if (n && n.meta && n.meta.run_data && n.meta.run_data.file && (n.meta.run_data.file.uuid || n.meta.run_data.file) === (relatedFileSource.for_file || 'x') ){
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (relatedFileNode){
+                        // Re-arrange group node to be closer to its relation.
+                        var oldIdx = nodesInColumn.indexOf(gN);
+                        nodesInColumn.splice(oldIdx, 1);
+                        var afterThisIdx = nodesInColumn.indexOf(relatedFileNode);
+                        nodesInColumn.splice(afterThisIdx + 1, 0, gN);
+                    }
+                });
+                // Update own indices (not used for anything currently xcept debugging)
+                _.forEach(nodesInColumn, function(n, index){
+                    n.indexInColumn = index;
+                });
+            }
+            
+            return nodesInColumn;
         }
     }
 
@@ -288,14 +323,35 @@ export default class Graph extends React.Component {
         if (!contentHeight) contentHeight = this.height();
 
         var nodes = _.sortBy(this.props.nodes.slice(0), 'column');
+        var nodesByColumnPairs = _.pairs(_.groupBy(nodes, 'column'));
+
+        // Sort nodes within columns.
+        if (typeof this.props.nodesInColumnSortFxn === 'function'){
+            nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
+                return [
+                    columnGroup[0],
+                    _.map(columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn), function(n, i){
+                        n.indexInColumn = i;
+                        return n;
+                    })
+                ];
+            });
+        }
+
+        // Run post-sort fxn, e.g. to manually re-arrange nodes.
+        if (typeof this.props.nodesInColumnPostSortFxn === 'function'){
+            nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
+                return [columnGroup[0], this.props.nodesInColumnPostSortFxn(columnGroup[1], columnGroup[0])];
+            });
+        }
+
 
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
-        _.pairs(_.groupBy(nodes, 'column')).forEach((columnGroup) => {
-            var countInCol = columnGroup[1].length;
-            
-            // Sort
+        nodesByColumnPairs.forEach((columnGroup) => {
 
-            var nodesInColumn = columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn);
+            var nodesInColumn = columnGroup[1];
+            var countInCol = nodesInColumn.length;
+            
             /*
             var nodesInColumn = _.sortBy(columnGroup[1], function(n){
                 if (n.type === 'input') return n && n.inputOf && n.inputOf.name;
@@ -318,7 +374,6 @@ export default class Graph extends React.Component {
                     d3.range(countInCol).forEach((i) => {
                         nodesInColumn[i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
                         nodesInColumn[i].nodesInColumn = countInCol;
-                        nodesInColumn[i].indexInColumn = i;
                     });
                 }
             } else if (this.props.rowSpacingType === 'stacked') {
@@ -326,7 +381,6 @@ export default class Graph extends React.Component {
                     if (!nodeInCol) return;
                     nodeInCol.y = (this.props.rowSpacing * idx) + (this.props.innerMargin.top + verticalMargin);//num + (this.props.innerMargin.top + verticalMargin);
                     nodeInCol.nodesInColumn = countInCol;
-                    nodeInCol.indexInColumn = idx;
                 });
 
             } else if (this.props.rowSpacingType === 'wide') {
@@ -337,7 +391,6 @@ export default class Graph extends React.Component {
                         if (!nodeInCol) return;
                         nodeInCol.y = num + (this.props.innerMargin.top + verticalMargin);
                         nodeInCol.nodesInColumn = countInCol;
-                        nodeInCol.indexInColumn = idx;
                     });
                 }
             } else {

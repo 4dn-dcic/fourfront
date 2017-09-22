@@ -16,6 +16,7 @@ import ReactTooltip from 'react-tooltip';
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
 //import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
 //import { MORE_PARTIALLY_RELEASED_PROCESSED_FILES } from './../testdata/traced_workflow_runs/replicate-4DNESLLTENG9';
+//import { HISTORY } from './../testdata/traced_workflow_runs/file_processed-4DN';
 
 
 export function allFilesForWorkflowRunsMappedByUUID(items){
@@ -105,7 +106,7 @@ export class WorkflowRunTracingView extends ItemBaseView {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
-        //var steps = MORE_PARTIALLY_RELEASED_PROCESSED_FILES;
+        //var steps = HISTORY;
         var steps = null;
         this.state = {
             'mounted' : false,
