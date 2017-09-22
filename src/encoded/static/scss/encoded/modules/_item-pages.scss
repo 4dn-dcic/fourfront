@@ -1021,15 +1021,14 @@ $download-button-width : 100px;
 		left: 0;
 		right: 0;
 		top: 0;
+		@media (min-width: $screen-md-min) {
+			top: 41px;
+			z-index: 1000;
+		}
 		bottom: 0;
 		z-index: 10000;
 		background: #fff;
 		overflow-y: auto;
-
-		> .tab-section-title {
-			padding-left: 20px;
-			padding-right: 20px;
-		}
 
 		> .graph-wrapper {
 			//position: absolute;
@@ -1042,8 +1041,22 @@ $download-button-width : 100px;
 			//overflow-y: auto;
 		}
 
-		.scroll-container-wrapper {
-
+		> .tab-section-title,
+		> .graph-wrapper .detail-pane {
+			margin: 0 auto;
+			padding-left: 20px;
+			padding-right: 20px;
+			@media (min-width: $screen-sm-min) {
+				max-width: $container-sm;
+			}
+			@media (min-width: $screen-md-min) {
+				max-width: $container-md;
+				padding-left: 0;
+				padding-right: 0;
+			}
+			@media (min-width: $screen-lg-min) {
+				max-width: $container-lg;
+			}
 		}
 	}
 }

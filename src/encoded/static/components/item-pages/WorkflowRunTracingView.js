@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas } from './../util';
+import { console, object, expFxn, ajax, Schemas, layout } from './../util';
 import { WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
@@ -292,6 +292,12 @@ export class FileViewGraphSection extends React.Component {
             'fullscreenViewEnabled' : false
         };
     }
+
+    componentWillUnmount(){
+        if (this.state.fullscreenViewEnabled){
+            layout.toggleBodyClass('is-full-screen', false);
+        }
+    }
     /*
     componentWillReceiveProps(nextProps){
         if (nextProps.allRuns !== this.props.allRuns){
@@ -360,18 +366,7 @@ export class FileViewGraphSection extends React.Component {
     onToggleFullScreenView(){
         requestAnimationFrame(()=>{
             var willBeFullscreen = !this.state.fullscreenViewEnabled;
-            var bodyElement = (window && document && document.body) || null;
-
-            if (bodyElement){
-                if (willBeFullscreen){
-                    bodyElement.className += ' is-full-screen';
-                    //bodyElement.style.overflow = 'hidden';
-                } else {
-                    //bodyElement.style.overflow = '';
-                    bodyElement.className = bodyElement.className.replace(' is-full-screen', '');
-                }
-            }
-
+            layout.toggleBodyClass('is-full-screen', willBeFullscreen);
             this.setState({ 'fullscreenViewEnabled' : willBeFullscreen }, ()=>{
                 ReactTooltip.rebuild();
             });
@@ -391,7 +386,7 @@ export class FileViewGraphSection extends React.Component {
                     <span>Graph</span>
                     <TracedGraphSectionControls
                         {...this.state}
-                        {..._.pick(this.props, 'allRuns', 'toggleAllRuns', 'loading')}
+                        {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'loading')}
                         onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles} onSetRowSpacingType={this.onSetRowSpacingType}
                         onToggleFullScreenView={this.onToggleFullScreenView}
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled}
