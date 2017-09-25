@@ -187,7 +187,7 @@ export class TracedGraphSectionControls extends React.Component {
                         <Checkbox checked={showIndirectFiles} onChange={onToggleIndirectFiles}>
                             Show More Context
                         </Checkbox>
-                </div>
+                    </div>
                 : null }
 
                 { typeof showParameters === 'boolean' && typeof onToggleParameters === 'function' ? // Currently not used.

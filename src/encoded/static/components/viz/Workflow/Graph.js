@@ -147,7 +147,7 @@ export default class Graph extends React.Component {
                 if ((n1OutputOf && n1OutputOf.name && n2OutputOf && n2OutputOf.name)){
                     if (n1OutputOf.name === n2OutputOf.name){
                         if (n1OutputOf.id === n2OutputOf.id){
-                            
+
                             if (typeof n1.inputOf !== 'undefined' && typeof n2.inputOf === 'undefined'){
                                 return -3;
                             } else if (typeof n1.inputOf === 'undefined' && typeof n2.inputOf !== 'undefined'){
