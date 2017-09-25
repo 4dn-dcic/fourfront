@@ -8,6 +8,7 @@ $navbar-transition-easing: ease-out;
 #top-nav {
     background: #ffffff;
     margin-bottom: 0;
+    transform: translate3d(0,0,0);
 
     > nav.navbar-main {
         /* React-Bootstrap Navbar itself */
@@ -18,8 +19,6 @@ $navbar-transition-easing: ease-out;
         box-sizing: content-box; /* Exclude bottom border from min-height */
         min-height: $navbar-full-height; /* Mobile default */
         line-height: $navbar-full-height;
-        //box-shadow: 0 0 3px rgba(0,0,0,0);
-        transform: translate3d(0,0,0);
         position: relative;
 
         @media screen and (min-width: $navbar-fixed-breakpoint){
