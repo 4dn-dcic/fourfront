@@ -649,21 +649,6 @@
                 }
             ]
         },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         "planned-submissions" : {
             "title" : "Planned Data Submission",
             "effective_principals" : ["system.Authenticated"]
