@@ -167,7 +167,7 @@ export class WorkflowRunTracingView extends ItemBaseView {
 
 export class TracedGraphSectionControls extends React.Component {
     render(){
-        var { 
+        var {
             showReferenceFiles, onToggleReferenceFiles, showIndirectFiles, onToggleIndirectFiles, showParameters, onToggleParameters,
             allRuns, onToggleAllRuns, loading, isAllRunsCheckboxDisabled, rowSpacingType, onSetRowSpacingType, fullscreenViewEnabled, onToggleFullScreenView
         } = this.props;
@@ -175,49 +175,49 @@ export class TracedGraphSectionControls extends React.Component {
             <div className="workflow-view-controls-container">
                 
                 { typeof showReferenceFiles === 'boolean' && typeof onToggleReferenceFiles === 'function' ?
-                <div className="inline-block show-params-checkbox-container">
-                    <Checkbox checked={showReferenceFiles} onChange={onToggleReferenceFiles}>
-                        Show Reference Files
-                    </Checkbox>
-                </div>
+                    <div className="inline-block show-params-checkbox-container">
+                        <Checkbox checked={showReferenceFiles} onChange={onToggleReferenceFiles}>
+                            Show Reference Files
+                        </Checkbox>
+                    </div>
                 : null }
 
                 { typeof showIndirectFiles === 'boolean' && typeof onToggleIndirectFiles === 'function' ?
-                <div className="inline-block show-params-checkbox-container">
-                    <Checkbox checked={showIndirectFiles} onChange={onToggleIndirectFiles}>
-                        Show More Context
-                    </Checkbox>
+                    <div className="inline-block show-params-checkbox-container">
+                        <Checkbox checked={showIndirectFiles} onChange={onToggleIndirectFiles}>
+                            Show More Context
+                        </Checkbox>
                 </div>
                 : null }
 
                 { typeof showParameters === 'boolean' && typeof onToggleParameters === 'function' ? // Currently not used.
-                <div className="inline-block show-params-checkbox-container">
-                    <Checkbox checked={showParameters} onChange={onToggleParameters}>
-                        Show Parameters
-                    </Checkbox>
-                </div>
+                    <div className="inline-block show-params-checkbox-container">
+                        <Checkbox checked={showParameters} onChange={onToggleParameters}>
+                            Show Parameters
+                        </Checkbox>
+                    </div>
                 : null }
                 
-                { typeof allRuns === 'boolean' ? 
-                <div className="inline-block show-params-checkbox-container">
-                    <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns} disabled={isAllRunsCheckboxDisabled}>
-                    { loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
-                    </Checkbox>
-                </div>
+                { typeof allRuns === 'boolean' ?
+                    <div className="inline-block show-params-checkbox-container">
+                        <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns} disabled={isAllRunsCheckboxDisabled}>
+                        { loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
+                        </Checkbox>
+                    </div>
                 : null }
 
                 { typeof rowSpacingType === 'string' && typeof onSetRowSpacingType === 'function' ?
-                <div className="inline-block">
-                    <RowSpacingTypeDropdown currentKey={rowSpacingType} onSelect={onSetRowSpacingType}/>
-                </div>
+                    <div className="inline-block">
+                        <RowSpacingTypeDropdown currentKey={rowSpacingType} onSelect={onSetRowSpacingType}/>
+                    </div>
                 : null }
                 {' '}
                 { typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function' ?
-                <div className="inline-block">
-                    <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
-                        <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
-                    </Button>
-                </div>
+                    <div className="inline-block">
+                        <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
+                            <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
+                        </Button>
+                    </div>
                 : null }
 
             </div>

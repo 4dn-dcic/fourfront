@@ -24,13 +24,13 @@ workflow_analysis_steps_schema = {
     "title": "Workflow Analysis Steps",
     "type": "array",
     "items": {
-        "title": "Analysis Step",
+        "title": "Step",
         "type": "object",
         "additionalProperties": True,
         "properties": {
             "uuid": {
                 "title": "UUID",
-                "description": "Unique Identifier for AnalysisStep",
+                "description": "Unique Identifier for AnalysisStep, Workflow, or WorkflowRun (or whatever random Item, technically)",
                 "type": "string"
             },
             "inputs" : {

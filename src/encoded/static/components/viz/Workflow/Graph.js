@@ -100,8 +100,17 @@ export default class Graph extends React.Component {
             return false;
         },
         'nodeClassName' : function(node){ return ''; },
+        'nodesPreSortFxn' : function(nodes){
+            // For any 'global input files', put them in first column (index 0).
+            _.forEach(nodes, function(node){
+                if (node.type === 'input' && node.format === 'Workflow Input File' && !node.outputOf && node.column !== 0){
+                    node.column = 0;
+                }
+            });
+            return nodes;
+        },
         'nodesInColumnSortFxn' : function(node1, node2){
-            
+
             function isNodeFileReference(n){
                 return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
             }
@@ -110,7 +119,7 @@ export default class Graph extends React.Component {
                 var n1InputOf = n1.type === 'step' ? n1.outputNodes : n1.inputOf;
                 var n2InputOf = n2.type === 'step' ? n2.outputNodes : n2.inputOf;
                 if (Array.isArray(n1InputOf) && Array.isArray(n2InputOf) && (n1InputOf[0] && n1InputOf[0].name && n2InputOf[0] && n2InputOf[0].name)){
-                    
+
                     if (n1InputOf[0].name === n2InputOf[0].name){
                         if (n1InputOf[0].id === n2InputOf[0].id){
                             if (n1.name === n2.name){
@@ -201,21 +210,7 @@ export default class Graph extends React.Component {
             if (node1.type === node2.type){
 
                 if (node1.type === 'output'){
-                    /*
-                    if (typeof node1.inputOf !== 'undefined' && typeof node2.inputOf === 'undefined'){
-                        return -3;
-                    } else if (typeof node1.inputOf === 'undefined' && typeof node2.inputOf !== 'undefined'){
-                        return 3;
-                    }
-                    */
-                    
-                    //ioResult = compareNodeInputOf(node1, node2);
-                    //if (ioResult !== 0) return ioResult;
                     ioResult = compareNodeOutputOf(node1, node2);
-                    //if (ioResult !== 0) return ioResult;
-                    //return compareNodeInputOf(node1, node2);
-                    //ioResult = compareNodeInputOf(node1, node2);
-                    //if (ioResult !== 0) return ioResult;
                     return ioResult;
                 }
 
@@ -234,16 +229,10 @@ export default class Graph extends React.Component {
                         return -1;
                     }
 
-                    //ioResult = compareNodeInputOf(node1, node2);
-                    //if (ioResult !== 0) return ioResult;
                     ioResult = compareNodeInputOf(node1, node2);
                     if (ioResult !== 0) return ioResult;
                 }
             }
-
-            //if ((node1.type === 'input' || node1.type === 'output') && (node2.type === 'input' || node2.type === 'output') ){
-            //    return node1.name < node2.name;
-            //}
         },
         'nodesInColumnPostSortFxn' : function(nodesInColumn, columnNumber){
             var groupNodes = _.filter(nodesInColumn, { 'type' : 'input-group' });
@@ -322,7 +311,19 @@ export default class Graph extends React.Component {
 
         if (!contentHeight) contentHeight = this.height();
 
-        var nodes = _.sortBy(this.props.nodes.slice(0), 'column');
+        var nodes = this.props.nodes.slice(0);
+
+        /****** Step 1: ***** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******
+         ****** Run optional post/pre-process functions to re-sort or arrange nodes in/within columns.
+         ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******/
+
+        // Run pre-sort fxn, e.g. to manually pre-arrange nodes into different columns.
+        if (typeof this.props.nodesPreSortFxn === 'function'){
+            nodes = this.props.nodesPreSortFxn(nodes);
+        }
+
+        // Arrange into lists of columns
+        nodes = _.sortBy(nodes, 'column');
         var nodesByColumnPairs = _.pairs(_.groupBy(nodes, 'column'));
 
         // Sort nodes within columns.
@@ -338,7 +339,7 @@ export default class Graph extends React.Component {
             });
         }
 
-        // Run post-sort fxn, e.g. to manually re-arrange nodes.
+        // Run post-sort fxn, e.g. to manually re-arrange nodes within columns.
         if (typeof this.props.nodesInColumnPostSortFxn === 'function'){
             nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
                 return [columnGroup[0], this.props.nodesInColumnPostSortFxn(columnGroup[1], columnGroup[0])];
@@ -346,20 +347,15 @@ export default class Graph extends React.Component {
         }
 
 
+        /****** Step 2: ***** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******
+         ****** Convert column placement and position within columns, along with other chart dimension settings, into X & Y coordinates.
+         ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******/
+
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
         nodesByColumnPairs.forEach((columnGroup) => {
 
             var nodesInColumn = columnGroup[1];
             var countInCol = nodesInColumn.length;
-            
-            /*
-            var nodesInColumn = _.sortBy(columnGroup[1], function(n){
-                if (n.type === 'input') return n && n.inputOf && n.inputOf.name;
-                if (n.type === 'output') return n && n.outputOf && n.outputOf.name;
-                if (n.type === 'step') return n.name;
-                return null;
-            });
-            */
 
             var centerNode = function(n){
                 n.y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
