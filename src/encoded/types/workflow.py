@@ -822,7 +822,9 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded_list = ['workflow.*',
+    embedded_list = [
+                'workflow.*',
+                'workflow.workflow_steps.step.software_used',
                 #'analysis_steps.*',
                 #'analysis_steps.software_used.*',
                 #'analysis_steps.outputs.*',
