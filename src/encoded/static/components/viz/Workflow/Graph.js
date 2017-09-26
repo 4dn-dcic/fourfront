@@ -102,6 +102,7 @@ export default class Graph extends React.Component {
         'nodeClassName' : function(node){ return ''; },
         'nodesPreSortFxn' : function(nodes){
             // For any 'global input files', put them in first column (index 0).
+            // MODIFIES IN-PLACE! Because it's a fine & performant side-effect if column assignment changes in-place. We may change this later.
             _.forEach(nodes, function(node){
                 if (node.type === 'input' && node.format === 'Workflow Input File' && !node.outputOf && node.column !== 0){
                     node.column = 0;
@@ -289,8 +290,13 @@ export default class Graph extends React.Component {
     }
 
     height() {
+        var nodes = this.props.nodes;
+        // Run pre-sort fxn, e.g. to manually pre-arrange nodes into different columns.
+        if (typeof this.props.nodesPreSortFxn === 'function'){
+            nodes = this.props.nodesPreSortFxn(nodes.slice(0));
+        }
         return Math.max(
-            _(this.props.nodes).chain()
+            _(nodes).chain()
             .groupBy('column')
             .pairs()
             .reduce(function(maxCount, nodeSet){
@@ -307,20 +313,15 @@ export default class Graph extends React.Component {
         }, 0) + 1) * (this.props.columnWidth + this.props.columnSpacing) + this.props.innerMargin.left + this.props.innerMargin.right - this.props.columnSpacing;
     }
 
-    nodesWithCoordinates(viewportWidth = null, contentWidth = null, contentHeight = null, verticalMargin = 0){
+    nodesWithCoordinates(nodes = null, viewportWidth = null, contentWidth = null, contentHeight = null, verticalMargin = 0){
 
         if (!contentHeight) contentHeight = this.height();
 
-        var nodes = this.props.nodes.slice(0);
+        if (!nodes) nodes = this.props.nodes.slice(0);
 
         /****** Step 1: ***** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******
          ****** Run optional post/pre-process functions to re-sort or arrange nodes in/within columns.
          ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******/
-
-        // Run pre-sort fxn, e.g. to manually pre-arrange nodes into different columns.
-        if (typeof this.props.nodesPreSortFxn === 'function'){
-            nodes = this.props.nodesPreSortFxn(nodes);
-        }
 
         // Arrange into lists of columns
         nodes = _.sortBy(nodes, 'column');
@@ -431,11 +432,18 @@ export default class Graph extends React.Component {
             height + this.props.innerMargin.top + this.props.innerMargin.bottom
         );
 
-        var nodes = this.nodesWithCoordinates(
+        var nodes = this.props.nodes.slice(0);
+
+        // Run pre-sort fxn, if any, to manually pre-arrange nodes into different columns.
+        if (typeof this.props.nodesPreSortFxn === 'function') nodes = this.props.nodesPreSortFxn(nodes);
+
+        nodes = this.nodesWithCoordinates(
+            nodes,
             width,
             contentWidth,
             height
         );
+
         var edges = this.props.edges;
 
         return (
