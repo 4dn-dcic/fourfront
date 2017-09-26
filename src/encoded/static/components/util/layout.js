@@ -236,6 +236,29 @@ export function verticalCenterOffset(innerElem, extraHeight = 0, outerElem = nul
     return ((outerElem.offsetHeight + extraHeight) - innerElem.offsetHeight) / 2;
 }
 
+/**
+ * Grabs the outer-most scrolling container for the page, either <body> or <html>.
+ * Needed because the outer-most scrolling container differs between Google Chrome (which use `document.body`, aka <body>)
+ * and Mozilla Firefox & MS Edge (which use `document.documentElement`, aka <html>).
+ * 
+ * @returns {HTMLElement}
+ */
+export function getScrollingOuterElement(){
+    if (!window || !document) return null;
+
+    // Best. Chrome will return document.body automatically here.
+    if (typeof document.scrollingElement !== 'undefined' && document.scrollingElement){
+        return document.scrollingElement;
+    }
+    if (document.documentElement && typeof document.documentElement.scrollTop === 'number'){
+        return document.documentElement;
+    }
+    if (document.body && typeof document.body.scrollTop === 'number'){
+        return document.body;
+    }
+    return document.body;
+}
+
 
 /**
  * 
@@ -246,6 +269,7 @@ export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 72, cal
 
     if (!document || !document.body) return null;
 
+    var scrollElement = getScrollingOuterElement();
     var elementTop;
 
     if (typeof to === 'string'){
@@ -261,19 +285,19 @@ export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 72, cal
     if (elementTop === null) return null;
 
     elementTop = Math.max(0, elementTop - offsetBeforeTarget); // - offset re: nav bar header.
-    if (document && document.body && document.body.scrollHeight && window && window.innerHeight){
+    if (scrollElement && scrollElement.scrollHeight && window && window.innerHeight){
         // Try to prevent from trying to scroll past max scrollable height.
-        elementTop = Math.min(document.body.scrollHeight - window.innerHeight, elementTop);
+        elementTop = Math.min(scrollElement.scrollHeight - window.innerHeight, elementTop);
     }
 
     function scrollTopTween(scrollTop){
         return function(){
             var interpolate = d3.interpolateNumber(this.scrollTop, scrollTop);
-            return function(t){ document.body.scrollTop = interpolate(t); };
+            return function(t){ scrollElement.scrollTop = interpolate(t); };
         };
     }
-    var origScrollTop = document.body.scrollTop;
-    var animation = d3.select(document.body)
+    var origScrollTop = scrollElement.scrollTop;
+    var animation = d3.select(scrollElement)
         .interrupt()
         .transition()
         .duration(duration)
