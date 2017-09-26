@@ -252,6 +252,117 @@
                     }
                 }
             }
+        },
+
+        "steps" : {
+            "title": "Workflow Steps",
+            "type": "array",
+            "items": {
+                "title": "Step",
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                    "uuid": {
+                        "title": "UUID",
+                        "description": "Unique Identifier for AnalysisStep, Workflow, or WorkflowRun (or whatever random Item, technically). If not set, 'name' will be used as unique ID of Node instead.",
+                        "type": "string"
+                    },
+                    "inputs" : {
+                        "title" : "Step Inputs",
+                        "type" : "array",
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "name" : {
+                                    "title" : "Input Name",
+                                    "type" : "string"
+                                },
+                                "meta" : {
+                                    "type" : "object",
+                                    "title" : "Additional metadata for input argument",
+                                    "description" : "Additional info that might be relavent to the input argument itself, such as argument_cardinality."
+                                },
+                                "source" : {
+                                    "title" : "Source Step",
+                                    "description" : "Where this input file came from.",
+                                    "type" : "array",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "name" : { "type" : "string" },
+                                            "type" : { "type" : "string" },
+                                            "step" : { "type" : "string" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "outputs" : {
+                        "title" : "Step Outputs",
+                        "type" : "array",
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "name" : {
+                                    "title" : "Output Name",
+                                    "type" : "string"
+                                },
+                                "meta" : {
+                                    "type" : "object",
+                                    "title" : "Additional metadata for output argument",
+                                    "description" : "Additional info that might be relavent to the output argument itself, such as argument_cardinality."
+                                },
+                                "target" : {
+                                    "title" : "Target Step",
+                                    "description" : "Where this output file should go next.",
+                                    "type" : "array",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "name" : { "type" : "string" },
+                                            "type" : { "type" : "string" },
+                                            "step" : { "type" : "string" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "name" : {
+                        "title" : "Step Name",
+                        "type" : "string"
+                    },
+                    "analysis_step_types" : {
+                        "title" : "Step Purposes",
+                        "description": "This is sometimes shown above the Node in Workflow graphs.",
+                        "type" : "array",
+                        "items" : {
+                            "type" : "string"
+                        }
+                    },
+                    "meta" : {
+                        "type" : "object",
+                        "title" : "Step Metadata",
+                        "description" : "Various properties which might be a subset of the Item represented by this step, e.g. uuid, @type, workflow, etc.",
+                        "additionalProperties" : true,
+                        "properties" : {
+                            "software_used": {
+                                "title": "Software Used",
+                                "description": "Reference to Software Used",
+                                "type": "string",
+                                "linkTo" : "Software"
+                            },
+                            "@id" : {
+                                "title" : "Unique identifier of Item in database represented by this step node. Either an AnalysisStep or a WorkflowRun.",
+                                "type" : "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
+
+
     }
 }

@@ -7,261 +7,455 @@
     "lab": "4dn-dcic-lab",
     "arguments": [
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_fastq2bam",
-                    "step_argument_name": "input_fastq2",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "workflow_argument_name": "input_fastq2",
             "argument_type": "Input file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_fastq2bam",
-                    "step_argument_name": "input_fastq1",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "workflow_argument_name": "input_fastq1",
             "argument_type": "Input file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_fastq2bam",
-                    "step_argument_name": "bowtie_index",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "workflow_argument_name": "bowtie_index",
             "argument_type": "Input file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "RE_bed",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "workflow_argument_name": "RE_bed",
             "argument_type": "Input file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "chrlen_file",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "workflow_argument_name": "chrlen_file",
             "argument_type": "Input file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "contact_matrix_binsize",
-                    "step_argument_type": "parameter"
-                }
-            ],
             "workflow_argument_name": "contact_matrix_binsize",
             "argument_type": "parameter"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "chromosome",
-                    "step_argument_type": "parameter"
-                }
-            ],
             "workflow_argument_name": "chromosome",
             "argument_type": "parameter"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_fastq2bam",
-                    "step_argument_name": "sorted_bam_pe",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "sorted_bam_pe",
             "argument_type": "Output processed file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "HiC_project_object_hdf5",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "HiC_project_object_hdf5",
             "argument_type": "Output processed file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "HiC_distance_function_hdf5",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "HiC_distance_function_hdf5",
             "argument_type": "Output processed file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "normalized_fend_contact_matrix",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "normalized_fend_contact_matrix",
             "argument_type": "Output processed file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "normalized_enrich_contact_matrix",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "normalized_enrich_contact_matrix",
             "argument_type": "Output processed file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "expected_enrich_contact_matrix",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "expected_enrich_contact_matrix",
             "argument_type": "Output processed file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "observed_contact_matrix",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "observed_contact_matrix",
             "argument_type": "Output processed file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "expected_fend_contact_matrix",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "expected_fend_contact_matrix",
             "argument_type": "Output processed file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "input_bam2",
-                    "step_argument_type": "Input file"
-                },
-                {
-                    "workflow_step": "hictool_fastq2bam",
-                    "step_argument_name": "split_bam2",
-                    "step_argument_type": "Output file"
-                }
-            ],
-            "workflow_argument_name": "split_bam2"
-        },
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "input_bam1",
-                    "step_argument_type": "Input file"
-                },
-                {
-                    "workflow_step": "hictool_fastq2bam",
-                    "step_argument_name": "split_bam1",
-                    "step_argument_type": "Output file"
-                }
-            ],
-            "workflow_argument_name": "split_bam1"
-        },
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "fend_object_hdf5",
-                    "step_argument_type": "Input file"
-                },
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "fend_object_hdf5",
-                    "step_argument_type": "Output file"
-                }
-            ],
-            "workflow_argument_name": "fend_object_hdf5"
-        },
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "HiC_norm_binning_hdf5",
-                    "step_argument_type": "Input file"
-                },
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "HiC_norm_binning_hdf5",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "HiC_norm_binning_hdf5",
             "argument_type": "Output processed file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "hictool_hdf52matrix",
-                    "step_argument_name": "HiC_data_object_hdf5",
-                    "step_argument_type": "Input file"
-                },
-                {
-                    "workflow_step": "hictool_bam2hdf5",
-                    "step_argument_name": "HiC_data_object_hdf5",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "HiC_data_object_hdf5",
             "argument_type": "Output processed file"
         }
     ],
     "name": "gitar",
-    "workflow_steps": [
+    "steps" : [
         {
-            "step": "d3b03a23-49e5-4c33-afab-9ec90d65faf3",
-            "step_name": "hictool_fastq2bam"
+            "uuid":"d3b03a23-49e5-4c33-afab-9ec90d65faf3",
+            "name":"hictool_fastq2bam",
+            "analysis_step_types":[
+                "alignment"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "description":"Alignment according to the GITAR pipeline",
+                "software_used":"/software/7868f960-50ac-11e4-916c-0800200c9a66/",
+                "@id":"/analysis-steps/d3b03a23-49e5-4c33-afab-9ec90d65faf3/"
+            },
+            "inputs":[
+                {
+                    "name":"input_fastq2",
+                    "source":[
+                        {
+                            "name":"input_fastq2",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"input_fastq1",
+                    "source":[
+                        {
+                            "name":"input_fastq1",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"bowtie_index",
+                    "source":[
+                        {
+                            "name":"bowtie_index",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"sorted_bam_pe",
+                    "target":[
+                        {
+                            "name":"sorted_bam_pe",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"split_bam2",
+                    "target":[
+                        {
+                            "name":"input_bam2",
+                            "step":"hictool_bam2hdf5",
+                            "type":"Input file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"split_bam1",
+                    "target":[
+                        {
+                            "name":"input_bam1",
+                            "step":"hictool_bam2hdf5",
+                            "type":"Input file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                }
+            ]
         },
         {
-            "step": "80c7771e-49e5-4c33-afab-9ec90d65faf3",
-            "step_name": "hictool_bam2hdf5"
+            "uuid":"80c7771e-49e5-4c33-afab-9ec90d65faf3",
+            "name":"hictool_bam2hdf5",
+            "analysis_step_types":[
+                "file format conversion"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "description":"Converting bam to hdf5 according to the GITAR pipeline",
+                "software_used":"/software/7868f960-50ac-11e4-916c-0800200c9a66/",
+                "@id":"/analysis-steps/80c7771e-49e5-4c33-afab-9ec90d65faf3/"
+            },
+            "inputs":[
+                {
+                    "name":"RE_bed",
+                    "source":[
+                        {
+                            "name":"RE_bed",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"split_bam2",
+                    "source":[
+                        {
+                            "name":"split_bam2",
+                            "step":"hictool_fastq2bam",
+                            "type":"Output file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"split_bam1",
+                    "source":[
+                        {
+                            "name":"split_bam1",
+                            "step":"hictool_fastq2bam",
+                            "type":"Output file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"HiC_project_object_hdf5",
+                    "target":[
+                        {
+                            "name":"HiC_project_object_hdf5",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"HiC_distance_function_hdf5",
+                    "target":[
+                        {
+                            "name":"HiC_distance_function_hdf5",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"fend_object_hdf5",
+                    "target":[
+                        {
+                            "name":"fend_object_hdf5",
+                            "step":"hictool_hdf52matrix",
+                            "type":"Input file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"HiC_norm_binning_hdf5",
+                    "target":[
+                        {
+                            "name":"HiC_norm_binning_hdf5",
+                            "step":"hictool_hdf52matrix",
+                            "type":"Input file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"HiC_data_object_hdf5",
+                    "target":[
+                        {
+                            "name":"HiC_data_object_hdf5",
+                            "step":"hictool_hdf52matrix",
+                            "type":"Input file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ]
         },
         {
-            "step": "a937f407-49e5-4c33-afab-9ec90d65faf3",
-            "step_name": "hictool_hdf52matrix"
+            "uuid":"a937f407-49e5-4c33-afab-9ec90d65faf3",
+            "name":"hictool_hdf52matrix",
+            "analysis_step_types":[
+                "normalization"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "description":"Contact (unnormalized and normalized) matrix creation according to the GITAR pipeline",
+                "software_used":"/software/7868f960-50ac-11e4-916c-0800200c9a66/",
+                "@id":"/analysis-steps/a937f407-49e5-4c33-afab-9ec90d65faf3/"
+            },
+            "inputs":[
+                {
+                    "name":"chrlen_file",
+                    "source":[
+                        {
+                            "name":"chrlen_file",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"contact_matrix_binsize",
+                    "source":[
+                        {
+                            "name":"contact_matrix_binsize",
+                            "type":"Workflow Parameter"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"parameter",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"chromosome",
+                    "source":[
+                        {
+                            "name":"chromosome",
+                            "type":"Workflow Parameter"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"parameter",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"fend_object_hdf5",
+                    "source":[
+                        {
+                            "name":"fend_object_hdf5",
+                            "step":"hictool_bam2hdf5",
+                            "type":"Output file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"HiC_norm_binning_hdf5",
+                    "source":[
+                        {
+                            "name":"HiC_norm_binning_hdf5",
+                            "step":"hictool_bam2hdf5",
+                            "type":"Output file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"HiC_data_object_hdf5",
+                    "source":[
+                        {
+                            "name":"HiC_data_object_hdf5",
+                            "step":"hictool_bam2hdf5",
+                            "type":"Output file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"normalized_fend_contact_matrix",
+                    "target":[
+                        {
+                            "name":"normalized_fend_contact_matrix",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"normalized_enrich_contact_matrix",
+                    "target":[
+                        {
+                            "name":"normalized_enrich_contact_matrix",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"expected_enrich_contact_matrix",
+                    "target":[
+                        {
+                            "name":"expected_enrich_contact_matrix",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"observed_contact_matrix",
+                    "target":[
+                        {
+                            "name":"observed_contact_matrix",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"expected_fend_contact_matrix",
+                    "target":[
+                        {
+                            "name":"expected_fend_contact_matrix",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ]
         }
     ],
     "data_types": ["Hi-C"],
@@ -284,58 +478,23 @@
     "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
     "arguments": [
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC",
-                    "step_argument_name": "limits_file",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "workflow_argument_name": "limits_file",
             "argument_type": "Input file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC",
-                    "step_argument_name": "input_fastq",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "workflow_argument_name": "input_fastq",
             "argument_format": "fastq",
             "argument_type": "Input file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC",
-                    "step_argument_name": "contaminants_file",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "workflow_argument_name": "contaminants_file",
             "argument_type": "Input file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC",
-                    "step_argument_name": "adapters_file",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "workflow_argument_name": "adapters_file",
             "argument_type": "Input file"
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC",
-                    "step_argument_name": "report_zip",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "workflow_argument_name": "report_zip",
             "argument_type": "Output QC file"
         }
@@ -346,10 +505,89 @@
     "description": "FastQC quality control step for fastq files",
     "data_types": ["Hi-C","Capture Hi-C", "Repli-seq"],
     "category": "QC",
-    "workflow_steps": [
+    "steps": [
         {
-            "step": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3",
-            "step_name": "FastQC"
+            "uuid":"f7b8cd87-49e5-4c33-afab-9ec90d65faf3",
+            "inputs":[
+                {
+                    "name":"limits_file",
+                    "source":[
+                        {
+                            "name":"limits_file",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"input_fastq",
+                    "source":[
+                        {
+                            "name":"input_fastq",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_format":"fastq",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"contaminants_file",
+                    "source":[
+                        {
+                            "name":"contaminants_file",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"adapters_file",
+                    "source":[
+                        {
+                            "name":"adapters_file",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"report_zip",
+                    "target":[
+                        {
+                            "name":"report_zip",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output QC file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"FastQC",
+            "analysis_step_types":[
+                "QC calculation"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "description":"FastQC QC for fastq files",
+                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a13131/",
+                "@id":"/analysis-steps/f7b8cd87-49e5-4c33-afab-9ec90d65faf3/"
+            }
         }
     ]
 },
@@ -369,32 +607,58 @@
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [
-                {
-                    "workflow_step": "validatefiles",
-                    "step_argument_name": "input_file",
-                    "step_argument_type": "Input file"
-                }
-            ],
-            "description": ""
+            "description": "The file(s) input into this Workflow."
         },
         {
             "workflow_argument_name": "report",
             "argument_type": "Output report file",
-            "argument_mapping": [
-                {
-                    "workflow_step": "validatefiles",
-                    "step_argument_name": "report",
-                    "step_argument_type": "Output file"
-                }
-            ],
-            "description": ""
+            "description": "The file(s) output of this Workflow."
         }
     ],
-    "workflow_steps": [
+    "steps" : [
         {
-            "step_name":"validatefiles",
-            "step":"0786554a-49e5-4c33-afab-9ec90d658888"
+            "uuid":"0786554a-49e5-4c33-afab-9ec90d658888",
+            "inputs":[
+                {
+                    "name":"input_file",
+                    "source":[
+                        {
+                            "name":"input_file",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"The file(s) input into this Workflow.",
+                        "argument_type":"Input file",
+                        "argument_format":"fastq",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"report",
+                    "target":[
+                        {
+                            "name":"report",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"The file(s) output of this Workflow.",
+                        "argument_type":"Output report file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"validatefiles",
+            "analysis_step_types":[
+                "QC calculation"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "@id":"/analysis-steps/0786554a-49e5-4c33-afab-9ec90d658888/"
+            }
         }
     ],
     "description": "ValidateFiles quality control step for fastq files"
@@ -420,32 +684,58 @@
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "argument_mapping": [
-                {
-                    "workflow_step": "md5",
-                    "step_argument_name": "input_file",
-                    "step_argument_type": "Input file"
-                }
-            ],
             "description": "File on which MD5 calculation is run on."
         },
         {
             "workflow_argument_name": "report",
             "argument_type": "Output report file",
-            "argument_mapping": [
-                {
-                    "workflow_step": "md5",
-                    "step_argument_name": "report",
-                    "step_argument_type": "Output file"
-                }
-            ],
             "description": "The MD5 checksum generated."
         }
     ],
-    "workflow_steps": [
+    "steps": [
         {
-            "step_name":"md5",
-            "step":"0786554a-49e5-4c33-afab-9ec90d657777"
+            "uuid":"0786554a-49e5-4c33-afab-9ec90d657777",
+            "inputs":[
+                {
+                    "name":"input_file",
+                    "source":[
+                        {
+                            "name":"input_file",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"File on which MD5 calculation is run on.",
+                        "argument_type":"Input file",
+                        "argument_format":"fastq",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"report",
+                    "target":[
+                        {
+                            "name":"report",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"The MD5 checksum generated.",
+                        "argument_type":"Output report file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"md5",
+            "analysis_step_types":[
+                "QC calculation"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "@id":"/analysis-steps/0786554a-49e5-4c33-afab-9ec90d657777/"
+            }
         }
     ],
     "description": "md5 on uncompressed file"
@@ -460,18 +750,215 @@
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
-    "workflow_steps": [
+    "steps": [
         {
-            "step_name":"bwa-mem",
-            "step":"02d636b9-d82d-4da9-950c-2ca994a73514"
+            "uuid":"02d636b9-d82d-4da9-950c-2ca994a73514",
+            "inputs":[
+                {
+                    "name":"fastq1",
+                    "source":[
+                        {
+                            "name":"fastq1",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Input file",
+                        "argument_format":"fastq",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"fastq2",
+                    "source":[
+                        {
+                            "name":"fastq2",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Input file",
+                        "argument_format":"fastq",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"bwa_index",
+                    "source":[
+                        {
+                            "name":"bwa_index",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Input file",
+                        "argument_format":"bwaIndex",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"nThreads",
+                    "source":[
+                        {
+                            "name":"nThreads",
+                            "type":"Workflow Parameter"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"parameter",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"out_bam",
+                    "target":[
+                        {
+                            "name":"input_bam",
+                            "step":"sort_bam",
+                            "type":"Input file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"bwa-mem",
+            "analysis_step_types":[
+                "alignment"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a13209/",
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a73514/"
+            }
         },
         {
-            "step_name":"sort_bam",
-            "step":"02d636b9-d82d-4da9-950c-2ca994a3625a"
+            "uuid":"02d636b9-d82d-4da9-950c-2ca994a3625a",
+            "inputs":[
+                {
+                    "name":"input_bam",
+                    "source":[
+                        {
+                            "name":"out_bam",
+                            "step":"bwa-mem",
+                            "type":"Output file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"out_sorted_bam",
+                    "target":[
+                        {
+                            "name":"input_bam",
+                            "step":"bam2pairs",
+                            "type":"Input file"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"bam",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"out_sorted_bam_index",
+                    "target":[
+                        {
+                            "name":"out_sorted_bam_index",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"bai",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"sort_bam",
+            "analysis_step_types":[
+                "alignment"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a06735/",
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a3625a/"
+            }
         },
         {
-            "step_name":"bam2pairs",
-            "step":"02d636b9-d82d-4da9-950c-2ca994a1330c"
+            "uuid":"02d636b9-d82d-4da9-950c-2ca994a1330c",
+            "inputs":[
+                {
+                    "name":"out_sorted_bam",
+                    "source":[
+                        {
+                            "name":"out_sorted_bam",
+                            "step":"sort_bam",
+                            "type":"Output file"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"bam",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"out_pairs",
+                    "target":[
+                        {
+                            "name":"out_pairs",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"pairs",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"out_pairs_index",
+                    "target":[
+                        {
+                            "name":"out_pairs_index",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"pairs_px2",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"bam2pairs",
+            "analysis_step_types":[
+                "alignment"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a1330c/"
+            }
         }
     ],
     "arguments": [
@@ -479,49 +966,21 @@
             "workflow_argument_name": "fastq1",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "fastq1",
-                    "step_argument_type": "Input file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "fastq2",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "fastq2",
-                    "step_argument_type": "Input file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "bwa_index",
             "argument_type": "Input file",
             "argument_format": "bwaIndex",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "bwa_index",
-                    "step_argument_type": "Input file"
-                }
-            ]
+            "description": ""
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "nThreads",
-                    "step_argument_type": "parameter"
-                }
-            ],
             "workflow_argument_name": "nThreads",
             "argument_type": "parameter"
         },
@@ -529,72 +988,25 @@
             "workflow_argument_name": "out_sorted_bam",
             "argument_type": "Output processed file",
             "argument_format": "bam",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "sort_bam",
-                    "step_argument_name": "out_sorted_bam",
-                    "step_argument_type": "Output file"
-                },
-                {
-                    "workflow_step": "bam2pairs",
-                    "step_argument_name": "input_bam",
-                    "step_argument_type": "Input file"
-                }
-            ]
-        },
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "out_bam",
-                    "step_argument_type": "Output file"
-                },
-                {
-                    "workflow_step": "sort_bam",
-                    "step_argument_name": "input_bam",
-                    "step_argument_type": "Input file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "out_sorted_bam_index",
             "argument_type": "Output processed file",
             "argument_format": "bai",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "sort_bam",
-                    "step_argument_name": "out_sorted_bam_index",
-                    "step_argument_type": "Output file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "out_pairs",
             "argument_type": "Output processed file",
             "argument_format": "pairs",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bam2pairs",
-                    "step_argument_name": "out_pairs",
-                    "step_argument_type": "Output file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "out_pairs_index",
             "argument_type": "Output processed file",
             "argument_format": "pairs_px2",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bam2pairs",
-                    "step_argument_name": "out_pairs_index",
-                    "step_argument_type": "Output file"
-                }
-            ]
+            "description": ""
         }
     ],
     "data_types": ["Hi-C"],
@@ -611,18 +1023,215 @@
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
-    "workflow_steps": [
+    "steps": [
         {
-            "step_name":"bwa-mem",
-            "step":"02d636b9-d82d-4da9-950c-2ca994a73514"
+            "uuid":"02d636b9-d82d-4da9-950c-2ca994a73514",
+            "inputs":[
+                {
+                    "name":"fastq1",
+                    "source":[
+                        {
+                            "name":"fastq1",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Input file",
+                        "argument_format":"fastq",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"fastq2",
+                    "source":[
+                        {
+                            "name":"fastq2",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Input file",
+                        "argument_format":"fastq",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"bwa_index",
+                    "source":[
+                        {
+                            "name":"bwa_index",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Input file",
+                        "argument_format":"bwaIndex",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"nThreads",
+                    "source":[
+                        {
+                            "name":"nThreads",
+                            "type":"Workflow Parameter"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"parameter",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"out_bam",
+                    "target":[
+                        {
+                            "name":"input_bam",
+                            "step":"sort_bam",
+                            "type":"Input file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"bwa-mem",
+            "analysis_step_types":[
+                "alignment"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a13209/",
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a73514/"
+            }
         },
         {
-            "step_name":"sort_bam",
-            "step":"02d636b9-d82d-4da9-950c-2ca994a3625a"
+            "uuid":"02d636b9-d82d-4da9-950c-2ca994a3625a",
+            "inputs":[
+                {
+                    "name":"input_bam",
+                    "source":[
+                        {
+                            "name":"out_bam",
+                            "step":"bwa-mem",
+                            "type":"Output file"
+                        }
+                    ],
+                    "meta":{
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"out_sorted_bam",
+                    "target":[
+                        {
+                            "name":"input_bam",
+                            "step":"bam2pairs",
+                            "type":"Input file"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"bam",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"out_sorted_bam_index",
+                    "target":[
+                        {
+                            "name":"out_sorted_bam_index",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"bai",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"sort_bam",
+            "analysis_step_types":[
+                "alignment"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a06735/",
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a3625a/"
+            }
         },
         {
-            "step_name":"bam2pairs",
-            "step":"02d636b9-d82d-4da9-950c-2ca994a1330c"
+            "uuid":"02d636b9-d82d-4da9-950c-2ca994a1330c",
+            "inputs":[
+                {
+                    "name":"out_sorted_bam",
+                    "source":[
+                        {
+                            "name":"out_sorted_bam",
+                            "step":"sort_bam",
+                            "type":"Output file"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"bam",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"out_pairs",
+                    "target":[
+                        {
+                            "name":"out_pairs",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"pairs",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"out_pairs_index",
+                    "target":[
+                        {
+                            "name":"out_pairs_index",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "description":"",
+                        "argument_type":"Output processed file",
+                        "argument_format":"pairs_px2",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"bam2pairs",
+            "analysis_step_types":[
+                "alignment"
+            ],
+            "meta":{
+                "status":"in review by lab",
+                "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a1330c/"
+            }
         }
     ],
     "arguments": [
@@ -630,49 +1239,21 @@
             "workflow_argument_name": "fastq1",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "fastq1",
-                    "step_argument_type": "Input file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "fastq2",
             "argument_type": "Input file",
             "argument_format": "fastq",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "fastq2",
-                    "step_argument_type": "Input file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "bwa_index",
             "argument_type": "Input file",
             "argument_format": "bwaIndex",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "bwa_index",
-                    "step_argument_type": "Input file"
-                }
-            ]
+            "description": ""
         },
         {
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "nThreads",
-                    "step_argument_type": "parameter"
-                }
-            ],
             "workflow_argument_name": "nThreads",
             "argument_type": "parameter"
         },
@@ -680,72 +1261,25 @@
             "workflow_argument_name": "out_sorted_bam",
             "argument_type": "Output processed file",
             "argument_format": "bam",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "sort_bam",
-                    "step_argument_name": "out_sorted_bam",
-                    "step_argument_type": "Output file"
-                },
-                {
-                    "workflow_step": "bam2pairs",
-                    "step_argument_name": "input_bam",
-                    "step_argument_type": "Input file"
-                }
-            ]
-        },
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "bwa-mem",
-                    "step_argument_name": "out_bam",
-                    "step_argument_type": "Output file"
-                },
-                {
-                    "workflow_step": "sort_bam",
-                    "step_argument_name": "input_bam",
-                    "step_argument_type": "Input file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "out_sorted_bam_index",
             "argument_type": "Output processed file",
             "argument_format": "bai",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "sort_bam",
-                    "step_argument_name": "out_sorted_bam_index",
-                    "step_argument_type": "Output file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "out_pairs",
             "argument_type": "Output processed file",
             "argument_format": "pairs",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bam2pairs",
-                    "step_argument_name": "out_pairs",
-                    "step_argument_type": "Output file"
-                }
-            ]
+            "description": ""
         },
         {
             "workflow_argument_name": "out_pairs_index",
             "argument_type": "Output processed file",
             "argument_format": "pairs_px2",
-            "description": "",
-            "argument_mapping": [
-                {
-                    "workflow_step": "bam2pairs",
-                    "step_argument_name": "out_pairs_index",
-                    "step_argument_type": "Output file"
-                }
-            ]
+            "description": ""
         }
     ],
     "data_types": ["Hi-C"],

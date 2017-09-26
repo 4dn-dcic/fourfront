@@ -653,10 +653,11 @@ class AnalysisStepDetailBody extends React.Component {
         var workflow = (step && step.workflow) || null;
         var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false;
         //var isThereAssociatedSoftware = !!(this.props.step && this.props.step.software_used);
-        var listOfSoftwareInWorkflow = (wfr && wfr.workflow && Array.isArray(wfr.workflow.workflow_steps) &&
-            _.any(wfr.workflow.workflow_steps, function(workflowStep){ return workflowStep.step && workflowStep.step.software_used; }) &&
+        // Still need to test this .workflow_steps.step.software_used -> .steps.meta.software_used :
+        var listOfSoftwareInWorkflow = (wfr && wfr.workflow && Array.isArray(wfr.workflow.steps) &&
+            _.any(wfr.workflow.steps, function(workflowStep){ return workflowStep.meta && workflowStep.meta.software_used; }) &&
             _.filter(
-                _.map(wfr.workflow.workflow_steps, function(workflowStep){ return (workflowStep.step && workflowStep.step.software_used) || null; }),
+                _.map(wfr.workflow.steps, function(workflowStep){ return (workflowStep.meta && workflowStep.meta.software_used) || null; }),
                 function(s) { return s !== null; }
             )
         ) || null;
