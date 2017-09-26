@@ -293,7 +293,7 @@ export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 72, cal
     function scrollTopTween(scrollTop){
         return function(){
             var interpolate = d3.interpolateNumber(this.scrollTop, scrollTop);
-            return function(t){ scrollElement.scrollTop = interpolate(t); };
+            return function(t){ window.scrollTo(0, interpolate(t)); /*scrollElement.scrollTop = interpolate(t);*/ };
         };
     }
     var origScrollTop = scrollElement.scrollTop;

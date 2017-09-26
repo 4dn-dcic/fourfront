@@ -1003,7 +1003,7 @@ export class ItemDetailList extends React.Component {
                     <h3 className="tab-section-title">
                         <span>Details</span>
                     </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
+                    <hr className="tab-section-title-horiz-divider mb-05"/>
                     <ItemDetailList context={context} schemas={schemas} />
                 </div>
             )

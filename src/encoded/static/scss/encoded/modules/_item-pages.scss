@@ -963,7 +963,7 @@ $download-button-width : 100px;
 		.overview-blocks {
 			> div {
 				> .inner {
-					padding: 15px 0 10px;
+					padding: 15px 0 5px;
 					h5 {
 						margin-top: 0;
 						margin-bottom: 5px;
@@ -973,6 +973,24 @@ $download-button-width : 100px;
 						margin-bottom: 0;
 					}
 				}
+				/*
+				&.col-md-4:nth-child(n + 4){
+					> .inner {
+						@media screen and (min-width: $screen-md-min){
+							border-top: 1px solid #eee;
+							//margin-top: 4px;
+						}
+					}
+				}
+				&.col-md-3:nth-child(n + 5){
+					> .inner {
+						@media screen and (min-width: $screen-md-min){
+							border-top: 1px solid #eee;
+							//margin-top: 4px;
+						}
+					}
+				}
+				*/
 			}
 		}
 	}
