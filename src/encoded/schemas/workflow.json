@@ -20,7 +20,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "accession": {
             "accessionType": "WF"
@@ -188,66 +188,6 @@
                     "description": {
                         "title": "Description",
                         "description": "Argument Description",
-                        "type": "string"
-                    },
-                    "argument_mapping": {
-                        "title": "Mappings",
-                        "internal_comment": "same workflow argument can be passed to multiple steps",
-                        "description": "Argument mapping between workflow and steps.",
-                        "type": "array",
-                        "items": {
-                            "title" : "Mapping",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "workflow_step": {
-                                    "title": "Workflow Step",
-                                    "description": "Step of the workflow which accepts or outputs the file.",
-                                    "type": "string",
-                                    "internal_comment": "the same analysis step may appear multiple times"
-                                },
-                                "step_argument_name": {
-                                    "title": "Step's Arg. Name",
-                                    "description": "Name of the argument of the step that corresponds to the workflow argument.",
-                                    "type": "string"
-                                },
-                                "step_argument_type": {
-                                    "title": "Step's Arg. Type",
-                                    "description": "Type of the argument of the step.",
-                                    "type": "string",
-                                    "enum": [
-                                        "Input file",
-                                        "Output file",
-                                        "parameter",
-                                        "Input file or parameter",
-                                        "Output file or parameter"
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "workflow_steps": {
-            "title": "Workflow Steps",
-            "description": "The analysis steps that comprise the workflow with info on who are their parents.",
-            "type": "array",
-            "items": {
-                "description": "A step in the workflow and whose its parent are.",
-                "title": "Step Info",
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "step": {
-                        "title": "Step",
-                        "description": "A step in the workflow.",
-                        "type": "string",
-                        "linkTo": "AnalysisStep"
-                    },
-                    "step_name": {
-                        "title": "Workflow Step Name",
-                        "description": "Name of step within this workflow. Potentially overrides step's own internal name, if necessary.",
                         "type": "string"
                     }
                 }
