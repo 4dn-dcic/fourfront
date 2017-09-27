@@ -451,7 +451,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         workflow_run_model_obj = workflow_run_model.source.get('object',{})
 
         step = {
-            "uuid" : last_workflow_run_uuid, # Gets moved to stepNode.meta.uuid on front-end
             "name" : workflow_run_model_obj.get('display_title'), # Gets duplicated to stepNode.meta.name, and stepNode.name,
             "meta" : {
                 "status" : workflow_run_model_obj.get('status'),
