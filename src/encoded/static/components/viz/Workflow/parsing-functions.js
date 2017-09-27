@@ -16,7 +16,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
     /**** Functions ****/
 
-    function stepNodeID   (step) { return step.uuid || step['@id'] || step.link_id || step.name; }
+    function stepNodeID   (step) { return step.uuid || (step.meta && typeof step.meta === 'object' && step.meta['@id']) || step['@id'] || step.link_id || step.name; }
     function stepNodeName (step) { return step.display_title || step.title || step.name || step['@id']; }
     function inputNodeID  (stepInput, readOnly = true) {
         return preventDuplicateNodeID(

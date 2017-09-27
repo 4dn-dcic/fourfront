@@ -863,7 +863,7 @@ class WorkflowRun(Item):
 
     @calculated_property(schema=workflow_analysis_steps_schema,
                         category='page')
-    def analysis_steps(self, request):
+    def steps(self, request):
         '''
         Extends the 'inputs' & 'outputs' (lists of dicts) properties of calculated property 'analysis_steps' (list of dicts) from
         WorkflowRun's related Workflow with additional property 'run_data', which contains references to Files, Parameters, and Reports
