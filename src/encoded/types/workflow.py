@@ -153,13 +153,6 @@ workflow_analysis_steps_schema = {
                 "title" : "Step Name",
                 "type" : "string"
             },
-            "analysis_step_types" : {
-                "title" : "Step Purposes",
-                "type" : "array",
-                "items" : {
-                    "type" : "string"
-                }
-            },
             "meta" : {
                 "type" : "object",
                 "title" : "Step Metadata",
@@ -175,6 +168,14 @@ workflow_analysis_steps_schema = {
                     "@id" : {
                         "title" : "Unique identifier of Item in database represented by this step node. Either an AnalysisStep or a WorkflowRun.",
                         "type" : "string"
+                    },
+                    "analysis_step_types" : {
+                        "title" : "Step Purposes",
+                        "description": "List of step purposes which may be shown above the Node in Workflow graphs.",
+                        "type" : "array",
+                        "items" : {
+                            "type" : "string"
+                        }
                     }
                 }
             }
@@ -457,9 +458,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 "run_status" : workflow_run_model_obj.get('run_status'),
                 '@type'  : workflow_run_model_obj.get('@type'),
                 '@id'    : workflow_run_model_obj.get('@id'),
-                'date_created' : workflow_run_model_obj.get('date_created')
+                'date_created' : workflow_run_model_obj.get('date_created'),
+                "analysis_step_types" : [],
             },
-            "analysis_step_types" : [], # Gets moved to stepNode.meta.analysis_step_types on front-end (we could put into meta here as well)
             "inputs" : [],
             "outputs" : []
         }
@@ -472,7 +473,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             if workflow_model and hasattr(workflow_model, 'source'):
                 workflow_model_obj = workflow_model.source.get('object',{})
                 if workflow_model_obj.get('workflow_type'):
-                    step['analysis_step_types'].append(workflow_model_obj['workflow_type'])
+                    step['meta']['analysis_step_types'].append(workflow_model_obj['workflow_type'])
                     step['meta']['workflow'] = {
                         '@id'               : workflow_model_obj.get('@id') or workflow_run_model_obj.get('workflow'),
                         '@type'             : workflow_model_obj.get('@type'),
@@ -875,8 +876,8 @@ class WorkflowRun(Item):
         if workflow is None:
             return []
 
-        workflow = self.collection.get(workflow)
-        analysis_steps = workflow.properties.get('steps') # workflow.analysis_steps(request)
+        workflow = request.embed('/' + workflow)
+        analysis_steps = workflow.get('steps')
 
         if not isinstance(analysis_steps, list) or len(analysis_steps) == 0:
             return []

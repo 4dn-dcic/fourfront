@@ -370,7 +370,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
         super(props);
         this.maybeLoadSoftware = this.maybeLoadSoftware.bind(this);
         this.state = {
-            software : this.props.software
+            software : props.software
         };
     }
 
@@ -649,9 +649,13 @@ class AnalysisStepDetailBody extends React.Component {
     render(){
         var node = this.props.node;
         var step = this.props.step;
-        var self_software_used = step.software_used && typeof step.software_used === 'object';
         var workflow = (step && step.workflow) || null;
-        var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false;
+        var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false; // If step ===  wfr, not step === analysis_step
+        var self_software_used = step.software_used || (workflow && workflow.software_used) || null;
+        if (typeof self_software_used === 'string' && self_software_used.charAt(0) !== '/' && object.isUUID(self_software_used)){
+            self_software_used = '/software/' + self_software_used;
+        }
+
         //var isThereAssociatedSoftware = !!(this.props.step && this.props.step.software_used);
         // Still need to test this .workflow_steps.step.software_used -> .steps.meta.software_used :
         var listOfSoftwareInWorkflow = (wfr && wfr.workflow && Array.isArray(wfr.workflow.steps) &&
@@ -676,7 +680,7 @@ class AnalysisStepDetailBody extends React.Component {
                     { listOfSoftwareInWorkflow ? <hr/> : null }
                     { listOfSoftwareInWorkflow ? <SoftwareDetailsForWorkflowNodeRow software={listOfSoftwareInWorkflow}/> : null }
                     { self_software_used ? <hr/> : null }
-                    { self_software_used ? <AnalysisStepSoftwareDetailRow software={step.software_used}/> : null }
+                    { self_software_used ? <AnalysisStepSoftwareDetailRow software={self_software_used}/> : null }
                     
                 </div>
                 <hr/>
@@ -761,7 +765,7 @@ export class WorkflowDetailPane extends React.Component {
                 </div>
             );
         }
-        if (node.type === 'step' && node.meta && node.meta.uuid){
+        if (node.type === 'step' && node.meta && typeof node.meta === 'object'){
             return (
                 <AnalysisStepDetailBody
                     step={node.meta}

@@ -333,14 +333,6 @@
                         "title" : "Step Name",
                         "type" : "string"
                     },
-                    "analysis_step_types" : {
-                        "title" : "Step Purposes",
-                        "description": "This is sometimes shown above the Node in Workflow graphs.",
-                        "type" : "array",
-                        "items" : {
-                            "type" : "string"
-                        }
-                    },
                     "meta" : {
                         "type" : "object",
                         "title" : "Step Metadata",
@@ -356,6 +348,14 @@
                             "@id" : {
                                 "title" : "Unique identifier of Item in database represented by this step node. Either an AnalysisStep or a WorkflowRun.",
                                 "type" : "string"
+                            },
+                            "analysis_step_types" : {
+                                "title" : "Step Purposes",
+                                "description": "List of step purposes which may be shown above the Node in Workflow graphs.",
+                                "type" : "array",
+                                "items" : {
+                                    "type" : "string"
+                                }
                             }
                         }
                     }

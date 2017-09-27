@@ -181,6 +181,15 @@ export function assertUUID(uuid){
     return uuid;
 }
 
+export function isUUID(uuid){
+    try {
+        uuid = assertUUID(uuid);
+        return true;
+    } catch (e){
+        return false;
+    }
+}
+
 export function isAccessionRegex(accessionStr){
     if (accessionStr.match(/^4DN(EX|ES|FI|FS|SR|BS|IN|WF)[1-9A-Z]{7}$/)){
         return true;

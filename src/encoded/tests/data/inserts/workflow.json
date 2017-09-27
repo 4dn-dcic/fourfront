@@ -78,16 +78,14 @@
     "name": "gitar",
     "steps" : [
         {
-            "uuid":"d3b03a23-49e5-4c33-afab-9ec90d65faf3",
             "name":"hictool_fastq2bam",
-            "analysis_step_types":[
-                "alignment"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "description":"Alignment according to the GITAR pipeline",
                 "software_used":"/software/7868f960-50ac-11e4-916c-0800200c9a66/",
-                "@id":"/analysis-steps/d3b03a23-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/d3b03a23-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "alignment"
+                ]
             },
             "inputs":[
                 {
@@ -173,16 +171,14 @@
             ]
         },
         {
-            "uuid":"80c7771e-49e5-4c33-afab-9ec90d65faf3",
             "name":"hictool_bam2hdf5",
-            "analysis_step_types":[
-                "file format conversion"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "description":"Converting bam to hdf5 according to the GITAR pipeline",
                 "software_used":"/software/7868f960-50ac-11e4-916c-0800200c9a66/",
-                "@id":"/analysis-steps/80c7771e-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/80c7771e-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "file format conversion"
+                ]
             },
             "inputs":[
                 {
@@ -296,16 +292,14 @@
             ]
         },
         {
-            "uuid":"a937f407-49e5-4c33-afab-9ec90d65faf3",
             "name":"hictool_hdf52matrix",
-            "analysis_step_types":[
-                "normalization"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "description":"Contact (unnormalized and normalized) matrix creation according to the GITAR pipeline",
                 "software_used":"/software/7868f960-50ac-11e4-916c-0800200c9a66/",
-                "@id":"/analysis-steps/a937f407-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/a937f407-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "normalization"
+                ]
             },
             "inputs":[
                 {
@@ -507,7 +501,6 @@
     "category": "QC",
     "steps": [
         {
-            "uuid":"f7b8cd87-49e5-4c33-afab-9ec90d65faf3",
             "inputs":[
                 {
                     "name":"limits_file",
@@ -579,14 +572,13 @@
                 }
             ],
             "name":"FastQC",
-            "analysis_step_types":[
-                "QC calculation"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "description":"FastQC QC for fastq files",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a13131/",
-                "@id":"/analysis-steps/f7b8cd87-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/f7b8cd87-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "QC calculation"
+                ]
             }
         }
     ]
@@ -617,7 +609,6 @@
     ],
     "steps" : [
         {
-            "uuid":"0786554a-49e5-4c33-afab-9ec90d658888",
             "inputs":[
                 {
                     "name":"input_file",
@@ -652,12 +643,11 @@
                 }
             ],
             "name":"validatefiles",
-            "analysis_step_types":[
-                "QC calculation"
-            ],
             "meta":{
-                "status":"in review by lab",
-                "@id":"/analysis-steps/0786554a-49e5-4c33-afab-9ec90d658888/"
+                "@id":"/analysis-steps/0786554a-49e5-4c33-afab-9ec90d658888/",
+                "analysis_step_types":[
+                    "QC calculation"
+                ]
             }
         }
     ],
@@ -694,7 +684,6 @@
     ],
     "steps": [
         {
-            "uuid":"0786554a-49e5-4c33-afab-9ec90d657777",
             "inputs":[
                 {
                     "name":"input_file",
@@ -729,12 +718,11 @@
                 }
             ],
             "name":"md5",
-            "analysis_step_types":[
-                "QC calculation"
-            ],
             "meta":{
-                "status":"in review by lab",
-                "@id":"/analysis-steps/0786554a-49e5-4c33-afab-9ec90d657777/"
+                "@id":"/analysis-steps/0786554a-49e5-4c33-afab-9ec90d657777/",
+                "analysis_step_types":[
+                    "QC calculation"
+                ]
             }
         }
     ],
@@ -752,7 +740,6 @@
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
     "steps": [
         {
-            "uuid":"02d636b9-d82d-4da9-950c-2ca994a73514",
             "inputs":[
                 {
                     "name":"fastq1",
@@ -829,17 +816,15 @@
                 }
             ],
             "name":"bwa-mem",
-            "analysis_step_types":[
-                "alignment"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a13209/",
-                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a73514/"
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a73514/",
+                "analysis_step_types":[
+                    "alignment"
+                ]
             }
         },
         {
-            "uuid":"02d636b9-d82d-4da9-950c-2ca994a3625a",
             "inputs":[
                 {
                     "name":"input_bam",
@@ -889,17 +874,15 @@
                 }
             ],
             "name":"sort_bam",
-            "analysis_step_types":[
-                "alignment"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a06735/",
-                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a3625a/"
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a3625a/",
+                "analysis_step_types":[
+                    "alignment"
+                ]
             }
         },
         {
-            "uuid":"02d636b9-d82d-4da9-950c-2ca994a1330c",
             "inputs":[
                 {
                     "name":"out_sorted_bam",
@@ -951,13 +934,12 @@
                 }
             ],
             "name":"bam2pairs",
-            "analysis_step_types":[
-                "alignment"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
-                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a1330c/"
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a1330c/",
+                "analysis_step_types":[
+                    "alignment"
+                ]
             }
         }
     ],
@@ -1025,7 +1007,6 @@
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
     "steps": [
         {
-            "uuid":"02d636b9-d82d-4da9-950c-2ca994a73514",
             "inputs":[
                 {
                     "name":"fastq1",
@@ -1102,17 +1083,15 @@
                 }
             ],
             "name":"bwa-mem",
-            "analysis_step_types":[
-                "alignment"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a13209/",
-                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a73514/"
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a73514/",
+                "analysis_step_types":[
+                    "alignment"
+                ]
             }
         },
         {
-            "uuid":"02d636b9-d82d-4da9-950c-2ca994a3625a",
             "inputs":[
                 {
                     "name":"input_bam",
@@ -1162,17 +1141,15 @@
                 }
             ],
             "name":"sort_bam",
-            "analysis_step_types":[
-                "alignment"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a06735/",
-                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a3625a/"
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a3625a/",
+                "analysis_step_types":[
+                    "alignment"
+                ]
             }
         },
         {
-            "uuid":"02d636b9-d82d-4da9-950c-2ca994a1330c",
             "inputs":[
                 {
                     "name":"out_sorted_bam",
@@ -1224,13 +1201,12 @@
                 }
             ],
             "name":"bam2pairs",
-            "analysis_step_types":[
-                "alignment"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
-                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a1330c/"
+                "@id":"/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a1330c/",
+                "analysis_step_types":[
+                    "alignment"
+                ]
             }
         }
     ],
@@ -1355,7 +1331,6 @@
     "name":"hi-c-processing-partb/15",
     "steps":[
         {
-            "uuid":"e4068c7a-49e5-4c33-afab-9ec90d65faf3",
             "inputs":[
                 {
                     "name":"input_pairs",
@@ -1432,17 +1407,15 @@
                 }
             ],
             "name":"merge_pairs",
-            "analysis_step_types":[
-                "file merging"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
-                "@id":"/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "file merging"
+                ]
             }
         },
         {
-            "uuid":"302366fb-49e5-4c33-afab-9ec90d65faf3",
             "inputs":[
                 {
                     "name":"ncores",
@@ -1514,17 +1487,15 @@
                 }
             ],
             "name":"cooler",
-            "analysis_step_types":[
-                "aggregation"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                "@id":"/analysis-steps/302366fb-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/302366fb-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "aggregation"
+                ]
             }
         },
         {
-            "uuid":"a9d0e56c-49e5-4c33-afab-9ec90d65faf3",
             "inputs":[
                 {
                     "name":"chrsizes",
@@ -1589,18 +1560,16 @@
                 }
             ],
             "name":"pairs2hic",
-            "analysis_step_types":[
-                "aggregation",
-                "normalization"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d8dd-4da9-950c-2ca994b23576/",
-                "@id":"/analysis-steps/a9d0e56c-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/a9d0e56c-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "aggregation",
+                    "normalization"
+                ]
             }
         },
         {
-            "uuid":"0786554a-49e5-4c33-afab-9ec90d65faf3",
             "inputs":[
                 {
                     "name":"normalization_type",
@@ -1646,13 +1615,12 @@
                 }
             ],
             "name":"hic2mcool",
-            "analysis_step_types":[
-                "file format conversion"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                "@id":"/analysis-steps/0786554a-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/0786554a-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "file format conversion"
+                ]
             }
         }
     ],
@@ -1698,7 +1666,6 @@
     "name": "hi-c-processing-partb/6",
     "steps": [
         {
-            "uuid":"e4068c7a-49e5-4c33-afab-9ec90d65faf3",
             "inputs":[
                 {
                     "name":"input_pairs_index",
@@ -1778,13 +1745,12 @@
                 }
             ],
             "name":"merge_pairs",
-            "analysis_step_types":[
-                "file merging"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
-                "@id":"/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "file merging"
+                ]
             }
         }
     ],
@@ -1807,7 +1773,6 @@
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.5.cwl",
     "steps": [
         {
-            "uuid":"98a6e081-49e5-4c33-afab-9ec90d65faf3",
             "inputs":[
                 {
                     "name":"fastq1",
@@ -1896,18 +1861,16 @@
                 }
             ],
             "name":"juicer",
-            "analysis_step_types":[
-                "alignment",
-                "filtering"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23548/",
-                "@id":"/analysis-steps/98a6e081-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/98a6e081-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "alignment",
+                    "filtering"
+                ]
             }
         },
         {
-            "uuid":"b1fe75f9-49e5-4c33-afab-9ec90d65faf3",
             "inputs":[
                 {
                     "name":"chrsizes",
@@ -1981,13 +1944,12 @@
                 }
             ],
             "name":"juicer2pairs",
-            "analysis_step_types":[
-                "file format conversion"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
-                "@id":"/analysis-steps/b1fe75f9-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/b1fe75f9-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "file format conversion"
+                ]
             }
         }
     ],
@@ -2053,7 +2015,6 @@
     "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.16.cwl",
     "steps": [
         {
-            "uuid":"98a6e081-49e5-4c33-afab-9ec90d65dddd",
             "inputs":[
                 {
                     "name":"fastq1",
@@ -2155,18 +2116,16 @@
                 }
             ],
             "name":"juicer",
-            "analysis_step_types":[
-                "alignment",
-                "filtering"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23599/",
-                "@id":"/analysis-steps/98a6e081-49e5-4c33-afab-9ec90d65dddd/"
+                "@id":"/analysis-steps/98a6e081-49e5-4c33-afab-9ec90d65dddd/",
+                "analysis_step_types":[
+                    "alignment",
+                    "filtering"
+                ]
             }
         },
         {
-            "uuid":"b1fe75f9-49e5-4c33-afab-9ec90d65faf3",
             "inputs":[
                 {
                     "name":"chrsizes",
@@ -2240,13 +2199,12 @@
                 }
             ],
             "name":"juicer2pairs",
-            "analysis_step_types":[
-                "file format conversion"
-            ],
             "meta":{
-                "status":"in review by lab",
                 "software_used":"/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
-                "@id":"/analysis-steps/b1fe75f9-49e5-4c33-afab-9ec90d65faf3/"
+                "@id":"/analysis-steps/b1fe75f9-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types":[
+                    "file format conversion"
+                ]
             }
         }
     ],
@@ -2365,7 +2323,6 @@
     "name": "hi-c-processing-partb/24",
     "steps": [
         {
-            "uuid": "e4068c7a-49e5-4c33-afab-9ec90d65faf3",
             "inputs": [
                 {
                     "name": "input_pairs",
@@ -2442,17 +2399,15 @@
                 }
             ],
             "name": "merge_pairs",
-            "analysis_step_types": [
-                "file merging"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
-                "@id": "/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/"
+                "@id": "/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types": [
+                    "file merging"
+                ]
             }
         },
         {
-            "uuid": "a9d0e56c-49e5-4c33-afab-9ec90d65faf3",
             "inputs": [
                 {
                     "name": "chrsizes",
@@ -2512,18 +2467,16 @@
                 }
             ],
             "name": "pairs2hic",
-            "analysis_step_types": [
-                "aggregation",
-                "normalization"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/",
-                "@id": "/analysis-steps/a9d0e56c-49e5-4c33-afab-9ec90d65faf3/"
+                "@id": "/analysis-steps/a9d0e56c-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types": [
+                    "aggregation",
+                    "normalization"
+                ]
             }
         },
         {
-            "uuid": "302366fb-49e5-4c33-afab-9ec90d65faf3",
             "inputs": [
                 {
                     "name": "ncores",
@@ -2595,13 +2548,12 @@
                 }
             ],
             "name": "cooler",
-            "analysis_step_types": [
-                "aggregation"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                "@id": "/analysis-steps/302366fb-49e5-4c33-afab-9ec90d65faf3/"
+                "@id": "/analysis-steps/302366fb-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types": [
+                    "aggregation"
+                ]
             }
         }
     ],
@@ -2666,7 +2618,6 @@
     "name": "hi-c-processing-partb/44",
     "steps": [
         {
-            "uuid": "e4068c7a-49e5-4c33-afab-9ec90d65faf3",
             "inputs": [
                 {
                     "name": "input_pairs",
@@ -2713,17 +2664,15 @@
                 }
             ],
             "name": "merge_pairs",
-            "analysis_step_types": [
-                "file merging"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a23547/",
-                "@id": "/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/"
+                "@id": "/analysis-steps/e4068c7a-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types": [
+                    "file merging"
+                ]
             }
         },
         {
-            "uuid": "a9d0e56c-49e5-4c33-afab-9ec90d65faf3",
             "inputs": [
                 {
                     "name": "chrsizes",
@@ -2783,18 +2732,16 @@
                 }
             ],
             "name": "pairs2hic",
-            "analysis_step_types": [
-                "aggregation",
-                "normalization"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/",
-                "@id": "/analysis-steps/a9d0e56c-49e5-4c33-afab-9ec90d65faf3/"
+                "@id": "/analysis-steps/a9d0e56c-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types": [
+                    "aggregation",
+                    "normalization"
+                ]
             }
         },
         {
-            "uuid": "302366fb-49e5-4c33-afab-9ec90d65faf3",
             "inputs": [
                 {
                     "name": "ncores",
@@ -2853,13 +2800,12 @@
                 }
             ],
             "name": "cooler",
-            "analysis_step_types": [
-                "aggregation"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                "@id": "/analysis-steps/302366fb-49e5-4c33-afab-9ec90d65faf3/"
+                "@id": "/analysis-steps/302366fb-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types": [
+                    "aggregation"
+                ]
             }
         }
     ],
@@ -2900,7 +2846,6 @@
     ],
     "steps": [
         {
-            "uuid": "11775554-5f85-4d0c-93e4-fa9d7f20d47a",
             "inputs": [
                 {
                     "name": "input_hic",
@@ -2951,13 +2896,12 @@
                 }
             ],
             "name": "add-hic-normvector-to-mcool",
-            "analysis_step_types": [
-                "file format conversion"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                "@id": "/analysis-steps/11775554-5f85-4d0c-93e4-fa9d7f20d47a/"
+                "@id": "/analysis-steps/11775554-5f85-4d0c-93e4-fa9d7f20d47a/",
+                "analysis_step_types": [
+                    "file format conversion"
+                ]
             }
         }
     ],
@@ -2994,7 +2938,6 @@
     ],
     "steps": [
         {
-            "uuid": "53e7b46f-1d3b-4a16-812f-c79456614bda",
             "inputs": [
                 {
                     "name": "input_mcool",
@@ -3043,13 +2986,12 @@
                 }
             ],
             "name": "extract-mcool-normvector-for-juicebox",
-            "analysis_step_types": [
-                "file format conversion"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/",
-                "@id": "/analysis-steps/53e7b46f-1d3b-4a16-812f-c79456614bda/"
+                "@id": "/analysis-steps/53e7b46f-1d3b-4a16-812f-c79456614bda/",
+                "analysis_step_types": [
+                    "file format conversion"
+                ]
             }
         }
     ],
@@ -3090,7 +3032,6 @@
     ],
     "steps": [
         {
-            "uuid": "12ad1dbe-cc44-4968-8a21-d1e5a12d3222",
             "inputs": [
                 {
                     "name": "input_hic",
@@ -3152,13 +3093,12 @@
                 }
             ],
             "name": "addnormtohic",
-            "analysis_step_types": [
-                "normalization"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23576/",
-                "@id": "/analysis-steps/12ad1dbe-cc44-4968-8a21-d1e5a12d3222/"
+                "@id": "/analysis-steps/12ad1dbe-cc44-4968-8a21-d1e5a12d3222/",
+                "analysis_step_types": [
+                    "normalization"
+                ]
             }
         }
     ],
@@ -3194,7 +3134,6 @@
     "name": "hi-c-processing-partc/6", 
     "steps": [
         {
-            "uuid": "25e911b4-49e5-4c33-afab-9ec90d65faf3",
             "inputs": [
                 {
                     "name": "input_cool",
@@ -3240,19 +3179,17 @@
                 }
             ],
             "name": "cool2mcool",
-            "analysis_step_types": [
-                "aggregation",
-                "normalization",
-                "file format conversion"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                "@id": "/analysis-steps/25e911b4-49e5-4c33-afab-9ec90d65faf3/"
+                "@id": "/analysis-steps/25e911b4-49e5-4c33-afab-9ec90d65faf3/",
+                "analysis_step_types": [
+                    "aggregation",
+                    "normalization",
+                    "file format conversion"
+                ]
             }
         },
         {
-            "uuid": "53e7b46f-1d3b-4a16-812f-c79456614bda",
             "inputs": [
                 {
                     "name": "input_mcool",
@@ -3285,17 +3222,15 @@
                 }
             ],
             "name": "extract_mcool_normvector_for_juicebox",
-            "analysis_step_types": [
-                "file format conversion"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/c91a2c9d-079c-4647-9951-da95f2c9baf1/",
-                "@id": "/analysis-steps/53e7b46f-1d3b-4a16-812f-c79456614bda/"
+                "@id": "/analysis-steps/53e7b46f-1d3b-4a16-812f-c79456614bda/",
+                "analysis_step_types": [
+                    "file format conversion"
+                ]
             }
         },
         {
-            "uuid": "11775554-5f85-4d0c-93e4-fa9d7f20d47a",
             "inputs": [
                 {
                     "name": "input_hic",
@@ -3347,13 +3282,12 @@
                 }
             ],
             "name": "add_hic_normvector_to_mcool",
-            "analysis_step_types": [
-                "file format conversion"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d8dd-4da9-950c-2ca994b23555/",
-                "@id": "/analysis-steps/11775554-5f85-4d0c-93e4-fa9d7f20d47a/"
+                "@id": "/analysis-steps/11775554-5f85-4d0c-93e4-fa9d7f20d47a/",
+                "analysis_step_types": [
+                    "file format conversion"
+                ]
             }
         }
     ], 
@@ -3378,7 +3312,6 @@
     "cwl_pointer": "",
     "steps": [
         {
-            "uuid": "02d636b9-d82d-4da9-950c-2ca994a73514",
             "inputs": [
                 {
                     "name": "fastq1",
@@ -3456,13 +3389,12 @@
                 }
             ],
             "name": "bwa-mem",
-            "analysis_step_types": [
-                "alignment"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/02d636b9-d82d-4da9-950c-2ca994a13209/",
-                "@id": "/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a73514/"
+                "@id": "/analysis-steps/02d636b9-d82d-4da9-950c-2ca994a73514/",
+                "analysis_step_types": [
+                    "alignment"
+                ]
             }
         }
     ],
@@ -3532,7 +3464,6 @@
     "name": "pairsam-parse-sort", 
     "steps": [
         {
-            "uuid": "9a30285a-d224-4ced-bde5-c26ba3af9325",
             "inputs": [
                 {
                     "name": "bam",
@@ -3593,13 +3524,12 @@
                 }
             ],
             "name": "pairsam-parse-sort",
-            "analysis_step_types": [
-                "sorting"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
-                "@id": "/analysis-steps/9a30285a-d224-4ced-bde5-c26ba3af9325/"
+                "@id": "/analysis-steps/9a30285a-d224-4ced-bde5-c26ba3af9325/",
+                "analysis_step_types": [
+                    "sorting"
+                ]
             }
         }
     ], 
@@ -3648,7 +3578,6 @@
     "name": "pairsam-merge",
     "steps": [
         {
-            "uuid": "ddb3d267-0289-48bd-afd2-1505ad8977a6",
             "inputs": [
                 {
                     "name": "input_pairsams",
@@ -3695,13 +3624,12 @@
                 }
             ],
             "name": "pairsam-merge",
-            "analysis_step_types": [
-                "merging"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
-                "@id": "/analysis-steps/ddb3d267-0289-48bd-afd2-1505ad8977a6/"
+                "@id": "/analysis-steps/ddb3d267-0289-48bd-afd2-1505ad8977a6/",
+                "analysis_step_types": [
+                    "merging"
+                ]
             }
         }
     ],
@@ -3749,7 +3677,6 @@
     "name": "pairsam-filter",
     "steps": [
         {
-            "uuid": "78708866-f965-4d85-9d01-577a03f51a12",
             "inputs": [
                 {
                     "name": "input_pairsam",
@@ -3814,13 +3741,12 @@
                 }
             ],
             "name": "pairsam-filter",
-            "analysis_step_types": [
-                "filtering"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
-                "@id": "/analysis-steps/78708866-f965-4d85-9d01-577a03f51a12/"
+                "@id": "/analysis-steps/78708866-f965-4d85-9d01-577a03f51a12/",
+                "analysis_step_types": [
+                    "filtering"
+                ]
             }
         }
     ],
@@ -3863,7 +3789,6 @@
     "name": "addfragtopairs",
     "steps": [
         {
-            "uuid": "e6843cbd-1de7-41fe-99c4-481c10f21d07",
             "inputs": [
                 {
                     "name": "input_pairs",
@@ -3914,13 +3839,12 @@
                 }
             ],
             "name": "addfragtopairs",
-            "analysis_step_types": [
-                "file format conversion"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/e17c3e9c-8882-4478-93da-062c5213341d/",
-                "@id": "/analysis-steps/e6843cbd-1de7-41fe-99c4-481c10f21d07/"
+                "@id": "/analysis-steps/e6843cbd-1de7-41fe-99c4-481c10f21d07/",
+                "analysis_step_types": [
+                    "file format conversion"
+                ]
             }
         }
     ],
@@ -3958,7 +3882,6 @@
     "name": "pairs-patch",
     "steps": [
         {
-            "uuid": "99bb38e0-c7a7-4e22-b452-3934462ce90a",
             "inputs": [
                 {
                     "name": "input_pairs",
@@ -3995,13 +3918,12 @@
                 }
             ],
             "name": "pairs-patch",
-            "analysis_step_types": [
-                "file format conversion"
-            ],
             "meta": {
-                "status": "in review by lab",
                 "software_used": "/software/e17c3e9c-8882-4478-93da-062c5213341d/",
-                "@id": "/analysis-steps/99bb38e0-c7a7-4e22-b452-3934462ce90a/"
+                "@id": "/analysis-steps/99bb38e0-c7a7-4e22-b452-3934462ce90a/",
+                "analysis_step_types": [
+                    "file format conversion"
+                ]
             }
         }
     ],
