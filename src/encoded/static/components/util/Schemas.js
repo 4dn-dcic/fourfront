@@ -29,7 +29,7 @@ export const itemTypeHierarchy = {
         'ExperimentSet', 'ExperimentSetReplicate'
     ],
     'File': [
-        'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference'
+        'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
     ],
     'FileSet': [
         'FileSet', 'FileSetCalibration'
@@ -262,10 +262,16 @@ export function flattenSchemaPropertyToColumnDefinition(tips, depth = 0){
 }
 
 
-export function getAbstractTypeForType(type){
+export function getAbstractTypeForType(type, returnSelfIfAbstract = true){
     var possibleParentTypes = _.keys(itemTypeHierarchy);
     var i;
     var foundIndex;
+    if (returnSelfIfAbstract){
+        foundIndex = possibleParentTypes.indexOf(type);
+        if ( foundIndex > -1 ){
+            return possibleParentTypes[foundIndex];
+        }
+    }
     for (i = 0; i < possibleParentTypes.length; i++){
         foundIndex = itemTypeHierarchy[possibleParentTypes[i]].indexOf(type);
         if ( foundIndex > -1 ){
