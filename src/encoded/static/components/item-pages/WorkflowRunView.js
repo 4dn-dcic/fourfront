@@ -102,7 +102,7 @@ export class WorkflowRunView extends ItemBaseView {
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
@@ -176,7 +176,7 @@ class GraphSection extends React.Component {
     }
 
     basicGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return (
             <Graph
                 { ...this.commonGraphProps() }
@@ -189,7 +189,7 @@ class GraphSection extends React.Component {
     }
 
     detailGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return (
             <Graph
                 { ...this.commonGraphProps() }

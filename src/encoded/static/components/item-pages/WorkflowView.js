@@ -77,9 +77,9 @@ export function parseAnalysisStepsMixin(context = null){
     if (!context) context = this.props.context;
     var graphData = (
         this.state.showChart === 'basic' ?
-            parseBasicIOAnalysisSteps(context.analysis_steps, context)
+            parseBasicIOAnalysisSteps(context.steps, context)
             :
-            parseAnalysisSteps(context.analysis_steps)
+            parseAnalysisSteps(context.steps)
     );
     if (this.state.showParameters) return graphData;
     else return filterOutParametersFromGraphData(graphData);
@@ -108,7 +108,7 @@ export class WorkflowView extends ItemBaseView {
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
@@ -266,8 +266,8 @@ export class RowSpacingTypeDropdown extends React.Component {
 class GraphSection extends React.Component {
 
     static analysisStepsSet(context){
-        if (!Array.isArray(context.analysis_steps)) return false;
-        if (context.analysis_steps.length === 0) return false;
+        if (!Array.isArray(context.steps)) return false;
+        if (context.steps.length === 0) return false;
         return true;
     }
 
@@ -295,7 +295,7 @@ class GraphSection extends React.Component {
     }
 
     basicGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return (
             <Graph
                 { ...this.commonGraphProps() }
@@ -308,7 +308,7 @@ class GraphSection extends React.Component {
     }
 
     detailGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return <Graph { ...this.commonGraphProps() } />;
     }
 
