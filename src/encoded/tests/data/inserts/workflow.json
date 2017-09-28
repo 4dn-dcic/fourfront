@@ -3430,72 +3430,72 @@
     "name": "pairsam-parse-sort", 
     "steps": [
         {
-            "inputs": [
-                {
-                    "name": "bam",
-                    "source": [
-                        {
-                            "name": "bam",
-                            "type": "Workflow Input File"
-                        }
-                    ],
-                    "meta": {
-                        "argument_type": "Input file",
-                        "argument_format": "bam",
-                        "argument_cardinality": "1"
-                    }
-                },
-                {
-                    "name": "chromsize",
-                    "source": [
-                        {
-                            "name": "chromsize",
-                            "type": "Workflow Input File"
-                        }
-                    ],
-                    "meta": {
-                        "argument_type": "Input file",
-                        "argument_format": "chromsizes",
-                        "argument_cardinality": "1"
-                    }
-                },
-                {
-                    "name": "nThreads",
-                    "source": [
-                        {
-                            "name": "nThreads",
-                            "type": "Workflow Parameter"
-                        }
-                    ],
-                    "meta": {
-                        "argument_type": "parameter",
-                        "argument_cardinality": "1"
-                    }
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "out_pairsam",
-                    "target": [
-                        {
-                            "name": "out_pairsam",
-                            "type": "Workflow Output File"
-                        }
-                    ],
-                    "meta": {
-                        "argument_type": "Output processed file",
-                        "argument_format": "pairsam",
-                        "argument_cardinality": "1"
-                    }
-                }
-            ],
             "name": "pairsam-parse-sort",
             "meta": {
                 "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
                 "analysis_step_types": [
                     "sorting"
                 ]
-            }
+            },
+            "inputs": [
+                {
+                    "name": "bam",
+                    "meta": {
+                        "argument_type": "Input file",
+                        "argument_format": "bam",
+                        "argument_cardinality": "1"
+                    },
+                    "source": [
+                        {
+                            "name": "bam",
+                            "type": "Workflow Input File"
+                        }
+                    ]
+                },
+                {
+                    "name": "chromsize",
+                    "meta": {
+                        "argument_type": "Input file",
+                        "argument_format": "chromsizes",
+                        "argument_cardinality": "1"
+                    },
+                    "source": [
+                        {
+                            "name": "chromsize",
+                            "type": "Workflow Input File"
+                        }
+                    ]
+                },
+                {
+                    "name": "nThreads",
+                    "meta": {
+                        "argument_type": "parameter",
+                        "argument_cardinality": "1"
+                    },
+                    "source": [
+                        {
+                            "name": "nThreads",
+                            "type": "Workflow Parameter"
+                        }
+                    ]
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "out_pairsam",
+                    "meta": {
+                        "argument_type": "Output processed file",
+                        "argument_format": "pairsam",
+                        "argument_cardinality": "1"
+                    },
+                    "target": [
+                        {
+                            "name": "out_pairsam",
+                            "type": "Workflow Output File"
+                        }
+                    ]
+                }
+            ]
         }
     ], 
     "workflow_type": "Hi-C data analysis", 
@@ -3543,6 +3543,13 @@
     "name": "pairsam-merge",
     "steps": [
         {
+            "name": "pairsam-merge",
+            "meta": {
+                "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
+                "analysis_step_types": [
+                    "merging"
+                ]
+            },
             "inputs": [
                 {
                     "name": "input_pairsams",
@@ -3587,20 +3594,87 @@
                         "argument_cardinality": "1"
                     }
                 }
-            ],
-            "name": "pairsam-merge",
-            "meta": {
-                "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
-                "analysis_step_types": [
-                    "merging"
-                ]
-            }
+            ]
         }
     ],
     "data_types": ["Hi-C"],
     "category": "merging",
     "workflow_type": "Hi-C data analysis",
     "accession": "4DNWF3YV81HS",
+    "award": "1U01CA200059-01"
+},
+{
+    "title":"Duplicate Marking for Hi-C using pairsamtools",
+    "description":"Duplicate Marking for Hi-C using pairsamtools",
+    "workflow_diagram":"",
+    "lab": "4dn-dcic-lab",
+    "cwl_pointer":"",
+    "cwl_main_filename" : "pairsam-markasdup.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "pairsam-markasdup",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "uuid":"a18978fa-7e78-488f-8e6b-bfb6f63b8861",
+    "arguments":[
+        {
+            "workflow_argument_name":"input_pairsams",
+            "argument_type":"Input file",
+            "argument_format":"pairsam"
+        },
+        {
+            "workflow_argument_name":"out_markedpairsam",
+            "argument_type":"Output processed file",
+            "argument_format":"pairsam"
+        }
+    ],
+    "name": "pairsam-markasdup",
+    "steps": [
+        {
+            "name":"pairsam-markasdup",
+            "meta":{
+                "software_used":"/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
+                "analysis_step_types":[
+                    "annotating"
+                ]
+            },
+            "outputs":[
+                {
+                    "name":"out_markedpairsam",
+                    "meta":{
+                        "argument_format":"pairsam",
+                        "argument_type":"Output processed file",
+                        "argument_cardinality":"1"
+                    },
+                    "target":[
+                        {
+                            "type":"Workflow Output File",
+                            "name":"out_markedpairsam"
+                        }
+                    ]
+                }
+            ],
+            "inputs":[
+                {
+                    "name":"input_pairsams",
+                    "meta":{
+                        "argument_format":"pairsam",
+                        "argument_type":"Input file",
+                        "argument_cardinality":"1"
+                    },
+                    "source":[
+                        {
+                            "type":"Workflow Input File",
+                            "name":"input_pairsams"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "data_types": ["Hi-C"],
+    "category": "annotating",
+    "workflow_type": "Hi-C data analysis",
+    "accession": "4DNWF1Y7DN3H",
     "award": "1U01CA200059-01"
 },
 {
@@ -3641,6 +3715,13 @@
     "name": "pairsam-filter",
     "steps": [
         {
+            "name": "pairsam-filter",
+            "meta": {
+                "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
+                "analysis_step_types": [
+                    "filtering"
+                ]
+            },
             "inputs": [
                 {
                     "name": "input_pairsam",
@@ -3703,14 +3784,7 @@
                         "argument_cardinality": "1"
                     }
                 }
-            ],
-            "name": "pairsam-filter",
-            "meta": {
-                "software_used": "/software/c9bf856d-0356-4a8e-8141-2fea6a0ac550/",
-                "analysis_step_types": [
-                    "filtering"
-                ]
-            }
+            ]
         }
     ],
     "data_types": ["Hi-C"],
@@ -3752,6 +3826,13 @@
     "name": "addfragtopairs",
     "steps": [
         {
+            "name": "addfragtopairs",
+            "meta": {
+                "software_used": "/software/e17c3e9c-8882-4478-93da-062c5213341d/",
+                "analysis_step_types": [
+                    "file format conversion"
+                ]
+            },
             "inputs": [
                 {
                     "name": "input_pairs",
@@ -3800,14 +3881,7 @@
                         ]
                     }
                 }
-            ],
-            "name": "addfragtopairs",
-            "meta": {
-                "software_used": "/software/e17c3e9c-8882-4478-93da-062c5213341d/",
-                "analysis_step_types": [
-                    "file format conversion"
-                ]
-            }
+            ]
         }
     ],
     "data_types": ["Hi-C"],
@@ -3844,6 +3918,13 @@
     "name": "pairs-patch",
     "steps": [
         {
+            "name": "pairs-patch",
+            "meta": {
+                "software_used": "/software/e17c3e9c-8882-4478-93da-062c5213341d/",
+                "analysis_step_types": [
+                    "file format conversion"
+                ]
+            },
             "inputs": [
                 {
                     "name": "input_pairs",
@@ -3878,14 +3959,7 @@
                         ]
                     }
                 }
-            ],
-            "name": "pairs-patch",
-            "meta": {
-                "software_used": "/software/e17c3e9c-8882-4478-93da-062c5213341d/",
-                "analysis_step_types": [
-                    "file format conversion"
-                ]
-            }
+            ]
         }
     ],
     "data_types": ["Hi-C"],
