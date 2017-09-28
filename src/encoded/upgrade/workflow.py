@@ -1,6 +1,7 @@
 from snovault import (
     upgrade_step,
 )
+from encoded.schema_formats import is_uuid
 
 @upgrade_step('workflow', '1', '2')
 def workflow_1_2(value, system):
@@ -9,18 +10,18 @@ def workflow_1_2(value, system):
     if value.get('steps') is not None:
         # This is probably an insert with correct data already, let's skip.
         print('\n\nWorkflow ' + (value.get('title', 'unknown')) + ' already has "steps".')
-        return True
+        return value
 
     workflow_steps = value.get('workflow_steps')
     arguments = value.get('arguments')
 
     if arguments is None:
         print('\n\nWorkflow ' + (value.get('title', 'unknown')) + ' has no "arguments".')
-        return False
+        return
 
     if workflow_steps is None:
         print('\n\nWorkflow ' + (value.get('title', 'unknown')) + ' has no "workflow_steps".')
-        return False
+        return
 
     item_instance = system.get('context')
     system_collection = None
@@ -198,4 +199,4 @@ def workflow_1_2(value, system):
             filtered_arguments.append(arg)
     
     value['arguments'] = filtered_arguments
-    return True
+    return value
