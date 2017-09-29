@@ -2,6 +2,7 @@
 """
 from itertools import chain
 from collections import OrderedDict
+import copy
 from encoded.schema_formats import is_uuid
 #import gevent
 from pyramid.response import Response
@@ -17,171 +18,44 @@ from .base import (
 
 import cProfile, pstats, io
 
-
-
-# This is the schema used for both Workflow.analysis_steps and WorkflowRun.analysis_steps.
-workflow_analysis_steps_schema = {
-    "title": "Workflow Analysis Steps",
-    "type": "array",
-    "items": {
-        "title": "Step",
-        "type": "object",
-        "additionalProperties": True,
-        "properties": {
-            "uuid": {
-                "title": "UUID",
-                "description": "Unique Identifier for AnalysisStep, Workflow, or WorkflowRun (or whatever random Item, technically)",
-                "type": "string"
-            },
-            "inputs" : {
-                "title" : "Step Inputs",
-                "type" : "array",
-                "items" : {
-                    "type" : "object",
-                    "properties" : {
-                        "name" : {
-                            "title" : "Input Name",
-                            "type" : "string"
-                        },
-                        "meta" : {
-                            "type" : "object",
-                            "title" : "Additional metadata for input argument",
-                            "description" : "Additional info that might be relavent to the input argument itself, such as argument_cardinality."
-                        },
-                        "source" : {
-                            "title" : "Source Step",
-                            "description" : "Where this input file came from.",
-                            "type" : "array",
-                            "items" : {
-                                "type" : "object",
-                                "properties" : {
-                                    "name" : { "type" : "string" },
-                                    "type" : { "type" : "string" },
-                                    "step" : { "type" : "string" }
-                                }
-                            }
-                        },
-                        "run_data" : {
-                            "type" : "object",
-                            "properties" : {
-                                "file" : {
-                                    "type" : "array",
-                                    "title" : "File(s)",
-                                    "description" : "File(s) for this step input argument.",
-                                    "items" : {
-                                        "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
-                                    }
-                                },
-                                "meta" : {
-                                    "type" : "array",
-                                    "title" : "Additional metadata for input file(s)",
-                                    "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal."
-                                },
-                                "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
-                                    "title" : "Value",
-                                    "type" : "string",
-                                    "description" : "Value used for this output argument."
-                                },
-                                "type" : {
-                                    "type" : "string",
-                                    "title" : "I/O Type"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "outputs" : {
-                "title" : "Step Outputs",
-                "type" : "array",
-                "items" : {
-                    "type" : "object",
-                    "properties" : {
-                        "name" : {
-                            "title" : "Output Name",
-                            "type" : "string"
-                        },
-                        "meta" : {
-                            "type" : "object",
-                            "title" : "Additional metadata for output argument",
-                            "description" : "Additional info that might be relavent to the output argument itself, such as argument_cardinality."
-                        },
-                        "target" : {
-                            "title" : "Target Step",
-                            "description" : "Where this output file should go next.",
-                            "type" : "array",
-                            "items" : {
-                                "type" : "object",
-                                "properties" : {
-                                    "name" : { "type" : "string" },
-                                    "type" : { "type" : "string" },
-                                    "step" : { "type" : "string" }
-                                }
-                            }
-                        },
-                        "run_data" : {
-                            "type" : "object",
-                            "properties" : {
-                                "file" : {
-                                    "type" : "array",
-                                    "title" : "File(s)",
-                                    "description" : "File(s) for this step output argument.",
-                                    "items" : {
-                                        "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
-                                    }
-                                },
-                                "meta" : {
-                                    "type" : "array",
-                                    "title" : "Additional metadata for output file(s)",
-                                    "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal."
-                                },
-                                "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
-                                    "title" : "Value",
-                                    "type" : "string",
-                                    "description" : "Value used for this output argument."
-                                },
-                                "type" : {
-                                    "type" : "string",
-                                    "title" : "I/O Type"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "name" : {
-                "title" : "Step Name",
-                "type" : "string"
-            },
-            "meta" : {
-                "type" : "object",
-                "title" : "Step Metadata",
-                "description" : "Various properties which might be a subset of the Item represented by this step, e.g. uuid, @type, workflow, etc.",
-                "additionalProperties" : True,
-                "properties" : {
-                    "software_used": {
-                        "title": "Software Used",
-                        "description": "Reference to Software Used",
-                        "type": "string",
-                        "linkTo" : "Software"
-                    },
-                    "@id" : {
-                        "title" : "Unique identifier of Item in database represented by this step node. Either an AnalysisStep or a WorkflowRun.",
-                        "type" : "string"
-                    },
-                    "analysis_step_types" : {
-                        "title" : "Step Purposes",
-                        "description": "List of step purposes which may be shown above the Node in Workflow graphs.",
-                        "type" : "array",
-                        "items" : {
-                            "type" : "string"
-                        }
-                    }
-                }
+steps_run_data_schema = {
+    "type" : "object",
+    "properties" : {
+        "file" : {
+            "type" : "array",
+            "title" : "File(s)",
+            "description" : "File(s) for this step input/output argument.",
+            "items" : {
+                "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
             }
+        },
+        "meta" : {
+            "type" : "array",
+            "title" : "Additional metadata for input/output file(s)",
+            "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal."
+        },
+        "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
+            "title" : "Value",
+            "type" : "string",
+            "description" : "Value used for this output argument."
+        },
+        "type" : {
+            "type" : "string",
+            "title" : "I/O Type"
         }
     }
 }
+
+workflow_schema = load_schema('encoded:schemas/workflow.json')
+workflow_steps_property_schema = workflow_schema.get('properties', {}).get('steps')
+
+# This is the schema used for WorkflowRun.steps. Extends Workflow.steps schema.
+workflow_run_steps_property_schema = copy.deepcopy(workflow_steps_property_schema)
+workflow_run_steps_property_schema['items']['properties']['inputs']['items']['properties']['run_data'] = steps_run_data_schema
+workflow_run_steps_property_schema['items']['properties']['outputs']['items']['properties']['run_data'] = steps_run_data_schema
+
+
+
 
 def get_unique_key_from_at_id(at_id):
     if not at_id:
@@ -607,7 +481,7 @@ class Workflow(Item):
     """The Workflow class that describes a workflow and steps in it."""
 
     item_type = 'workflow'
-    schema = load_schema('encoded:schemas/workflow.json')
+    schema = workflow_schema
     embedded_list = [
                 'steps.meta.software_used.name',
                 'steps.meta.software_used.title',
@@ -680,7 +554,7 @@ class WorkflowRun(Item):
                 #'output_quality_metrics.value'
                 ]
 
-    @calculated_property(schema=workflow_analysis_steps_schema,
+    @calculated_property(schema=workflow_run_steps_property_schema,
                         category='page')
     def steps(self, request):
         '''

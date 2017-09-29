@@ -195,7 +195,8 @@ def workflow_1_2(value, system):
     for arg in arguments:
         if arg.get('argument_mapping') is not None:
             del arg['argument_mapping']
-        if len(arg.keys()) != 0:
+        keys_in_argument = arg.keys()
+        if len(keys_in_argument) != 0 and 'workflow_argument_name' in keys_in_argument:
             filtered_arguments.append(arg)
     
     value['arguments'] = filtered_arguments
