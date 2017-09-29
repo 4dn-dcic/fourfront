@@ -61,7 +61,6 @@ def static_pages(config):
     except Exception as e:
         print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
 
-
     def static_page(request):
 
         page = request.matchdict.get('page','none')
