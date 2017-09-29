@@ -527,14 +527,6 @@ class WorkflowRun(Item):
                 'workflow.steps.meta.software_used.title',
                 'workflow.steps.meta.software_used.version',
                 'workflow.steps.meta.software_used.source_url',
-                #'analysis_steps.*',
-                #'analysis_steps.software_used.*',
-                #'analysis_steps.outputs.*',
-                #'analysis_steps.inputs.*',
-                #'analysis_steps.outputs.run_data.*',
-                #'analysis_steps.inputs.run_data.*',
-                #'analysis_steps.outputs.run_data.file.*',
-                #'analysis_steps.inputs.run_data.file.*',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
                 'input_files.value.display_title',
@@ -550,8 +542,7 @@ class WorkflowRun(Item):
                 'output_files.value.@type',
                 'output_quality_metrics.name',
                 'output_quality_metrics.value.uuid',
-                'output_quality_metrics.value.@type',
-                #'output_quality_metrics.value'
+                'output_quality_metrics.value.@type'
                 ]
 
     @calculated_property(schema=workflow_run_steps_property_schema,
