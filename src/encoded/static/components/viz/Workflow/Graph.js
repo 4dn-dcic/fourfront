@@ -157,7 +157,7 @@ export default class Graph extends React.Component {
                             if (n1.name < n2.name) return -1;
                             if (n1.name > n2.name) return 1;
                             return 0;//compareNodeInputOf(n1, n2);
-                            
+
                         }
                         return n1OutputOf.id < n2OutputOf.id ? -3 : 3;
                     }
