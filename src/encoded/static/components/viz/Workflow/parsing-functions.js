@@ -31,6 +31,16 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         );
     }
 
+    function ioNodeName(stepIOArg){
+        var nameToUse = stepIOArg.name; // Default; name of step argument from step we're drawing IO nodes currently.
+        var list = null;
+        if (Array.isArray(stepIOArg.source)){
+            list = stepIOArg.source;
+        } else if (Array.isArray(stepIOArg.target)){
+            list = stepIOArg.target;
+        }
+    }
+
 
     function preventDuplicateNodeID(id, readOnly = true){
         if (typeof id !== 'string') throw new Error('param id is not a string.');
