@@ -198,6 +198,6 @@ def workflow_1_2(value, system):
         keys_in_argument = arg.keys()
         if len(keys_in_argument) != 0 and 'workflow_argument_name' in keys_in_argument:
             filtered_arguments.append(arg)
-    
+
     value['arguments'] = filtered_arguments
     return value
