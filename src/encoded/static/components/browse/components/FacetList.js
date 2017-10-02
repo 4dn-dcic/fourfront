@@ -812,7 +812,6 @@ export class FacetList extends React.Component {
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.searchQueryTerms = this.searchQueryTerms.bind(this);
-        this.filterFacets = this.filterFacets.bind(this);
         this.state = {
             'mounted' : false
         };
@@ -840,17 +839,9 @@ export class FacetList extends React.Component {
         return href && url.parse(href, true).query;
     }
 
-
-    filterFacets(facets){
-        return facets.filter((f)=>{
-            return this.props.filterFacetsFxn(f, this.props, this.state);
-        });
-    }
-
-
     renderFacets(facets, maxTermsToShow = 12){
 
-        facets = _.uniq(facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state)), false, function(f){ return f.field });
+        facets = _.uniq(facets.filter((facet)=> this.props.filterFacetsFxn(facet, this.props, this.state)), false, function(f){ return f.field; });
 
         var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
             if (m.end) return m;
