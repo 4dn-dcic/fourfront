@@ -1,5 +1,4 @@
 """The type file for the collection Pages.  Which is used for static pages on the portal
-
 """
 import os
 import requests
@@ -7,10 +6,45 @@ from snovault import (
     calculated_property,
     collection,
     load_schema,
+    COLLECTIONS,
+    CONNECTION
 )
 from .base import (
     Item
 )
+
+from snovault.resource_views import item_view_page, item_view_object
+from pyramid.view import view_config
+from pyramid.response import Response
+
+
+def is_static_page(info, request):
+    page_name = "/".join(info.get('match', {}).get('subpath'))
+    if '@@' in page_name:
+        return False
+
+    pages = request.registry[COLLECTIONS]['page']
+    if len(pages) <= 0:
+        return False
+
+    # TODO: we could cache this to remove extraneous db requests
+    conn = request.registry[CONNECTION]
+
+    if conn.storage.get_by_unique_key('page:name', page_name):
+        return True
+    else:
+        return False
+
+
+
+
+def includeme(config):
+    config.add_route(
+        'staticpage',
+        '/*subpath',
+        custom_predicates=[is_static_page]
+    )
+    config.add_view(static_page, route_name='staticpage')
 
 
 def listFilesInInDirectory(dirLocation):
@@ -130,3 +164,32 @@ class Page(Item):
                 print("No files found for static page: \"" + page + "\"")
 
         return content
+
+
+
+
+def static_page(request):
+    '''
+    basically get the page in a standard way (item_view_page) which will
+    do permissions checking.  Then format the return result to be something
+    the front-end expects
+    '''
+
+    page_name = "/".join(request.subpath)
+    caps_list = list(reversed(request.subpath))
+    pageType = ([pg.capitalize() + "Page" for pg in caps_list])
+    pageType.extend(["StaticPage", "Portal"])
+
+    # creates SubmittingHelpPage, HelpPage, etc..
+    conn = request.registry[CONNECTION]
+    # at this point we should be guaranteed to have this object, as the custom_predicate
+    # should prevent this view being called with invalide pagename
+    page_in_db = conn.storage.get_by_unique_key('page:name', page_name)
+
+    context = request.registry[COLLECTIONS]['pages'].get(page_in_db.uuid)
+    item = item_view_page(context, request)
+    item['@id'] = "/" + page_name
+    item['@context'] = "/" + page_name
+    item['@type'] = pageType
+    item['toc'] = item.get('table-of-contents')
+    return item
