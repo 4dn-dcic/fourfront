@@ -166,13 +166,12 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             for out_file in workflow_run_model_obj.get('output_files', []):
                 out_file_atid = out_file.get('value', {})
                 if out_file_atid == in_file.get('@id', 'b'):
-                    step_name = workflow_run_model_obj.get('display_title')
                     step_uuid = workflow_run_uuid
                     if step_uuid:
                         step_uuids.add( (step_uuid, in_file_uuid) )
                     sources_for_in_file.append({
                         "name" : out_file.get('workflow_argument_name'),
-                        "step" : step_name,
+                        "step" : workflow_run_model_obj.get('@id'),
                         "type" : "Output file",
                         "for_file" : in_file_uuid,
                         "workflow" : workflow_run_model_obj.get('workflow')
@@ -233,7 +232,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 source_for_in_file = {
                     "type" : "Input File Group",
                     "for_file" : in_file_uuid,
-                    "step" : workflow_run_model_obj.get('display_title'),
+                    "step" : workflow_run_model_obj.get('@id'),
                     "grouped_by" : "workflow",
                     "workflow" : workflow_run_model_obj.get('workflow')
                 }
@@ -290,7 +289,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                                     if not exists:
                                         output['target'].append({
                                             "name" : argument_name,
-                                            "step" : target_workflow_run_model.get('display_title'),
+                                            "step" : target_workflow_run_model.get('@id'),
                                             "type" : "Input file",
                                             "for_file" : current_file_model_object['uuid']
                                         })

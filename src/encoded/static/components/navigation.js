@@ -142,7 +142,7 @@ export default class Navigation extends React.Component {
             if (!this.state.navInitialized){
                 stateChange.navInitialized = true;
             }
-            var currentScrollTop = ((document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop);
+            var currentScrollTop = layout.getPageVerticalScrollPosition();
             var scrollVector = currentScrollTop - lastScrollTop;
             lastScrollTop = currentScrollTop;
 

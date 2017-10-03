@@ -290,7 +290,6 @@ class GraphSection extends React.Component {
 
     commonGraphProps(){
         var graphData = this.parseAnalysisSteps();
-        console.log('NODES', graphData.nodes);
         return _.extend(commonGraphPropsFromProps(this.props), this.parseAnalysisSteps(), { 'rowSpacingType' : this.state.rowSpacingType });
     }
 

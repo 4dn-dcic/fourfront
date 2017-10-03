@@ -10,13 +10,14 @@ import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/W
 import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
+import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 
 // Testing / Dummy data
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
 //import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
 //import { MORE_PARTIALLY_RELEASED_PROCESSED_FILES } from './../testdata/traced_workflow_runs/replicate-4DNESLLTENG9';
-//import { HISTORY } from './../testdata/traced_workflow_runs/file_processed-4DN';
+import { HISTORY } from './../testdata/traced_workflow_runs/file_processed-4DN';
 
 
 export function allFilesForWorkflowRunsMappedByUUID(items){
@@ -106,8 +107,8 @@ export class WorkflowRunTracingView extends ItemBaseView {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
-        //var steps = HISTORY;
-        var steps = null;
+        var steps = HISTORY;
+        //var steps = null;
         this.state = {
             'mounted' : false,
             'steps' : steps,
@@ -125,7 +126,7 @@ export class WorkflowRunTracingView extends ItemBaseView {
         this.setState(state);
     }
 
-    loadGraphSteps(force = false, cb = null){
+    loadGraphSteps(force = false, cb = null, cache = false){
         var context = this.props.context;
         if (typeof context.uuid !== 'string') return;
         if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
@@ -150,8 +151,15 @@ export class WorkflowRunTracingView extends ItemBaseView {
         }.bind(this);
 
         var tracingHref = '/trace_workflow_run_steps/' + this.props.context.uuid + '/';
+        var opts = {};
+        if (!cache) {
+            opts['timestamp'] = moment.utc().unix();
+        }
         if (this.state.allRuns === true){
-            tracingHref += '?all_runs=True';
+            opts['all_runs'] = true;
+        }
+        if (_.keys(opts).length > 0){
+            tracingHref += '?' + _.map(_.pairs(opts), function(p){ return p[0] + '=' + p[1]; }).join('&');
         }
 
         ajax.load(tracingHref, callback, 'GET', callback);

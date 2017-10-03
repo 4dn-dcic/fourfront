@@ -4,44 +4,102 @@ import _ from 'underscore';
 import { console } from './../../util';
 
 
+
+/**
+ * Type definition for Step input/output argument source or target object.
+ * 
+ * @typedef {Object} StepIOArgumentTargetOrSource
+ * @property {string} type      Type of IO argument in context of this target/source, e.g. 'Input File', 'Output Processed File'. "Global" workflow file args/IOs are "Workflow Output File" or "Workflow Input File"
+ * @property {string} name      Name of this IO/argument in context of this target/source (e.g. if a step, or global workflow arg).
+ * @property {string} [step]    ID of the step IO/argument comes from or is going to, if not a global argument w/ type = 'Workflow Output File' or type = 'Workflow Input File'.
+ */
+
+/**
+ * Type definition for a Step input/output argument.
+ * 
+ * @typedef {Object} StepIOArgument
+ * @property {string} name                          Name of argument in context of step itself
+ * @property {Object} meta                          Various properties related to the argument itself, in context of Step.
+ * @property {StepIOArgumentTargetOrSource[]} [target]   List of targets for IO
+ * @property {StepIOArgumentTargetOrSource[]} [source]   List of sources for IO
+ */
+
+ /**
+ * Type definition for a Step.
+ * 
+ * @typedef {Object} Step
+ * @property {string} name                          Name of step
+ * @property {Object} meta                          Various properties related to the step itself.
+ * @property {StepIOArgument[]} inputs              Input arguments
+ * @property {StepIOArgument[]} outputs             Output arguments
+ */
+
 export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
-    /**** Outputs ****/
+    /*************
+     ** Outputs **
+     *************/
 
     var nodes = [];
     var edges = [];
 
-    /* Temp Vars */
-    var ioIdsUsed = {  }; // Keep track of IO arg node ids used, via keys; prevent duplicates by incrementing int val.
+    /*************
+     * Temp Vars *
+     *************/
 
-    /**** Functions ****/
+    var ioIdsUsed = {  };       // Keep track of IO arg node ids used, via keys; prevent duplicates by incrementing int val.
+    var processedSteps = {};    // Keep track of steps already processed & added to graph. We start drawing first step, and its inputs/outputs, then recursively draw steps that its outputs go to. At the end, we restart from step that has not yet been encountered/processed, if any.
+
+    /***************
+     ** Functions **
+     ***************/
 
     function stepNodeID   (step) { return step.uuid || (step.meta && typeof step.meta === 'object' && step.meta['@id']) || step['@id'] || step.link_id || step.name; }
     function stepNodeName (step) { return step.display_title || step.title || step.name || step['@id']; }
-    function inputNodeID  (stepInput, readOnly = true) {
+
+    function ioNodeID(stepIOArg, readOnly = true){
         return preventDuplicateNodeID(
-            stepInput.id /*|| (Array.isArray(stepInput.source) && stepInput.source.length > 0 && stepInput.source[0].name)*/ || stepInput.name,
-            readOnly
-        );
-    }
-    function outputNodeID (stepOutput, readOnly = true){
-        return preventDuplicateNodeID(
-            stepOutput.id /*|| (Array.isArray(stepOutput.target) && stepOutput.target.length > 0 && (stepOutput.target[1] || stepOutput.target[0]).name)*/ || stepOutput.name,
+            stepIOArg.id /*|| (Array.isArray(stepInput.source) && stepInput.source.length > 0 && stepInput.source[0].name)*/ || stepIOArg.name,
             readOnly
         );
     }
 
+    /**
+     * Generate name for IO node based on 'global' step argument input source or output target name, if available.
+     * If no global source or target (w/ 'type' === 'Workflow (Input|Output) File') available, reverts to StepIOArgument.name (name of argument in context of step itself, at time of drawing).
+     * 
+     * @param {StepIOArgument} stepIOArg - Input or output argument of a step.
+     * @returns {string} Name of node.
+     */
     function ioNodeName(stepIOArg){
-        var nameToUse = stepIOArg.name; // Default; name of step argument from step we're drawing IO nodes currently.
+        var nameToUse = stepIOArg.name || null; // Default; name of step argument from step we're drawing IO nodes currently.
         var list = null;
-        if (Array.isArray(stepIOArg.source)){
-            list = stepIOArg.source;
-        } else if (Array.isArray(stepIOArg.target)){
+        if (Array.isArray(stepIOArg.target)){
             list = stepIOArg.target;
         }
+        if (Array.isArray(stepIOArg.source)){
+            if (list) list = list.concat(stepIOArg.source);
+            else list = stepIOArg.source;
+        }
+        if (!list) return nameToUse;
+        var i, listLength = list.length;
+        for (i = 0; i < listLength; i++){
+            if (list[i] && (list[i].type === 'Workflow Output File' || list[i].type === 'Workflow Input File') && typeof list[i].name === 'string'){
+                nameToUse = list[i].name;
+                break;
+            }
+        }
+        return nameToUse;
     }
 
-
+    /**
+     * Pass a should-be-unique ID through this function to check if same ID exists already.
+     * If so, returns a copy of ID with '~' + increment appended to it.
+     * 
+     * @param {string} id - ID to make sure is unique. 
+     * @param {boolean} [readOnly=true] If true, will NOT update increment count in cache. Use readOnly when generating nodes to match against without concretely adding them to final list of nodes (yet/ever).
+     * @returns {string} Original id, if unique, or uniqueified ID.
+     */
     function preventDuplicateNodeID(id, readOnly = true){
         if (typeof id !== 'string') throw new Error('param id is not a string.');
         id = id.replace(/(~\d+)/,'');
@@ -92,86 +150,34 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         };
     }
 
-
-    function generateOutputNode(stepOutput, column, outputOfNode, readOnly = true){
+    function generateInputNode(stepInput, column, inputOfNode, readOnly = true){
+        var namesOnSteps = {};
+        namesOnSteps[inputOfNode.id] = stepInput.name;
         return {
-            column      : column,
-            format      : (Array.isArray(stepOutput.target) && stepOutput.target.length > 0 && stepOutput.target[0].type) || null,
-            id          : outputNodeID(stepOutput, readOnly),
-            name        : stepOutput.name,
-            type        : 'output',
-            meta        : _.extend({}, stepOutput.meta || {}, _.omit(stepOutput, 'required', 'name', 'meta')),
-            outputOf    : outputOfNode
+            column       : column,
+            format       : (Array.isArray(stepInput.source) && stepInput.source.length > 0 && stepInput.source[0].type) || null, // First source type takes priority
+            id           : ioNodeID(stepInput, readOnly),
+            name         : ioNodeName(stepInput),// stepInput.name, 
+            argNamesOnSteps : namesOnSteps,
+            type         : 'input',
+            inputOf      : [inputOfNode],
+            meta         : _.extend({}, stepInput.meta || {}, _.omit(stepInput, 'required', 'name', 'meta')),
+            required     : stepInput.required || false,
         };
     }
 
-    /**
-     * Generate output nodes from step.outputs and create edges between them and stepNode.
-     * 
-     * @param {Object} step - Analysis Step
-     * @param {number} column - Column index (later translated into X coordinate).
-     * @param {Object} stepNode - Analysis Step Node Reference
-     */
-    function generateOutputNodesSimple(step, column, stepNode){
-
-        var outputNodes = _.flatten(step.outputs.map(function(stepOutput, j){
-            return expandIONodes(stepOutput, column, stepNode, "output", false);
-        }), true);
-
-        // Find __ INPUT __ nodes with same file (checks OUTPUT as well, there just shouldn't be any unless a unique file comes out of 2+ steps)
-        // if any exist, replace them, re-use instead of adding new, and make edge.
-        // also... : move node down in column list somehow
-        var existingMatchedNodes = [];
-        outputNodes = _.filter(outputNodes, function(oN){
-            for (var i = 0; i < nodes.length; i++){
-                if (nodes[i] && nodes[i].meta && nodes[i].meta.run_data && nodes[i].meta.run_data.file){
-                    if (checkNodeFileForMatch(oN, nodes[i].meta.run_data.file)){
-                        nodes[i].outputOf = stepNode;
-                        
-                        nodes[i].format = oN.format;
-                        //nodes[i].name = oN.name || nodes[i].name; //ioNodeNameCombo(nodes[i], oN);
-                        nodes[i].type = 'output'; // Convert our found input file to an output file, if not already.
-                        if (nodes[i].meta && oN.meta && oN.meta.argument_type){
-                            nodes[i].meta.argument_type = oN.meta.argument_type;
-                        }
-                        nodes[i].wasMatchedAsOutputOf = stepNode.id; // For debugging.
-                        edges.push({
-                            'source' : stepNode,
-                            'target' : nodes[i],
-                            'capacity' : 'Output',
-                        });
-                        existingMatchedNodes.push(nodes[i]);
-                        return false;
-                    }
-                }
-            }
-            return true;
-        });
-
-        stepNode.outputNodes = _.sortBy(existingMatchedNodes.concat(outputNodes), 'id');
-        
-        outputNodes.forEach(function(n){
-            edges.push({
-                'source' : stepNode,
-                'target' : n,
-                'capacity' : 'Output',
-            });
-        });
-
-        nodes = nodes.concat(outputNodes);
-        return outputNodes;
-    }
-
-    function generateInputNode(stepInput, column, inputOfNode, readOnly = true){
+    function generateOutputNode(stepOutput, column, outputOfNode, readOnly = true){
+        var namesOnSteps = {};
+        namesOnSteps[outputOfNode.id] = stepOutput.name;
         return {
-            column      : column,
-            format      : (Array.isArray(stepInput.source) && stepInput.source.length > 0 && stepInput.source[0].type) || null, // First source type takes priority
-            id          : inputNodeID(stepInput, readOnly),
-            name        : stepInput.name, 
-            type        : 'input',
-            inputOf     : [inputOfNode],
-            meta        : _.extend({}, stepInput.meta || {}, _.omit(stepInput, 'required', 'name', 'meta')),
-            required    : stepInput.required || false,
+            column       : column,
+            format       : (Array.isArray(stepOutput.target) && stepOutput.target.length > 0 && stepOutput.target[0].type) || null,
+            id           : ioNodeID(stepOutput, readOnly),
+            name         : ioNodeName(stepOutput),
+            argNamesOnSteps : namesOnSteps,
+            type         : 'output',
+            meta         : _.extend({}, stepOutput.meta || {}, _.omit(stepOutput, 'required', 'name', 'meta')),
+            outputOf     : outputOfNode
         };
     }
 
@@ -197,8 +203,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     file = file[1];
                 }
                 var stepInputAdjusted = _.extend({}, stepInput, {
-                    'name' : stepInput.name,
-                    'id' : stepInput.name + '.' + (file.accession || file.uuid || idx),
+                    'name'  : ioNodeName(stepInput),
+                    'id'    : ioNodeName(stepInput) + '.' + (file.accession || file.uuid || idx),
                     'run_data' : _.extend({}, stepInput.run_data, {
                         'file' : file,
                         'meta' : (stepInput.run_data.meta && stepInput.run_data.meta[idx]) || null
@@ -256,11 +262,14 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             // Should only be one groupingName for now.
             var groupingName = 'workflow';
             var groupNodes = _.reduce(_.pairs(filesByGroup[groupingName]), function(m, wfPair, i){
+                var namesOnSteps = {};
+                namesOnSteps[inputOfNode.id] = stepInput.name;
                 var groupNode = {
                     column      : column,
                     format      : groupTypeToCheck,
-                    id          : stepInput.name + '.group:' + groupingName + '.' + wfPair[0],
-                    name        : stepInput.name,
+                    id          : ioNodeName(stepInput)+ '.group:' + groupingName + '.' + wfPair[0],
+                    name        : ioNodeName(stepInput),
+                    argNamesOnSteps : namesOnSteps,
                     type        : inputOrOutput + '-group',
                     meta        : _.extend({}, stepInput.meta || {}, _.omit(stepInput, 'required', 'name', 'meta')),
                     inputOf     : [inputOfNode]
@@ -277,36 +286,75 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         
     }
 
-    
+    /**
+     * Generate output nodes from step.outputs and create edges between them and stepNode.
+     * 
+     * @param {Object} step - Analysis Step
+     * @param {number} column - Column index (later translated into X coordinate).
+     * @param {Object} stepNode - Analysis Step Node Reference
+     */
+    function generateOutputNodesSimple(step, column, stepNode){
 
-    function filterNodesToRelatedIONodes(allNodes, stepName){
-        return _.filter(nodes, function(n){
-            if (n.type === 'output' || n.type === 'input'){
-                var targetPropertyName = n.type === 'input' ? 'source' : 'target';
-                if (!Array.isArray(n.meta[targetPropertyName])) return false;
+        var outputNodesToCreate = _.flatten(step.outputs.map(function(stepOutput, j){
+            return expandIONodes(stepOutput, column, stepNode, "output", false);
+        }), true);
 
-                for (var i = 0; i < n.meta[targetPropertyName].length; i++){
-                    if (n.meta[targetPropertyName][i].step === stepName) return true;
+        // Find __ INPUT __ nodes with same file (checks OUTPUT as well, there just shouldn't be any unless a unique file comes out of 2+ steps)
+        // if any exist, replace them, re-use instead of adding new, and make edge.
+        // also... : move node down in column list somehow
+        var existingMatchedNodes = [];
+        var newOutputNodes = _.filter(outputNodesToCreate, function(oN){
+            for (var i = 0; i < nodes.length; i++){
+                if (nodes[i] && nodes[i].meta && nodes[i].meta.run_data && nodes[i].meta.run_data.file){
+                    if (checkNodeFileForMatch(oN, nodes[i].meta.run_data.file)){
+                        nodes[i].outputOf = stepNode;
+                        
+                        nodes[i].format = oN.format;
+                        //nodes[i].name = oN.name || nodes[i].name; //ioNodeNameCombo(nodes[i], oN);
+                        nodes[i].type = 'output'; // Convert our found input file to an output file, if not already.
+                        if (nodes[i].meta && oN.meta && oN.meta.argument_type){
+                            nodes[i].meta.argument_type = oN.meta.argument_type;
+                        }
+                        nodes[i].wasMatchedAsOutputOf = stepNode.id; // For debugging.
+                        edges.push({
+                            'source' : stepNode,
+                            'target' : nodes[i],
+                            'capacity' : 'Output',
+                        });
+                        existingMatchedNodes.push(nodes[i]);
+                        return false;
+                    }
                 }
-
-                if (n[n.type + 'Of']){
-                    if (n[n.type + 'Of'].name === stepName) return true;
-                }
-
-                return false;
             }
-            return false;
+            return true;
         });
+
+        stepNode.outputNodes = _.sortBy(existingMatchedNodes.concat(newOutputNodes), 'id');
+        
+        newOutputNodes.forEach(function(n){
+            edges.push({
+                'source' : stepNode,
+                'target' : n,
+                'capacity' : 'Output',
+            });
+        });
+
+        nodes = nodes.concat(newOutputNodes);
+        return newOutputNodes;
     }
 
+    
+
+    
 
     /**
      * Find existing or generate new input nodes for each input in step.inputs and
      * create edges between them and stepNode.
      * 
-     * @param {Object} step - Analysis Step
+     * @param {Step} step - Analysis Step
      * @param {number} column - Column index (later translated into X coordinate).
      * @param {Object} stepNode - Analysis Step Node Reference
+     * @returns {Object} Object containing two lists - 'created' and 'matched' - containing nodes which were newly created and matched & re-used, respectively, for this step's input arguments.
      */
     function generateInputNodesComplex(step, column, stepNode){
         var inputNodesMatched = [];
@@ -315,7 +363,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         step.inputs.forEach(function(fullStepInput){
             if (!Array.isArray(fullStepInput.source)) return;
 
-            var inputNodes = []; // All input nodes matched to step input will be in here
+            var inputNodes = []; // All input nodes matched to step input will be in here, e.g. to draw edges from to step.
 
             // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
             var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode, "input", true);
@@ -324,10 +372,17 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
             var currentInputNodesMatched = (
                 _.filter(nodes /*allRelatedIONodes*/, function(n){
+                    
+                    // Skip any step nodes
+                    if (n.type === 'step') return false;
+
+                    // Compare IO nodes against step input arg sources
                     if (_.find(fullStepInput.source, function(s){
-                        // Match source/target (todo: inputOf to array)
-                        if (s.name === n.name && n.outputOf && s.step === n.outputOf.name) return true;
-                        if (s.name === n.name && Array.isArray(n.inputOf) && _.any(n.inputOf, function(nIO){ return stepNode.name === nIO.name; })) return true;
+                        
+                        // Match node by source step name === node.outputOf (stepNode); source.step is normally step.name but may be ID as well.
+                        if (s.step && n.argNamesOnSteps[s.step] === s.name && n.outputOf && (s.step === n.outputOf.id || s.step === n.outputOf.name)) return true; // Case: existing node is output node of our step.input.source.step
+                        // Match node by current step === node.inputOf (stepNode)
+                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n.inputOf) && _.any(n.inputOf, function(nIO){ return stepNode.id === nIO.id; })) return true; // Case: existing node is already input node of current step(.input.source)
 
                         // Match Groups
                         if (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
@@ -344,18 +399,14 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         else if (s.for_file && !Array.isArray(s.for_file) && checkNodeFileForMatch(n, s.for_file)) return true;
 
                         // Match Output Nodes that target this step.
-                        if ( _.find(
-                                n.meta.target || [],
-                                function(t){
-                                    if (t.step === step.name && fullStepInput.name === t.name) return true;
-                                    return false;
-                                }
-                            )
-                        ) return true;
+                        if (Array.isArray(n.meta.target) && _.find(n.meta.target, function(t){
+                            if (t.step === step.name && fullStepInput.name === t.name) return true;
+                            return false;
+                        })) return true;
                         
                         return false;
                     })){
-                        nodesNamesMatched[n.name] = fullStepInput.name;
+                        nodesNamesMatched[n.name] = ioNodeName(fullStepInput);
                         return true;
                     }
 
@@ -363,19 +414,24 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 })
             );
 
-            var matchedNames = _.keys(nodesNamesMatched);
-            var nodesNamesMatchedInverted = _.invert(nodesNamesMatched);
-
             //console.log('MATCHED', currentInputNodesMatched);
 
             if (currentInputNodesMatched.length > 0){
                 inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
                 inputNodes = inputNodes.concat(currentInputNodesMatched);
+
+                // Extend each existing node `n` that we've matched with data from nodes that would've been newly created otherwise `inNode`.
                 _.forEach(currentInputNodesMatched, function(n){
                     var inNodeName = nodesNamesMatched[n.name];
-                    if (typeof inNodeName === 'undefined') return;
+                    if (typeof inNodeName === 'undefined'){
+                        console.warn("Didn't find new node to extend from which was previously matched against node", n);
+                        return;
+                    }
                     var inNodes = _.where(inputNodesToMatch, { 'name' : inNodeName });
-                    if (!inNodes || inNodes.length === 0) return;
+                    if (!inNodes || inNodes.length === 0) {
+                        console.warn("Didn't find new node to extend from which was previously matched against node", inNodeName, n);
+                        return;
+                    }
                     
                     var inNode;
                     // Sometimes we have more than 1 file per argument 'name'. So lets narrow it down.
@@ -389,15 +445,18 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                             return false;
                         });
                     }
-                    if (!inNode) return;
-                    //console.log(n, inNode);
+                    if (!inNode){
+                        console.warn("Didn't find new node to extend from which was previously matched against node", inNodeName, n);
+                        return;
+                    }
+                    var combinedMeta = _.extend(n.meta, inNode.meta);
                     _.extend(n, {
                         'inputOf' : _.sortBy( (n.inputOf || []).concat(inNode.inputOf || []), 'id'),
-                        'meta' : _.extend(n.meta, inNode.meta),
-                        'name' : inNode.name,
+                        'meta' : combinedMeta,
+                        'name' : ioNodeName(combinedMeta) || n.name,
+                        'argNamesOnSteps' : _.extend(n.argNamesOnSteps, inNode.argNamesOnSteps),
                         'id' : preventDuplicateNodeID(inNode.id, false),
                         'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.id) // Used only for debugging.
-                        //'name' : n.name || inNode.name //ioNodeNameCombo(inNode, n)
                     });
                 });
             }
@@ -421,14 +480,15 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         return true;
                     }),
                     function(n){
-                        n.id = preventDuplicateNodeID(n.id, false);
-                        n.generatedAsInputOf = (n.generatedAsInputOf || []).concat(stepNode.id);
+                        n.id = preventDuplicateNodeID(n.id, false); // Cement ID in dupe ID cache from previously read-only 'to-check-only' value.
+                        n.generatedAsInputOf = (n.generatedAsInputOf || []).concat(stepNode.id); // Add reference to stepNode to indicate how/where was drawn from. For debugging only.
                         return n;
                     }
                 );
-                nodes = nodes.concat(unmatchedInputNodes);
+                nodes = nodes.concat(unmatchedInputNodes); // <- Add new nodes to list of all nodes.
                 inputNodesCreated = inputNodesCreated.concat(unmatchedInputNodes);
                 inputNodes = inputNodes.concat(unmatchedInputNodes);
+                //console.log('NEW NODES CREATED', unmatchedInputNodes, unmatchedInputNodes[0].column, stepNode.column, stepNode.id);
             }
 
             //console.log('CREATED', inputNodesCreated);
@@ -456,132 +516,16 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         return { 'created' : inputNodesCreated, 'matched' : inputNodesMatched };
     }
 
-    function generateInputNodesSimple(step, column, stepNode){
-
-        var inputNodes = _.flatten(step.inputs.map(function(stepInput, j){
-            return expandIONodes(stepInput, column, stepNode, "input", false);
-        }), true);
-        
-        inputNodes.forEach(function(n){
-            edges.push({
-                'source' : n,
-                'target' : stepNode,
-                'capacity' : 'Input',
-            });
-        });
-
-        nodes = nodes.concat(inputNodes);
-        return inputNodes;
-    }
-
-    function generateOutputNodesComplex(step, column, stepNode){
-
-        var inputNodesMatched = [];
-        var inputNodesCreated = [];
-
-        step.outputs.forEach(function(fullStepOutput){
-            if (!Array.isArray(fullStepOutput.target)) return;
-
-            var outputNodes = []; // All input nodes matched to step input will be in here
-
-            // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
-            var outputNodesToMatch = expandIONodes(fullStepOutput, column, stepNode, "output", true);
-            var nodesNamesMatched = {  };
-
-            // Sorry. Try to match up a previous input node by its source (s) with one of our output target (t)
-            var currentOutputNodesMatched = (
-                _.filter(nodes, function(n){
-                    if (n.type === 'input'
-                    &&  _.find(n.meta.source, function(s){
-                        if (s.step === step.name && s.name === fullStepOutput.name) return true;
-                        return false;
-                    })
-                    ){
-                        nodesNamesMatched[n.name] = fullStepOutput.name;
-                        return true;
-                    }
-                    if (_.find(fullStepOutput.target, function(t){
-                        if (n.type === 'input' && t.name === n.name &&
-                            _.any(n.inputOf || [], function(nIO){ return nIO.name === t.step; })
-                        ) return true;
-                        return false;
-                    })){
-                        nodesNamesMatched[n.name] = fullStepOutput.name;
-                        return true;
-                    }
-                    else return false;
-                })
-            );
-
-            var matchedNames = _.keys(nodesNamesMatched); //_.pluck(currentOutputNodesMatched, 'name');
-
-            if (currentOutputNodesMatched.length > 0){
-                inputNodesMatched = inputNodesMatched.concat(currentOutputNodesMatched);
-                outputNodes = outputNodes.concat(currentOutputNodesMatched);
-                // Merge any bound-metadata from 'output' node version to its existing 'input' counterpart.
-                _.forEach(currentOutputNodesMatched, function(n){
-                    var outNodeName = nodesNamesMatched[n.name];
-                    if (typeof outNodeName === 'undefined') return;
-                    var outNode = _.findWhere(outputNodesToMatch, { 'name' : outNodeName });
-                    if (!outNode) return;
-                    _.extend(n, { 'outputOf' : outNode.outputOf, 'meta' : _.extend(n.meta, outNode.meta) });
-                });
-            }
-
-            // Step 2. For any unmatched input nodes, create them (via adding to 'nodes' list).
-            if (currentOutputNodesMatched.length < outputNodesToMatch.length){
-                //var matchedNames = _.pluck(currentOutputNodesMatched, 'name');
-                var unmatchedInputNodes = _.map(
-                    _.filter(outputNodesToMatch, function(n,idx){
-                        if (matchedNames.indexOf(n.name) > -1) return false;
-                        return true;
-                    }),
-                    function(n){
-                        n.id = preventDuplicateNodeID(n.id, false);
-                        return n;
-                    }
-                );
-                nodes = nodes.concat(unmatchedInputNodes);
-                inputNodesCreated = inputNodesCreated.concat(unmatchedInputNodes);
-                outputNodes = outputNodes.concat(unmatchedInputNodes);
-            }
-
-            // Finally, attach edge to all input nodes associated to step input.
-            if (outputNodes.length > 0) {
-                _.forEach(outputNodes, function(n){
-                    edges.push({
-                        'source' : stepNode,
-                        'target' : n,
-                        'capacity' : 'Output'
-                    });
-                });
-            }
-
-        });
-
-        return { 'created' : inputNodesCreated, 'matched' : inputNodesMatched };
-    }
-
-    var processedSteps = {}; // Just for optimization
-
     function findNextStepsFromIONode(ioNodes){
 
         var targetPropertyName = parsingMethod === 'output' ? 'target' : 'source';
-        /*
-        var remainingSteps = analysis_steps.filter(function(step){
-            if (typeof processedSteps[stepNodeID(step) || stepNodeName(step)] !== 'undefined'){
-                return false;
-            }
-            return true;
-        });
-        */
         var nextSteps = new Set();
 
         ioNodes.forEach(function(n){
             if (n.meta && Array.isArray(n.meta[targetPropertyName])){
                 n.meta[targetPropertyName].forEach(function(t){
                     if (typeof t.step === 'string'){
-                        var matchedStep = _.findWhere(analysis_steps, { 'name' : t.step });
+                        var matchedStep = _.find(analysis_steps, function(step){ return stepNodeID(step) === t.step; });
                         if (matchedStep) {
                             nextSteps.add(matchedStep);
                         }
@@ -597,7 +541,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      * Recursive function which generates step, output, and input nodes (if input not matched to existing node),
      * starting at param 'step' and tracing path, splitting if needs to, of outputNodes->meta.target.step->outputNodes->meta.target.step->...
      * 
-     * @param {Object} step - AnalysisStep object representation, extended with additional 'inputs' and 'outputs' arrays. 
+     * @param {Step} step - Step object representation from backend-provided list of steps.
      * @param {number} [level=0] - Step level or depth. Used for nodes' column (precursor to X axis position).
      */
     function processStepInPath(step, level = 0){
@@ -606,12 +550,20 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         var inputNodesUsedOrCreated, outputNodesCreated;
 
         if (parsingMethod === 'output'){
-            inputNodesUsedOrCreated  = generateInputNodesComplex(step, (level + 1) * 2 - 2, stepNode);
-            outputNodesCreated = generateOutputNodesSimple(step, (level + 1) * 2, stepNode);
+            inputNodesUsedOrCreated = generateInputNodesComplex(
+                step,                   // Step
+                (level + 1) * 2 - 2,    // (Preliminary) Column
+                stepNode                // Step Node
+            );
+            outputNodesCreated = generateOutputNodesSimple(
+                step,                   // Step
+                (level + 1) * 2,        // (Preliminary) Column
+                stepNode                // Step Node
+            );
 
             nodes.push(stepNode);
 
-            processedSteps[stepNode.id || stepNode.name] = stepNode;
+            processedSteps[stepNode.id] = stepNode;
 
             findNextStepsFromIONode(outputNodesCreated).forEach(function(nextStep){
                 if (typeof processedSteps[stepNodeID(nextStep)] === 'undefined'){
@@ -621,98 +573,55 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 }
             });
         } else {
-            
-            outputNodesCreated = generateOutputNodesComplex(step, (level + 1) * 2, stepNode);
-            inputNodesUsedOrCreated  = generateInputNodesSimple(step, (level + 1) * 2 - 2, stepNode);
 
-            nodes.push(stepNode);
+            throw Error("Input-direction drawing not currently supported.");
 
-            processedSteps[stepNode.id || stepNode.name] = stepNode;
-
-            findNextStepsFromIONode(inputNodesUsedOrCreated).forEach(function(nextStep){
-                processStepInPath(nextStep, level - 1);
-            });
         }
         
         
     }
 
-    /***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
-     *  Process each Analysis Step as a node. Inputs & output nodes placed in alternating column.  *
-     ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****/
+    /***********************************************************************************************
+     ** Process each Analysis Step as a node. Inputs & output nodes placed in alternating column. **
+     ***********************************************************************************************/
 
     /**
-     * Process step[]->output[]->step[]->output[] graph.
-     * Start at first analysis step in array.
+     * Process step[]->output[]->step[]->output[] graph. Start at first analysis step in array.
+     * @returns {void} Nothing
      */
     function processStepIOPath(){
         if (Array.isArray(analysis_steps) && analysis_steps.length > 0){
-            if (parsingMethod === 'output'){
 
+            processStepInPath(analysis_steps[0]);
 
-                processStepInPath(analysis_steps[0]);
-                //console.log('FIRSTSTEP', analysis_steps[0])
+            // We should be done at this point, however there might steps which were not drawn from output path stemming from first step, so here
+            // we loop up to 1000 times and repeat drawing process until no more steps are left to draw.
 
-                for (var i = 0; i < 1000; i++){
-
-                    if (_.keys(processedSteps).length < analysis_steps.length){
-                        var nextSteps = _.filter(analysis_steps, function(s){
-                            if (typeof processedSteps[stepNodeID(s)] === 'undefined') return true;
-                            return false;
-                        });
-                        //console.log('NEXTSTEPS', i, nextSteps);
-                        if (nextSteps.length > 0) processStepInPath(nextSteps[0]);
-                    } else {
-                        break;
-                    }
-
-                }
-
-
-
-            } else if (parsingMethod === 'input') {
-                processStepInPath(analysis_steps[analysis_steps.length - 1], analysis_steps.length - 1);
-                var colDepthMin = _.reduce(nodes, function(m,n){ return Math.min(n.column, m); }, 100);
-                if (colDepthMin > 0){
-                    nodes.forEach(function(n){
-                        n.column -= colDepthMin;
+            for (var i = 0; i < 1000; i++){
+                if (_.keys(processedSteps).length < analysis_steps.length){
+                    var nextSteps = _.filter(analysis_steps, function(s){
+                        if (typeof processedSteps[stepNodeID(s)] === 'undefined') return true;
+                        return false;
                     });
+                    if (nextSteps.length > 0) processStepInPath(nextSteps[0]);
+                } else {
+                    break;
                 }
-                
+
             }
+
         }
         
     }
 
-    /**
-     * Process steps linearly, by their order in list.
-     * @deprecated
-     * @param {Object} step - List of AnalysisSteps, each extended with 'inputs' and 'outputs' arrays.
-     * @param {number} index - Step index.
-     */
-    function processStepsLinearly(){
-        analysis_steps.forEach(function(step, i){
-            var stepNode = generateStepNode(step, (i + 1) * 2 - 1);
-            generateInputNodesComplex(step, (i + 1) * 2 - 2, stepNode);
-            generateOutputNodesSimple(step, (i + 1) * 2, stepNode);
-            nodes.push(stepNode);
-        });
-    }
 
-
-
-    /** Entry Point **/
+    /*********************
+     **** Entry Point ****
+     *********************/
     
-    if (parsingMethod === 'linear'){
-        processStepsLinearly();
-    } else if (parsingMethod === 'input' || parsingMethod === 'output') {
-        processStepIOPath();
-    }
+    processStepIOPath();
 
-    return correctColumnAssignments({
-        'nodes' : nodes,
-        'edges' : edges
-    });
+    return correctColumnAssignments({ nodes, edges });
 
 }
 

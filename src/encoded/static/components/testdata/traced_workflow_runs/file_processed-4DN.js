@@ -37,7 +37,7 @@ export const HISTORY = [
                     },
                     {
                         "type":"Input file",
-                        "step":"pairsam-parse-sort run 2017-09-14 17:54:37.332192",
+                        "step":"/workflow-runs-awsem/7dfc5022-ef1a-4f6c-866c-c1a105846a67/",
                         "for_file":"003edd35-ab95-42cd-930a-1c6c73b2ed33",
                         "name":"bam"
                     }
@@ -232,13 +232,13 @@ export const HISTORY = [
                     },
                     {
                         "type":"Input file",
-                        "step":"pairsam-merge run 2017-09-15 02:11:05.616825",
+                        "step":"/workflow-runs-awsem/91787af7-7c47-418e-8f6e-a31200b95b7a/",
                         "for_file":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc",
                         "name":"input_pairsams"
                     },
                     {
                         "type":"Input file",
-                        "step":"pairsam-merge run 2017-09-15 17:42:17.814966",
+                        "step":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/",
                         "for_file":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc",
                         "name":"input_pairsams"
                     }
@@ -284,7 +284,7 @@ export const HISTORY = [
                     {
                         "workflow":"/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
                         "type":"Output file",
-                        "step":"bwa-mem run 2017-09-13 20:16:24.446879",
+                        "step":"/workflow-runs-awsem/3a302bf0-6943-434c-803d-0b9c777198ec/",
                         "for_file":"003edd35-ab95-42cd-930a-1c6c73b2ed33",
                         "name":"out_bam"
                     }
@@ -397,13 +397,13 @@ export const HISTORY = [
                     },
                     {
                         "type":"Input file",
-                        "step":"pairsam-markasdup run 2017-09-15 20:28:42.315188",
+                        "step":"/workflow-runs-awsem/c8d4f6df-7dce-4c7f-8e48-ddd61b745842/",
                         "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
                         "name":"input_pairsams"
                     },
                     {
                         "type":"Input file",
-                        "step":"pairsam-markasdup run 2017-09-15 20:30:47.997521",
+                        "step":"/workflow-runs-awsem/e42511cf-a65a-471c-8189-d44bcbf0f6e9/",
                         "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
                         "name":"input_pairsam"
                     }
@@ -449,28 +449,28 @@ export const HISTORY = [
                     {
                         "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/",
                         "type":"Output file",
-                        "step":"pairsam-parse-sort run 2017-09-14 17:54:37.332192",
+                        "step":"/workflow-runs-awsem/7dfc5022-ef1a-4f6c-866c-c1a105846a67/",
                         "for_file":"6ad758a1-a6e3-4c7e-acd9-55a843b7f9bc",
                         "name":"out_pairsam"
                     },
                     {
                         "grouped_by":"workflow",
                         "type":"Input File Group",
-                        "step":"pairsam-parse-sort run 2017-09-14 17:54:42.439084",
+                        "step":"/workflow-runs-awsem/2781b17e-134b-4116-a7e6-f03c2b5afaf0/",
                         "for_file":"df45891e-4341-4233-baf2-d296c7e08abe",
                         "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
                     },
                     {
                         "grouped_by":"workflow",
                         "type":"Input File Group",
-                        "step":"pairsam-parse-sort run 2017-09-14 17:54:47.780382",
+                        "step":"/workflow-runs-awsem/3d74e9b5-7f47-440a-a511-d07ed2d68d2d/",
                         "for_file":"be6daffe-094d-4758-b138-20f0e8080987",
                         "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
                     },
                     {
                         "grouped_by":"workflow",
                         "type":"Input File Group",
-                        "step":"pairsam-parse-sort run 2017-09-14 20:21:10.272849",
+                        "step":"/workflow-runs-awsem/750c5aaa-6aba-4e05-80fe-b765854f531f/",
                         "for_file":"f3310aa9-d947-40f5-8e65-9cbe24386187",
                         "workflow":"/workflows/65586d4b-1e3b-4b31-891e-11f48c816545/"
                     }
@@ -596,7 +596,7 @@ export const HISTORY = [
                     },
                     {
                         "type":"Input file",
-                        "step":"pairsam-filter run 2017-09-16 00:10:42.865657",
+                        "step":"/workflow-runs-awsem/b2fc0880-62be-460e-b854-d87a58c6665a/",
                         "for_file":"c08b165e-8fc0-46af-8211-d363f7def6dc",
                         "name":"input_pairsam"
                     }
@@ -642,7 +642,7 @@ export const HISTORY = [
                     {
                         "workflow":"/workflows/af8908bf-fdcb-40be-8bca-f1a49226bd20/",
                         "type":"Output file",
-                        "step":"pairsam-merge run 2017-09-15 17:42:17.814966",
+                        "step":"/workflow-runs-awsem/33db8da4-c689-4ae1-a47a-22e8fc39eeb2/",
                         "for_file":"dc8c6fdc-b385-41e2-9ec4-b5a6c77f120e",
                         "name":"merged_pairsam"
                     }
@@ -717,19 +717,19 @@ export const HISTORY = [
                     },
                     {
                         "type":"Input file",
-                        "step":"addfragtopairs run 2017-09-16 06:37:00.522517",
+                        "step":"/workflow-runs-awsem/2320c3ab-96da-4ff2-88f8-a4e766f91976/",
                         "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
                         "name":"input_pairs"
                     },
                     {
                         "type":"Input file",
-                        "step":"addfragtopairs run 2017-09-16 12:43:22.792334",
+                        "step":"/workflow-runs-awsem/dfc8fa60-0009-4755-a264-9020ad498744/",
                         "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
                         "name":"input_pairs"
                     },
                     {
                         "type":"Input file",
-                        "step":"addfragtopairs run 2017-09-16 12:52:22.610248",
+                        "step":"/workflow-runs-awsem/a76a62ac-efaf-4933-9223-b9562f10e9e6/",
                         "for_file":"aa3303ce-b7e4-43ce-b4f2-5262252fc383",
                         "name":"input_pairs"
                     },
