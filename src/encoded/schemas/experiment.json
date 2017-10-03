@@ -23,6 +23,7 @@
                 "revoked",
                 "deleted",
                 "replaced",
+                "planned",
                 "in review by lab",
                 "in review by project",
                 "released to project"

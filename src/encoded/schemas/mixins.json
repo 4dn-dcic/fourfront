@@ -76,6 +76,7 @@
             "enum": [
                 "released",
                 "current",
+                "planned",
                 "revoked",
                 "deleted",
                 "obsolete",
