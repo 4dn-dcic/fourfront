@@ -166,8 +166,6 @@ class Page(Item):
         return content
 
 
-
-
 def static_page(request):
     '''
     basically get the page in a standard way (item_view_page) which will
@@ -192,4 +190,5 @@ def static_page(request):
     item['@context'] = "/" + page_name
     item['@type'] = pageType
     item['toc'] = item.get('table-of-contents')
+
     return item
