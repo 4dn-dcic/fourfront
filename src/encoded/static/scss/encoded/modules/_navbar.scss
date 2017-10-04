@@ -8,6 +8,7 @@ $navbar-transition-easing: ease-out;
 #top-nav {
     background: #ffffff;
     margin-bottom: 0;
+    transform: translate3d(0,0,0);
 
     > nav.navbar-main {
         /* React-Bootstrap Navbar itself */
@@ -18,8 +19,6 @@ $navbar-transition-easing: ease-out;
         box-sizing: content-box; /* Exclude bottom border from min-height */
         min-height: $navbar-full-height; /* Mobile default */
         line-height: $navbar-full-height;
-        //box-shadow: 0 0 3px rgba(0,0,0,0);
-        transform: translate3d(0,0,0);
         position: relative;
 
         @media screen and (min-width: $navbar-fixed-breakpoint){
@@ -39,7 +38,9 @@ $navbar-transition-easing: ease-out;
                     border-color $navbar-transition-length */;
             }
 
-            .navbar-container.scrolled-past-top & {
+            .navbar-container.scrolled-past-top &,
+            //body.scrolled-past-top .navbar-container &,
+            body.is-full-screen .navbar-container & {
                 height: $navbar-small-height;
                 line-height: $navbar-small-height;
                 //border-color: #d4d4d4;
@@ -312,7 +313,9 @@ $navbar-transition-easing: ease-out;
     @media (min-width: $navbar-fixed-breakpoint) {
         position: fixed;
 
-        .navbar-container.nav-initialized.navbar-container.scrolled-past-top & {
+        .navbar-container.nav-initialized.scrolled-past-top &,
+        //body.scrolled-past-top .navbar-container.nav-initialized &,
+        body.is-full-screen .navbar-container & {
             border-color: #d4d4d4;
             box-shadow: 0 0 3px rgba(0,0,0,0.2);
         }

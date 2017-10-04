@@ -115,6 +115,19 @@ body[data-pathname="/browse/"]{
 */
 
 
+/*************** BODY STYLES RE: FULL-SCREEN THINGS ***************/
+
+body.is-full-screen {
+	overflow: hidden;
+	&::-webkit-scrollbar { 
+		display: none; 
+	}
+	#top-nav > .test-warning {
+		display: none;
+	}
+}
+
+
 /***********************************************************
 		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
 ************************************************************/
@@ -135,8 +148,10 @@ h1.page-title {
 		body[data-pathname="/"] &,
 		body[data-pathname="/home"] &,
 		&.home-page-title {
-			height: 64px;
-			margin-bottom: -3px;
+			@media screen and (min-width: $screen-sm-min){
+				height: 64px;
+				margin-bottom: -3px;
+			}
 
 			.subtitle {
 				font-size: 1.7rem;
@@ -461,22 +476,26 @@ h3.submission-subtitle {
 }
 
 /** Margin Classes, inspired by Swiss github-pages/jekyll template **/
-.mb-0 { margin-bottom: 0px; }
-.mb-02 { margin-bottom: 2px; }
-.mb-05 { margin-bottom: 5px; }
-.mb-08 { margin-bottom: 8px; }
-.mb-1 { margin-bottom: 10px; }
-.mb-2 { margin-bottom: 20px; }
-.mb-3 { margin-bottom: 30px; }
-.mb-4 { margin-bottom: 40px; }
-.mt-0 { margin-top: 0px; }
-.mt-02 { margin-top: 2px; }
-.mt-05 { margin-top: 5px; }
-.mt-08 { margin-top: 8px; }
-.mt-1 { margin-top: 10px; }
-.mt-2 { margin-top: 20px; }
-.mt-3 { margin-top: 30px; }
-.mt-4 { margin-top: 40px; }
+$margin-util-sizes: 0, 1, 2, 3, 4, 5;   // * 10px
+$margin-util-sizes-mini: 2, 3, 5, 7, 8; // * 1px
+
+@each $util-size in $margin-util-sizes {
+	.mb-#{$util-size}, * > .mb-#{$util-size}{
+		margin-bottom : $util-size * 10px !important;
+	}
+	.mt-#{$util-size}, * > .mt-#{$util-size}{
+		margin-top : $util-size * 10px !important;
+	}
+}
+
+@each $util-size in $margin-util-sizes-mini {
+	.mb-0#{$util-size}, * > .mb-0#{$util-size}{
+		margin-bottom : $util-size * 1px !important;
+	}
+	.mt-0#{$util-size}, * > .mt-0#{$util-size}{
+		margin-top : $util-size * 1px !important;
+	}
+}
 
 /** Modal Stuff **/
 

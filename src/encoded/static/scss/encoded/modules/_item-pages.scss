@@ -963,13 +963,34 @@ $download-button-width : 100px;
 		.overview-blocks {
 			> div {
 				> .inner {
-					padding: 15px 0 10px;
+					padding: 15px 0 5px;
 					h5 {
 						margin-top: 0;
 						margin-bottom: 5px;
 						font-weight: 500;
 					}
+					ol {
+						margin-bottom: 0;
+					}
 				}
+				/*
+				&.col-md-4:nth-child(n + 4){
+					> .inner {
+						@media screen and (min-width: $screen-md-min){
+							border-top: 1px solid #eee;
+							//margin-top: 4px;
+						}
+					}
+				}
+				&.col-md-3:nth-child(n + 5){
+					> .inner {
+						@media screen and (min-width: $screen-md-min){
+							border-top: 1px solid #eee;
+							//margin-top: 4px;
+						}
+					}
+				}
+				*/
 			}
 		}
 	}
@@ -1010,6 +1031,51 @@ $download-button-width : 100px;
 	.graph-wrapper {
 		opacity : 1;
 		transition: opacity .5s ease-out;
+	}
+
+	// Full Screen Styling
+	&.full-screen-view {
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 0;
+		@media (min-width: $screen-md-min) {
+			top: 41px;
+			z-index: 1000;
+		}
+		bottom: 0;
+		z-index: 10000;
+		background: #fff;
+		overflow-y: auto;
+
+		> .graph-wrapper {
+			//position: absolute;
+			//top: 68px;
+			padding-left: 20px;
+			padding-right: 20px;
+			//bottom: 0;
+			//left: 0;
+			//right: 0;
+			//overflow-y: auto;
+		}
+
+		> .tab-section-title,
+		> .graph-wrapper .detail-pane {
+			margin: 0 auto;
+			padding-left: 20px;
+			padding-right: 20px;
+			@media (min-width: $screen-sm-min) {
+				max-width: $container-sm;
+			}
+			@media (min-width: $screen-md-min) {
+				max-width: $container-md;
+				padding-left: 0;
+				padding-right: 0;
+			}
+			@media (min-width: $screen-lg-min) {
+				max-width: $container-lg;
+			}
+		}
 	}
 }
 
