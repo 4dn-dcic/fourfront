@@ -245,7 +245,6 @@ export class RawFilesTableSection extends React.Component {
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ rawFiles.length }</span> Raw File{ rawFiles.length === 1 ? '' : 's' }</span>
                 </h3>
-                <hr className="tab-section-title-horiz-divider"/>
                 <SimpleFilesTableLoaded
                     files={rawFiles}
                     schemas={this.props.schemas}
@@ -266,7 +265,6 @@ export class ProcessedFilesTableSection extends React.Component {
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ processedFiles.length }</span> Processed File{ processedFiles.length === 1 ? '' : 's' }</span>
                 </h3>
-                <hr className="tab-section-title-horiz-divider"/>
                 <SimpleFilesTableLoaded
                     files={processedFiles}
                     schemas={this.props.schemas}

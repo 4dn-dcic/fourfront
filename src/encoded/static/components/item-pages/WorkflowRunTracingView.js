@@ -1,20 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Checkbox } from 'react-bootstrap';
+import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas } from './../util';
+import { console, object, expFxn, ajax, Schemas, layout } from './../util';
 import { WorkflowNodeElement } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
+import ReactTooltip from 'react-tooltip';
 
 // Testing / Dummy data
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
 //import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
 //import { MORE_PARTIALLY_RELEASED_PROCESSED_FILES } from './../testdata/traced_workflow_runs/replicate-4DNESLLTENG9';
+//import { HISTORY } from './../testdata/traced_workflow_runs/file_processed-4DN';
 
 
 export function allFilesForWorkflowRunsMappedByUUID(items){
@@ -104,7 +106,7 @@ export class WorkflowRunTracingView extends ItemBaseView {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
-        //var steps = MORE_PARTIALLY_RELEASED_PROCESSED_FILES;
+        //var steps = HISTORY;
         var steps = null;
         this.state = {
             'mounted' : false,
@@ -163,7 +165,65 @@ export class WorkflowRunTracingView extends ItemBaseView {
 
 }
 
+export class TracedGraphSectionControls extends React.Component {
+    render(){
+        var {
+            showReferenceFiles, onToggleReferenceFiles, showIndirectFiles, onToggleIndirectFiles, showParameters, onToggleParameters,
+            allRuns, onToggleAllRuns, loading, isAllRunsCheckboxDisabled, rowSpacingType, onSetRowSpacingType, fullscreenViewEnabled, onToggleFullScreenView
+        } = this.props;
+        return (
+            <div className="workflow-view-controls-container">
+                
+                { typeof showReferenceFiles === 'boolean' && typeof onToggleReferenceFiles === 'function' ?
+                    <div className="inline-block show-params-checkbox-container">
+                        <Checkbox checked={showReferenceFiles} onChange={onToggleReferenceFiles}>
+                            Show Reference Files
+                        </Checkbox>
+                    </div>
+                : null }
 
+                { typeof showIndirectFiles === 'boolean' && typeof onToggleIndirectFiles === 'function' ?
+                    <div className="inline-block show-params-checkbox-container">
+                        <Checkbox checked={showIndirectFiles} onChange={onToggleIndirectFiles}>
+                            Show More Context
+                        </Checkbox>
+                    </div>
+                : null }
+
+                { typeof showParameters === 'boolean' && typeof onToggleParameters === 'function' ? // Currently not used.
+                    <div className="inline-block show-params-checkbox-container">
+                        <Checkbox checked={showParameters} onChange={onToggleParameters}>
+                            Show Parameters
+                        </Checkbox>
+                    </div>
+                : null }
+                
+                { typeof allRuns === 'boolean' ?
+                    <div className="inline-block show-params-checkbox-container">
+                        <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns} disabled={isAllRunsCheckboxDisabled}>
+                        { loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
+                        </Checkbox>
+                    </div>
+                : null }
+
+                { typeof rowSpacingType === 'string' && typeof onSetRowSpacingType === 'function' ?
+                    <div className="inline-block">
+                        <RowSpacingTypeDropdown currentKey={rowSpacingType} onSelect={onSetRowSpacingType}/>
+                    </div>
+                : null }
+                {' '}
+                { typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function' ?
+                    <div className="inline-block">
+                        <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
+                            <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
+                        </Button>
+                    </div>
+                : null }
+
+            </div>
+        );
+    }
+}
 
 export class FileViewGraphSection extends React.Component {
     
@@ -222,13 +282,22 @@ export class FileViewGraphSection extends React.Component {
         this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
         this.onToggleReferenceFiles = this.onToggleReferenceFiles.bind(this);
         this.onToggleAllRuns = _.throttle(this.onToggleAllRuns.bind(this), 1000);
+        this.onSetRowSpacingType = this.onSetRowSpacingType.bind(this);
+        this.onToggleFullScreenView = this.onToggleFullScreenView.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
             'showIndirectFiles' : false,
             'showReferenceFiles' : false,
-            'rowSpacingType' : 'stacked'
+            'rowSpacingType' : 'stacked',
+            'fullscreenViewEnabled' : false
         };
+    }
+
+    componentWillUnmount(){
+        if (this.state.fullscreenViewEnabled){
+            layout.toggleBodyClass('is-full-screen', false);
+        }
     }
     /*
     componentWillReceiveProps(nextProps){
@@ -277,15 +346,32 @@ export class FileViewGraphSection extends React.Component {
     }
 
     onToggleIndirectFiles(){
-        this.setState({ showIndirectFiles : !this.state.showIndirectFiles });
+        this.setState({ 'showIndirectFiles' : !this.state.showIndirectFiles });
     }
 
     onToggleReferenceFiles(){
-        this.setState({ showReferenceFiles : !this.state.showReferenceFiles });
+        this.setState({ 'showReferenceFiles' : !this.state.showReferenceFiles });
     }
 
     onToggleAllRuns(){
         return this.props.onToggleAllRuns();
+    }
+
+    onSetRowSpacingType(eventKey, evt){
+        requestAnimationFrame(()=>{
+            if (eventKey === this.state.rowSpacingType) return;
+            this.setState({ 'rowSpacingType' : eventKey });
+        });
+    }
+
+    onToggleFullScreenView(){
+        requestAnimationFrame(()=>{
+            var willBeFullscreen = !this.state.fullscreenViewEnabled;
+            layout.toggleBodyClass('is-full-screen', willBeFullscreen);
+            this.setState({ 'fullscreenViewEnabled' : willBeFullscreen }, ()=>{
+                ReactTooltip.rebuild();
+            });
+        });
     }
 
     render(){
@@ -294,37 +380,18 @@ export class FileViewGraphSection extends React.Component {
             graphProps = this.commonGraphProps();
         }
         var isAllRunsCheckboxDisabled = this.props.loading || (!this.props.allRuns && !this.anyGroupNodesExist ? true : false);
+
         return (
-            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
+            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart) + (this.state.fullscreenViewEnabled ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
-                    <div className="workflow-view-controls-container">
-                        <div className="inline-block show-params-checkbox-container">
-                            <Checkbox checked={this.state.showReferenceFiles} onChange={this.onToggleReferenceFiles}>
-                                Show Reference Files
-                            </Checkbox>
-                        </div>
-                        <div className="inline-block show-params-checkbox-container">
-                            <Checkbox checked={this.state.showIndirectFiles} onChange={this.onToggleIndirectFiles}>
-                                Show More Context
-                            </Checkbox>
-                        </div>
-                        { typeof this.props.allRuns === 'boolean' ? 
-                        <div className="inline-block show-params-checkbox-container">
-                            <Checkbox checked={!this.props.allRuns && !isAllRunsCheckboxDisabled} onChange={this.onToggleAllRuns} disabled={isAllRunsCheckboxDisabled}>
-                            { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
-                            </Checkbox>
-                        </div>
-                        : null }
-                        <div className="inline-block">
-                            <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
-                                requestAnimationFrame(()=>{
-                                    if (eventKey === this.state.rowSpacingType) return;
-                                    this.setState({ rowSpacingType : eventKey });
-                                });
-                            }}/>
-                        </div>
-                    </div>
+                    <TracedGraphSectionControls
+                        {...this.state}
+                        {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'loading')}
+                        onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles} onSetRowSpacingType={this.onSetRowSpacingType}
+                        onToggleFullScreenView={this.onToggleFullScreenView}
+                        isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled}
+                    />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }}>

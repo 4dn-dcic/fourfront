@@ -21,7 +21,7 @@ export class AttributionTabView extends React.Component {
                     <h3 className="tab-section-title">
                         <span>Attribution</span>
                     </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
+                    <hr className="tab-section-title-horiz-divider mb-1"/>
                     <AttributionTabView context={context} />
                 </div>
             )
@@ -213,7 +213,7 @@ export class AttributionTabView extends React.Component {
                         { this.props.context.produced_in_pub || Array.isArray(this.props.context.publications_of_set) ? 
                             <div className="col-sm-12 col-md-12 col-sm-float-right">
                                 <Publications context={this.props.context} />
-                                <hr/>
+                                <hr className="mt-05 mb-10"/>
                             </div>
                         : null }
 
