@@ -90,7 +90,7 @@
         "date_created": {
             "rdfs:subPropertyOf": "dc:created",
             "title": "Date Created",
-            "exclude_from": ["submit4dn"],
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -163,6 +163,12 @@
              "linkTo": "Lab",
              "linkSubmitsFor": true,
              "default":""
+        },
+        "contributing_labs": {
+            "title": "Contributing Labs",
+             "description": "Other labs associated with the submitted data.",
+             "type": "string",
+             "linkTo": "Lab"
         },
         "award": {
             "title": "Grant",

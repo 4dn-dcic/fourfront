@@ -202,10 +202,10 @@
                 "type": "object",
                 "additionalProperties": true,
                 "properties": {
-                    "uuid": {
-                        "title": "UUID",
-                        "description": "Unique Identifier for AnalysisStep, Workflow, or WorkflowRun (or whatever random Item, technically). If not set, 'name' will be used as unique ID of Node instead.",
-                        "type": "string"
+                    "name" : {
+                        "title" : "Step Name",
+                        "description" : "Unique name (or other identifier) of step within this Workflow.",
+                        "type" : "string"
                     },
                     "inputs" : {
                         "title" : "Step Inputs",
@@ -269,10 +269,6 @@
                             }
                         }
                     },
-                    "name" : {
-                        "title" : "Step Name",
-                        "type" : "string"
-                    },
                     "meta" : {
                         "type" : "object",
                         "title" : "Step Metadata",
@@ -286,7 +282,7 @@
                                 "linkTo" : "Software"
                             },
                             "@id" : {
-                                "title" : "Unique identifier of Item in database represented by this step node. Either an AnalysisStep or a WorkflowRun.",
+                                "title" : "Unique identifier of Item in database represented by this step node. If present, will be loaded in via AJAX upon node click.",
                                 "type" : "string"
                             },
                             "analysis_step_types" : {

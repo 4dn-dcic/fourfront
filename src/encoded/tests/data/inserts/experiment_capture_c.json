@@ -15,6 +15,7 @@
         "crosslinking_time": 30,
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
+        "contributing_labs": "test-4dn-lab",
         "aliases": ["labsample:alias25"],
         "description": "Capture Expt 1",
         "ligation_temperature": 37,
