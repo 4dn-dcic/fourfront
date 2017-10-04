@@ -54,8 +54,8 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      ** Functions **
      ***************/
 
-    function stepNodeID   (step) { return step.uuid || (step.meta && typeof step.meta === 'object' && step.meta['@id']) || step['@id'] || step.link_id || step.name; }
-    function stepNodeName (step) { return step.display_title || step.title || step.name || step['@id']; }
+    //function stepNodeID   (step) { return step.uuid || (step.meta && typeof step.meta === 'object' && step.meta['@id']) || step['@id'] || step.link_id || step.name; }
+    function stepNodeName (step) { return step.name || (step.meta && typeof step.meta === 'object' && step.meta['@id']) || step.display_title || step.title || step['@id']; }
 
     function ioNodeID(stepIOArg, readOnly = true){
         return preventDuplicateNodeID(
@@ -137,10 +137,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
 
     function generateStepNode(step, column){
+        var nodeName = stepNodeName(step);
         return {
-            id : stepNodeID(step),
+            id : nodeName,
             type : 'step',
-            name : stepNodeName(step),
+            name : nodeName,
             meta : _.extend(
                 {},
                 step.meta || {},
@@ -152,7 +153,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
     function generateInputNode(stepInput, column, inputOfNode, readOnly = true){
         var namesOnSteps = {};
-        namesOnSteps[inputOfNode.id] = stepInput.name;
+        namesOnSteps[inputOfNode.name] = stepInput.name;
         return {
             column       : column,
             format       : (Array.isArray(stepInput.source) && stepInput.source.length > 0 && stepInput.source[0].type) || null, // First source type takes priority
@@ -168,7 +169,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
     function generateOutputNode(stepOutput, column, outputOfNode, readOnly = true){
         var namesOnSteps = {};
-        namesOnSteps[outputOfNode.id] = stepOutput.name;
+        namesOnSteps[outputOfNode.name] = stepOutput.name;
         return {
             column       : column,
             format       : (Array.isArray(stepOutput.target) && stepOutput.target.length > 0 && stepOutput.target[0].type) || null,
@@ -263,7 +264,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             var groupingName = 'workflow';
             var groupNodes = _.reduce(_.pairs(filesByGroup[groupingName]), function(m, wfPair, i){
                 var namesOnSteps = {};
-                namesOnSteps[inputOfNode.id] = stepInput.name;
+                namesOnSteps[inputOfNode.name] = stepInput.name;
                 var groupNode = {
                     column      : column,
                     format      : groupTypeToCheck,
@@ -315,7 +316,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         if (nodes[i].meta && oN.meta && oN.meta.argument_type){
                             nodes[i].meta.argument_type = oN.meta.argument_type;
                         }
-                        nodes[i].wasMatchedAsOutputOf = stepNode.id; // For debugging.
+                        nodes[i].wasMatchedAsOutputOf = stepNode.name; // For debugging.
                         edges.push({
                             'source' : stepNode,
                             'target' : nodes[i],
@@ -380,9 +381,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     if (_.find(fullStepInput.source, function(s){
                         
                         // Match node by source step name === node.outputOf (stepNode); source.step is normally step.name but may be ID as well.
-                        if (s.step && n.argNamesOnSteps[s.step] === s.name && n.outputOf && (s.step === n.outputOf.id || s.step === n.outputOf.name)) return true; // Case: existing node is output node of our step.input.source.step
+                        if (s.step && n.argNamesOnSteps[s.step] === s.name && n.outputOf && (s.step === n.outputOf.name)) return true; // Case: existing node is output node of our step.input.source.step
                         // Match node by current step === node.inputOf (stepNode)
-                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n.inputOf) && _.any(n.inputOf, function(nIO){ return stepNode.id === nIO.id; })) return true; // Case: existing node is already input node of current step(.input.source)
+                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n.inputOf) && _.any(n.inputOf, function(nIO){ return stepNode.name === nIO.name; })) return true; // Case: existing node is already input node of current step(.input.source)
 
                         // Match Groups
                         if (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
@@ -456,7 +457,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         'name' : ioNodeName(combinedMeta) || n.name,
                         'argNamesOnSteps' : _.extend(n.argNamesOnSteps, inNode.argNamesOnSteps),
                         'id' : preventDuplicateNodeID(inNode.id, false),
-                        'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.id) // Used only for debugging.
+                        'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.name) // Used only for debugging.
                     });
                 });
             }
@@ -481,7 +482,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     }),
                     function(n){
                         n.id = preventDuplicateNodeID(n.id, false); // Cement ID in dupe ID cache from previously read-only 'to-check-only' value.
-                        n.generatedAsInputOf = (n.generatedAsInputOf || []).concat(stepNode.id); // Add reference to stepNode to indicate how/where was drawn from. For debugging only.
+                        n.generatedAsInputOf = (n.generatedAsInputOf || []).concat(stepNode.name); // Add reference to stepNode to indicate how/where was drawn from. For debugging only.
                         return n;
                     }
                 );
@@ -525,7 +526,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             if (n.meta && Array.isArray(n.meta[targetPropertyName])){
                 n.meta[targetPropertyName].forEach(function(t){
                     if (typeof t.step === 'string'){
-                        var matchedStep = _.find(analysis_steps, function(step){ return stepNodeID(step) === t.step; });
+                        var matchedStep = _.find(analysis_steps, function(step){ return stepNodeName(step) === t.step; });
                         if (matchedStep) {
                             nextSteps.add(matchedStep);
                         }
@@ -563,13 +564,13 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
             nodes.push(stepNode);
 
-            processedSteps[stepNode.id] = stepNode;
+            processedSteps[stepNode.name] = stepNode;
 
             findNextStepsFromIONode(outputNodesCreated).forEach(function(nextStep){
-                if (typeof processedSteps[stepNodeID(nextStep)] === 'undefined'){
+                if (typeof processedSteps[stepNodeName(nextStep)] === 'undefined'){
                     processStepInPath(nextStep, level + 1);
                 } else {
-                    generateInputNodesComplex(nextStep, (level + 2) * 2 - 2, processedSteps[stepNodeID(nextStep)]);
+                    generateInputNodesComplex(nextStep, (level + 2) * 2 - 2, processedSteps[stepNodeName(nextStep)]);
                 }
             });
         } else {
@@ -600,7 +601,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             for (var i = 0; i < 1000; i++){
                 if (_.keys(processedSteps).length < analysis_steps.length){
                     var nextSteps = _.filter(analysis_steps, function(s){
-                        if (typeof processedSteps[stepNodeID(s)] === 'undefined') return true;
+                        if (typeof processedSteps[stepNodeName(s)] === 'undefined') return true;
                         return false;
                     });
                     if (nextSteps.length > 0) processStepInPath(nextSteps[0]);

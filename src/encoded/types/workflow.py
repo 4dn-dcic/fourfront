@@ -324,8 +324,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         workflow_run_model_obj = workflow_run_model.source.get('object',{})
 
         step = {
-            "name" : workflow_run_model_obj.get('display_title'), # Gets duplicated to stepNode.meta.name, and stepNode.name,
+            "name" : workflow_run_model_obj.get('@id'), # We use our front-end Node component to show display_title or something else from meta instead.
             "meta" : {
+                'display_title' : workflow_run_model_obj.get('display_title'),
                 "status" : workflow_run_model_obj.get('status'),
                 "run_status" : workflow_run_model_obj.get('run_status'),
                 '@type'  : workflow_run_model_obj.get('@type'),
