@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import url from 'url';
 import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout } from './../util';
-import { WorkflowNodeElement } from './components';
+import { WorkflowNodeElement, TabbedView } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
@@ -100,6 +101,17 @@ export function filterOutReferenceFilesFromGraphData(graphData){
     return { nodes, edges };
 }
 
+export function isGraphSectionOpen(href, hash){
+    if (!href || typeof href !== 'string') return false;
+    if (typeof hash !== 'string' || !hash){
+        var parts = url.parse(href);
+        hash = parts.hash;
+    }
+    
+    if (typeof hash === 'string' && hash && hash.length > 1) return true;
+    return false;
+}
+
 
 export class WorkflowRunTracingView extends ItemBaseView {
     
@@ -107,6 +119,7 @@ export class WorkflowRunTracingView extends ItemBaseView {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
+        this.tabbedView = this.tabbedView.bind(this);
         //var steps = HISTORY;
         var steps = null;
         this.state = {
@@ -118,12 +131,25 @@ export class WorkflowRunTracingView extends ItemBaseView {
     }
 
     componentDidMount(){
+
+        var changeTabToGraphSectionIfHaveHash = function(){
+            if (isGraphSectionOpen(this.props.href)){
+                if (this.refs.tabbedView && this.refs.tabbedView.refs && this.refs.tabbedView.refs.tabs && typeof this.refs.tabbedView.refs.tabs.setActiveKey === 'function'){
+                    try {
+                        this.refs.tabbedView.refs.tabs.setActiveKey(TabbedView.getDefaultActiveKeyFromContents(this.getTabViewContents()));
+                    } catch (e) {
+                        console.warn('Could not automatically switch tabs to Graph section, perhaps no longer supported by rc-tabs.');
+                    }
+                }
+            }
+        }.bind(this);
+
         var state = { 'mounted' : true };
         if (!this.state.steps){
             state.loading = true;
             this.loadGraphSteps();
         }
-        this.setState(state);
+        this.setState(state, function(){ setTimeout(changeTabToGraphSectionIfHaveHash, 750); });
     }
 
     loadGraphSteps(force = false, cb = null, cache = false){
@@ -169,6 +195,10 @@ export class WorkflowRunTracingView extends ItemBaseView {
         this.setState({ 'allRuns' : !this.state.allRuns, 'loading' : true }, ()=>{
             this.loadGraphSteps(true);
         });
+    }
+
+    tabbedView(){
+        return <TabbedView contents={this.getTabViewContents} ref="tabbedView" />;
     }
 
 }
@@ -250,10 +280,13 @@ export class FileViewGraphSection extends React.Component {
         } else {
             iconClass += 'code-fork';
         }
+        var parts = url.parse(props.href);
+        var hash = (parts.hash && parts.hash.length > 1 && parts.hash.slice(1)) || null;
         return {
             tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
             key : 'graph',
             disabled : !Array.isArray(steps) || steps.length === 0,
+            isDefault : isGraphSectionOpen(props.href, hash),
             content : <FileViewGraphSection
                 {...props}
                 steps={steps}
@@ -262,6 +295,7 @@ export class FileViewGraphSection extends React.Component {
                 onToggleAllRuns={onToggleAllRuns}
                 allRuns={allRuns}
                 loading={loading}
+                urlHash={hash}
             />
         };
     }

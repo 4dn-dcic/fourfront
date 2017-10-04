@@ -233,7 +233,7 @@ export class TooltipInfoIconContainerAuto extends React.Component {
         'result' : PropTypes.shape({
             '@type' : PropTypes.array.isRequired
         }).isRequired,
-        'schemas' : PropTypes.object.isRequired
+        'schemas' : PropTypes.object
     }
 
     render(){

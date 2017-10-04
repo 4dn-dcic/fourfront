@@ -76,7 +76,12 @@ class FileViewOverview extends React.Component {
                 'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
                     'link_id' : PropTypes.string.isRequired
                 }))
-            })).isRequired
+            })),
+            'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
+                'experiments_in_set' : PropTypes.arrayOf(PropTypes.shape({
+                    'link_id' : PropTypes.string.isRequired
+                }))
+            }))
         }).isRequired
     }
 
