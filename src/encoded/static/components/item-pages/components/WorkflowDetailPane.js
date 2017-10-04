@@ -400,7 +400,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
         var soft = this.state.software;
         if (!soft){
             return (
-                <div className="col-sm-6 col-md-4 box">
+                <div className="col-sm-6 box">
                     <span className="text-600">Software Used</span>
                     <h5 className="text-400 text-ellipsis-container">
                         <em>N/A</em>
@@ -410,7 +410,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
         }
         if (typeof soft === 'string'){
             return (
-                <div className="col-sm-6 col-md-4 box">
+                <div className="col-sm-6 box">
                     <span className="text-600">Software Used</span>
                     <h5 className="text-400 text-ellipsis-container">
                         <i className="icon icon-circle-o-notch icon-spin icon-fw"/>
@@ -429,7 +429,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
         }
 
         return (
-            <div className="col-sm-6 col-md-4 box">
+            <div className="col-sm-6 box">
                 <span className="text-600">Software Used</span>
                 <h4 className="text-400 text-ellipsis-container">
                     <a href={link}>{ title }</a>
@@ -441,7 +441,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
     softwareLinkBox(){
         var soft = this.state.software;
         if (!soft || !soft.source_url) return (
-            <div className="col-sm-6 col-md-8 box">
+            <div className="col-sm-6 box">
                 <span className="text-600">Software Source</span>
                 <h5 className="text-400 text-ellipsis-container">
                     <em>N/A</em>
@@ -449,7 +449,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
             </div>
         );
         return (
-            <div className="col-sm-6 col-md-8 box">
+            <div className="col-sm-6 box">
                 <span className="text-600">Software Source</span>
                 <h5 className="text-400 text-ellipsis-container">
                     <a href={soft.source_url} title={soft.source_url}>{ soft.source_url }</a>
@@ -474,24 +474,24 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 
 class WorkflowDetailsForWorkflowNodeRow extends React.Component {
     render(){
-        var workflow = this.props.workflow;
-        var innerContent;
+        var { workflow, workflow_run } = this.props;
+        var title, innerContent;
 
         if (workflow) {
             var link = object.atIdFromObject(workflow);
-            var title = workflow.display_title || workflow.title || workflow.name;
+            title = workflow.display_title || workflow.title || workflow.name;
             innerContent = <a href={link}>{ title }</a>;
         } else {
             innerContent = <em>N/A</em>;
         }
 
-        var workflowSteps;
-        if (Array.isArray(workflow.workflow_steps) && workflow.workflow_steps.length > 0){
-            workflowSteps = _.map(workflow.workflow_steps, function(wf_step){
-                return (
-                    <a href={wf_step.step}>{ wf_step.step_name }</a>
-                );
-            });
+        console.log('WORKFLOW', workflow);
+
+        var workflowSteps = workflow.steps || workflow_run.steps || workflow.workflow_steps;
+        if (Array.isArray(workflowSteps) && workflowSteps.length > 0){
+            workflowSteps = _.uniq(_.map(workflowSteps, function(step){
+                return step.name;
+            })).join(', ');
         } else {
             workflowSteps = <em>N/A</em>;
         }
@@ -499,14 +499,14 @@ class WorkflowDetailsForWorkflowNodeRow extends React.Component {
         return (
             <div className="row">
 
-                <div className="col-sm-6 col-md-4 box">
+                <div className="col-sm-6 box">
                     <span className="text-600">Workflow Name</span>
-                    <h4 className="text-400 text-ellipsis-container">
+                    <h4 className="text-400 text-ellipsis-container" data-tip={title}>
                         { innerContent }
                     </h4>
                 </div>
 
-                <div className="col-sm-6 col-md-4 box steps-in-workflow">
+                <div className="col-sm-6 box steps-in-workflow">
                     <span className="text-600">Steps in Workflow</span>
                     <h5 className="text-400 text-ellipsis-container">
                         { workflowSteps }
@@ -566,7 +566,7 @@ class AnalysisStepDetailBody extends React.Component {
     }
 
     componentWillReceiveProps(nextProps){
-        if ((nextProps.step && nextProps.step['@id']) || null !== (this.props.step && this.props.step['@id']) || null) {
+        if ((nextProps.step && nextProps.step['@id']) !== (this.props.step && this.props.step['@id'])) {
             this.setState({ wfr : nextProps.step['@id'] }, this.maybeLoadWFR.bind(this, nextProps.step['@id']));
         }
     }
@@ -621,7 +621,7 @@ class AnalysisStepDetailBody extends React.Component {
         }
 
         return (
-            <div className="col-sm-6 col-md-4 box">
+            <div className="col-sm-6 box">
                 <span className="text-600">{ label }</span>
                 { content }
             </div>
@@ -632,12 +632,12 @@ class AnalysisStepDetailBody extends React.Component {
         var step = this.props.step;
         var purposeList = step.analysis_step_types;
         if (!Array.isArray(purposeList)){
-            return <div className="col-sm-6 col-md-8 box"/>;
+            return <div className="col-sm-6 box"/>;
         }
         var elementType = 'h5';
         if (purposeList.length  === 1) elementType = 'h4';
         return(
-            <div className="col-sm-6 col-md-8 box">
+            <div className="col-sm-6 box">
                 <span className="text-600">Purpose{ purposeList.length > 1 ? 's' : '' }</span>
                 { React.createElement(elementType, { 'className' : 'text-400' }, purposeList.map(function(p, i){
                     return <span className="text-capitalize" key={p}>{ p }{ i !== purposeList.length - 1 ? ', ' : '' }</span>;
@@ -660,10 +660,10 @@ class AnalysisStepDetailBody extends React.Component {
         // Still need to test this .workflow_steps.step.software_used -> .steps.meta.software_used :
         var listOfSoftwareInWorkflow = (wfr && wfr.workflow && Array.isArray(wfr.workflow.steps) &&
             _.any(wfr.workflow.steps, function(workflowStep){ return workflowStep.meta && workflowStep.meta.software_used; }) &&
-            _.filter(
+            _.uniq(_.filter(
                 _.map(wfr.workflow.steps, function(workflowStep){ return (workflowStep.meta && workflowStep.meta.software_used) || null; }),
                 function(s) { return s !== null; }
-            )
+            ), false, object.atIdFromObject)
         ) || null;
 
         return(
@@ -676,7 +676,7 @@ class AnalysisStepDetailBody extends React.Component {
 
                     </div>
                     { workflow ? <hr/> : null }
-                    { workflow ? <WorkflowDetailsForWorkflowNodeRow workflow={workflow}/> : null }
+                    { workflow ? <WorkflowDetailsForWorkflowNodeRow workflow_run={wfr} step={step} workflow={workflow}/> : null }
                     { listOfSoftwareInWorkflow ? <hr/> : null }
                     { listOfSoftwareInWorkflow ? <SoftwareDetailsForWorkflowNodeRow software={listOfSoftwareInWorkflow}/> : null }
                     { self_software_used ? <hr/> : null }
@@ -744,6 +744,7 @@ export class WorkflowDetailPane extends React.Component {
             return (
                 <layout.WindowResizeUpdateTrigger>
                     <FileDetailBody
+                        key="body"
                         node={node}
                         file={node.meta.run_data.file}
                         schemas={this.props.schemas}
@@ -768,6 +769,7 @@ export class WorkflowDetailPane extends React.Component {
         if (node.type === 'step' && node.meta && typeof node.meta === 'object'){
             return (
                 <AnalysisStepDetailBody
+                    key="body"
                     step={node.meta}
                     node={node}
                     typeTitle={typeTitle}

@@ -100,6 +100,7 @@ export default class Graph extends React.Component {
             return false;
         },
         'nodeClassName' : function(node){ return ''; },
+        'nodeEdgeLedgeWidths' : [3,5],
         'nodesPreSortFxn' : function(nodes){
             // For any 'global input files', put them in first column (index 0).
             // MODIFIES IN-PLACE! Because it's a fine & performant side-effect if column assignment changes in-place. We may change this later.
@@ -172,8 +173,14 @@ export default class Graph extends React.Component {
                 if (node1.inputNodes && !node2.inputNodes) return -1;
                 if (!node1.inputNodes && node2.inputNodes) return 1;
                 if (node1.inputNodes && node2.inputNodes){
-                    var n1input = _.find(node1.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; }) || null;
-                    var n2input = _.find(node2.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; }) || null;
+                    var n1input = _.find(
+                        _.sortBy(_.sortBy(node1.inputNodes, 'indexInColumn'), 'column'),
+                        function(n){ return typeof n.indexInColumn === 'number'; }
+                    ) || null;
+                    var n2input = _.find(
+                        _.sortBy(_.sortBy(node2.inputNodes, 'indexInColumn'), 'column'),
+                        function(n){ return typeof n.indexInColumn === 'number'; }
+                    ) || null;
                     if (n1input && !n2input) return -1;
                     if (!n1input && n2input) return 1;
                     if (n1input && n2input){
@@ -464,7 +471,7 @@ export default class Graph extends React.Component {
                             onNodeClick={this.props.onNodeClick}
                         >
                             <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing')} />
+                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
                                 <NodesLayer {..._.pick(this.props, 'nodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} title={this.props.nodeTitle} />
                             </ScrollContainer>
                             { this.props.detailPane }
