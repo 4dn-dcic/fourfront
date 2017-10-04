@@ -77,6 +77,32 @@ globals.panel_views.register(BiosampleView, 'Biosample');
 
 
 
+export class IndividualItemTitle extends React.Component {
+    render(){
+        var indv = this.props.result || this.props.context;
+        if (!indv || !object.atIdFromObject(indv)) return 'None';
+        var href = object.atIdFromObject(indv);
+        var sex = null;
+        if (indv.sex && typeof indv.sex === 'string'){
+            if (indv.sex.toLowerCase() === 'female'){
+                sex = <i className="icon icon-fw icon-venus"/>;
+            } else if (indv.sex.toLowerCase() === 'male'){
+                sex = <i className="icon icon-fw icon-mars"/>;
+            }
+        }
+        var title = indv.display_title;
+        var organism = null;
+        if (indv.organism && indv.organism.name && typeof indv.organism.name === 'string' && title.indexOf(indv.organism.name) === -1){
+            organism = Schemas.Term.capitalizeSentence(indv.organism.name);
+        }
+        return (
+            <span>{ sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
+                <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title }</a>
+            </span>
+        );
+    }
+}
+
 export class BiosourcesTable extends React.Component {
 
     static defaultProps = {
@@ -90,24 +116,7 @@ export class BiosourcesTable extends React.Component {
             "individual" : {
                 "render" : function(result, columnDefinition, props, width){
                     if (!result || !result.individual || !object.atIdFromObject(result.individual)) return '-';
-                    var indv = result.individual;
-                    var href = object.atIdFromObject(indv);
-                    var sex = null;
-                    if (indv.sex && typeof indv.sex === 'string'){
-                        if (indv.sex.toLowerCase() === 'female'){
-                            sex = <i className="icon icon-fw icon-venus"/>;
-                        } else if (indv.sex.toLowerCase() === 'male'){
-                            sex = <i className="icon icon-fw icon-mars"/>;
-                        }
-                    }
-                    var title = indv.display_title;
-                    var organism = null;
-                    if (indv.organism && indv.organism.name && typeof indv.organism.name === 'string' && title.indexOf(indv.organism.name) === -1){
-                        organism = Schemas.Term.capitalizeSentence(indv.organism.name);
-                    }
-                    return <span>{ sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
-                        <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title }</a>
-                    </span>;
+                    return <IndividualItemTitle context={result.individual} />;
                 }
             }
         }, ItemPageTable.defaultProps.columnDefinitionOverrideMap)
@@ -162,24 +171,28 @@ class BiosampleViewOverview extends React.Component {
     render(){
         var { context, width } = this.props;
 
-        var table = null;
+        var biosources = null;
 
         if (Array.isArray(context.biosource) && context.biosource.length > 0){
-            table = (
-                <div className="mt-3">
-                    <h3 className="tab-section-title">
-                        <span>Biosources</span>
-                    </h3>
-                    <BiosourcesTable biosources={context.biosource} width={this.state.mounted? width : 1140} />
-                </div>
-            );
+            if (context.biosource.length > 1){
+                biosources = (
+                    <div className="mt-3">
+                        <h3 className="tab-section-title">
+                            <span>Biosources</span>
+                        </h3>
+                        <BiosourcesTable biosources={context.biosource} width={this.state.mounted? width : 1140} />
+                    </div>
+                );
+            } else {
+                biosources = <BiosourceInfoBody result={context} biosource={context.biosource[0]} />;
+            }
         }
 
         return (
             <div>
                 <OverViewBody result={context} schemas={this.props.schemas} />
+                { biosources }
                 <CellCultureInfoBody result={context} schemas={this.props.schemas} />
-                { table }
             </div>
         );
 
@@ -241,7 +254,7 @@ class CellCultureInfoBody extends React.Component {
         var tipsForCellCulture = object.tipsFromSchema(this.props.schemas || Schemas.get(), cell_culture);
 
         return (
-            <div className="row">
+            <div className="row mt-3">
                 <div className="col-md-12 col-xs-12">
                     <h3 className="tab-section-title">
                         <span>Cell Culture</span>
@@ -271,6 +284,62 @@ class CellCultureInfoBody extends React.Component {
                             <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='culture_start_date' fallbackTitle="Culture Start Date" titleRenderFxn={(field, value)=>{
                                 return cell_culture.culture_start_date ? <DateUtility.LocalizedTime timestamp={cell_culture.culture_start_date}/> : 'None';
                             }} />
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </div>
+        );
+
+    }
+}
+
+class BiosourceInfoBody extends React.Component {
+    
+    render(){
+        var result = this.props.result;
+        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), result);
+        var biosource = _.extend({ '@type' : ['Biosource', 'Item'] }, this.props.biosource); // WE EXPECT ONLY 1!
+
+        if (!biosource || !object.atIdFromObject(biosource) || !biosource.display_title) return null;
+
+        var tipsForBiosource = object.tipsFromSchema(this.props.schemas || Schemas.get(), biosource);
+
+        return (
+            <div className="row mt-3">
+                <div className="col-md-12 col-xs-12">
+                    <h3 className="tab-section-title">
+                        <span>Biosource</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                </div>
+                <div className="col-md-12 col-xs-12">
+                    <div className="row overview-blocks">
+
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem result={result} tips={tips} property='biosource' fallbackTitle="Biosource" />
+                        </div>
+
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem result={biosource} tips={tipsForBiosource} property='biosource_type' fallbackTitle="Biosource Type" />
+                        </div>
+                        
+                        { biosource.cell_line ?
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem result={biosource} tips={tipsForBiosource} property='cell_line' fallbackTitle="Cell Line Name" />
+                        </div>
+                        : null }
+
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem result={biosource} tips={tipsForBiosource} property='individual' fallbackTitle="Individual" titleRenderFxn={function(field, val){
+                                return <IndividualItemTitle context={val} />;
+                            }} />
+                        </div>
+
+                        <div className="col-xs-6 col-md-4">
+                            <OverViewBodyItem result={biosource} tips={tipsForBiosource} property='biosource_vendor' fallbackTitle="Biosource Vendor" />
                         </div>
 
 

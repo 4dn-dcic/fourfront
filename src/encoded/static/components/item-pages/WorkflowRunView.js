@@ -102,7 +102,7 @@ export class WorkflowRunView extends ItemBaseView {
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
@@ -115,7 +115,7 @@ export class WorkflowRunView extends ItemBaseView {
             AuditTabView.getTabObject(this.props.context)
         ]).map((tabObj)=>{ // Common properties
             return _.extend(tabObj, {
-                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 650 }
+                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
             });
         });
     }
@@ -176,7 +176,7 @@ class GraphSection extends React.Component {
     }
 
     basicGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return (
             <Graph
                 { ...this.commonGraphProps() }
@@ -189,7 +189,7 @@ class GraphSection extends React.Component {
     }
 
     detailGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return (
             <Graph
                 { ...this.commonGraphProps() }
