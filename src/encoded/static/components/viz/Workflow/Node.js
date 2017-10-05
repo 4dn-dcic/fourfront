@@ -156,7 +156,14 @@ export default class Node extends React.Component {
         if (!selectedNode) return false;
         if (selectedNode === currentNode) return true;
         if (typeof selectedNode.name === 'string' && typeof currentNode.name === 'string') {
-            if (selectedNode.name === currentNode.name) return true;
+            if (selectedNode.name === currentNode.name){
+                // Case: IO node (which would have add'l self-generated ID to ensure uniqueness)
+                if (typeof selectedNode.id === 'string'){
+                    if (selectedNode.id === currentNode.id) return true;
+                    return false;
+                }
+                return true;
+            }
             return false;
         }
         return false;

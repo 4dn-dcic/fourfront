@@ -168,6 +168,12 @@ export class WorkflowNodeElement extends React.Component {
             return <div {...elemProps}>{ _.pluck(node.meta.workflow.steps, 'name').join(', ') }</div>;
         }
 
+        // If Parameter
+        if (this.doesRunDataValueExist()){
+            elemProps.className += ' mono-text';
+            return <div {...elemProps}>{ node.name }</div>;
+        }
+
         // If File
         if (this.doesRunDataFileExist()){
             if (typeof node.meta.run_data.file.file_format === 'string' && node.meta.run_data.file.file_format !== 'other'){

@@ -14,7 +14,6 @@ import { console, object, DateUtility, Schemas, isServerSide, navigate, layout }
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { DropdownButton, MenuItem, Checkbox, Button } from 'react-bootstrap';
-import { filterOutParametersFromGraphData } from './WorkflowRunTracingView';
 import ReactTooltip from 'react-tooltip';
 
 
@@ -74,8 +73,30 @@ export function doValidAnalysisStepsExist(steps){
     return true;
 }
 
-export function parseAnalysisStepsMixin(context = null){
-    
+/**
+ * For when "Show Parameters" UI setting === false.
+ * 
+ * @param {Object}      graphData 
+ * @param {Object[]}    graphData.nodes
+ * @param {Object[]}    graphData.edges
+ * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
+ */
+export function filterOutParametersFromGraphData(graphData){
+    var deleted = {  };
+    var nodes = _.filter(graphData.nodes, function(n, i){
+        if (n.type === 'input' && n.format === 'Workflow Parameter') {
+            deleted[n.id] = true;
+            return false;
+        }
+        return true;
+    });
+    var edges = _.filter(graphData.edges, function(e,i){
+        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
+            return false;
+        }
+        return true;
+    });
+    return { nodes, edges };
 }
 
 
@@ -200,18 +221,23 @@ export class WorkflowGraphSectionControls extends React.Component {
         return null;
     }
 
+    showParameters(){
+        if (typeof this.props.showParameters !== 'boolean' || typeof this.props.onToggleShowParameters !== 'function'){
+            return null;
+        }
+        return (
+            <div className="inline-block show-params-checkbox-container">
+                <Checkbox checked={this.props.showParameters} onChange={this.props.onToggleShowParameters}>
+                    Show Parameters
+                </Checkbox>
+            </div>
+        );
+    }
+
     render(){
-        var {
-            showParameters, rowSpacingType, onToggleShowParameters, onChangeRowSpacingType
-        } = this.props;
         return (
             <div className="pull-right workflow-view-controls-container">
-                <div className="inline-block show-params-checkbox-container">
-                    <Checkbox checked={showParameters} onChange={onToggleShowParameters}>
-                        Show Parameters
-                    </Checkbox>
-                </div>
-                
+                { this.showParameters() }
                 { this.chartTypeDropdown() }
                 { this.rowSpacingTypeDropdown() }
                 { this.fullScreenButton() }

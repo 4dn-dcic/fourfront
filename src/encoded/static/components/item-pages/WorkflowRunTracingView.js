@@ -9,7 +9,7 @@ import { WorkflowNodeElement, TabbedView } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection } from './WorkflowView';
+import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection, filterOutParametersFromGraphData } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
@@ -48,34 +48,6 @@ export function filterOutIndirectFilesFromGraphData(graphData){
     });
     return { nodes, edges };
 }
-
-
-/**
- * For when "Show Parameters" UI setting === false.
- * 
- * @param {Object}      graphData 
- * @param {Object[]}    graphData.nodes
- * @param {Object[]}    graphData.edges
- * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
- */
-export function filterOutParametersFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-        if (n.type === 'input' && n.format === 'Workflow Parameter') {
-            deleted[n.id] = true;
-            return false;
-        }
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
-    });
-    return { nodes, edges };
-}
-
 
 export function filterOutReferenceFilesFromGraphData(graphData){
     var deleted = {  };
@@ -228,13 +200,7 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
                     </div>
                 : null }
 
-                { typeof showParameters === 'boolean' && typeof onToggleParameters === 'function' ? // Currently not used.
-                    <div className="inline-block show-params-checkbox-container">
-                        <Checkbox checked={showParameters} onChange={onToggleParameters}>
-                            Show Parameters
-                        </Checkbox>
-                    </div>
-                : null }
+                { this.showParameters() }
                 
                 { typeof allRuns === 'boolean' ?
                     <div className="inline-block show-params-checkbox-container">
@@ -319,7 +285,8 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             'showIndirectFiles' : false,
             'showReferenceFiles' : false,
             'rowSpacingType' : 'stacked',
-            'fullscreenViewEnabled' : false
+            'fullscreenViewEnabled' : false,
+            'showParameters' : false
         };
     }
 
@@ -387,6 +354,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
                         onToggleIndirectFiles={this.onToggleIndirectFiles}
                         onChangeRowSpacingType={this.onChangeRowSpacingType}
                         onToggleFullScreenView={this.onToggleFullScreenView}
+                        onToggleShowParameters={this.onToggleShowParameters}
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled}
                     />
                 </h3>

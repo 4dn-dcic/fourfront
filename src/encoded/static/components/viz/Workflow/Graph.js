@@ -121,6 +121,10 @@ export default class Graph extends React.Component {
                 return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
             }
 
+            function isNodeParameter(n){
+                return n.meta.run_data && !n.meta.run_data.file && n.meta.run_data.value && (typeof n.meta.run_data.value === 'string' || typeof n.meta.run_data.value === 'number');
+            }
+
             function compareNodeInputOf(n1, n2){
                 var n1InputOf = n1.type === 'step' ? n1.outputNodes : n1.inputOf;
                 var n2InputOf = n2.type === 'step' ? n2.outputNodes : n2.inputOf;
@@ -222,6 +226,9 @@ export default class Graph extends React.Component {
                 
 
                 if (node1.type === 'input'){
+
+                    if (isNodeParameter(node1)) return 1;
+                    if (isNodeParameter(node2)) return -1;
 
                     if (isNodeFileReference(node1)){
                         if (isNodeFileReference(node2)) {
