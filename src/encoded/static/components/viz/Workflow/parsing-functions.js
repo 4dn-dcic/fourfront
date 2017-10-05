@@ -194,9 +194,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
     }
 
     /**
-     * @param {Step} step - A step object from which to generate step node from. 
-     * @param {number} column - Column number to assign to this node.
-     * @returns {Object} - Node object representation.
+     * @param {Step} step       - A step object from which to generate step node from. 
+     * @param {number} column   - Column number to assign to this node.
+     * @returns {Node}          - Node object representation.
      */
     function generateStepNode(step, column){
         return {
@@ -211,6 +211,14 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         };
     }
 
+    /**
+     * @param {StepIOArgument} stepIOArgument   Input or output argument of a step for/from which to create output node(s) from.
+     * @param {number} column                   Column number to assign to this node.
+     * @param {Node} stepNode                   Step node from which this IO node is being created from. Will be connected to IO node with an edge.
+     * @param {string} nodeType                 Type of node in relation to stepNode - either "input" or "output".
+     * @param {boolean} [readOnly=true]         If true, will not generate unique ID for IO node.
+     * @returns {Node} - Node object representation.
+     */
     function generateIONode(stepIOArgument, column, stepNode, nodeType, readOnly = true){
         if (nodeType !== 'input' && nodeType !== 'output') throw new Error('Incorrect type, must be one of input or output.');
 
@@ -245,18 +253,24 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      * Checks to see if WorkflowRun (via presence of run_data object in step input/output), and if multiple files exist in run_data.file, 
      * will generate that many nodes.
      *
-     * @param {StepIOArgument} stepInput
+     * @param {StepIOArgument} stepIOArgument   Input or output argument of a step for/from which to create output node(s) from.
+     * @param {number} column                   Column number to assign to this node.
+     * @param {Node} stepNode                   Step node from which this IO node is being created from. Will be connected to IO node with an edge.
+     * @param {string} nodeType                 Type of node in relation to stepNode - either "input" or "output".
+     * @param {boolean} [readOnly=true]         If true, will not generate unique ID for IO node.
      * @returns {Node[]} List of expanded I/O nodes.
      */
-    function expandIONodes(stepInput, column, inputOfNode, nodeType, readOnly){
+    function expandIONodes(stepIOArgument, column, stepNode, nodeType, readOnly){
+
+        //console.log('PARAM1', column, stepNode, stepIOArgument);
 
         // Return just the single node if we don't have array for run_data.file or run_data.value.
-        if (typeof stepInput.run_data === 'undefined' ||
-            (!stepInput.run_data.file && !stepInput.run_data.value) ||
-            (stepInput.run_data.file && (!Array.isArray(stepInput.run_data.file) || stepInput.run_data.file.length === 0)) ||
-            (stepInput.run_data.value && (!Array.isArray(stepInput.run_data.value) || stepInput.run_data.value.length === 0))
+        if (typeof stepIOArgument.run_data === 'undefined' ||
+            (!stepIOArgument.run_data.file && !stepIOArgument.run_data.value) ||
+            (stepIOArgument.run_data.file && (!Array.isArray(stepIOArgument.run_data.file) || stepIOArgument.run_data.file.length === 0)) ||
+            (stepIOArgument.run_data.value && (!Array.isArray(stepIOArgument.run_data.value) || stepIOArgument.run_data.value.length === 0))
             ) { // Not valid WorkflowRun
-            return [generateIONode(stepInput, column, inputOfNode, nodeType, readOnly)];
+            return [generateIONode(stepIOArgument, column, stepNode, nodeType, readOnly)];
         }
 
         /**
@@ -273,9 +287,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     idx = val[0];
                     val = val[1];
                 }
-                var id = ioNodeName(stepInput) + '.';
-                var run_data = _.extend({}, stepInput.run_data, { 'meta' : (stepInput.run_data.meta && stepInput.run_data.meta[idx]) || null });
-                if (propertyToExpand === 'file' && typeof val !== 'string'){
+                var id = ioNodeName(stepIOArgument) + '.';
+                var run_data = _.extend({}, stepIOArgument.run_data, { 'meta' : (stepIOArgument.run_data.meta && stepIOArgument.run_data.meta[idx]) || null });
+                if (propertyToExpand === 'file'){
                     id += (val.accession || val.uuid || idx);
                     run_data.file = val;
                 } else if (propertyToExpand === 'value') { // Case: Parameter or anything else.
@@ -283,28 +297,30 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     run_data.value = val;
                 }
 
-                return generateIONode(_.extend({}, stepInput, {
-                    'name'  : ioNodeName(stepInput),
+                //console.log('RUNDATA', run_data);
+
+                return generateIONode(_.extend({}, stepIOArgument, {
+                    'name'  : ioNodeName(stepIOArgument),
                     'id'    : id,
                     'run_data' : run_data
-                }), column, inputOfNode, nodeType, readOnly);
+                }), column, stepNode, nodeType, readOnly);
             });
         }
 
         var valuesForArgument, isParameterArgument;
-        if (stepInput.run_data && Array.isArray(stepInput.run_data.value) && !stepInput.run_data.file){
+        if (stepIOArgument.run_data && Array.isArray(stepIOArgument.run_data.value) && !stepIOArgument.run_data.file){
             isParameterArgument = true;
-            valuesForArgument = stepInput.run_data.value;
+            valuesForArgument = stepIOArgument.run_data.value;
         } else {
             isParameterArgument = false;
-            valuesForArgument = stepInput.run_data.file;
+            valuesForArgument = stepIOArgument.run_data.file;
         }
 
-        console.log('PARAM', isParameterArgument, valuesForArgument, stepInput.name, stepInput.run_data);
+        //console.log('PARAM', isParameterArgument, valuesForArgument);
 
         // CREATE/HANDLE GROUP NODES ---- N.B. THIS IS LIKELY TEMPORARY AND WILL CHANGE ONCE WE HAVE DESIGN/IDEA FOR GROUPED WFRs. DOES NOT HANDLE PARAMETERS
         var groupTypeToCheck = nodeType === 'output' ? 'Output File Group' : 'Input File Group';
-        var groupSources = _.filter(stepInput.source || [], function(s){
+        var groupSources = _.filter(stepIOArgument.source || [], function(s){
             return (s.type === groupTypeToCheck && typeof s.for_file === 'string');
         });
 
@@ -323,7 +339,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
             var groupKeys = _.keys(groups);
             var filesNotInGroups = [];
-            var filesByGroup = _.reduce(stepInput.run_data.file, function(m, file, idx){
+            var filesByGroup = _.reduce(stepIOArgument.run_data.file, function(m, file, idx){
                 var incl = false;
                 _.forEach(groupKeys, function(groupingTypeKey){
                     _.forEach(_.keys(groups[groupingTypeKey]), function(group){
@@ -351,16 +367,16 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             var groupingName = 'workflow';
             var groupNodes = _.reduce(_.pairs(filesByGroup[groupingName]), function(m, wfPair, i){
                 var namesOnSteps = {};
-                namesOnSteps[inputOfNode.name] = stepInput.name;
+                namesOnSteps[stepNode.name] = stepIOArgument.name;
                 var groupNode = {
                     column      : column,
                     format      : groupTypeToCheck,
-                    id          : ioNodeName(stepInput)+ '.group:' + groupingName + '.' + wfPair[0],
-                    name        : ioNodeName(stepInput),
+                    id          : ioNodeName(stepIOArgument)+ '.group:' + groupingName + '.' + wfPair[0],
+                    name        : ioNodeName(stepIOArgument),
                     argNamesOnSteps : namesOnSteps,
                     type        : nodeType + '-group',
-                    meta        : _.extend({}, stepInput.meta || {}, _.omit(stepInput, 'required', 'name', 'meta')),
-                    inputOf     : [inputOfNode]
+                    meta        : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'required', 'name', 'meta')),
+                    inputOf     : [stepNode]
                 };
                 groupNode.meta[groupingName] = wfPair[0];
                 m.push(groupNode);
@@ -378,9 +394,10 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
     /**
      * Generate output nodes from step.outputs and create edges between them and stepNode.
      * 
-     * @param {Object} step - Analysis Step
+     * @param {Step} step - Analysis Step
      * @param {number} column - Column index (later translated into X coordinate).
-     * @param {Object} stepNode - Analysis Step Node Reference
+     * @param {Node} stepNode - Analysis Step Node Reference
+     * @returns {Node[]} List of new output nodes.
      */
     function generateOutputNodesSimple(step, column, stepNode){
 
@@ -399,7 +416,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         nodes[i].outputOf = stepNode;
                         
                         nodes[i].format = oN.format;
-                        //nodes[i].name = oN.name || nodes[i].name; //ioNodeNameCombo(nodes[i], oN);
                         nodes[i].type = 'output'; // Convert our found input file to an output file, if not already.
                         if (nodes[i].meta && oN.meta && oN.meta.argument_type){
                             nodes[i].meta.argument_type = oN.meta.argument_type;
@@ -442,7 +458,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      * 
      * @param {Step} step - Analysis Step
      * @param {number} column - Column index (later translated into X coordinate).
-     * @param {Object} stepNode - Analysis Step Node Reference
+     * @param {Node} stepNode - Analysis Step Node Reference
      * @returns {Object} Object containing two lists - 'created' and 'matched' - containing nodes which were newly created and matched & re-used, respectively, for this step's input arguments.
      */
     function generateInputNodesComplex(step, column, stepNode){
@@ -515,6 +531,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 _.forEach(currentInputNodesMatched, function(n){
                     // Step 1: Grab the new node we created (inputNodesTomatch) but didn't use because matched existing node in `var currentInputNodesMatched`.
                     try {
+                        //console.log('FIND', n.id, ioNodeIDsMatched[n.id], stepNode);
                         var inNode, inNodes = _.where(inputNodesToMatch, { 'name' : ioNodeIDsMatched[n.id] });
                         // Sometimes we may have more than 1 file per argument 'name'. So lets narrow it down.
                         if (inNodes.length === 1){
@@ -614,10 +631,13 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         if (matchedStep) {
                             nextSteps.add(matchedStep);
                         }
+                        //console.log('XXXXX', n.name, t.step, nextSteps, _.pluck(analysis_steps, 'name'));
                     }
                 });
             }
         });
+
+        
 
         return [...nextSteps];
     }
