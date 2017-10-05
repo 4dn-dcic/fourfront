@@ -155,11 +155,7 @@ export default class Node extends React.Component {
     static isSelected(currentNode, selectedNode){
         if (!selectedNode) return false;
         if (selectedNode === currentNode) return true;
-        if (typeof selectedNode.id === 'string' && typeof currentNode.id === 'string') {
-            if (selectedNode.id === currentNode.id) return true;
-            return false;
-        }
-        if (selectedNode.name && currentNode.name) {
+        if (typeof selectedNode.name === 'string' && typeof currentNode.name === 'string') {
             if (selectedNode.name === currentNode.name) return true;
             return false;
         }
@@ -177,10 +173,10 @@ export default class Node extends React.Component {
                 // Make sure target.step == selectedNode.inputOf.name
                 var i;
                 if (currentNode.type === 'input' || currentNode.type === 'output'){
-                    if (((Array.isArray(selectedNode.inputOf) && selectedNode.inputOf[0] && selectedNode.inputOf[0].id) || 'a') === ((Array.isArray(currentNode.inputOf) && currentNode.inputOf[0] && currentNode.inputOf[0].id) || 'b')) return true;
+                    if (((Array.isArray(selectedNode.inputOf) && selectedNode.inputOf[0] && selectedNode.inputOf[0].name) || 'a') === ((Array.isArray(currentNode.inputOf) && currentNode.inputOf[0] && currentNode.inputOf[0].name) || 'b')) return true;
                     if (Array.isArray(selectedNode.inputOf) && Array.isArray(currentNode.meta.target)){
                         for (i = 0; i < currentNode.meta.target.length; i++){
-                            if (selectedNode.inputOf[0] && currentNode.meta.target[i].step === selectedNode.inputOf[0].id) {
+                            if (selectedNode.inputOf[0] && currentNode.meta.target[i].step === selectedNode.inputOf[0].name) {
                                 return true;
                             }
                         }
@@ -190,10 +186,10 @@ export default class Node extends React.Component {
 
                 }
                 if (currentNode.type === 'output'){
-                    if (((selectedNode.outputOf && selectedNode.outputOf.id) || 'a') === ((currentNode.outputOf && currentNode.outputOf.id) || 'b')) return true;
+                    if (((selectedNode.outputOf && selectedNode.outputOf.name) || 'a') === ((currentNode.outputOf && currentNode.outputOf.name) || 'b')) return true;
                     if (selectedNode.outputOf !== 'undefined' && Array.isArray(currentNode.meta.source)){
                         for (i = 0; i < currentNode.meta.source.length; i++){
-                            if (typeof selectedNode.outputOf !== 'undefined' && currentNode.meta.source[i].step === selectedNode.outputOf.id) {
+                            if (typeof selectedNode.outputOf !== 'undefined' && currentNode.meta.source[i].step === selectedNode.outputOf.name) {
                                 return true;
                             }
                         }

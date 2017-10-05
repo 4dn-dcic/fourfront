@@ -10,11 +10,12 @@ import {
     WorkflowNodeElement
 } from './components';
 import { ItemBaseView } from './DefaultItemView';
-import { console, object, DateUtility, Schemas, isServerSide, navigate } from './../util';
+import { console, object, DateUtility, Schemas, isServerSide, navigate, layout } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
+import { DropdownButton, MenuItem, Checkbox, Button } from 'react-bootstrap';
 import { filterOutParametersFromGraphData } from './WorkflowRunTracingView';
+import ReactTooltip from 'react-tooltip';
 
 
 
@@ -74,15 +75,7 @@ export function doValidAnalysisStepsExist(steps){
 }
 
 export function parseAnalysisStepsMixin(context = null){
-    if (!context) context = this.props.context;
-    var graphData = (
-        this.state.showChart === 'basic' ?
-            parseBasicIOAnalysisSteps(context.steps, context)
-            :
-            parseAnalysisSteps(context.steps)
-    );
-    if (this.state.showParameters) return graphData;
-    else return filterOutParametersFromGraphData(graphData);
+    
 }
 
 
@@ -112,7 +105,7 @@ export class WorkflowView extends ItemBaseView {
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
-                content : <GraphSection {...this.props} mounted={this.state.mounted} />
+                content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} />
             }
         ];
 
@@ -141,73 +134,91 @@ export class WorkflowView extends ItemBaseView {
 }
 
 
-export function dropDownMenuMixin(){
+export class WorkflowGraphSectionControls extends React.Component {
+
+    static analysisStepsSet(context){
+        if (!Array.isArray(context.steps)) return false;
+        if (context.steps.length === 0) return false;
+        return true;
+    }
+
+    static keyTitleMap = {
+        'detail' : 'Analysis Steps',
+        'basic' : 'Basic Inputs & Outputs',
+        'cwl' : 'CWL Graph'
+    }
+
+    chartTypeDropdown(){
+        var detail = WorkflowGraphSectionControls.analysisStepsSet(this.props.context) ? (
+            <MenuItem eventKey='detail' active={this.props.showChartType === 'detail'}>
+                Analysis Steps
+            </MenuItem>
+        ) : null;
     
-    var detail = GraphSection.analysisStepsSet(this.props.context) ? (
-        <MenuItem eventKey='detail' active={this.state.showChart === 'detail'}>
-            Analysis Steps
-        </MenuItem>
-    ) : null;
+        var basic = (
+            <MenuItem eventKey='basic' active={this.props.showChartType === 'basic'}>
+                Basic Inputs & Outputs
+            </MenuItem>
+        );
 
-    var basic = (
-        <MenuItem eventKey='basic' active={this.state.showChart === 'basic'}>
-            Basic Inputs & Outputs
-        </MenuItem>
-    );
-
-
-    return (
-        <DropdownButton
-            id="detail-granularity-selector"
-            pullRight
-            onSelect={(eventKey, evt)=>{
-                requestAnimationFrame(()=>{
-                    if (eventKey === this.state.showChart) return;
-                    this.setState({ showChart : eventKey });
-                });
-            }}
-            title={GraphSection.keyTitleMap[this.state.showChart]}
-        >
-            { basic }{ detail }
-        </DropdownButton>
-    );
-}
-
-export const onShowParametersCheckboxChangeMixin = _.throttle(function(){
-    this.setState({ showParameters : !this.state.showParameters });
-}, 500, { trailing : false });
-
-export function uiControlsMixin(){
-    return (
-        <div className="pull-right workflow-view-controls-container">
-            <div className="inline-block show-params-checkbox-container">
-                <Checkbox checked={this.state.showParameters} onChange={onShowParametersCheckboxChangeMixin.bind(this)}>
-                    Show Parameters
-                </Checkbox>
-            </div>
+        return (
             <div className="inline-block">
-                { dropDownMenuMixin.call(this) }
+                <DropdownButton
+                    id="detail-granularity-selector"
+                    pullRight
+                    onSelect={this.props.onChangeShowChartType}
+                    title={WorkflowGraphSectionControls.keyTitleMap[this.props.showChartType]}
+                >
+                    { basic }{ detail }
+                </DropdownButton>
             </div>
-            {' '}
+        );
+    }
+
+    rowSpacingTypeDropdown(){
+        if (typeof this.props.rowSpacingType !== 'string' || typeof this.props.onChangeRowSpacingType !== 'function') {
+            return null;
+        }
+        return (
             <div className="inline-block">
-                <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
-                    requestAnimationFrame(()=>{
-                        if (eventKey === this.state.rowSpacingType) return;
-                        this.setState({ rowSpacingType : eventKey });
-                    });
-                }}/>
+                <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType}/>
             </div>
-        </div>
-    );
-}
+        );
+    }
 
-export function graphBodyMixin(){
-    if (this.state.showChart === 'cwl') return this.cwlGraph();
-    if (this.state.showChart === 'detail') return this.detailGraph();
-    if (this.state.showChart === 'basic') return this.basicGraph();
-    return null;
-}
+    fullScreenButton(){
+        var { fullscreenViewEnabled, onToggleFullScreenView } = this.props;
+        if( typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function'){
+            return (
+                <div className="inline-block">
+                    <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
+                        <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
+                    </Button>
+                </div>
+            );
+        }
+        return null;
+    }
 
+    render(){
+        var {
+            showParameters, rowSpacingType, onToggleShowParameters, onChangeRowSpacingType
+        } = this.props;
+        return (
+            <div className="pull-right workflow-view-controls-container">
+                <div className="inline-block show-params-checkbox-container">
+                    <Checkbox checked={showParameters} onChange={onToggleShowParameters}>
+                        Show Parameters
+                    </Checkbox>
+                </div>
+                
+                { this.chartTypeDropdown() }
+                { this.rowSpacingTypeDropdown() }
+                { this.fullScreenButton() }
+            </div>
+        );
+    }
+}
 
 
 export class RowSpacingTypeDropdown extends React.Component {
@@ -263,29 +274,43 @@ export class RowSpacingTypeDropdown extends React.Component {
 
 
 
-class GraphSection extends React.Component {
-
-    static analysisStepsSet(context){
-        if (!Array.isArray(context.steps)) return false;
-        if (context.steps.length === 0) return false;
-        return true;
-    }
+export class WorkflowGraphSection extends React.Component {
 
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.basicGraph = this.basicGraph.bind(this);
         this.detailGraph = this.detailGraph.bind(this);
-        this.dropDownMenu = dropDownMenuMixin.bind(this);
-        this.body = graphBodyMixin.bind(this);
-        this.parseAnalysisSteps = parseAnalysisStepsMixin.bind(this);
-        this.uiControls = uiControlsMixin.bind(this);
+        this.body = this.body.bind(this);
+        this.parseAnalysisSteps = this.parseAnalysisSteps.bind(this);
+        this.onToggleShowParameters = _.throttle(this.onToggleShowParameters.bind(this), 500, { trailing : false });
+        this.onChangeRowSpacingType = _.throttle(this.onChangeRowSpacingType.bind(this), 500, { trailing : false });
+        this.onChangeShowChartType = _.throttle(this.onChangeShowChartType.bind(this), 500, { trailing : false });
+        this.onToggleFullScreenView = _.throttle(this.onToggleFullScreenView.bind(this), 500, { trailing : false });
         this.render = this.render.bind(this);
         this.state = {
-            'showChart' : GraphSection.analysisStepsSet(props.context) ? 'detail' : 'basic',
+            'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
-            'rowSpacingType' : 'wide'
+            'rowSpacingType' : 'wide',
+            'fullscreenViewEnabled' : false
         };
+    }
+
+    componentWillUnmount(){
+        if (this.state.fullscreenViewEnabled){
+            layout.toggleBodyClass('is-full-screen', false);
+        }
+    }
+
+    parseAnalysisSteps(context = this.props.context){
+        var graphData = (
+            this.state.showChart === 'basic' ?
+                parseBasicIOAnalysisSteps(context.steps, context)
+                :
+                parseAnalysisSteps(context.steps)
+        );
+        if (this.state.showParameters) return graphData;
+        else return filterOutParametersFromGraphData(graphData);
     }
 
     commonGraphProps(){
@@ -310,20 +335,61 @@ class GraphSection extends React.Component {
         if (!Array.isArray(this.props.context.steps)) return null;
         return <Graph { ...this.commonGraphProps() } />;
     }
+    
 
-    static keyTitleMap = {
-        'detail' : 'Analysis Steps',
-        'basic' : 'Basic Inputs & Outputs',
-        'cwl' : 'CWL Graph'
+    onToggleShowParameters(){
+        this.setState({ 'showParameters' : !this.state.showParameters });
+    }
+
+    onChangeRowSpacingType(eventKey, evt){
+        requestAnimationFrame(()=>{
+            if (eventKey === this.state.rowSpacingType) return;
+            this.setState({ 'rowSpacingType' : eventKey });
+        });
+    }
+
+    onChangeShowChartType(eventKey, evt){
+        requestAnimationFrame(()=>{
+            if (eventKey === this.state.showChart) return;
+            this.setState({ 'showChart' : eventKey });
+        });
+    }
+
+    onToggleFullScreenView(){
+        requestAnimationFrame(()=>{
+            var willBeFullscreen = !this.state.fullscreenViewEnabled;
+            layout.toggleBodyClass('is-full-screen', willBeFullscreen);
+            this.setState({ 'fullscreenViewEnabled' : willBeFullscreen }, ()=>{
+                ReactTooltip.rebuild();
+            });
+        });
+    }
+
+    body(){
+        /* if (this.state.showChart === 'cwl') return this.cwlGraph(); */
+        if (this.state.showChart === 'detail') return this.detailGraph();
+        if (this.state.showChart === 'basic') return this.basicGraph();
+        return null;
     }
 
     render(){
 
         return (
-            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
+            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart) + (this.state.fullscreenViewEnabled ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
-                    { this.uiControls() }
+                    <WorkflowGraphSectionControls
+                        {..._.pick(this.props, 'context', 'href')}
+                        showChartType={this.state.showChart}
+                        onChangeShowChartType={this.onChangeShowChartType}
+                        rowSpacingType={this.state.rowSpacingType}
+                        onChangeRowSpacingType={this.onChangeRowSpacingType}
+                        showParameters={this.state.showParameters}
+                        onToggleShowParameters={this.onToggleShowParameters}
+                        fullscreenViewEnabled={this.state.fullscreenViewEnabled}
+                        onToggleFullScreenView={this.onToggleFullScreenView}
+
+                    />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 { this.body() }

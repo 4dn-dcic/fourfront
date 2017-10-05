@@ -352,7 +352,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                         '@type'             : workflow_model_obj.get('@type'),
                         'display_title'     : workflow_model_obj.get('display_title') or workflow_model_obj.get('title'),
                         'accession'         : workflow_model_obj.get('accession'),
-                        'workflow_steps'    : workflow_model_obj.get('workflow_steps'),
+                        'steps'             : workflow_model_obj.get('steps'),
                         'uuid'              : workflow_uuid,
                         'workflow_type'     : workflow_model_obj.get('workflow_type')
                     }

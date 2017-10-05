@@ -160,12 +160,12 @@ export class WorkflowNodeElement extends React.Component {
 
         // If WorkflowRun & Workflow w/ steps w/ name
         if (node.type === 'step' && node.meta.workflow
-            && Array.isArray(node.meta.workflow.workflow_steps)
-            && node.meta.workflow.workflow_steps.length > 0
-            && typeof node.meta.workflow.workflow_steps[0].step_name === 'string'
+            && Array.isArray(node.meta.workflow.steps)
+            && node.meta.workflow.steps.length > 0
+            && typeof node.meta.workflow.steps[0].name === 'string'
         ){
             //elemProps.className += ' mono-text';
-            return <div {...elemProps}>{ _.pluck(node.meta.workflow.workflow_steps, 'step_name').join(', ') }</div>;
+            return <div {...elemProps}>{ _.pluck(node.meta.workflow.steps, 'name').join(', ') }</div>;
         }
 
         // If File

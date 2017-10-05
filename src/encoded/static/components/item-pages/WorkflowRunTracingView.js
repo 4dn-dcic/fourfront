@@ -9,7 +9,7 @@ import { WorkflowNodeElement, TabbedView } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, RowSpacingTypeDropdown } from './WorkflowView';
+import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
@@ -203,7 +203,7 @@ export class WorkflowRunTracingView extends ItemBaseView {
 
 }
 
-export class TracedGraphSectionControls extends React.Component {
+export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
     render(){
         var {
             showReferenceFiles, onToggleReferenceFiles, showIndirectFiles, onToggleIndirectFiles, showParameters, onToggleParameters,
@@ -244,26 +244,14 @@ export class TracedGraphSectionControls extends React.Component {
                     </div>
                 : null }
 
-                { typeof rowSpacingType === 'string' && typeof onSetRowSpacingType === 'function' ?
-                    <div className="inline-block">
-                        <RowSpacingTypeDropdown currentKey={rowSpacingType} onSelect={onSetRowSpacingType}/>
-                    </div>
-                : null }
-                {' '}
-                { typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function' ?
-                    <div className="inline-block">
-                        <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
-                            <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
-                        </Button>
-                    </div>
-                : null }
-
+                { this.rowSpacingTypeDropdown() }
+                { this.fullScreenButton() }
             </div>
         );
     }
 }
 
-export class FileViewGraphSection extends React.Component {
+export class FileViewGraphSection extends WorkflowGraphSection {
     
     static getTabObject(props, state, onToggleAllRuns){
         var { loading, steps, mounted, allRuns } = state;
@@ -319,12 +307,11 @@ export class FileViewGraphSection extends React.Component {
 
     constructor(props){
         super(props);
-        //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
         this.onToggleReferenceFiles = this.onToggleReferenceFiles.bind(this);
         this.onToggleAllRuns = _.throttle(this.onToggleAllRuns.bind(this), 1000);
-        this.onSetRowSpacingType = this.onSetRowSpacingType.bind(this);
+        this.onChangeRowSpacingType = this.onChangeRowSpacingType.bind(this);
         this.onToggleFullScreenView = this.onToggleFullScreenView.bind(this);
         this.render = this.render.bind(this);
         this.state = {
@@ -336,23 +323,6 @@ export class FileViewGraphSection extends React.Component {
         };
     }
 
-    componentWillUnmount(){
-        if (this.state.fullscreenViewEnabled){
-            layout.toggleBodyClass('is-full-screen', false);
-        }
-    }
-    /*
-    componentWillReceiveProps(nextProps){
-        if (nextProps.allRuns !== this.props.allRuns){
-            if (nextProps.allRuns && this.state.rowSpacingType !== 'stacked') {
-                this.setState({ 'rowSpacingType' : 'stacked' });
-            }
-            else if (!nextProps.allRuns && this.state.rowSpacingType !== 'wide') {
-                this.setState({ 'rowSpacingType' : 'wide' });
-            }
-        }
-    }
-    */
     commonGraphProps(){
 
         var steps = this.props.steps;
@@ -399,23 +369,6 @@ export class FileViewGraphSection extends React.Component {
         return this.props.onToggleAllRuns();
     }
 
-    onSetRowSpacingType(eventKey, evt){
-        requestAnimationFrame(()=>{
-            if (eventKey === this.state.rowSpacingType) return;
-            this.setState({ 'rowSpacingType' : eventKey });
-        });
-    }
-
-    onToggleFullScreenView(){
-        requestAnimationFrame(()=>{
-            var willBeFullscreen = !this.state.fullscreenViewEnabled;
-            layout.toggleBodyClass('is-full-screen', willBeFullscreen);
-            this.setState({ 'fullscreenViewEnabled' : willBeFullscreen }, ()=>{
-                ReactTooltip.rebuild();
-            });
-        });
-    }
-
     render(){
         var graphProps = null;
         if (Array.isArray(this.props.steps)){
@@ -430,7 +383,9 @@ export class FileViewGraphSection extends React.Component {
                     <TracedGraphSectionControls
                         {...this.state}
                         {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'loading')}
-                        onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles} onSetRowSpacingType={this.onSetRowSpacingType}
+                        onToggleReferenceFiles={this.onToggleReferenceFiles}
+                        onToggleIndirectFiles={this.onToggleIndirectFiles}
+                        onChangeRowSpacingType={this.onChangeRowSpacingType}
                         onToggleFullScreenView={this.onToggleFullScreenView}
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled}
                     />

@@ -111,6 +111,10 @@ export default class Graph extends React.Component {
             });
             return nodes;
         },
+        /**
+         * This function, along with 'nodesInColumnPostSortFxn' & 'nodesPreSortFxn', is _PROTOTYPICAL_ - a R&D work in progress.
+         * It's quick, dirty, hacky. And it will remain this way until we figure out what we want from it, or if we want it at all, and then we'll go back and make it DRY and pretty.
+         */
         'nodesInColumnSortFxn' : function(node1, node2){
 
             function isNodeFileReference(n){
@@ -123,13 +127,10 @@ export default class Graph extends React.Component {
                 if (Array.isArray(n1InputOf) && Array.isArray(n2InputOf) && (n1InputOf[0] && n1InputOf[0].name && n2InputOf[0] && n2InputOf[0].name)){
 
                     if (n1InputOf[0].name === n2InputOf[0].name){
-                        if (n1InputOf[0].id === n2InputOf[0].id){
-                            if (n1.name === n2.name){
-                                return (n1.id < n2.id) ? -2 : 2;
-                            }
-                            return (n1.name < n2.name) ? -2 : 2;
+                        if (n1.name === n2.name){
+                            return (n1.id < n2.id) ? -2 : 2;
                         }
-                        return n1InputOf[0].id < n2InputOf[0].id ? -3 : 3;
+                        return (n1.name < n2.name) ? -2 : 2;
                     }
                     return n1InputOf[0].name < n2InputOf[0].name ? -1 : 1;
                 }
@@ -148,19 +149,16 @@ export default class Graph extends React.Component {
                 }
                 if ((n1OutputOf && n1OutputOf.name && n2OutputOf && n2OutputOf.name)){
                     if (n1OutputOf.name === n2OutputOf.name){
-                        if (n1OutputOf.id === n2OutputOf.id){
 
-                            if (typeof n1.inputOf !== 'undefined' && typeof n2.inputOf === 'undefined'){
-                                return -3;
-                            } else if (typeof n1.inputOf === 'undefined' && typeof n2.inputOf !== 'undefined'){
-                                return 3;
-                            }
-                            if (n1.name < n2.name) return -1;
-                            if (n1.name > n2.name) return 1;
-                            return 0;//compareNodeInputOf(n1, n2);
-
+                        if (typeof n1.inputOf !== 'undefined' && typeof n2.inputOf === 'undefined'){
+                            return -3;
+                        } else if (typeof n1.inputOf === 'undefined' && typeof n2.inputOf !== 'undefined'){
+                            return 3;
                         }
-                        return n1OutputOf.id < n2OutputOf.id ? -3 : 3;
+                        if (n1.name < n2.name) return -1;
+                        if (n1.name > n2.name) return 1;
+                        return 0;//compareNodeInputOf(n1, n2);
+
                     }
                     return n1OutputOf.name < n2OutputOf.name ? -3 : 3;
                 }
@@ -190,9 +188,8 @@ export default class Graph extends React.Component {
                         }
                     }
                 }
-                if (node1.name === node2.name){
-                    if (node1.id === node2.id) return 0;
-                    return (node1.id < node2.id) ? -2 : 2;
+                if (node1.name === node2.name){ // Shouldnt happen. Step names are now enforced to be unique.
+                    return 0;
                 }
                 return (node1.name < node2.name) ? -2 : 2;
             }

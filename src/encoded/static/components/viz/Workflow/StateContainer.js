@@ -75,8 +75,8 @@ export default class StateContainer extends React.Component {
 
         // Update own selectedNode to latest v, if still exists & new one not otherwise set.
         if (typeof newState.selectedNode === 'undefined' && this.state.selectedNode){
-            var find = { 'name' : this.state.selectedNode.name };
-            if (this.state.selectedNode.id) find.id = this.state.selectedNode.id;
+            var find = { 'name' : this.state.selectedNode.name, 'type' : this.state.selectedNode.type };
+            if (this.state.selectedNode.id) find.id = this.state.selectedNode.id; // Case: IO Node
             foundNode = _.findWhere(this.props.nodes, find);
             if (foundNode){
                 newState.selectedNode = foundNode;

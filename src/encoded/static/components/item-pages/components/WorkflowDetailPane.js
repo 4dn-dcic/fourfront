@@ -366,38 +366,8 @@ class FileDetailBody extends React.Component {
 
 class AnalysisStepSoftwareDetailRow extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.maybeLoadSoftware = this.maybeLoadSoftware.bind(this);
-        this.state = {
-            software : props.software
-        };
-    }
-
-    componentDidMount(){
-        this.maybeLoadSoftware();
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (nextProps.software !== this.props.software) {
-            this.setState({ software : nextProps.software }, this.maybeLoadSoftware.bind(this, nextProps.software));
-        }
-    }
-
-    maybeLoadSoftware(software = this.state.software){
-        if (typeof software === 'string') { // Our software is not embedded.
-            ajax.load(software, (res)=>{
-                if (res && typeof res === 'object'){
-                    this.setState({ software : res });
-                }
-            }, 'GET', () => {
-                this.setState({ software : null });
-            });
-        }
-    }
-
     softwareUsedBox(){
-        var soft = this.state.software;
+        var soft = this.props.software;
         if (!soft){
             return (
                 <div className="col-sm-6 box">
@@ -439,7 +409,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
     }
 
     softwareLinkBox(){
-        var soft = this.state.software;
+        var soft = this.props.software;
         if (!soft || !soft.source_url) return (
             <div className="col-sm-6 box">
                 <span className="text-600">Software Source</span>
@@ -520,10 +490,7 @@ class WorkflowDetailsForWorkflowNodeRow extends React.Component {
 
 class SoftwareDetailsForWorkflowNodeRow extends React.Component {
     render(){
-
-        var softwareList = this.props.software;
-
-        var softwareElements;
+        var softwareList = this.props.software, softwareElements;
 
         if (Array.isArray(softwareList) && softwareList.length > 0){
             softwareElements = _.map(softwareList, function(sw){
@@ -550,12 +517,13 @@ class SoftwareDetailsForWorkflowNodeRow extends React.Component {
     }
 }
 
-class AnalysisStepDetailBody extends React.Component {
 
+class WFRStepDetailBody extends React.Component {
     constructor(props){
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.maybeLoadWFR = this.maybeLoadWFR.bind(this);
+        this.purposesBox = StepDetailBody.prototype.purposesBox.bind(this);
         this.state = {
             wfr : (this.props.step && this.props.step['@id']) || null
         };
@@ -597,33 +565,95 @@ class AnalysisStepDetailBody extends React.Component {
 
     stepTitleBox(){
         var { step, context, node } = this.props;
-        var stepHref = object.atIdFromObject(step) || '/' + step.uuid;
-        var titleString = step.name || step.title || step.display_title || step.uuid;
-
-        var isStepWorkflow = context && (
-            object.atIdFromObject(context) === stepHref ||
-            (step && Array.isArray(step.analysis_step_types) && step.analysis_step_types.indexOf('Workflow Process') > -1)
-        );
-        
-        var content = isStepWorkflow ? (
-            <h3 className="text-300 text-ellipsis-container">{ titleString }</h3>
-        ) : (
-            <h3 className="text-400 text-ellipsis-container"><a href={stepHref}>{ titleString }</a></h3>
-        );
-
-        var label;
-        if (isStepWorkflow){
-            label = 'Workflow Process';
-        } else if (step && Array.isArray(step['@type']) && step['@type'].indexOf('WorkflowRun') > -1){
-            label = 'Run Name';
-        } else {
-            label = 'Step Name';
-        }
+        var stepHref = object.atIdFromObject(step);
+        var titleString = step.display_title || step.name;
 
         return (
             <div className="col-sm-6 box">
-                <span className="text-600">{ label }</span>
-                { content }
+                <span className="text-600">Workflow Run</span>
+                { stepHref ?
+                    <h3 className="text-400 text-ellipsis-container" data-tip={titleString}><a href={stepHref}>{ titleString }</a></h3>
+                    :
+                    <h3 className="text-300 text-ellipsis-container">{ titleString }</h3>
+                }
+            </div>
+        );
+    }
+
+    render(){
+        var { node, step } = this.props; // this.props.step === this.props.node.meta
+        var workflow = (step && step.workflow) || null;
+        var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false; // If step ===  wfr, not step === analysis_step
+        workflow = (wfr && wfr.workflow) || workflow;
+
+        // Still need to test this .workflow_steps.step.software_used -> .steps.meta.software_used :
+        var listOfSoftwareInWorkflow = (wfr && wfr.workflow && Array.isArray(wfr.workflow.steps) &&
+            _.any(wfr.workflow.steps, function(workflowStep){ return workflowStep.meta && workflowStep.meta.software_used; }) &&
+            _.uniq(_.filter(
+                _.map(wfr.workflow.steps, function(workflowStep){ return (workflowStep.meta && workflowStep.meta.software_used) || null; }),
+                function(s) { return s !== null; }
+            ), false, object.atIdFromObject)
+        ) || null;
+
+        return(
+            <div style={{ minHeight : this.props.minHeight }}>
+                <div className="information">
+                    <div className="row">
+
+                        { this.stepTitleBox() }
+                        { this.purposesBox() }
+
+                    </div>
+                    { workflow ? <hr/> : null }
+                    { workflow ? <WorkflowDetailsForWorkflowNodeRow workflow_run={wfr} step={step} workflow={workflow}/> : null }
+                    { listOfSoftwareInWorkflow ? <hr/> : null }
+                    { listOfSoftwareInWorkflow ? <SoftwareDetailsForWorkflowNodeRow software={listOfSoftwareInWorkflow}/> : null }
+                    
+                </div>
+                <hr/>
+                
+                
+                <Fade in={!!(wfr)} key="wfr-detail-container">
+                    <div>
+                        <h3 className="tab-section-title">
+                            <span>Details of Run</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider"/>
+                        { wfr ?
+                        <ItemDetailList
+                            context={wfr}
+                            schemas={this.props.schemas}
+                            minHeight={this.props.minHeight}
+                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                        />
+                        : null }
+                    </div>
+                </Fade>
+                { typeof this.state.wfr === 'string' ? 
+                    <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div>
+                : null }
+                
+                
+            </div>
+        );
+    }
+}
+
+class StepDetailBody extends React.Component {
+
+    stepTitleBox(){
+        var { step, context, node } = this.props;
+        var titleString = step.display_title || step.name || node.name;
+        var stepHref = object.atIdFromObject(step) || null;
+
+        return (
+            <div className="col-sm-6 box">
+                <span className="text-600">Step Name</span>
+                { stepHref ?
+                    <h3 className="text-400 text-ellipsis-container"><a href={stepHref}>{ titleString }</a></h3>
+                    :
+                    <h3 className="text-300 text-ellipsis-container">{ titleString }</h3>
+                }
             </div>
         );
     }
@@ -647,24 +677,18 @@ class AnalysisStepDetailBody extends React.Component {
     }
 
     render(){
-        var node = this.props.node;
-        var step = this.props.step;
-        var workflow = (step && step.workflow) || null;
-        var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false; // If step ===  wfr, not step === analysis_step
-        var self_software_used = step.software_used || (workflow && workflow.software_used) || null;
+        var { node, step } = this.props; // this.props.step === this.props.node.meta
+
+        // Check if we have an @id, and if it is of workflow-run-*.
+        var related_item_at_id = object.atIdFromObject(step);
+        if (related_item_at_id && ((Array.isArray(step['@type']) && step['@type'].indexOf('WorkflowRun') > -1) || related_item_at_id.slice(0,14) === '/workflow-runs')){
+            return <WFRStepDetailBody {...this.props}/>;
+        }
+
+        var self_software_used = step.software_used || null;
         if (typeof self_software_used === 'string' && self_software_used.charAt(0) !== '/' && object.isUUID(self_software_used)){
             self_software_used = '/software/' + self_software_used;
         }
-
-        //var isThereAssociatedSoftware = !!(this.props.step && this.props.step.software_used);
-        // Still need to test this .workflow_steps.step.software_used -> .steps.meta.software_used :
-        var listOfSoftwareInWorkflow = (wfr && wfr.workflow && Array.isArray(wfr.workflow.steps) &&
-            _.any(wfr.workflow.steps, function(workflowStep){ return workflowStep.meta && workflowStep.meta.software_used; }) &&
-            _.uniq(_.filter(
-                _.map(wfr.workflow.steps, function(workflowStep){ return (workflowStep.meta && workflowStep.meta.software_used) || null; }),
-                function(s) { return s !== null; }
-            ), false, object.atIdFromObject)
-        ) || null;
 
         return(
             <div style={{ minHeight : this.props.minHeight }}>
@@ -675,38 +699,11 @@ class AnalysisStepDetailBody extends React.Component {
                         { this.purposesBox() }
 
                     </div>
-                    { workflow ? <hr/> : null }
-                    { workflow ? <WorkflowDetailsForWorkflowNodeRow workflow_run={wfr} step={step} workflow={workflow}/> : null }
-                    { listOfSoftwareInWorkflow ? <hr/> : null }
-                    { listOfSoftwareInWorkflow ? <SoftwareDetailsForWorkflowNodeRow software={listOfSoftwareInWorkflow}/> : null }
                     { self_software_used ? <hr/> : null }
                     { self_software_used ? <AnalysisStepSoftwareDetailRow software={self_software_used}/> : null }
                     
                 </div>
                 <hr/>
-                
-                
-                <Fade in={!!(wfr)} key="wfr-detail-container">
-                    <div>
-                        <h3 className="tab-section-title">
-                            <span>Details</span>
-                        </h3>
-                        <hr className="tab-section-title-horiz-divider"/>
-                        { wfr ?
-                        <ItemDetailList
-                            context={wfr}
-                            schemas={this.props.schemas}
-                            minHeight={this.props.minHeight}
-                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
-                        />
-                        : null }
-                    </div>
-                </Fade>
-                { typeof this.state.wfr === 'string' ? 
-                    <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div>
-                : null }
-                
-                
             </div>
         );
     }
@@ -768,7 +765,7 @@ export class WorkflowDetailPane extends React.Component {
         }
         if (node.type === 'step' && node.meta && typeof node.meta === 'object'){
             return (
-                <AnalysisStepDetailBody
+                <StepDetailBody
                     key="body"
                     step={node.meta}
                     node={node}
