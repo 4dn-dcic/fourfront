@@ -10,52 +10,7 @@ import Node from './Node';
 import { traceNodePathAndRun } from './parsing-functions';
 
 
-export default class Edge extends React.Component {
-
-    static isSelected(edge, selectedNode, isNodeDisabled = null){
-        return (
-            Node.isSelected(edge.source, selectedNode) ||
-            Node.isSelected(edge.target, selectedNode)
-        ) && !Edge.isDisabled(edge, isNodeDisabled);
-    }
-
-    static isRelated(edge, selectedNode, isNodeDisabled = null){
-        return (
-            Node.isRelated(edge.source, selectedNode) ||
-            Node.isRelated(edge.target, selectedNode)
-        ) && !Edge.isDisabled(edge, isNodeDisabled);
-    }
-
-    static isDistantlyRelated(edge, selectedNode, isNodeDisabled){
-        if (Edge.isDisabled(edge, isNodeDisabled)) return false;
-        if (!selectedNode) return false;
-        if (selectedNode.column < edge.source.column) return false;
-        var selectedInputs = (selectedNode && (selectedNode.inputNodes || (selectedNode.outputOf && [selectedNode.outputOf]))) || null;
-
-        function check(node, prevNode, nextNodes){
-            return Node.isSelected(edge.target, node);
-        }
-
-        if (Array.isArray(selectedInputs) && selectedInputs.length > 0){
-            var results = _.flatten(_.map(selectedInputs, (sI)=>{
-                return traceNodePathAndRun(sI, check, 'input', selectedNode);
-            }), false);
-
-            return _.any(results);
-        }
-        return false;
-    }
-
-    static isDisabled(edge, isNodeDisabled = null){
-        if (typeof isNodeDisabled === 'boolean') return isNodeDisabled;
-        return (
-            typeof isNodeDisabled === 'function' &&
-            (
-                isNodeDisabled(edge.source) ||
-                isNodeDisabled(edge.target)
-            )
-        );
-    }
+export const pathDimensionFunctions = {
 
     /**
      * Draw a bezier path from startPt to endPt.
@@ -65,7 +20,7 @@ export default class Edge extends React.Component {
      * @param {Number[]} [ledgeWidths] - Little widths of line right before/after node. To allow for horizontal arrow.
      * @returns {string} 'd' attribute value for an SVG path.
      */
-    static drawBezierEdge(startPt, endPt, config){
+    'drawBezierEdge' : function(startPt, endPt, config){
         var { rowSpacing, columnSpacing, nodeEdgeLedgeWidths } = config;
         var ledgeWidths = nodeEdgeLedgeWidths;
 
@@ -116,9 +71,9 @@ export default class Edge extends React.Component {
             endPt.y
         );
         return path.toString();
-    }
+    },
 
-    static drawStraightLineCurved(startPt, endPt, config){
+    'drawStraightLineCurved' : function(startPt, endPt, config){
         var path;
         var radius = config.curveRadius || config.radius;
         path = d3.path();
@@ -157,22 +112,71 @@ export default class Edge extends React.Component {
         );
 
         return path.toString();
-    }
+    },
 
-    static drawStraightLineToCurve(){
+    drawStraightLineToCurve : function(){
 
-    }
+    },
 
     /**
      * @deprecated
      */
-    static drawStraightEdge(startPt, endPt){
+    'drawStraightEdge' : function(startPt, endPt){
         var path;
         path = d3.path();
         path.moveTo(startPt.x, startPt.y);
         path.lineTo(endPt.x, endPt.y);
         path.closePath();
         return path.toString();
+    }
+};
+
+
+export default class Edge extends React.Component {
+
+    static isSelected(edge, selectedNode, isNodeDisabled = null){
+        return (
+            Node.isSelected(edge.source, selectedNode) ||
+            Node.isSelected(edge.target, selectedNode)
+        ) && !Edge.isDisabled(edge, isNodeDisabled);
+    }
+
+    static isRelated(edge, selectedNode, isNodeDisabled = null){
+        return (
+            Node.isRelated(edge.source, selectedNode) ||
+            Node.isRelated(edge.target, selectedNode)
+        ) && !Edge.isDisabled(edge, isNodeDisabled);
+    }
+
+    static isDistantlyRelated(edge, selectedNode, isNodeDisabled){
+        if (Edge.isDisabled(edge, isNodeDisabled)) return false;
+        if (!selectedNode) return false;
+        if (selectedNode.column < edge.source.column) return false;
+        var selectedInputs = (selectedNode && (selectedNode.inputNodes || (selectedNode.outputOf && [selectedNode.outputOf]))) || null;
+
+        function check(node, prevNode, nextNodes){
+            return Node.isSelected(edge.target, node);
+        }
+
+        if (Array.isArray(selectedInputs) && selectedInputs.length > 0){
+            var results = _.flatten(_.map(selectedInputs, (sI)=>{
+                return traceNodePathAndRun(sI, check, 'input', selectedNode);
+            }), false);
+
+            return _.any(results);
+        }
+        return false;
+    }
+
+    static isDisabled(edge, isNodeDisabled = null){
+        if (typeof isNodeDisabled === 'boolean') return isNodeDisabled;
+        return (
+            typeof isNodeDisabled === 'function' &&
+            (
+                isNodeDisabled(edge.source) ||
+                isNodeDisabled(edge.target)
+            )
+        );
     }
 
     static defaultProps = {
@@ -184,9 +188,88 @@ export default class Edge extends React.Component {
         super(props);
         this.render = this.render.bind(this);
         this.generatePathDimension = this.generatePathDimension.bind(this);
+        this.state = {
+            'pathDimension' : this.generatePathDimension(props.edge, props.edgeStyle)
+        };
     }
 
-    generatePathDimension(edge, edgeStyle = 'bezier', startOffset = 5, endOffset = -5){
+    /**
+     * If any of our nodes' coordinates have updated, update state.pathDimension either via a D3 animation tween acting on setState or instantly via setState.
+     * Whether instant or gradual dimension update is based on result of this.doTransitionOfEdge() : boolean/
+     */
+    componentDidUpdate(pastProps){
+        if (this.didNodeCoordinatesChange(this.props, pastProps)){
+            if (this.doTransitionOfEdge()) {
+                // Animate
+                this.transitionPathDimensions(
+                    { 'x' : pastProps.startX,   'y' : pastProps.startY },
+                    { 'x' : this.props.startX,  'y' : this.props.startY },
+                    { 'x' : pastProps.endX,     'y' : pastProps.endY },
+                    { 'x' : this.props.endX,    'y' : this.props.endY },
+                );
+            } else {
+                // Instant
+                this.setState({
+                    'pathDimension' : this.generatePathDimension(this.props.edge, this.props.edgeStyle)
+                });
+            }
+        }
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+        if (this.didNodeCoordinatesChange(nextProps, this.props) || nextState.pathDimension !== this.state.pathDimension){
+            return true;
+        }
+        return false;
+    }
+
+    doTransitionOfEdge(props = this.props){
+        if (props.noTransition) return false;
+        if (props.edgeCount > 80) return false;
+        return true;
+    }
+
+    didNodeCoordinatesChange(nextProps, pastProps){
+        if (
+            nextProps.startX !== pastProps.startX ||
+            nextProps.startY !== pastProps.startY ||
+            nextProps.endX !== pastProps.endX ||
+            nextProps.endY !== pastProps.endY
+        ) return true;
+        return false;
+    }
+
+    transitionPathDimensions(startPtA, startPtB, endPtA, endPtB){
+
+        var changeTween = function(){
+            return (function(){
+                var interpolateSourceX = d3.interpolateNumber(startPtA.x, startPtB.x);
+                var interpolateSourceY = d3.interpolateNumber(startPtA.y, startPtB.y);
+                var interpolateTargetX = d3.interpolateNumber(endPtA.x, endPtB.x);
+                var interpolateTargetY = d3.interpolateNumber(endPtA.y, endPtB.y);
+
+                return (t)=>{
+                    this.setState({
+                        'pathDimension' : this.generatePathDimension(this.props.edge, this.props.edgeStyle,
+                            { 'x' : interpolateSourceX(t), 'y' : interpolateSourceY(t) },
+                            { 'x' : interpolateTargetX(t), 'y' : interpolateTargetY(t) },
+                        )
+                    });
+                    //window.scrollTo(0, interpolate(t));
+                };
+            }.bind(this));
+        }.bind(this);
+
+        //var origScrollTop = scrollElement.scrollTop;
+        var animation = d3.select(this.refs.path)
+            .interrupt()
+            .transition()
+            .ease(d3.easeQuadOut)
+            .duration(500)
+            .tween("changeDimension", changeTween());
+    }
+
+    generatePathDimension(edge, edgeStyle = 'bezier', startPtOverride = null, endPtOverride = null, startOffset = 5, endOffset = -5){
         if (this.props.pathArrows){
             endOffset -= 10;
         }
@@ -201,23 +284,23 @@ export default class Edge extends React.Component {
         }
         
         var startPt = {
-            x : edge.source.x + this.props.columnWidth + startOffset,
-            y : edge.source.y
+            x : ((startPtOverride && startPtOverride.x) || this.props.startX) + this.props.columnWidth + startOffset,
+            y : ((startPtOverride && startPtOverride.y) || this.props.startY)
         };
 
         var endPt = {
-            x : edge.target.x + endOffset,
-            y : edge.target.y
+            x : ((endPtOverride && endPtOverride.x) || this.props.endX) + endOffset,
+            y : ((endPtOverride && endPtOverride.y) || this.props.endY)
         };
 
         if (edgeStyle === 'straight'){
-            return Edge.drawStraightEdge(startPt, endPt);
+            return pathDimensionFunctions.drawStraightEdge(startPt, endPt);
         }
         if (edgeStyle === 'curve'){
-            return Edge.drawStraightLineCurved(startPt, endPt, _.pick(this.props, 'curveRadius'));
+            return pathDimensionFunctions.drawStraightLineCurved(startPt, endPt, _.pick(this.props, 'curveRadius'));
         }
         if (edgeStyle === 'bezier'){
-            return Edge.drawBezierEdge(startPt, endPt, _.pick(this.props, 'columnSpacing', 'rowSpacing', 'nodeEdgeLedgeWidths'));
+            return pathDimensionFunctions.drawBezierEdge(startPt, endPt, _.pick(this.props, 'columnSpacing', 'rowSpacing', 'nodeEdgeLedgeWidths'));
         }
     }
 
@@ -232,7 +315,8 @@ export default class Edge extends React.Component {
         }
         return (
             <path
-                d={this.generatePathDimension(edge, this.props.edgeStyle)}
+                d={this.state.pathDimension}
+                ref="path"
                 className={"edge-path" + (disabled ? ' disabled' : '' )}
                 data-edge-selected={selected}
                 data-edge-related={related || isDistantlyRelated}

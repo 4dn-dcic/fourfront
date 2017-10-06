@@ -27,12 +27,16 @@ steps_run_data_schema = {
             "description" : "File(s) for this step input/output argument.",
             "items" : {
                 "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
+                "linkTo" : "File" # TODO: (Med/High Priority) Make this work. Will likely wait until after embedding edits b.c. want to take break from WF stuff and current solution works.
             }
         },
         "meta" : {
             "type" : "array",
             "title" : "Additional metadata for input/output file(s)",
-            "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal."
+            "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal.",
+            "items" : {
+                "type" : "object"
+            }
         },
         "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
             "title" : "Value",
@@ -74,10 +78,10 @@ DEFAULT_TRACING_OPTIONS = {
 class WorkflowRunTracingException(Exception):
     pass
 
-#def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options=None):
 def trace_workflows(original_file_set_to_trace, request, options=None):
     '''
     Trace a set of files according to supplied options.
+    TODO: After grouping design: CLEANUP! Rename get_model to get_item, etc. Remove grouping.
 
     :param original_file_set_to_trace: Must be a list of DICTIONARIES. If have Item instances, grab their model.source['object'] or similar. Each dict should have at minimum:
         - uuid, workflow_run_inputs, workflow_run_outputs
@@ -95,7 +99,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     uuidCacheTracedHistory = {}
     uuidCacheGroupSourcesByRun = {}
     steps = [] # Our output
-
 
     def get_model(uuid, key = None):
         model = None
@@ -120,6 +123,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         uuidCacheModels[cacheKey] = model
 
         return model
+
+    def get_model_obj(uuid, key = None):
+        return get_model(uuid, key).source.get('object', {})
 
 
     def group_files_by_workflow_argument_name(set_of_files):
@@ -200,6 +206,10 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             in_file['@type'] = input_file_model_obj.get('@type')
             in_file['file_type'] = input_file_model_obj.get('file_type')
             in_file['filename'] = input_file_model_obj.get('filename')
+            in_file['file_size'] = input_file_model_obj.get('file_size')
+            in_file['status'] = input_file_model_obj.get('status')
+            in_file['display_title'] = input_file_model_obj.get('display_title')
+
             # Get @ids from ES source.
             output_of_workflow_runs = input_file_model_obj.get('workflow_run_outputs', [])
             if len(output_of_workflow_runs) == 0:
@@ -316,12 +326,10 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             return
 
         uuidCacheTracedHistory[last_workflow_run_uuid] = True
-        workflow_run_model = get_model(last_workflow_run_uuid)
 
-        if not workflow_run_model:
+        workflow_run_model_obj = get_model_obj(last_workflow_run_uuid)
+        if not workflow_run_model_obj:
             return
-
-        workflow_run_model_obj = workflow_run_model.source.get('object',{})
 
         step = {
             "name" : workflow_run_model_obj.get('@id'), # We use our front-end Node component to show display_title or something else from meta instead.
@@ -542,11 +550,12 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = [
-                'workflow.*',
+                #'workflow.*',
                 'workflow.steps.meta.software_used.name',
                 'workflow.steps.meta.software_used.title',
                 'workflow.steps.meta.software_used.version',
                 'workflow.steps.meta.software_used.source_url',
+                'workflow.workflow_type',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
                 'input_files.value.display_title',
@@ -565,8 +574,7 @@ class WorkflowRun(Item):
                 'output_quality_metrics.value.@type'
                 ]
 
-    @calculated_property(schema=workflow_run_steps_property_schema,
-                        category='page')
+    @calculated_property(schema=workflow_run_steps_property_schema, category='page')
     def steps(self, request):
         '''
         Extends the 'inputs' & 'outputs' (lists of dicts) properties of calculated property 'analysis_steps' (list of dicts) from

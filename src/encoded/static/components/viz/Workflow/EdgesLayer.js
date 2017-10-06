@@ -36,6 +36,7 @@ export default class EdgesLayer extends React.Component {
         var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
         var divWidth = Math.max(fullWidth, this.props.contentWidth);
         var edges = this.props.edges;
+        var edgeCount = edges.length;
         return (
             <div className="edges-layer-wrapper" style={{ width : divWidth, height : fullHeight }}>
                 <svg className="edges-layer" width={ divWidth } height={ fullHeight }>
@@ -68,6 +69,11 @@ export default class EdgesLayer extends React.Component {
                             <Edge
                                 {...this.props}
                                 edge={edge}
+                                edgeCount={edgeCount}
+                                startX={edge.source.x}
+                                startY={edge.source.y}
+                                endX={edge.target.x}
+                                endY={edge.target.y}
                                 key={(edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name)}
                             />
                         )

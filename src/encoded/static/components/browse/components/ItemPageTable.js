@@ -44,9 +44,12 @@ export class ItemPageTable extends React.Component {
                         title = <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>;
                     }
 
-                    var typeTitle = Schemas.getItemTypeTitle(result);
-                    if (typeof typeTitle === 'string'){
-                        typeTitle += ' ';
+                    var typeTitle = null;
+                    if (!props.hideTypeTitle){
+                        typeTitle = Schemas.getItemTypeTitle(result);
+                        if (typeof typeTitle === 'string'){
+                            typeTitle += ' ';
+                        }
                     }
 
                     var toggleButton = null;
@@ -131,6 +134,7 @@ export class ItemPageTable extends React.Component {
                     var atId = object.atIdFromObject(result);
                     return (
                         <ItemPageTableRow
+                            {...this.props}
                             key={atId || rowIndex}
                             result={result}
                             width={width}
@@ -180,6 +184,7 @@ class ItemPageTableRow extends React.Component {
     renderValue(colDefinition, result, columnIndex){
         return (
             <ResultRowColumnBlockValue
+                {...this.props}
                 columnDefinition={colDefinition}
                 columnNumber={columnIndex}
                 key={colDefinition.field}
