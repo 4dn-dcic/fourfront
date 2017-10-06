@@ -91,6 +91,16 @@
         "software_used": "02d636b9-d82d-4da9-950c-2ca994aababc"
     },
     {
+        "uuid": "e6843cbd-1de7-41fe-99c4-481c10f21d07",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "addfragtopairs",
+        "name": "addfragtopairs",
+        "version": "3",
+        "analysis_step_types": ["file format conversion"],
+        "software_used": "e17c3e9c-8882-4478-93da-062c5213341d"
+    },
+    {
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a73514",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
@@ -228,5 +238,45 @@
         "analysis_step_types":[ "aggregation", "normalization", "file format conversion" ],
         "award":"1U01CA200059-01",
         "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"pairsam-parse-sort",
+        "uuid":"9a30285a-d224-4ced-bde5-c26ba3af9325",
+        "version":"2",
+        "software_used":"c9bf856d-0356-4a8e-8141-2fea6a0ac550",
+        "name":"pairsamtools",
+        "analysis_step_types":[ "sorting" ],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"pairsam-merge",
+        "uuid":"ddb3d267-0289-48bd-afd2-1505ad8977a6",
+        "version":"2",
+        "software_used":"c9bf856d-0356-4a8e-8141-2fea6a0ac550",
+        "name":"pairsamtools",
+        "analysis_step_types":[ "merging" ],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "title":"pairsam-filter",
+        "uuid":"78708866-f965-4d85-9d01-577a03f51a12",
+        "version":"2",
+        "software_used":"c9bf856d-0356-4a8e-8141-2fea6a0ac550",
+        "name":"pairsamtools",
+        "analysis_step_types":[ "filtering" ],
+        "award":"1U01CA200059-01",
+        "lab":"4dn-dcic-lab"
+    },
+    {
+        "uuid": "99bb38e0-c7a7-4e22-b452-3934462ce90a",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "title": "pairs-patch",
+        "name": "pairs-patch",
+        "version": "1",
+        "analysis_step_types": ["file format conversion"],
+        "software_used": "e17c3e9c-8882-4478-93da-062c5213341d"
     }
 ]

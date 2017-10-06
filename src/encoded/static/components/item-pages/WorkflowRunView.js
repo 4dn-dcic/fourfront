@@ -10,6 +10,10 @@ import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { commonGraphPropsFromProps, graphBodyMixin, parseAnalysisStepsMixin, uiControlsMixin, doValidAnalysisStepsExist } from './WorkflowView';
 
+// Test/Debug Data
+//import { WFR_JSON } from './../testdata/traced_workflow_runs/WorkflowRunSBG-4DNWF06BPEF2';
+
+
 /**
  * N.B. CAUSES SIDE EFFECTS (PURPOSELY)
  * Replaces n.meta.run_data.file UUID with embedded object from input_files or output_files, or output_quality_metrics (assuming they are in param uuidFileMap).
@@ -98,7 +102,7 @@ export class WorkflowRunView extends ItemBaseView {
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
@@ -111,7 +115,7 @@ export class WorkflowRunView extends ItemBaseView {
             AuditTabView.getTabObject(this.props.context)
         ]).map((tabObj)=>{ // Common properties
             return _.extend(tabObj, {
-                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 650 }
+                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
             });
         });
     }
@@ -172,7 +176,7 @@ class GraphSection extends React.Component {
     }
 
     basicGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return (
             <Graph
                 { ...this.commonGraphProps() }
@@ -185,7 +189,7 @@ class GraphSection extends React.Component {
     }
 
     detailGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return (
             <Graph
                 { ...this.commonGraphProps() }

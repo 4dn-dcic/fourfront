@@ -156,10 +156,15 @@ export default class BuildField extends React.Component{
         var cannot_delete = ['filename'];
         var showDelete = false;
         // don't show delet button unless:
-        // 1. not in hardcoded cannot delete list AND 2. has a value (non-null)
-        // AND 3. is not an object or non-empty array element (individual values get deleted)
-        if(!_.contains(cannot_delete, this.props.field) && this.props.value !== null && this.props.fieldType !== 'array'){
+        // not in hardcoded cannot delete list AND is not an object or
+        // non-empty array element (individual values get deleted)
+        if(!_.contains(cannot_delete, this.props.field) && this.props.fieldType !== 'array'){
             showDelete = true;
+        }
+
+        // if there is no value in the field and non-array, hide delete button
+        if(this.props.value === null && !this.props.isArray){
+            showDelete = false;
         }
 
         var rowClassName = "row facet" + (this.state.dropdownOpen ? ' active-submission-row' : '');
@@ -681,11 +686,28 @@ class S3FileInput extends React.Component{
     handleChange = (e) => {
         var req_type = null;
         var file = e.target.files[0];
+        // get the current context and overall schema for the file object
+        var currContext = this.props.getCurrContext();
+        var currSchema = this.props.getCurrSchema();
+        var schema_extensions = object.getNestedProperty(currSchema, ['file_format_file_extension'], true);
+        var extension;
+        // find the extension the file should have
+        if(currContext.file_format in schema_extensions){
+            extension = schema_extensions[currContext.file_format];
+        }else{
+            alert('Internal file extension conflict.');
+            return;
+        }
         // file was not chosen
         if(!file){
             return;
         }else{
             var filename = file.name ? file.name : "unknown";
+            // check extension
+            if(!filename.endsWith(extension)){
+                alert('File extension error! Please enter a file of type: ' + extension);
+                return;
+            }
             this.props.modifyNewContext(this.props.nestedField, filename, 'file upload', this.props.linkType, this.props.arrayIdx);
             // calling modifyFile changes the 'file' state of top level component
             this.modifyFile(file);

@@ -72,7 +72,7 @@ class BarSection extends React.Component {
                 ref={(r)=>{
                     if (this.props.isNew) setTimeout(function(){
                         vizUtil.requestAnimationFrame(function(){
-                            r.style.height = d.attr.height + 'px';
+                            if (r) r.style.height = d.attr.height + 'px';
                         });
                     }, 0);
                 }}

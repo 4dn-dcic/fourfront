@@ -938,15 +938,15 @@ export default class SubmissionView extends React.Component{
             stateToSet.errorCount = 0;
         }
         this.setState({'processingFetch': true});
-        ajax.promise('/me?frame=embedded').then(data => {
-            if(!data || !data.submits_for || data.submits_for.length == 0){
+        ajax.promise('/me?frame=embedded').then(me_data => {
+            if(!me_data || !me_data.submits_for || me_data.submits_for.length == 0){
                 console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
                 keyValid[inKey] = 2;
                 this.setState(stateToSet);
                 return;
             }
             // use first lab for now
-            var submits_for = data.submits_for[0];
+            var submits_for = me_data.submits_for[0];
             lab = submits_for['@id'] ? submits_for['@id'] : submits_for.link_id.replace(/~/g, "/");
             ajax.promise(lab).then(lab_data => {
                 if(!lab || !lab_data.awards || lab_data.awards.length == 0){
@@ -963,14 +963,19 @@ export default class SubmissionView extends React.Component{
                     finalizedContext.lab = propContext.lab.link_id.replace(/~/g, "/");
                     // an admin is editing. Use the pre-existing submitted_by
                     // otherwise, permissions won't let us change this field
-                    if(data.groups && _.contains(data.groups, 'admin')){
-                        finalizedContext.submitted_by = propContext.submitted_by.link_id.replace(/~/g, "/");
+                    if(me_data.groups && _.contains(me_data.groups, 'admin')){
+                        if(propContext.submitted_by){
+                            finalizedContext.submitted_by = propContext.submitted_by.link_id.replace(/~/g, "/");
+                        }else{
+                            // use current user
+                            finalizedContext.submitted_by = me_data.link_id.replace(/~/g, "/");
+                        }
                     }
-                }else{ // use info of person creating/cloning
-                    if(currSchema.properties.award){
+                }else{ // use info of person creating/cloning unless values present
+                    if(currSchema.properties.award && !('award' in finalizedContext)){
                         finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
                     }
-                    if(currSchema.properties.lab){
+                    if(currSchema.properties.lab && !('lab' in finalizedContext)){
                         finalizedContext.lab = lab;
                     }
                 }
@@ -1430,6 +1435,20 @@ class IndividualObjectView extends React.Component{
     }
 
     /*
+    Simple function, return the currContext. Used in BuildField
+    */
+    getCurrContext = () => {
+        return this.props.currContext;
+    }
+
+    /*
+    Simple function, return the current schema. Used in BuildField
+    */
+    getCurrSchema = () => {
+        return this.props.schemas[this.props.currType];
+    }
+
+    /*
     Use ajax to get the display_title for an existing object. Use that to kicks
     of the addExistingObj process; if a title can't be found, use the object
     path as a fallback.
@@ -1512,6 +1531,8 @@ class IndividualObjectView extends React.Component{
                         'selectArrayIdx': array
                     });
                     this.props.setSubmissionState('fullScreen', true);
+                }else{ // this is not a great long-term solution
+                    alert('No objects of this type exist yet! Please use "Create new"');
                 }
             }
         });
@@ -1534,6 +1555,22 @@ class IndividualObjectView extends React.Component{
         }else{
             this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
         }
+        this.setState({
+            'selectType': null,
+            'selectData': null,
+            'selectQuery': null,
+            'selectField': null,
+            'selectLink': null,
+            'selectArrayIdx': null
+        });
+        this.props.setSubmissionState('fullScreen', false);
+    }
+
+    /*
+    Exit out of the selection process and clean up state
+    */
+    selectCancel = () => {
+        this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
         this.setState({
             'selectType': null,
             'selectData': null,
@@ -1642,6 +1679,8 @@ class IndividualObjectView extends React.Component{
                 linkType={linked}
                 isLinked={isLinked}
                 selectObj={this.selectObj}
+                getCurrContext={this.getCurrContext}
+                getCurrSchema={this.getCurrSchema}
                 title={fieldTitle}
                 arrayIdx={null}
                 edit={this.props.edit}
@@ -1701,6 +1740,14 @@ class IndividualObjectView extends React.Component{
             <div>
                 <Fade in={selecting} transitionAppear={true}>
                     <div>
+                        <div>
+                            {selecting ?
+                                <Button style={{'marginBottom':'-50px'}} bsStyle="danger" onClick={this.selectCancel}>
+                                    {'Cancel selection'}
+                                </Button>
+                                : null
+                            }
+                        </div>
                         {selecting ?
                             <Search {...this.props}
                                 context={this.state.selectData}
@@ -1830,7 +1877,7 @@ class WarningBanner extends React.Component {
             'paddingBottom': '5px',
             'color': '#8b8b8b'
         };
-        var textBody = 'Please note: do not navigate away from, refresh or close this page while submitting. Doing so will result in your work being lost. The submission process is under active development and features may change.';
+        var textBody = 'Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. The submission process is under active development and features may change.';
         return(
             <h5 style={style}>
                 {textBody}

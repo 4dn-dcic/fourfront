@@ -329,27 +329,40 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 
 	.list-item {
-
-		/* Equalize Height of Columns, unsupported for IE9 and below: */
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -ms-flexbox;
-		display: flex;
-
-
+		@media screen and (min-width: $screen-sm-min) {
+			/* Equalize Height of Columns, unsupported for IE9 and below: */
+			display: -webkit-box;
+			display: -webkit-flex;
+			display: -ms-flexbox;
+			display: flex;
+		}
 
 		.item-label, .item-value {
 			> div {
 				min-height: 26px;
 				height: 100%;
 				word-break: break-all;
-				border-bottom: 1px solid #eee;
+				
 				padding-top: 8px;
-				padding-bottom: 8px;
+				
 			}
 		}
 		.item-label {
 			font-weight: 500;
+			flex-grow: 1;
+			@media screen and (min-width: $screen-sm-min) {
+				> div {
+					border-bottom: 1px solid #eee;
+					padding-bottom: 8px;
+				}
+			}
+		}
+		.item-value {
+			flex-grow: 2;
+			> div {
+				border-bottom: 1px solid #eee;
+				padding-bottom: 8px;
+			}
 		}
 		ol {
 			padding-left: 20px;
@@ -522,6 +535,14 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			}
 		}
 
+	}
+
+	@media screen and (max-width: $screen-xs-max) {
+		.array-group .array-group-row.list-item:not(.first-item) {
+			.item-label {
+				display: none;
+			}
+		}
 	}
 
 	.sub-panel {
@@ -934,6 +955,47 @@ $download-button-width : 100px;
 
 }
 
+/************** OverviewBody ***********/
+
+.item-page-container {
+	.rc-tabs-content {
+		
+		.overview-blocks {
+			> div {
+				> .inner {
+					padding: 15px 0 5px;
+					h5 {
+						margin-top: 0;
+						margin-bottom: 5px;
+						font-weight: 500;
+					}
+					ol {
+						margin-bottom: 0;
+					}
+				}
+				/*
+				&.col-md-4:nth-child(n + 4){
+					> .inner {
+						@media screen and (min-width: $screen-md-min){
+							border-top: 1px solid #eee;
+							//margin-top: 4px;
+						}
+					}
+				}
+				&.col-md-3:nth-child(n + 5){
+					> .inner {
+						@media screen and (min-width: $screen-md-min){
+							border-top: 1px solid #eee;
+							//margin-top: 4px;
+						}
+					}
+				}
+				*/
+			}
+		}
+	}
+}
+
 /************** Experiments Set View **************/
 
 .exp-table-section {
@@ -969,6 +1031,51 @@ $download-button-width : 100px;
 	.graph-wrapper {
 		opacity : 1;
 		transition: opacity .5s ease-out;
+	}
+
+	// Full Screen Styling
+	&.full-screen-view {
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 0;
+		@media (min-width: $screen-md-min) {
+			top: 41px;
+			z-index: 1000;
+		}
+		bottom: 0;
+		z-index: 10000;
+		background: #fff;
+		overflow-y: auto;
+
+		> .graph-wrapper {
+			//position: absolute;
+			//top: 68px;
+			padding-left: 20px;
+			padding-right: 20px;
+			//bottom: 0;
+			//left: 0;
+			//right: 0;
+			//overflow-y: auto;
+		}
+
+		> .tab-section-title,
+		> .graph-wrapper .detail-pane {
+			margin: 0 auto;
+			padding-left: 20px;
+			padding-right: 20px;
+			@media (min-width: $screen-sm-min) {
+				max-width: $container-sm;
+			}
+			@media (min-width: $screen-md-min) {
+				max-width: $container-md;
+				padding-left: 0;
+				padding-right: 0;
+			}
+			@media (min-width: $screen-lg-min) {
+				max-width: $container-lg;
+			}
+		}
 	}
 }
 
@@ -1108,19 +1215,6 @@ $download-button-width : 100px;
 .item-page-container.type-File {
 
 	.rc-tabs-content {
-
-		.overview-blocks {
-			> div {
-				> .inner {
-					padding: 15px 0 10px;
-					h5 {
-						margin-top: 0;
-						margin-bottom: 5px;
-						font-weight: 500;
-					}
-				}
-			}
-		}
 
 		 .file-download-container {
 

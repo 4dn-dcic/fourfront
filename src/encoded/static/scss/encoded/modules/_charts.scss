@@ -1764,3 +1764,271 @@ $workflow-step-node-lineheight: 18px;
 .__react_component_tooltip {
     z-index: 9999 !important;
 }
+
+
+
+/************* Stacked Block Matrixy-Viz ************/
+
+.stacked-block-viz-container {
+
+
+    .header-for-viz {
+        display: flex;
+        .column-group-header {
+            //flex-grow: 1;
+            text-align: center;
+            > .inner {
+                display: inline-block;
+                white-space: nowrap;
+                transform-origin: 0 0;
+                transform: rotate(-45deg);
+                width: 20px;
+            }
+        }
+    }
+
+    .blocks-container {
+        display: flex;
+        .stacked-block {
+            @include planned-submitted-cell-styles;
+            display: inline-block;
+            background-color: #707070;
+            text-align: center;
+            border: 1px solid transparent;
+            color: #fff;
+            &.production {
+                /*
+                border-color: transparent;
+                //background-color: #cfdcd3;
+                background-color: #5e776b;
+                */
+            }
+            &.multiple-sets {
+                box-shadow: -3px 3px 0px #444;
+                transform: translate(1px, -1px) scale(0.925);
+            }
+            @media screen and (max-width: $screen-xs-min){
+                width : 100% !important;
+            }
+        }
+
+        .block-container-group {
+            //flex-grow: 1;
+            text-align: center;
+            &:not(:first-child){
+                border-left: 1px solid #eee;
+            }
+            //border-top: 1px solid #eee;
+        }
+    }
+
+   
+
+    .grouping {
+
+        border: none;
+        position: relative;
+        //border-bottom: 1px solid transparent;
+        //margin-bottom: -1px;
+        > .child-blocks {
+            //border-top: 1px solid transparent;
+            //margin-top: -1px;
+        }
+
+        &.may-collapse {
+            > .row > .label-section > h4 > span {
+                cursor: pointer;
+            }
+
+           
+
+        }
+
+        &:not(.open):not(:first-child):not(.depth-0),
+        &:not(.open):not(:first-child):not(.depth-0) + &:not(.open):not(:first-child):not(.depth-0) {
+            > .row > .list-section > .blocks-container {
+                border-top: 1px solid #eee;
+            }
+        }
+
+        &.open + .grouping:not(.open):not(:first-child):not(.depth-0) {
+            > .row > .list-section > .blocks-container {
+                border-top: none;
+            }
+        }
+
+        .label-section > h4 {
+            margin-top: 0px;
+            margin-bottom: 2px;
+        }
+
+        &.depth-0 {
+            margin-bottom: 0px;
+            > .row > .label-section > h4 {
+                margin-top: 5px;
+            }
+            > .row > .list-section { 
+                padding-top: 10px;
+                > .group-value {
+                    font-size: 1.3rem;
+                }
+
+            }
+            &.open > .row > .list-section,
+            &:first-child > .row > .list-section {
+                padding-top: 80px;
+            }
+        }
+        
+        &:not(.depth-0) {
+
+            > .row {
+                > div {
+                    @media screen and (min-width: $screen-sm-min){
+                        float: none !important;
+                        display: inline-block;
+                        vertical-align: middle;
+                    }
+
+                }
+            }
+
+            > .row > .label-section {
+                > h4 {
+                    font-size: 1rem;
+                    i.icon.icon-fw {
+                        min-width: 20px;
+                    }
+                }
+                > small {
+                    display: inline-block;
+                    padding-top: 4px;
+                }
+            }
+
+            &.open {
+                > .row {
+                    display: none;
+                }
+            }
+
+            &.open {
+                
+                > .close-button {
+                    position: absolute;
+                    width: 20px;
+                    text-align: center;
+                    z-index: 10;
+                    top: 1px;
+                    bottom: 0;
+                    cursor: pointer;
+                    background: #f7f7f7;
+                    > i.icon {
+                        position: absolute;
+                        height: 20px;
+                        width: 20px;
+                        line-height: 24px;
+                        top: 50%;
+                        margin-top: -10px;
+                        left: 0;
+                    }
+                    @media screen and (max-width: $screen-xs-min){
+                        position: relative;
+                        height: 30px;
+                        line-height: 34px;
+                        float: left;
+                        margin-right: 10px;
+                        > i.icon {
+                            position: relative;
+                        }
+                    }
+                }
+                & + .open {
+                    > .close-button {
+                        top: 0;
+                    }
+                }
+                @for $i from 1 through 5 {
+                    &.depth-#{$i} {
+                        > .close-button {
+                            left: 0px + (27px * ($i - 0)) - 4px;
+                        }
+                    }
+                }
+            }
+
+            &.open {
+                
+                &:not(:last-child){
+                    border-bottom: 1px solid #ddd;
+                }
+                > .child-blocks {
+                    border-top: 1px solid #ddd;
+                }
+
+                & + .open > .child-blocks {
+                    border-top: none;
+                }
+            }
+
+        }
+
+        // Close Button
+        &.open {
+            
+            > .close-button {
+                position: absolute;
+                width: 20px;
+                text-align: center;
+                z-index: 10;
+                top: 1px;
+                bottom: 0;
+                cursor: pointer;
+                background: #f7f7f7;
+                > i.icon {
+                    position: absolute;
+                    height: 20px;
+                    width: 20px;
+                    line-height: 24px;
+                    top: 50%;
+                    margin-top: -10px;
+                    left: 0;
+                }
+                @media screen and (max-width: $screen-xs-min){
+                    position: relative;
+                    height: 30px;
+                    line-height: 34px;
+                    float: left;
+                    margin-right: 10px;
+                    > i.icon {
+                        position: relative;
+                    }
+                }
+            }
+            & + .open {
+                > .close-button {
+                    top: 0;
+                }
+            }
+            @for $i from 1 through 5 {
+                &.depth-#{$i} {
+                    > .close-button {
+                        left: 0px + (27px * ($i - 0));
+                    }
+                }
+            }
+        }
+
+        @media screen and (min-width: $screen-sm-min){
+            @for $i from 1 through 5 {
+                &.depth-#{$i} {
+                    > .row > .label-section {
+                        padding-left: 10px + (27px * $i);
+                    }
+                }
+            }
+        }
+
+    }
+
+}

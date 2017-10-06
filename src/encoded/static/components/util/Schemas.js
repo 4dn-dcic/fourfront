@@ -2,13 +2,14 @@
 
 import _ from 'underscore';
 import url from 'url';
-import { atIdFromObject } from './object';
+import React from 'react';
+import { linkFromItem } from './object';
 
 let cachedSchemas = null;
 
-/** 
+/**
  * Should be set by app.js to return app.state.schemas
- * 
+ *
  * @type {function}
  */
 export function get(){
@@ -22,25 +23,25 @@ export function set(schemas){
 
 export const itemTypeHierarchy = {
     'Experiment': [
-        'Experiment', 'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq'
+        'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq', 'ExperimentAtacseq'
     ],
     'ExperimentSet': [
         'ExperimentSet', 'ExperimentSetReplicate'
     ],
     'File': [
-        'File', 'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference'
+        'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
     ],
     'FileSet': [
         'FileSet', 'FileSetCalibration'
     ],
     'Individual': [
-        'Individual', 'IndividualHuman', 'IndividualMouse'
+        'IndividualHuman', 'IndividualMouse'
     ],
     'Treatment': [
-        'Treatment', 'TreatmentChemical', 'TreatmentRnai'
+        'TreatmentChemical', 'TreatmentRnai'
     ],
     'QualityMetric' : [
-        'QualityMetric', 'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc'
+        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc'
     ],
     'WorkflowRun' : [
         'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
@@ -49,7 +50,13 @@ export const itemTypeHierarchy = {
 
 export const Term = {
 
-    toName : function(field, term){
+    toName : function(field, term, allowJSXOutput = false){
+
+        if (allowJSXOutput && typeof term !== 'string' && term && typeof term === 'object'){
+            // Object, probably an item.
+            return linkFromItem(term);
+        }
+
         var name = null;
 
         switch (field) {
@@ -75,6 +82,7 @@ export const Term = {
         }
 
         switch (standardizedFieldKey) {
+            case 'biosource.biosource_type':
             case 'biosample.biosource.individual.organism.name':
                 name = Term.capitalize(term);
                 break;
@@ -217,7 +225,7 @@ export const Field = {
 /**
  * Converts a nested object from this form: "key" : { ..., "items" : { ..., "properties" : { "property" : { ...details... } } } }
  * To this form: "key" : { ... }, "key.property" : { ...details... }, ...
- * 
+ *
  * @param {Object} tips - Schema property object with a potentially nested 'items'->'properties' value(s).
  * @returns {Object} Object with period-delimited keys instead of nested value to represent nested schema structure.
  */
@@ -254,10 +262,16 @@ export function flattenSchemaPropertyToColumnDefinition(tips, depth = 0){
 }
 
 
-export function getAbstractTypeForType(type){
+export function getAbstractTypeForType(type, returnSelfIfAbstract = true){
     var possibleParentTypes = _.keys(itemTypeHierarchy);
     var i;
     var foundIndex;
+    if (returnSelfIfAbstract){
+        foundIndex = possibleParentTypes.indexOf(type);
+        if ( foundIndex > -1 ){
+            return possibleParentTypes[foundIndex];
+        }
+    }
     for (i = 0; i < possibleParentTypes.length; i++){
         foundIndex = itemTypeHierarchy[possibleParentTypes[i]].indexOf(type);
         if ( foundIndex > -1 ){
@@ -288,7 +302,7 @@ export function getItemType(context){
  * Returns base Item type from Item's '@type' array. This is the type right before 'Item'.
 
  * @param {Object} context - JSON representation of current Item.
- * @param {string[]} context['@type] - List of types for the Item. 
+ * @param {string[]} context['@type] - List of types for the Item.
  * @returns {string} Base Ttem type.
  */
 export function getBaseItemType(context){
@@ -323,7 +337,7 @@ export function getSchemaForItemType(itemType, schemas = null){
 
 /**
  * Lookup the title for an Item type, given the entire schemas object.
- * 
+ *
  * @param {string} atType - Item type.
  * @param {Object} [schemas=null] - Entire schemas object, e.g. as stored in App state.
  * @returns {string} Human-readable title.
@@ -349,7 +363,7 @@ export function getTitleForType(atType, schemas = null){
 
 /**
  * Get title for leaf Item type from Item's context + schemas.
- * 
+ *
  * @export
  * @param {Object} context - JSON representation of Item.
  * @param {Object} [schemas=null] - Schemas object passed down from App.
@@ -361,7 +375,7 @@ export function getItemTypeTitle(context, schemas = null){
 
 /**
  * Get title for base Item type from Item's context + schemas.
- * 
+ *
  * @export
  * @param {Object} context - JSON representation of Item.
  * @param {Object} [schemas=null] - Schemas object passed down from App.

@@ -33,7 +33,7 @@ class SubItem extends React.Component {
         this.state = {
             isOpen : false
         };
-        
+
     }
 
     componentDidMount(){
@@ -135,7 +135,7 @@ class SubItemListView extends React.Component {
 
 /**
  *  Messiness.
- * 
+ *
  * @class SubItemTable
  * @extends {React.Component}
  */
@@ -144,7 +144,7 @@ class SubItemTable extends React.Component {
     /**
      * This code could look better.
      * Essentially, checks each property in first object of param 'list' and if no values fail a rough validation wherein there must be no too-deeply nested objects or lists, returns true.
-     * 
+     *
      * @param {Object[]} list - List of objects
      * @returns {boolean} True if a table would be good for showing these items.
      */
@@ -187,7 +187,7 @@ class SubItemTable extends React.Component {
 
         var rootKeys = _.keys(objectWithAllItemKeys);
         var embeddedKeys, i, j, k, embeddedListItem, embeddedListItemKeys;
-        
+
 
         for (i = 0; i < rootKeys.length; i++){
 
@@ -201,7 +201,7 @@ class SubItemTable extends React.Component {
                 var listNotItems = _.filter(listObjects, function(v){ return !object.isAnItem(v); });
                 if (listNotItems.length === 0) continue; // List of Items that can be rendered as links. Continue.
 
-                // Else, we have list of Objects. Assert that each sub-object has only strings, numbers, or Item (object with link), or list of such -- no other sub-objects. 
+                // Else, we have list of Objects. Assert that each sub-object has only strings, numbers, or Item (object with link), or list of such -- no other sub-objects.
                 for (k = 0; k < listNotItems.length; k++){
                     embeddedListItem = listNotItems[k];
                     embeddedListItemKeys = _.keys(embeddedListItem);
@@ -257,7 +257,7 @@ class SubItemTable extends React.Component {
                             return false;
                         }
                     }
-                    
+
                     // Ensure that if is not an array, it is a simple string or number (not another embedded object).
                     if (
                         !Array.isArray(objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]]) &&
@@ -321,7 +321,7 @@ class SubItemTable extends React.Component {
                         columnKeys.push({
                             'key' : rootKeys[i],
                             'childKeys' : _.keys(
-                                _.reduce(this.props.items, function(m1,v1){ 
+                                _.reduce(this.props.items, function(m1,v1){
                                     return _.extend(
                                         m1,
                                         _.reduce(v1[rootKeys[i]], function(m2,v2) {
@@ -443,7 +443,7 @@ class SubItemTable extends React.Component {
                                                     }
                                                 }
                                                 if (!renderedSubVal) {
-                                                    renderedSubVal = object.isAnItem(embeddedRow[k]) ? 
+                                                    renderedSubVal = object.isAnItem(embeddedRow[k]) ?
                                                         <a href={object.atIdFromObject(embeddedRow[k])}>{ getTitleStringFromContext(embeddedRow[k]) }</a>
                                                         :
                                                         Schemas.Term.toName(k, embeddedRow[k]);
@@ -517,7 +517,7 @@ class SubItemTable extends React.Component {
                                 return (
                                     <th key={"header-for-" + colKey} className={hasChildren ? 'has-children' : null}>
                                         <object.TooltipInfoIconContainer title={title} tooltip={tooltip}/>
-                                        { 
+                                        {
                                             hasChildren ? (()=>{
                                                 //var subKeyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
                                                 //var subKeyTitleDescriptionMap = keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey] || {};
@@ -640,7 +640,7 @@ class DetailRow extends React.Component {
         if (value.type === SubItem) {
             // What we have here is an embedded object of some sort. Lets override its 'isOpen' & 'onToggle' functions.
             value = React.cloneElement(value, { onToggle : this.handleToggle, isOpen : this.state.isOpen });
-            
+
             return (
                 <div>
                     <PartialList.Row label={label} children={value} className={(this.props.className || '') + (this.state.isOpen ? ' open' : '')} />
@@ -785,7 +785,7 @@ export class Detail extends React.Component {
             }
         } else if (typeof item === 'string'){
             if (keyPrefix === '@id' || keyPrefix === 'link_id'){
-                var href = (keyPrefix === 'link_id' ? item.replace(/~/g, "/") : item); 
+                var href = (keyPrefix === 'link_id' ? item.replace(/~/g, "/") : item);
                 if(popLink){
                     return (
                         <a key={item} href={href} target="_blank">
@@ -1003,7 +1003,7 @@ export class ItemDetailList extends React.Component {
                     <h3 className="tab-section-title">
                         <span>Details</span>
                     </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
+                    <hr className="tab-section-title-horiz-divider mb-05"/>
                     <ItemDetailList context={context} schemas={schemas} />
                 </div>
             )
@@ -1066,7 +1066,7 @@ export class ItemDetailList extends React.Component {
                 <div className="row">
                     <div className="col-xs-12">{ this.seeMoreButton() }</div>
                 </div>
-            ); 
+            );
         }
         return (
             <div className="row">
@@ -1090,6 +1090,7 @@ export class ItemDetailList extends React.Component {
                         <Detail
                             context={this.props.context}
                             schemas={this.props.schemas}
+                            popLink={this.props.popLink}
                             open={!collapsed}
                             columnDefinitions={columnDefinitions}
                             excludedKeys={this.props.excludedKeys || Detail.defaultProps.excludedKeys}

@@ -36,6 +36,7 @@ class Experiment(Item):
                 "lab.title",
 
                 "experiment_sets.experimentset_type",
+                "experiment_sets.@type",
                 "experiment_sets.accession",
 
                 "produced_in_pub.*",

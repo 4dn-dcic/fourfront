@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import { getTitleStringFromContext, isDisplayTitleAccession } from './item-pages/item';
-import { console, object, Schemas, JWT } from './util';
+import { console, object, Schemas, JWT, layout } from './util';
 import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
 
@@ -40,6 +40,14 @@ var TITLE_PATHNAME_MAP = {
             }
             return getTitleStringFromContext(context);
         }
+    },
+    '/planned-submissions' : {
+        'title' : function(pathName, context){
+            if (context.status === 'error' && context.code && (context.code === 404 || context.code === 403)){
+                return 'Forbidden';
+            }
+            return getTitleStringFromContext(context);
+        }
     }
 };
 
@@ -54,6 +62,15 @@ export default class PageTitle extends React.Component {
                 if (context['@type'].indexOf('HomePage') > -1) return false; // Exclude home page
                 return true;
             }
+        }
+        return false;
+    }
+
+    static isHomePage(href){
+        var currentHrefParts = url.parse(href, false);
+        var pathName = currentHrefParts.pathname;
+        if (pathName === '/' || pathName === '/home'){
+            return true;
         }
         return false;
     }
@@ -77,7 +94,6 @@ export default class PageTitle extends React.Component {
         if (!title) {
             
             var pathRoot = currentPathName.split('/')[1] || null;
-            console.log(TITLE_PATHNAME_MAP, pathRoot);
             if (typeof pathRoot === 'string' && pathRoot.length > 0){
                 currentPathName = '/' + pathRoot + '/*';
                 title = TITLE_PATHNAME_MAP[currentPathName] && TITLE_PATHNAME_MAP[currentPathName].title;
@@ -147,11 +163,16 @@ export default class PageTitle extends React.Component {
         return { 'title' : getTitleStringFromContext(context) };
     }
 
-    static getStyles(context, href){
+    static getStyles(context, href, mounted){
         var style = { marginTop : 45 };
         if (!QuickInfoBar.isInvisibleForHref(href)){
             // We're showing QuickInfoBar, lets extend margin top by height of QuickInfoBar (hardcoded in CSS 38px).
-            style.marginTop += 38;
+            var gridSize = mounted && layout.responsiveGridState();
+            if (mounted && (gridSize === 'xs' || gridSize === 'sm')) {
+                // don't do it; but do by default if not mounted (aka serverside) since desktop is more common than mobile for us
+            } else {
+                style.marginTop += 38;
+            }
         }
 
         if (PageTitle.isStaticPage(context)){
@@ -174,7 +195,18 @@ export default class PageTitle extends React.Component {
     }
 
     render(){
-        var { title, subtitle, calloutTitle } = PageTitle.calculateTitles(this.props.context, this.props.href, (this.props.shemas || Schemas.get()), this.state.mounted);
+        var { context, href } = this.props;
+
+        if (PageTitle.isHomePage(href)){
+            return (
+                <layout.WindowResizeUpdateTrigger>
+                    <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} />
+                </layout.WindowResizeUpdateTrigger>
+            );
+        }
+
+        var { title, subtitle, calloutTitle } = PageTitle.calculateTitles(context, href, (this.props.shemas || Schemas.get()), this.state.mounted);
+        
 
         if (title) {
             title = (
@@ -200,11 +232,41 @@ export default class PageTitle extends React.Component {
             );
         }
 
+        return (
+            <layout.WindowResizeUpdateTrigger>
+                <PageTitleElement {... { title, subtitle, context, href, calloutTitle } } mounted={this.state.mounted} />
+            </layout.WindowResizeUpdateTrigger>
+        );
+    }
+
+}
+
+
+class PageTitleElement extends React.Component {
+    render(){
+        var { title, calloutTitle, subtitle, context, href, mounted } = this.props;
+
         return ((title || subtitle) && (
-            <h1 className="page-title top-of-page" style={PageTitle.getStyles(this.props.context, this.props.href)}>
+            <h1 className="page-title top-of-page" style={PageTitle.getStyles(context, href, mounted)} >
                 { title }{ calloutTitle }{ subtitle }
             </h1>
         )) || <br/>;
     }
-
 }
+
+class HomePageTitleElement extends React.Component {
+    render(){
+        var { title, calloutTitle, subtitle, context, href, mounted } = this.props;
+
+        var style = PageTitle.getStyles(context, href, mounted);
+        style.marginTop ? style.marginTop -= 3 : null;
+
+        return (
+            <h1 className="home-page-title page-title top-of-page" style={style} >
+                <span className="title">4D Nucleome Data Portal</span>
+                <div className="subtitle">A platform to search, visualize, and download nucleomics data.</div>
+            </h1>
+        );
+    }
+}
+

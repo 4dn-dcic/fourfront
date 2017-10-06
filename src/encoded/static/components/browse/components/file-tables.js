@@ -2,11 +2,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock } from './StackedBlockTable';
-import { allProcessedFilesFromExperiments, allProcessedFilesFromExperimentSet, processedFilesFromExperimentSetToGroup } from './../../item-pages/components/ProcessedFilesTable';
 import { expFxn, Filters, console, isServerSide, analytics, object } from './../../util';
 
 
@@ -154,7 +152,8 @@ export class RawFilesStackedTable extends React.Component {
         columnHeaders : [
             { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-            { columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   }
+            { columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   },
+            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ]
     }
 
@@ -429,7 +428,7 @@ export class RawFilesStackedTable extends React.Component {
         return (
             <StackedBlockTable
                 columnHeaders={columnHeaders}
-                className="expset-experiments"
+                className="expset-raw-files"
                 fadeIn
                 selectedFiles={this.props.selectedFiles}
                 selectFile={this.props.selectFile}
@@ -463,7 +462,7 @@ export class ProcessedFilesStackedTable extends React.Component {
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
             { columnClass: 'file',                                      title: 'File',          initialWidth: 100   },
             { columnClass: 'file-detail', title: 'File Type', initialWidth: 90 },
-            { columnClass: 'file-detail', title: 'File Size', initialWidth: 60, field : "file_size" }
+            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file']
@@ -471,6 +470,10 @@ export class ProcessedFilesStackedTable extends React.Component {
 
     constructor(props){
         super(props);
+        this.oddExpRow = false;
+    }
+
+    componentWillUpdate(nextProps, nextState){
         this.oddExpRow = false;
     }
 
@@ -482,7 +485,7 @@ export class ProcessedFilesStackedTable extends React.Component {
                     key={object.atIdFromObject(file)}
                     file={file}
                     hideNameOnHover={false}
-                    experimentAccession={experimentAccession}
+                    experimentAccession={experimentAccession === 'global' ? 'NONE' : experimentAccession}
                     isSingleItem={filesForExperiment.length === 1}
                     stripe={this.oddExpRow}
                 />
@@ -502,7 +505,7 @@ export class ProcessedFilesStackedTable extends React.Component {
             var experimentObj = _.find(_.pluck(filesForExperiment, 'from_experiment'), function(exp){ return exp && exp.accession && exp.accession === experimentAccession; });
 
             var nameTitle = (
-                experimentAccession === 'global' ? <div style={{ fontSize : '1.25rem', lineHeight : '16px', height: 16 }} className="text-300">Multiple</div>
+                experimentAccession === 'global' ? <div style={{ fontSize : '1.25rem', lineHeight : '16px', height: 16 }} className="text-300">Multiple Experiments</div>
                 : (experimentObj && typeof experimentObj.display_title === 'string' && experimentObj.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession
             );
             var nameLink = (experimentAccession !== 'global' && object.atIdFromObject(experimentObj)) || null;
@@ -557,7 +560,7 @@ export class ProcessedFilesStackedTable extends React.Component {
     render(){
 
         // Contains: { 'experiments' : { 'ACCESSSION1' : [..file_objects..], 'ACCESSION2' : [..file_objects..] }, 'experiment_sets' : { 'ACCESSION1' : [..file_objects..] } }
-        var groupedFiles = processedFilesFromExperimentSetToGroup(this.props.files);
+        var groupedFiles = expFxn.processedFilesFromExperimentSetToGroup(this.props.files);
 
         var expSetAccessions = _.keys(groupedFiles.experiment_sets || {});
         var filesGroupedByExperimentOrGlobal = _.clone(groupedFiles.experiments);
@@ -566,19 +569,20 @@ export class ProcessedFilesStackedTable extends React.Component {
         if (expSetAccessions.length === 1){
             filesGroupedByExperimentOrGlobal.global = groupedFiles.experiment_sets[expSetAccessions[0]];
         } else {
-            console.error('Theres more than ExpSet for these files - ', expSetAccessions);
+            console.error('Theres more than 1 ExpSet for these files/sets - ', expSetAccessions, groupedFiles);
         }
 
         return (
             <StackedBlockTable
                 columnHeaders={this.props.columnHeaders}
-                className="expset-experiments"
+                className="expset-processed-files"
                 fadeIn
                 selectedFiles={this.props.selectedFiles}
                 selectFile={this.props.selectFile}
                 unselectFile={this.props.unselectFile}
                 experimentSetAccession={this.props.experimentSetAccession}
                 width={this.props.width}
+                collapseLongLists={this.props.collapseLongLists}
             >
                 <StackedBlockList
                     className="sets"

@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { Fade } from 'react-bootstrap';
 import { console, layout, isServerSide } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 
@@ -154,7 +155,8 @@ export class FlexibleDescriptionBox extends React.Component {
             'descriptionExpanded' : false,
             'descriptionWillFitOneLine' : true,
             'descriptionWhiteSpace' : this.props.linesOfText > 1 ? 'normal' : 'nowrap',
-            'shortContent' : null
+            'shortContent' : null,
+            'mounted' : false
         };
     }
 
@@ -188,6 +190,7 @@ export class FlexibleDescriptionBox extends React.Component {
                 var willDescriptionFitAtCurrentSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
                 this.setState({
                     descriptionWillFitOneLine : willDescriptionFitAtCurrentSize,
+                    mounted : true,
                     shortContent : this.props.linesOfText > 1 ? this.makeShortContent() : null
                 });
             });
@@ -242,7 +245,7 @@ export class FlexibleDescriptionBox extends React.Component {
         this.descriptionHeight = tcw.containerHeight + dims.paddingHeight; // Account for padding, border.
         this.descriptionWidth = containerWidth;
 
-        console.log('HEIGHT', this.descriptionHeight);
+        //console.log('HEIGHT', this.descriptionHeight);
 
         // If we want more than 1 line, calculate if descriptionheight / lineheight > linesWanted.
         if (typeof this.props.linesOfText === 'number' && this.props.linesOfText > 1 && typeof this.props.lineHeight === 'number'){
@@ -289,13 +292,29 @@ export class FlexibleDescriptionBox extends React.Component {
                 </button>
             );
         }
+
+        var containerHeightSet = (expanded ?
+            this.descriptionHeight
+            :
+            !this.state.mounted && this.props.showOnMount ? (
+                0
+            ) : Math.min(
+                Math.max(
+                    this.dimensions().initialHeight,
+                    this.props.lineHeight * (this.props.linesOfText || 1)
+                ),
+                this.state.mounted && this.descriptionHeight ? this.descriptionHeight : 1000
+            )
+        );
+
         return (
             <div
                 ref={this.props.fitTo === 'grid' ? null : "box"}
                 className={"flexible-description-box " + (this.props.className ? this.props.className : '')}
                 style={{
-                    height : expanded ? this.descriptionHeight : Math.max(this.dimensions().initialHeight, this.props.lineHeight * (this.props.linesOfText || 1)),
-                    whiteSpace : expanded ? 'normal' : this.state.descriptionWhiteSpace
+                    height : containerHeightSet,
+                    whiteSpace : expanded ? 'normal' : this.state.descriptionWhiteSpace,
+                    visibility : !this.state.mounted && this.props.showOnMount ? 'hidden' : null
                 }}
             >
                 { expandButton }

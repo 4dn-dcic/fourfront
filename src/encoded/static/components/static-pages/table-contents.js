@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
 import * as globals from './../globals';
-import { getElementTop, animateScrollTo } from './../util/layout';
+import { getElementTop, animateScrollTo, getScrollingOuterElement } from './../util/layout';
 import { isServerSide, console, navigate } from './../util';
 
 
@@ -84,7 +84,7 @@ class TableEntry extends React.Component {
 
     handleClick(){
 
-        var elementTop;
+        var scrollingOuterElement, elementTop;
         if (this.props.link === "top") {
             elementTop = 0;
         } else if (typeof this.props.link === 'string'){
@@ -93,13 +93,15 @@ class TableEntry extends React.Component {
             return null;
         }
 
+        scrollingOuterElement = getScrollingOuterElement(); // Get document.body or document.documentElement, depending on browser.
+
         animateScrollTo(elementTop, 750, this.props.offsetBeforeTarget, ()=>{
             if (typeof this.props.navigate === 'function'){
                 var link = this.props.link;
                 setTimeout(()=>{
                     if (link === 'top' || link === 'bottom') link = '';
                     this.props.navigate('#' + link, { 'replace' : true, 'skipRequest' : true });
-                }, link === 'top' || (document && document.body && document.body.scrollTop <= 40) ? 800 : 0);
+                }, link === 'top' || (scrollingOuterElement && scrollingOuterElement.scrollTop <= 40) ? 800 : 0);
             }
         });
 
@@ -111,16 +113,18 @@ class TableEntry extends React.Component {
 
         if (!props.mounted) return false;
 
-        var targetElem, elemTop;
-        
+        var scrollingOuterElement, targetElem, elemTop;
+        scrollingOuterElement = getScrollingOuterElement();
+
+
         if (props.depth === 0 && props.mounted){
             elemTop = 0;
         } else {
             targetElem = this.getTargetElement(props.link);
             elemTop = getElementTop(targetElem);
-            if (props.mounted && document && document.body && document.body.scrollHeight && window && window.innerHeight){
+            if (props.mounted && scrollingOuterElement && scrollingOuterElement.scrollHeight && window && window.innerHeight){
                 // Try to prevent from trying to scroll past max scrollable height.
-                elemTop = Math.min(document.body.scrollHeight - window.innerHeight, elemTop);
+                elemTop = Math.min(scrollingOuterElement.scrollHeight - window.innerHeight, elemTop);
             }
         }
 
@@ -448,9 +452,11 @@ export default class TableOfContents extends React.Component {
     }
 
     componentDidMount(e){
-        if (window && document && document.body){
+        var scrollingOuterElement = getScrollingOuterElement();
+
+        if (window && scrollingOuterElement){
             this.setState(
-                { 'mounted' : true, 'scrollTop' : parseInt(document.body.scrollTop) },
+                { 'mounted' : true, 'scrollTop' : parseInt(scrollingOuterElement.scrollTop) },
                 () => { 
                     window.addEventListener('scroll', this.onPageScroll);
                     window.addEventListener('resize', this.onResize);
@@ -473,13 +479,21 @@ export default class TableOfContents extends React.Component {
 
     onPageScroll(e){
         setTimeout(()=>{
-            this.setState({ 'scrollTop' : parseInt(document.body.scrollTop) });
+            var scrollingOuterElement = getScrollingOuterElement();
+            if (scrollingOuterElement) this.setState({ 'scrollTop' : parseInt(scrollingOuterElement.scrollTop) });
+            else {
+                throw new Error('Couldn\'t get scrollingOuterElement');
+            }
         }, 0);
     }
 
     onResize(e){
         setTimeout(()=>{
-            this.setState({ 'scrollTop' : parseInt(document.body.scrollTop) });
+            var scrollingOuterElement = getScrollingOuterElement();
+            if (scrollingOuterElement) this.setState({ 'scrollTop' : parseInt(scrollingOuterElement.scrollTop) });
+            else {
+                throw new Error('Couldn\'t get scrollingOuterElement');
+            }
         }, 0);
     }
 

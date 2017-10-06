@@ -22,7 +22,7 @@ var render = function (Component, body, res) {
         'context': context,
         'href': res.getHeader('X-Request-URL') || context['@id'],
         'inline': inline,
-        'expSetFilters' : Filters.hrefToFilters(res.getHeader('X-Request-URL') || context['@id']),
+        'expSetFilters' : Filters.hrefToFilters(res.getHeader('X-Request-URL') || context['@id'], (context && Array.isArray(context.filters) && context.filters) || null),
         'lastCSSBuildTime' : lastCSSBuildTime
     };
 

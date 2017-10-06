@@ -66,11 +66,7 @@ class User(Item):
 
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
-    # Avoid access_keys reverse link so editing access keys does not reindex content.
     embedded_list = ['lab.awards.project']
-    rev = {
-        'access_keys': ('AccessKey', 'user')
-    }
 
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
@@ -106,12 +102,15 @@ class User(Item):
     }, category='page')
     def access_keys(self, request):
         if not request.has_permission('view_details'):
-            return
-        atids = self.rev_link_atids(request, "access_keys")
-        acc_keys = [request.embed('/', atid, '@@object')
-                for atid in paths_filtered_by_status(request, atids)]
-        if acc_keys:
-            return [key for key in acc_keys if key['status'] not in ('deleted', 'replaced')]
+            return []
+        key_coll = self.registry['collections']['AccessKey']
+        # need to handle both esstorage and db storage results
+        uuids = [str(uuid) for uuid in key_coll]
+        acc_keys = [request.embed('/', uuid, '@@object')
+                for uuid in paths_filtered_by_status(request, uuids)]
+        my_keys = [acc_key for acc_key in acc_keys if acc_key['user'] == request.path]
+        if my_keys:
+            return [key for key in my_keys if key['status'] not in ('deleted', 'replaced')]
         else:
             return []
 
@@ -123,33 +122,36 @@ class User(Item):
         my_uuid = self.uuid.__str__()
         needs_sub = True
         needs_lab = True
+        lab_id = properties.get('lab')
+        if lab_id:
+            lab_obj = self.collection.get(lab_id)
+            lab_props = lab_obj.properties
+            lab_title = lab_props.get('title')
+        else:
+            lab_obj = lab_props = lab_title = None
         curr_subs = properties['subscriptions'] if 'subscriptions' in properties else []
         for sub in curr_subs:
             if 'title' in sub:
                 if sub['title'] == 'My submissions':
                     needs_sub = False
-                if sub['title'] == 'My lab':
+                if sub['title'] == lab_title:
                     needs_sub = False
         if needs_sub and 'submits_for' in properties and len(properties['submits_for']) > 0:
-            if my_uuid:
-                submission_creds = {}
-                submission_creds['url'] = '?submitted_by.link_id=~users~' + my_uuid + '~&sort=-date_created'
-                submission_creds['title'] = 'My submissions'
-                curr_subs.append(submission_creds)
-        if needs_lab and 'lab' in properties:
-            lab_obj = self.collection.get(properties['lab'])
-            if lab_obj:
-                lab_props = lab_obj.properties
-                if 'name' in lab_props:
-                    lab_id = lab_props['name']
-                elif 'uuid' in lab_props:
-                    lab_id = lab_props['uuid']
-                else:
-                    lab_id = lab_props['title']
-                submission_creds2 = {}
-                submission_creds2['url'] = '?lab.link_id=~labs~' + lab_id + '~&sort=-date_created'
-                submission_creds2['title'] = 'My lab'
-                curr_subs.append(submission_creds2)
+            submission_creds = {}
+            submission_creds['url'] = '?submitted_by.link_id=~users~' + my_uuid + '~&sort=-date_created'
+            submission_creds['title'] = 'My submissions'
+            curr_subs.append(submission_creds)
+        if needs_lab and lab_obj is not None:
+            if 'name' in lab_props:
+                lab_id = lab_props['name']
+            elif 'uuid' in lab_props:
+                lab_id = lab_props['uuid']
+            else:
+                lab_id = lab_props['title']
+            submission_creds2 = {}
+            submission_creds2['url'] = '?lab.link_id=~labs~' + lab_id + '~&sort=-date_created'
+            submission_creds2['title'] = lab_title
+            curr_subs.append(submission_creds2)
         if len(curr_subs) > 0 and (needs_sub or needs_lab):
             properties['subscriptions'] = curr_subs
         super(User, self)._update(properties, sheets)

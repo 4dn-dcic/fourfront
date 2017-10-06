@@ -240,14 +240,18 @@ def metadata_tsv(context, request):
     for prop in _tsv_mapping:
         header.append(prop)
         param_list['field'] = param_list['field'] + _tsv_mapping[prop]
+        for param_field in _tsv_mapping[prop]:
+            if 'experiments_in_set.files.' in param_field:
+                param_list['field'].append(param_field.replace('experiments_in_set.files.', 'experiments_in_set.processed_files.'))
+                param_list['field'].append(param_field.replace('experiments_in_set.files.', 'processed_files.'))
     param_list['limit'] = [search_results_chunk_row_size]
 
     # Ensure we send accessions to ES to help narrow initial result down.
     # If too many accessions to include in /search/ URL (exceeds 2048 characters, aka accessions for roughly 20 files), we'll fetch search query as-is and then filter/narrow down.
-    if accession_triples and len(accession_triples) < 20:
-        param_list['accession'] = [ triple[0] for triple in accession_triples ]
-        param_list['experiments_in_set.accession'] = [ triple[1] for triple in accession_triples ]
-        param_list['experiments_in_set.files.accession'] = [ triple[2] for triple in accession_triples ]
+    #if accession_triples and len(accession_triples) < 20:
+    #    param_list['accession'] = [ triple[0] for triple in accession_triples ]
+    #    param_list['experiments_in_set.accession'] = [ triple[1] for triple in accession_triples ]
+    #    param_list['experiments_in_set.files.accession'] = [ triple[2] for triple in accession_triples ]
 
     initial_path = '{}?{}'.format(search_path, urlencode(param_list, True))
 
@@ -307,7 +311,7 @@ def metadata_tsv(context, request):
         for triple in accession_triples:
             if (
                 triple[0] == column_vals_dict['Experiment Set Accession'] and
-                triple[1] == column_vals_dict['Experiment Accession'] and
+                (triple[1] == column_vals_dict['Experiment Accession'] or triple[1] == 'NONE') and
                 triple[2] == column_vals_dict['File Accession']
             ):
                 return True
@@ -318,8 +322,20 @@ def metadata_tsv(context, request):
         for column in header:
             if not _tsv_mapping[column][0].startswith('experiments_in_set'):
                 exp_set_row_vals[column] = get_value_for_column(exp_set, column, 0)
+
         # Flatten map's child result maps up to self.
-        return chain.from_iterable(map(lambda exp: format_experiment(exp, exp_set, exp_set_row_vals), sorted(exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") ) ))
+        return chain(
+            chain.from_iterable(
+                map(
+                    lambda exp: format_experiment(exp, exp_set, exp_set_row_vals),
+                    sorted(exp_set.get('experiments_in_set', []), key=lambda d: d.get("accession") )
+                )
+            ),
+            map(
+                lambda f: format_file(f, exp_set, dict(exp_set_row_vals, **{ 'Experiment Accession' : 'NONE' }), exp_set, exp_set_row_vals),
+                sorted(exp_set.get('processed_files', []), key=lambda d: d.get("accession") )
+            )
+        )
 
 
     def format_experiment(exp, exp_set, exp_set_row_vals):
@@ -328,7 +344,10 @@ def metadata_tsv(context, request):
             if not _tsv_mapping[column][0].startswith('experiments_in_set.files') and _tsv_mapping[column][0].startswith('experiments_in_set'):
                 exp_row_vals[column] = get_value_for_column(exp, column, 19)
 
-        return map(lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals), sorted(exp.get('files', []), key=lambda d: d.get("accession") ) )
+        return map(
+            lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
+            sorted(exp.get('files', []) + exp.get('processed_files', []), key=lambda d: d.get("accession") )
+        )
 
 
     def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):
@@ -349,7 +368,7 @@ def metadata_tsv(context, request):
 
     def format_graph_of_experiment_sets(graph):
         return map(
-            lambda file_row_object: [ file_row_object[column] for column in header ], # Convert object to list of values in same order defined in tsvMapping & header.
+            lambda file_row_object: [ file_row_object.get(column, 'N/A') for column in header ], # Convert object to list of values in same order defined in tsvMapping & header.
             filter(
                 should_file_row_object_be_included,
                 chain.from_iterable(map(format_experiment_set, graph)) # chain.from_itertable = Flatten own map's child result maps up to self.

@@ -3,12 +3,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
+import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem, Checkbox, DropdownButton, Fade } from 'react-bootstrap';
 import _ from 'underscore';
 import Login from './login';
 import * as store from '../store';
-import { JWT, console, layout, isServerSide } from './util';
+import { JWT, console, layout, isServerSide, navigate, Filters } from './util';
+import { requestAnimationFrame } from './viz/utilities';
 import QuickInfoBar from './viz/QuickInfoBar';
+import { ChartDataController } from './viz/chart-data-controller';
 import TestWarning from './testwarning';
 import { productionHost } from './globals';
 
@@ -140,41 +142,34 @@ export default class Navigation extends React.Component {
             if (!this.state.navInitialized){
                 stateChange.navInitialized = true;
             }
-
-            var scrollVector = document.body.scrollTop - lastScrollTop;
-            lastScrollTop = document.body.scrollTop;
+            var currentScrollTop = ((document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop);
+            var scrollVector = currentScrollTop - lastScrollTop;
+            lastScrollTop = currentScrollTop;
 
             if (
                 ['xs','sm'].indexOf(layout.responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
                 (
-                    (document.body.scrollTop > 20 && scrollVector >= 0) ||
-                    (document.body.scrollTop > 80)
+                    (currentScrollTop > 20 && scrollVector >= 0) ||
+                    (currentScrollTop > 80)
                 )
             ){
                 if (!this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = true;
-                    this.setState(stateChange, function(){
-                        if (document.body.className.indexOf(' scrolled-past-top') === -1) document.body.className += ' scrolled-past-top';
-                    });
+                    this.setState(stateChange, layout.toggleBodyClass.bind(layout, 'scrolled-past-top', true, document.body));
                 }
-                if (document.body.scrollTop > 80 && document.body.className.indexOf(' scrolled-past-80') === -1){
-                    document.body.className += ' scrolled-past-80';
+                if (currentScrollTop > 80){
+                    layout.toggleBodyClass('scrolled-past-80', true, document.body);
                 }
             } else {
                 if (this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = false;
-                    this.setState(stateChange, function(){
-                        if (document.body.className.indexOf(' scrolled-past-top') !== -1){
-                            var newClassName = document.body.className.replace(' scrolled-past-top', '').replace(' scrolled-past-80','');
-                            document.body.className = newClassName;
-                        }
-                    });
+                    this.setState(stateChange, layout.toggleBodyClass.bind(layout, ['scrolled-past-80', 'scrolled-past-top'], false, document.body));
                 }
             }
         }
 
         // We add as property of class instance so we can remove event listener on unmount, for example.
-        this.throttledScrollHandler = _.throttle(handleScroll.bind(this), 10);
+        this.throttledScrollHandler = _.throttle(requestAnimationFrame.bind(requestAnimationFrame, handleScroll.bind(this)), 10);
 
         // Save logo/brand element's 'full width' before any height transitions.
         // Ideally wait until logo/brand image has loaded before doing so.
@@ -298,15 +293,118 @@ class SearchBar extends React.Component{
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.toggleSearchAllItems = this.toggleSearchAllItems.bind(this);
+        this.onSearchInputChange = this.onSearchInputChange.bind(this);
+        this.onResetSearch = this.onResetSearch.bind(this);
+        this.onSearchInputBlur = this.onSearchInputBlur.bind(this);
+        this.selectItemTypeDropdown = this.selectItemTypeDropdown.bind(this);
+        var initialQuery = '';
+        if (props.href){
+            initialQuery = Filters.searchQueryStringFromHref(props.href) || '';
+        }
+        this.state = {
+            searchAllItems : false,
+            typedSearchQuery : initialQuery
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (nextProps.href !== this.props.href){
+            var query = Filters.searchQueryStringFromHref(nextProps.href) || '';
+            if (query !== this.state.typedSearchQuery){
+                this.setState({ typedSearchQuery : query });
+            }
+        }
+    }
+
+    hasInput(typedSearchQuery = this.state.typedSearchQuery){
+        return (typedSearchQuery && typeof typedSearchQuery === 'string' && typedSearchQuery.length > 0) || false;
+    }
+
+    toggleSearchAllItems(willSearchAllItems = null){
+        if (willSearchAllItems === null){
+            willSearchAllItems = !this.state.searchAllItems;
+        }
+        this.setState({ searchAllItems : willSearchAllItems });
+    }
+
+    onSearchInputChange(e){
+        var newValue = e.target.value;
+        var state = { typedSearchQuery : newValue };
+        if (!this.hasInput(newValue)) {
+            state.searchAllItems = false;
+        }
+        this.setState(state);
+    }
+
+    onSearchInputBlur(e){
+        var lastQuery = Filters.searchQueryStringFromHref(this.props.href);
+        if (this.hasInput(lastQuery) && !this.hasInput(this.state.typedSearchQuery)) {
+            this.setState({ typedSearchQuery : lastQuery });
+        }
+        
+    }
+
+    onResetSearch (e){
+        var id = url.parse(this.props.href, true);
+        delete id.query['q'];
+        var resetHref = id.protocol + '//' + id.host + id.pathname + (_.keys(id.query).length > 0 ? '?' + _.map(_.pairs(id.query), p => p[0]+'='+p[1] ).join('&') : '' );
+        this.setState({
+            searchAllItems : false,
+            typedSearchQuery : ''
+        }, navigate.bind(navigate, resetHref));
+    }
+
+    selectItemTypeDropdown(inProp = false){
+        return (
+            <Fade in={inProp} transitionAppear>
+                <DropdownButton
+                    id="search-item-type-selector"
+                    bsSize="sm"
+                    pullRight
+                    onSelect={(eventKey, evt)=>{
+                        this.toggleSearchAllItems(eventKey === 'all' ? true : false);
+                    }}
+                    title={this.state.searchAllItems ? 'All Items' : 'Experiment Sets'}
+                >
+                    <MenuItem eventKey='sets' active={!this.state.searchAllItems}>
+                        Experiment Sets
+                    </MenuItem>
+                    <MenuItem eventKey='all' active={this.state.searchAllItems}>
+                        All Items (advanced)
+                    </MenuItem>
+                </DropdownButton>
+            </Fade>
+        );
     }
 
     render() {
         var id = url.parse(this.props.href, true);
-        var searchQuery = id.query['q'] || '';
+        var searchAllItems = this.state.searchAllItems;
+        var searchQueryFromHref = id.query['q'] || '';
+        var resetIconButton = null;
+        var searchBoxHasInput = this.hasInput();
+
+        if (searchQueryFromHref){
+            resetIconButton = <i className="reset-button icon icon-close" onClick={this.onResetSearch}/>;
+        }
+        
         return (
-            <form className="navbar-form navbar-right" action="/search/">
+            <form
+                className={"navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (this.hasInput() ? ' has-input' : '')}
+                action={searchAllItems ? "/search/" : "/browse/" }
+                method="GET"
+            >
+                {/*<Checkbox className="toggle-all-items-search" checked={this.state.searchAllItems} onChange={this.toggleSearchAllItems}>&nbsp; All Items</Checkbox>*/}
+                {  this.selectItemTypeDropdown(searchBoxHasInput || searchQueryFromHref) }
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
-                    ref="q" name="q" defaultValue={searchQuery} key={searchQuery} />
+                    ref="q" name="q" value={this.state.typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
+                {resetIconButton}
+                <input id="type-select" type="hidden" name="type" value={searchAllItems ? "Item" : "ExperimentSetReplicate"}/>
+                { !searchAllItems ? <input id="expset-type-select" type="hidden" name="experimentset_type" value="replicate"/> : null }
+                <button type="submit" className="search-icon-button">
+                    <i className="icon icon-fw icon-search"/>
+                </button>
             </form>
         );
     }

@@ -50,6 +50,7 @@ ORDER = [
     'file_processed',
     'file_reference',
     'file_calibration',
+    'file_microscopy',
     'file_set',
     'file_set_calibration',
     'experiment_hi_c',
@@ -565,6 +566,12 @@ PHASE1_PIPELINES = {
     'file_reference': [
         remove_keys('related_files'),
     ],
+    'file_calibration': [
+        remove_keys('related_files'),
+    ],
+    'file_microscopy': [
+        remove_keys('related_files'),
+    ],
     'file_set': [
         remove_keys('files_in_set'),
     ],
@@ -625,6 +632,12 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('related_files', "workflow_run", "source_experiments"),
     ],
     'file_reference': [
+        skip_rows_missing_all_keys('related_files'),
+    ],
+    'file_calibration': [
+        skip_rows_missing_all_keys('related_files'),
+    ],
+    'file_microscopy': [
         skip_rows_missing_all_keys('related_files'),
     ],
     'file_set': [

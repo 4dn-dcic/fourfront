@@ -15,7 +15,7 @@ import SubmissionView from './submission/submission-view';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
@@ -214,7 +214,7 @@ export default class App extends React.Component {
         this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
         this.render = this.render.bind(this);
 
-        console.log('APP FILTERS', Filters.hrefToFilters(props.href));
+        console.log('APP FILTERS', Filters.hrefToFilters(props.href, (props.context && Array.isArray(props.context.filters) && props.context.filters) || null));
 
         this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
 
@@ -536,7 +536,18 @@ export default class App extends React.Component {
         // through the navigate method.
         if (this.historyEnabled) {
             event.preventDefault();
-            navigate(href, navOpts);
+            navigate(href, navOpts, ()=>{
+                var hrefParts = url.parse(href);
+                var hrefHash = hrefParts.hash;
+                if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1){
+                    hrefHash = hrefHash.slice(1); // Strip out '#'
+                    setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
+                }
+                if (hrefParts.pathname.indexOf('/browse/') > -1){
+                    var filters = Filters.hrefToFilters(href, null, false);
+                    Filters.saveChangedFilters(filters, false);
+                }
+            });
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
             }
@@ -1089,18 +1100,21 @@ export default class App extends React.Component {
         var status;
         var route = currRoute[currRoute.length-1];
 
-        if(context.code && context.code == 404){
-            // check to ensure we're not looking at a static page
-            if(route != 'help' && route != 'about' && route != 'home' && route != 'submissions'){
-                status = 'not_found';
-            }
-        }else if(context.code && context.code == 403){
-            if(context.title && (context.title.toLowerCase() == 'login failure' || context.title == 'No Access')){
+        var isPlannedSubmissionsPage = href_url.pathname.indexOf('/planned-submissions') > -1; // TEMP EXTRA CHECK WHILE STATIC_PAGES RETURN 404 (vs 403)
+        if (context.code && (context.code === 403 || (isPlannedSubmissionsPage && context.code === 404))){
+            if (isPlannedSubmissionsPage){
+                status = 'forbidden';
+            } else if (context.title && (context.title.toLowerCase() === 'login failure' || context.title === 'No Access')){
                 status = 'invalid_login';
-            }else if(context.title && context.title == 'Forbidden'){
+            } else if (context.title && context.title === 'Forbidden'){
                 status = 'forbidden';
             }
-        }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+        } else if (context.code && context.code === 404){
+            // check to ensure we're not looking at a static page
+            if (route != 'help' && route != 'about' && route !== 'home' && route !== 'submissions'){
+                status = 'not_found';
+            }
+        } else if (route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
@@ -1242,8 +1256,11 @@ export default class App extends React.Component {
                                     ref="navigation"
                                     schemas={this.state.schemas}
                                 />
-                                <div id="content" className="container">
+                                <div id="pre-content-placeholder"/>
+                                <div id="page-title-container" className="container">
                                     <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
+                                </div>
+                                <div id="facet-charts-container" className="container">
                                     <FacetCharts
                                         href={this.props.href}
                                         context={this.props.context}
@@ -1253,6 +1270,8 @@ export default class App extends React.Component {
                                         schemas={this.state.schemas}
                                         session={this.state.session}
                                     />
+                                </div>
+                                <div id="content" className="container">
                                     <Alerts alerts={this.props.alerts} />
                                     { content }
                                 </div>

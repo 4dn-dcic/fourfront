@@ -9,11 +9,12 @@ import _ from 'underscore';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
-import Infinite from './../../lib/react-infinite/src/react-infinite';
+//import Infinite from './../../lib/react-infinite/src/react-infinite';
+import Infinite from 'react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
-import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
+import { console, isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import {
     defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap,
@@ -92,18 +93,26 @@ class ResultDetail extends React.Component{
 
     constructor(props){
         super(props);
+        this.setDetailHeightFromPane = this.setDetailHeightFromPane.bind(this);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        //this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.render = this.render.bind(this);
         this.state = { 'closing' : false };
+    }
+
+    setDetailHeightFromPane(height = null){
+        if (typeof height !== 'number'){
+            height = this.refs.detail && parseInt(this.refs.detail.offsetHeight);
+            if (!this.firstFoundHeight && height && !isNaN(height)) this.firstFoundHeight = height;
+        }
+        if (isNaN(height) || typeof height !== 'number') height = this.firstFoundHeight || 1;
+        this.props.setDetailHeight(height);
     }
 
     componentDidUpdate(pastProps, pastState){
         if (pastProps.open !== this.props.open){
             if (this.props.open && typeof this.props.setDetailHeight === 'function'){
-                setTimeout(()=>{
-                    var detailHeight = parseInt(this.refs.detail.offsetHeight) + 10;
-                    if (isNaN(detailHeight)) detailHeight = 0;
-                    this.props.setDetailHeight(detailHeight);
-                }, 0);
+                setTimeout(this.setDetailHeightFromPane, 10);
             }
         }
     }
@@ -112,12 +121,12 @@ class ResultDetail extends React.Component{
         return (
             <div className={"result-table-detail-container" + (this.props.open || this.state.closing ? ' open' : ' closed')}>
                 { this.props.open ?
-                
+
                     <div className="result-table-detail" ref="detail" style={{
                         'width' : this.props.tableContainerWidth,
                         'transform' : vizUtil.style.translate3d(this.props.tableContainerScrollLeft)
                     }}>
-                        { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth) }
+                        { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.tableContainerWidth, this.setDetailHeightFromPane) }
                         { this.props.tableContainerScrollLeft && this.props.tableContainerScrollLeft > 10 ?
                             <div className="close-button-container text-center" onClick={this.props.toggleDetailOpen}>
                                 <i className="icon icon-angle-up"/>
@@ -206,7 +215,7 @@ class ResultRow extends React.Component {
         }
     }
     */
-    
+
     toggleDetailOpen(){
         this.props.toggleDetailPaneOpen(this.props['data-key']);
     }
@@ -271,7 +280,8 @@ class LoadMoreAsYouScroll extends React.Component {
 
     static defaultProps = {
         'limit' : 25,
-        'debouncePointerEvents' : 150
+        'debouncePointerEvents' : 150,
+        'openRowHeight' : 56
     }
 
     constructor(props){
@@ -315,7 +325,7 @@ class LoadMoreAsYouScroll extends React.Component {
             this.setState({ 'canLoad' : true });
         }
     }
-    
+
     isMounted(){
         if (typeof this.props.mounted === 'boolean') return this.props.mounted;
         return this.state.mounted;
@@ -341,7 +351,7 @@ class LoadMoreAsYouScroll extends React.Component {
     }
 
     handleLoad(e,p,t){
-        
+
         var nextHref = this.rebuiltHref();
         var loadCallback = (function(resp){
             if (resp && resp['@graph'] && resp['@graph'].length > 0){
@@ -386,7 +396,8 @@ class LoadMoreAsYouScroll extends React.Component {
         if (!this.isMounted()) return <div>{ this.props.children }</div>;
         var elementHeight = _.keys(this.props.openDetailPanes).length === 0 ? this.props.rowHeight : this.props.children.map((c) => {
             if (typeof this.props.openDetailPanes[c.props['data-key']] === 'number'){
-                return this.props.openDetailPanes[c.props['data-key']];
+                //console.log('height', this.props.openDetailPanes[c.props['data-key']], this.props.rowHeight, 2 + this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight);
+                return this.props.openDetailPanes[c.props['data-key']] + this.props.openRowHeight + 2;
             }
             return this.props.rowHeight;
         });
@@ -565,7 +576,7 @@ class ShadowBorderLayer extends React.Component {
         return (
             <div className={"shadow-border-layer hidden-xs" + this.shadowStateClass(edges) + this.tallDimensionClass() + (this.props.isWindowPastTableTop ? ' fixed-position-arrows' : '')}>
                 { this.edgeScrollButtonLeft(edges.left) }{ this.edgeScrollButtonRight(edges.right) }
-            </div>    
+            </div>
         );
     }
 }
@@ -607,7 +618,7 @@ class DimensioningContainer extends React.Component {
             var w = DimensioningContainer.findLargestBlockWidth(colDef.field);
             if (typeof w !== 'number') return 0;
             if (w < colDef.widthMap.lg) return w + padding;
-            return 0; 
+            return 0;
         });
     }
 
@@ -654,7 +665,7 @@ class DimensioningContainer extends React.Component {
             'isWindowPastTableTop' : false,
             'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview.
         };
-        
+
     }
 
     componentDidMount(){
@@ -674,7 +685,7 @@ class DimensioningContainer extends React.Component {
             }
 
             window.addEventListener('scroll', this.onVerticalScroll);
-            
+
         }
 
         this.lastResponsiveGridSize = layout.responsiveGridState();
@@ -714,7 +725,7 @@ class DimensioningContainer extends React.Component {
                         this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions) });
                     });
                 });
-                
+
             }
         }
     }
@@ -726,7 +737,7 @@ class DimensioningContainer extends React.Component {
     }
 
     toggleDetailPaneOpen(rowKey, cb = null){
-        setTimeout(() => {
+        //setTimeout(() => {
             var openDetailPanes = _.clone(this.state.openDetailPanes);
             if (openDetailPanes[rowKey]){
                 delete openDetailPanes[rowKey];
@@ -734,7 +745,7 @@ class DimensioningContainer extends React.Component {
                 openDetailPanes[rowKey] = true;
             }
             this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
-        }, 0);
+        //}, 0);
     }
 
     setDetailHeight(rowKey, height, cb){
@@ -755,14 +766,14 @@ class DimensioningContainer extends React.Component {
     onVerticalScroll(e){
         if (!document || !window || !this.refs.innerContainer) return null;
 
-        
+
 
         //vizUtil.requestAnimationFrame(()=>{
 
             var windowHeight    = window.innerHeight;
             var scrollTop       = document && document.body && document.body.scrollTop;
             var tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
-    
+
             //var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
 
 
@@ -789,7 +800,7 @@ class DimensioningContainer extends React.Component {
                             }
                             done = true;
                         } else if (distanceToTopOfTable > 5 && distanceToTopOfTable <= this.props.fullWidthInitOffset){
-                            
+
                             //var fullWidthInitOffset = Math.min(this.props.fullWidthInitOffset, tableTopOffset + this.props.stickyHeaderTopOffset);
                             //var difScale = (fullWidthInitOffset - distanceToTopOfTable) / fullWidthInitOffset;
                             //pageTableContainer.style.transition = "margin-left .33s, margin-right .33s";
@@ -797,7 +808,7 @@ class DimensioningContainer extends React.Component {
                             //if (this.lastDistanceToTopOfTable !== distanceToTopOfTable || !this.state.isWindowPastTableTop){
                             //    this.setState({ 'isWindowPastTableTop' : true });
                             //}
-                            
+
                         } else if (distanceToTopOfTable > this.props.fullWidthInitOffset){
                             pageTableContainer.style.transition = "margin-left .6s, margin-right .6s";
                             pageTableContainer.style.marginLeft = pageTableContainer.style.marginRight = '0px';
@@ -809,7 +820,7 @@ class DimensioningContainer extends React.Component {
                             done = true;
                         }
                         this.lastDistanceToTopOfTable = distanceToTopOfTable;
-                        
+
                     }
                     //console.log('V',scrollTop, tableTopOffset, distanceToTopOfTable);
                 }
@@ -826,7 +837,7 @@ class DimensioningContainer extends React.Component {
 
         //});
 
-        
+
     }
 
     getTableLeftOffset(){
@@ -911,7 +922,7 @@ class DimensioningContainer extends React.Component {
                     <div className="search-results-container">
                         <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
-                                
+
                                 {
                                     <Sticky topOffset={stickyHeaderTopOffset} >{
                                         ({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}) =>
@@ -929,12 +940,13 @@ class DimensioningContainer extends React.Component {
                                             rowHeight={this.props.rowHeight}
                                             results={this.state.results}
                                             stickyHeaderTopOffset={stickyHeaderTopOffset}
+                                            renderDetailPane={this.props.renderDetailPane}
 
                                             stickyStyle={style}
                                             isSticky={isSticky}
                                         />
                                     }</Sticky>
-                                
+
                                 }
                                 <LoadMoreAsYouScroll
                                     results={this.state.results}
@@ -973,7 +985,7 @@ class DimensioningContainer extends React.Component {
 
 /**
  * Reusable table for displaying search results according to column definitions.
- * 
+ *
  * @export
  * @class SearchResultTable
  * @prop {Object[]}         results             Results as returned from back-end, e.g. props.context['@graph'].
@@ -983,7 +995,7 @@ class DimensioningContainer extends React.Component {
  * @prop {string[]}         [hiddenColumns]     Keys of columns to remove from final columnDefinitions before rendering. Useful for hiding constantColumnDefinitions in response to some state.
  * @prop {function}         [renderDetailPane]  An instance of a React component which will receive prop 'result'.
  * @prop {Object}           [columnDefinitionOverrideMap]  - Extend constant and default column-derived column definitions, by column definition field key.
- * 
+ *
  * @prop {string}           sortColumn          Current sort column, as fed by SortController.
  * @prop {boolean}          sortReverse         Whether current sort column is reversed, as fed by SortController.
  * @prop {function}         sortBy              Callback function for performing a sort, acceping 'sortColumn' and 'sortReverse' as params. As fed by SortController.
@@ -1032,7 +1044,7 @@ export class SearchResultTable extends React.Component {
 
     /**
      * Grab loaded results.
-     * 
+     *
      * @returns {Object[]|null} JSON list of all loaded results.
      */
     getLoadedResults(){

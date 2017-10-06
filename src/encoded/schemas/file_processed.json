@@ -31,11 +31,13 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "enum": [
+            "suggested_enum": [
                 "bam",
                 "bai",
                 "pairs",
+                "pairsam",
                 "pairs_px2",
+                "pairsam_px2",
                 "cool",
                 "hic",
                 "mcool",
@@ -47,7 +49,7 @@
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "enum": [
+            "suggested_enum": [
                 "read pairs",
                 "alignments",
                 "unfiltered alignments",
@@ -75,7 +77,9 @@
         "bam": ".bam",
         "bai": ".bam.bai",
         "pairs": ".pairs.gz",
+        "pairsam": ".sam.pairs.gz",
         "pairs_px2": ".pairs.gz.px2",
+        "pairsam_px2": ".sam.pairs.gz.px2",
         "cool": ".cool",
         "mcool": ".mcool",
         "hic": ".hic",

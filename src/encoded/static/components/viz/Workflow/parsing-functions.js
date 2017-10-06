@@ -16,7 +16,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
     /**** Functions ****/
 
-    function stepNodeID   (step) { return step.uuid || step['@id'] || step.link_id || step.name; }
+    function stepNodeID   (step) { return step.uuid || (step.meta && typeof step.meta === 'object' && step.meta['@id']) || step['@id'] || step.link_id || step.name; }
     function stepNodeName (step) { return step.display_title || step.title || step.name || step['@id']; }
     function inputNodeID  (stepInput, readOnly = true) {
         return preventDuplicateNodeID(
@@ -203,7 +203,9 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
         var groupSources = _.filter(stepInput.source || [], function(s){
             return (s.type === groupTypeToCheck && typeof s.for_file === 'string');
         });
+
         if (groupSources.length > 0){
+
             var groups = _.reduce(groupSources, function(m,v){
                 if (typeof m[v.grouped_by] === 'undefined'){
                     m[v.grouped_by] = {};
@@ -219,16 +221,16 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             var filesNotInGroups = [];
             var filesByGroup = _.reduce(stepInput.run_data.file, function(m, file, idx){
                 var incl = false;
-                _.forEach(groupKeys, function(grouping){
-                    _.forEach(_.keys(groups[grouping]), function(group){
-                        if (groups[grouping][group].has(file.uuid || file)){
-                            if (typeof m[grouping] === 'undefined'){
-                                m[grouping] = {};
+                _.forEach(groupKeys, function(groupingTypeKey){
+                    _.forEach(_.keys(groups[groupingTypeKey]), function(group){
+                        if (groups[groupingTypeKey][group].has(file.uuid || file)){
+                            if (typeof m[groupingTypeKey] === 'undefined'){
+                                m[groupingTypeKey] = {};
                             }
-                            if (typeof m[grouping][group] === 'undefined'){
-                                m[grouping][group] = new Set();
+                            if (typeof m[groupingTypeKey][group] === 'undefined'){
+                                m[groupingTypeKey][group] = new Set();
                             }
-                            m[grouping][group].add(file);
+                            m[groupingTypeKey][group].add(file);
                             incl = true;
                         }
                     });
@@ -321,12 +323,17 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         if (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
                             if (n.meta && Array.isArray(n.meta.source) && _.any(n.meta.source, function(nS){
                                 return typeof nS.grouped_by === 'string' && typeof nS[nS.grouped_by] === 'string' && nS[nS.grouped_by] === s[s.grouped_by];
-                            })) return true;
+                            })){ // Matched by Workflow (or other grouping type), now lets ensure it's the right group.
+                                var nodeBeingCheckedGroupFiles = _.pluck(_.filter(n.meta.source, function(nS){ return typeof nS.for_file === 'string'; }), 'for_file');
+                                return (s.for_file && _.contains(nodeBeingCheckedGroupFiles, s.for_file) && true) || false;
+                            }
                         }
-                        // Match File
+
+                        // Match By File
                         if (Array.isArray(s.for_file) && _.any(s.for_file, checkNodeFileForMatch.bind(checkNodeFileForMatch, n))) return true;
                         else if (s.for_file && !Array.isArray(s.for_file) && checkNodeFileForMatch(n, s.for_file)) return true;
-                        // Match Output Nodes
+
+                        // Match Output Nodes that target this step.
                         if ( _.find(
                                 n.meta.target || [],
                                 function(t){
@@ -379,7 +386,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         'meta' : _.extend(n.meta, inNode.meta),
                         'name' : inNode.name,
                         'id' : preventDuplicateNodeID(inNode.id, false),
-                        'wasMatchedAsInputOf' : stepNode.id // Used only for debugging.
+                        'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.id) // Used only for debugging.
                         //'name' : n.name || inNode.name //ioNodeNameCombo(inNode, n)
                     });
                 });
@@ -405,6 +412,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     }),
                     function(n){
                         n.id = preventDuplicateNodeID(n.id, false);
+                        n.generatedAsInputOf = (n.generatedAsInputOf || []).concat(stepNode.id);
                         return n;
                     }
                 );
@@ -736,26 +744,31 @@ export function traceNodePathAndRun(nextNode, fxn, direction = 'output', lastNod
 
 export function correctColumnAssignments(graphData){
     var { nodes, edges } = graphData;
-    var stepNodes = _.filter(nodes, { 'type' : 'step' });
 
-    var colCorrectFxn = function(node, lastNode){
+    var colCorrectFxn = function(node, lastNode, nextNodes){
         if (typeof node.column !== 'number' || typeof lastNode.column !== 'number'){
             console.error('No column number on one of theses nodes', node, lastNode);
             return;
         }
-        var colDifference = Math.abs(lastNode.column - node.column) + 1;
-        node.column += colDifference;
+        var currentColDifference = node.column - lastNode.column;
+        if (currentColDifference < 1){
+            var colDifferenceToAdd = Math.abs(lastNode.column - node.column) + 1;
+            node.column += colDifferenceToAdd;
+        }
+        
     };
 
-    _.forEach(stepNodes, function(stepNode){
-        if (typeof stepNode.column !== 'number'){
-            console.error('No column number on step', stepNode);
+    _.forEach(nodes, function(node){
+        if (typeof node.column !== 'number'){
+            console.error('No column number on node', node);
             return;
         }
-        if (Array.isArray(stepNode.outputNodes) && stepNode.outputNodes.length > 0){
 
-            var laggingOutputNodes = _.filter(stepNode.outputNodes, function(oN){
-                if (typeof oN.column === 'number' && oN.column <= stepNode.column){
+        // Case: Step Node
+        if (Array.isArray(node.outputNodes) && node.outputNodes.length > 0){
+
+            var laggingOutputNodes = _.filter(node.outputNodes, function(oN){
+                if (typeof oN.column === 'number' && oN.column <= node.column){
                     return true;
                     // !FIX!
                 }
@@ -763,7 +776,24 @@ export function correctColumnAssignments(graphData){
             });
 
             _.forEach(laggingOutputNodes, function(loN){
-                traceNodePathAndRun(loN, colCorrectFxn, 'output', stepNode);
+                traceNodePathAndRun(loN, colCorrectFxn, 'output', node);
+            });
+
+        }
+
+        // Case: IO Node
+        if (Array.isArray(node.inputOf) && node.inputOf.length > 0){
+
+            var laggingStepNodes = _.filter(node.inputOf, function(sN){
+                if (typeof sN.column === 'number' && sN.column <= node.column){
+                    return true;
+                    // !FIX!
+                }
+                return false;
+            });
+
+            _.forEach(laggingStepNodes, function(lsN){
+                traceNodePathAndRun(lsN, colCorrectFxn, 'output', node);
             });
 
         }

@@ -76,5 +76,16 @@
     "filename": "GRCh38_HindIII_new.txt",
     "lab": "4dn-dcic-lab",
     "award": "1U01CA200059-01"
+ },
+ {
+    "uuid": "84db9821-3b82-4c6a-bf4f-5e0b3f43036e",
+    "accession": "4DNFIBNAPW30",
+    "status": "uploaded",
+    "submitted_by": "4dndcic@gmail.com",
+    "file_format": "juicer_format_restriction_site_file",
+    "notes": "restriction sites for DpnII on hg38, juicer-formatted",
+    "filename": "hg38_DpnII.txt",
+    "lab": "4dn-dcic-lab",
+    "award": "1U01CA200059-01"
  }
 ]

@@ -69,7 +69,7 @@ export class ItemFooterRow extends React.Component {
         var alternateAccessions = this.props.context.alternate_accessions.length > 0 ? this.props.context.alternate_accessions : [<em>None</em>];
         return (
             <div>
-                <h4 className="text-500">Alternate Accessions</h4>
+                <h4 className="text-300">Alternate Accessions</h4>
                 <div>
                     <ul>
                     { alternateAccessions.map(function(alias, i){
@@ -92,7 +92,7 @@ export class ItemFooterRow extends React.Component {
         var externalRefs = this.props.context.external_references.length > 0 ? this.props.context.external_references : [<em>None</em>];
         return (
             <div>
-                <h4 className="text-500">External References</h4>
+                <h4 className="text-300">External References</h4>
                 <div>
                     <ul>
                     { externalRefs.map(function(extRef, i){
@@ -121,8 +121,12 @@ export class ItemFooterRow extends React.Component {
             aliases             = this.aliases(),
             alternateAccessions = this.alternateAccessions();
 
+        if (!externalReferences && !alternateAccessions) return null;
+
         return (
             <div className="row">
+
+                <hr className="mb-08 mt-4"/>
 
                 { externalReferences ?
                 <div className="col-xs-12 col-md-6">

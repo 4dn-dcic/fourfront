@@ -82,15 +82,17 @@ export class UIControlsWrapper extends React.Component {
 
     componentWillReceiveProps(nextProps){
         if (
-            this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters) &&
-            !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters) && (
+            // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+            this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) &&
+            !this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) && (
                 this.state.showState === 'all'
             )
         ){
             this.setState({ 'showState' : 'filtered' });
         } else if (
-            this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters) &&
-            !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters) && (
+            // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+            this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters, nextProps.href) &&
+            !this.filterObjExistsAndNoFiltersSelected(this.props.expSetFilters, this.props.href) && (
                 this.state.showState === 'filtered'
             )
         ){
@@ -98,8 +100,9 @@ export class UIControlsWrapper extends React.Component {
         }
     }
 
-    filterObjExistsAndNoFiltersSelected(expSetFilters = this.props.expSetFilters){
-        return Filters.filterObjExistsAndNoFiltersSelected(expSetFilters);
+    // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+    filterObjExistsAndNoFiltersSelected(expSetFilters = this.props.expSetFilters, href = this.props.href){
+        return Filters.filterObjExistsAndNoFiltersSelected(expSetFilters) && !Filters.searchQueryStringFromHref(href);
     }
 
     titleMap(key = null, fromDropdown = false){
@@ -228,7 +231,8 @@ export class UIControlsWrapper extends React.Component {
 
     renderShowTypeDropdown(contextualView){
         if (contextualView === 'home') return null;
-        var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected();
+        // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
+        var isSelectedDisabled = this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(this.props.href);
         return (
             <div className="show-type-change-section">
                 <h6 className="dropdown-heading">Show</h6>
@@ -301,7 +305,7 @@ export class UIControlsWrapper extends React.Component {
 
     render(){
 
-        if (!this.props.experiments) return null;
+        if (!this.props.experiment_sets) return null;
         
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
@@ -358,9 +362,9 @@ export class UIControlsWrapper extends React.Component {
                         { this.renderGroupByFieldDropdown(contextualView) }
                         <div className="legend-container" style={{ height : legendContainerHeight }}>
                             <AggregatedLegend
-                                experiments={this.props.experiments}
+                                experiment_sets={this.props.experiment_sets}
+                                filtered_experiment_sets={this.props.filtered_experiment_sets}
                                 height={legendContainerHeight}
-                                filteredExperiments={this.props.filteredExperiments}
                                 fields={this.state.fields}
                                 showType={this.state.showState}
                                 aggregateType={this.state.aggregateType}
@@ -462,10 +466,9 @@ class AggregatedLegend extends React.Component {
     render(){
 
         var fieldsForLegend = Legend.barPlotFieldDataToLegendFieldsData(
-            (!this.props.experiments || !this.props.fields[1] ? null :
+            (!this.props.experiment_sets || !this.props.fields[1] ? null :
                 Legend.aggregegateBarPlotData(
-                    this.props.showType === 'filtered' ? (this.props.filteredExperiments || this.props.experiments) :
-                        this.props.experiments,
+                    this.props.showType === 'filtered' ? (this.props.filtered_experiment_sets || this.props.experiment_sets) : this.props.experiment_sets,
                     [this.props.fields[1]]
                 )
             ),

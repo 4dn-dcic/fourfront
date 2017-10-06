@@ -14,58 +14,9 @@ import { console, object, DateUtility, Schemas, isServerSide, navigate } from '.
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
+import { filterOutParametersFromGraphData } from './WorkflowRunTracingView';
 
 
-/**
- * For when "Show Parameters" UI setting === false.
- * 
- * @param {Object}      graphData 
- * @param {Object[]}    graphData.nodes
- * @param {Object[]}    graphData.edges
- * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
- */
-export function filterOutParametersFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-        if (n.type === 'input' && n.format === 'Workflow Parameter') {
-            deleted[n.id] = true;
-            return false;
-        }
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
-    });
-    return { nodes, edges };
-}
-
-
-export function filterOutReferenceFilesFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-
-        if (n && n.meta && n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type'])){
-
-            if (n.meta.run_data.file['@type'].indexOf('FileReference') > -1) {
-                deleted[n.id] = true;
-                return false;
-            }
-
-        }
-
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
-    });
-    return { nodes, edges };
-}
 
 /**
  * Pass this to props.onNodeClick for Graph.
@@ -122,12 +73,13 @@ export function doValidAnalysisStepsExist(steps){
     return true;
 }
 
-export function parseAnalysisStepsMixin(){
+export function parseAnalysisStepsMixin(context = null){
+    if (!context) context = this.props.context;
     var graphData = (
         this.state.showChart === 'basic' ?
-            parseBasicIOAnalysisSteps(this.props.context.analysis_steps, this.props.context)
+            parseBasicIOAnalysisSteps(context.steps, context)
             :
-            parseAnalysisSteps(this.props.context.analysis_steps)
+            parseAnalysisSteps(context.steps)
     );
     if (this.state.showParameters) return graphData;
     else return filterOutParametersFromGraphData(graphData);
@@ -156,7 +108,7 @@ export class WorkflowView extends ItemBaseView {
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph</span>,
                 key : 'graph',
@@ -170,7 +122,7 @@ export class WorkflowView extends ItemBaseView {
             AuditTabView.getTabObject(this.props.context)
         ]).map((tabObj)=>{ // Common properties
             return _.extend(tabObj, {
-                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 650 }
+                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
             });
         });
     }
@@ -314,8 +266,8 @@ export class RowSpacingTypeDropdown extends React.Component {
 class GraphSection extends React.Component {
 
     static analysisStepsSet(context){
-        if (!Array.isArray(context.analysis_steps)) return false;
-        if (context.analysis_steps.length === 0) return false;
+        if (!Array.isArray(context.steps)) return false;
+        if (context.steps.length === 0) return false;
         return true;
     }
 
@@ -343,7 +295,7 @@ class GraphSection extends React.Component {
     }
 
     basicGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return (
             <Graph
                 { ...this.commonGraphProps() }
@@ -356,7 +308,7 @@ class GraphSection extends React.Component {
     }
 
     detailGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
+        if (!Array.isArray(this.props.context.steps)) return null;
         return <Graph { ...this.commonGraphProps() } />;
     }
 

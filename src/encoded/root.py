@@ -55,18 +55,12 @@ def listFilesInInDirectory(dirLocation):
 
 def static_pages(config):
     '''Setup static routes & content from static files (HTML or Markdown)'''
-
     try:
         contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
         pageLocations = json.loads(get_local_file_contents("static_pages.json", "/static/data", contentFilesLocation + "/static/data")).get('pages', {})
     except Exception as e:
         print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
 
-
-    config.add_route(
-        'static-page',
-        '/{page:(' + '|'.join( map(escape, pageLocations.keys() )) + ')}'
-    )
 
     def static_page(request):
 
@@ -165,7 +159,18 @@ def static_pages(config):
 
         return responseDict
 
-    config.add_view(static_page, route_name='static-page')
+    # Add 'effective_principals' kwarg if page definition has permissions.
+    for key in pageLocations.keys():
+        principals = None # Should this be a list instd of None and then we just + to it when encounter in config JSON?
+        if isinstance(pageLocations[key], dict) and isinstance(pageLocations[key].get('effective_principals'), list):
+            principals = pageLocations[key]['effective_principals']
+        config.add_route(
+            'static-page-' + escape(key),
+            '/{page:' + escape(key) + '}',
+            effective_principals=principals,
+        )
+
+        config.add_view(static_page, route_name='static-page-' + escape(key))
 
 
 def health_check(config):
@@ -193,7 +198,7 @@ def health_check(config):
         db_es_compare = OrderedDict()
         all_collections = list(request.registry[COLLECTIONS].by_item_type.keys())
         for collection in all_collections:
-            db_count, es_count, _ = get_db_es_counts_and_db_uuids(request, es, collection)
+            db_count, es_count, _, _ = get_db_es_counts_and_db_uuids(request, es, collection)
             warn_str = build_warn_string(db_count, es_count)
             db_total += db_count
             es_total += es_count
@@ -234,9 +239,9 @@ def health_check(config):
 
 def build_warn_string(db_count, es_count):
     if db_count > es_count:
-        warn_str = '  < WARNING: DB has %s more items >' % (str(db_count - es_count))
+        warn_str = '  < DB has %s more items >' % (str(db_count - es_count))
     elif db_count < es_count:
-        warn_str = '  < WARNING: ES has %s more items >' % (str(es_count - db_count))
+        warn_str = '  < ES has %s more items >' % (str(es_count - db_count))
     else:
         warn_str = ''
     return warn_str

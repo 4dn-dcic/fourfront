@@ -112,12 +112,10 @@ $tooltip-color: desaturate(lighten(#0a253d,30%),30%);
 
 }
 
-body[data-path="/joint-analysis-data-plans"]{
-    .__react_component_tooltip.has-links-or-buttons {
-        pointer-events: all !important;
-        &:hover {
-            visibility: visible;
-            opacity: 1;
-        }
+.__react_component_tooltip.has-links-or-buttons {
+    pointer-events: all !important;
+    &:hover {
+        visibility: visible;
+        opacity: 1;
     }
 }

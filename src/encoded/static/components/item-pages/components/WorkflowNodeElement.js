@@ -12,7 +12,7 @@ export class WorkflowNodeElement extends React.Component {
 
     static propTypes = {
         'node' : PropTypes.object.isRequired,
-        'title': PropTypes.string.isRequired,
+        'title': PropTypes.string,
         'disabled' : PropTypes.bool,
         'selected' : PropTypes.bool,
         'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
@@ -201,9 +201,16 @@ export class WorkflowNodeElement extends React.Component {
 
         var node = this.props.node;
 
+        /*
+        if (node.meta && typeof node.meta.argument_type === 'string') {
+            return <div {...elemProps}><span className="lighter">{ node.meta.argument_type }</span></div>;
+        }
+        */
+        /*
         if (node.meta && typeof node.meta.argument_format === 'string') {
             return <div {...elemProps}><span className="lighter"><span className="text-500">Format: </span>{ node.meta.argument_format }</span></div>;
         }
+        */
 
         if (node.type === 'step' && node.meta && node.meta.software_used && node.meta.software_used.title){
             if (typeof node.meta.software_used.name === 'string' && typeof node.meta.software_used.version === 'string'){
@@ -217,6 +224,7 @@ export class WorkflowNodeElement extends React.Component {
 
     nodeTitle(){
         var node = this.props.node;
+
         if (node.type === 'input-group'){
             var files = node.meta.run_data.file;
             if (Array.isArray(files)){
@@ -227,6 +235,11 @@ export class WorkflowNodeElement extends React.Component {
                 </span>;
             }
         }
+
+        if (node.type === 'step' && node.meta && node.meta.workflow && typeof node.meta.workflow === 'object' && node.meta.workflow.display_title && typeof node.meta.workflow.display_title === 'string'){
+            return <span className="node-name">{ this.icon() }{ node.meta.workflow.display_title }</span>;
+        }
+
         if (this.doesRunDataFileExist()){
             var file = node.meta.run_data.file;
             return <span className={"node-name" + (file.accession ? ' mono-text' : '')}>
@@ -234,9 +247,11 @@ export class WorkflowNodeElement extends React.Component {
                 { typeof file === 'string' ? node.format.replace('Workflow ', '') : file.accession || file.display_title }
             </span>;
         }
+
         if (this.doesRunDataValueExist()){
             return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
         }
+
         return <span className="node-name">{ this.icon() }{ this.props.title }</span>;
     }
     

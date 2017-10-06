@@ -289,7 +289,7 @@ export class StackedBlockListViewMoreButton extends React.Component {
             if (collapsedMsg){
                 title = "Show " + this.props.collapsibleChildren.length + " More";
             } else {
-                title = "Show Less";
+                title = "Show Fewer";
             }
             if (this.props.title) title += ' ' + this.props.title;
 
@@ -787,22 +787,24 @@ export class FileEntryBlock extends React.Component {
 
     renderName(){
 
+        var file = this.props.file;
+
         function titleString(){
-            if (!this.props.file) return 'No Files';
-            return this.props.file.accession || this.props.file.uuid || object.atIdFromObject(this.props.file);
+            if (!file) return 'No Files';
+            return file.accession || file.uuid || object.atIdFromObject(file) || (file.error && <em>{ file.error }</em>) || 'N/A';
         }
 
         function title(){
-            if (!this.props.file) return <div className="name-title">{ titleString.call(this) }</div>;
+            if (!file || !object.atIdFromObject(file)) return <div className="name-title">{ titleString.call(this) }</div>;
             return (
-                <a className="name-title mono-text" href={ object.atIdFromObject(this.props.file) || '#' }>
+                <a className="name-title mono-text" href={ object.atIdFromObject(file) || '#' }>
                     { titleString.call(this) }
                 </a>
             );
         }
 
         function label(){
-            if (!this.props.file) return null;
+            if (!file) return null;
 
             var commonProperties = {
                 title : 'File',
@@ -827,19 +829,19 @@ export class FileEntryBlock extends React.Component {
             if (Array.isArray(this.props.columnHeaders)) {
                 var headerTitles = _.pluck(this.props.columnHeaders, 'title');
                 if (
-                    (this.props.file.file_type || this.props.file.file_format) &&
+                    (file.file_type || file.file_format) &&
                     _.intersection(headerTitles,['File Type', 'File Format']).length === 0
                 ){
                     return <StackedBlock.Name.Label {..._.extend(commonProperties, {
-                        subtitle : this.props.file.file_type || this.props.file.file_format,
+                        subtitle : file.file_type || file.file_format,
                     })} />;
                 }
                 if (
-                    this.props.file.instrument &&
+                    file.instrument &&
                     _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0
                 ){
                     return <StackedBlock.Name.Label {..._.extend(commonProperties, {
-                        subtitle : this.props.file.instrument
+                        subtitle : file.instrument
                     })} />;
                 }
             }

@@ -6,6 +6,8 @@ import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 import { FormattedInfoBlock } from './FormattedInfoBlock';
 import { Publications } from './Publications';
+import { object } from './../../util';
+import { ItemFooterRow } from './ItemFooterRow';
 
 export class AttributionTabView extends React.Component {
 
@@ -19,7 +21,7 @@ export class AttributionTabView extends React.Component {
                     <h3 className="tab-section-title">
                         <span>Attribution</span>
                     </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
+                    <hr className="tab-section-title-horiz-divider mb-1"/>
                     <AttributionTabView context={context} />
                 </div>
             )
@@ -136,8 +138,8 @@ export class AttributionTabView extends React.Component {
 
         if (typeof this.props.context[propertyName] == 'string') {
             propertyID = this.props.context[propertyName];
-        } else if (this.props.context[propertyName] && this.props.context[propertyName].link_id){
-            propertyID = this.props.context[propertyName].link_id.replace(/~/g, "/");
+        } else if (!Array.isArray(this.props.context[propertyName])){
+            propertyID = object.atIdFromObject(this.props.context[propertyName]);
         }
 
         if (Array.isArray(experiments)){
@@ -147,7 +149,7 @@ export class AttributionTabView extends React.Component {
                 // If we have property ID from ExperimentSet, just grab first property info with matching ID.
                 if (
                     propertyID && experiments[i][propertyName] &&
-                    propertyID == (experiments[i][propertyName]['@id'])
+                    propertyID == object.atIdFromObject(experiments[i][propertyName])
                 ) {
                     propertyInfo = experiments[i][propertyName];
                     break;
@@ -157,7 +159,7 @@ export class AttributionTabView extends React.Component {
                     if (i == 0) {
                         propertyInfo = experiments[i][propertyName];
                         continue;
-                    } else if (experiments[i][propertyName]['@id'] == propertyInfo['@id']) {
+                    } else if ((object.atIdFromObject(experiments[i][propertyName]) || 'a') === (object.atIdFromObject(propertyInfo) || 'b')) {
                         continue; // Good.
                     } else {
                         //throw new Error(propertyName + " IDs in experiments of ExperimentSet " + this.props.context.accession + " do not all match.");
@@ -211,7 +213,7 @@ export class AttributionTabView extends React.Component {
                         { this.props.context.produced_in_pub || Array.isArray(this.props.context.publications_of_set) ? 
                             <div className="col-sm-12 col-md-12 col-sm-float-right">
                                 <Publications context={this.props.context} />
-                                <hr/>
+                                <hr className="mt-05 mb-10"/>
                             </div>
                         : null }
 
@@ -236,6 +238,9 @@ export class AttributionTabView extends React.Component {
 
                     </div>
 
+                </div>
+                <div className="col-sm-12">
+                    <ItemFooterRow context={this.props.context} schemas={this.props.schemas} />
                 </div>
             </div>
         );
