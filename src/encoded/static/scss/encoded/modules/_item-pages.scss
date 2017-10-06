@@ -1032,8 +1032,10 @@ $download-button-width : 100px;
 	// Header
 	h3.tab-section-title {
 		> span:first-child { // Text itself
-			display: inline-block;
+			display: block;
 			padding-top: 27px;
+			float: left;
+			padding-right: 20px;
 		}
 		padding-top: 0;
 		min-height: 67px;

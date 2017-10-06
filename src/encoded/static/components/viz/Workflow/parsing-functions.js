@@ -638,7 +638,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         if (matchedStep) {
                             nextSteps.add(matchedStep);
                         }
-                        //console.log('XXXXX', n.name, t.step, nextSteps, _.pluck(analysis_steps, 'name'));
                     }
                 });
             }

@@ -181,38 +181,31 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
             showReferenceFiles, onToggleReferenceFiles, showIndirectFiles, onToggleIndirectFiles, showParameters, onToggleParameters,
             allRuns, onToggleAllRuns, loading, isAllRunsCheckboxDisabled, rowSpacingType, onSetRowSpacingType, fullscreenViewEnabled, onToggleFullScreenView
         } = this.props;
-        return (
-            <div className="workflow-view-controls-container">
-                
-                { typeof showReferenceFiles === 'boolean' && typeof onToggleReferenceFiles === 'function' ?
-                    <div className="inline-block show-params-checkbox-container">
-                        <Checkbox checked={showReferenceFiles} onChange={onToggleReferenceFiles}>
-                            Show Reference Files
-                        </Checkbox>
-                    </div>
-                : null }
 
-                { typeof showIndirectFiles === 'boolean' && typeof onToggleIndirectFiles === 'function' ?
-                    <div className="inline-block show-params-checkbox-container">
-                        <Checkbox checked={showIndirectFiles} onChange={onToggleIndirectFiles}>
-                            Show More Context
-                        </Checkbox>
-                    </div>
-                : null }
-
-                { this.showParameters() }
-                
-                { typeof allRuns === 'boolean' ?
-                    <div className="inline-block show-params-checkbox-container">
-                        <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns} disabled={isAllRunsCheckboxDisabled}>
-                        { loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
-                        </Checkbox>
-                    </div>
-                : null }
-
-                { this.rowSpacingTypeDropdown() }
-                { this.fullScreenButton() }
-            </div>
+        return this.wrapper(
+            typeof showReferenceFiles === 'boolean' && typeof onToggleReferenceFiles === 'function' ?
+                <div className="inline-block show-params-checkbox-container">
+                    <Checkbox checked={showReferenceFiles} onChange={onToggleReferenceFiles}>
+                        Show Reference Files
+                    </Checkbox>
+                </div>
+            : null,
+            typeof showIndirectFiles === 'boolean' && typeof onToggleIndirectFiles === 'function' ?
+                <div className="inline-block show-params-checkbox-container">
+                    <Checkbox checked={showIndirectFiles} onChange={onToggleIndirectFiles}>
+                        Show More Context
+                    </Checkbox>
+                </div>
+            : null,
+            this.showParameters(),
+            typeof allRuns === 'boolean' ?
+                <div className="inline-block show-params-checkbox-container">
+                    <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns} disabled={isAllRunsCheckboxDisabled}>
+                    { loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
+                    </Checkbox>
+                </div>
+            : null,
+            this.rowSpacingTypeDropdown()
         );
     }
 }

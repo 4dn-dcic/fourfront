@@ -13,7 +13,7 @@ import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Schemas, isServerSide, navigate, layout } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { DropdownButton, MenuItem, Checkbox, Button } from 'react-bootstrap';
+import { DropdownButton, MenuItem, Checkbox, Button, Collapse } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 
 
@@ -169,6 +169,16 @@ export class WorkflowGraphSectionControls extends React.Component {
         'cwl' : 'CWL Graph'
     }
 
+    constructor(props){
+        super(props);
+        this.toggleOpenMenu = this.toggleOpenMenu.bind(this);
+        this.state = { 'open' : false, 'mounted' : false };
+    }
+
+    componentDidMount(){
+        this.setState({ 'mounted' : true });
+    }
+
     chartTypeDropdown(){
         var detail = WorkflowGraphSectionControls.analysisStepsSet(this.props.context) ? (
             <MenuItem eventKey='detail' active={this.props.showChartType === 'detail'}>
@@ -234,15 +244,37 @@ export class WorkflowGraphSectionControls extends React.Component {
         );
     }
 
-    render(){
+    toggleOpenMenu(){
+        this.setState({ 'open' : !this.state.open });
+    }
+
+    /**
+     * @param {...JSX.Element} element - Element(s) to wrap in controls wrapper.
+     * @returns {JSX.Element} Workflow Controls Element.
+     */
+    wrapper(element){
+        var isOpen = (this.state.mounted && layout.responsiveGridState() === 'lg') || this.state.open;
         return (
             <div className="pull-right workflow-view-controls-container">
-                { this.showParameters() }
-                { this.chartTypeDropdown() }
-                { this.rowSpacingTypeDropdown() }
-                { this.fullScreenButton() }
+                <Collapse in={isOpen}>
+                    <div className="inner-panel">
+                        {[...arguments]}
+                    </div>
+                </Collapse>
+                <div className="inner-panel constant-panel pull-right">
+                    <div className="inline-block">
+                        <Button className="hidden-lg toggle-open-button" onClick={this.toggleOpenMenu}>
+                            <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'ellipsis-v')}/>&nbsp; Options&nbsp;
+                        </Button>
+                    </div>
+                    { this.fullScreenButton() }
+                </div>
             </div>
         );
+    }
+
+    render(){
+        return this.wrapper(this.showParameters(), this.chartTypeDropdown(), this.rowSpacingTypeDropdown());
     }
 }
 

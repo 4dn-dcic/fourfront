@@ -601,7 +601,6 @@
 
                             span.caret {
                                 position: absolute;
-                                top: 9px;
                                 right: 10px;
                             }
                         }
@@ -707,20 +706,12 @@
                 text-align: left;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                padding-right: 20px;
                 span.caret {
                     position: absolute;
-                    right: 12px;
-                    top: 14px;
                 }
             }
             &.btn-group-xs {
                 > button {
-                    span.caret {
-                        top: 9px;
-                    }
-                    padding-left: 12px;
-                    padding-right: 24px;
                     overflow-x: hidden;
                     text-overflow: ellipsis;
                 }
@@ -1562,31 +1553,74 @@ $workflow-step-node-lineheight: 18px;
     padding-top: 10px;
     padding-left: 5px;
     float: right;
-    > div.inline-block {
-        vertical-align: middle;
-        line-height: 24px;
-        height: 34px;
-        @media screen and (max-width: $screen-sm-max){
-            display: block;
-        }
-        &.show-params-checkbox-container {
-            padding: 5px 12px 5px 0;
+    padding-top: 17px;
+
+    // For mobile/smaller widths.
+    button.toggle-open-button {
+        @include button-no-focus-outline;
+    }
+
+    > .inner-panel {
+        float: left;
+        > div.inline-block {
             vertical-align: middle;
-            div.checkbox {
-                margin: 0;
-                input[type="checkbox"]{
-                    margin-top: 6px;
+            line-height: 20px;
+            height: 34px;
+            
+            
+            
+            button#rowspacingtype-select {
+                min-width: 120px;
+            }
+        }
+
+        &:not(.constant-panel) {
+            > div.inline-block {
+
+                &.show-params-checkbox-container {
+                    padding: 8px 12px 6px 0;
+                    vertical-align: middle;
+                    font-size: 0.9rem;
+                    div.checkbox {
+                        margin: 0;
+                        input[type="checkbox"]{
+                            margin-top: 3px;
+                        }
+                    }
                 }
+
+                @media screen and (max-width: $screen-md-max){
+                    display: block;
+                    &.show-params-checkbox-container {
+                        padding-top: 5px;
+                        padding-bottom: 5px;
+                        height: auto;
+                    }
+                }
+            }
+        }
+
+        &.constant-panel {
+            > div.inline-block {
+                display: table-cell;
+                padding-left: 3px;
             }
         }
     }
     
-    @media screen and (min-width: $screen-md-min){
-        padding-top: 17px;
+    @media screen and (min-width: $screen-lg-min){
         
-        > div.inline-block {
-            display: table-cell;
-            padding-left: 3px;
+        > .inner-panel {
+            > div.inline-block {
+                display: table-cell;
+                padding-left: 3px;
+            }
+        }
+    }
+    @media screen and (max-width: $screen-md-max){
+        float: left;
+        > .inner-panel:first-child {
+            padding-right: 10px;
         }
     }
 }
