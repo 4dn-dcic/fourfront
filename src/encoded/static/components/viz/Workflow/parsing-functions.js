@@ -115,6 +115,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      ** Functions **
      ***************/
 
+     /**
+      * @param {StepIOArgument} stepIOArg - Input or output argument of a step.
+      * @param {boolean} [readOnly=true] - @see preventDuplicateNodeID()
+      * @returns {string} Unique ID for node.
+      */
     function ioNodeID(stepIOArg, readOnly = true){
         return preventDuplicateNodeID(
             stepIOArg.id || stepIOArg.name,
@@ -470,9 +475,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
 
             var inputNodes = []; // All input nodes matched to step input will be in here, e.g. to draw edges from to step.
 
-            // Step 1. Associate existing input nodes from prev. steps if same argument/name as for this one.
-            var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode, "input", true);
-            //console.log('NEED TO MATCH for' + fullStepInput.name, inputNodesToMatch);
+            // Step 1a. Associate existing input nodes from prev. steps if same argument/name as for this one.
             var ioNodeIDsMatched = {  };
 
             var currentInputNodesMatched = (
@@ -484,10 +487,15 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     // Compare IO nodes against step input arg sources
                     if (_.find(fullStepInput.source, function(s){
                         
-                        // Match node by source step name === node.outputOf (stepNode); source.step is normally step.name but may be ID as well.
-                        if (s.step && n.argNamesOnSteps[s.step] === s.name && n.outputOf && (s.step === n.outputOf.name)) return true; // Case: existing node is output node of our step.input.source.step
-                        // Match node by current step === node.inputOf (stepNode)
-                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n.inputOf) && _.any(n.inputOf, function(nIO){ return stepNode.name === nIO.name; })) return true; // Case: existing node is already input node of current step(.input.source)
+                        // Match nodes by source step & name, check that they target this step.
+                        if (s.step && n.argNamesOnSteps[s.step] === s.name && Array.isArray(n.meta.target) && _.any(n.meta.target, function(t){ return t.step === step.name; })) return true;
+
+                        // Extra CWL-like check case by existing node target step match
+                        if (Array.isArray(n.meta.target) && _.any(n.meta.target, function(t){
+                            return (t.step === step.name && fullStepInput.name === t.name);
+                        })) return true;
+
+                        /**** EXTRA NON-CWL THINGS ****/
 
                         // Match Groups
                         if (typeof s.grouped_by === 'string' && typeof s[s.grouped_by] === 'string'){
@@ -502,12 +510,6 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                         // Match By File
                         if (Array.isArray(s.for_file) && _.any(s.for_file, checkNodeFileForMatch.bind(checkNodeFileForMatch, n))) return true;
                         else if (s.for_file && !Array.isArray(s.for_file) && checkNodeFileForMatch(n, s.for_file)) return true;
-
-                        // Match Output Nodes that target this step.
-                        if (Array.isArray(n.meta.target) && _.find(n.meta.target, function(t){
-                            if (t.step === step.name && fullStepInput.name === t.name) return true;
-                            return false;
-                        })) return true;
                         
                         return false;
                     })){
@@ -521,15 +523,19 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 })
             );
 
-            //console.log('MATCHED', currentInputNodesMatched);
+            //console.log('MATCHED', currentInputNodesMatched, nodes);
+
+            // Step 1b. Create input nodes we need to add, and extend our matched node with its fake-new-node-counterpart's data.
+            var inputNodesToMatch = expandIONodes(fullStepInput, column, stepNode, "input", true);
+            //console.log('NEED TO FILTER for' + fullStepInput.name, _.pluck(inputNodesToMatch, 'id'));
 
             if (currentInputNodesMatched.length > 0){
                 inputNodesMatched = inputNodesMatched.concat(currentInputNodesMatched);
-                inputNodes = inputNodes.concat(currentInputNodesMatched);
+                inputNodes = inputNodes.concat(currentInputNodesMatched); // Add to inputNodes var to later draw edge for.
 
                 // Extend each existing node `n` that we've matched with data from nodes that would've been newly created otherwise `inNode`.
                 _.forEach(currentInputNodesMatched, function(n){
-                    // Step 1: Grab the new node we created (inputNodesTomatch) but didn't use because matched existing node in `var currentInputNodesMatched`.
+                    // Sub-Step 1: Grab the new node we created (inputNodesTomatch) but didn't use because matched existing node in `var currentInputNodesMatched`.
                     try {
                         //console.log('FIND', n.id, ioNodeIDsMatched[n.id], stepNode);
                         var inNode, inNodes = _.where(inputNodesToMatch, { 'name' : ioNodeIDsMatched[n.id] });
@@ -544,31 +550,32 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                                 return false;
                             });
                         }
-                        if (!inNode) throw new Error("Not found.");
+                        if (!inNode) throw new Error(n.id + " new node version not found");
                     } catch (e){
                         console.warn("Didn't find new node to extend from which was previously matched against node", n, e);
                         return;
                     }
 
-                    // Step 2: Extend the node we did match with any new relevant information from input definition on next step (available from new node we created but are throwing out).
+                    // Sub-Step 2: Extend the node we did match with any new relevant information from input definition on next step (available from new node we created but are throwing out).
                     var combinedMeta = _.extend(n.meta, inNode.meta);
                     _.extend(n, {
                         'inputOf' : _.sortBy( (n.inputOf || []).concat(inNode.inputOf || []), 'id'),
                         'meta' : combinedMeta,
                         'name' : ioNodeName(combinedMeta) || n.name,
                         'argNamesOnSteps' : _.extend(n.argNamesOnSteps, inNode.argNamesOnSteps),
-                        'id' : preventDuplicateNodeID(inNode.id, false),
                         'wasMatchedAsInputOf' : (n.wasMatchedAsInputOf || []).concat(stepNode.name) // Used only for debugging.
                     });
                 });
             }
 
-            // Step 2. For any unmatched input nodes, create them (via adding to 'nodes' list).
+            // Step 2. Filter out nodes from inputNodesToMatch which we have matched already, then for any unmatched input nodes, create them (via adding to high-level output 'nodes' list & cementing their ID).
             if (currentInputNodesMatched.length < inputNodesToMatch.length){
                 var unmatchedInputNodes = _.map(
                     _.filter(inputNodesToMatch, function(n,idx){
+                        
                         if (typeof ioNodeIDsMatched[n.id] !== 'undefined') return false;
-                        // Compare file, if we have them.
+
+                        // Compare new node's file with already-matched files to filter new node out, if have files.
                         if (n.meta && n.meta.run_data && n.meta.run_data.file){
                             var fileToMatch = n.meta.run_data.file;
                             var filesToCheck = _.filter(_.map(currentInputNodesMatched, function(n2){
@@ -593,7 +600,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                 //console.log('NEW NODES CREATED', unmatchedInputNodes, unmatchedInputNodes[0].column, stepNode.column, stepNode.id);
             }
 
-            //console.log('CREATED', inputNodesCreated);
+            //console.log('CREATED', inputNodesCreated, ioNodeIDsMatched);
 
             // Keep references to incoming nodes on our step.
             stepNode.inputNodes = _.sortBy(  inputNodesCreated.concat(inputNodesMatched)  , 'id'  );
