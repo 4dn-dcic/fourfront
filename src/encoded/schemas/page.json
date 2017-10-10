@@ -31,8 +31,8 @@
             "type": "string"
 		},
         "name": {
-            "title": "Page Name",
-            "comment": "Title for the Page",
+            "title": "Path Name",
+            "comment": "Unique route/pathname of this page.",
             "type": "string",
             "uniqueKey": "page:name"
         },
