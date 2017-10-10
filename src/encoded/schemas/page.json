@@ -51,42 +51,42 @@
             "type": "string",
             "default": ""
         },
-		"table-of-contents": {
-			"title": "Table of Contents",
-			"type": "object",
-			"additionalProperties": false,
-			"properties": {
-				"header-depth": {
+        "table-of-contents": {
+            "title": "Table of Contents",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "header-depth": {
                     "title": "Header Depth",
                     "description": "depth of header object",
                     "type": "integer" 
-				},
-				"skip-depth" : {
+                },
+                "skip-depth" : {
                     "title": "Skip Depth",
                     "description": "skip depth",
                     "type": "integer"	
-				},
-				"enabled" : {
+                },
+                "enabled" : {
                     "title": "Enabled",
                     "description": "Enable the table of contents or not",
                     "type": "boolean",
                     "default": false
-				},
-				"list-styles": {
+                },
+                "list-styles": {
                     "title": "List Styles",
                     "description": "Styles used for list",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-				}, 
-				"include-top-link" : {
+                }, 
+                "include-top-link" : {
                     "title": "Include toplink",
                     "description": "Show links on top of page",
                     "type": "boolean",
                     "default": false
-				}
-		    }
+                }
+            }
         },
         "directory": {
             "title": "Directory",
