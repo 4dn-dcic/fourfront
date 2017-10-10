@@ -707,7 +707,7 @@
         "sections" : [
             {
                 "id" : "policy-content",
-                "title" : null,
+                "title" : "",
                 "filename" : "privacy-policy.md"
             }
         ]
