@@ -58,31 +58,31 @@
             "properties": {
                 "header-depth": {
                     "title": "Header Depth",
-                    "description": "depth of header object",
+                    "description": "Maximum depth for table of contents titles, 1-6",
                     "type": "integer" 
                 },
                 "skip-depth" : {
                     "title": "Skip Depth",
-                    "description": "skip depth",
+                    "description": "Skip header depths until this one, 0-6",
                     "type": "integer"	
                 },
                 "enabled" : {
                     "title": "Enabled",
-                    "description": "Enable the table of contents or not",
+                    "description": "Enable the table of contents or not. Defaults to false.",
                     "type": "boolean",
                     "default": false
                 },
                 "list-styles": {
                     "title": "List Styles",
-                    "description": "Styles used for list",
+                    "description": "CSS list styles used for <li> elements.",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 }, 
                 "include-top-link" : {
-                    "title": "Include toplink",
-                    "description": "Show links on top of page",
+                    "title": "Include 'go to top' link",
+                    "description": "Show button/link to take you to top of page. Useful if no 'intro' section. Defaults to false.",
                     "type": "boolean",
                     "default": false
                 }
