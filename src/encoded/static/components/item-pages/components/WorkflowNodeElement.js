@@ -258,7 +258,7 @@ export class WorkflowNodeElement extends React.Component {
             return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
         }
 
-        return <span className="node-name">{ this.icon() }{ this.props.title }</span>;
+        return <span className="node-name">{ this.icon() }{ this.props.title || this.props.titleString }</span>;
     }
     
     render(){

@@ -81,7 +81,8 @@ class WorkflowRunTracingException(Exception):
 def trace_workflows(original_file_set_to_trace, request, options=None):
     '''
     Trace a set of files according to supplied options.
-    TODO: After grouping design: CLEANUP! Rename get_model to get_item, etc. Remove grouping.
+
+    -- TODO: After grouping design: CLEANUP! Rename get_model to get_item, etc. Remove grouping. --
 
     :param original_file_set_to_trace: Must be a list of DICTIONARIES. If have Item instances, grab their model.source['object'] or similar. Each dict should have at minimum:
         - uuid, workflow_run_inputs, workflow_run_outputs
@@ -219,10 +220,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             workflow_run_uuid = get_unique_key_from_at_id(last_workflow_run_output_of)
             if not workflow_run_uuid or uuidCacheTracedHistory.get(workflow_run_uuid):
                 continue
-            workflow_run_model = get_model(workflow_run_uuid)
-            if not workflow_run_model:
+            workflow_run_model_obj = get_model_obj(workflow_run_uuid)
+            if not workflow_run_model_obj:
                 continue
-            workflow_run_model_obj = workflow_run_model.source.get('object', {})
             all_workflow_runs.append( (workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file) )
 
         # Filter WFRs by WF down to most recent WFR - working, but not enabled as no UI for it yet.
@@ -269,7 +269,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             #futures = []
             for step_uuid, in_file_uuid in step_uuids:
                 #futures.append(gevent.spawn(trace_history, [s], depth + 1))
-                trace_history([step_uuid], get_model(in_file_uuid).source.get('object', {}), depth + 1)
+                trace_history([step_uuid], get_model_obj(in_file_uuid), depth + 1)
             #for f in futures:
                 #print('\n\n\nGOT', f.get())
         return sources
@@ -350,20 +350,18 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         workflow_uuid = get_unique_key_from_at_id(workflow_run_model_obj.get('workflow')) #workflow_run.properties.get('workflow')
         workflow_model = None
         if workflow_uuid:
-            workflow_model = get_model(workflow_uuid)
-            if workflow_model and hasattr(workflow_model, 'source'):
-                workflow_model_obj = workflow_model.source.get('object',{})
-                if workflow_model_obj.get('workflow_type'):
-                    step['meta']['analysis_step_types'].append(workflow_model_obj['workflow_type'])
-                    step['meta']['workflow'] = {
-                        '@id'               : workflow_model_obj.get('@id') or workflow_run_model_obj.get('workflow'),
-                        '@type'             : workflow_model_obj.get('@type'),
-                        'display_title'     : workflow_model_obj.get('display_title') or workflow_model_obj.get('title'),
-                        'accession'         : workflow_model_obj.get('accession'),
-                        'steps'             : workflow_model_obj.get('steps'),
-                        'uuid'              : workflow_uuid,
-                        'workflow_type'     : workflow_model_obj.get('workflow_type')
-                    }
+            workflow_model_obj = get_model_obj(workflow_uuid)
+            if workflow_model_obj and workflow_model_obj.get('workflow_type'):
+                step['meta']['analysis_step_types'].append(workflow_model_obj['workflow_type'])
+                step['meta']['workflow'] = {
+                    '@id'               : workflow_model_obj.get('@id') or workflow_run_model_obj.get('workflow'),
+                    '@type'             : workflow_model_obj.get('@type'),
+                    'display_title'     : workflow_model_obj.get('display_title') or workflow_model_obj.get('title'),
+                    'accession'         : workflow_model_obj.get('accession'),
+                    'steps'             : workflow_model_obj.get('steps'),
+                    'uuid'              : workflow_uuid,
+                    'workflow_type'     : workflow_model_obj.get('workflow_type')
+                }
 
 
         # Add Output Files, 1-level deep max (maybe change in future)
@@ -511,6 +509,9 @@ class Workflow(Item):
     item_type = 'workflow'
     schema = workflow_schema
     embedded_list = [
+                'steps.name',
+                'steps.inputs',
+                'steps.outputs',
                 'steps.meta.software_used.name',
                 'steps.meta.software_used.title',
                 'steps.meta.software_used.version',
@@ -551,6 +552,7 @@ class WorkflowRun(Item):
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = [
                 #'workflow.*',
+                'workflow.steps.name',
                 'workflow.steps.meta.software_used.name',
                 'workflow.steps.meta.software_used.title',
                 'workflow.steps.meta.software_used.version',

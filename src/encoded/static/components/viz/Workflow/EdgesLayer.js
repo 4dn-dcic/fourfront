@@ -16,19 +16,7 @@ export default class EdgesLayer extends React.Component {
 
     pathArrows(){
         if (!this.props.pathArrows) return null;
-        return (
-            <defs>
-                <marker
-                    id="pathArrow"
-                    viewBox="0 0 15 15" refX="0" refY="5" 
-                    markerUnits="strokeWidth"
-                    markerWidth="6" markerHeight="5"
-                    orient="auto"
-                >
-                    <path d="M 0 0 L 10 5 L 0 10 Z" className="pathArrow-marker" />
-                </marker>
-            </defs>
-        );
+        return Edge.pathArrowsMarker();
     }
 
     render(){

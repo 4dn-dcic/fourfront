@@ -39,8 +39,12 @@ export function commonGraphPropsFromProps(props){
     return {
         'href'        : props.href,
         'onNodeClick' : onItemPageNodeClick,
-        'detailPane'  : <WorkflowDetailPane schemas={props.schemas} context={props.context} />,
-        'nodeElement' : <WorkflowNodeElement schemas={props.schemas} />,
+        'renderDetailPane' : function(selectedNode, paneProps){
+            return <WorkflowDetailPane {...paneProps} schemas={props.schemas} context={props.context} selectedNode={selectedNode} />;
+        },
+        'renderNodeElement' : function(node, graphProps){
+            return <WorkflowNodeElement {...graphProps} schemas={props.schemas} node={node}/>;
+        },
         'rowSpacingType' : 'wide',
         'nodeClassName' : function(node){
             var file = (

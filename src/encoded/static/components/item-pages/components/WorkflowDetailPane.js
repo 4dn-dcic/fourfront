@@ -9,6 +9,9 @@ import { ExperimentSetTablesLoaded } from './ExperimentSetTables';
 import { SimpleFilesTable } from './SimpleFilesTable';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
+import { WorkflowNodeElement } from './WorkflowNodeElement';
+import Node from './../../viz/Workflow/Node';
+import Edge from './../../viz/Workflow/Edge';
 import { console, object, layout, ajax, fileUtil, expFxn } from './../../util';
 
 
@@ -739,6 +742,85 @@ class StepDetailBody extends React.Component {
 
 }
 
+/**
+ * MAYBE
+ */
+export class WorkflowLegend extends React.Component {
+    render(){
+
+        var columnWidth = 120;
+
+        var stepNode = {
+            'type'  : 'step',
+            'name'  : "A Step Node",
+            'x'     : 200,
+            'y'     : 40,
+            'column': 1,
+            'meta'  : {
+                'name' : 'A Step'
+            }
+        };
+
+        var inputNode = {
+            'type' : 'input',
+            'name' : 'Input Node',
+            'x'     : 20,
+            'y'     : 40,
+            'isGlobal' : true,
+            'column' : 0
+        };
+
+        var outputNode = {
+            'type' : 'output',
+            'name' : 'Output Node',
+            'x'     : 380,
+            'y'     : 40,
+            'isGlobal' : true,
+            'column' : 2
+        };
+
+        var ioEdge1 = {
+            'source' : inputNode,
+            'target' : stepNode
+        };
+
+        var ioEdge2 = {
+            'source' : stepNode,
+            'target' : outputNode
+        };
+
+        return (
+            <div className="workflow-legend-container">
+                <div className="inner">
+                    <Node
+                        key="1"
+                        columnWidth={columnWidth}
+                        node={inputNode}
+                        renderNodeElement={(node, props)=> <WorkflowNodeElement {...props} node={node} titleString="Input" /> }
+                    />
+                    <Node
+                        key="2"
+                        columnWidth={columnWidth}
+                        node={stepNode}
+                        renderNodeElement={(node, props)=> <WorkflowNodeElement {...props} node={node} titleString="Step" /> }
+                    />
+                    <Node
+                        key="3"
+                        columnWidth={columnWidth}
+                        node={outputNode}
+                        renderNodeElement={(node, props)=> <WorkflowNodeElement {...props} node={node} titleString="Output" /> }
+                    />
+                    <svg>
+                        {Edge.pathArrowsMarker()}
+                        <Edge pathArrows columnWidth={columnWidth} edge={ioEdge1} columnSpacing={20} rowSpacing={20} startX={inputNode.x} startY={inputNode.y} endX={stepNode.x} endY={stepNode.y} nodeEdgeLedgeWidths={[5,5]} />
+                        <Edge pathArrows columnWidth={columnWidth} edge={ioEdge2} columnSpacing={20} rowSpacing={20} startX={stepNode.x} startY={stepNode.y} endX={outputNode.x} endY={outputNode.y} nodeEdgeLedgeWidths={[5,5]} />
+                    </svg>
+                </div>
+            </div>
+        );
+    }
+}
+
 
 export class WorkflowDetailPane extends React.Component {
 
@@ -832,6 +914,7 @@ export class WorkflowDetailPane extends React.Component {
     render(){
         var node = this.props.selectedNode;
         console.log('SELECTED NODE', node);
+        //if (!node) return <WorkflowLegend/>;
         if (!node) return (
             <div className="detail-pane" style={{ minHeight : this.props.minHeight }}>
                 <h5 className="text-400 text-center" style={{ paddingTop : 7 }}>

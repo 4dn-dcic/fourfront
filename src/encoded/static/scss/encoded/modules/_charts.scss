@@ -1157,6 +1157,347 @@ $workflow-step-node-lineheight: 18px;
     }
 }
 
+@mixin workflow-node {
+    pointer-events: all;
+    position: absolute;
+    transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out;
+    transform: translate3d(0,0,0);
+    cursor: pointer;
+
+    > .inner {
+
+        .node-visible-element {
+            background-color: #ddd;
+            white-space: nowrap;
+
+            > .node-name {
+                padding-left: 2px;
+                padding-right: 5px;
+                display: inline-block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            i.icon.icon-fw {
+                margin-right: 5px;
+                margin-left: 1px;
+            }
+        }
+
+        .above-node-title ,
+        .below-node-title {
+            pointer-events: none;
+            position: absolute;
+            left : 0px;
+            transform: translate3d(0px,0px,0);
+            transition: opacity .25s ease-out, transform .33s ease-out;
+            opacity: 1;
+            font-size: 75%;
+            line-height: 12px;
+            background: rgba(255,255,255,0.95);
+            
+        }
+
+        .above-node-title {
+            top : -16px;
+            box-shadow: -1px -2px 9px 3px rgba(255,255,255,0.95);
+        }
+
+        .below-node-title {
+            bottom : -16px;
+            transform: translate3d(0px,0px,0);
+            box-shadow: -1px 2px 7px 2px rgba(255,255,255,0.95);
+            .lighter {
+                opacity: 0.66;
+            }
+        }
+    }
+
+    &[data-node-selected="true"],
+    &[data-node-related="true"],
+    &:hover {
+        > .inner {
+            .above-node-title {
+                transform: translate3d(0px,-6px,0);
+            }
+            .below-node-title {
+                transform: translate3d(0px,6px,0);
+                .lighter {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    &.disabled {
+        opacity : 0.33;
+        &.node-type-input,
+        &.node-type-output {
+            &:before {
+                background-color: #ddd !important;
+            }
+        }
+    }
+
+    &.node-type-step {
+        margin-top: - ($workflow-step-node-height / 2);
+        outline: 2px solid transparent;
+        outline-offset: 4px;
+        transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out, outline-color .2s;
+
+        > .inner {
+            
+            .node-visible-element {
+                height : $workflow-step-node-height;
+                line-height: $workflow-step-node-lineheight;
+                padding-top: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
+                padding-bottom: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
+                
+                background-color: #b0c4da;
+                border-radius: 2px;
+                border: 1px solid rgba(0,0,0,0.2);
+                > .node-name {
+                    padding-left: 10px;
+                    padding-right: 4px;
+                }
+            }
+        }
+
+        &:hover{
+            outline-color: #ddd;
+        }
+
+        &[data-node-selected="true"]{
+            outline-color: #000;
+        }
+
+    }
+
+    &.node-type-input,
+    &.node-type-output,
+    &.node-type-input-group,
+    &.node-type-output-group {
+        
+        margin-top: - ($workflow-io-node-height / 2);
+
+        /*
+        &:before, &:after {
+            display: inline-block;
+            content: '';
+            width: 10px;
+            height: $workflow-io-node-height;
+            background: transparent;
+            vertical-align: middle;
+        }
+        &:before {
+            border-right: 10px solid #ddd;
+            border-top: $workflow-io-node-height solid transparent;
+        }
+        &:after {
+            border-left: 10px solid #ddd;
+            border-bottom: $workflow-io-node-height solid transparent;
+        }
+        */
+        &:before {
+            display : block;
+            content : ' ';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            background-color: #e0e0e0;
+            transform: skewX(25deg);
+            z-index: 1;
+            outline: 2px solid transparent;
+            outline-offset: 4px;
+            transition: outline-color .2s, outline-width .2s;
+        }
+        > .inner {
+            
+            .node-visible-element {
+                height : $workflow-io-node-height;
+                line-height: $workflow-io-node-lineheight;
+                padding-top: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
+                padding-bottom: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
+                display: inline-block;
+                vertical-align: middle;
+                position: relative;
+                z-index: 5;
+                background-color: transparent;
+                width: 100%;
+                > .node-name {
+                    padding-left: 7px;
+                    &.mono-text {
+                        transform: translateY(-1px);
+                        transform: translateY(-0.5px);
+                        > i.icon {
+                            transform: translateY(1px);
+                            transform: translateY(0.5px);
+                        }
+                    }
+                }
+            }
+
+            .above-node-title {
+                transform: translate3d(-6px,0px,0);
+            }
+            .below-node-title {
+                transform: translate3d(6px,0px,0);
+            }
+            
+        }
+
+        &[data-node-selected="true"],
+        &[data-node-related="true"],
+        &:hover {
+            > .inner {
+                .above-node-title {
+                    transform: translate3d(-6px,-6px,0);
+                }
+                .below-node-title {
+                    transform: translate3d(6px,5px,0);
+                }
+            }
+        }
+
+        &:hover:not(.disabled){
+            &:before {
+                outline-color: #ddd;
+            }
+        }
+        &[data-node-selected="true"]:not(.disabled){
+            &:before {
+                outline-color: #000;
+            }
+        }
+        &[data-node-related="true"]:not(.disabled):not([data-node-selected="true"]){
+            &:before {
+                outline-color: rgba(0,0,0,0.55);
+                outline-width: 1px;
+                outline-style: dashed;
+            }
+        }
+    }
+
+    &.node-type-output {
+        &[data-node-global="true"] {
+            &:before {
+                background-color: #d5eac3;
+            }
+            .workflow-viewing-basic &:after {
+                content: '';
+                top: 50%;
+                margin-top: -1px;
+                height: 1px;
+                width: 10px;
+                background-color: #555;
+                position: absolute;
+                right: -15px;
+            }
+            .workflow-viewing-basic &[data-node-selected="true"]:after{
+                height : 2px;
+            }
+        }
+        // Node whose page we currently are on.
+        &.current-context{
+            &:before {
+                //background-color: #b0e885;
+                background-color: #ffb3b3;
+                transition: outline-offset .5s;
+            }
+            &:not([data-node-selected="true"]):not(:hover){
+                &:before {
+                    outline-offset: 9px;
+                    outline-color: rgba(0,0,0,0.75);
+                    outline-style: dotted;
+                    outline-width: 1px;
+                }
+            }
+            .node-name {
+                font-weight: 500;
+            }
+        }
+    }
+    &.node-type-input {
+        &[data-node-global="true"] {
+            &:before {
+                background-color: #cdc5f3;
+            }
+            &[data-node-type-detail="Workflow Parameter"] {
+                &:before {
+                    // background-color: #d1cde2;
+                    background-color: #cfdff1;
+                }
+            }
+            @include pre-node-dot;
+            
+        }
+        &.node-item-type-file-reference {
+            &:before {
+                background-color: #e7e3f9;
+            }
+        }
+    }
+    &.node-type-input-group,
+    &.node-type-output-group {
+        margin-top: - (($workflow-io-node-height * 1.8) / 2);
+        > .inner {
+            font-weight: 500;
+            .node-visible-element {
+                height : $workflow-io-node-height * 1.8;
+                padding-top: ($workflow-io-node-height * 1.8 - $workflow-io-node-lineheight) / 2;
+                padding-bottom: ($workflow-io-node-height * 1.8 - $workflow-io-node-lineheight) / 2;
+                padding-left: 7px;
+            }
+        }
+        &:before {
+            background-color: #b0da8b;
+            border-radius: 5px;
+        }
+        @include pre-node-dot;
+        &:after {
+            content: "\f141";
+        }
+    }
+}
+
+@mixin workflow-edge-layer {
+    path.pathArrow-marker {
+        fill: #333;
+        stroke: none;
+    }
+
+    path {
+        pointer-events: all;
+        stroke: #888;
+        stroke: rgba(58,58,58,0.75);
+        fill: none;
+        stroke-width: 1px;
+        stroke-width: 1.5px;
+        transition: stroke-width .3s;
+
+        &:hover {
+            stroke: #000;
+            stroke-width: 2px;
+        }
+        &[data-edge-selected="true"]{
+            stroke-width: 3px;
+            stroke: #000;
+        }
+        &[data-edge-related="true"]:not([data-edge-selected="true"]){
+            stroke-width: 3px;
+            stroke: rgba(0,0,0,0.75);
+        }
+        &.disabled {
+            stroke-width: 1px;
+            //stroke: #bbb;
+            opacity: 0.33;
+        }
+    }
+}
+
 .worfklow-chart-outer-container {
 
     .workflow-chart-inner-container {
@@ -1191,309 +1532,7 @@ $workflow-step-node-lineheight: 18px;
                     position: relative;
                     
                     .node {
-                        pointer-events: all;
-                        position: absolute;
-                        transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out;
-                        transform: translate3d(0,0,0);
-                        cursor: pointer;
-
-                        > .inner {
-
-                            .node-visible-element {
-                                background-color: #ddd;
-                                white-space: nowrap;
-
-                                > .node-name {
-                                    padding-left: 2px;
-                                    padding-right: 5px;
-                                    display: inline-block;
-                                    max-width: 100%;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
-                                }
-
-                                i.icon.icon-fw {
-                                    margin-right: 5px;
-                                    margin-left: 1px;
-                                }
-                            }
-
-                            .above-node-title ,
-                            .below-node-title {
-                                pointer-events: none;
-                                position: absolute;
-                                left : 0px;
-                                transform: translate3d(0px,0px,0);
-                                transition: opacity .25s ease-out, transform .33s ease-out;
-                                opacity: 1;
-                                font-size: 75%;
-                                line-height: 12px;
-                                background: rgba(255,255,255,0.95);
-                                
-                            }
-
-                            .above-node-title {
-                                top : -16px;
-                                box-shadow: -1px -2px 9px 3px rgba(255,255,255,0.95);
-                            }
-
-                            .below-node-title {
-                                bottom : -16px;
-                                transform: translate3d(0px,0px,0);
-                                box-shadow: -1px 2px 7px 2px rgba(255,255,255,0.95);
-                                .lighter {
-                                    opacity: 0.66;
-                                }
-                            }
-                        }
-
-                        &[data-node-selected="true"],
-                        &[data-node-related="true"],
-                        &:hover {
-                            > .inner {
-                                .above-node-title {
-                                    transform: translate3d(0px,-6px,0);
-                                }
-                                .below-node-title {
-                                    transform: translate3d(0px,6px,0);
-                                    .lighter {
-                                        opacity: 1;
-                                    }
-                                }
-                            }
-                        }
-
-                        &.disabled {
-                            opacity : 0.33;
-                            &.node-type-input,
-                            &.node-type-output {
-                                &:before {
-                                    background-color: #ddd !important;
-                                }
-                            }
-                        }
-
-                        &.node-type-step {
-                            margin-top: - ($workflow-step-node-height / 2);
-                            outline: 2px solid transparent;
-                            outline-offset: 4px;
-                            transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s .25s ease-out, outline-color .2s;
-
-                            > .inner {
-                                
-                                .node-visible-element {
-                                    height : $workflow-step-node-height;
-                                    line-height: $workflow-step-node-lineheight;
-                                    padding-top: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
-                                    padding-bottom: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
-                                    
-                                    background-color: #b0c4da;
-                                    border-radius: 2px;
-                                    border: 1px solid rgba(0,0,0,0.2);
-                                    > .node-name {
-                                        padding-left: 10px;
-                                        padding-right: 4px;
-                                    }
-                                }
-                            }
-
-                            &:hover{
-                                outline-color: #ddd;
-                            }
-
-                            &[data-node-selected="true"]{
-                                outline-color: #000;
-                            }
-
-                        }
-
-                        &.node-type-input,
-                        &.node-type-output,
-                        &.node-type-input-group,
-                        &.node-type-output-group {
-                            
-                            margin-top: - ($workflow-io-node-height / 2);
-
-                            /*
-                            &:before, &:after {
-                                display: inline-block;
-                                content: '';
-                                width: 10px;
-                                height: $workflow-io-node-height;
-                                background: transparent;
-                                vertical-align: middle;
-                            }
-                            &:before {
-                                border-right: 10px solid #ddd;
-                                border-top: $workflow-io-node-height solid transparent;
-                            }
-                            &:after {
-                                border-left: 10px solid #ddd;
-                                border-bottom: $workflow-io-node-height solid transparent;
-                            }
-                            */
-                            &:before {
-                                display : block;
-                                content : ' ';
-                                position: absolute;
-                                left: 0;
-                                top: 0;
-                                bottom: 0;
-                                right: 0;
-                                background-color: #e0e0e0;
-                                transform: skewX(25deg);
-                                z-index: 1;
-                                outline: 2px solid transparent;
-                                outline-offset: 4px;
-                                transition: outline-color .2s, outline-width .2s;
-                            }
-                            > .inner {
-                                
-                                .node-visible-element {
-                                    height : $workflow-io-node-height;
-                                    line-height: $workflow-io-node-lineheight;
-                                    padding-top: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
-                                    padding-bottom: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
-                                    display: inline-block;
-                                    vertical-align: middle;
-                                    position: relative;
-                                    z-index: 5;
-                                    background-color: transparent;
-                                    width: 100%;
-                                    > .node-name {
-                                        padding-left: 7px;
-                                        &.mono-text {
-                                            transform: translateY(-1px);
-                                            transform: translateY(-0.5px);
-                                            > i.icon {
-                                                transform: translateY(1px);
-                                                transform: translateY(0.5px);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                .above-node-title {
-                                    transform: translate3d(-6px,0px,0);
-                                }
-                                .below-node-title {
-                                    transform: translate3d(6px,0px,0);
-                                }
-                                
-                            }
-
-                            &[data-node-selected="true"],
-                            &[data-node-related="true"],
-                            &:hover {
-                                > .inner {
-                                    .above-node-title {
-                                        transform: translate3d(-6px,-6px,0);
-                                    }
-                                    .below-node-title {
-                                        transform: translate3d(6px,5px,0);
-                                    }
-                                }
-                            }
-
-                            &:hover:not(.disabled){
-                                &:before {
-                                    outline-color: #ddd;
-                                }
-                            }
-                            &[data-node-selected="true"]:not(.disabled){
-                                &:before {
-                                    outline-color: #000;
-                                }
-                            }
-                            &[data-node-related="true"]:not(.disabled):not([data-node-selected="true"]){
-                                &:before {
-                                    outline-color: rgba(0,0,0,0.55);
-                                    outline-width: 1px;
-                                    outline-style: dashed;
-                                }
-                            }
-                        }
-
-                        &.node-type-output {
-                            &[data-node-global="true"] {
-                                &:before {
-                                    background-color: #d5eac3;
-                                }
-                                .workflow-viewing-basic &:after {
-                                    content: '';
-                                    top: 50%;
-                                    margin-top: -1px;
-                                    height: 1px;
-                                    width: 10px;
-                                    background-color: #555;
-                                    position: absolute;
-                                    right: -15px;
-                                }
-                                .workflow-viewing-basic &[data-node-selected="true"]:after{
-                                    height : 2px;
-                                }
-                            }
-                            // Node whose page we currently are on.
-                            &.current-context{
-                                &:before {
-                                    //background-color: #b0e885;
-                                    background-color: #ffb3b3;
-                                    transition: outline-offset .5s;
-                                }
-                                &:not([data-node-selected="true"]):not(:hover){
-                                    &:before {
-                                        outline-offset: 9px;
-                                        outline-color: rgba(0,0,0,0.75);
-                                        outline-style: dotted;
-                                        outline-width: 1px;
-                                    }
-                                }
-                                .node-name {
-                                    font-weight: 500;
-                                }
-                            }
-                        }
-                        &.node-type-input {
-                            &[data-node-global="true"] {
-                                &:before {
-                                    background-color: #cdc5f3;
-                                }
-                                &[data-node-type-detail="Workflow Parameter"] {
-                                    &:before {
-                                        // background-color: #d1cde2;
-                                        background-color: #cfdff1;
-                                    }
-                                }
-                                @include pre-node-dot;
-                                
-                            }
-                            &.node-item-type-file-reference {
-                                &:before {
-                                    background-color: #e7e3f9;
-                                }
-                            }
-                        }
-                        &.node-type-input-group,
-                        &.node-type-output-group {
-                            margin-top: - (($workflow-io-node-height * 1.8) / 2);
-                            > .inner {
-                                font-weight: 500;
-                                .node-visible-element {
-                                    height : $workflow-io-node-height * 1.8;
-                                    padding-top: ($workflow-io-node-height * 1.8 - $workflow-io-node-lineheight) / 2;
-                                    padding-bottom: ($workflow-io-node-height * 1.8 - $workflow-io-node-lineheight) / 2;
-                                    padding-left: 7px;
-                                }
-                            }
-                            &:before {
-                                background-color: #b0da8b;
-                                border-radius: 5px;
-                            }
-                            @include pre-node-dot;
-                            &:after {
-                                content: "\f141";
-                            }
-                        }
+                        @include workflow-node;
                     }
 
                 }
@@ -1503,40 +1542,7 @@ $workflow-step-node-lineheight: 18px;
                 pointer-events: none;
                 .edges-layer {
                     pointer-events: inherit;
-
-                    path.pathArrow-marker {
-                        fill: #333;
-                        stroke: none;
-                    }
-
-                    path {
-                        pointer-events: all;
-                        stroke: #888;
-                        stroke: rgba(58,58,58,0.75);
-                        fill: none;
-                        stroke-width: 1px;
-                        stroke-width: 1.5px;
-                        transition: stroke-width .3s;
-
-                        &:hover {
-                            stroke: #000;
-                            stroke-width: 2px;
-                        }
-                        &[data-edge-selected="true"]{
-                            stroke-width: 3px;
-                            stroke: #000;
-                        }
-                        &[data-edge-related="true"]:not([data-edge-selected="true"]){
-                            stroke-width: 3px;
-                            stroke: rgba(0,0,0,0.75);
-                        }
-                        &.disabled {
-                            stroke-width: 1px;
-                            //stroke: #bbb;
-                            opacity: 0.33;
-                        }
-                    }
-
+                    @include workflow-edge-layer;
                 }
             }
 
@@ -1544,6 +1550,20 @@ $workflow-step-node-lineheight: 18px;
 
     }
 
+}
+
+.workflow-legend-container {
+    > .inner {
+        position: relative;
+        height: 80px;
+        .node {
+            @include workflow-node;
+        }
+        svg {
+            width: 100%;
+            @include workflow-edge-layer;
+        }
+    }
 }
 
 

@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { console } from './../../util';
+import { requestAnimationFrame } from './../utilities';
 import _ from 'underscore';
 import { Fade } from 'react-bootstrap';
 
@@ -138,7 +139,7 @@ export class DefaultNodeElement extends React.Component {
                 data-html
                 style={this.style()}
             >
-                <span className="node-name">{ this.icon() }{ this.props.title }</span>
+                <span className="node-name">{ this.icon() }{ this.props.title || this.props.titleString }</span>
             </div>
         );
     }
@@ -258,7 +259,6 @@ export default class Node extends React.Component {
             if (nodeXEnd > (containerWidth + scrollLeft)){
                 scrollWrapper.scrollLeft = (nodeXEnd - containerWidth);
             }
-
         }
     }
 
@@ -285,16 +285,16 @@ export default class Node extends React.Component {
             className += ' ' + 'current-context';
         }
 
-        var visibleNode = React.cloneElement(
-            this.props.nodeElement,
-            _.extend(_.omit(this.props, 'children', 'onMouseEnter', 'onMouseLeave', 'onClick', 'className', 'nodeElement'), {
-                'title' : this.props.title(node, true),
-                'titleString' : this.props.title(node, false),
-                'disabled' : disabled,
-                'selected' : selected,
-                'related' : related
-            })
-        );
+        var visibleNodeProps = _.extend(_.omit(this.props, 'children', 'onMouseEnter', 'onMouseLeave', 'onClick', 'className', 'nodeElement'), {
+            'disabled' : disabled,
+            'selected' : selected,
+            'related' : related
+        });
+
+        if (typeof this.props.title === 'function'){
+            visibleNodeProps.title = this.props.title(node, true);
+            visibleNodeProps.titleString = this.props.title(node, false);
+        }
 
         return (
             <Fade in transitionAppear>
@@ -319,7 +319,7 @@ export default class Node extends React.Component {
                         onMouseLeave={this.props.onMouseLeave}
                         onClick={disabled ? null : this.props.onClick}
                     >
-                        { visibleNode }
+                    { this.props.renderNodeElement(node, visibleNodeProps) }
                     </div>
                 </div>
             </Fade>

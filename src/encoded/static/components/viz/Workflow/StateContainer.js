@@ -108,16 +108,25 @@ export default class StateContainer extends React.Component {
         }
     }
 
+    detailPane(){
+        if (typeof this.props.renderDetailPane === 'function'){
+            return this.props.renderDetailPane(this.state.selectedNode, this.props);
+        }
+        return null;
+    }
+
     render(){
+        var detailPane = null;
         return (
             <div className="state-container">
-            {
-                React.Children.map(this.props.children, (child)=>{
-                    return React.cloneElement(child, _.extend(
-                        _.omit(this.props, 'children'), { onNodeClick : this.handleNodeClick }, this.state
-                    ));
-                })
-            }
+                {
+                    React.Children.map(this.props.children, (child)=>{
+                        return React.cloneElement(child, _.extend(
+                            _.omit(this.props, 'children'), { onNodeClick : this.handleNodeClick }, this.state
+                        ));
+                    })
+                }
+                { this.detailPane() }
             </div>
         );
     }
