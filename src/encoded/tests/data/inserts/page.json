@@ -21,6 +21,11 @@
             "enabled":false
         }
     },
+
+
+
+
+
     {
         "name":"help",
         "title":"Introduction to 4DN Metadata",
@@ -50,6 +55,7 @@
             "skip-depth":1
         }
     },
+
     {
         "name":"help/account-creation",
         "title":"Creating an Account",
@@ -175,6 +181,13 @@
             "skip-depth":1
         }
     },
+
+
+
+
+
+
+
     {
         "name":"error/login-failed",
         "title":"Login Failed",
@@ -190,6 +203,13 @@
             }
         ]
     },
+
+
+
+
+
+
+
     {
         "name":"nofic-matrix/2017-05",
         "title":"NOFIC Matrix",
@@ -641,6 +661,11 @@
             }
         ]
     },
+
+
+
+
+
     {
         "name":"planned-submissions",
         "title":"Planned Data Submission"
@@ -670,5 +695,23 @@
                 }
             }
         ]
+    },
+
+
+
+
+    {
+        "name" : "privacy-policy",
+        "title" : "Privacy Policy",
+        "directory":"/src/encoded/static/data",
+        "sections" : [
+            {
+                "id" : "policy-content",
+                "title" : null,
+                "filename" : "privacy-policy.md"
+            }
+        ]
     }
+
+
 ]
