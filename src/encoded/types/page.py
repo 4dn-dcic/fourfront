@@ -13,9 +13,7 @@ from .base import (
     Item
 )
 
-from snovault.resource_views import item_view_page, item_view_object
-from pyramid.view import view_config
-from pyramid.response import Response
+from snovault.resource_views import item_view_page
 
 
 def is_static_page(info, request):
@@ -92,7 +90,7 @@ class Page(Item):
 
         pageMeta = self.properties
 
-        if pageMeta.get('directory', None) is not None:
+        if pageMeta.get('directory'):
             contentFilesLocation += "/../../.."  # get us to root of Git repo.
             contentFilesLocation += pageMeta['directory']
 
@@ -152,7 +150,7 @@ class Page(Item):
                 print('Could not get contents from ' + contentFilesLocation)
 
         else:
-            print("No directory set for page \"" + page + "\" in /static/data/directories.json, checking default (/static/data)")
+            print("No explicit directory set for page with pathname \"" + page + "\", checking default directory location (/static/data/<pathname>)")
             try:
                 # Where the static files be stored by default.
                 contentFilesLocation += "/static/data/"
@@ -161,7 +159,7 @@ class Page(Item):
                            for fn in os.listdir(contentFilesLocation)
                            if os.path.isfile(contentFilesLocation + '/' + fn)}
             except FileNotFoundError as e:
-                print("No files found for static page: \"" + page + "\"")
+                print("No files found for static page: \"" + page + "\". No 'content' property will be returned from this page.")
 
         return content
 

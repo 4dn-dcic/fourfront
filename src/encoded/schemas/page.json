@@ -23,12 +23,12 @@
             "enum" : [
                 "released",
                 "draft",
-				"deleted"
+                "deleted"
             ]
         },
 		"source_uri": {
-				"Title": "URI of source file",
-				"type": "string"
+            "title": "URI of source file",
+            "type": "string"
 		},
         "name": {
             "title": "Page Name",
@@ -57,73 +57,72 @@
 			"additionalProperties": false,
 			"properties": {
 				"header-depth": {
-						"title": "Header Depth",
-						"description": "depth of header object",
-						"type": "integer" 
+                    "title": "Header Depth",
+                    "description": "depth of header object",
+                    "type": "integer" 
 				},
 				"skip-depth" : {
-						"title": "Skip Depth",
-						"description": "skip depth",
-					    "type": "integer"	
+                    "title": "Skip Depth",
+                    "description": "skip depth",
+                    "type": "integer"	
 				},
 				"enabled" : {
-						"title": "Enabled",
-						"description": "Enable the table of contents or not",
-						"type": "boolean",
-						"default": false
+                    "title": "Enabled",
+                    "description": "Enable the table of contents or not",
+                    "type": "boolean",
+                    "default": false
 				},
 				"list-styles": {
-						"title": "List Styles",
-						"description": "Styles used for list",
-						"type": "array",
-						"items": {
-						   "type": "string"
-						}
+                    "title": "List Styles",
+                    "description": "Styles used for list",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
 				}, 
 				"include-top-link" : {
-						"title": "Include toplink",
-						"description": "Show links on top of page",
-						"type": "boolean",
-						"default": false
+                    "title": "Include toplink",
+                    "description": "Show links on top of page",
+                    "type": "boolean",
+                    "default": false
 				}
-		}
-    },
-    "directory": {
+		    }
+        },
+        "directory": {
             "title": "Directory",
             "description": "location of additional files needed to assemble the static page",
-            "type": "string",
-            "default": ""
-    },
-    "sections": {
-        "title": "Sections",
-        "description": "sections used to compose the static page",
-        "type": "array",
-        "items": {
-			"type": "object",
-			"additionalProperties": false,
-			"properties": {
-                "id": {
-                    "title": "section id",
-                    "type": "string"
-                },
-                "options": {
-                    "title": "Options",
-                    "type": "object"
-                },
-                "filename": {
-                    "title": "Filename",
-                    "type": "string"
-                },
-                "title": {
-                    "title": "Section Title",
-                    "type": "string"
-                },
-                "content":{
-                    "title": "content",
-                    "type": "string"
+            "type": "string"
+        },
+        "sections": {
+            "title": "Sections",
+            "description": "sections used to compose the static page",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "id": {
+                        "title": "section id",
+                        "type": "string"
+                    },
+                    "options": {
+                        "title": "Options",
+                        "type": "object"
+                    },
+                    "filename": {
+                        "title": "Filename",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Section Title",
+                        "type": "string"
+                    },
+                    "content":{
+                        "title": "content",
+                        "type": "string"
+                    }
                 }
             }
         }
     }
-  }
 }

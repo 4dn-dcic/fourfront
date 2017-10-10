@@ -11,6 +11,7 @@ from snovault import (
 )
 from snovault.elasticsearch.create_mapping import get_db_es_counts_and_db_uuids
 from .schema_formats import is_accession
+from .types.page import get_local_file_contents
 from pyramid.security import (
     ALL_PERMISSIONS,
     Allow,
