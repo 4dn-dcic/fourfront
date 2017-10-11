@@ -307,8 +307,6 @@ def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, it
         try:
             res = htmltestapp.get(item_id)
         except Exception as e:
-            import pdb
-            pdb.set_trace()
             print(e)
             continue
         assert res.body.startswith(b'<!DOCTYPE html>')
