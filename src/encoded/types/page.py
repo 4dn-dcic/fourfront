@@ -21,8 +21,9 @@ def is_static_page(info, request):
     if '@@' in page_name:
         return False
 
-    pages = request.registry[COLLECTIONS]['page']
-    if len(pages) <= 0:
+    col = request.registry[COLLECTIONS]
+    page_start = page_name.split('/')[0]
+    if page_start != "pages" and page_start in col.keys():
         return False
 
     # TODO: we could cache this to remove extraneous db requests
@@ -34,13 +35,12 @@ def is_static_page(info, request):
         return False
 
 
-
-
 def includeme(config):
     config.add_route(
         'staticpage',
         '/*subpath',
-        custom_predicates=[is_static_page]
+        custom_predicates=[is_static_page],
+        request_method="GET"
     )
     config.add_view(static_page, route_name='staticpage')
 
