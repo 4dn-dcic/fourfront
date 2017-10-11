@@ -93,7 +93,6 @@ class Biosource(Item):
 
 # validator for tissue field
 def validate_biosource_tissue(context, request):
-    # import pdb; pdb.set_trace()
     data = request.json
     if 'tissue' not in data:
         return
@@ -130,7 +129,6 @@ def validate_biosource_tissue(context, request):
 
 # validator for cell_line field
 def validate_biosource_cell_line(context, request):
-    # import pdb; pdb.set_trace()
     data = request.json
     if 'cell_line' not in data:
         return
