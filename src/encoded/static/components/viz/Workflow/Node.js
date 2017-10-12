@@ -297,32 +297,30 @@ export default class Node extends React.Component {
         }
 
         return (
-            <Fade in transitionAppear>
+            <div
+                className={className}
+                data-node-key={node.id || node.name}
+                data-node-type={node.type}
+                data-node-global={node.isGlobal || null}
+                data-node-selected={selected}
+                data-node-related={related}
+                data-node-type-detail={node.format}
+                style={{
+                    'top' : node.y,
+                    'left' : node.x,
+                    'width' : this.props.columnWidth || 100,
+                    'zIndex' : 2 + (node.indexInColumn || 0)
+                }}
+            >
                 <div
-                    className={className}
-                    data-node-key={node.id || node.name}
-                    data-node-type={node.type}
-                    data-node-global={node.isGlobal || null}
-                    data-node-selected={selected}
-                    data-node-related={related}
-                    data-node-type-detail={node.format}
-                    style={{
-                        'top' : node.y,
-                        'left' : node.x,
-                        'width' : this.props.columnWidth || 100,
-                        'zIndex' : 2 + (node.indexInColumn || 0)
-                    }}
+                    className="inner"
+                    onMouseEnter={this.props.onMouseEnter}
+                    onMouseLeave={this.props.onMouseLeave}
+                    onClick={disabled ? null : this.props.onClick}
                 >
-                    <div
-                        className="inner"
-                        onMouseEnter={this.props.onMouseEnter}
-                        onMouseLeave={this.props.onMouseLeave}
-                        onClick={disabled ? null : this.props.onClick}
-                    >
-                    { this.props.renderNodeElement(node, visibleNodeProps) }
-                    </div>
+                { this.props.renderNodeElement(node, visibleNodeProps) }
                 </div>
-            </Fade>
+            </div>
         );
     }
 

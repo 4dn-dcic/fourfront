@@ -5,7 +5,7 @@ import url from 'url';
 import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout } from './../util';
-import { WorkflowNodeElement, TabbedView } from './components';
+import { WorkflowNodeElement, TabbedView, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
@@ -267,11 +267,9 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
-        this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
-        this.onToggleReferenceFiles = this.onToggleReferenceFiles.bind(this);
-        this.onToggleAllRuns = _.throttle(this.onToggleAllRuns.bind(this), 1000);
-        this.onChangeRowSpacingType = this.onChangeRowSpacingType.bind(this);
-        this.onToggleFullScreenView = this.onToggleFullScreenView.bind(this);
+        this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 250);
+        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
+        this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
@@ -286,10 +284,13 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     commonGraphProps(){
 
         var steps = this.props.steps;
+
+        var legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
         
         var graphData = parseAnalysisSteps(this.props.steps);
         if (!this.state.showParameters){
             graphData = filterOutParametersFromGraphData(graphData);
+            delete legendItems['Input Parameter']; // Remove legend items which aren't relevant for this context.
         }
 
         this.anyGroupNodesExist = !this.props.allRuns && _.any(graphData.nodes, function(n){ return n.type === 'input-group' || n.type === 'output-group'; });
@@ -300,12 +301,19 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         }
         if (!this.state.showReferenceFiles){
             graphData = filterOutReferenceFilesFromGraphData(graphData);
+            delete legendItems['Input Reference File'];
+        }
+        if (!this.anyGroupNodesExist || this.props.all_runs){
+            delete legendItems['Group of Similar Files'];
         }
         var fileMap = allFilesForWorkflowRunsMappedByUUID(
             (this.props.context.workflow_run_outputs || []).concat(this.props.context.workflow_run_inputs || [])
         );
         var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
-        return _.extend(commonGraphPropsFromProps(this.props), {
+
+
+
+        return _.extend(commonGraphPropsFromProps(_.extend({ legendItems }, this.props)), {
             'isNodeDisabled' : FileViewGraphSection.isNodeDisabled,
             'nodes' : nodes,
             'edges' : graphData.edges,

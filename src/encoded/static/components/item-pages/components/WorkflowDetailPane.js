@@ -4,14 +4,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Fade } from 'react-bootstrap';
+import ReactTooltip from 'react-tooltip';
 import { ItemDetailList } from './ItemDetailList';
 import { ExperimentSetTablesLoaded } from './ExperimentSetTables';
 import { SimpleFilesTable } from './SimpleFilesTable';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
-import { WorkflowNodeElement } from './WorkflowNodeElement';
-import Node from './../../viz/Workflow/Node';
-import Edge from './../../viz/Workflow/Edge';
 import { console, object, layout, ajax, fileUtil, expFxn } from './../../util';
 
 
@@ -742,79 +740,73 @@ class StepDetailBody extends React.Component {
 
 }
 
-/**
- * MAYBE
- */
-export class WorkflowLegend extends React.Component {
+class LegendItem extends React.Component {
+
     render(){
-
-        var columnWidth = 120;
-
-        var stepNode = {
-            'type'  : 'step',
-            'name'  : "A Step Node",
-            'x'     : 200,
-            'y'     : 40,
-            'column': 1,
-            'meta'  : {
-                'name' : 'A Step'
-            }
-        };
-
-        var inputNode = {
-            'type' : 'input',
-            'name' : 'Input Node',
-            'x'     : 20,
-            'y'     : 40,
-            'isGlobal' : true,
-            'column' : 0
-        };
-
-        var outputNode = {
-            'type' : 'output',
-            'name' : 'Output Node',
-            'x'     : 380,
-            'y'     : 40,
-            'isGlobal' : true,
-            'column' : 2
-        };
-
-        var ioEdge1 = {
-            'source' : inputNode,
-            'target' : stepNode
-        };
-
-        var ioEdge2 = {
-            'source' : stepNode,
-            'target' : outputNode
-        };
-
+        var { title, className, tooltip } = this.props;
         return (
-            <div className="workflow-legend-container">
+            <div className="legend-item">
+                <span className="inline-block" data-tip={tooltip || null} data-place="right" data-html>
+                    <div className={"color-patch " + className}/> { title }
+                </span>
+            </div>
+        );
+    }
+}
+
+class WorkflowLegend extends React.Component {
+
+    static defaultProps = {
+        'items' : {
+            'Input File'                : {
+                className: 'node-type-global-input',
+                tooltip : 'File input into a workflow.'
+            },
+            'Output File'               : {
+                className: 'node-type-global-output',
+                tooltip : 'File generated from a workflow.'
+            },
+            //'Workflow Step'     : { className: 'node-type-step' },
+            'Group of Similar Files'    : {
+                className: 'node-type-global-group',
+                tooltip : 'Grouping of similar files, e.g. those which are generated from different runs of the same <em>workflow</em>.'
+            },
+            'Input Reference File'      : {
+                className: 'node-type-input-file-reference',
+                tooltip : 'Reference file input into a workflow.'
+            },
+            'Input Parameter'           : {
+                className: 'node-type-parameter',
+                tooltip : 'Parameter which input into a workflow.'
+            },
+            'Intermediate File'         : {
+                className:'node-type-io-default',
+                tooltip : 'File that was generated in the Workflow but perhaps not saved or important.'
+            },
+            //'Unsaved File'              : { className: 'node-disabled' },
+            'Current Context'           : {
+                className: 'node-type-global-context',
+                tooltip : 'Files which are contextual to the Item you\'re viewing, e.g. terminal processed files from an Experiment Set.'
+            }
+        },
+        'title' : 'Legend'
+    };
+
+    componentDidMount(){
+        ReactTooltip.rebuild();
+    }
+
+    render(){
+        return (
+            <div className="workflow-legend-container overflow-hidden mt-1">
                 <div className="inner">
-                    <Node
-                        key="1"
-                        columnWidth={columnWidth}
-                        node={inputNode}
-                        renderNodeElement={(node, props)=> <WorkflowNodeElement {...props} node={node} titleString="Input" /> }
-                    />
-                    <Node
-                        key="2"
-                        columnWidth={columnWidth}
-                        node={stepNode}
-                        renderNodeElement={(node, props)=> <WorkflowNodeElement {...props} node={node} titleString="Step" /> }
-                    />
-                    <Node
-                        key="3"
-                        columnWidth={columnWidth}
-                        node={outputNode}
-                        renderNodeElement={(node, props)=> <WorkflowNodeElement {...props} node={node} titleString="Output" /> }
-                    />
-                    <svg>
-                        {Edge.pathArrowsMarker()}
-                        <Edge pathArrows columnWidth={columnWidth} edge={ioEdge1} columnSpacing={20} rowSpacing={20} startX={inputNode.x} startY={inputNode.y} endX={stepNode.x} endY={stepNode.y} nodeEdgeLedgeWidths={[5,5]} />
-                        <Edge pathArrows columnWidth={columnWidth} edge={ioEdge2} columnSpacing={20} rowSpacing={20} startX={stepNode.x} startY={stepNode.y} endX={outputNode.x} endY={outputNode.y} nodeEdgeLedgeWidths={[5,5]} />
-                    </svg>
+                    { this.props.title?
+                        <div>
+                            <h4 className="text-300">{ this.props.title }</h4>
+                            <hr className="mb-1 mt-1"/>
+                        </div>
+                    : null}
+                    { _.map(_.pairs(this.props.items), (p)=> <LegendItem {...p[1]} title={p[0]} key={p[0]} /> ) }
                 </div>
             </div>
         );
@@ -823,6 +815,8 @@ export class WorkflowLegend extends React.Component {
 
 
 export class WorkflowDetailPane extends React.Component {
+
+    static Legend = WorkflowLegend
 
     static propTypes = {
         'selectedNode' : PropTypes.oneOfType([ PropTypes.object, PropTypes.oneOf([null]) ])
@@ -914,8 +908,8 @@ export class WorkflowDetailPane extends React.Component {
     render(){
         var node = this.props.selectedNode;
         console.log('SELECTED NODE', node);
-        //if (!node) return <WorkflowLegend/>;
-        if (!node) return (
+        if (!node && this.props.legendItems) return <WorkflowLegend items={this.props.legendItems} />;
+        else if (!node) return (
             <div className="detail-pane" style={{ minHeight : this.props.minHeight }}>
                 <h5 className="text-400 text-center" style={{ paddingTop : 7 }}>
                     <small>Select a node above for more detail.</small>

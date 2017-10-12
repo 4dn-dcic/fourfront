@@ -163,7 +163,21 @@ class GraphSection extends WorkflowGraphSection {
 
     commonGraphProps(){
         var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
-        return _.extend(commonGraphPropsFromProps(this.props), {
+
+        var legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
+        // Remove Items which aren't relevant for this context.
+        delete legendItems['Current Context'];
+        delete legendItems['Group of Similar Files'];
+        if (!this.state.showParameters){
+            delete legendItems['Input Parameter'];
+        }
+        if (this.state.showChart === 'basic'){
+            delete legendItems['Intermediate File'];
+        }
+
+        return _.extend(commonGraphPropsFromProps(
+            _.extend({ legendItems }, this.props)
+        ), {
             'isNodeDisabled' : GraphSection.isNodeDisabled,
             'nodes' : mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, allFilesForWorkflowRunMappedByUUID(this.props.context) ),
             'edges' : graphData.edges,

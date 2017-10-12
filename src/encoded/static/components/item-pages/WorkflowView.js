@@ -40,7 +40,7 @@ export function commonGraphPropsFromProps(props){
         'href'        : props.href,
         'onNodeClick' : onItemPageNodeClick,
         'renderDetailPane' : function(selectedNode, paneProps){
-            return <WorkflowDetailPane {...paneProps} schemas={props.schemas} context={props.context} selectedNode={selectedNode} />;
+            return <WorkflowDetailPane {...paneProps} schemas={props.schemas} context={props.context} selectedNode={selectedNode} legendItems={props.legendItems} />;
         },
         'renderNodeElement' : function(node, graphProps){
             return <WorkflowNodeElement {...graphProps} schemas={props.schemas} node={node}/>;
@@ -345,10 +345,10 @@ export class WorkflowGraphSection extends React.Component {
         this.detailGraph = this.detailGraph.bind(this);
         this.body = this.body.bind(this);
         this.parseAnalysisSteps = this.parseAnalysisSteps.bind(this);
-        this.onToggleShowParameters = _.throttle(this.onToggleShowParameters.bind(this), 500, { trailing : false });
-        this.onChangeRowSpacingType = _.throttle(this.onChangeRowSpacingType.bind(this), 500, { trailing : false });
-        this.onChangeShowChartType = _.throttle(this.onChangeShowChartType.bind(this), 500, { trailing : false });
-        this.onToggleFullScreenView = _.throttle(this.onToggleFullScreenView.bind(this), 500, { trailing : false });
+        this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 250);
+        this.onChangeRowSpacingType     = _.throttle(this.onChangeRowSpacingType.bind(this), 250, { trailing : false });
+        this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 250, { trailing : false });
+        this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 250, { trailing : false });
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
@@ -377,7 +377,16 @@ export class WorkflowGraphSection extends React.Component {
 
     commonGraphProps(){
         var graphData = this.parseAnalysisSteps();
-        return _.extend(commonGraphPropsFromProps(this.props), this.parseAnalysisSteps(), { 'rowSpacingType' : this.state.rowSpacingType });
+        
+        // Filter out legend items which aren't relevant for this context.
+        var keepItems = ['Input File','Output File'];
+        if (this.state.showParameters){
+            keepItems.push('Input Parameter');
+        }
+        keepItems.push('Intermediate File');
+        var legendItems = _.pick.apply(_, [WorkflowDetailPane.Legend.defaultProps.items].concat(keepItems));
+
+        return _.extend(commonGraphPropsFromProps(_.extend({ legendItems },this.props)), this.parseAnalysisSteps(), { 'rowSpacingType' : this.state.rowSpacingType });
     }
 
     basicGraph(){

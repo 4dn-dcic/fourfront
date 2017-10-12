@@ -634,7 +634,7 @@
             right: 0px;
             font-size: 1.35rem;
             cursor: pointer;
-            user-select: none;
+            @include user-select(none);
             .text {
                 font-size: 0.85rem;
                 line-height: 0.9rem;
@@ -1083,18 +1083,6 @@
         margin-top: 0px;
     }
 
-    .color-patch {
-        display: inline-block;
-        height: 12px;
-        width: 12px;
-        margin-right: 6px;
-        position: relative;
-        top: 1px;
-        background-color: transparent; // Default
-        transition: opacity .25s, background-color .5s ease-out;
-        //border: 1px solid #000;
-    }
-
     .highlight .color-patch {
         opacity : 0.125;
         &.highlight {
@@ -1118,6 +1106,18 @@
         }
 
     }
+}
+
+.color-patch {
+    display: inline-block;
+    height: 12px;
+    width: 12px;
+    margin-right: 6px;
+    position: relative;
+    top: 1px;
+    background-color: transparent; // Default
+    transition: opacity .25s, background-color .5s ease-out;
+    //border: 1px solid #000;
 }
 
 
@@ -1157,6 +1157,17 @@ $workflow-step-node-lineheight: 18px;
     }
 }
 
+$workflow-node-color-default: #ddd;
+$workflow-node-color-disabled: #ddd;
+$workflow-node-color-type-step: #b0c4da;
+$workflow-node-color-type-io-default: #e0e0e0;
+$workflow-node-color-type-global-input: #cdc5f3;
+$workflow-node-color-type-global-group: #b0da8b;
+$workflow-node-color-type-global-output: #d5eac3;
+$workflow-node-color-type-parameter: #cfdff1;
+$workflow-node-color-type-input-file-reference: #e7e3f9;
+$workflow-node-color-type-global-context: #ffb3b3;
+
 @mixin workflow-node {
     pointer-events: all;
     position: absolute;
@@ -1167,7 +1178,7 @@ $workflow-step-node-lineheight: 18px;
     > .inner {
 
         .node-visible-element {
-            background-color: #ddd;
+            background-color: $workflow-node-color-default;
             white-space: nowrap;
 
             > .node-name {
@@ -1235,7 +1246,7 @@ $workflow-step-node-lineheight: 18px;
         &.node-type-input,
         &.node-type-output {
             &:before {
-                background-color: #ddd !important;
+                background-color: $workflow-node-color-disabled !important;
             }
         }
     }
@@ -1254,7 +1265,7 @@ $workflow-step-node-lineheight: 18px;
                 padding-top: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
                 padding-bottom: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
                 
-                background-color: #b0c4da;
+                background-color: $workflow-node-color-type-step;
                 border-radius: 2px;
                 border: 1px solid rgba(0,0,0,0.2);
                 > .node-name {
@@ -1307,7 +1318,7 @@ $workflow-step-node-lineheight: 18px;
             top: 0;
             bottom: 0;
             right: 0;
-            background-color: #e0e0e0;
+            background-color: $workflow-node-color-type-io-default;
             transform: skewX(25deg);
             z-index: 1;
             outline: 2px solid transparent;
@@ -1384,7 +1395,7 @@ $workflow-step-node-lineheight: 18px;
     &.node-type-output {
         &[data-node-global="true"] {
             &:before {
-                background-color: #d5eac3;
+                background-color: $workflow-node-color-type-global-output;
             }
             .workflow-viewing-basic &:after {
                 content: '';
@@ -1404,7 +1415,7 @@ $workflow-step-node-lineheight: 18px;
         &.current-context{
             &:before {
                 //background-color: #b0e885;
-                background-color: #ffb3b3;
+                background-color: $workflow-node-color-type-global-context;
                 transition: outline-offset .5s;
             }
             &:not([data-node-selected="true"]):not(:hover){
@@ -1423,12 +1434,12 @@ $workflow-step-node-lineheight: 18px;
     &.node-type-input {
         &[data-node-global="true"] {
             &:before {
-                background-color: #cdc5f3;
+                background-color: $workflow-node-color-type-global-input;
             }
             &[data-node-type-detail="Workflow Parameter"] {
                 &:before {
                     // background-color: #d1cde2;
-                    background-color: #cfdff1;
+                    background-color: $workflow-node-color-type-parameter;
                 }
             }
             @include pre-node-dot;
@@ -1436,7 +1447,7 @@ $workflow-step-node-lineheight: 18px;
         }
         &.node-item-type-file-reference {
             &:before {
-                background-color: #e7e3f9;
+                background-color: $workflow-node-color-type-input-file-reference;
             }
         }
     }
@@ -1453,7 +1464,7 @@ $workflow-step-node-lineheight: 18px;
             }
         }
         &:before {
-            background-color: #b0da8b;
+            background-color: $workflow-node-color-type-global-group;
             border-radius: 5px;
         }
         @include pre-node-dot;
@@ -1476,7 +1487,7 @@ $workflow-step-node-lineheight: 18px;
         fill: none;
         stroke-width: 1px;
         stroke-width: 1.5px;
-        transition: stroke-width .3s;
+        transition: stroke-width .3s, opacity .5s .25s ease-out;
 
         &:hover {
             stroke: #000;
@@ -1555,7 +1566,34 @@ $workflow-step-node-lineheight: 18px;
 .workflow-legend-container {
     > .inner {
         position: relative;
-        height: 80px;
+        min-height: 80px;
+
+        .node-default { background-color: $workflow-node-color-default; }
+        
+        .node-type-step { background-color: $workflow-node-color-type-step; }
+        .node-type-io-default { background-color: $workflow-node-color-type-io-default; }
+        .node-type-global-input { background-color: $workflow-node-color-type-global-input; }
+        .node-type-global-group { background-color: $workflow-node-color-type-global-group; }
+        .node-type-global-output { background-color: $workflow-node-color-type-global-output }
+        .node-type-parameter { background-color: $workflow-node-color-type-parameter; }
+        .node-type-input-file-reference { background-color: $workflow-node-color-type-input-file-reference; }
+        .node-type-global-context { background-color: $workflow-node-color-type-global-context; }
+        .node-disabled { background-color: $workflow-node-color-disabled; opacity: 0.5; }
+        
+        /*
+        @media screen and (min-width: $screen-lg-min){
+            display: table;
+            width: 100%;
+            > .legend-item {
+                display: table-cell;
+                
+                &:not(:first-child), &:not(:nth-child(2)) {
+                    padding-left: 10px;
+                }
+            }
+        }
+        */
+
         .node {
             @include workflow-node;
         }
@@ -1601,6 +1639,7 @@ $workflow-step-node-lineheight: 18px;
                     padding: 8px 12px 6px 0;
                     vertical-align: middle;
                     font-size: 0.9rem;
+                    @include user-select(none);
                     div.checkbox {
                         margin: 0;
                         input[type="checkbox"]{
