@@ -119,17 +119,22 @@ def get_item_if_you_can(request, value, itype=None):
         svalue = str(value)
         if not svalue.startswith('/'):
             svalue = '/' + svalue
-        item = request.embed(svalue, '@@object')
         try:
-            item.get('uuid')
-            return item
-        except AttributeError:
-            if itype is not None:
-                svalue = '/' + itype + svalue + '/?datastore=database'
-                try:
-                    return request.embed(svalue, '@@object')
-                except:
-                    return value
+            item = request.embed(svalue, '@@object')
+        except:
+            pass
+        else:
+            try:
+                item.get('uuid')
+                return item
+            except AttributeError:
+                pass
+        if itype is not None:
+            svalue = '/' + itype + svalue + '/?datastore=database'
+            try:
+                return request.embed(svalue, '@@object')
+            except:
+                return value
 
 
 class AbstractCollection(snovault.AbstractCollection):
