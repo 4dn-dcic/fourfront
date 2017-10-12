@@ -449,7 +449,7 @@ def test_submitter_cannot_view_ownitem(ind_human_item, submitter_testapp, wrangl
 
 
 def test_submitter_can_view_ownitem(ind_human_item, submitter_testapp, wrangler_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress']
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -473,7 +473,7 @@ def test_submitter_cannot_patch_statuses(ind_human_item, submitter_testapp, wran
 
 
 def test_submitter_can_patch_statuses(ind_human_item, submitter_testapp, wrangler_testapp):
-    statuses = ['in review by lab', 'submission in progress']
+    statuses = ['in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -513,7 +513,7 @@ def test_labmember_cannot_view_submitter_item(ind_human_item, submitter_testapp,
 
 
 def test_labmember_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress']
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -536,7 +536,7 @@ def test_labmember_cannot_view_submitter_item_replaced(ind_human_item, submitter
 
 # Submitter created item and lab member wants to patch
 def test_labmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress']
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -555,7 +555,7 @@ def test_labmember_cannot_patch_submitter_file(file_item, submitter_testapp, wra
 # person with shared award tests
 # award member would need to have viewing_group set to have the ...project ones work
 def test_awardmember_cannot_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['deleted', 'released to project', 'submission in progress']
+    statuses = ['deleted', 'released to project', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -578,7 +578,7 @@ def test_awardmember_cannot_view_submitter_item_replaced(ind_human_item, submitt
 
 # Submitter created item and lab member wants to patch
 def test_awardmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress']
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -604,7 +604,7 @@ def test_viewing_group_member_cannot_view_submitter_file(file_item, submitter_te
 
 
 def test_viewing_group_member_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'submission in progress']
+    statuses = ['current', 'released', 'revoked', 'released to project', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -627,7 +627,7 @@ def test_viewing_group_member_cannot_view_submitter_item_replaced(ind_human_item
 
 # Submitter created item and viewing group member wants to patch
 def test_viewing_group_member_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress']
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -659,7 +659,7 @@ def test_non_member_can_view_submitter_file(file_item, submitter_testapp, wrangl
 
 
 def test_non_member_cannot_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, remc_member_testapp):
-    statuses = ['released to project', 'submission in progress', 'in review by lab', 'deleted']
+    statuses = ['released to project', 'submission in progress', 'in review by lab', 'deleted', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
