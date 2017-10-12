@@ -89,13 +89,16 @@ export class HealthView extends React.Component {
 
 content_views.register(HealthView, 'Health');
 
+
 class AdminPanel extends React.Component {
 
     constructor(props){
         super(props);
         this.loadFoursight = _.throttle(this.loadFoursight, 500);
         this.state = {
-            'foursight_data': null
+            'foursight_checks': null,
+            'foursight_run_resp': null,
+            'working': false
         };
     }
 
@@ -105,12 +108,26 @@ class AdminPanel extends React.Component {
 
     loadFoursight = () => {
         // Fetch foursight checks
+        this.setState({'working': true});
         var url = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/api/latest/webprod/all';
         var callbackFxn = function(payload) {
-            console.log('--Foursight-->', payload);
-            this.setState({'foursight_data': payload});
+            console.log('--Foursight checks found-->', payload);
+            this.setState({'foursight_checks': payload, 'working': false});
         }.bind(this);
-        ajax.load(url, callbackFxn);
+        ajax.load(url, callbackFxn, 'GET', this.fallbackForAjax);
+    }
+
+    runFoursight = () => {
+        // Fetch foursight checks
+        this.setState({'working': true});
+        var url = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/api/run/webprod/all';
+        var callbackFxn = function(payload) {
+            console.log('--Foursight checks run-->', payload);
+            // automatically refresh after run
+            this.setState({'foursight_run_resp': payload});
+            this.loadFoursight();
+        }.bind(this);
+        ajax.load(url, callbackFxn, 'GET', this.fallbackForAjax);
     }
 
     onClickRunIndexing(){
@@ -119,9 +136,17 @@ class AdminPanel extends React.Component {
         }
     }
 
+    fallbackForAjax = () => {
+        this.setState({
+            'foursight_checks': null,
+            'foursight_run_resp': null,
+            'working': false
+        });
+    }
+
     buildCheckEntry = (check) => {
         return(
-            <FoursightCheck data={check}/>
+            <FoursightCheck data={check} key={check.name}/>
         );
     }
 
@@ -131,12 +156,15 @@ class AdminPanel extends React.Component {
         return (
             <div className="admin-panel">
                 <h3 className="text-300 mt-3">Foursight</h3>
-                <Button onClick={this.loadFoursight}>Refresh</Button>
+                <div>
+                    <Button style={{'marginRight': '10px'}} onClick={this.loadFoursight} disabled={this.state.working}>Refresh</Button>
+                    <Button onClick={this.runFoursight} disabled={this.state.working}>Rerun</Button>
+                </div>
                 <hr className="mt-05 mb-1"/>
                 {/*<Button onClick={this.onClickRunIndexing}>Index Things</Button>*/}
                 {
-                    this.state.foursight_data !== null ?
-                    this.state.foursight_data.checks.map((check) =>
+                    this.state.foursight_checks !== null ?
+                    this.state.foursight_checks.checks.map((check) =>
                     this.buildCheckEntry(check))
                     :
                     <i className="icon icon-spin icon-circle-o-notch"></i>
@@ -145,6 +173,7 @@ class AdminPanel extends React.Component {
         );
     }
 }
+
 
 class FoursightCheck extends React.Component {
 
