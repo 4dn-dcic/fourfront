@@ -23,8 +23,6 @@ describe('Testing Workflow Graph', function() {
         context = require('./../testdata/workflow_run/awsem-partc').default;
         schemas = require('../testdata/schemas');
 
-        console.log(context.steps);
-
         // Setup
         Wrapper = React.createClass({
             render: function() {

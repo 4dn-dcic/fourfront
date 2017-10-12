@@ -202,7 +202,7 @@ export default class Edge extends React.Component {
             <defs>
                 <marker
                     id="pathArrow"
-                    viewBox="0 0 15 15" refX="0" refY="5" 
+                    viewBox="0 0 15 15" refX="0" refY="5"
                     markerUnits="strokeWidth"
                     markerWidth="6" markerHeight="5"
                     orient="auto"

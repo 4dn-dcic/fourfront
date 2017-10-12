@@ -235,7 +235,7 @@ export class WorkflowGraphSectionControls extends React.Component {
         return null;
     }
 
-    showParameters(){
+    parametersCheckbox(){
         if (typeof this.props.showParameters !== 'boolean' || typeof this.props.onToggleShowParameters !== 'function'){
             return null;
         }
@@ -278,7 +278,7 @@ export class WorkflowGraphSectionControls extends React.Component {
     }
 
     render(){
-        return this.wrapper(this.showParameters(), this.chartTypeDropdown(), this.rowSpacingTypeDropdown());
+        return this.wrapper(this.parametersCheckbox(), this.chartTypeDropdown(), this.rowSpacingTypeDropdown());
     }
 }
 
@@ -384,7 +384,7 @@ export class WorkflowGraphSection extends React.Component {
             keepItems.push('Input Parameter');
         }
         keepItems.push('Intermediate File');
-        var legendItems = _.pick.apply(_, [WorkflowDetailPane.Legend.defaultProps.items].concat(keepItems));
+        var legendItems = _.pick(...[WorkflowDetailPane.Legend.defaultProps.items].concat(keepItems));
 
         return _.extend(commonGraphPropsFromProps(_.extend({ legendItems },this.props)), this.parseAnalysisSteps(), { 'rowSpacingType' : this.state.rowSpacingType });
     }

@@ -75,7 +75,7 @@ import { console } from './../../util';
  */
 
 
- /**
+/**
  * Type definition for an Edge between nodes.
  * 
  * @typedef {Object} Edge
@@ -274,7 +274,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             (!stepIOArgument.run_data.file && !stepIOArgument.run_data.value) ||
             (stepIOArgument.run_data.file && (!Array.isArray(stepIOArgument.run_data.file) || stepIOArgument.run_data.file.length === 0)) ||
             (stepIOArgument.run_data.value && (!Array.isArray(stepIOArgument.run_data.value) || stepIOArgument.run_data.value.length === 0))
-            ) { // Not valid WorkflowRun
+        ){ // Not valid WorkflowRun
             return [generateIONode(stepIOArgument, column, stepNode, nodeType, readOnly)];
         }
 
