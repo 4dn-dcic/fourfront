@@ -533,8 +533,10 @@
 }
 
 .tab-section-title-horiz-divider {
+    /* Use classes 'mb-0', 'mb-1', etc. to set margins */ 
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 0;
+    border-top-color: #ccc;
 }
 
 .rc-tabs-top {

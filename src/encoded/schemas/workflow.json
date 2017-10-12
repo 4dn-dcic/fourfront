@@ -20,7 +20,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "accession": {
             "accessionType": "WF"
@@ -189,69 +189,116 @@
                         "title": "Description",
                         "description": "Argument Description",
                         "type": "string"
+                    }
+                }
+            }
+        },
+
+        "steps" : {
+            "title": "Workflow Steps",
+            "type": "array",
+            "items": {
+                "title": "Step",
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                    "name" : {
+                        "title" : "Step Name",
+                        "description" : "Unique name (or other identifier) of step within this Workflow.",
+                        "type" : "string"
                     },
-                    "argument_mapping": {
-                        "title": "Mappings",
-                        "internal_comment": "same workflow argument can be passed to multiple steps",
-                        "description": "Argument mapping between workflow and steps.",
-                        "type": "array",
-                        "items": {
-                            "title" : "Mapping",
-                            "type": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                                "workflow_step": {
-                                    "title": "Workflow Step",
-                                    "description": "Step of the workflow which accepts or outputs the file.",
-                                    "type": "string",
-                                    "internal_comment": "the same analysis step may appear multiple times"
+                    "inputs" : {
+                        "title" : "Step Inputs",
+                        "type" : "array",
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "name" : {
+                                    "title" : "Input Name",
+                                    "type" : "string"
                                 },
-                                "step_argument_name": {
-                                    "title": "Step's Arg. Name",
-                                    "description": "Name of the argument of the step that corresponds to the workflow argument.",
-                                    "type": "string"
+                                "meta" : {
+                                    "type" : "object",
+                                    "title" : "Additional metadata for input argument",
+                                    "description" : "Additional info that might be relavent to the input argument itself, such as argument_cardinality."
                                 },
-                                "step_argument_type": {
-                                    "title": "Step's Arg. Type",
-                                    "description": "Type of the argument of the step.",
-                                    "type": "string",
-                                    "enum": [
-                                        "Input file",
-                                        "Output file",
-                                        "parameter",
-                                        "Input file or parameter",
-                                        "Output file or parameter"
-                                    ]
+                                "source" : {
+                                    "title" : "Source Step",
+                                    "description" : "Where this input file came from.",
+                                    "type" : "array",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "name" : { "type" : "string" },
+                                            "type" : { "type" : "string" },
+                                            "step" : { "type" : "string" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "outputs" : {
+                        "title" : "Step Outputs",
+                        "type" : "array",
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "name" : {
+                                    "title" : "Output Name",
+                                    "type" : "string"
+                                },
+                                "meta" : {
+                                    "type" : "object",
+                                    "title" : "Additional metadata for output argument",
+                                    "description" : "Additional info that might be relavent to the output argument itself, such as argument_cardinality."
+                                },
+                                "target" : {
+                                    "title" : "Target Step",
+                                    "description" : "Where this output file should go next.",
+                                    "type" : "array",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "name" : { "type" : "string" },
+                                            "type" : { "type" : "string" },
+                                            "step" : { "type" : "string" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "meta" : {
+                        "type" : "object",
+                        "title" : "Step Metadata",
+                        "description" : "Various properties which might be a subset of the Item represented by this step, e.g. uuid, @type, workflow, etc.",
+                        "additionalProperties" : true,
+                        "properties" : {
+                            "software_used": {
+                                "title": "Software Used",
+                                "description": "Reference to Software Used",
+                                "type": "string",
+                                "linkTo" : "Software"
+                            },
+                            "@id" : {
+                                "title" : "Unique identifier of Item in database represented by this step node. If present, will be loaded in via AJAX upon node click.",
+                                "type" : "string"
+                            },
+                            "analysis_step_types" : {
+                                "title" : "Step Purposes",
+                                "description": "List of step purposes which may be shown above the Node in Workflow graphs.",
+                                "type" : "array",
+                                "items" : {
+                                    "type" : "string"
                                 }
                             }
                         }
                     }
                 }
             }
-        },
-        "workflow_steps": {
-            "title": "Workflow Steps",
-            "description": "The analysis steps that comprise the workflow with info on who are their parents.",
-            "type": "array",
-            "items": {
-                "description": "A step in the workflow and whose its parent are.",
-                "title": "Step Info",
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "step": {
-                        "title": "Step",
-                        "description": "A step in the workflow.",
-                        "type": "string",
-                        "linkTo": "AnalysisStep"
-                    },
-                    "step_name": {
-                        "title": "Workflow Step Name",
-                        "description": "Name of step within this workflow. Potentially overrides step's own internal name, if necessary.",
-                        "type": "string"
-                    }
-                }
-            }
         }
+
+
     }
 }

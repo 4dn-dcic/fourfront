@@ -66,11 +66,7 @@ class User(Item):
 
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
-    # Avoid access_keys reverse link so editing access keys does not reindex content.
     embedded_list = ['lab.awards.project']
-    rev = {
-        'access_keys': ('AccessKey', 'user')
-    }
 
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
@@ -106,12 +102,15 @@ class User(Item):
     }, category='page')
     def access_keys(self, request):
         if not request.has_permission('view_details'):
-            return
-        atids = self.rev_link_atids(request, "access_keys")
-        acc_keys = [request.embed('/', atid, '@@object')
-                for atid in paths_filtered_by_status(request, atids)]
-        if acc_keys:
-            return [key for key in acc_keys if key['status'] not in ('deleted', 'replaced')]
+            return []
+        key_coll = self.registry['collections']['AccessKey']
+        # need to handle both esstorage and db storage results
+        uuids = [str(uuid) for uuid in key_coll]
+        acc_keys = [request.embed('/', uuid, '@@object')
+                for uuid in paths_filtered_by_status(request, uuids)]
+        my_keys = [acc_key for acc_key in acc_keys if acc_key['user'] == request.path]
+        if my_keys:
+            return [key for key in my_keys if key['status'] not in ('deleted', 'replaced')]
         else:
             return []
 

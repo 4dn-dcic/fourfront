@@ -100,9 +100,91 @@ export default class Graph extends React.Component {
             return false;
         },
         'nodeClassName' : function(node){ return ''; },
+        'nodesPreSortFxn' : function(nodes){
+            // For any 'global input files', put them in first column (index 0).
+            // MODIFIES IN-PLACE! Because it's a fine & performant side-effect if column assignment changes in-place. We may change this later.
+            _.forEach(nodes, function(node){
+                if (node.type === 'input' && node.format === 'Workflow Input File' && !node.outputOf && node.column !== 0){
+                    node.column = 0;
+                }
+            });
+            return nodes;
+        },
         'nodesInColumnSortFxn' : function(node1, node2){
+
+            function isNodeFileReference(n){
+                return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
+            }
+
+            function compareNodeInputOf(n1, n2){
+                var n1InputOf = n1.type === 'step' ? n1.outputNodes : n1.inputOf;
+                var n2InputOf = n2.type === 'step' ? n2.outputNodes : n2.inputOf;
+                if (Array.isArray(n1InputOf) && Array.isArray(n2InputOf) && (n1InputOf[0] && n1InputOf[0].name && n2InputOf[0] && n2InputOf[0].name)){
+
+                    if (n1InputOf[0].name === n2InputOf[0].name){
+                        if (n1InputOf[0].id === n2InputOf[0].id){
+                            if (n1.name === n2.name){
+                                return (n1.id < n2.id) ? -2 : 2;
+                            }
+                            return (n1.name < n2.name) ? -2 : 2;
+                        }
+                        return n1InputOf[0].id < n2InputOf[0].id ? -3 : 3;
+                    }
+                    return n1InputOf[0].name < n2InputOf[0].name ? -1 : 1;
+                }
+                return 0;
+            }
+
+            function compareNodeOutputOf(n1, n2){
+                var n1OutputOf = n1.type === 'step' ? (n1.inputNodes && n1.inputNodes.length > 0 && _.find(n1.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n1.outputOf;
+                var n2OutputOf = n2.type === 'step' ? (n2.inputNodes && n2.inputNodes.length > 0 && _.find(n2.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n2.outputOf;
+
+                if ((n1OutputOf && typeof n1OutputOf.indexInColumn === 'number' && n2OutputOf && typeof n2OutputOf.indexInColumn === 'number')){
+                    if (n1OutputOf.column === n2OutputOf.column){
+                        if (n1OutputOf.indexInColumn < n2OutputOf.indexInColumn) return -1;
+                        if (n1OutputOf.indexInColumn > n2OutputOf.indexInColumn) return 1;
+                    }
+                }
+                if ((n1OutputOf && n1OutputOf.name && n2OutputOf && n2OutputOf.name)){
+                    if (n1OutputOf.name === n2OutputOf.name){
+                        if (n1OutputOf.id === n2OutputOf.id){
+
+                            if (typeof n1.inputOf !== 'undefined' && typeof n2.inputOf === 'undefined'){
+                                return -3;
+                            } else if (typeof n1.inputOf === 'undefined' && typeof n2.inputOf !== 'undefined'){
+                                return 3;
+                            }
+                            if (n1.name < n2.name) return -1;
+                            if (n1.name > n2.name) return 1;
+                            return 0;//compareNodeInputOf(n1, n2);
+
+                        }
+                        return n1OutputOf.id < n2OutputOf.id ? -3 : 3;
+                    }
+                    return n1OutputOf.name < n2OutputOf.name ? -3 : 3;
+                }
+                return 0;
+            }
+
+            var ioResult;
+
             if (node1.type === 'step' && node2.type === 'step'){
+                if (node1.inputNodes && !node2.inputNodes) return -1;
+                if (!node1.inputNodes && node2.inputNodes) return 1;
+                if (node1.inputNodes && node2.inputNodes){
+                    var n1input = _.find(node1.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; }) || null;
+                    var n2input = _.find(node2.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; }) || null;
+                    if (n1input && !n2input) return -1;
+                    if (!n1input && n2input) return 1;
+                    if (n1input && n2input){
+                        if (n1input.column === n2input.column){
+                            if (n1input.indexInColumn < n2input.indexInColumn) return -1;
+                            if (n1input.indexInColumn > n2input.indexInColumn) return 1;
+                        }
+                    }
+                }
                 if (node1.name === node2.name){
+                    if (node1.id === node2.id) return 0;
                     return (node1.id < node2.id) ? -2 : 2;
                 }
                 return (node1.name < node2.name) ? -2 : 2;
@@ -119,34 +201,18 @@ export default class Graph extends React.Component {
                 return 1;
             }
 
-            function isNodeFileReference(n){
-                return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
+            // Groups go to bottom always. For now.
+            if (node1.type === 'input-group' && node2.type !== 'input-group'){
+                return 1;
+            } else if (node1.type !== 'input-group' && node2.type === 'input-group'){
+                return -1;
             }
 
             if (node1.type === node2.type){
 
                 if (node1.type === 'output'){
-                    /*
-                    if (typeof node1.inputOf !== 'undefined' && typeof node2.inputOf === 'undefined'){
-                        return -3;
-                    } else if (typeof node1.inputOf === 'undefined' && typeof node2.inputOf !== 'undefined'){
-                        return 3;
-                    }
-                    */
-                    if ((node1.outputOf && node1.outputOf.name && node2.outputOf && node2.outputOf.name)){
-                        if (node1.outputOf.name === node2.outputOf.name){
-                            if (node1.outputOf.id == node2.outputOf.id){
-                                if (typeof node1.inputOf !== 'undefined' && typeof node2.inputOf === 'undefined'){
-                                    return -3;
-                                } else if (typeof node1.inputOf === 'undefined' && typeof node2.inputOf !== 'undefined'){
-                                    return 3;
-                                }
-                                return 0;
-                            }
-                            return node1.outputOf.id < node2.outputOf.id ? -3 : 3;
-                        }
-                        return node1.outputOf.name < node2.outputOf.name ? -3 : 3;
-                    }
+                    ioResult = compareNodeOutputOf(node1, node2);
+                    return ioResult;
                 }
 
                 
@@ -164,25 +230,37 @@ export default class Graph extends React.Component {
                         return -1;
                     }
 
-                    if (Array.isArray(node1.inputOf) && Array.isArray(node2.inputOf) && (node1.inputOf[0] && node1.inputOf[0].name && node2.inputOf[0] && node2.inputOf[0].name)){
-
-                        if (node1.inputOf[0].name === node2.inputOf[0].name){
-                            if (node1.inputOf[0].id === node2.inputOf[0].id){
-                                if (node1.name === node2.name){
-                                    return (node1.id < node2.id) ? -2 : 2;
-                                }
-                                return (node1.name < node2.name) ? -2 : 2;
-                            }
-                            return node1.inputOf[0].id < node2.inputOf[0].id ? -3 : 3;
-                        }
-                        return node1.inputOf[0].name < node2.inputOf[0].name ? -1 : 1;
-                    }
+                    ioResult = compareNodeInputOf(node1, node2);
+                    if (ioResult !== 0) return ioResult;
                 }
             }
-
-            //if ((node1.type === 'input' || node1.type === 'output') && (node2.type === 'input' || node2.type === 'output') ){
-            //    return node1.name < node2.name;
-            //}
+        },
+        'nodesInColumnPostSortFxn' : function(nodesInColumn, columnNumber){
+            var groupNodes = _.filter(nodesInColumn, { 'type' : 'input-group' });
+            if (groupNodes.length > 0){
+                _.forEach(groupNodes, function(gN){
+                    var relatedFileSource = _.find(gN.meta.source, function(s){ var typeToCheck = s.type.toLowerCase(); return typeToCheck === 'input file' || typeToCheck === 'output file'; });
+                    var relatedFileNode = relatedFileSource && _.find(nodesInColumn, function(n){
+                        if (n && n.meta && n.meta.run_data && n.meta.run_data.file && (n.meta.run_data.file.uuid || n.meta.run_data.file) === (relatedFileSource.for_file || 'x') ){
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (relatedFileNode){
+                        // Re-arrange group node to be closer to its relation.
+                        var oldIdx = nodesInColumn.indexOf(gN);
+                        nodesInColumn.splice(oldIdx, 1);
+                        var afterThisIdx = nodesInColumn.indexOf(relatedFileNode);
+                        nodesInColumn.splice(afterThisIdx + 1, 0, gN);
+                    }
+                });
+                // Update own indices (not used for anything currently xcept debugging)
+                _.forEach(nodesInColumn, function(n, index){
+                    n.indexInColumn = index;
+                });
+            }
+            
+            return nodesInColumn;
         }
     }
 
@@ -212,8 +290,13 @@ export default class Graph extends React.Component {
     }
 
     height() {
+        var nodes = this.props.nodes;
+        // Run pre-sort fxn, e.g. to manually pre-arrange nodes into different columns.
+        if (typeof this.props.nodesPreSortFxn === 'function'){
+            nodes = this.props.nodesPreSortFxn(nodes.slice(0));
+        }
         return Math.max(
-            _(this.props.nodes).chain()
+            _(nodes).chain()
             .groupBy('column')
             .pairs()
             .reduce(function(maxCount, nodeSet){
@@ -230,27 +313,50 @@ export default class Graph extends React.Component {
         }, 0) + 1) * (this.props.columnWidth + this.props.columnSpacing) + this.props.innerMargin.left + this.props.innerMargin.right - this.props.columnSpacing;
     }
 
-    nodesWithCoordinates(viewportWidth = null, contentWidth = null, contentHeight = null, verticalMargin = 0){
+    nodesWithCoordinates(nodes = null, viewportWidth = null, contentWidth = null, contentHeight = null, verticalMargin = 0){
 
         if (!contentHeight) contentHeight = this.height();
 
-        var nodes = _.sortBy(this.props.nodes.slice(0), 'column');
+        if (!nodes) nodes = this.props.nodes.slice(0);
+
+        /****** Step 1: ***** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******
+         ****** Run optional post/pre-process functions to re-sort or arrange nodes in/within columns.
+         ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******/
+
+        // Arrange into lists of columns
+        nodes = _.sortBy(nodes, 'column');
+        var nodesByColumnPairs = _.pairs(_.groupBy(nodes, 'column'));
+
+        // Sort nodes within columns.
+        if (typeof this.props.nodesInColumnSortFxn === 'function'){
+            nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
+                return [
+                    columnGroup[0],
+                    _.map(columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn), function(n, i){
+                        n.indexInColumn = i;
+                        return n;
+                    })
+                ];
+            });
+        }
+
+        // Run post-sort fxn, e.g. to manually re-arrange nodes within columns.
+        if (typeof this.props.nodesInColumnPostSortFxn === 'function'){
+            nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
+                return [columnGroup[0], this.props.nodesInColumnPostSortFxn(columnGroup[1], columnGroup[0])];
+            });
+        }
+
+
+        /****** Step 2: ***** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******
+         ****** Convert column placement and position within columns, along with other chart dimension settings, into X & Y coordinates.
+         ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******/
 
         // Set correct Y coordinate on each node depending on how many nodes are in each column.
-        _.pairs(_.groupBy(nodes, 'column')).forEach((columnGroup) => {
-            var countInCol = columnGroup[1].length;
-            
-            // Sort
+        nodesByColumnPairs.forEach((columnGroup) => {
 
-            var nodesInColumn = columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn);
-            /*
-            var nodesInColumn = _.sortBy(columnGroup[1], function(n){
-                if (n.type === 'input') return n && n.inputOf && n.inputOf.name;
-                if (n.type === 'output') return n && n.outputOf && n.outputOf.name;
-                if (n.type === 'step') return n.name;
-                return null;
-            });
-            */
+            var nodesInColumn = columnGroup[1];
+            var countInCol = nodesInColumn.length;
 
             var centerNode = function(n){
                 n.y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
@@ -265,7 +371,6 @@ export default class Graph extends React.Component {
                     d3.range(countInCol).forEach((i) => {
                         nodesInColumn[i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
                         nodesInColumn[i].nodesInColumn = countInCol;
-                        nodesInColumn[i].indexInColumn = i;
                     });
                 }
             } else if (this.props.rowSpacingType === 'stacked') {
@@ -273,7 +378,6 @@ export default class Graph extends React.Component {
                     if (!nodeInCol) return;
                     nodeInCol.y = (this.props.rowSpacing * idx) + (this.props.innerMargin.top + verticalMargin);//num + (this.props.innerMargin.top + verticalMargin);
                     nodeInCol.nodesInColumn = countInCol;
-                    nodeInCol.indexInColumn = idx;
                 });
 
             } else if (this.props.rowSpacingType === 'wide') {
@@ -284,7 +388,6 @@ export default class Graph extends React.Component {
                         if (!nodeInCol) return;
                         nodeInCol.y = num + (this.props.innerMargin.top + verticalMargin);
                         nodeInCol.nodesInColumn = countInCol;
-                        nodeInCol.indexInColumn = idx;
                     });
                 }
             } else {
@@ -329,11 +432,18 @@ export default class Graph extends React.Component {
             height + this.props.innerMargin.top + this.props.innerMargin.bottom
         );
 
-        var nodes = this.nodesWithCoordinates(
+        var nodes = this.props.nodes.slice(0);
+
+        // Run pre-sort fxn, if any, to manually pre-arrange nodes into different columns.
+        if (typeof this.props.nodesPreSortFxn === 'function') nodes = this.props.nodesPreSortFxn(nodes);
+
+        nodes = this.nodesWithCoordinates(
+            nodes,
             width,
             contentWidth,
             height
         );
+
         var edges = this.props.edges;
 
         return (

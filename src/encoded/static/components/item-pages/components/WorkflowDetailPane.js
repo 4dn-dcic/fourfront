@@ -318,11 +318,10 @@ class FileDetailBody extends React.Component {
             var fileLoaded = fileUtil.isFileDataComplete(this.state.file);
             var table = null;
             if (
-                this.state.file && Array.isArray(this.state.file.experiments) && this.state.file.experiments.length > 0 &&
-                Array.isArray(this.state.file.experiments[0].experiment_sets)
+                this.state.file && (Array.isArray(this.state.file.experiments) || Array.isArray(this.state.file.experiment_sets))
             ){
                 var setsByKey = expFxn.experimentSetsFromFile(this.state.file);
-                if (_.keys(setsByKey).length > 0){
+                if (setsByKey && _.keys(setsByKey).length > 0){
                     table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} />;
                 }
             }
@@ -371,7 +370,7 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
         super(props);
         this.maybeLoadSoftware = this.maybeLoadSoftware.bind(this);
         this.state = {
-            software : this.props.software
+            software : props.software
         };
     }
 
@@ -519,6 +518,38 @@ class WorkflowDetailsForWorkflowNodeRow extends React.Component {
     }
 }
 
+class SoftwareDetailsForWorkflowNodeRow extends React.Component {
+    render(){
+
+        var softwareList = this.props.software;
+
+        var softwareElements;
+
+        if (Array.isArray(softwareList) && softwareList.length > 0){
+            softwareElements = _.map(softwareList, function(sw){
+                return (
+                    <a href={object.atIdFromObject(sw)}>{ sw.display_title }</a>
+                );
+            });
+        } else {
+            softwareElements = <em>N/A</em>;
+        }
+
+        return (
+            <div className="row">
+
+                <div className="col-sm-12 box steps-in-workflow">
+                    <span className="text-600">Software Used in Workflow</span>
+                    <h5 className="text-400 text-ellipsis-container">
+                        { softwareElements }
+                    </h5>
+                </div>
+
+            </div>
+        );
+    }
+}
+
 class AnalysisStepDetailBody extends React.Component {
 
     constructor(props){
@@ -618,10 +649,23 @@ class AnalysisStepDetailBody extends React.Component {
     render(){
         var node = this.props.node;
         var step = this.props.step;
-        var software_used = step.software_used;
         var workflow = (step && step.workflow) || null;
-        var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false;
+        var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false; // If step ===  wfr, not step === analysis_step
+        var self_software_used = step.software_used || (workflow && workflow.software_used) || null;
+        if (typeof self_software_used === 'string' && self_software_used.charAt(0) !== '/' && object.isUUID(self_software_used)){
+            self_software_used = '/software/' + self_software_used;
+        }
+
         //var isThereAssociatedSoftware = !!(this.props.step && this.props.step.software_used);
+        // Still need to test this .workflow_steps.step.software_used -> .steps.meta.software_used :
+        var listOfSoftwareInWorkflow = (wfr && wfr.workflow && Array.isArray(wfr.workflow.steps) &&
+            _.any(wfr.workflow.steps, function(workflowStep){ return workflowStep.meta && workflowStep.meta.software_used; }) &&
+            _.filter(
+                _.map(wfr.workflow.steps, function(workflowStep){ return (workflowStep.meta && workflowStep.meta.software_used) || null; }),
+                function(s) { return s !== null; }
+            )
+        ) || null;
+
         return(
             <div style={{ minHeight : this.props.minHeight }}>
                 <div className="information">
@@ -633,8 +677,10 @@ class AnalysisStepDetailBody extends React.Component {
                     </div>
                     { workflow ? <hr/> : null }
                     { workflow ? <WorkflowDetailsForWorkflowNodeRow workflow={workflow}/> : null }
-                    { software_used ? <hr/> : null }
-                    { software_used ? <AnalysisStepSoftwareDetailRow software={step.software_used}/> : null }
+                    { listOfSoftwareInWorkflow ? <hr/> : null }
+                    { listOfSoftwareInWorkflow ? <SoftwareDetailsForWorkflowNodeRow software={listOfSoftwareInWorkflow}/> : null }
+                    { self_software_used ? <hr/> : null }
+                    { self_software_used ? <AnalysisStepSoftwareDetailRow software={self_software_used}/> : null }
                     
                 </div>
                 <hr/>
@@ -675,7 +721,7 @@ export class WorkflowDetailPane extends React.Component {
     }
 
     static defaultProps = {
-        'minHeight' : 650,
+        'minHeight' : 800,
         'selectedNode' : null,
         'keyTitleDescriptionMap' : {
             '@id' : {
@@ -719,7 +765,7 @@ export class WorkflowDetailPane extends React.Component {
                 </div>
             );
         }
-        if (node.type === 'step' && node.meta && node.meta.uuid){
+        if (node.type === 'step' && node.meta && typeof node.meta === 'object'){
             return (
                 <AnalysisStepDetailBody
                     step={node.meta}

@@ -45,7 +45,6 @@ export class ExperimentSetTables extends React.Component {
                 <h3 className="tab-section-title">
                     <span>In Experiment Sets</span>
                 </h3>
-                <hr className="tab-section-title-horiz-divider"/>
                 <ItemPageTable
                     results={experiment_sets}
                     renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
