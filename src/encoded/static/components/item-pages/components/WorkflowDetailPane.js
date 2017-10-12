@@ -7,6 +7,7 @@ import { Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { ItemDetailList } from './ItemDetailList';
 import { ExperimentSetTablesLoaded } from './ExperimentSetTables';
+import { WorkflowLegend } from './WorkflowLegend';
 import { SimpleFilesTable } from './SimpleFilesTable';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 import { getTitleStringFromContext } from './../item';
@@ -224,7 +225,7 @@ class FileDetailBody extends React.Component {
             if (!this.doesDescriptionOrNotesExist()){
                 colClassName = "col-sm-6 col-lg-6";
             }
-            fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid}>{ fileTitle }</a>;
+            fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="inline-block">{ fileTitle }</a>;
         }
         return (
             <div className={colClassName + " file-title box"}>
@@ -240,8 +241,8 @@ class FileDetailBody extends React.Component {
                             'File'
                     }
                 </div>
-                <h3 className="text-400 text-ellipsis-container inline-block node-file-title" data-tip={fileTitle}>
-                    { fileTitleFormatted }
+                <h3 className="text-400 node-file-title text-ellipsis-container">
+                    <span className="inline-block" data-tip={fileTitle}>{ fileTitleFormatted }</span>
                 </h3>
             </div>
         );
@@ -608,7 +609,7 @@ class WFRStepDetailBody extends React.Component {
             <div className="col-sm-6 box">
                 <span className="text-600">Workflow Run</span>
                 { stepHref ?
-                    <h3 className="text-400 text-ellipsis-container" data-tip={titleString}><a href={stepHref}>{ titleString }</a></h3>
+                    <h3 className="text-500 text-ellipsis-container" data-tip={titleString}><a href={stepHref}>{ titleString }</a></h3>
                     :
                     <h3 className="text-300 text-ellipsis-container">{ titleString }</h3>
                 }
@@ -740,74 +741,41 @@ class StepDetailBody extends React.Component {
 
 }
 
-class LegendItem extends React.Component {
+class ParameterDetailBody extends React.Component {
 
-    render(){
-        var { title, className, tooltip } = this.props;
+    parameterName(){
+        var node = this.props.node;
         return (
-            <div className="legend-item">
-                <span className="inline-block" data-tip={tooltip || null} data-place="right" data-html>
-                    <div className={"color-patch " + className}/> { title }
-                </span>
+            <div className="col-sm-4 box">
+                <span className="text-600">Parameter Name</span>
+                <h3 className="text-300 text-ellipsis-container">{ node.name || node.meta.name }</h3>
             </div>
         );
     }
-}
 
-class WorkflowLegend extends React.Component {
-
-    static defaultProps = {
-        'items' : {
-            'Input File'                : {
-                className: 'node-type-global-input',
-                tooltip : 'File input into a workflow.'
-            },
-            'Output File'               : {
-                className: 'node-type-global-output',
-                tooltip : 'File generated from a workflow.'
-            },
-            //'Workflow Step'     : { className: 'node-type-step' },
-            'Group of Similar Files'    : {
-                className: 'node-type-global-group',
-                tooltip : 'Grouping of similar files, e.g. those which are generated from different runs of the same <em>workflow</em>.'
-            },
-            'Input Reference File'      : {
-                className: 'node-type-input-file-reference',
-                tooltip : 'Reference file input into a workflow.'
-            },
-            'Input Parameter'           : {
-                className: 'node-type-parameter',
-                tooltip : 'Parameter which input into a workflow.'
-            },
-            'Intermediate File'         : {
-                className:'node-type-io-default',
-                tooltip : 'File that was generated in the Workflow but perhaps not saved or important.'
-            },
-            //'Unsaved File'              : { className: 'node-disabled' },
-            'Current Context'           : {
-                className: 'node-type-global-context',
-                tooltip : 'Files which are contextual to the Item you\'re viewing, e.g. terminal processed files from an Experiment Set.'
-            }
-        },
-        'title' : 'Legend'
-    };
-
-    componentDidMount(){
-        ReactTooltip.rebuild();
+    parameterValue(){
+        var node = this.props.node;
+        return (
+            <div className="col-sm-8 box">
+                <span className="text-600">Value Used</span>
+                <h4 className="text-300 text-ellipsis-container">
+                    <code>{ node.meta.run_data.value }</code>
+                </h4>
+            </div>
+        );
     }
 
     render(){
+        var node = this.props.node;
         return (
-            <div className="workflow-legend-container overflow-hidden mt-1">
-                <div className="inner">
-                    { this.props.title?
-                        <div>
-                            <h4 className="text-300">{ this.props.title }</h4>
-                            <hr className="mb-1 mt-1"/>
-                        </div>
-                    : null}
-                    { _.map(_.pairs(this.props.items), (p)=> <LegendItem {...p[1]} title={p[0]} key={p[0]} /> ) }
+            <div style={typeof this.props.minHeight === 'number' ? { minHeight : this.props.minHeight } : null}>
+                <div className="information">
+                    <div className="row">
+                        { this.parameterName() }
+                        { this.parameterValue() }
+                    </div>
                 </div>
+                <hr/>
             </div>
         );
     }
@@ -865,16 +833,7 @@ export class WorkflowDetailPane extends React.Component {
         }
         if (node.meta && node.meta.run_data && (typeof node.meta.run_data.value === 'number' || typeof node.meta.run_data.value === 'string')){
             // Parameter
-            return (
-                <div style={typeof this.props.minHeight === 'number' ? { minHeight : this.props.minHeight } : null}>
-                    <div className="information">
-                        <div className="text-600" style={{ paddingTop : 10 }}>Value Used</div>
-                        <h3 className="text-500">
-                            <pre>{ node.meta.run_data.value }</pre>
-                        </h3>
-                    </div>
-                </div>
-            );
+            return <ParameterDetailBody {...commonDetailProps} />;
         }
         if (node.type === 'step' && node.meta && typeof node.meta === 'object'){
             // Step - WorkflowRun or Basic

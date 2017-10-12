@@ -80,7 +80,7 @@ export class DefaultNodeElement extends React.Component {
 
         // Title
         output += '<h5 class="text-600 tooltip-title">' +
-            this.props.titleString +
+            (this.props.titleString || node.title || node.name) +
             '</h5>';
 
         // Argument Type
@@ -131,6 +131,7 @@ export class DefaultNodeElement extends React.Component {
     }
     
     render(){
+        var node = this.props.node;
         return (
             <div
                 className="node-visible-element"
@@ -139,7 +140,7 @@ export class DefaultNodeElement extends React.Component {
                 data-html
                 style={this.style()}
             >
-                <span className="node-name">{ this.icon() }{ this.props.title || this.props.titleString }</span>
+                <span className="node-name">{ this.icon() }{ this.props.title || node.title || node.name }</span>
             </div>
         );
     }
@@ -290,11 +291,6 @@ export default class Node extends React.Component {
             'selected' : selected,
             'related' : related
         });
-
-        if (typeof this.props.title === 'function'){
-            visibleNodeProps.title = this.props.title(node, true);
-            visibleNodeProps.titleString = this.props.title(node, false);
-        }
 
         return (
             <div

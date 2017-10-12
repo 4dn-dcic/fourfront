@@ -1106,37 +1106,39 @@ $download-button-width : 100px;
 		}
 		.information {
 			margin-top: 12px;
-			padding-bottom: 3px;
 			padding-top: 0;
 			border-top: 1px solid #ccc;
 			
 			> hr {
 				margin-bottom: 0;
+				margin-top: 0;
 			}
 
 			& + hr {
 				border-color: #ccc;
+				margin-top: 0;
 			}
 
 
 			> .row > .box {
-				padding-top : 20px;
-				min-height: 64px;
-				> h3 {
-					margin-top: 1px;
-					margin-bottom : 0px;
-					> pre {
+				padding-top : 12px;
+				padding-bottom: 10px;
+				min-height: 70px;
+				> h3, > h4, > h5 {
+					margin-bottom: 0;
+					margin-top: 0;
+					line-height: 28px;
+					> pre, > code {
 						margin-top: 5px;
+						line-height: 23px;
+					}
+					> code {
+						display: inline-block;
+						padding-top: 0;
+						padding-bottom: 0;
 					}
 				}
-				> h4 {
-					margin-top: 4px;
-					margin-bottom: 2px;
-				}
-				> h5 {
-					margin-top: 6px;
-					margin-bottom: 2px;
-				}
+
 				> .download-button {
 					margin-top: 6px;
 				}

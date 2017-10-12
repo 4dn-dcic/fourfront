@@ -78,7 +78,11 @@ export class WorkflowNodeElement extends React.Component {
 
         // Node Type
         if (node.type === 'step'){
-            output += '<small>Step ' + ((node.column - 1) / 2 + 1) + '</small>';
+            if (node.meta && node.meta.workflow){
+                output += '<small>Workflow Run</small>'; // Workflow Run
+            } else {
+                output += '<small>Step</small>'; // Reg Step
+            }
         } else {
             var nodeType = node.type;
             nodeType = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
@@ -93,33 +97,13 @@ export class WorkflowNodeElement extends React.Component {
         
 
         // Title
-        output += '<h5 class="text-600 tooltip-title">' +
-            this.props.titleString +
-            '</h5>';
+        var title = (node.meta && node.meta.display_title) || node.title || node.name; // IO arg name or step ID/name.
+        output += '<h5 class="text-600 tooltip-title">' + title + '</h5>';
 
-        // Argument Type
-        if (node.type === 'input' || node.type === 'output'){
-            output += '<div><small>';
-            
-            if (Array.isArray(node.format) && node.format.length > 0){
-                var formats = node.format.map(function(f){
-                    if (f === 'File'){
-                        if (node.meta && node.meta['sbg:fileTypes']){
-                            var fileTypes = node.meta['sbg:fileTypes'].split(',').map(function(fType){
-                                return '.' + fType.trim();
-                            }).join(' | ');
-                            return fileTypes;
-                        }
-                    }
-                    return f;
-                });
-                output += 'Type: ' + formats.join(' | ') + '';
-            } else if (typeof node.format === 'string') {
-                output += 'Type: ' + node.format;
-            } else {
-                output += '<em>Unknown Type</em>';
-            }
-            output += '</small></div>';
+        // Workflow name, if any
+        if (node.type === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
+            //title 
+            output += '<hr class="mt-08 mb-05"/><div><span class="text-600">Workflow: </span><span class="text-400">' + node.meta.workflow.display_title + '</span></div>';
         }
 
         if (node.type === 'input'){
@@ -129,8 +113,8 @@ export class WorkflowNodeElement extends React.Component {
         }
 
         // Description
-        if (typeof node.description === 'string'){
-            output += '<div>' + node.description + '</div>';
+        if (typeof node.description === 'string' || (node.meta && typeof node.meta.description === 'string')){
+            output += '<div>' + (node.description || node.meta.description) + '</div>';
         }
 
         return output; 
@@ -258,7 +242,8 @@ export class WorkflowNodeElement extends React.Component {
             return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
         }
 
-        return <span className="node-name">{ this.icon() }{ this.props.title || this.props.titleString }</span>;
+        // Fallback / Default - use node.name
+        return <span className="node-name">{ this.icon() }{ node.title || node.name }</span>;
     }
     
     render(){

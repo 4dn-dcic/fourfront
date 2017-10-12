@@ -89,7 +89,6 @@ export default class Graph extends React.Component {
             return <DefaultNodeElement {...props} node={node} />;
         },
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
-        'nodeTitle'     : function(node, canBeJSX = false){ return node.title || node.name; },
         'innerMargin'   : {
             'top' : 60,
             'bottom' : 60,
@@ -473,7 +472,7 @@ export default class Graph extends React.Component {
                         >
                             <ScrollContainer outerHeight={fullHeight}>
                                 <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
-                                <NodesLayer {..._.pick(this.props, 'nodeElement', 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} title={this.props.nodeTitle} />
+                                <NodesLayer {..._.pick(this.props, 'nodeElement', 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} />
                             </ScrollContainer>
                         </StateContainer>
                     </div>
