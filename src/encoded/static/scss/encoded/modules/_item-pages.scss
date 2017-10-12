@@ -244,7 +244,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			background-color: #d8bd22;
 		}
 
-		&.expset-status[data-status="in review by project"]:before {
+		&.expset-status[data-status="submission in progress"]:before {
 			color: #fff;
 			background-color: #d8bd22;
 		}
