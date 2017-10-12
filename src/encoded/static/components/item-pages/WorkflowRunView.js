@@ -81,8 +81,6 @@ export function allFilesForWorkflowRunMappedByUUID(item){
 
 /**
  * @export
- * @class WorkflowRunView
- * @memberof module:item-pages
  * @extends module:item-pages/DefaultItemView.ItemBaseView
  */
 export class WorkflowRunView extends ItemBaseView {

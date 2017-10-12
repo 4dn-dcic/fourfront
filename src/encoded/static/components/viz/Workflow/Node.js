@@ -13,7 +13,6 @@ export class DefaultNodeElement extends React.Component {
 
     static propTypes = {
         'node' : PropTypes.object,
-        'title': PropTypes.string,
         'disabled' : PropTypes.bool,
         'selected' : PropTypes.bool,
         'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
@@ -233,10 +232,6 @@ export default class Node extends React.Component {
             ) return true;
         }
         */
-    }
-
-    static propTypes = {
-        'title' : PropTypes.func.isRequired
     }
 
     constructor(props){

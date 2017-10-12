@@ -197,7 +197,7 @@ export class WorkflowGraphSectionControls extends React.Component {
         );
 
         return (
-            <div className="inline-block">
+            <div className="inline-block" key="chart-type-dropdown">
                 <DropdownButton
                     id="detail-granularity-selector"
                     pullRight
@@ -215,7 +215,7 @@ export class WorkflowGraphSectionControls extends React.Component {
             return null;
         }
         return (
-            <div className="inline-block">
+            <div className="inline-block" key="rowspacing-dropdown-block">
                 <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType}/>
             </div>
         );
@@ -225,7 +225,7 @@ export class WorkflowGraphSectionControls extends React.Component {
         var { fullscreenViewEnabled, onToggleFullScreenView } = this.props;
         if( typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
-                <div className="inline-block">
+                <div className="inline-block" key="toggle-fullscreen">
                     <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
                         <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
                     </Button>
@@ -240,7 +240,7 @@ export class WorkflowGraphSectionControls extends React.Component {
             return null;
         }
         return (
-            <div className="inline-block show-params-checkbox-container">
+            <div className="inline-block show-params-checkbox-container" key="show-params">
                 <Checkbox checked={this.props.showParameters} onChange={this.props.onToggleShowParameters}>
                     Show Parameters
                 </Checkbox>
