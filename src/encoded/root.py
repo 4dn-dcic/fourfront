@@ -227,7 +227,7 @@ def health_check(config):
             "@context" : "/health",
             "@id" : "/health",
             "content" : None,
-            "display_title" : "Health Status",
+            "display_title" : "Fourfront Status and Foursight Monitoring",
             'db_es_total': db_es_total,
             'db_es_compare': db_es_compare
         }
