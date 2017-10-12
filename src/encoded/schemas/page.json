@@ -2,9 +2,8 @@
     "title": "Page",
     "id": "/profiles/page.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "required": [],
+    "required": ["name"],
     "additionalProperties": false,
-	"requiredProperties": ["name"],
     "identifyingProperties": ["uuid", "aliases", "name"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
