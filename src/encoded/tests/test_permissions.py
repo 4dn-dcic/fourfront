@@ -749,10 +749,10 @@ def individual_human(human, remc_lab, nofic_award, wrangler_testapp):
 def test_multi_viewing_group_viewer_can_view_nofic_when_submission_in_progress(
         wrangler_testapp, multi_viewing_group_member_testapp, individual_human):
     wrangler_testapp.patch_json(individual_human['@id'], {'status': 'submission in progress'}, status=200)
-    res = multi_viewing_group_member_testapp.get(individual_human['@id'], status=200)
+    multi_viewing_group_member_testapp.get(individual_human['@id'], status=200)
 
 
 def test_viewing_group_viewer_cannot_view_nofic_when_submission_in_progress(
         wrangler_testapp, viewing_group_member_testapp, individual_human):
     wrangler_testapp.patch_json(individual_human['@id'], {'status': 'submission in progress'}, status=200)
-    res = viewing_group_member_testapp.get(individual_human['@id'], status=403)
+    viewing_group_member_testapp.get(individual_human['@id'], status=403)
