@@ -19,7 +19,7 @@ class LegendItem extends React.Component {
     }
 }
 
-export class WorkflowLegend extends React.Component {
+export class Legend extends React.Component {
 
     static defaultProps = {
         'items' : {

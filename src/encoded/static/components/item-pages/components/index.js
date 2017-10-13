@@ -23,7 +23,7 @@ export { TabbedView } from './TabbedView';
 export { ItemDetailList, Detail } from './ItemDetailList';
 export { AuditTabView } from './AuditTabView';
 export { AttributionTabView } from './AttributionTabView';
-export { WorkflowDetailPane, MetricsView, ViewMetricButton } from './WorkflowDetailPane';
+export { WorkflowDetailPane } from './WorkflowDetailPane';
 export { WorkflowNodeElement } from './WorkflowNodeElement';
 export { FlexibleDescriptionBox, FlexibleCharacterCountBox } from './FlexibleDescriptionBox';
 export { SimpleFilesTable, SimpleFilesTableLoaded } from './SimpleFilesTable';
