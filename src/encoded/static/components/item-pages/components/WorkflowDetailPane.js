@@ -812,69 +812,75 @@ export class WorkflowDetailPane extends React.Component {
     route(){
         var node = this.props.selectedNode;
 
-        var commonDetailProps = {
-            'key' : 'body',
-            'node' : node,
-            'schemas' : this.props.schemas,
-            'minHeight' : this.props.minHeight,
-            'keyTitleDescriptionMap' : this.props.keyTitleDescriptionMap
-        };
-        
-        if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file){
-            // File
-            return (
-                <layout.WindowResizeUpdateTrigger>
-                    <FileDetailBody
-                        {...commonDetailProps}
-                        file={node.meta.run_data.file}
-                    />
-                </layout.WindowResizeUpdateTrigger>
-            );
-        }
-        if (node.meta && node.meta.run_data && (typeof node.meta.run_data.value === 'number' || typeof node.meta.run_data.value === 'string')){
-            // Parameter
-            return <ParameterDetailBody {...commonDetailProps} />;
-        }
-        if (node.type === 'step' && node.meta && typeof node.meta === 'object'){
-            // Step - WorkflowRun or Basic
+        if (node){
 
-            var nodeTypeVisible = null;
-            if ((node.meta && node.meta['@type']) && (node.meta['@type'].indexOf('WorkflowRun') > -1 || node.meta['@type'].indexOf('Workflow'))){
-                nodeTypeVisible = 'Workflow Run';
-            } else if ((node.meta && node.meta['@type']) && node.meta['@type'].indexOf('Workflow')) {
-                nodeTypeVisible = 'Workflow';
-            } else {
-                nodeTypeVisible = 'Analysis Step';
+            var commonDetailProps = {
+                'key' : 'body',
+                'node' : node,
+                'schemas' : this.props.schemas,
+                'minHeight' : this.props.minHeight,
+                'keyTitleDescriptionMap' : this.props.keyTitleDescriptionMap
+            };
+            
+            if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file){
+                // File
+                return (
+                    <layout.WindowResizeUpdateTrigger>
+                        <FileDetailBody
+                            {...commonDetailProps}
+                            file={node.meta.run_data.file}
+                        />
+                    </layout.WindowResizeUpdateTrigger>
+                );
+            }
+            if (node.meta && node.meta.run_data && (typeof node.meta.run_data.value === 'number' || typeof node.meta.run_data.value === 'string')){
+                // Parameter
+                return <ParameterDetailBody {...commonDetailProps} />;
+            }
+            if (node.type === 'step' && node.meta && typeof node.meta === 'object'){
+                // Step - WorkflowRun or Basic
+
+                var nodeTypeVisible = null;
+                if ((node.meta && node.meta['@type']) && (node.meta['@type'].indexOf('WorkflowRun') > -1 || node.meta['@type'].indexOf('Workflow'))){
+                    nodeTypeVisible = 'Workflow Run';
+                } else if ((node.meta && node.meta['@type']) && node.meta['@type'].indexOf('Workflow')) {
+                    nodeTypeVisible = 'Workflow';
+                } else {
+                    nodeTypeVisible = 'Analysis Step';
+                }
+
+                var stepProps = _.extend({
+                    'step' : node.meta,
+                    'typeTitle' : nodeTypeVisible,
+                    'context' : this.props.context
+                }, commonDetailProps);
+
+                // Check if we have an @id, and if it is of workflow-run-*.
+                var related_item_at_id = object.atIdFromObject(node.meta);
+                if (related_item_at_id && ((Array.isArray(node.meta['@type']) && node.meta['@type'].indexOf('WorkflowRun') > -1) || related_item_at_id.slice(0,14) === '/workflow-runs')){
+                    return <WFRStepDetailBody {...stepProps} />;
+                }
+                return (
+                    <StepDetailBody {...stepProps} />
+                );
             }
 
-            var stepProps = _.extend({
-                'step' : node.meta,
-                'typeTitle' : nodeTypeVisible,
-                'context' : this.props.context
-            }, commonDetailProps);
-
-            // Check if we have an @id, and if it is of workflow-run-*.
-            var related_item_at_id = object.atIdFromObject(node.meta);
-            if (related_item_at_id && ((Array.isArray(node.meta['@type']) && node.meta['@type'].indexOf('WorkflowRun') > -1) || related_item_at_id.slice(0,14) === '/workflow-runs')){
-                return <WFRStepDetailBody {...stepProps} />;
-            }
-            return (
-                <StepDetailBody {...stepProps} />
-            );
         }
+
+        // Default / no node
+        if (this.props.legendItems){
+            return <WorkflowLegend items={this.props.legendItems} />;
+        }
+
+        return (
+            <h5 className="text-400 text-center" style={{ paddingTop : 7 }}>
+                <small>Select a node above for more detail.</small>
+            </h5>
+        );
     }
 
     render(){
-        var node = this.props.selectedNode;
-        console.log('SELECTED NODE', node);
-        if (!node && this.props.legendItems) return <WorkflowLegend items={this.props.legendItems} />;
-        else if (!node) return (
-            <div className="detail-pane" style={{ minHeight : this.props.minHeight }}>
-                <h5 className="text-400 text-center" style={{ paddingTop : 7 }}>
-                    <small>Select a node above for more detail.</small>
-                </h5>
-            </div>
-        );
+        console.log('SELECTED NODE', this.props.selectedNode);
 
         return (
             <div className="detail-pane" style={{ minHeight : this.props.minHeight }}>

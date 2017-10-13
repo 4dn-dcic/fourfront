@@ -227,9 +227,11 @@ export default class Graph extends React.Component {
                 
 
                 if (node1.type === 'input'){
-
-                    if (isNodeParameter(node1)) return 1;
-                    if (isNodeParameter(node2)) return -1;
+                    if (isNodeParameter(node1) && isNodeParameter(node2)){
+                        return compareNodeInputOf(node1, node2);
+                    }
+                    else if (isNodeParameter(node1)) return 1;
+                    else if (isNodeParameter(node2)) return -1;
 
                     if (isNodeFileReference(node1)){
                         if (isNodeFileReference(node2)) {
