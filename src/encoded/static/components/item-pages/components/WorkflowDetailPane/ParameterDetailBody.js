@@ -3,7 +3,7 @@
 import React from 'react';
 
 export class ParameterDetailBody extends React.Component {
-    
+
     parameterName(){
         var node = this.props.node;
         return (

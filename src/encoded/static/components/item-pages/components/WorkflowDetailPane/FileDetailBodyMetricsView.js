@@ -42,7 +42,7 @@ export class ViewMetricButton extends React.Component {
 }
 
 class MetricsViewItem extends React.Component {
-    
+
     static resultStringToIcon(resultStr = "UNKNOWN", extraIconClassName = ''){
         if (typeof resultStr !== 'string') return resultStr;
         switch(resultStr.toUpperCase()){

@@ -770,14 +770,14 @@ class DimensioningContainer extends React.Component {
 
         //vizUtil.requestAnimationFrame(()=>{
 
-            var windowHeight    = window.innerHeight;
-            var scrollTop       = layout.getPageVerticalScrollPosition();
-            var tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
+        var windowHeight    = window.innerHeight;
+        var scrollTop       = layout.getPageVerticalScrollPosition();
+        var tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
 
             //var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
 
 
-            var done = false;
+        var done = false;
 
             // Resize to full width.
             /*
@@ -827,12 +827,12 @@ class DimensioningContainer extends React.Component {
             }
             */
 
-            if (!done){
-                var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
-                if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
-                    this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
-                }
+        if (!done){
+            var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
+            if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
+                this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
             }
+        }
 
 
         //});

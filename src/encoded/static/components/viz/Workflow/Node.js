@@ -308,9 +308,7 @@ export default class Node extends React.Component {
                     onMouseEnter={this.props.onMouseEnter}
                     onMouseLeave={this.props.onMouseLeave}
                     onClick={disabled ? null : this.props.onClick}
-                >
-                { this.props.renderNodeElement(node, visibleNodeProps) }
-                </div>
+                >{ this.props.renderNodeElement(node, visibleNodeProps) }</div>
             </div>
         );
     }

@@ -24,7 +24,7 @@ import { WFRStepDetailBody } from './WFRStepDetailBody';
  */
 
 export class WorkflowDetailPane extends React.Component {
-    
+
     static Legend = Legend
 
     static propTypes = {

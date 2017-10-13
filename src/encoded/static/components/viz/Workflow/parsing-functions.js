@@ -115,11 +115,11 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
      ** Functions **
      ***************/
 
-     /**
-      * @param {StepIOArgument} stepIOArg - Input or output argument of a step.
-      * @param {boolean} [readOnly=true] - @see preventDuplicateNodeID()
-      * @returns {string} Unique ID for node.
-      */
+    /**
+     * @param {StepIOArgument} stepIOArg - Input or output argument of a step.
+     * @param {boolean} [readOnly=true] - @see preventDuplicateNodeID()
+     * @returns {string} Unique ID for node.
+     */
     function ioNodeID(stepIOArg, readOnly = true){
         return preventDuplicateNodeID(
             stepIOArg.id || stepIOArg.name,

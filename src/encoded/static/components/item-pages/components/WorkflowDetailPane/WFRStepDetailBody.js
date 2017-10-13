@@ -109,7 +109,7 @@ export class WFRStepDetailBody extends React.Component {
 
     maybeLoadWFR(wfr = this.state.wfr){
         var hrefToRequest = null;
-        
+
         if (typeof wfr === 'string') {
             hrefToRequest = wfr;
         } /*else if (wfr && typeof wfr === 'object' && !Array.isArray(wfr)){
@@ -188,16 +188,16 @@ export class WFRStepDetailBody extends React.Component {
                         </h3>
                         <hr className="tab-section-title-horiz-divider"/>
                         { wfr ?
-                        <ItemDetailList
-                            context={wfr}
-                            schemas={this.props.schemas}
-                            minHeight={this.props.minHeight}
-                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
-                        />
+                            <ItemDetailList
+                                context={wfr}
+                                schemas={this.props.schemas}
+                                minHeight={this.props.minHeight}
+                                keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                            />
                         : null }
                     </div>
                 </Fade>
-                { typeof this.state.wfr === 'string' ? 
+                { typeof this.state.wfr === 'string' ?
                     <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div>
                 : null }
                 

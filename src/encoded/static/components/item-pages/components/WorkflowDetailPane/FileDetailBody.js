@@ -49,7 +49,7 @@ export class FileDetailBody extends React.Component {
 
     maybeLoadFile(file = this.state.file){
         var hrefToRequest = null;
-        
+
         if (typeof file === 'string') { // If we have a UUID instead of a complete file object.
             if (file === 'Forbidden') {
                 return false;
@@ -130,9 +130,9 @@ export class FileDetailBody extends React.Component {
             <div className={colClassName + " file-title box"}>
                 <div className="text-600">
                     {
-                    node.type === 'output' ? 'Generated' :
-                        node.type === 'input' ? 'Used' :
-                            null
+                        node.type === 'output' ? 'Generated' :
+                            node.type === 'input' ? 'Used' :
+                                null
                     } {
                         Array.isArray(this.props.file) ?
                             this.props.file.length + ' total files from' + (file && file.display_title ? ' Workflow' : '')
@@ -237,17 +237,18 @@ export class FileDetailBody extends React.Component {
         } else if (MetricsView.isNodeQCMetric(node)){
             // Case: QC Metric
             var metrics = object.listFromTips(object.tipsFromSchema(this.props.schemas, this.state.file))
-            .filter(function(m){
-                if (m.key === 'status') return false;
-                if (m.enum) return true;
-                if (m.type === 'number') return true;
-                return false;
-            })
-            .map((m)=>{
-                return _.extend(m, {
-                    'result' : this.state.file[m.key]
+                .filter(function(m){
+                    if (m.key === 'status') return false;
+                    if (m.enum) return true;
+                    if (m.type === 'number') return true;
+                    return false;
+                })
+                .map((m)=>{
+                    return _.extend(m, {
+                        'result' : this.state.file[m.key]
+                    });
                 });
-            });
+
             body = <MetricsView metrics={metrics} />;
         } else {
             // Default Case: Single (Pre-)Loaded File
@@ -263,21 +264,21 @@ export class FileDetailBody extends React.Component {
             }
             body = (
                 <Fade in={fileLoaded} transitionAppear>
-                    { fileLoaded ? 
-                    <div>
-                        { table }
-                        { table ? <br/> : null }
-                        <h3 className="tab-section-title">
-                            <span>Details</span>
-                        </h3>
-                        <hr className="tab-section-title-horiz-divider"/>
-                        <ItemDetailList
-                            context={this.state.file}
-                            schemas={this.props.schemas}
-                            minHeight={this.props.minHeight}
-                            keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
-                        />
-                    </div>
+                    { fileLoaded ?
+                        <div>
+                            { table }
+                            { table ? <br/> : null }
+                            <h3 className="tab-section-title">
+                                <span>Details</span>
+                            </h3>
+                            <hr className="tab-section-title-horiz-divider"/>
+                            <ItemDetailList
+                                context={this.state.file}
+                                schemas={this.props.schemas}
+                                minHeight={this.props.minHeight}
+                                keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
+                            />
+                        </div>
                     : <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div> }
                 </Fade>
             );

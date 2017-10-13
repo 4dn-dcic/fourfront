@@ -6,7 +6,7 @@ import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 
 class LegendItem extends React.Component {
-    
+
     render(){
         var { title, className, tooltip } = this.props;
         return (
