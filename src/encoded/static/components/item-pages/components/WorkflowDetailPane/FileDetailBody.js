@@ -98,7 +98,15 @@ export class FileDetailBody extends React.Component {
         var fileTitleFormatted;
         var colClassName = "col-sm-6 col-lg-4";
         //if (typeof file === 'object' && file && !fileUtil.isFileDataComplete(file) && !Array.isArray(file)) {}
-        if (typeof file === 'string') {
+        if (Array.isArray(this.props.file)) { // Some sort of group
+            fileTitle = 'Workflow';
+            if (typeof file !== 'string' && file && file.display_title) fileTitle = file.display_title;
+            if (typeof node.meta.workflow === 'string'){
+                fileTitleFormatted = <a href={node.meta.workflow}>{ fileTitle }</a>;
+            } else {
+                fileTitleFormatted = fileTitle;
+            }
+        } else if (typeof file === 'string') {
             if (file === 'Forbidden'){
                 if (this.props.file && typeof this.props.file !== 'string'){
                     fileTitle = getTitleStringFromContext(this.props.file);
@@ -110,14 +118,6 @@ export class FileDetailBody extends React.Component {
             } else {
                 fileTitle = null;
                 fileTitleFormatted = <small><i className="icon icon-circle-o-notch icon-spin icon-fw"/></small>;
-            }
-        } else if (Array.isArray(this.props.file)) { // Some sort of group
-            fileTitle = 'Workflow';
-            if (file && file.display_title) fileTitle = file.display_title;
-            if (typeof node.meta.workflow === 'string'){
-                fileTitleFormatted = <a href={node.meta.workflow}>{ fileTitle }</a>;
-            } else {
-                fileTitleFormatted = fileTitle;
             }
         } else {
             fileTitle = getTitleStringFromContext(file);
@@ -214,7 +214,13 @@ export class FileDetailBody extends React.Component {
             return null;
         }
 
-        if (typeof file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
+        if (Array.isArray(this.props.file) && typeof this.props.file[0] === 'object' && object.atIdFromObject(this.props.file[0])) {
+            // Case: Group of Files
+            var columns = _.clone(SimpleFilesTable.defaultProps.columns);
+            delete columns.file_type;
+            columns.status = 'Status';
+            body = <SimpleFilesTable results={this.props.file} columns={columns} hideTypeTitle />;
+        } else if (typeof file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
             // Case: Loading or Forbidden
             if (file === 'Forbidden'){
                 body = (
@@ -243,12 +249,6 @@ export class FileDetailBody extends React.Component {
                 });
             });
             body = <MetricsView metrics={metrics} />;
-        } else if (Array.isArray(this.props.file) && typeof this.props.file[0] === 'object' && object.atIdFromObject(this.props.file[0])) {
-            // Case: Group of Files
-            var columns = _.clone(SimpleFilesTable.defaultProps.columns);
-            delete columns.file_type;
-            columns.status = 'Status';
-            body = <SimpleFilesTable results={this.props.file} columns={columns} hideTypeTitle />;
         } else {
             // Default Case: Single (Pre-)Loaded File
             var fileLoaded = fileUtil.isFileDataComplete(this.state.file);
