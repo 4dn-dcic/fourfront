@@ -126,6 +126,9 @@ export class FileDetailBody extends React.Component {
             }
             fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="inline-block">{ fileTitle }</a>;
         }
+        if (typeof fileTitle !== 'string' || fileTitle.length < (this.doesDescriptionOrNotesExist() ? 25 : 35)){
+            fileTitle = null;
+        }
         return (
             <div className={colClassName + " file-title box"}>
                 <div className="text-600">
@@ -140,9 +143,7 @@ export class FileDetailBody extends React.Component {
                             'File'
                     }
                 </div>
-                <h3 className="text-400 node-file-title text-ellipsis-container">
-                    <span className="inline-block" data-tip={fileTitle}>{ fileTitleFormatted }</span>
-                </h3>
+                <h3 className="text-400 node-file-title text-ellipsis-container" data-tip={fileTitle}>{ fileTitleFormatted }</h3>
             </div>
         );
     }

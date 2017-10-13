@@ -240,8 +240,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
             name         : ioNodeName(stepIOArgument),// stepInput.name, 
             argNamesOnSteps : namesOnSteps,
             type         : nodeType,
-            meta         : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'required', 'name', 'meta')),
-            required     : stepIOArgument.required || false,
+            meta         : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta'))
         };
 
         if (nodeType === 'input'){
@@ -380,7 +379,7 @@ export function parseAnalysisSteps(analysis_steps, parsingMethod = 'output'){
                     name        : ioNodeName(stepIOArgument),
                     argNamesOnSteps : namesOnSteps,
                     type        : nodeType + '-group',
-                    meta        : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'required', 'name', 'meta')),
+                    meta        : _.extend({}, stepIOArgument.meta || {}, _.omit(stepIOArgument, 'name', 'meta')),
                     inputOf     : [stepNode]
                 };
                 groupNode.meta[groupingName] = wfPair[0];

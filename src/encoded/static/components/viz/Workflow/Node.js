@@ -8,7 +8,6 @@ import _ from 'underscore';
 import { Fade } from 'react-bootstrap';
 
 
-
 export class DefaultNodeElement extends React.Component {
 
     static propTypes = {
@@ -32,21 +31,7 @@ export class DefaultNodeElement extends React.Component {
                 } else if (
                     formats.indexOf('parameter') > -1 || formats.indexOf('int') > -1 || formats.indexOf('string') > -1
                 ){
-                    iconClass = 'cog';
-                } else {
-                    iconClass = 'question';
-                }
-            } else if (Array.isArray(formats)) {
-                if (
-                    formats[0] === 'File' ||
-                    (formats[0] === 'null' && formats[1] === 'File')
-                ){
-                    iconClass = 'file-text-o';
-                } else if (
-                    (formats[0] === 'int' || formats[0] === 'string') ||
-                    (formats[0] === 'null' && (formats[1] === 'int' || formats[1] === 'string'))
-                ){
-                    iconClass = 'cog';
+                    iconClass = 'wrench';
                 }
             }
 
@@ -70,52 +55,14 @@ export class DefaultNodeElement extends React.Component {
             output += '<small>' + nodeType + '</small>';
         }
 
-        // Required
-        if (node.required){
-            output+= ' <small style="opacity: 0.66;"> - <em>Required</em></small>';
-        }
-
-        
-
         // Title
         output += '<h5 class="text-600 tooltip-title">' +
-            (this.props.titleString || node.title || node.name) +
+            (node.title || node.name) +
             '</h5>';
 
-        // Argument Type
-        if (node.type === 'input' || node.type === 'output'){
-            output += '<div><small>';
-            
-            if (Array.isArray(node.format) && node.format.length > 0){
-                var formats = node.format.map(function(f){
-                    if (f === 'File'){
-                        if (node.meta && node.meta['sbg:fileTypes']){
-                            var fileTypes = node.meta['sbg:fileTypes'].split(',').map(function(fType){
-                                return '.' + fType.trim();
-                            }).join(' | ');
-                            return fileTypes;
-                        }
-                    }
-                    return f;
-                });
-                output += 'Type: ' + formats.join(' | ') + '';
-            } else if (typeof node.format === 'string') {
-                output += 'Type: ' + node.format;
-            } else {
-                output += '<em>Unknown Type</em>';
-            }
-            output += '</small></div>';
-        }
-
-        if (node.type === 'input'){
-            if (node.meta && node.meta['sbg:toolDefaultValue']){
-                output += '<div><small>Default: "' + node.meta['sbg:toolDefaultValue'] + '"</small></div>';
-            }
-        }
-
         // Description
-        if (typeof node.description === 'string'){
-            output += '<div>' + node.description + '</div>';
+        if (typeof node.description === 'string' || (node.meta && typeof node.meta.description === 'string')){
+            output += '<div>' + (node.description || node.meta.description) + '</div>';
         }
 
         return output; 

@@ -8,6 +8,13 @@ import { console, object, ajax } from './../../../util';
 import { ItemDetailList } from './../ItemDetailList';
 import { StepDetailBody } from './StepDetailBody';
 
+function tipIfLongString(tip){
+    if (typeof tip !== 'string' || tip.length < 35){
+        return null;
+    }
+    return tip;
+}
+
 
 class WorkflowDetailsForWorkflowNodeRow extends React.Component {
     render(){
@@ -38,7 +45,7 @@ class WorkflowDetailsForWorkflowNodeRow extends React.Component {
 
                 <div className="col-sm-6 box">
                     <span className="text-600">Workflow Name</span>
-                    <h4 className="text-400 text-ellipsis-container" data-tip={title}>
+                    <h4 className="text-400 text-ellipsis-container" data-tip={tipIfLongString(title)}>
                         { innerContent }
                     </h4>
                 </div>
@@ -140,7 +147,7 @@ export class WFRStepDetailBody extends React.Component {
             <div className="col-sm-6 box">
                 <span className="text-600">Workflow Run</span>
                 { stepHref ?
-                    <h3 className="text-500 text-ellipsis-container" data-tip={titleString}><a href={stepHref}>{ titleString }</a></h3>
+                    <h3 className="text-500 text-ellipsis-container" data-tip={tipIfLongString(titleString)}><a href={stepHref}>{ titleString }</a></h3>
                     :
                     <h3 className="text-300 text-ellipsis-container">{ titleString }</h3>
                 }

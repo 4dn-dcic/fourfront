@@ -76,29 +76,34 @@ export class WorkflowNodeElement extends React.Component {
         var node = this.props.node;
         var output = '';
 
-        // Node Type
+        // Node Type -specific
         if (node.type === 'step'){
             if (node.meta && node.meta.workflow){
                 output += '<small>Workflow Run</small>'; // Workflow Run
             } else {
                 output += '<small>Step</small>'; // Reg Step
             }
+            // Step Title
+            output += '<h5 class="text-600 tooltip-title">' + ((node.meta && node.meta.display_title) || node.title || node.name) + '</h5>';
+        } else if (node.type === 'input-group'){
+            output += '<small>Input Argument</small>';
         } else {
-            var nodeType = node.type;
-            nodeType = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
-            output += '<small>' + nodeType + '</small>';
+            var title = node.type;
+            title = title.charAt(0).toUpperCase() + title.slice(1);
+            if (title === 'Input' || title === 'Output'){
+                title += ' Argument &nbsp; <b>' + node.name + '</b>';
+            }
+            output += '<small>' + title + '</small>';
         }
 
-        // Required
-        if (node.required){
-            output+= ' <small style="opacity: 0.66;"> - <em>Required</em></small>';
+        // If file, and has file-size, add it (idk, why not)
+        if (
+            (node.type === 'input' || node.type === 'output') &&
+            this.doesRunDataFileExist() &&
+            typeof node.meta.run_data.file.file_size === 'number'
+        ){
+            output += '<div><span class="text-300">Size:</span> ' + Schemas.Term.bytesToLargerUnit(node.meta.run_data.file.file_size) + '</div>';
         }
-
-        
-
-        // Title
-        var title = (node.meta && node.meta.display_title) || node.title || node.name; // IO arg name or step ID/name.
-        output += '<h5 class="text-600 tooltip-title">' + title + '</h5>';
 
         // Workflow name, if any
         if (node.type === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
@@ -106,7 +111,7 @@ export class WorkflowNodeElement extends React.Component {
             output += '<hr class="mt-08 mb-05"/><div><span class="text-600">Workflow: </span><span class="text-400">' + node.meta.workflow.display_title + '</span></div>';
         }
 
-        if (node.type === 'input'){
+        if (node.type === 'input'){ // Old/deprecated -- remove?
             if (node.meta && node.meta['sbg:toolDefaultValue']){
                 output += '<div><small>Default: "' + node.meta['sbg:toolDefaultValue'] + '"</small></div>';
             }
@@ -175,6 +180,12 @@ export class WorkflowNodeElement extends React.Component {
             return <div {...elemProps}>{  node.meta.analysis_step_types.map(Schemas.Term.capitalize).join(', ') }</div>;
         }
 
+        // If IO Arg w/o file but w/ format
+        if ((node.type === 'input' || node.type === 'output') && node.meta && typeof node.meta.argument_format === 'string'){
+            return <div {...elemProps}>{ node.meta.argument_format }</div>;
+        }
+
+        // Default-ish
         if (typeof node.format === 'string') {
             return <div {...elemProps}>{ node.format }</div>;
         }
