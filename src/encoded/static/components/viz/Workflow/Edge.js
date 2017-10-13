@@ -75,7 +75,7 @@ export const pathDimensionFunctions = {
 
     'drawStraightLineCurved' : function(startPt, endPt, config){
         var path;
-        var radius = config.curveRadius || config.radius;
+        var radius = Math.min(config.curveRadius || config.radius, Math.abs(startPt.y - endPt.y) / 2);
         path = d3.path();
         path.moveTo(startPt.x, startPt.y);
         path.lineTo(
