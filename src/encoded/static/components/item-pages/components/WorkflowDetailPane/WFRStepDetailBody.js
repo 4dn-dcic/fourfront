@@ -152,7 +152,6 @@ export class WFRStepDetailBody extends React.Component {
         var { node, step } = this.props; // this.props.step === this.props.node.meta
         var workflow = (step && step.workflow) || null;
         var wfr = (this.state.wfr && typeof this.state.wfr !== 'string' && this.state.wfr) || false; // If step ===  wfr, not step === analysis_step
-        workflow = (wfr && wfr.workflow) || workflow;
 
         // Still need to test this .workflow_steps.step.software_used -> .steps.meta.software_used :
         var listOfSoftwareInWorkflow = (wfr && wfr.workflow && Array.isArray(wfr.workflow.steps) &&

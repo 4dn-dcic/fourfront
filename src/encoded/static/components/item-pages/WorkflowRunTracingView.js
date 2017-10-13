@@ -207,7 +207,7 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
         );
     }
     render(){
-        return this.wrapper(this.referenceFilesCheckbox(), this.indirectFilesCheckbox(), this.parametersCheckbox(), this.allRunsCheckbox(), this.rowSpacingTypeDropdown());
+        return this.wrapper(this.referenceFilesCheckbox(), this.indirectFilesCheckbox(), /*this.parametersCheckbox(),*/ this.allRunsCheckbox(), this.rowSpacingTypeDropdown());
     }
 }
 
