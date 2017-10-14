@@ -126,25 +126,56 @@ export default class Graph extends React.Component {
                 return n.meta.run_data && !n.meta.run_data.file && n.meta.run_data.value && (typeof n.meta.run_data.value === 'string' || typeof n.meta.run_data.value === 'number');
             }
 
-            function compareNodeInputOf(n1, n2){
-                var n1InputOf = n1.type === 'step' ? n1.outputNodes : n1.inputOf;
-                var n2InputOf = n2.type === 'step' ? n2.outputNodes : n2.inputOf;
-                if (Array.isArray(n1InputOf) && Array.isArray(n2InputOf) && (n1InputOf[0] && n1InputOf[0].name && n2InputOf[0] && n2InputOf[0].name)){
+            function getNodeFromListForComparison(nodeList, highestColumn = true){
+                if (!Array.isArray(nodeList) || nodeList.length === 0) return null;
+                var sortedList = (highestColumn ?
+                    _.sortBy(_.sortBy(nodeList, 'indexInColumn').reverse(), 'column').reverse()
+                    :
+                    _.sortBy(_.sortBy(nodeList, 'indexInColumn'), 'column')
+                );
+                return (
+                    _.find(sortedList, function(n){ return typeof n.indexInColumn === 'number'; })
+                    || sortedList[0]
+                    || null
+                );
+            }
 
-                    if (n1InputOf[0].name === n2InputOf[0].name){
+            function compareNodesBySameColumnIndex(n1, n2){
+                if (n1 && !n2) return -1;
+                if (!n1 && n2) return 1;
+                if (n1 && n2){
+                    if (n1.column === n2.column){
+                        if (n1.indexInColumn < n2.indexInColumn) return -1;
+                        if (n1.indexInColumn > n2.indexInColumn) return 1;
+                    }
+                }
+                return 0;
+            }
+
+            function compareNodeInputOf(n1, n2){
+                var n1InputOf = getNodeFromListForComparison(n1.type === 'step' ? n1.outputNodes : n1.inputOf, false);
+                var n2InputOf = getNodeFromListForComparison(n2.type === 'step' ? n2.outputNodes : n2.inputOf, false);
+
+                var ioResult = compareNodesBySameColumnIndex(n1InputOf, n2InputOf);
+                console.log('R', n1InputOf, n2InputOf, n1, n2, ioResult);
+                if (ioResult !== 0) return ioResult;
+                
+                if (n1InputOf && n2InputOf && n1InputOf.name && n2InputOf.name){
+                    if (n1InputOf.name === n2InputOf.name){
                         if (n1.name === n2.name){
                             return (n1.id < n2.id) ? -2 : 2;
                         }
                         return (n1.name < n2.name) ? -2 : 2;
                     }
-                    return n1InputOf[0].name < n2InputOf[0].name ? -1 : 1;
+                    return n1InputOf.name < n2InputOf.name ? -1 : 1;
                 }
+                
                 return 0;
             }
 
             function compareNodeOutputOf(n1, n2){
-                var n1OutputOf = n1.type === 'step' ? (n1.inputNodes && n1.inputNodes.length > 0 && _.find(n1.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n1.outputOf;
-                var n2OutputOf = n2.type === 'step' ? (n2.inputNodes && n2.inputNodes.length > 0 && _.find(n2.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n2.outputOf;
+                var n1OutputOf = n1.type === 'step' ? (n1.inputNodes && getNodeFromListForComparison(n1.inputNodes)) : n1.outputOf;
+                var n2OutputOf = n2.type === 'step' ? (n2.inputNodes && getNodeFromListForComparison(n2.inputNodes)) : n2.outputOf;
 
                 if ((n1OutputOf && typeof n1OutputOf.indexInColumn === 'number' && n2OutputOf && typeof n2OutputOf.indexInColumn === 'number')){
                     if (n1OutputOf.column === n2OutputOf.column){
@@ -173,25 +204,20 @@ export default class Graph extends React.Component {
             var ioResult;
 
             if (node1.type === 'step' && node2.type === 'step'){
+
+                if (node1.column === 1){
+                    //return 0;
+                    return node1.name < node2.name ? -1 : 1;
+                }
+
                 if (node1.inputNodes && !node2.inputNodes) return -1;
                 if (!node1.inputNodes && node2.inputNodes) return 1;
                 if (node1.inputNodes && node2.inputNodes){
-                    var n1input = _.find(
-                        _.sortBy(_.sortBy(node1.inputNodes, 'indexInColumn'), 'column'),
-                        function(n){ return typeof n.indexInColumn === 'number'; }
-                    ) || null;
-                    var n2input = _.find(
-                        _.sortBy(_.sortBy(node2.inputNodes, 'indexInColumn'), 'column'),
-                        function(n){ return typeof n.indexInColumn === 'number'; }
-                    ) || null;
-                    if (n1input && !n2input) return -1;
-                    if (!n1input && n2input) return 1;
-                    if (n1input && n2input){
-                        if (n1input.column === n2input.column){
-                            if (n1input.indexInColumn < n2input.indexInColumn) return -1;
-                            if (n1input.indexInColumn > n2input.indexInColumn) return 1;
-                        }
-                    }
+                    ioResult = compareNodesBySameColumnIndex(
+                        getNodeFromListForComparison(node1.inputNodes),
+                        getNodeFromListForComparison(node2.inputNodes)
+                    );
+                    if (ioResult !== 0) return ioResult;
                 }
                 if (node1.name === node2.name){ // Shouldnt happen. Step names are now enforced to be unique.
                     return 0;
