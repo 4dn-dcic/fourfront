@@ -303,20 +303,20 @@ export default class Graph extends React.Component {
                 // If all step nodes, move those with more inputs toward the middle.
                 var nodesByNumberOfInputs = _.groupBy(nodesInColumn, function(n){ return n.inputNodes.length; });
                 var inputCounts = _.keys(nodesByNumberOfInputs).map(function(num){ return parseInt(num); }).sort();
-                console.log('INPUTCOUNTS', inputCounts, nodesByNumberOfInputs);
                 if (inputCounts.length > 1){
+                    console.log('INPUTCOUNTS', inputCounts, nodesByNumberOfInputs);
                     var popped;
-                    var middeIndex = Math.floor(nodesInColumn.length / 2);
-                    var centeredCount = 0;
+                    var nodesToCenter = [];
                     while (inputCounts.length > 1){
                         popped = inputCounts.pop();
-                        _.forEach(nodesByNumberOfInputs[popped + ''], function(nodeToCenter){
-                            var oldIdx = nodesInColumn.indexOf(nodeToCenter);
-                            nodesInColumn.splice(oldIdx, 1);
-                            nodesInColumn.splice(middeIndex + centeredCount, 0, nodeToCenter);
-                            centeredCount++;
-                        });
+                        nodesToCenter = nodesToCenter.concat(nodesByNumberOfInputs[popped + '']);
                     }
+                    _.forEach(nodesToCenter, function(nodeToCenter){
+                        var oldIdx = nodesInColumn.indexOf(nodeToCenter);
+                        nodesInColumn.splice(oldIdx, 1);
+                    });
+                    var middeIndex = Math.floor(nodesInColumn.length / 2);
+                    nodesInColumn.splice(middeIndex, 0, ...nodesToCenter);
                 }
             }
             
