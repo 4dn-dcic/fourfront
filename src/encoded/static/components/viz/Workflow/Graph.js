@@ -112,6 +112,7 @@ export default class Graph extends React.Component {
             });
             return nodes;
         },
+        'skipSortOnColumns' : [1],
         /**
          * This function, along with 'nodesInColumnPostSortFxn' & 'nodesPreSortFxn', is _PROTOTYPICAL_ - a R&D work in progress.
          * It's quick, dirty, hacky. And it will remain this way until we figure out what we want from it, or if we want it at all, and then we'll go back and make it DRY and pretty.
@@ -128,13 +129,12 @@ export default class Graph extends React.Component {
 
             function getNodeFromListForComparison(nodeList, highestColumn = true){
                 if (!Array.isArray(nodeList) || nodeList.length === 0) return null;
-                var sortedList = (highestColumn ?
-                    _.sortBy(_.sortBy(nodeList, 'indexInColumn').reverse(), 'column').reverse()
-                    :
-                    _.sortBy(_.sortBy(nodeList, 'indexInColumn'), 'column')
-                );
+                var sortedList = _.sortBy(nodeList.slice(0), function(n){
+                    return (n.indexInColumn || n.origIndexInColumn);
+                });
+                sortedList = _.sortBy(sortedList, function(n){ return highestColumn ? -n.column : n.column; });
                 return (
-                    _.find(sortedList, function(n){ return typeof n.indexInColumn === 'number'; })
+                    _.find(sortedList, function(n){ return typeof n.indexInColumn === 'number' || typeof n.origIndexInColumn === 'number'; })
                     || sortedList[0]
                     || null
                 );
@@ -145,8 +145,8 @@ export default class Graph extends React.Component {
                 if (!n1 && n2) return 1;
                 if (n1 && n2){
                     if (n1.column === n2.column){
-                        if (n1.indexInColumn < n2.indexInColumn) return -1;
-                        if (n1.indexInColumn > n2.indexInColumn) return 1;
+                        if ((n1.indexInColumn || n1.origIndexInColumn) < (n2.indexInColumn || n2.origIndexInColumn)) return -1;
+                        if ((n1.indexInColumn || n1.origIndexInColumn) > (n2.indexInColumn || n2.origIndexInColumn)) return 1;
                     }
                 }
                 return 0;
@@ -159,17 +159,11 @@ export default class Graph extends React.Component {
                 var ioResult = compareNodesBySameColumnIndex(n1InputOf, n2InputOf);
                 if (ioResult !== 0) return ioResult;
                 
-                if (n1InputOf && n2InputOf && n1InputOf.name && n2InputOf.name){
-                    if (n1InputOf.name === n2InputOf.name){
-                        if (n1.name === n2.name){
-                            return (n1.id < n2.id) ? -2 : 2;
-                        }
-                        return (n1.name < n2.name) ? -2 : 2;
-                    }
-                    return n1InputOf.name < n2InputOf.name ? -1 : 1;
+                if (n1.name === n2.name){
+                    return 0;
                 }
-                
-                return 0;
+                return (n1.name < n2.name) ? -1 : 1;
+
             }
 
             function compareNodeOutputOf(n1, n2){
@@ -200,14 +194,14 @@ export default class Graph extends React.Component {
                 return 0;
             }
 
+            function nonIOStepCompare(n1,n2){ // Fallback
+                return 0; // Use order step was given to us in.
+            }
+
             var ioResult;
 
             if (node1.type === 'step' && node2.type === 'step'){
 
-                if (node1.column === 1){
-                    //return 0;
-                    return node1.name < node2.name ? -1 : 1;
-                }
 
                 if (node1.inputNodes && !node2.inputNodes) return -1;
                 if (!node1.inputNodes && node2.inputNodes) return 1;
@@ -218,20 +212,12 @@ export default class Graph extends React.Component {
                     );
                     if (ioResult !== 0) return ioResult;
                 }
-                if (node1.name === node2.name){ // Shouldnt happen. Step names are now enforced to be unique.
-                    return 0;
-                }
-                return (node1.name < node2.name) ? -2 : 2;
+                
+                return nonIOStepCompare(node1,node2);
             }
             if (node1.type === 'output' && node2.type === 'input'){
-                if (typeof node1.inputOf !== 'undefined'){
-                    return -4;
-                }
                 return -1;
             } else if (node1.type === 'input' && node2.type === 'output'){
-                if (typeof node2.inputOf !== 'undefined'){
-                    return 4;
-                }
                 return 1;
             }
 
@@ -255,8 +241,8 @@ export default class Graph extends React.Component {
                     if (isNodeParameter(node1) && isNodeParameter(node2)){
                         return compareNodeInputOf(node1, node2);
                     }
-                    else if (isNodeParameter(node1)) return 1;
-                    else if (isNodeParameter(node2)) return -1;
+                    else if (isNodeParameter(node1)) return 5;
+                    else if (isNodeParameter(node2)) return -5;
 
                     if (isNodeFileReference(node1)){
                         if (isNodeFileReference(node2)) {
@@ -266,13 +252,15 @@ export default class Graph extends React.Component {
                             return 7;
                         }
                     } else if (isNodeFileReference(node2)) {
-                        return -1;
+                        return -7;
                     }
 
                     ioResult = compareNodeInputOf(node1, node2);
-                    if (ioResult !== 0) return ioResult;
+                    return ioResult;
                 }
             }
+
+            return  0;
         },
         'nodesInColumnPostSortFxn' : function(nodesInColumn, columnNumber){
             var groupNodes = _.filter(nodesInColumn, { 'type' : 'input-group' });
@@ -297,7 +285,7 @@ export default class Graph extends React.Component {
             
             if (_.every(nodesInColumn, function(n){ return n.type === 'step'; })){
                 // If all step nodes, move those with more inputs toward the middle.
-                var nodesByNumberOfInputs = _.groupBy(nodesInColumn, function(n){ return n.inputNodes.length; });
+                var nodesByNumberOfInputs = _.groupBy(nodesInColumn.slice(0), function(n){ return n.inputNodes.length; });
                 var inputCounts = _.keys(nodesByNumberOfInputs).map(function(num){ return parseInt(num); }).sort();
                 if (inputCounts.length > 1){ // If any step nodes which have more inputs than others.
                     inputCounts.reverse().pop();
@@ -389,19 +377,33 @@ export default class Graph extends React.Component {
         nodes = _.sortBy(nodes, 'column');
         var nodesByColumnPairs = _.pairs(_.groupBy(nodes, 'column'));
 
+        // Add prelim index for each node, over-written in sorting if any.
+        nodesByColumnPairs = _.map(nodesByColumnPairs, function(columnGroup){
+            _.forEach(columnGroup[1], function(n, i){
+                n.origIndexInColumn = i;
+            });
+            return [ parseInt(columnGroup[0]), columnGroup[1] ];
+        });
+
         // Sort nodes within columns.
         if (typeof this.props.nodesInColumnSortFxn === 'function'){
             nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
-
+                var nodesInColumn;
                 // Sort
-                var nodesInColumn = columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn);
+                if (this.props.skipSortOnColumns.indexOf(columnGroup[0]) > -1){
+                    nodesInColumn = columnGroup[1].slice(0);
+                } else {
+                    nodesInColumn = columnGroup[1].sort(this.props.nodesInColumnSortFxn);
+                }
 
                 // Run post-sort fxn, e.g. to manually re-arrange nodes within columns. If avail.
                 if (typeof this.props.nodesInColumnPostSortFxn === 'function'){
                     nodesInColumn = this.props.nodesInColumnPostSortFxn(nodesInColumn, columnGroup[0]);
                 }
 
-                return [ columnGroup[0], _.map(nodesInColumn, function(n, i){ n.indexInColumn = i; return n; }) ];
+                _.forEach(nodesInColumn, function(n, i){ n.indexInColumn = i; }); // Update w/ new index in column
+
+                return [ columnGroup[0], nodesInColumn ];
             });
         }
 
