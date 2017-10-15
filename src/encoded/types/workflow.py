@@ -431,26 +431,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 }
             })
 
-        # Add parameters
-        params_by_argument_name = group_files_by_workflow_argument_name(workflow_run_model_obj.get('parameters', []))
-        for argument_name, input_params_for_arg in params_by_argument_name.items():
-
-            values = [ p.get('value') for p in input_params_for_arg ]
-
-            step['inputs'].append({
-                "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
-                "source" : [{ "name" : argument_name, "type" : "Workflow Parameter" }],
-                "meta" : {
-                    "argument_type" : "Workflow Parameter",
-                    "in_path" : True
-                },
-                "run_data" : {
-                    "value" : values,
-                    "type" : "parameter",
-                    "meta" : [ { k:v for k,v in p.items() if k not in ['value', 'workflow_argument_name'] } for p in input_params_for_arg ]
-                }
-            })
-
         steps.append(step)
         uuidCacheTracedHistory[last_workflow_run_uuid] = step
         return step

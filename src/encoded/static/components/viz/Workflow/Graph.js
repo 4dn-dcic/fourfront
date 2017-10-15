@@ -293,11 +293,34 @@ export default class Graph extends React.Component {
                         nodesInColumn.splice(afterThisIdx + 1, 0, gN);
                     }
                 });
-                // Update own indices (not used for anything currently xcept debugging)
-                _.forEach(nodesInColumn, function(n, index){
-                    n.indexInColumn = index;
-                });
             }
+
+            /** 
+             * Works at moment, but need to recursively re-sort / continue on next columns after correcting this one.
+             */
+            
+            if (_.every(nodesInColumn, function(n){ return n.type === 'step'; })){
+                // If all step nodes, move those with more inputs toward the middle.
+                var nodesByNumberOfInputs = _.groupBy(nodesInColumn, function(n){ return n.inputNodes.length; });
+                var inputCounts = _.keys(nodesByNumberOfInputs).map(function(num){ return parseInt(num); }).sort();
+                console.log('INPUTCOUNTS', inputCounts, nodesByNumberOfInputs);
+                if (inputCounts.length > 1){
+                    var popped;
+                    var middeIndex = Math.floor(nodesInColumn.length / 2);
+                    var centeredCount = 0;
+                    while (inputCounts.length > 1){
+                        popped = inputCounts.pop();
+                        _.forEach(nodesByNumberOfInputs[popped + ''], function(nodeToCenter){
+                            var oldIdx = nodesInColumn.indexOf(nodeToCenter);
+                            nodesInColumn.splice(oldIdx, 1);
+                            nodesInColumn.splice(middeIndex + centeredCount, 0, nodeToCenter);
+                            centeredCount++;
+                        });
+                    }
+                }
+            }
+            
+
             
             return nodesInColumn;
         }
@@ -369,20 +392,16 @@ export default class Graph extends React.Component {
         // Sort nodes within columns.
         if (typeof this.props.nodesInColumnSortFxn === 'function'){
             nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
-                return [
-                    columnGroup[0],
-                    _.map(columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn), function(n, i){
-                        n.indexInColumn = i;
-                        return n;
-                    })
-                ];
-            });
-        }
 
-        // Run post-sort fxn, e.g. to manually re-arrange nodes within columns.
-        if (typeof this.props.nodesInColumnPostSortFxn === 'function'){
-            nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
-                return [columnGroup[0], this.props.nodesInColumnPostSortFxn(columnGroup[1], columnGroup[0])];
+                // Sort
+                var nodesInColumn = columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn);
+
+                // Run post-sort fxn, e.g. to manually re-arrange nodes within columns. If avail.
+                if (typeof this.props.nodesInColumnPostSortFxn === 'function'){
+                    nodesInColumn = this.props.nodesInColumnPostSortFxn(nodesInColumn, columnGroup[0]);
+                }
+
+                return [ columnGroup[0], _.map(nodesInColumn, function(n, i){ n.indexInColumn = i; return n; }) ];
             });
         }
 
