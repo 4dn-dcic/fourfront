@@ -1,6 +1,7 @@
 [
     {
         "name":"about",
+        "uuid":"c79afee0-7ba5-4dc6-9c1c-684984f85607",
         "title":"About",
         "directory":"/src/encoded/static/data/about",
         "sections":[
@@ -23,6 +24,7 @@
     },
     {
         "name":"help",
+        "uuid":"311d0f4f-56ee-4450-8cbb-780c10229284",
         "title":"Introduction to 4DN Metadata",
         "directory":"/docs/public/help",
         "sections":[
@@ -52,6 +54,7 @@
     },
     {
         "name":"help/account-creation",
+        "uuid":"5153c902-a0d2-4246-9b41-cea7a1c91f52",
         "title":"Creating an Account",
         "directory":"/docs/public/metadata-submission",
         "sections":[
@@ -63,6 +66,7 @@
     },
     {
         "name":"help/getting-started",
+        "uuid":"6292facf-9eb4-451e-8d05-2e56e1bd7cbe",
         "title":"Getting Started with Submissions",
         "directory":"/docs/public/metadata-submission",
         "sections":[
@@ -85,6 +89,7 @@
     },
     {
         "name":"help/biosample",
+        "uuid":"3c999ac4-1727-4aac-96f5-61ae701a4006",
         "title":"Biosample Metadata",
         "directory":"/docs/public/metadata-submission",
         "sections":[
@@ -107,6 +112,7 @@
     },
     {
         "name":"help/web-submission",
+        "uuid":"251d6d2b-4ed0-4fbe-b8b1-eaa49569187b",
         "title":"Online Submissions",
         "directory":"/docs/public/metadata-submission",
         "sections":[
@@ -129,6 +135,7 @@
     },
     {
         "name":"help/spreadsheet",
+        "uuid":"4f115e02-5291-436d-92e8-617af96355df",
         "title":"Spreadsheet Submissions",
         "directory":"/docs/public/metadata-submission",
         "sections":[
@@ -155,6 +162,7 @@
     },
     {
         "name":"help/rest-api",
+        "uuid":"cb2dda1c-a53f-4ec5-bf94-8a866ca836fb",
         "title":"The REST-API",
         "directory":"/docs/public/metadata-submission",
         "sections":[
@@ -177,6 +185,7 @@
     },
     {
         "name":"error/login-failed",
+        "uuid":"5f7e0c7a-d31a-4f77-a109-508f0c9a4553",
         "title":"Login Failed",
         "directory":"/src/encoded/static/data",
         "sections":[
@@ -192,6 +201,7 @@
     },
     {
         "name":"nofic-matrix/2017-05",
+        "uuid":"9061346d-bc61-4f59-bbe8-054b83978a0e",
         "title":"NOFIC Matrix",
         "directory":"/src/encoded/static/data",
         "sections":[
@@ -234,6 +244,7 @@
     },
     {
         "name":"joint-analysis-data-plans",
+        "uuid":"e4e0ff82-ac00-4e05-9db3-ac6df59fb3bd",
         "title":"Joint Analysis Data",
         "directory":"/src/encoded/static/data",
         "sections":[
@@ -302,6 +313,7 @@
     },
     {
         "name":"joint-analysis-data-plans/dev",
+        "uuid":"80706e23-aabf-40e5-85b8-f0e41ceda669",
         "title":"Joint Analysis Data",
         "directory":"/src/encoded/static/data",
         "sections":[
@@ -371,6 +383,7 @@
     },
     {
         "name":"joint-analysis-data-plans/jan2018",
+        "uuid":"abf6c6de-a8d4-4610-9cbb-54d8366f535a",
         "title":"Joint Analysis Data - January 2018",
         "directory":"/src/encoded/static/data",
         "sections":[
@@ -439,6 +452,7 @@
     },
     {
         "name":"joint-analysis-data-plans/jan2018/dev",
+        "uuid":"766acc78-8a9b-4f83-8d5b-b184654e527c",
         "title":"Joint Analysis Data - January 2018",
         "directory":"/src/encoded/static/data",
         "sections":[
@@ -507,6 +521,7 @@
     },
     {
         "name":"joint-analysis-data-plans/july2018",
+        "uuid":"82695325-f27a-4adf-b741-a97287958c8b",
         "title":"Joint Analysis Data - July 2018",
         "directory":"/src/encoded/static/data",
         "sections":[
@@ -575,6 +590,7 @@
     },
     {
         "name":"joint-analysis-data-plans/july2018/dev",
+        "uuid":"5ecf54fd-cc7c-459e-b011-1a58cad85ac7",
         "title":"Joint Analysis Data - July 2018",
         "directory":"/src/encoded/static/data",
         "sections":[
@@ -643,10 +659,12 @@
     },
     {
         "name":"planned-submissions",
+        "uuid":"c6675562-c574-4b58-bf14-fb25f8ee5360",
         "title":"Planned Data Submission"
     },
     {
         "name":"planned-submissions-matrix",
+        "uuid":"d013f70e-1ad7-4f3b-ac43-b60cb1bc96f4",
         "title":"Planned Data Submission",
         "directory":"/src/encoded/static/data",
         "sections":[
