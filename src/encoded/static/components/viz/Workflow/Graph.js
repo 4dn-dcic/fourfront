@@ -157,7 +157,6 @@ export default class Graph extends React.Component {
                 var n2InputOf = getNodeFromListForComparison(n2.type === 'step' ? n2.outputNodes : n2.inputOf, false);
 
                 var ioResult = compareNodesBySameColumnIndex(n1InputOf, n2InputOf);
-                console.log('R', n1InputOf, n2InputOf, n1, n2, ioResult);
                 if (ioResult !== 0) return ioResult;
                 
                 if (n1InputOf && n2InputOf && n1InputOf.name && n2InputOf.name){
