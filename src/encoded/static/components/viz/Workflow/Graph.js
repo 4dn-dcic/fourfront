@@ -89,6 +89,8 @@ export default class Graph extends React.Component {
             return <DefaultNodeElement {...props} node={node} />;
         },
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
+        'checkHrefForSelectedNode' : true,
+        'checkWindowLocationHref' : true,
         'innerMargin'   : {
             'top' : 60,
             'bottom' : 60,
@@ -516,7 +518,7 @@ export default class Graph extends React.Component {
                             innerWidth={width}
                             innerHeight={height}
                             contentWidth={contentWidth}
-                            {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane')}
+                            {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane', 'checkHrefForSelectedNode', 'checkWindowLocationHref')}
                         >
                             <ScrollContainer outerHeight={fullHeight}>
                                 <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />

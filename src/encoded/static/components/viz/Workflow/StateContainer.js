@@ -28,12 +28,6 @@ export function findNodeFromHref(href, nodes){
 
 export default class StateContainer extends React.Component {
 
-    static defaultProps = {
-        'checkHrefForSelectedNode' : true,
-        'checkWindowLocationHref' : true,
-        'onNodeClick' : null
-    }
-
     constructor(props){
         super(props);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);

@@ -29,6 +29,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 // Navbar search
 .navbar-form.navbar-right {
 	position: relative;
+	margin-top: -1px;
 	#navbar-search {
 		font-size: 1em;
 		width: 140px;
@@ -121,7 +122,8 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			display: inline-block;
 			z-index: -1000;
 			border-radius: 3px;
-			padding: 4px 10px;
+			padding: 4px 24px 4px 10px;
+			max-width: 118px;
 			.caret {
 				margin-left: 2px;
 			}

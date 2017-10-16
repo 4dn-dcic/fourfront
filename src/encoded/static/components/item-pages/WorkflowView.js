@@ -38,7 +38,6 @@ export function onItemPageNodeClick(node, selectedNode, evt){
 export function commonGraphPropsFromProps(props){
     return {
         'href'        : props.href,
-        'onNodeClick' : onItemPageNodeClick,
         'renderDetailPane' : function(selectedNode, paneProps){
             return <WorkflowDetailPane {...paneProps} schemas={props.schemas} context={props.context} selectedNode={selectedNode} legendItems={props.legendItems} />;
         },
@@ -60,6 +59,9 @@ export function commonGraphPropsFromProps(props){
             }
             return '';
         },
+        'onNodeClick' : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : onItemPageNodeClick,
+        'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : true,
+        'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : true
     };
 }
 
@@ -111,6 +113,11 @@ export function filterOutParametersFromGraphData(graphData){
  * @extends module:item-pages/DefaultItemView.ItemBaseView
  */
 export class WorkflowView extends ItemBaseView {
+
+    static defaultProps = {
+        'checkHrefForSelectedNode' : true,
+        'checkWindowLocationHref' : true
+    }
 
     constructor(props){
         super(props);
@@ -385,8 +392,9 @@ export class WorkflowGraphSection extends React.Component {
         }
         keepItems.push('Intermediate File');
         var legendItems = _.pick(...[WorkflowDetailPane.Legend.defaultProps.items].concat(keepItems));
+        var commonGraphProps = commonGraphPropsFromProps(_.extend({ 'legendItems' : legendItems }, this.props));
 
-        return _.extend(commonGraphPropsFromProps(_.extend({ legendItems },this.props)), this.parseAnalysisSteps(), { 'rowSpacingType' : this.state.rowSpacingType });
+        return _.extend(commonGraphProps, this.parseAnalysisSteps(), {'rowSpacingType' : this.state.rowSpacingType });
     }
 
     basicGraph(){

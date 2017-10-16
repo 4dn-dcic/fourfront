@@ -1338,6 +1338,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 z-index: 5;
                 background-color: transparent;
                 width: 100%;
+                transition: opacity .5s .25s ease-out;
                 > .node-name {
                     padding-left: 7px;
                     &.mono-text {
