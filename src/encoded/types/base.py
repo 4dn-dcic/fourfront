@@ -303,6 +303,33 @@ class Item(snovault.Item):
             keys['accession'].append(properties['accession'])
         return keys
 
+    def is_update_by_admin_user(self, properties):
+        # determine if the submitter in the properties is an admin user
+        import pdb; pdb.set_trace()
+        print(request)
+        if 'submitted_by' in properties:
+            userid = properties['submitted_by']
+            users = self.registry['collections']['User']
+            user = users.get(userid)
+            if 'groups' in user.properties:
+                if 'admin' in user.properties['groups']:
+                    return True
+        return False
+
+    def _update(self, properties, sheets=None):
+        # if an item is status 'planned' and an update is submitted
+        # by a non-admin user then status should be changed to 'submission in progress'
+        import pdb; pdb.set_trace()
+        try:
+            self.is_update_by_admin_user(properties)
+            props = self.properties
+            if 'status' in props and props['status'] == 'planned':
+                if not self.is_update_by_admin_user(properties):
+                    properties['status'] = 'submission in progress'
+        except KeyError:
+            pass
+        super(Item, self)._update(properties, sheets)
+
     @snovault.calculated_property(schema={
         "title": "External Reference URIs",
         "description": "External references to this item.",
