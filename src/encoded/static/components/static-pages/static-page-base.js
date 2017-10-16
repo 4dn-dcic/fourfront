@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { compiler } from './../lib/markdown-to-jsx';
+import { compiler } from 'markdown-to-jsx';
 import TableOfContents from './table-contents';
 import { CSVMatrixView } from './components';
 import * as globals from './../globals';
