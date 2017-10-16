@@ -53,6 +53,7 @@ STATUS_LEVEL = {
     'released': 3,
     'current': 3,
     'revoked': 3,
+    'planned': 2,
     'released to project': 2,
     'submission in progress': 2,
     'in review by lab': 1,
