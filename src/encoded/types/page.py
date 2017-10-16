@@ -105,7 +105,7 @@ class Page(Item):
             contentFilesLocation += "/../../.."  # get us to root of Git repo.
             contentFilesLocation += pageMeta['directory']
         else:
-            print("No explicit directory set for page with pathname \"" + page + "\", checking default directory location (/static/data/<pathname>)")
+            print("No explicit directory set for page with pathname \"" + page + "\", will check default directory location (/static/data/<pathname>) for sections with filenames")
             contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
             contentFilesLocation += "/static/data/"
             contentFilesLocation += page

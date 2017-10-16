@@ -707,7 +707,18 @@
             {
                 "id" : "information",
                 "title" : "Introduction",
-                "content" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/workflows/\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</ul>"
+                "content" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/search/?type=Workflow\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</li></ul>"
+            }
+        ]
+    },
+    {
+        "name" : "search-info-header/Workflow",
+        "title" : "Workflow Run Information",
+        "sections" : [
+            {
+                "id" : "information",
+                "title" : "Introduction",
+                "content" : "<ul><li>Workflows are definitions of steps and their sometimes-connecting inputs & outputs.</li><li>Workflow steps definitions are similar to and usually derived directly from a Common Workflow Language (CWL) definition.</li><li><a href=\"/search/?type=WorkflowRun\">WorkflowRuns</a> are unique runs of each Workflow and have input/output files associated with them.</li></ul>"
             }
         ]
     },

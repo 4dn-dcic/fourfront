@@ -710,8 +710,8 @@
         "sections" : [
             {
                 "id" : "information",
-                "title" : "Workflow Run Information",
-                "content" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/workflows/\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</ul>"
+                "title" : "Introduction",
+                "content" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/search/?type=Workflow\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</li></ul>"
             }
         ]
     }
