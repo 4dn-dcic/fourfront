@@ -9,7 +9,7 @@ import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
 import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList } from './components';
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, AboveSearchTablePanel } from './components';
 
 
 
@@ -206,8 +206,7 @@ export class ResultTableHandlersContainer extends React.Component {
 class ControlsAndResults extends React.Component {
 
     static defaultProps = {
-        restrictions : {},
-        searchBase : ''
+        restrictions : {}
     }
 
     constructor(props){
@@ -228,16 +227,16 @@ class ControlsAndResults extends React.Component {
 
         // get type of this object for getSchemaProperty (if type="Item", no tooltips)
         var thisType = 'Item';
-        var searchBits = this.props.searchBase.split(/[\?&]+/);
-        var filteredBits = searchBits.filter(bit => bit.slice(0,5) === 'type=' && bit.slice(5,9) !== 'Item');
-        if (filteredBits.length == 1){ // if multiple types, don't use any tooltips
-            thisType = filteredBits[0].slice(5);
-        }
+        //var searchBits = this.props.searchBase.split(/[\?&]+/);
+        //var filteredBits = searchBits.filter(bit => bit.slice(0,5) === 'type=' && bit.slice(5,9) !== 'Item');
+        //if (filteredBits.length == 1){ // if multiple types, don't use any tooltips
+        //    thisType = filteredBits[0].slice(5);
+        //}
         var urlParts = url.parse(this.props.searchBase, true);
         var itemTypeForSchemas = null;
         if (typeof urlParts.query.type === 'string') { // Can also be array
             if (urlParts.query.type !== 'Item') {
-                itemTypeForSchemas = urlParts.query.type;
+                thisType = itemTypeForSchemas = urlParts.query.type;
             }
         }
 
@@ -374,12 +373,6 @@ class ControlsAndResults extends React.Component {
 
 export default class SearchView extends React.Component {
 
-    fullWidthStyle(){
-        if (!this.refs || !this.refs.container) return null;
-        //var marginLeft =
-
-    }
-
     componentDidMount(){
         ReactTooltip.rebuild();
     }
@@ -398,10 +391,9 @@ export default class SearchView extends React.Component {
             searchBase = url.parse(this.props.href).search || '';
         }
         return (
-            <div>
-                <div className="browse-page-container search-page-container" ref="container">
-                    <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
-                </div>
+            <div className="browse-page-container search-page-container" ref="container">
+                <AboveSearchTablePanel href={searchBase} context={context} />
+                <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
             </div>
         );
     }
