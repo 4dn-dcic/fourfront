@@ -17,10 +17,7 @@ class AboveSearchTablePanelStaticContentPane extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = {
-            'content' : null,
-            'title' : null
-        };
+        this.state = { 'content' : null, 'title' : null };
         this.loadStaticContent();
     }
 
@@ -81,12 +78,10 @@ class AboveSearchTablePanelStaticContentPane extends React.Component {
 
         return (
             <div className="row mt-1">
-
-                <div className="col-md-12 hidden-xs hidden-sm">
+                <div className="col-md-9 pull-right">
                     { title }
                     <div dangerouslySetInnerHTML={{ __html : this.state.content }} />
                 </div>
-
             </div>
             
         );
@@ -110,28 +105,36 @@ export class AboveSearchTablePanel extends React.Component {
     }
 
     static defaultProps = {
-        "mapping_location" : "/sysinfos/search-header-mappings/"
+        "mappingLocation" : "/sysinfos/search-header-mappings/",
+        "cacheMappingGlobally" : true
     }
 
     static propTypes = {
         'href' : PropTypes.string.isRequired,
-        'context' : PropTypes.object.isRequired
+        'context' : PropTypes.object.isRequired,
+        'mappingLocation' : PropTypes.any, // String or null
+        'cacheMappingGlobally' : PropTypes.bool
     }
+
+    static cachedMapping = null;
 
     constructor(props){
         super(props);
         this.state = {
-            'mapping' : null
+            'mapping' : AboveSearchTablePanel.cachedMapping || null
         };
     }
 
     componentDidMount(){
-        if (!this.state.mapping && typeof this.props.mapping_location === 'string'){
-            ajax.load(this.props.mapping_location, (resp)=>{
+        if (!this.state.mapping && typeof this.props.mappingLocation === 'string'){
+            ajax.load(this.props.mappingLocation, (resp)=>{
                 if (resp && resp.mapping && _.keys(resp.mapping).length > 0){
                     this.setState({
                         'mapping' : resp.mapping
                     });
+                    if (this.props.cacheMappingGlobally) {
+                        AboveSearchTablePanel.cachedMapping = resp.mapping;
+                    }
                 }
             });
         }
@@ -140,7 +143,7 @@ export class AboveSearchTablePanel extends React.Component {
     routeStaticContentHref(contextHref, context){
         var targetHref = null; // Our return val. Null by default.
 
-        // 1. By Type
+        // 1. By Type v. lookup map
         var urlParts = url.parse(contextHref, true);
         var { searchItemType, abstractType } = AboveSearchTablePanel.currentItemTypesFromHrefParts(urlParts);
         var lookupMap = this.state.mapping;
