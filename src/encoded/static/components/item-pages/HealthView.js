@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import { content_views } from './../globals';
-import { ajax, console, object, Filters, JWT } from './../util';
+import { ajax, console, object, Filters, JWT, DateUtility } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
 import _ from 'underscore';
 import { Button } from 'react-bootstrap';
@@ -81,7 +81,7 @@ export class HealthView extends React.Component {
                         description : "Aggregations of ES-indexed data."
                     }
                 }} />
-                <AdminPanel />
+            <AdminPanel context={context}/>
             </div>
         );
     }
@@ -95,10 +95,12 @@ class AdminPanel extends React.Component {
     constructor(props){
         super(props);
         this.loadFoursight = _.throttle(this.loadFoursight, 500);
+        this.runFoursight = _.throttle(this.runFoursight, 500);
         this.state = {
             'foursight_checks': null,
             'foursight_run_resp': null,
-            'working': false
+            'working': false,
+            'foursight_environ': this.props.context.foursight_environ || null
         };
     }
 
@@ -108,8 +110,12 @@ class AdminPanel extends React.Component {
 
     loadFoursight = () => {
         // Fetch foursight checks
+        var environ = this.state.foursight_environ;
+        if(environ === null){
+            return;
+        }
         this.setState({'working': true});
-        var url = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/api/latest/webprod/all';
+        var url = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/api/latest/' + environ + '/all';
         var callbackFxn = function(payload) {
             console.log('--Foursight checks found-->', payload);
             this.setState({'foursight_checks': payload, 'working': false});
@@ -119,8 +125,12 @@ class AdminPanel extends React.Component {
 
     runFoursight = () => {
         // Fetch foursight checks
+        var environ = this.state.foursight_environ;
+        if(environ === null){
+            return;
+        }
         this.setState({'working': true});
-        var url = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/api/run/webprod/all';
+        var url = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/api/run/' + environ + '/all';
         var callbackFxn = function(payload) {
             console.log('--Foursight checks run-->', payload);
             // automatically refresh after run
@@ -153,19 +163,34 @@ class AdminPanel extends React.Component {
     render(){
         var userDetails = JWT.getUserDetails();
         if (!userDetails || !userDetails.groups || !Array.isArray(userDetails.groups) || (userDetails.groups.indexOf('admin') === -1)) return null;
+        // get foursight checks
+        var foursight_checks = null;
+        var check_success = this.state.foursight_checks && !_.isEmpty(this.state.foursight_checks.checks);
+        if(check_success){
+            foursight_checks = this.state.foursight_checks.checks.map((check) => this.buildCheckEntry(check));
+        }else{
+            foursight_checks = <div>{'Error loading foursight results; check the console.'}</div>;
+        }
+        // format foursight title with environ
+        var foursight_title = 'Foursight';
+        if(this.state.foursight_environ){
+            foursight_title = foursight_title + ' (' + this.state.foursight_environ + ')';
+        }
         return (
             <div className="admin-panel">
-                <h3 className="text-300 mt-3">Foursight</h3>
-                <div>
-                    <Button style={{'marginRight': '10px'}} onClick={this.loadFoursight} disabled={this.state.working}>Refresh</Button>
-                    <Button onClick={this.runFoursight} disabled={this.state.working}>Rerun</Button>
-                </div>
+                <h3 className="text-300 mt-3">{foursight_title}</h3>
+                {check_success ?
+                    <div>
+                        <Button style={{'marginRight': '10px'}} onClick={this.loadFoursight} disabled={this.state.working}>Refresh</Button>
+                        <Button onClick={this.runFoursight} disabled={this.state.working}>Rerun</Button>
+                    </div>
+                    :
+                    null
+                }
                 <hr className="mt-05 mb-1"/>
                 {/*<Button onClick={this.onClickRunIndexing}>Index Things</Button>*/}
-                {
-                    this.state.foursight_checks !== null ?
-                    this.state.foursight_checks.checks.map((check) =>
-                    this.buildCheckEntry(check))
+                {this.state.foursight_checks !== null ?
+                    foursight_checks
                     :
                     <i className="icon icon-spin icon-circle-o-notch"></i>
                 }
@@ -209,7 +234,10 @@ class FoursightCheck extends React.Component {
         var statStyle = {
             'marginLeft': '10px'
         };
-        if (data.status === 'PASS'){
+        // operate on check status. If IGNORE, don't render anything
+        if (data.status === 'IGNORE'){
+            return null;
+        } else if (data.status === 'PASS'){
             boxStyle.backgroundColor = '#dff0d8';
             statStyle.color = '#3c763d';
         } else if (data.status == 'WARN') {
@@ -230,9 +258,12 @@ class FoursightCheck extends React.Component {
         }
         return(
             <div style={boxStyle}>
-                <h4 className="text-300" style={{'marginLeft': '5px'}}>
+                <h4 className="text-300" style={{'margin': '10px 5px 10px 5px'}}>
                     <span>{data.title}</span>
                     <span style={statStyle}>{data.status}</span>
+                    <span className="pull-right">
+                        {DateUtility.format(data.timestamp, 'date-time-md', ' at ') + ' (UTC)'}
+                    </span>
                 </h4>
                 <div style={commonStyle}>{data.description}</div>
                 <div style={commonStyle}>

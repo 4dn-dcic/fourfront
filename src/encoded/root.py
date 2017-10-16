@@ -215,6 +215,21 @@ def health_check(config):
         except:  # pylint:disable
             ont_date = "Never Generated"
 
+        # for foursight; maybe this shouldn't be hardcoded
+        # upside is it allows easy testing / manual api access
+        # use webdev for local testing
+        foursight_origin_to_environ = {
+            'http://localhost:8000/' : 'webdev',
+            'https://data.4dnucleome.org/': 'webprod',
+            'http://fourfront-webdev.us-east-1.elasticbeanstalk.com/': 'webdev'
+        }
+
+        app_url = request.application_url
+        if not app_url.endswith('/'):
+            app_url = ''.join([app_url, '/'])
+
+        foursight_environ = foursight_origin_to_environ.get(app_url)
+
         responseDict = {
             "file_upload_bucket" : settings.get('file_upload_bucket'),
             "blob_bucket" : settings.get('blob_bucket'),
@@ -222,6 +237,7 @@ def health_check(config):
             "elasticsearch" : settings.get('elasticsearch.server'),
             "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
+            "foursight_environ": foursight_environ,
             'ontology_updated': ont_date,
             "@type" : [ "Health", "Portal" ],
             "@context" : "/health",
