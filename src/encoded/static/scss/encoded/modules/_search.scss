@@ -1,6 +1,28 @@
 $form-element-height: 26px;
 $form-bg: #f3f3f3;
 
+
+/********
+COMMON SEARCH TABLE
+*********/
+
+// Outer Wrapper
+// Inner stuff (cell, row styling, etc.) is located in _tables.scss
+
+.browse-page-container {
+	margin-top: 40px;
+	&.search-page-container {
+		margin-top: 0px;
+	}
+}
+
+
+
+
+
+
+/*** OLDER STUFF - TO BE ARRANGED & REMOVED ***/
+
 .search-list {
     position: relative;
     z-index: 0;

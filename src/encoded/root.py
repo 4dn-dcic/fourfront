@@ -206,7 +206,7 @@ class EncodedRoot(Root):
         try:
             contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
             contentFilesLocation += "/static/data/home" # Where the static files be stored. TODO: Put in .ini file
-            return { fn.split('.')[0] : get_local_file_contents(fn, 'home', contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
+            return { fn.split('.')[0] : get_local_file_contents(fn, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
         except FileNotFoundError as e:
             print("No content files found for Root object (aka Home, '/').")
             return {}

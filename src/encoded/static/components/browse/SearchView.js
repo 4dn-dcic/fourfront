@@ -305,6 +305,7 @@ class ControlsAndResults extends React.Component {
 
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
+                        <div className="above-results-table-row"/>{/* <-- temporary-ish */}
                         <FacetList
                             className="with-header-bg"
                             facets={facets}

@@ -701,6 +701,21 @@
 
 
     {
+        "name" : "search-info-header/WorkflowRun",
+        "title" : "Workflow Run Information",
+        "sections" : [
+            {
+                "id" : "information",
+                "title" : "Introduction",
+                "content" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/workflows/\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</ul>"
+            }
+        ]
+    },
+
+
+
+
+    {
         "name" : "privacy-policy",
         "title" : "Privacy Policy",
         "directory":"/src/encoded/static/data",

@@ -34,27 +34,41 @@ class AboveSearchTablePanelStaticContentPane extends React.Component {
         if (!AboveSearchTablePanelStaticContentPane.isTargetHrefValid(targetHref)){ return null; }
 
         var callback = function(resp){
-            if (!resp || (resp.code && (resp.code === 403 || resp.code === 404))) return;
-            
+            if (!resp || (resp.code && (resp.code === 403 || resp.code === 404))){
+                if (this.state.content !== null) {
+                    this.setState({
+                        content : null, title : null
+                    });
+                }
+                return null;
+            }
             
             var content = null, title = null;
-            // TODO: Adjust for static block once we have those (once it exists it wont have sections).
-            if (resp && resp.sections && resp.sections[0] && typeof resp.sections[0].content === 'string'){
-                content = resp.sections[0].content;
-                title = resp.sections[0].title || resp.title;
+            // TODO: Likely need to adjust for static block once we have those (once it exists it wont have sections).
+
+            if (resp && resp.content){
+                if (resp.content && typeof resp.content !== 'string' && resp['@type'].indexOf('StaticPage') > -1){ // Case: Static Page
+                    // Use first section only, at moment.
+                    var contentSectionToUse = _.find(resp.content, function(c){ return c.order === 0; });
+                    content = contentSectionToUse.content;
+                    title = contentSectionToUse.title || resp.title || resp.display_title;
+                } else if (typeof resp.content === 'string'){ // Case: Static Block
+                    content = resp.content;
+                    title = resp.display_title || resp.title;
+                }
             }
 
             if (content){
                 this.setState({ content, title });
             }
+
         }.bind(this);
 
         ajax.load(targetHref, callback, 'GET', callback);
     }
 
     render(){
-        if (!AboveSearchTablePanelStaticContentPane.isTargetHrefValid(this.props.targetHref)) return null;
-        console.log('CONTENT', this.state);
+        if (!this.state.content || !AboveSearchTablePanelStaticContentPane.isTargetHrefValid(this.props.targetHref)) return null;
 
         var title = null;
         if (this.state.title){
@@ -66,14 +80,13 @@ class AboveSearchTablePanelStaticContentPane extends React.Component {
         }
 
         return (
-            <div className="row">
-                <div className="col-md-3 hidden-xs hidden-sm">
-                    <div>&nbsp;</div>
-                </div>
-                <div className="col-md-9 hidden-xs hidden-sm">
+            <div className="row mt-1">
+
+                <div className="col-md-12 hidden-xs hidden-sm">
                     { title }
                     <div dangerouslySetInnerHTML={{ __html : this.state.content }} />
                 </div>
+
             </div>
             
         );
@@ -96,13 +109,32 @@ export class AboveSearchTablePanel extends React.Component {
         return { searchItemType, abstractType };
     }
 
-    static staticContentByTypeMap = {
-        'Protocol' : '/search-info-header/Protocol'
+    static defaultProps = {
+        "mapping_location" : "/sysinfos/search-header-mappings/"
     }
 
     static propTypes = {
         'href' : PropTypes.string.isRequired,
         'context' : PropTypes.object.isRequired
+    }
+
+    constructor(props){
+        super(props);
+        this.state = {
+            'mapping' : null
+        };
+    }
+
+    componentDidMount(){
+        if (!this.state.mapping && typeof this.props.mapping_location === 'string'){
+            ajax.load(this.props.mapping_location, (resp)=>{
+                if (resp && resp.mapping && _.keys(resp.mapping).length > 0){
+                    this.setState({
+                        'mapping' : resp.mapping
+                    });
+                }
+            });
+        }
     }
 
     routeStaticContentHref(contextHref, context){
@@ -111,8 +143,8 @@ export class AboveSearchTablePanel extends React.Component {
         // 1. By Type
         var urlParts = url.parse(contextHref, true);
         var { searchItemType, abstractType } = AboveSearchTablePanel.currentItemTypesFromHrefParts(urlParts);
-        var lookupMap = AboveSearchTablePanel.staticContentByTypeMap;
-        targetHref = lookupMap[abstractType] || lookupMap[searchItemType] || null;
+        var lookupMap = this.state.mapping;
+        targetHref = (lookupMap && (lookupMap[abstractType] || lookupMap[searchItemType])) || null;
         if (typeof targetHref === 'string'){
             return targetHref;
         }
