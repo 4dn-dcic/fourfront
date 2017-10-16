@@ -7,13 +7,22 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing Workflow Graph', function() {
-    var React, ItemView, TestUtils, context, schemas, _, Wrapper, WorkflowRunView, testWorkflowInstance;
+    var React, ItemView, TestUtils, context, schemas, _, Wrapper, WorkflowRunView, testWorkflowInstance, sinon, server;
 
     function getShowParamsCheckBox(){
         var showParamsBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'show-params-checkbox-container')[0];
         showParamsBox = showParamsBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
         return showParamsBox;
     }
+
+    beforeAll(function(){
+        sinon = require('sinon');
+        server = sinon.fakeServer.create(); // We just need this to patch AJAX requests atm.
+    });
+
+    afterAll(function(){
+        server.restore();
+    });
 
     beforeEach(function() {
 
@@ -166,6 +175,30 @@ describe('Testing Workflow Graph', function() {
         // Make sure our step name, and proper label for it, is somewhere within content of detail pane.
         expect(detailPaneBody.textContent.indexOf('Step Name')).toBeGreaterThan(-1);
         expect(detailPaneBody.textContent.indexOf(stepNodeToClickName)).toBeGreaterThan(-1);
+
+        // -----
+
+        // Lets find some other cool node to click. How about an output mcool.
+        var outMcoolNodeToClick = _.find(nodes, function(n){
+            return n.getAttribute('data-node-key') === 'output_mcool.0';
+        });
+
+        // Ensure our node is -not- selected.
+        expect(outMcoolNodeToClick.getAttribute('data-node-selected')).toEqual('false');
+
+        // CLICK IT CLICK IT NOW!
+        TestUtils.Simulate.click(outMcoolNodeToClick.childNodes[0]); // click handler bound to inner div element.
+        jest.runAllTimers();
+
+        // Ensure our node -IS- selected.
+        expect(outMcoolNodeToClick.getAttribute('data-node-selected')).toEqual('true');
+
+        // Ensure old step node now NOT ALSO selected.
+        expect(stepNodeToClick.getAttribute('data-node-selected')).toEqual('false');
+
+        // Make sure our file accession, and proper label for it, is somewhere within content of detail pane.
+        expect(detailPaneBody.textContent.indexOf('Generated File')).toBeGreaterThan(-1);
+        expect(detailPaneBody.textContent.indexOf('4DNFII7498B3')).toBeGreaterThan(-1);
 
     });
 
