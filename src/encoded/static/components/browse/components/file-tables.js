@@ -154,7 +154,8 @@ export class RawFilesStackedTable extends React.Component {
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
             { columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
-        ]
+        ],
+        collapseLongLists : false
     }
 
     constructor(props){

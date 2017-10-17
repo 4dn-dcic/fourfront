@@ -1091,24 +1091,6 @@ var MosaicChart = createReactClass({
             var svgWidth = this.width();
             var svgHeight = this.height();
 
-            /*
-            <ZoomCursor
-                    onMouseLeave={this.mouseleave}
-                    width={svgWidth}
-                    height={svgHeight}
-                    offsetX={styleOpts.offset.left}
-                    offsetY={styleOpts.offset.top}
-                    isChildSVG={true}
-                    zoomClassName="chart-sunburst chart-zoombox"
-                    visibilityMargin={{
-                        top : 5,
-                        bottom : 5,
-                        left : 5,
-                        right : 5//- (svgWidth / (this.props.maxFieldDepthIndex + 1))
-                    }}
-                >
-                */
-
             return (
                 <svg
                     key={this.props.id + "-svg"}
@@ -1134,7 +1116,6 @@ var MosaicChart = createReactClass({
                     </g>
                 </svg>
             );
-            /* </ZoomCursor> */
         }
 
         function renderYAxisTop(){
