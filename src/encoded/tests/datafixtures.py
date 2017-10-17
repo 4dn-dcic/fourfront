@@ -302,7 +302,7 @@ def experiment_project_review(testapp, lab, award, human_biosample):
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'micro-C',
-        'status': 'in review by project'
+        'status': 'submission in progress'
     }
     return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]
 
