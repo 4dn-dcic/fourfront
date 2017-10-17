@@ -45,10 +45,13 @@ class AboveSearchTablePanelStaticContentPane extends React.Component {
 
             if (resp && resp.content){
                 if (resp.content && typeof resp.content !== 'string' && resp['@type'].indexOf('StaticPage') > -1){ // Case: Static Page
-                    // Use first section only, at moment.
-                    var contentSectionToUse = _.find(resp.content, function(c){ return c.order === 0; });
-                    content = contentSectionToUse.content;
-                    title = contentSectionToUse.title || resp.title || resp.display_title;
+                    var contentSectionKeys = _.keys(resp.content);
+                    if (contentSectionKeys.length > 0){
+                        // Use first section only, at moment.
+                        var contentSectionToUse = _.find(resp.content, function(c){ return c.order === 0; }) || resp.content[contentSectionKeys[0]];
+                        content = contentSectionToUse.content;
+                        title = contentSectionToUse.title || resp.title || resp.display_title;
+                    }
                 } else if (typeof resp.content === 'string'){ // Case: Static Block
                     content = resp.content;
                     title = resp.display_title || resp.title;
