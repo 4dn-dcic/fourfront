@@ -784,7 +784,6 @@ def test_planned_item_status_can_be_updated_by_admin(
 
 def test_planned_item_status_is_not_changed_on_admin_patch(
         submitter_testapp, wrangler_testapp, planned_experiment_set_data):
-    # import pdb; pdb.set_trace()
     desc = 'updated description'
     res1 = submitter_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
     wrangler_testapp.patch_json(res1['@id'], {'status': 'planned'}, status=200)
