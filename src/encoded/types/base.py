@@ -305,8 +305,10 @@ class Item(snovault.Item):
 
     def is_update_by_admin_user(self):
         # determine if the submitter in the properties is an admin user
+        # import pdb; pdb.set_trace()
         request = get_current_request()
-        _, userid = request.unauthenticated_userid.split('.')
+        princ = request.effective_principals
+        userid = [l for l in princ if l.startswith('userid')][0].split('.')[1]
         users = self.registry['collections']['User']
         user = users.get(userid)
         if 'groups' in user.properties:
