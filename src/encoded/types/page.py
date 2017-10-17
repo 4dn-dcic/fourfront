@@ -93,36 +93,27 @@ class Page(Item):
 
         pageMeta = self.properties
 
-        content = {}
-        sections = None
-        if pageMeta.get('sections', None) is not None:
-            sections = pageMeta['sections']
-
-
+        content = {} # Our output object/dict
+        sections = pageMeta.get('sections', None) # Used to fill up our output object/dict
 
         if pageMeta.get('directory'):
-            contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-            contentFilesLocation += "/../../.."  # get us to root of Git repo.
-            contentFilesLocation += pageMeta['directory']
+            contentFilesLocation = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../../.." + pageMeta['directory']) # Go to top of repo, append directory
         else:
-            print("No explicit directory set for page with pathname \"" + page + "\", will check default directory location (/static/data/<pathname>) for sections with filenames")
-            contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-            contentFilesLocation += "/static/data/"
-            contentFilesLocation += page
+            contentFilesLocation = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../static/data/" + page)
+            print("No explicit directory set for page with pathname \"" + page + "\", will check default directory location (/static/data/<pathname> : " + contentFilesLocation + ") for sections with filenames")
 
-        if sections is None and contentFilesLocation is not None and os.path.isdir(contentFilesLocation):
+
+        if sections is None and os.path.isdir(contentFilesLocation):
             print("No explicity-defined sections for page " + page + ', attempting to use filenames from this directory as sections: ' + contentFilesLocation)
             sections = [{'filename': fn} for fn in listFilesInInDirectory(contentFilesLocation)]
 
-        if sections is None:
+        if sections is None or len(sections) == 0:
             print("No sections nor local directory of files defined for page " + page + ', CANCELLING - NO CONTENT WILL BE AVAILABLE FOR PAGE')
             return None
 
-        # Set order (dicts don't maintain order)
-        i = 0
 
         try:
-            for s in sections:
+            for i, s in enumerate(sections):
                 sectionID = s.get('id')  # use section 'id', or 'filename' minus extension
                 if sectionID is None:
                     sectionID = s['filename'].split('.')[0]
@@ -159,7 +150,6 @@ class Page(Item):
                 })
 
                 content[sectionID]["order"] = i
-                i += 1
 
         except Exception as e:
             print(e)
