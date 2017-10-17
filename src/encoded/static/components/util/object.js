@@ -254,7 +254,7 @@ export class TooltipInfoIconContainerAuto extends React.Component {
 export const itemUtil = {
 
     // Aliases
-    
+
     isAnItem : isAnItem,
     generateLink : linkFromItem,
     atId : atIdFromObject,
@@ -276,7 +276,7 @@ export const itemUtil = {
             context.download        ||
             context.accession       ||
             context.uuid            ||
-            ( typeof context['@id'] === 'string' ? context['@id'] : 
+            ( typeof context['@id'] === 'string' ? context['@id'] :
                 null //: 'No title found'
             )
         );
@@ -308,4 +308,3 @@ export const itemUtil = {
     },
 
 };
-
