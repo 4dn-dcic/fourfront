@@ -117,7 +117,7 @@ export default class PageTitle extends React.Component {
         }
 
         if (PageTitle.isStaticPage(context)){
-            return { 'title' : object.itemUtil.eStringFromContext(context) };
+            return { 'title' : object.itemUtil.getTitleStringFromContext(context) };
         }
 
         if (object.isAnItem(context)){ // If Item
