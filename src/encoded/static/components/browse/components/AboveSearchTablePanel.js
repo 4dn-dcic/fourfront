@@ -39,7 +39,7 @@ class AboveSearchTablePanelStaticContentPane extends React.Component {
                 }
                 return null;
             }
-            
+
             var content = null, title = null;
             // TODO: Likely need to adjust for static block once we have those (once it exists it wont have sections).
 

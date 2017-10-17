@@ -332,7 +332,7 @@ export default class SearchView extends React.Component {
 
         // Filter Facets down to abstract types only (if none selected) for Search. Do something about restrictions(?)
         var facets = context.facets.map((facet)=>{
-            
+
             if (this.props.restrictions[facet.field] !== undefined) {
                 facet = _.clone(facet);
                 facet.restrictions = this.props.restrictions[facet.field];
