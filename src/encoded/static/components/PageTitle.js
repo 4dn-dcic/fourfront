@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { getTitleStringFromContext, isDisplayTitleAccession } from './item-pages/item';
 import { console, object, Schemas, JWT, layout } from './util';
 import { windowHref } from './globals';
 import QuickInfoBar from './viz/QuickInfoBar';
@@ -41,7 +40,7 @@ var TITLE_PATHNAME_MAP = {
             if (myEmail && context && context.email && myEmail === context.email){
                 return "My Profile";
             }
-            return getTitleStringFromContext(context);
+            return object.itemUtil.getTitleStringFromContext(context);
         }
     },
     '/planned-submissions' : {
@@ -49,7 +48,7 @@ var TITLE_PATHNAME_MAP = {
             if (context.status === 'error' && context.code && (context.code === 404 || context.code === 403)){
                 return 'Forbidden';
             }
-            return getTitleStringFromContext(context);
+            return object.itemUtil.getTitleStringFromContext(context);
         }
     }
 };
@@ -118,7 +117,7 @@ export default class PageTitle extends React.Component {
         }
 
         if (PageTitle.isStaticPage(context)){
-            return { 'title' : getTitleStringFromContext(context) };
+            return { 'title' : object.itemUtil.eStringFromContext(context) };
         }
 
         if (object.isAnItem(context)){ // If Item
@@ -128,12 +127,12 @@ export default class PageTitle extends React.Component {
             if (currentHrefParts.hash === '#!edit'){
                 return {
                     'title' : "Editing",
-                    'calloutTitle' : getTitleStringFromContext(context)
+                    'calloutTitle' : object.itemUtil.getTitleStringFromContext(context)
                 };
             }
 
             
-            title = getTitleStringFromContext(context);
+            title = object.itemUtil.getTitleStringFromContext(context);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
 
             if (currentHrefParts.hash === '#!create') {
@@ -143,7 +142,7 @@ export default class PageTitle extends React.Component {
                 };
             }
 
-            if (isDisplayTitleAccession(context, title, true)){ // Don't show Accessions in titles.
+            if (object.itemUtil.isDisplayTitleAccession(context, title, true)){ // Don't show Accessions in titles.
 
                 // But show rest of title if it is in form 'Something - ACCESSION'
                 if (typeof context.accession === 'string' && context.accession.length >= 12 && title.indexOf(' - ' + context.accession) > -1){
@@ -163,7 +162,7 @@ export default class PageTitle extends React.Component {
             
 
         }
-        return { 'title' : getTitleStringFromContext(context) };
+        return { 'title' : object.itemUtil.getTitleStringFromContext(context) };
     }
 
     static getStyles(context, href, mounted){

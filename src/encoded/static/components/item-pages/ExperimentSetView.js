@@ -149,8 +149,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     render() {
-
-        var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
 
         if (this.props.debug) console.log('render ExperimentSet view');

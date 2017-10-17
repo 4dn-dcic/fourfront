@@ -5,12 +5,12 @@ var _ = require('underscore');
 var { ajax, console, object, isServerSide, animateScrollTo } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} = require('react-bootstrap');
-var makeTitle = require('../item-pages/item').title;
 var Alerts = require('../alerts');
 import { getLargeMD5 } from '../util/file';
 var ReactTooltip = require('react-tooltip');
 var ProgressBar = require('rc-progress').Line;
 
+var makeTitle = object.itemUtil.title;
 
 
 /*

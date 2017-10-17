@@ -5,7 +5,6 @@ var _ = require('underscore');
 var { ajax, console, JWT, object, isServerSide, layout, Schemas } = require('../util');
 var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
-import { getTitleStringFromContext } from '../item-pages/item';
 var Search = require('./../browse/SearchView').default;
 var ReactTooltip = require('react-tooltip');
 import { getLargeMD5 } from '../util/file';

@@ -249,3 +249,63 @@ export class TooltipInfoIconContainerAuto extends React.Component {
         return <TooltipInfoIconContainer tooltip={tooltip} title={title || fallbackTitle || property} elementType={this.props.elementType} />;
     }
 }
+
+
+export const itemUtil = {
+
+    // Aliases
+    
+    isAnItem : isAnItem,
+    generateLink : linkFromItem,
+    atId : atIdFromObject,
+
+    // Funcs
+
+    /**
+     * Function to determine title for each Item object.
+     * 
+     * @param {Object} props - Object containing props commonly supplied to Item page. At minimum, must have a 'context' property.
+     * @returns {string} Title string to use.
+     */
+    titleFromProps : function(props) {
+        var context = props.context;
+        return (
+            context.display_title   ||
+            context.title           ||
+            context.name            ||
+            context.download        ||
+            context.accession       ||
+            context.uuid            ||
+            ( typeof context['@id'] === 'string' ? context['@id'] : 
+                null //: 'No title found'
+            )
+        );
+    },
+
+    /**
+     * Get Item title string from a context object (JSON representation of Item).
+     * 
+     * @param {Object} context - JSON representation of an Item object.
+     * @returns {string} The title.
+     */
+    getTitleStringFromContext : function(context){
+        return itemUtil.titleFromProps({'context' : context});
+    },
+
+    /**
+     * Determine whether the title which is displayed is an accession or not.
+     * Use for determining whether to include accession in ItemHeader.TopRow.
+     * 
+     * @param {Object} context - JSON representation of an Item object.
+     * @param {string} [displayTitle] - Display title of Item object. Gets it from context if not provided.
+     * @returns {boolean} If title is an accession (or contains it).
+     */
+    isDisplayTitleAccession : function(context, displayTitle = null, checkContains = false){
+        if (!displayTitle) displayTitle = itemUtil.getTitleStringFromContext(context);
+        if (context.accession && context.accession === displayTitle) return true;
+        if (checkContains && displayTitle.indexOf(context.accession) > -1) return true;
+        return false;
+    },
+
+};
+
