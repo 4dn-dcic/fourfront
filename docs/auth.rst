@@ -87,7 +87,7 @@ Permissions of items are tied to the statuses of items. We have 8 statuses for m
 * Replaced : Nobody can view, admin can edit
 * Obsolete : Nobody can view, admin can edit
 * In review by lab : Lab members can view, submitter can edit
-* In review by project : Project members can view, submitter can edit
+* submission in progress : Project members can view, submitter can edit
 * Released to project : Project members can view
 
 
