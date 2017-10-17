@@ -68,7 +68,7 @@ export class FileDownloadButtonAuto extends React.Component {
             'uploaded',
             'released',
             'replaced',
-            'in review by project',
+            'submission in progress',
             'released to project'
         ]
     }

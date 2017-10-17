@@ -232,8 +232,9 @@ class Item(snovault.Item):
         'revoked': ALLOW_CURRENT,
         'deleted': DELETED,
         'replaced': DELETED,
+        'planned': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'in review by lab': ALLOW_LAB_SUBMITTER_EDIT,
-        'in review by project': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
+        'submission in progress': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'released to project': ALLOW_VIEWING_GROUP_VIEW,
         # for file
         'obsolete': DELETED,
@@ -400,7 +401,6 @@ class Item(snovault.Item):
     def principals_allowed(self, request):
         principals = calc_principals(self)
         return principals
-
 
     def rev_link_atids(self, request, rev_name):
         conn = request.registry[CONNECTION]
