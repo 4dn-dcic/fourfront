@@ -15,6 +15,7 @@ from pyramid.traversal import (
     find_root,
     traverse,
 )
+from pyramid.threadlocal import get_current_request
 import snovault
 # from ..schema_formats import is_accession
 # import snovalut default post / patch stuff so we can overwrite it in this file
@@ -251,7 +252,6 @@ class Item(snovault.Item):
         super().__init__(registry, models)
         self.STATUS_ACL = self.__class__.STATUS_ACL
 
-
     @property
     def __name__(self):
         """smth."""
@@ -303,28 +303,24 @@ class Item(snovault.Item):
             keys['accession'].append(properties['accession'])
         return keys
 
-    def is_update_by_admin_user(self, properties):
+    def is_update_by_admin_user(self):
         # determine if the submitter in the properties is an admin user
-        import pdb; pdb.set_trace()
-        print(request)
-        if 'submitted_by' in properties:
-            userid = properties['submitted_by']
-            users = self.registry['collections']['User']
-            user = users.get(userid)
-            if 'groups' in user.properties:
-                if 'admin' in user.properties['groups']:
-                    return True
+        request = get_current_request()
+        _, userid = request.unauthenticated_userid.split('.')
+        users = self.registry['collections']['User']
+        user = users.get(userid)
+        if 'groups' in user.properties:
+            if 'admin' in user.properties['groups']:
+                return True
         return False
 
     def _update(self, properties, sheets=None):
         # if an item is status 'planned' and an update is submitted
         # by a non-admin user then status should be changed to 'submission in progress'
-        import pdb; pdb.set_trace()
         try:
-            self.is_update_by_admin_user(properties)
             props = self.properties
             if 'status' in props and props['status'] == 'planned':
-                if not self.is_update_by_admin_user(properties):
+                if not self.is_update_by_admin_user():
                     properties['status'] = 'submission in progress'
         except KeyError:
             pass
