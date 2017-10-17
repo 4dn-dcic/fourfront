@@ -758,9 +758,8 @@ def test_viewing_group_viewer_cannot_view_nofic_when_submission_in_progress(
     viewing_group_member_testapp.get(individual_human['@id'], status=403)
 
 
-"""These aren't strictly permissions tests but putting them here so we don't need to
-    move around wrangler and submitter testapps and associated fixtures
-"""
+### These aren't strictly permissions tests but putting them here so we don't need to
+###    move around wrangler and submitter testapps and associated fixtures
 
 
 @pytest.fixture
