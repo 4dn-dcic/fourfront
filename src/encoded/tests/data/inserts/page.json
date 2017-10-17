@@ -718,7 +718,7 @@
             {
                 "id" : "information",
                 "title" : "Introduction",
-                "content" : "<ul><li>Workflows are definitions of steps and their sometimes-connecting inputs & outputs.</li><li>Workflow steps definitions are similar to and usually derived directly from a Common Workflow Language (CWL) definition.</li><li><a href=\"/search/?type=WorkflowRun\">WorkflowRuns</a> are unique runs of each Workflow and have input/output files associated with them.</li></ul>"
+                "content" : "<ul><li>Workflows define steps and their inputs & outputs. They are structurally similar to Common Workflow Language (CWL) definitions.</li><li><a href=\"/search/?type=WorkflowRun\">Workflow Runs</a> are unique runs of each Workflow and have specific files associated with them.</li></ul>"
             }
         ]
     },
