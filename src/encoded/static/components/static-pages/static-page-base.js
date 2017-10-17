@@ -50,7 +50,7 @@ export function renderSections(renderMethod, context){
         .pairs()
         .sort(function(a,b){
             a = a[1]; b = b[1];
-            return a.order - b.order;
+            return (a.order || 0) - (b.order || 0);
         })
         .map(function(contentPair){
             return renderMethod(
