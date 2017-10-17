@@ -31,6 +31,9 @@ var TITLE_PATHNAME_MAP = {
             }
         }
     },
+    '/health' : {
+        'title' : "Health"
+    },
     '/users/\*' : {
         'title' : function(pathName, context){
             var myDetails = JWT.getUserDetails();

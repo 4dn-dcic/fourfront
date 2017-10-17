@@ -515,6 +515,24 @@ $margin-util-sizes-mini: 2, 3, 5, 7, 8; // * 1px
   }
 }
 
+// Moving caret to always right position
+.dropdown-toggle.btn {
+	position: relative;
+	padding-right: 24px;
+	padding-left: 10px;
+	span.caret {
+		position: absolute;
+		top: 50%;
+		margin-top: -2px;
+		right: 10px;
+	}
+}
+
+@mixin button-no-focus-outline {
+	&:active, &:focus, &.focus, &:focus.active, &.focus:active, &.focus:focus {
+		outline: none;
+	}
+}
 
 /**************** React Tooltips (NPM: react-tooltip) overwrite of styling *********************/
 

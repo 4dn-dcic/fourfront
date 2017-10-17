@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
 import * as globals from './../globals';
-import { getElementTop, animateScrollTo, getScrollingOuterElement } from './../util/layout';
+import { getElementTop, animateScrollTo, getScrollingOuterElement, getPageVerticalScrollPosition } from './../util/layout';
 import { isServerSide, console, navigate } from './../util';
 
 
@@ -84,7 +84,7 @@ class TableEntry extends React.Component {
 
     handleClick(){
 
-        var scrollingOuterElement, elementTop;
+        var pageScrollTop, elementTop;
         if (this.props.link === "top") {
             elementTop = 0;
         } else if (typeof this.props.link === 'string'){
@@ -93,7 +93,7 @@ class TableEntry extends React.Component {
             return null;
         }
 
-        scrollingOuterElement = getScrollingOuterElement(); // Get document.body or document.documentElement, depending on browser.
+        pageScrollTop = getPageVerticalScrollPosition();
 
         animateScrollTo(elementTop, 750, this.props.offsetBeforeTarget, ()=>{
             if (typeof this.props.navigate === 'function'){
@@ -101,7 +101,7 @@ class TableEntry extends React.Component {
                 setTimeout(()=>{
                     if (link === 'top' || link === 'bottom') link = '';
                     this.props.navigate('#' + link, { 'replace' : true, 'skipRequest' : true });
-                }, link === 'top' || (scrollingOuterElement && scrollingOuterElement.scrollTop <= 40) ? 800 : 0);
+                }, link === 'top' || (typeof pageScrollTop === 'number' && pageScrollTop <= 40) ? 800 : 0);
             }
         });
 
@@ -452,11 +452,9 @@ export default class TableOfContents extends React.Component {
     }
 
     componentDidMount(e){
-        var scrollingOuterElement = getScrollingOuterElement();
-
-        if (window && scrollingOuterElement){
+        if (window && !isServerSide()){
             this.setState(
-                { 'mounted' : true, 'scrollTop' : parseInt(scrollingOuterElement.scrollTop) },
+                { 'mounted' : true, 'scrollTop' : parseInt(getPageVerticalScrollPosition()) },
                 () => { 
                     window.addEventListener('scroll', this.onPageScroll);
                     window.addEventListener('resize', this.onResize);
@@ -479,21 +477,13 @@ export default class TableOfContents extends React.Component {
 
     onPageScroll(e){
         setTimeout(()=>{
-            var scrollingOuterElement = getScrollingOuterElement();
-            if (scrollingOuterElement) this.setState({ 'scrollTop' : parseInt(scrollingOuterElement.scrollTop) });
-            else {
-                throw new Error('Couldn\'t get scrollingOuterElement');
-            }
+            this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
         }, 0);
     }
 
     onResize(e){
         setTimeout(()=>{
-            var scrollingOuterElement = getScrollingOuterElement();
-            if (scrollingOuterElement) this.setState({ 'scrollTop' : parseInt(scrollingOuterElement.scrollTop) });
-            else {
-                throw new Error('Couldn\'t get scrollingOuterElement');
-            }
+            this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
         }, 0);
     }
 

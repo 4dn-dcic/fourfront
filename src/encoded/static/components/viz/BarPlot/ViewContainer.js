@@ -403,7 +403,7 @@ export const barPlotCursorActions = [
                 href,
                 function(){
                     // Scroll to top of browse page container after navigation is complete.
-                    setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(document.body.scrollTop - 510) * 2, 125);
+                    setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 125);
                 }
             );
 

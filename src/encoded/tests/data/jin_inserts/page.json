@@ -1,0 +1,717 @@
+[
+    {
+        "name":"about",
+        "title":"About",
+        "directory":"/src/encoded/static/data/about",
+        "sections":[
+            {
+                "filename":"introduction.html",
+                "title":""
+            },
+            {
+                "filename":"dcic.html",
+                "title":"Team"
+            },
+            {
+                "filename":"acknowledgements.html",
+                "title":"Acknowledgements"
+            }
+        ],
+        "table-of-contents":{
+            "enabled":false
+        }
+    },
+
+
+
+
+
+    {
+        "name":"help",
+        "title":"Introduction to 4DN Metadata",
+        "directory":"/docs/public/help",
+        "sections":[
+            {
+                "filename":"introduction.md"
+            },
+            {
+                "filename":"carousel-place-holder",
+                "content":"placeholder: <SlideCarousel />"
+            },
+            {
+                "filename":"introduction2.md",
+                "title":""
+            }
+        ],
+        "table-of-contents":{
+            "enabled":true,
+            "header-depth":4,
+            "list-styles":[
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link":false,
+            "skip-depth":1
+        }
+    },
+
+    {
+        "name":"help/account-creation",
+        "title":"Creating an Account",
+        "directory":"/docs/public/metadata-submission",
+        "sections":[
+            {
+                "filename":"account_creation.md",
+                "title":""
+            }
+        ]
+    },
+    {
+        "name":"help/getting-started",
+        "title":"Getting Started with Submissions",
+        "directory":"/docs/public/metadata-submission",
+        "sections":[
+            {
+                "filename":"getting_started.md",
+                "title":""
+            }
+        ],
+        "table-of-contents":{
+            "enabled":true,
+            "header-depth":4,
+            "list-styles":[
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link":false,
+            "skip-depth":1
+        }
+    },
+    {
+        "name":"help/biosample",
+        "title":"Biosample Metadata",
+        "directory":"/docs/public/metadata-submission",
+        "sections":[
+            {
+                "title":"",
+                "filename":"biosample_metadata.md"
+            }
+        ],
+        "table-of-contents":{
+            "enabled":true,
+            "header-depth":2,
+            "list-styles":[
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link":false,
+            "skip-depth":1
+        }
+    },
+    {
+        "name":"help/web-submission",
+        "title":"Online Submissions",
+        "directory":"/docs/public/metadata-submission",
+        "sections":[
+            {
+                "title":"",
+                "filename":"web_submission.md"
+            }
+        ],
+        "table-of-contents":{
+            "enabled":true,
+            "header-depth":4,
+            "list-styles":[
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link":false,
+            "skip-depth":1
+        }
+    },
+    {
+        "name":"help/spreadsheet",
+        "title":"Spreadsheet Submissions",
+        "directory":"/docs/public/metadata-submission",
+        "sections":[
+            {
+                "title":"",
+                "filename":"excel_submission.md"
+            },
+            {
+                "title":"",
+                "filename":"schema_info.md"
+            }
+        ],
+        "table-of-contents":{
+            "enabled":true,
+            "header-depth":3,
+            "list-styles":[
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link":false,
+            "skip-depth":1
+        }
+    },
+    {
+        "name":"help/rest-api",
+        "title":"The REST-API",
+        "directory":"/docs/public/metadata-submission",
+        "sections":[
+            {
+                "title":"",
+                "filename":"rest_api_submission.md"
+            }
+        ],
+        "table-of-contents":{
+            "enabled":true,
+            "header-depth":4,
+            "list-styles":[
+                "decimal",
+                "lower-alpha",
+                "lower-roman"
+            ],
+            "include-top-link":false,
+            "skip-depth":1
+        }
+    },
+
+
+
+
+
+
+
+    {
+        "name":"error/login-failed",
+        "title":"Login Failed",
+        "directory":"/src/encoded/static/data",
+        "sections":[
+            {
+                "filename":"no-account",
+                "content":"There is no account registered with the provided email. Access is restricted to members of the 4DN consortium."
+            },
+            {
+                "filename":"new-account-registration",
+                "content":"<b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/account-creation\">creating an account</a></b>."
+            }
+        ]
+    },
+
+
+
+
+
+
+
+    {
+        "name":"nofic-matrix/2017-05",
+        "title":"NOFIC Matrix",
+        "directory":"/src/encoded/static/data",
+        "sections":[
+            {
+                "id":"introduction",
+                "title":"Introduction",
+                "content":"This matrix shows a cross-section of experiment methods & groups vs cell lines. "
+            },
+            {
+                "id":"nofic-matrix-1",
+                "filename":"nofic-collab.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[1,2],
+                    "xaxisRows":[3],
+                    "titleCell":[1,4],
+                    "skipRows":[22,23,24],
+                    "startCell":[3,5],
+                    "endCell":[8,21],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-2",
+                "filename":"nofic-collab.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[1,2],
+                    "xaxisRows":[3],
+                    "titleCell":[1,24],
+                    "skipRows":[22,23,24],
+                    "startCell":[3,25],
+                    "endCell":[8,32],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            }
+        ]
+    },
+    {
+        "name":"joint-analysis-data-plans",
+        "title":"Joint Analysis Data",
+        "directory":"/src/encoded/static/data",
+        "sections":[
+            {
+                "id":"legend",
+                "title":"",
+                "filename":"joint_data_analysis-legend.html"
+            },
+            {
+                "id":"nofic-matrix-1",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[4],
+                    "titleCell":[2,3],
+                    "skipRows":[],
+                    "startCell":[4,5],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-2",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[58],
+                    "titleCell":[2,57],
+                    "skipRows":[],
+                    "startCell":[4,59],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-3",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[77],
+                    "titleCell":[2,76],
+                    "skipRows":[],
+                    "startCell":[4,78],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-4",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[95],
+                    "titleCell":[2,94],
+                    "skipRows":[],
+                    "startCell":[4,96],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            }
+        ]
+    },
+    {
+        "name":"joint-analysis-data-plans/dev",
+        "title":"Joint Analysis Data",
+        "directory":"/src/encoded/static/data",
+        "sections":[
+            {
+                "id":"legend",
+                "title":"",
+                "filename":"joint_data_analysis-legend.html"
+            },
+            {
+                "id":"nofic-matrix-1",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[4],
+                    "titleCell":[2,3
+                    ],
+                    "skipRows":[],
+                    "startCell":[4,5],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-2",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[58],
+                    "titleCell":[2,57],
+                    "skipRows":[],
+                    "startCell":[4,59],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-3",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[77],
+                    "titleCell":[2,76],
+                    "skipRows":[],
+                    "startCell":[4,78],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-4",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[95],
+                    "titleCell":[2,94],
+                    "skipRows":[],
+                    "startCell":[4,96],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            }
+        ]
+    },
+    {
+        "name":"joint-analysis-data-plans/jan2018",
+        "title":"Joint Analysis Data - January 2018",
+        "directory":"/src/encoded/static/data",
+        "sections":[
+            {
+                "id":"legend",
+                "title":"",
+                "filename":"joint_data_analysis-legend.html"
+            },
+            {
+                "id":"nofic-matrix-1",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[4],
+                    "titleCell":[2,3],
+                    "skipRows":[],
+                    "startCell":[4,5],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-2",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[58],
+                    "titleCell":[2,57],
+                    "skipRows":[],
+                    "startCell":[4,59],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-3",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[77],
+                    "titleCell":[2,76],
+                    "skipRows":[],
+                    "startCell":[4,78],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-4",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[95],
+                    "titleCell":[2,94],
+                    "skipRows":[],
+                    "startCell":[4,96],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            }
+        ]
+    },
+    {
+        "name":"joint-analysis-data-plans/jan2018/dev",
+        "title":"Joint Analysis Data - January 2018",
+        "directory":"/src/encoded/static/data",
+        "sections":[
+            {
+                "id":"legend",
+                "title":"",
+                "filename":"joint_data_analysis-legend.html"
+            },
+            {
+                "id":"nofic-matrix-1",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[4],
+                    "titleCell":[2,3],
+                    "skipRows":[],
+                    "startCell":[4,5],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-2",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[58],
+                    "titleCell":[2,57],
+                    "skipRows":[],
+                    "startCell":[4,59],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-3",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[77],
+                    "titleCell":[2,76],
+                    "skipRows":[],
+                    "startCell":[4,78],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-4",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[95],
+                    "titleCell":[2,94],
+                    "skipRows":[],
+                    "startCell":[4,96],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            }
+        ]
+    },
+    {
+        "name":"joint-analysis-data-plans/july2018",
+        "title":"Joint Analysis Data - July 2018",
+        "directory":"/src/encoded/static/data",
+        "sections":[
+            {
+                "id":"legend",
+                "title":"",
+                "filename":"joint_data_analysis-legend.html"
+            },
+            {
+                "id":"nofic-matrix-1",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[4],
+                    "titleCell":[2,3],
+                    "skipRows":[],
+                    "startCell":[4,5],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-2",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[58],
+                    "titleCell":[2,57],
+                    "skipRows":[],
+                    "startCell":[4,59],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-3",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[77],
+                    "titleCell":[2,76],
+                    "skipRows":[],
+                    "startCell":[4,78],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-4",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[95],
+                    "titleCell":[2,94],
+                    "skipRows":[],
+                    "startCell":[4,96],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            }
+        ]
+    },
+    {
+        "name":"joint-analysis-data-plans/july2018/dev",
+        "title":"Joint Analysis Data - July 2018",
+        "directory":"/src/encoded/static/data",
+        "sections":[
+            {
+                "id":"legend",
+                "title":"",
+                "filename":"joint_data_analysis-legend.html"
+            },
+            {
+                "id":"nofic-matrix-1",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[4],
+                    "titleCell":[2,3],
+                    "skipRows":[],
+                    "startCell":[4,5],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-2",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[58],
+                    "titleCell":[2,57],
+                    "skipRows":[],
+                    "startCell":[4,59],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-3",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[77],
+                    "titleCell":[2,76],
+                    "skipRows":[],
+                    "startCell":[4,78],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            },
+            {
+                "id":"nofic-matrix-4",
+                "filename":"https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[95],
+                    "titleCell":[2,94],
+                    "skipRows":[],
+                    "startCell":[4,96],
+                    "yaxisTitle":"Method",
+                    "xaxisTitle":"Cell Line"
+                }
+            }
+        ]
+    },
+
+
+
+
+
+    {
+        "name":"planned-submissions",
+        "title":"Planned Data Submission"
+    },
+    {
+        "name":"planned-submissions-matrix",
+        "title":"Planned Data Submission",
+        "directory":"/src/encoded/static/data",
+        "sections":[
+            {
+                "id":"legend",
+                "title":"",
+                "filename":"joint_data_analysis-legend.html"
+            },
+            {
+                "id":"nofic-matrix-1",
+                "filename":"dense_format.csv",
+                "title":"",
+                "options":{
+                    "yaxisCols":[2,3],
+                    "xaxisRows":[2,3],
+                    "titleCell":[2,3],
+                    "skipRows":[],
+                    "startCell":[4,4],
+                    "yaxisTitle":"Lab",
+                    "xaxisTitle":"Experiment Type"
+                }
+            }
+        ]
+    },
+
+
+
+
+    {
+        "name" : "privacy-policy",
+        "title" : "Privacy Policy",
+        "directory":"/src/encoded/static/data",
+        "sections" : [
+            {
+                "id" : "policy-content",
+                "title" : "",
+                "filename" : "privacy-policy.md"
+            }
+        ]
+    }
+
+
+]
