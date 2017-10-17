@@ -83,7 +83,6 @@ class AboveSearchTablePanelStaticContentPane extends React.Component {
                     <div dangerouslySetInnerHTML={{ __html : this.state.content }} />
                 </div>
             </div>
-            
         );
     }
 

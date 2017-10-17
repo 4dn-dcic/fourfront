@@ -713,7 +713,7 @@
     },
     {
         "name" : "search-info-header/Workflow",
-        "title" : "Workflow Run Information",
+        "title" : "Workflow Information",
         "sections" : [
             {
                 "id" : "information",
