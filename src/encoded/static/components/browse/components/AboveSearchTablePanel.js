@@ -81,7 +81,7 @@ class AboveSearchTablePanelStaticContentPane extends React.Component {
 
         return (
             <div className="row mt-1">
-                <div className="col-md-9 pull-right">
+                <div className="col-sm-12 col-lg-9 pull-right">
                     { title }
                     <div dangerouslySetInnerHTML={{ __html : this.state.content }} />
                 </div>
