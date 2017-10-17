@@ -247,6 +247,7 @@ class ResultTableContainer extends React.Component {
             <div className="row">
                 { facets.length > 0 ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
+                        <div className="above-results-table-row"/>{/* <-- temporary-ish */}
                         <ReduxExpSetFiltersInterface
                             experimentSets={results}
                             expSetFilters={this.props.expSetFilters}

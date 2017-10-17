@@ -11,6 +11,7 @@ export { CustomColumnController, CustomColumnSelector } from './CustomColumnCont
 export { SearchResultTable } from './SearchResultTable';
 export { ItemPageTable, ItemPageTableLoader, ItemPageTableBatchLoader } from './ItemPageTable';
 export { AboveTableControls } from './AboveTableControls';
+export { AboveSearchTablePanel } from './AboveSearchTablePanel';
 export { ExperimentSetDetailPane } from './ExperimentSetDetailPane';
 export { SearchResultDetailPane } from './SearchResultDetailPane';
 export { FacetList, ReduxExpSetFiltersInterface } from './FacetList';

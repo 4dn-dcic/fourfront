@@ -199,6 +199,13 @@
             }
         ]
     },
+
+
+
+
+
+
+
     {
         "name":"nofic-matrix/2017-05",
         "uuid":"9061346d-bc61-4f59-bbe8-054b83978a0e",
@@ -657,6 +664,10 @@
             }
         ]
     },
+
+
+
+
     {
         "name":"planned-submissions",
         "uuid":"c6675562-c574-4b58-bf14-fb25f8ee5360",
@@ -688,5 +699,26 @@
                 }
             }
         ]
+    },
+
+
+
+    {
+        "name" : "search-info-header/WorkflowRun",
+        "uuid" : "db5ed2fd-b4fb-4f4d-9053-4137d90560b0",
+        "title" : "Workflow Run Information",
+        "sections" : [
+            {
+                "id" : "information",
+                "title" : "Introduction",
+                "content" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/search/?type=Workflow\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</li></ul>"
+            }
+        ]
     }
+
+
+
+
+
+
 ]

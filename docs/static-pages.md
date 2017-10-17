@@ -2,14 +2,16 @@
 Creating & Editing Static Pages
 ===============================
 
-All static pages content - unless hard-coded for the front-end (in case of custom interactivity, etc.) - exists in HTML or Markdown files in the repository. These are read and then cached into RAM, via a Python dict, on boot-up of webserver ( `bin/pserve development.ini` ). This caching means that after any change to either the static pages configuration or a static page content (file), the webserver must be restarted.
+Most static pages content - unless hard-coded for the front-end (in case of custom interactivity, etc.) - exists in HTML or Markdown files in the repository, in an S3 bucket, or in-line within insert. Content is loaded in the same way as other Items, and exposed via a calculated "content" property. The "name" property of the Page Item becomes the static page's path.
 
 Configuration for which pages and routes are available & accessible is currently controlled by a JSON config file: _src/encoded/static/data/static_pages.json_. This file may be moved to _src/encoded/schemas_ eventually.
 
-In the **static_pages.json** configuration file, there is a single property, _pages_, which contains objects that define page contents and are keyed by page route. A page object might be in this form, for example: 
+In the `/src/encoded/tests/data/[..]/page.json` file, an insert defining the page available at "help/submitting" might be in this form:
 ```json
-"help/submitting" : {
+[...
+{
     "title" : "<page_title>",
+    "name" : "help/submitting",
     "directory" : "<absolute_from_repo_root_path_to_static_files>",
     "sections" : [
         {
@@ -30,13 +32,14 @@ In the **static_pages.json** configuration file, there is a single property, _pa
     }
     
 }
+...]
 ```
 
 What the above configuration objects says, is for the back-end to enable a page route 'help/submitting', and at that route to return some JSON which has two sections - one with no title visible on page but with one in the table of contents ("Introduction"); and one with the same title for both table of contents and on page ("Metadata Structure"). If do not include "title" nor "toc-title", or have "title" set to null without a "toc-title", the section (& any children) will be excluded from the table of contents (but not the page). Page title is mandatory.
 
-The section content will be the raw contents of the file located at `pages["help/submitting"]["directory"] + pages["help/submitting"]["sections"][i]["filename"]`. The entirety of the "table-of-contents" object is sent across to the front-end to be used as configuration options for the table of contents. If "enabled" is set to false in this configuration, the page rendered on front-end will have just a single wider pane with all the content in lieu of a Table of Contents.
+The section content will be the raw contents of the file located at `insert["directory"] + insert["sections"][i]["filename"]`. The entirety of the "table-of-contents" object is sent across to the front-end to be used as configuration options for the table of contents. If "enabled" is set to false in this configuration, the page rendered on front-end will have just a single wider pane with all the content in lieu of a Table of Contents.
 
-If do not include "directory" property, it will default to `src/encoded/static/data/<section-route-name>`.
+If exclude "directory" property, it will default to and check `src/encoded/static/data/<section-route-name>`.
 
 ## No Content
 At minimum, can set the value of a route key as `true`, e.g., `"help/submitting" : true`, instead of an object with sections and Table of Contents config as in example above. Doing this will deliver a relatively empty JSON object from the back-end for that route. It will have "content" sections in the ?format=JSON for any pages in directory default directory `src/encoded/static/data/<section-route-name>`, but as plaintext instead of objects with properties (incl. 'content'). Use this if are planning on doing all content presentation from the front-end, e.g. in case of the more custom/unique Home or Planned Submissions pages.
@@ -71,6 +74,8 @@ It will be the word "placeholder", followed by a colon, followed by any string y
 
 # Permissions
 
+## DEPRECATED - USE ITEM PERMISSIONS
+
 You may define `effective_principals` per page route. To do this, add property `effective_principals` property to root level of path/page configuration as a *list* of system-identifiable principals.
 Example: 
 ```json
@@ -91,6 +96,53 @@ Examples of effective_principals options include the following:
 - `submits_for.some-lab-uuid`
 - `auth0.someone@gmail.com`
 - `userid.some-users-identification-weqddw3`, etc.
+
+# Static Content Above Search Results
+
+N.B. Currently uses static page but may change to static section or block in future. TBD. Should look like https://gyazo.com/0d8d60750c1e0139ed345046df052696 after setup:
+
+## Static Page Header `@type` Mapping
+
+Currently this can be dynamically updated via the `SysInfo` Item : `/sysinfos/search-header-mappings/`
+
+The Item `/sysinfos/search-header-mappings/` must exist in database for any static content to appear. Else will get nothing in area above search results. SysInfo cannot be inserted via deploy and must be POSTed in.
+
+Do this on any instances we want mappings: https://gyazo.com/de6758e68ca898101218ad3d95687569 , with "mapping" taking the correct form (PATCHing subsequently after creation for updates).
+
+Again, the name of the sysinfo object **MUST** be **`search-header-mappings`**
+
+**POST** to `<host>/sysinfo/` :
+```json
+{
+  "name" : "search-header-mappings",
+  "title" : "Search Header Mapping",
+  "description": "Mapping of Static search result header URIs to Item @type",
+  "mapping" : {
+      "WorkflowRun" : "/search-info-header/WorkflowRun",
+      "Workflow" : "/search-info-header/Workflow"
+  }
+}
+```
+
+**PATCH** to `<host>/sysinfo/search-header-mappings`:
+```json
+{
+  "mapping" : {
+      "WorkflowRun" : "/search-info-header/WorkflowRun",
+      "Workflow" : "/search-info-header/Workflow"
+  }
+}
+```
+
+## Static Page Definition
+
+Also - the `content` property or content coming from file referred to in `filename` property - in the insert/content for an `@type` static page section - must (for now) be in HTML or plaintext format. Markdown not yet supported.
+
+Currently, only the first section of the static page is used/shown. Will change to be static block/section once those exist.
+
+## Simplification & Future
+
+If we like this structure of having a static page or block for (almost) each `@type`, we could simplify greatly by getting rid of the Sysinfo Item & just having search.py look-up if any page w/ name `’/search-info-header/’ + @type` exists and then including its contents into a ‘search_header_content’ property as part of search results/response JSON.
 
 # Adding Static Pages to Portal Navigation Menu/Bar
 
