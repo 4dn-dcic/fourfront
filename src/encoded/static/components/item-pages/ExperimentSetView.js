@@ -305,6 +305,6 @@ export class ProcessedFilesStackedTableSection extends React.Component {
 
 
 // Register ExperimentSetView to be the view for these @types.
-globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
-globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
+globals.content_views.register(ExperimentSetView, 'ExperimentSet');
+globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 

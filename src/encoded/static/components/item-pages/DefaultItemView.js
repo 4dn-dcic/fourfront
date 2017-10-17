@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { panel_views, itemClass } from './../globals';
+import { panel_views, itemClass, content_views } from './../globals';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters, layout, Schemas } from './../util';
@@ -125,7 +125,7 @@ export default class DefaultItemView extends ItemBaseView {
 
 }
 
-panel_views.register(DefaultItemView, 'Item');
+content_views.register(DefaultItemView, 'Item');
 
 
 

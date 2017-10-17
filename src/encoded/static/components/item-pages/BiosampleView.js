@@ -73,7 +73,7 @@ export default class BiosampleView extends ItemBaseView {
 
 }
 
-globals.panel_views.register(BiosampleView, 'Biosample');
+globals.content_views.register(BiosampleView, 'Biosample');
 
 
 

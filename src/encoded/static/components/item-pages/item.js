@@ -63,7 +63,7 @@ export default class Item extends React.Component {
 //    schemas: React.PropTypes.object
 //}
 
-globals.content_views.register(Item, 'Item');
+//globals.content_views.register(Item, 'Item');
 
 
 
