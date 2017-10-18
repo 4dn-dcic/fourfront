@@ -756,3 +756,46 @@ def test_viewing_group_viewer_cannot_view_nofic_when_submission_in_progress(
         wrangler_testapp, viewing_group_member_testapp, individual_human):
     wrangler_testapp.patch_json(individual_human['@id'], {'status': 'submission in progress'}, status=200)
     viewing_group_member_testapp.get(individual_human['@id'], status=403)
+
+
+### These aren't strictly permissions tests but putting them here so we don't need to
+###    move around wrangler and submitter testapps and associated fixtures
+
+
+@pytest.fixture
+def planned_experiment_set_data(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'test experiment set',
+        'experimentset_type': 'custom',
+    }
+
+
+def test_planned_item_status_can_be_updated_by_admin(
+        submitter_testapp, wrangler_testapp, planned_experiment_set_data):
+        # submitter cannot change status so wrangler needs to patch
+    res1 = submitter_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'planned'}).json['@graph'][0]
+    assert res2['status'] == 'planned'
+
+
+def test_planned_item_status_is_not_changed_on_admin_patch(
+        submitter_testapp, wrangler_testapp, planned_experiment_set_data):
+    desc = 'updated description'
+    res1 = submitter_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
+    wrangler_testapp.patch_json(res1['@id'], {'status': 'planned'}, status=200)
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'description': desc}).json['@graph'][0]
+    assert res2['description'] == desc
+    assert res2['status'] == 'planned'
+
+
+def test_planned_item_status_is_changed_on_submitter_patch(
+        submitter_testapp, wrangler_testapp, planned_experiment_set_data):
+    desc = 'updated description'
+    res1 = submitter_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
+    wrangler_testapp.patch_json(res1['@id'], {'status': 'planned'}, status=200)
+    res2 = submitter_testapp.patch_json(res1['@id'], {'description': desc}).json['@graph'][0]
+    assert res2['description'] == desc
+    assert res2['status'] == 'submission in progress'
