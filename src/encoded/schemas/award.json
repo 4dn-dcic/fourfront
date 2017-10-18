@@ -96,7 +96,8 @@
             "type": "string",
             "enum": [
                 "4DN",
-                "Not 4DN"
+                "Not 4DN",
+                "NOFIC"
             ]
         }
     },

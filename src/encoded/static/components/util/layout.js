@@ -260,6 +260,12 @@ export function getScrollingOuterElement(){
 }
 
 
+export function getPageVerticalScrollPosition(){
+    if (isServerSide() || !window || !document) return null;
+    return window.pageYOffset || ((document.scrollingElement && document.scrollingElement.scrollTop) || (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop);
+}
+
+
 /**
  * 
  * @param {string|number|HTMLElement} to - Where to scroll to.

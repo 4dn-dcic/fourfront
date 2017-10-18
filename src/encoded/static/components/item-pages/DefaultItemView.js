@@ -64,6 +64,10 @@ export class ItemBaseView extends React.Component {
         );
     }
 
+    tabbedView(){
+        return <TabbedView contents={this.getTabViewContents} />;
+    }
+
     render() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
@@ -80,7 +84,7 @@ export class ItemBaseView extends React.Component {
                     <div className="col-xs-12 col-md-12 tab-view-container" ref="tabViewContainer">
 
                         <layout.WindowResizeUpdateTrigger>
-                            <TabbedView contents={this.getTabViewContents} />
+                            { this.tabbedView() }
                         </layout.WindowResizeUpdateTrigger>
 
                     </div>

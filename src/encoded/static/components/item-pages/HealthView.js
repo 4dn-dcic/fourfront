@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
+import { Button } from 'react-bootstrap';
 import { content_views } from './../globals';
 import { ajax, console, object, Filters, JWT, DateUtility } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
@@ -36,7 +37,7 @@ export class HealthView extends React.Component {
             <div className="view-item">
                 <hr/>
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
-                <ItemDetailList context={context} schemas={this.props.schemas} hideButtons={true} keyTitleDescriptionMap={{
+                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} context={context} hideButtons={true} schemas={this.props.schemas} keyTitleDescriptionMap={{
                     'blob_bucket' : {
                         title : "Blob Bucket",
                         description : "Name of S3 bucket used for blob data."

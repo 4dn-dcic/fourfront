@@ -1,10 +1,13 @@
 var CryptoJS = require('crypto-js');
 import React from 'react';
 import PropTypes from 'prop-types';
+import { isServerSide } from './misc';
 
 
 /**
- * Use presence of 'status' property to determine if File object/Item we have
+ * Pass a File Item through this function to determine whether to fetch more of it via AJAX or not.
+ * 
+ * Use presence of 'status', '@type', and 'display_title' property to determine if File object/Item we have
  * is complete in its properties or not.
  * 
  * @param {Object} file - Object representing an embedded file. Should have display_title, at minimum.
@@ -13,10 +16,10 @@ import PropTypes from 'prop-types';
  */
 export function isFileDataComplete(file){
     if (!file || typeof file !== 'object') throw new Error('File param is not an object.');
-    if (typeof file.status !== 'string') {
-        return false;
+    if (isServerSide() || !window || !document){
+        return true; // For tests, primarily. 
     }
-    if (typeof file.link_id !== 'string') {
+    if (typeof file.status !== 'string') {
         return false;
     }
     if (typeof file.display_title !== 'string') {
@@ -65,7 +68,7 @@ export class FileDownloadButtonAuto extends React.Component {
             'uploaded',
             'released',
             'replaced',
-            'in review by project',
+            'submission in progress',
             'released to project'
         ]
     }

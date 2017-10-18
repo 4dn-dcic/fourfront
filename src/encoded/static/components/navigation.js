@@ -142,7 +142,7 @@ export default class Navigation extends React.Component {
             if (!this.state.navInitialized){
                 stateChange.navInitialized = true;
             }
-            var currentScrollTop = ((document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop);
+            var currentScrollTop = layout.getPageVerticalScrollPosition();
             var scrollVector = currentScrollTop - lastScrollTop;
             lastScrollTop = currentScrollTop;
 
@@ -396,7 +396,7 @@ class SearchBar extends React.Component{
                 method="GET"
             >
                 {/*<Checkbox className="toggle-all-items-search" checked={this.state.searchAllItems} onChange={this.toggleSearchAllItems}>&nbsp; All Items</Checkbox>*/}
-                {  this.selectItemTypeDropdown(searchBoxHasInput || searchQueryFromHref) }
+                {  this.selectItemTypeDropdown(!!(searchBoxHasInput || searchQueryFromHref)) }
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
                     ref="q" name="q" value={this.state.typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
                 {resetIconButton}

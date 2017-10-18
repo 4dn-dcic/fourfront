@@ -13,5 +13,4 @@ export { ActiveFiltersBar } from './ActiveFiltersBar';
 export { SVGFilters } from './SVGFilters';
 export { FetchingView } from './FetchingView';
 export { Legend } from './Legend';
-export { ZoomCursor } from './ZoomCursor';
 export { RotatedLabel } from './RotatedLabel';
