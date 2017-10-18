@@ -8,7 +8,6 @@ import { content_views } from './../globals';
 import { ajax, console, object, Filters, JWT, DateUtility } from './../util';
 import { ItemPageTitle, ItemDetailList } from './components';
 import _ from 'underscore';
-import { Button } from 'react-bootstrap';
 import JSONTree from 'react-json-tree';
 
 /**
