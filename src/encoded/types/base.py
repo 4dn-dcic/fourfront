@@ -15,7 +15,6 @@ from pyramid.traversal import (
     find_root,
     traverse,
 )
-from pyramid.threadlocal import get_current_request
 import snovault
 # from ..schema_formats import is_accession
 # import snovalut default post / patch stuff so we can overwrite it in this file
@@ -305,10 +304,7 @@ class Item(snovault.Item):
 
     def is_update_by_admin_user(self):
         # determine if the submitter in the properties is an admin user
-        # import pdb; pdb.set_trace()
-        request = get_current_request()
-        princ = request.effective_principals
-        userid = [l for l in princ if l.startswith('userid')][0].split('.')[1]
+        userid = snovault.schema_utils.SERVER_DEFAULTS['userid']('blah', 'blah')
         users = self.registry['collections']['User']
         user = users.get(userid)
         if 'groups' in user.properties:
