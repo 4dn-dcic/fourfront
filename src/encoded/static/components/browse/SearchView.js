@@ -9,7 +9,7 @@ import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
 import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList } from './components';
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, AboveSearchTablePanel } from './components';
 
 
 
@@ -47,28 +47,6 @@ function buildSearchHref(unselectHref, field, term, searchBase){
     return href;
 }
 
-// Determine whether any of the given terms are selected
-function countSelectedTerms(terms, field, filters) {
-    var count = 0;
-    for(var oneTerm in terms) {
-        if(getUnselectHrefIfSelectedFromResponseFilters(terms[oneTerm].key, field, filters)) {
-            count++;
-        }
-    }
-    return count;
-}
-
-/*
-class TypeTerm extends React.Component {
-    render() {
-        var term = this.props.term['key'];
-        var filters = this.props.filters;
-        var total = this.props.total;
-        return <Term {...this.props} title={term} filters={filters} total={total} />;
-    }
-}
-*/
-
 class InfoIcon extends React.Component{
     render() {
         if (!this.props.children) return null;
@@ -96,11 +74,22 @@ export function getSearchType(facets){
     }
 }
 
+/**
+ * Provides callbacks for FacetList to filter on term click and check if a term is selected by interfacing with the 
+ * 'searchBase' or 'href' prop (treated the same) and the 'navigate' callback prop (usually utils/navigate.js).
+ * 
+ * Passes other props down to ControlsAndResults.
+ * 
+ * @export
+ * @class ResultTableHandlersContainer
+ * @extends {React.Component}
+ */
 export class ResultTableHandlersContainer extends React.Component {
 
     static defaultProps = {
         restrictions : {},
-        searchBase : ''
+        searchBase : '',
+        navigate : navigate
     }
 
     constructor(props){
@@ -145,55 +134,10 @@ export class ResultTableHandlersContainer extends React.Component {
     }
 
     render(){
-
-        // Preprocess Facets for Search
-        var facets = this.props.context.facets.map((facet)=>{
-
-            if (this.props.restrictions[facet.field] !== undefined) {
-                facet = _.clone(facet);
-                facet.restrictions = this.props.restrictions[facet.field];
-                facet.terms = facet.terms.filter(term => _.contains(facet.restrictions, term.key));
-            }
-
-            // For search page, filter out Item types which are subtypes of an abstract type. Unless are on an abstract type.
-            if (facet.field === 'type'){
-                facet = _.clone(facet);
-                var queryParts = url.parse((this.props.searchBase || ''), true).query;
-                if (typeof queryParts.type === 'string') queryParts.type = [queryParts.type];
-                queryParts.type = _.without(queryParts.type, 'Item');
-
-                var isParentTypeSet = queryParts.type.filter(function(t){
-                    var pt = Schemas.getAbstractTypeForType(t);
-                    if (pt){
-                        return true;
-                    }
-                    return false;
-                }).length > 0;
-
-                if (!isParentTypeSet){
-                    facet.terms = facet.terms.filter(function(itemType){
-                        var parentType = Schemas.getAbstractTypeForType(itemType.key);
-                        if (parentType && itemType.key !== parentType){
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-
-            }
-
-            return facet;
-        });
-
         return (
             <CustomColumnController defaultHiddenColumns={['status']}>
                 <SortController href={this.props.searchBase || this.props.href} context={this.props.context} navigate={this.props.navigate}>
-                    <ControlsAndResults
-                        {...this.props}
-                        isTermSelected={this.isTermSelected}
-                        onFilter={this.onFilter}
-                        facets={facets}
-                    />
+                    <ControlsAndResults {...this.props} isTermSelected={this.isTermSelected} onFilter={this.onFilter} />
                 </SortController>
             </CustomColumnController>
         );
@@ -206,8 +150,7 @@ export class ResultTableHandlersContainer extends React.Component {
 class ControlsAndResults extends React.Component {
 
     static defaultProps = {
-        restrictions : {},
-        searchBase : ''
+        restrictions : {}
     }
 
     constructor(props){
@@ -216,28 +159,17 @@ class ControlsAndResults extends React.Component {
     }
 
     render() {
-        const batchHubLimit = 100;
         var context = this.props.context;
         var results = context['@graph'];
-        var total = context['total'];
-        var batch_hub_disabled = total > batchHubLimit;
-        var filters = context['filters'];
-        var show_link;
         var submission_facet_list = false;
-        var facets = this.props.facets;
+        var facets = this.props.facets || context.facets;
 
         // get type of this object for getSchemaProperty (if type="Item", no tooltips)
-        var thisType = 'Item';
-        var searchBits = this.props.searchBase.split(/[\?&]+/);
-        var filteredBits = searchBits.filter(bit => bit.slice(0,5) === 'type=' && bit.slice(5,9) !== 'Item');
-        if (filteredBits.length == 1){ // if multiple types, don't use any tooltips
-            thisType = filteredBits[0].slice(5);
-        }
+        var thisType = 'Item', itemTypeForSchemas;
         var urlParts = url.parse(this.props.searchBase, true);
-        var itemTypeForSchemas = null;
         if (typeof urlParts.query.type === 'string') { // Can also be array
             if (urlParts.query.type !== 'Item') {
-                itemTypeForSchemas = urlParts.query.type;
+                thisType = itemTypeForSchemas = urlParts.query.type;
             }
         }
 
@@ -306,10 +238,11 @@ class ControlsAndResults extends React.Component {
 
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
+                        <div className="above-results-table-row"/>{/* <-- temporary-ish */}
                         <FacetList
                             className="with-header-bg"
                             facets={facets}
-                            filters={filters}
+                            filters={context.filters}
                             onFilter={this.props.onFilter}
                             filterFacetsFxn={FacetList.filterFacetsForSearch}
                             isTermSelected={this.props.isTermSelected}
@@ -317,8 +250,9 @@ class ControlsAndResults extends React.Component {
                             session={this.props.session}
                             showClearFiltersButton={(()=>{
                                 var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
-                                var clearParts = url.parse(clearFiltersURL, true);
-                                return !object.isEqual(clearParts.query, urlParts.query);
+                                var urlPartQueryCorrectedForType = _.clone(urlParts.query);
+                                if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
+                                return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
                             })()}
                             onClearFilters={(evt)=>{
                                 evt.preventDefault();
@@ -374,10 +308,8 @@ class ControlsAndResults extends React.Component {
 
 export default class SearchView extends React.Component {
 
-    fullWidthStyle(){
-        if (!this.refs || !this.refs.container) return null;
-        //var marginLeft =
-
+    static defaultProps = {
+        restrictions : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
     }
 
     componentDidMount(){
@@ -393,15 +325,54 @@ export default class SearchView extends React.Component {
         // submission. this switch controls several things, including
         // pagination, clear filter, and types filter.
         if(this.props.submissionBase){
-            searchBase = this.props.submissionBase;
+            searchBase = this.props.submissionBase || '';
         }else{
             searchBase = url.parse(this.props.href).search || '';
         }
+
+        // Filter Facets down to abstract types only (if none selected) for Search. Do something about restrictions(?)
+        var facets = context.facets.map((facet)=>{
+
+            if (this.props.restrictions[facet.field] !== undefined) {
+                facet = _.clone(facet);
+                facet.restrictions = this.props.restrictions[facet.field];
+                facet.terms = facet.terms.filter(term => _.contains(facet.restrictions, term.key));
+            }
+
+            // For search page, filter out Item types which are subtypes of an abstract type. Unless are on an abstract type.
+            if (facet.field === 'type'){
+                facet = _.clone(facet);
+                var queryParts = url.parse(searchBase, true).query;
+                if (typeof queryParts.type === 'string') queryParts.type = [queryParts.type];
+                queryParts.type = _.without(queryParts.type, 'Item');
+
+                var isParentTypeSet = queryParts.type.filter(function(t){
+                    var pt = Schemas.getAbstractTypeForType(t);
+                    if (pt){
+                        return true;
+                    }
+                    return false;
+                }).length > 0;
+
+                if (!isParentTypeSet){
+                    facet.terms = facet.terms.filter(function(itemType){
+                        var parentType = Schemas.getAbstractTypeForType(itemType.key);
+                        if (parentType && itemType.key !== parentType){
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+            }
+
+            return facet;
+        });
+
         return (
-            <div>
-                <div className="browse-page-container search-page-container" ref="container">
-                    <ResultTableHandlersContainer {...this.props} searchBase={searchBase} navigate={this.props.navigate || navigate} />
-                </div>
+            <div className="browse-page-container search-page-container" ref="container">
+                <AboveSearchTablePanel href={searchBase} context={context} />
+                <ResultTableHandlersContainer {...this.props} facets={facets} searchBase={searchBase} navigate={this.props.navigate || navigate} />
             </div>
         );
     }
