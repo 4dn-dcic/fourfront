@@ -33,6 +33,8 @@ export class HealthView extends React.Component {
     render() {
         var context = this.props.context;
         var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
+        // should be updated when chalice-prod is deployed
+        var foursight = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/';
         return (
             <div className="view-item">
                 <hr/>
@@ -82,7 +84,7 @@ export class HealthView extends React.Component {
                         description : "Aggregations of ES-indexed data."
                     }
                 }} />
-            <AdminPanel context={context}/>
+            <AdminPanel foursightServer={foursight} context={context}/>
             </div>
         );
     }
@@ -116,7 +118,7 @@ class AdminPanel extends React.Component {
             return;
         }
         this.setState({'working': true});
-        var url = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/api/latest/' + environ + '/all';
+        var url = this.props.foursightServer + 'api/latest/' + environ + '/all';
         var callbackFxn = function(payload) {
             console.log('--Foursight checks found-->', payload);
             this.setState({'foursight_checks': payload, 'working': false});
@@ -131,7 +133,7 @@ class AdminPanel extends React.Component {
             return;
         }
         this.setState({'working': true});
-        var url = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/api/run/' + environ + '/all';
+        var url = this.props.foursightServer + 'api/run/' + environ + '/all';
         var callbackFxn = function(payload) {
             console.log('--Foursight checks run-->', payload);
             // automatically refresh after run
