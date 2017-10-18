@@ -251,7 +251,6 @@ class Item(snovault.Item):
         super().__init__(registry, models)
         self.STATUS_ACL = self.__class__.STATUS_ACL
 
-
     @property
     def __name__(self):
         """smth."""
@@ -302,6 +301,28 @@ class Item(snovault.Item):
         if properties.get('status') != 'replaced' and 'accession' in properties:
             keys['accession'].append(properties['accession'])
         return keys
+
+    def is_update_by_admin_user(self):
+        # determine if the submitter in the properties is an admin user
+        userid = snovault.schema_utils.SERVER_DEFAULTS['userid']('blah', 'blah')
+        users = self.registry['collections']['User']
+        user = users.get(userid)
+        if 'groups' in user.properties:
+            if 'admin' in user.properties['groups']:
+                return True
+        return False
+
+    def _update(self, properties, sheets=None):
+        # if an item is status 'planned' and an update is submitted
+        # by a non-admin user then status should be changed to 'submission in progress'
+        try:
+            props = self.properties
+            if 'status' in props and props['status'] == 'planned':
+                if not self.is_update_by_admin_user():
+                    properties['status'] = 'submission in progress'
+        except KeyError:
+            pass
+        super(Item, self)._update(properties, sheets)
 
     @snovault.calculated_property(schema={
         "title": "External Reference URIs",
