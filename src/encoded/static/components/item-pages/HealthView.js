@@ -32,8 +32,6 @@ export class HealthView extends React.Component {
     render() {
         var context = this.props.context;
         var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
-        // should be updated when chalice-prod is deployed
-        var foursight = 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com/';
         return (
             <div className="view-item">
                 <hr/>
@@ -83,7 +81,7 @@ export class HealthView extends React.Component {
                         description : "Aggregations of ES-indexed data."
                     }
                 }} />
-                <AdminPanel foursightServer={foursight} context={context}/>
+                <AdminPanel context={context}/>
             </div>
         );
     }
@@ -102,7 +100,9 @@ class AdminPanel extends React.Component {
             'foursight_checks': null,
             'foursight_run_resp': null,
             'working': false,
-            'foursight_environ': this.props.context.foursight_environ || null
+            'foursight_env': this.props.context.foursight_env || null,
+            'foursight_server': this.props.context.foursight_server || null
+
         };
     }
 
@@ -112,12 +112,13 @@ class AdminPanel extends React.Component {
 
     loadFoursight = () => {
         // Fetch foursight checks
-        var environ = this.state.foursight_environ;
-        if(environ === null){
+        var environ = this.state.foursight_env;
+        var server = this.state.foursight_server;
+        if(environ === null || server === null){
             return;
         }
         this.setState({'working': true});
-        var url = this.props.foursightServer + 'api/latest/' + environ + '/all';
+        var url = server + '/api/latest/' + environ + '/all';
         var callbackFxn = function(payload) {
             console.log('--Foursight checks found-->', payload);
             this.setState({'foursight_checks': payload, 'working': false});
@@ -127,12 +128,13 @@ class AdminPanel extends React.Component {
 
     runFoursight = () => {
         // Fetch foursight checks
-        var environ = this.state.foursight_environ;
-        if(environ === null){
+        var environ = this.state.foursight_env;
+        var server = this.state.foursight_server;
+        if(environ === null || server === null){
             return;
         }
         this.setState({'working': true});
-        var url = this.props.foursightServer + 'api/run/' + environ + '/all';
+        var url = server + '/api/run/' + environ + '/all';
         var callbackFxn = function(payload) {
             console.log('--Foursight checks run-->', payload);
             // automatically refresh after run
@@ -175,8 +177,8 @@ class AdminPanel extends React.Component {
         }
         // format foursight title with environ
         var foursight_title = 'Foursight';
-        if(this.state.foursight_environ){
-            foursight_title = foursight_title + ' (' + this.state.foursight_environ + ')';
+        if(this.state.foursight_env){
+            foursight_title = foursight_title + ' (' + this.state.foursight_env + ')';
         }
         return (
             <div className="admin-panel">
