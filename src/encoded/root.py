@@ -71,9 +71,9 @@ def health_check(config):
             ont_date = "Never Generated"
 
         # for foursight environment
-        foursight_env = settings.get('foursight.env')
-        if foursight_env:
-            foursight_env = foursight_env.split('-')[-1]
+        ff_env = settings.get('env.name')
+        if ff_env:
+            foursight_env = ff_env.split('-')[-1]
         else:
             foursight_env = 'webdev' # default for testing
 

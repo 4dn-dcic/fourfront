@@ -16,7 +16,6 @@ file_wfout_bucket = elasticbeanstalk-{env_name}-wfoutput
 region_search_instance = {es_server}
 elasticsearch_instance = {es_server}
 elasticsearch_index = {env_name}
-foursight_env = {env_name}
 sqlalchemy_url = {dbconn}
 
 create_tables = true
