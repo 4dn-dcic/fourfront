@@ -83,7 +83,7 @@ export class HealthView extends React.Component {
                         description : "Aggregations of ES-indexed data."
                     }
                 }} />
-            <AdminPanel foursightServer={foursight} context={context}/>
+                <AdminPanel foursightServer={foursight} context={context}/>
             </div>
         );
     }
