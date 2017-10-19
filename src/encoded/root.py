@@ -71,11 +71,7 @@ def health_check(config):
             ont_date = "Never Generated"
 
         # for foursight environment
-        ff_env = settings.get('env.name')
-        if ff_env:
-            foursight_env = ff_env.split('-')[-1]
-        else:
-            foursight_env = 'webdev' # default for testing
+        foursight_env = settings.get('env.name', 'webdev').split('-')[-1]
 
         app_url = request.application_url
         if not app_url.endswith('/'):
