@@ -898,36 +898,25 @@ export class FacetList extends React.Component {
         var clearButtonStyle = (this.props.className && this.props.className.indexOf('with-header-bg') > -1) ?
             "btn-outline-white" : "btn-outline-default";
 
-        //var terms = this.searchQueryTerms();
-        //var searchBase = url.parse(this.context.location_href).search || '';
-        //searchBase = searchBase && searchBase.length > 0 ? searchBase + '&' : searchBase + '?';
-
         return (
-            <div>
-                {/*
-                <div className="exptype-box">
-                    { exptypeDropdown }
-                </div>
-                */}
-                <div className={
-                    "facets-container facets " +
-                    this.props.orientation +
-                    ( this.props.className ? ' ' + this.props.className : '' )
-                }>
-                    <div className="row facets-header">
-                        <div className="col-xs-6 facets-title-column">
-                            <i className="icon icon-fw icon-filter"></i>
-                            &nbsp;
-                            <h4 className="facets-title">{ this.props.title }</h4>
-                        </div>
-                        <div className={"col-xs-6 clear-filters-control" + (this.props.showClearFiltersButton ? '' : ' placeholder')}>
-                            <a href="#" onClick={this.props.onClearFilters} className={"btn btn-xs rounded " + clearButtonStyle}>
-                                <i className="icon icon-times"></i> Clear All
-                            </a>
-                        </div>
+            <div className={
+                "facets-container facets " +
+                this.props.orientation +
+                ( this.props.className ? ' ' + this.props.className : '' )
+            }>
+                <div className="row facets-header">
+                    <div className="col-xs-6 facets-title-column">
+                        <i className="icon icon-fw icon-filter"></i>
+                        &nbsp;
+                        <h4 className="facets-title">{ this.props.title }</h4>
                     </div>
-                    { this.renderFacets(facets) }
+                    <div className={"col-xs-6 clear-filters-control" + (this.props.showClearFiltersButton ? '' : ' placeholder')}>
+                        <a href="#" onClick={this.props.onClearFilters} className={"btn btn-xs rounded " + clearButtonStyle}>
+                            <i className="icon icon-times"></i> Clear All
+                        </a>
+                    </div>
                 </div>
+                { this.renderFacets(facets) }
             </div>
         );
     }

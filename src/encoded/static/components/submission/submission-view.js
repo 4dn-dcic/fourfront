@@ -1,18 +1,17 @@
 'use strict';
-var React = require('react');
-var globals = require('../globals');
-var _ = require('underscore');
-var { ajax, console, JWT, object, isServerSide, layout, Schemas } = require('../util');
-var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
-var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
-import { getTitleStringFromContext } from '../item-pages/item';
-var Search = require('./../browse/SearchView').default;
-var ReactTooltip = require('react-tooltip');
+import React from 'react';
+import globals from '../globals';
+import _ from 'underscore';
+import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
+import {getS3UploadUrl, s3UploadFile} from '../util/aws';
+import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} from 'react-bootstrap';
+import Search from './../browse/SearchView';
+import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
 import SubmissionTree from './expandable-tree';
 import BuildField from './submission-fields';
 import Alerts from '../alerts';
-var { Detail } = require('../item-pages/components');
+import { Detail } from '../item-pages/components';
 
 /*
 Key container component for Submission components.

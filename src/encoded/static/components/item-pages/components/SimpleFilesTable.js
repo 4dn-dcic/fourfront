@@ -44,6 +44,7 @@ export class SimpleFilesTable extends React.Component {
 
         return (
             <ItemPageTable
+                {...this.props}
                 results={reducedFiles}
                 //renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
                 //    'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47

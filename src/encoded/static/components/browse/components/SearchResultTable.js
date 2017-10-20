@@ -443,7 +443,7 @@ class ShadowBorderLayer extends React.Component {
     static isWindowPastTableTop(tableContainerElement, windowHeight = null, scrollTop = null, tableTopOffset = null){
         if (isServerSide()) return false;
         if (!windowHeight)      windowHeight    = window.innerHeight;
-        if (!scrollTop)         scrollTop       = document && document.body && document.body.scrollTop;
+        if (!scrollTop)         scrollTop       = layout.getPageVerticalScrollPosition();
         if (!tableTopOffset)    tableTopOffset  = layout.getElementOffset(tableContainerElement).top;
         if (windowHeight / 2 + scrollTop > tableTopOffset){
             return true;
@@ -770,14 +770,14 @@ class DimensioningContainer extends React.Component {
 
         //vizUtil.requestAnimationFrame(()=>{
 
-            var windowHeight    = window.innerHeight;
-            var scrollTop       = document && document.body && document.body.scrollTop;
-            var tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
+        var windowHeight    = window.innerHeight;
+        var scrollTop       = layout.getPageVerticalScrollPosition();
+        var tableTopOffset  = layout.getElementOffset(this.refs.innerContainer).top;
 
             //var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
 
 
-            var done = false;
+        var done = false;
 
             // Resize to full width.
             /*
@@ -827,12 +827,12 @@ class DimensioningContainer extends React.Component {
             }
             */
 
-            if (!done){
-                var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
-                if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
-                    this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
-                }
+        if (!done){
+            var isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(this.refs.innerContainer, windowHeight, scrollTop, tableTopOffset);
+            if (isWindowPastTableTop !== this.state.isWindowPastTableTop){
+                this.setState({ 'isWindowPastTableTop' : isWindowPastTableTop });
             }
+        }
 
 
         //});

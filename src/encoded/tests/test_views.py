@@ -291,7 +291,7 @@ def test_jsonld_term(testapp):
     assert res.json
 
 
-@pytest.mark.parametrize('item_type', INDEX_DATA_TYPES)
+@pytest.mark.parametrize('item_type', TYPE_LENGTH)
 def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, item_type):
     import random
     # randomly sample all items and take 2
@@ -299,7 +299,8 @@ def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, it
     # previously test_load_workbook
     item_len = len(res.json['@graph'])
     assert item_len == TYPE_LENGTH[item_type]
-    random_id_idxs = random.sample(range(item_len), 2)
+    num_items = 2 if item_len >= 2 else item_len
+    random_id_idxs = random.sample(range(item_len), num_items)
     random_ids = [res.json['@graph'][idx]['@id'] for idx in random_id_idxs]
     for item_id in random_ids:
         indexer_testapp.get(item_id + '@@index-data', status=200)
@@ -307,8 +308,6 @@ def test_index_data_workbook(workbook, testapp, indexer_testapp, htmltestapp, it
         try:
             res = htmltestapp.get(item_id)
         except Exception as e:
-            import pdb
-            pdb.set_trace()
             print(e)
             continue
         assert res.body.startswith(b'<!DOCTYPE html>')

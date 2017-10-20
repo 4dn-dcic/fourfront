@@ -17,12 +17,11 @@ import { DefaultNodeElement } from './Node';
 /**
  * Primary/entry component for the Workflow graph.
  * 
- * @export
  * @class Graph
- * @extends {React.Component}
  * @prop {Object[]}     nodes                   Array of node objects to plot. Both nodes and edges can be generated from a CWL-like structure using static functions, including the provided 'parseAnalysisSteps'. See propTypes in class def below for object structure.
  * @prop {Object[]}     edges                   Array of edge objects to plot. See propTypes in class def below for object structure.
- * @prop {React.Component} [detailPane]         Provide a React Component instance (e.g. as JSX) to use to display node metadata at bottom of graph. A default pane applicable to 4DN is used if not provided. Pass in null to perform your own logic in onNodeClick.
+ * @prop {function}     renderNodeElement       Function to render out own custom Node Element. Accepts two params - 'node' and 'props' (of graph).
+ * @prop {function?}    renderDetailPane        Function to render out own custom Detail Pane. Accepts two params - 'selectedNode' and 'props' (of graph). Pass in null to perform your own logic in onNodeClick.
  * @prop {function}     [onNodeClick]           A function to be executed each time a node is clicked. 'this' will refer to internal statecontainer. Should accept params: {Object} 'node', {Object|null} 'selectedNode', and {MouseEvent} 'evt'. By default, it changes internal state's selectedNode. You should either disable props.checkHrefForSelectedNode -or- change href in this function.
  * @prop {function}     [isNodeDisabled]        Function which accepts a 'node' object and returns a boolean.
  * @prop {boolean}      [checkHrefForSelectedNode=true] - If true, will check props.href or window.location.href on updates as well as mounting and update selectedNode if '#' + node.name is in URL. Recommended to leave as true and in props.onNodeClick, to change href to contain '#' + node.name.
@@ -45,8 +44,7 @@ export default class Graph extends React.Component {
             'left'              : PropTypes.number.isRequired,
             'right'             : PropTypes.number.isRequired
         }).isRequired,
-        'nodeElement'       : PropTypes.element, // !!TODO!! Allow to pass in a Node element in place of default Node component and extend its props. For making reusable.
-        'edgeElement'       : PropTypes.element, // !!TODO!!
+        'renderNodeElement' : PropTypes.func.isRequired,
         'detailPane'        : PropTypes.element,
         'nodes'             : PropTypes.arrayOf(PropTypes.shape({
             'column'            : PropTypes.number.isRequired,
@@ -84,10 +82,15 @@ export default class Graph extends React.Component {
         'rowSpacing'    : 75,
         'rowSpacingType': 'wide',
         'pathArrows'    : true,
-        'detailPane'    : <DefaultDetailPane />,
-        'nodeElement'   : <DefaultNodeElement />,
+        'renderDetailPane' : function(selectedNode, props){
+            return <DefaultDetailPane {...props} selectedNode={selectedNode} />;
+        },
+        'renderNodeElement' : function(node, props){
+            return <DefaultNodeElement {...props} node={node} />;
+        },
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
-        'nodeTitle'     : function(node, canBeJSX = false){ return node.title || node.name; },
+        'checkHrefForSelectedNode' : true,
+        'checkWindowLocationHref' : true,
         'innerMargin'   : {
             'top' : 60,
             'bottom' : 60,
@@ -100,6 +103,7 @@ export default class Graph extends React.Component {
             return false;
         },
         'nodeClassName' : function(node){ return ''; },
+        'nodeEdgeLedgeWidths' : [3,5],
         'nodesPreSortFxn' : function(nodes){
             // For any 'global input files', put them in first column (index 0).
             // MODIFIES IN-PLACE! Because it's a fine & performant side-effect if column assignment changes in-place. We may change this later.
@@ -110,34 +114,63 @@ export default class Graph extends React.Component {
             });
             return nodes;
         },
+        'skipSortOnColumns' : [1],
+        /**
+         * This function, along with 'nodesInColumnPostSortFxn' & 'nodesPreSortFxn', is _PROTOTYPICAL_ - a R&D work in progress.
+         * It's quick, dirty, hacky. And it will remain this way until we figure out what we want from it, or if we want it at all, and then we'll go back and make it DRY and pretty.
+         */
         'nodesInColumnSortFxn' : function(node1, node2){
 
             function isNodeFileReference(n){
                 return n.meta.run_data && n.meta.run_data.file && Array.isArray(n.meta.run_data.file['@type']) && n.meta.run_data.file['@type'].indexOf('FileReference') > -1;
             }
 
-            function compareNodeInputOf(n1, n2){
-                var n1InputOf = n1.type === 'step' ? n1.outputNodes : n1.inputOf;
-                var n2InputOf = n2.type === 'step' ? n2.outputNodes : n2.inputOf;
-                if (Array.isArray(n1InputOf) && Array.isArray(n2InputOf) && (n1InputOf[0] && n1InputOf[0].name && n2InputOf[0] && n2InputOf[0].name)){
+            function isNodeParameter(n){
+                return n.meta.run_data && !n.meta.run_data.file && n.meta.run_data.value && (typeof n.meta.run_data.value === 'string' || typeof n.meta.run_data.value === 'number');
+            }
 
-                    if (n1InputOf[0].name === n2InputOf[0].name){
-                        if (n1InputOf[0].id === n2InputOf[0].id){
-                            if (n1.name === n2.name){
-                                return (n1.id < n2.id) ? -2 : 2;
-                            }
-                            return (n1.name < n2.name) ? -2 : 2;
-                        }
-                        return n1InputOf[0].id < n2InputOf[0].id ? -3 : 3;
+            function getNodeFromListForComparison(nodeList, highestColumn = true){
+                if (!Array.isArray(nodeList) || nodeList.length === 0) return null;
+                var sortedList = _.sortBy(nodeList.slice(0), function(n){
+                    return (n.indexInColumn || n.origIndexInColumn);
+                });
+                sortedList = _.sortBy(sortedList, function(n){ return highestColumn ? -n.column : n.column; });
+                return (
+                    _.find(sortedList, function(n){ return typeof n.indexInColumn === 'number' || typeof n.origIndexInColumn === 'number'; })
+                    || sortedList[0]
+                    || null
+                );
+            }
+
+            function compareNodesBySameColumnIndex(n1, n2){
+                if (n1 && !n2) return -1;
+                if (!n1 && n2) return 1;
+                if (n1 && n2){
+                    if (n1.column === n2.column){
+                        if ((n1.indexInColumn || n1.origIndexInColumn) < (n2.indexInColumn || n2.origIndexInColumn)) return -1;
+                        if ((n1.indexInColumn || n1.origIndexInColumn) > (n2.indexInColumn || n2.origIndexInColumn)) return 1;
                     }
-                    return n1InputOf[0].name < n2InputOf[0].name ? -1 : 1;
                 }
                 return 0;
             }
 
+            function compareNodeInputOf(n1, n2){
+                var n1InputOf = getNodeFromListForComparison(n1.type === 'step' ? n1.outputNodes : n1.inputOf, false);
+                var n2InputOf = getNodeFromListForComparison(n2.type === 'step' ? n2.outputNodes : n2.inputOf, false);
+
+                var ioResult = compareNodesBySameColumnIndex(n1InputOf, n2InputOf);
+                if (ioResult !== 0) return ioResult;
+                
+                if (n1.name === n2.name){
+                    return 0;
+                }
+                return (n1.name < n2.name) ? -1 : 1;
+
+            }
+
             function compareNodeOutputOf(n1, n2){
-                var n1OutputOf = n1.type === 'step' ? (n1.inputNodes && n1.inputNodes.length > 0 && _.find(n1.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n1.outputOf;
-                var n2OutputOf = n2.type === 'step' ? (n2.inputNodes && n2.inputNodes.length > 0 && _.find(n2.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; })) || null : n2.outputOf;
+                var n1OutputOf = n1.type === 'step' ? (n1.inputNodes && getNodeFromListForComparison(n1.inputNodes)) : n1.outputOf;
+                var n2OutputOf = n2.type === 'step' ? (n2.inputNodes && getNodeFromListForComparison(n2.inputNodes)) : n2.outputOf;
 
                 if ((n1OutputOf && typeof n1OutputOf.indexInColumn === 'number' && n2OutputOf && typeof n2OutputOf.indexInColumn === 'number')){
                     if (n1OutputOf.column === n2OutputOf.column){
@@ -147,57 +180,46 @@ export default class Graph extends React.Component {
                 }
                 if ((n1OutputOf && n1OutputOf.name && n2OutputOf && n2OutputOf.name)){
                     if (n1OutputOf.name === n2OutputOf.name){
-                        if (n1OutputOf.id === n2OutputOf.id){
 
-                            if (typeof n1.inputOf !== 'undefined' && typeof n2.inputOf === 'undefined'){
-                                return -3;
-                            } else if (typeof n1.inputOf === 'undefined' && typeof n2.inputOf !== 'undefined'){
-                                return 3;
-                            }
-                            if (n1.name < n2.name) return -1;
-                            if (n1.name > n2.name) return 1;
-                            return 0;//compareNodeInputOf(n1, n2);
-
+                        if (typeof n1.inputOf !== 'undefined' && typeof n2.inputOf === 'undefined'){
+                            return -3;
+                        } else if (typeof n1.inputOf === 'undefined' && typeof n2.inputOf !== 'undefined'){
+                            return 3;
                         }
-                        return n1OutputOf.id < n2OutputOf.id ? -3 : 3;
+                        if (n1.name < n2.name) return -1;
+                        if (n1.name > n2.name) return 1;
+                        return 0;//compareNodeInputOf(n1, n2);
+
                     }
                     return n1OutputOf.name < n2OutputOf.name ? -3 : 3;
                 }
                 return 0;
             }
 
+            function nonIOStepCompare(n1,n2){ // Fallback
+                return 0; // Use order step was given to us in.
+            }
+
             var ioResult;
 
             if (node1.type === 'step' && node2.type === 'step'){
+
+
                 if (node1.inputNodes && !node2.inputNodes) return -1;
                 if (!node1.inputNodes && node2.inputNodes) return 1;
                 if (node1.inputNodes && node2.inputNodes){
-                    var n1input = _.find(node1.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; }) || null;
-                    var n2input = _.find(node2.inputNodes, function(n){ return typeof n.indexInColumn === 'number'; }) || null;
-                    if (n1input && !n2input) return -1;
-                    if (!n1input && n2input) return 1;
-                    if (n1input && n2input){
-                        if (n1input.column === n2input.column){
-                            if (n1input.indexInColumn < n2input.indexInColumn) return -1;
-                            if (n1input.indexInColumn > n2input.indexInColumn) return 1;
-                        }
-                    }
+                    ioResult = compareNodesBySameColumnIndex(
+                        getNodeFromListForComparison(node1.inputNodes),
+                        getNodeFromListForComparison(node2.inputNodes)
+                    );
+                    if (ioResult !== 0) return ioResult;
                 }
-                if (node1.name === node2.name){
-                    if (node1.id === node2.id) return 0;
-                    return (node1.id < node2.id) ? -2 : 2;
-                }
-                return (node1.name < node2.name) ? -2 : 2;
+                
+                return nonIOStepCompare(node1,node2);
             }
             if (node1.type === 'output' && node2.type === 'input'){
-                if (typeof node1.inputOf !== 'undefined'){
-                    return -4;
-                }
                 return -1;
             } else if (node1.type === 'input' && node2.type === 'output'){
-                if (typeof node2.inputOf !== 'undefined'){
-                    return 4;
-                }
                 return 1;
             }
 
@@ -218,6 +240,11 @@ export default class Graph extends React.Component {
                 
 
                 if (node1.type === 'input'){
+                    if (isNodeParameter(node1) && isNodeParameter(node2)){
+                        return compareNodeInputOf(node1, node2);
+                    }
+                    else if (isNodeParameter(node1)) return 5;
+                    else if (isNodeParameter(node2)) return -5;
 
                     if (isNodeFileReference(node1)){
                         if (isNodeFileReference(node2)) {
@@ -227,13 +254,15 @@ export default class Graph extends React.Component {
                             return 7;
                         }
                     } else if (isNodeFileReference(node2)) {
-                        return -1;
+                        return -7;
                     }
 
                     ioResult = compareNodeInputOf(node1, node2);
-                    if (ioResult !== 0) return ioResult;
+                    return ioResult;
                 }
             }
+
+            return  0;
         },
         'nodesInColumnPostSortFxn' : function(nodesInColumn, columnNumber){
             var groupNodes = _.filter(nodesInColumn, { 'type' : 'input-group' });
@@ -254,11 +283,34 @@ export default class Graph extends React.Component {
                         nodesInColumn.splice(afterThisIdx + 1, 0, gN);
                     }
                 });
-                // Update own indices (not used for anything currently xcept debugging)
-                _.forEach(nodesInColumn, function(n, index){
-                    n.indexInColumn = index;
-                });
             }
+            
+            if (_.every(nodesInColumn, function(n){ return n.type === 'step'; })){
+                // If all step nodes, move those with more inputs toward the middle.
+                var nodesByNumberOfInputs = _.groupBy(nodesInColumn.slice(0), function(n){ return n.inputNodes.length; });
+                var inputCounts = _.keys(nodesByNumberOfInputs).map(function(num){ return parseInt(num); }).sort();
+                if (inputCounts.length > 1){ // If any step nodes which have more inputs than others.
+                    inputCounts.reverse().pop();
+                    console.log('INPUTCOUNTS', inputCounts, nodesByNumberOfInputs);
+                    var popped, nodesToCenter, middeIndex;
+                    while (inputCounts.length > 0){ // In low->high # of inputs (after first lowest)
+                        popped = inputCounts.pop();
+                        nodesToCenter = nodesByNumberOfInputs[popped + ''];
+
+                        _.forEach(nodesToCenter, function(nodeToCenter){ // Remove these nodes
+                            var oldIdx = nodesInColumn.indexOf(nodeToCenter);
+                            nodesInColumn.splice(oldIdx, 1);
+                        });
+
+                        middeIndex = Math.floor(nodesInColumn.length / 2); // Re-add them in middle of remaining nodes.
+                        nodesInColumn.splice(middeIndex, 0, ...nodesToCenter);
+                    }
+                    
+                    
+                }
+            }
+            
+
             
             return nodesInColumn;
         }
@@ -327,23 +379,33 @@ export default class Graph extends React.Component {
         nodes = _.sortBy(nodes, 'column');
         var nodesByColumnPairs = _.pairs(_.groupBy(nodes, 'column'));
 
+        // Add prelim index for each node, over-written in sorting if any.
+        nodesByColumnPairs = _.map(nodesByColumnPairs, function(columnGroup){
+            _.forEach(columnGroup[1], function(n, i){
+                n.origIndexInColumn = i;
+            });
+            return [ parseInt(columnGroup[0]), columnGroup[1] ];
+        });
+
         // Sort nodes within columns.
         if (typeof this.props.nodesInColumnSortFxn === 'function'){
             nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
-                return [
-                    columnGroup[0],
-                    _.map(columnGroup[1].slice(0).sort(this.props.nodesInColumnSortFxn), function(n, i){
-                        n.indexInColumn = i;
-                        return n;
-                    })
-                ];
-            });
-        }
+                var nodesInColumn;
+                // Sort
+                if (this.props.skipSortOnColumns.indexOf(columnGroup[0]) > -1){
+                    nodesInColumn = columnGroup[1].slice(0);
+                } else {
+                    nodesInColumn = columnGroup[1].sort(this.props.nodesInColumnSortFxn);
+                }
 
-        // Run post-sort fxn, e.g. to manually re-arrange nodes within columns.
-        if (typeof this.props.nodesInColumnPostSortFxn === 'function'){
-            nodesByColumnPairs = _.map(nodesByColumnPairs, (columnGroup)=>{
-                return [columnGroup[0], this.props.nodesInColumnPostSortFxn(columnGroup[1], columnGroup[0])];
+                // Run post-sort fxn, e.g. to manually re-arrange nodes within columns. If avail.
+                if (typeof this.props.nodesInColumnPostSortFxn === 'function'){
+                    nodesInColumn = this.props.nodesInColumnPostSortFxn(nodesInColumn, columnGroup[0]);
+                }
+
+                _.forEach(nodesInColumn, function(n, i){ n.indexInColumn = i; }); // Update w/ new index in column
+
+                return [ columnGroup[0], nodesInColumn ];
             });
         }
 
@@ -456,18 +518,12 @@ export default class Graph extends React.Component {
                             innerWidth={width}
                             innerHeight={height}
                             contentWidth={contentWidth}
-                            innerMargin={this.props.innerMargin}
-                            columnWidth={this.props.columnWidth}
-                            columnSpacing={this.props.columnSpacing}
-                            pathArrows={this.props.pathArrows}
-                            href={this.props.href}
-                            onNodeClick={this.props.onNodeClick}
+                            {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane', 'checkHrefForSelectedNode', 'checkWindowLocationHref')}
                         >
                             <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing')} />
-                                <NodesLayer {..._.pick(this.props, 'nodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} title={this.props.nodeTitle} />
+                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
+                                <NodesLayer {..._.pick(this.props, 'nodeElement', 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} />
                             </ScrollContainer>
-                            { this.props.detailPane }
                         </StateContainer>
                     </div>
                 </Fade>
