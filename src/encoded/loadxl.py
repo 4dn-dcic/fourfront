@@ -52,8 +52,10 @@ ORDER = [
     'file_reference',
     'file_calibration',
     'file_microscopy',
+    'file_microscope_qc',
     'file_set',
     'file_set_calibration',
+    'file_set_microscope_qc',
     'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',
@@ -570,10 +572,19 @@ PHASE1_PIPELINES = {
     'file_calibration': [
         remove_keys('related_files'),
     ],
+    'file_microscope_qc': [
+        remove_keys('related_files'),
+    ],
     'file_microscopy': [
         remove_keys('related_files'),
     ],
     'file_set': [
+        remove_keys('files_in_set'),
+    ],
+    'file_set_calibration': [
+        remove_keys('files_in_set'),
+    ],
+    'file_set_microscope_qc': [
         remove_keys('files_in_set'),
     ],
     'experiment_hi_c': [
@@ -641,7 +652,16 @@ PHASE2_PIPELINES = {
     'file_microscopy': [
         skip_rows_missing_all_keys('related_files'),
     ],
+    'file_microscope_qc': [
+        skip_rows_missing_all_keys('related_files'),
+    ],
     'file_set': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_calibration': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_microscope_qc': [
         skip_rows_missing_all_keys('files_in_set'),
     ],
     'experiment_hi_c': [

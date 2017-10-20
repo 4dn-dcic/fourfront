@@ -1,0 +1,24 @@
+[
+    {
+        "accession":"4DNFIATESTM1",
+        "description": "MicroscopeQC Image 1",
+        "lab": "4dn-dcic-lab",
+        "file_format": "tiff",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "uuid": "47e82a90-49e5-4c33-afab-9ec90d65fcc9",
+        "status": "uploaded",
+        "wavelength": 515
+    },
+    {
+        "accession":"4DNFIATESTM2",
+        "description": "MicroscopeQC Image 2",
+        "lab": "4dn-dcic-lab",
+        "file_format": "tiff",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "uuid": "47e82a90-49e5-4c33-afab-9ec90d65fcc1",
+        "status": "uploaded",
+        "wavelength": 580
+    }
+]
