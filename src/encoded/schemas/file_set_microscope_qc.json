@@ -16,6 +16,7 @@
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/accession" }
     ],
     "properties": {
@@ -58,6 +59,10 @@
             "title": "Magnification (X)",
             "description": "Magnification used for imaging, enter without X",
             "type": "number"
+        },
+        "attachment": {
+            "title": "PSFj Analysis Result",
+            "description": "PDF document with PSFj result"
         },
         "files_in_set": {
             "title": "Microscopy Images for QC",
