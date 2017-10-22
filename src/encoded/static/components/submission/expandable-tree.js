@@ -1,11 +1,10 @@
 'use strict';
-var React = require('react');
-var globals = require('../globals');
-var _ = require('underscore');
-var { ajax, console, object, isServerSide } = require('../util');
-var { DropdownButton, Button, MenuItem, Panel, Table, Collapse} = require('react-bootstrap');
-var d3 = require('d3');
-var ReactTooltip = require('react-tooltip');
+import React from 'react';
+import globals from '../globals';
+import _ from 'underscore';
+import { ajax, console, object, isServerSide } from '../util';
+import { DropdownButton, Button, MenuItem, Panel, Table, Collapse} from 'react-bootstrap';
+import ReactTooltip from 'react-tooltip';
 
 // Create a custom tree to represent object hierarchy in front end submission.
 // Each leaf is clickable and will bring you to a view of the new object

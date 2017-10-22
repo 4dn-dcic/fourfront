@@ -1,5 +1,6 @@
 .coverage
 coverage.xml
+beanstalk.cfg
 /coverage
 /.installed.cfg
 /.mr.developer.cfg

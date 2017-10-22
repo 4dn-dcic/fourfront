@@ -17,7 +17,7 @@ region_search_instance = {es_server}
 elasticsearch_instance = {es_server}
 elasticsearch_index = {env_name}
 sqlalchemy_url = {dbconn}
-
+env_name = {env_name}
 create_tables = true
 load_test_data = encoded.loadxl:{load_function}
 '''

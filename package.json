@@ -91,6 +91,7 @@
     "lodash": "^4.17.4",
     "lodash.isfinite": "^3.3.2",
     "marked": "^0.3.6",
+    "markdown-to-jsx" : "^5.4.2",
     "moment": "^2.18.1",
     "prop-types": "^15.5.10",
     "qs": "^6.5.0",

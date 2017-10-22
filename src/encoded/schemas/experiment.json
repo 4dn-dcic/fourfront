@@ -24,7 +24,8 @@
                 "deleted",
                 "replaced",
                 "in review by lab",
-                "in review by project",
+                "planned",
+                "submission in progress",
                 "released to project"
             ]
         },

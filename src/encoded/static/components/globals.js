@@ -180,10 +180,19 @@ export function isHashPartOfHref(href, parts = null){
     if (!parts && typeof href !== 'string') throw Error("No href or parts passed.");
     if (!parts) parts = url.parse(href);
 
+    // Edit Pages
     if (parts.hash === '#!edit' || parts.hash === '#!create') return true;
 
-    // Custom Rules
+    // Workflow Pages
     if (parts.path.slice(0,14) === '/workflow-runs' || parts.path.slice(0,11) === '/workflows/' ){
+        return true;
+    }
+
+    // Item pages with Workflow graphs
+    if (parts.path.slice(0,27) === '/experiment-set-replicates/' && parts.path.length > 28 ){
+        return true;
+    }
+    if (parts.path.slice(0,17) === '/files-processed/' && parts.path.length > 18 ){
         return true;
     }
 

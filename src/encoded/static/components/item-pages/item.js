@@ -27,7 +27,7 @@ import AuditTabView from './components/AuditTabView';
 export default class Item extends React.Component {
 
     static propTypes = {
-        schemas : PropTypes.any.isRequired,
+        schemas : PropTypes.any,
         listActionsFor : PropTypes.func.isRequired,
         href : PropTypes.string.isRequired,
         session : PropTypes.bool.isRequired,
