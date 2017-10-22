@@ -143,7 +143,11 @@ after_success:
           echo "Job succeeded! PUBLISHING to fourfront-mastertest environment..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
-          eb use fourfront-mastertest --debug
+          if [-z $tibanna_deploy]; then 
+             eb use fourfront-mastertest --debug
+          else
+             eb use ${tibanna_deploy} --debug
+          fi
           travis_wait 30 python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
