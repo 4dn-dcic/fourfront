@@ -7,6 +7,7 @@ import argparse
 
 def tag(name):
     subprocess.check_output(['git', 'tag', name, '-m', 'version created for staging deploy'])
+    subprocess.check_output(['git', 'push', 'origin', name])
 
 
 def merge(source, merge_to):
@@ -15,7 +16,7 @@ def merge(source, merge_to):
     subprocess.check_output(
         ['git', 'config', "--replace-all", "remote.origin.fetch",
          '+refs/heads/*:refs/remotes/origin/*'])
-    subprocess.check_output(['git', 'fetch', '--no-tags', '--depth' '200'])
+    subprocess.check_output(['git', 'fetch', '--no-tags', '--depth', '200'])
     subprocess.check_output(
         ['git', 'checkout', merge_to]).decode('utf-8').strip()
     subprocess.check_output(
@@ -107,7 +108,7 @@ if __name__ == "__main__":
         update_version(ver)
         if merge_to:
             merge(branch, merge_to)
-            tag()
+            tag(ver)
         deploy()
     if args.prod:
         print("args production")
