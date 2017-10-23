@@ -15,7 +15,7 @@ def merge(source, merge_to):
     subprocess.check_output(
         ['git', 'config', "--replace-all", "remote.origin.fetch",
          '+refs/heads/*:refs/remotes/origin/*'])
-    subprocess.check_output(['git', 'fetch', '--no-tags', '--depth 200'])
+    subprocess.check_output(['git', 'fetch', '--no-tags', '--depth' '200'])
     subprocess.check_output(
         ['git', 'checkout', merge_to]).decode('utf-8').strip()
     subprocess.check_output(
