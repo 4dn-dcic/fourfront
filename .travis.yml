@@ -139,9 +139,11 @@ after_success:
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
+
+        git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git
+        git config --global user.email "travis@builder.com"
+        git config --global user.name "Travis"
         if [ "$TRAVIS_BRANCH" = "master" ]; then
-          git config --global user.email "travis@builder.com"
-          git config --global user.name "Travis"
           if [ -z "$tibanna_deploy" ]; then 
              echo "Job succeeded! PUBLISHING to fourfront-mastertest environment..."
              eb use fourfront-mastertest --debug
@@ -153,8 +155,6 @@ after_success:
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
             echo "Tests passed! PUBLISHING to ${tibanna_deploy} environment..."
-            git config --global user.email "travis@builder.com"
-            git config --global user.name "Travis"
             eb use ${tibanna_deploy} --debug
             travis_wait 30 python deploy/deploy_beanstalk.py --prod
           fi
