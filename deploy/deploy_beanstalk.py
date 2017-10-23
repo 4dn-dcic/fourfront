@@ -13,8 +13,12 @@ def tag(name):
 def merge(source, merge_to):
     subprocess.check_output(
         ['git', 'checkout', merge_to]).decode('utf-8').strip()
-    subprocess.check_output(
+    res = subprocess.check_output(
+        ['git', 'pull']).decode('utf-8').strip()
+    print(res)
+    res2 = subprocess.check_output(
         ['git', 'merge', source, '-m', 'merged']).decode('utf-8').strip()
+    print(res2)
     subprocess.check_output(
         ['git', 'push', 'origin-travis', merge_to]).decode('utf-8').strip()
 
