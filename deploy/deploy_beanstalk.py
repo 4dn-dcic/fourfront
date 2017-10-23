@@ -7,7 +7,7 @@ import argparse
 
 def tag(name):
     subprocess.check_output(['git', 'tag', name, '-m', 'version created for staging deploy'])
-    subprocess.check_output(['git', 'push', 'origin', name])
+    subprocess.check_output(['git', 'push', 'origin-travis', name])
 
 
 def merge(source, merge_to):
@@ -22,7 +22,7 @@ def merge(source, merge_to):
     subprocess.check_output(
         ['git', 'merge', current, '-m', 'merged']).decode('utf-8').strip()
     subprocess.check_output(
-        ['git', 'push', 'origin', merge_to]).decode('utf-8').strip()
+        ['git', 'push', 'origin-travis', merge_to]).decode('utf-8').strip()
 
 
 def get_git_version():
@@ -67,7 +67,7 @@ def previous_git_commit():
     ).decode('utf-8').strip()
 
 def parse(commit):
-    author , msg = "", ""
+    author, msg = "", ""
     # parse up some commit lines
     commit_lines = commit.split('\n')
     author = commit_lines[1].split(":")[1].strip()
