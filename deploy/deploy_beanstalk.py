@@ -5,9 +5,29 @@ import hashlib
 import argparse
 
 
+def tag(name):
+    subprocess.check_output(['git', 'tag', name, '-m', 'version created for staging deploy'])
+    subprocess.check_output(['git', 'push', 'origin-travis', name])
+
+
+def merge(source, merge_to):
+    current = subprocess.check_output(
+        ['git', 'rev-parse', "HEAD"]).decode('utf-8').strip()
+    subprocess.check_output(
+        ['git', 'config', "--replace-all", "remote.origin.fetch",
+         '+refs/heads/*:refs/remotes/origin/*'])
+    subprocess.check_output(['git', 'fetch', '--no-tags', '--depth', '200'])
+    subprocess.check_output(
+        ['git', 'checkout', merge_to]).decode('utf-8').strip()
+    subprocess.check_output(
+        ['git', 'merge', current, '-m', 'merged']).decode('utf-8').strip()
+    subprocess.check_output(
+        ['git', 'push', 'origin-travis', merge_to]).decode('utf-8').strip()
+
+
 def get_git_version():
     if (os.environ.get("TRAVIS_BRANCH") == "production"):
-        version = "0.7a"  #  Change this with new version
+        version = "1.0.0"  # Change this with new version
     else:
         version = os.environ.get("TRAVIS_COMMIT")
     if not version:
@@ -47,14 +67,13 @@ def previous_git_commit():
     ).decode('utf-8').strip()
 
 def parse(commit):
-    author , msg = "", ""
+    author, msg = "", ""
     # parse up some commit lines
     commit_lines = commit.split('\n')
     author = commit_lines[1].split(":")[1].strip()
     msg = " ".join(l.strip() for l in commit_lines[3:] if l)
 
     return  "%s - %s" % (author, msg)
-
 
 
 def deploy():
@@ -81,11 +100,15 @@ if __name__ == "__main__":
     parser.add_argument('--prod', action="store_true", help="deploy to prod")
     args = parser.parse_args()
     branch = os.environ.get("TRAVIS_BRANCH")
+    merge_to = os.environ.get("tibanna_merge")
 
     if not args.prod:
         print("not production")
         ver = get_git_version()
         update_version(ver)
+        if merge_to:
+            merge(branch, merge_to)
+            tag(ver)
         deploy()
     if args.prod:
         print("args production")
