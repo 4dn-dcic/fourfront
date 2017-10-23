@@ -9,6 +9,10 @@ def merge(source, merge_to):
     current = subprocess.check_output(
         ['git', 'rev-parse', "HEAD"]).decode('utf-8').strip()
     subprocess.check_output(
+        ['git', 'config', "--replace-all", "remote.origin.fetch",
+         '+refs/heads/*:refs/remotes/origin/*'])
+    subprocess.check_output(['git', 'fetch'])
+    subprocess.check_output(
         ['git', 'checkout', merge_to]).decode('utf-8').strip()
     subprocess.check_output(
         ['git', 'merge', current, '-m', 'merged']).decode('utf-8').strip()
