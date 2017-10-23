@@ -11,16 +11,10 @@ def tag(name):
 
 
 def merge(source, merge_to):
-    current = subprocess.check_output(
-        ['git', 'rev-parse', "HEAD"]).decode('utf-8').strip()
-    subprocess.check_output(
-        ['git', 'config', "--replace-all", "remote.origin.fetch",
-         '+refs/heads/*:refs/remotes/origin/*'])
-    subprocess.check_output(['git', 'fetch', '--no-tags', '--depth', '200'])
     subprocess.check_output(
         ['git', 'checkout', merge_to]).decode('utf-8').strip()
     subprocess.check_output(
-        ['git', 'merge', current, '-m', 'merged']).decode('utf-8').strip()
+        ['git', 'merge', source, '-m', 'merged']).decode('utf-8').strip()
     subprocess.check_output(
         ['git', 'push', 'origin-travis', merge_to]).decode('utf-8').strip()
 
@@ -105,6 +99,13 @@ if __name__ == "__main__":
     if not args.prod:
         print("not production")
         ver = get_git_version()
+        # checkout correct branch
+        subprocess.check_output(
+            ['git', 'config', "--replace-all", "remote.origin.fetch",
+             '+refs/heads/*:refs/remotes/origin/*'])
+        subprocess.check_output(['git', 'fetch', '--no-tags', '--depth', '200'])
+        subprocess.check_output(
+            ['git', 'checkout', branch])
         update_version(ver)
         if merge_to:
             merge(branch, merge_to)
