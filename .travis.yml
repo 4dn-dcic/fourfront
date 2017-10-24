@@ -71,7 +71,7 @@ before_install:
 - git fetch
 - git checkout master
 - git checkout production
-- get merge master
+- git merge master
 - exit
 install:
 - curl -O  ${ES_DOWNLOAD_URL}
