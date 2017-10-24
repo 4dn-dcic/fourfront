@@ -11,9 +11,13 @@ def tag(name):
 
 
 def merge(source, merge_to):
+    res1 = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
+
+    print("status on master is" + res1)
     subprocess.check_output(
         ['git', 'checkout', merge_to])
-    res = subprocess.check_output(['git', 'stats'])
+    res = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
+
     print(res)
     res2 = subprocess.check_output(
         ['git', 'merge', source, '-m', 'merged']).decode('utf-8').strip()
