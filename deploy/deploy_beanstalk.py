@@ -11,12 +11,22 @@ def tag(name):
 
 
 def merge(source, merge_to):
+    res1 = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
+
+    print("status on master is" + res1)
     subprocess.check_output(
-        ['git', 'checkout', merge_to]).decode('utf-8').strip()
-    subprocess.check_output(
+        ['git', 'checkout', merge_to])
+
+    subprocess.check_output(['git', 'stash'])
+    res = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
+    print("status on prod is " + res)
+
+    res2 = subprocess.check_output(
         ['git', 'merge', source, '-m', 'merged']).decode('utf-8').strip()
+    print(res2)
     subprocess.check_output(
         ['git', 'push', 'origin-travis', merge_to]).decode('utf-8').strip()
+    subprocess.check_output(['git', 'stash', 'pop'])
 
 
 def get_git_version():
@@ -34,17 +44,17 @@ def get_git_version():
     return version
 
 
-def update_version(version):
+def update_version(version, branch):
     filename = 'buildout.cfg'
     regex = 's/encoded_version.*/encoded_version = %s/' % (version)
 
     print("updated buildout.cfg with version", version)
     subprocess.check_output(
         ['sed', '-i', regex, filename])
-    commit_with_previous_msg(filename)
+    commit_with_previous_msg(filename, branch)
 
 
-def commit_with_previous_msg(filename):
+def commit_with_previous_msg(filename, branch):
     print("adding file to git")
     subprocess.check_output(
         ['git', 'add', filename])
@@ -55,10 +65,15 @@ def commit_with_previous_msg(filename):
     subprocess.check_output(
         ['git', 'commit', '-m', 'version bump + ' + msg])
 
+    subprocess.check_output(
+        ['git', 'push', 'origin-travis', branch])
+
+
 def previous_git_commit():
     return subprocess.check_output(
         ['git', 'log', '-1']
     ).decode('utf-8').strip()
+
 
 def parse(commit):
     author, msg = "", ""
@@ -67,7 +82,7 @@ def parse(commit):
     author = commit_lines[1].split(":")[1].strip()
     msg = " ".join(l.strip() for l in commit_lines[3:] if l)
 
-    return  "%s - %s" % (author, msg)
+    return "%s - %s" % (author, msg)
 
 
 def deploy():
@@ -101,12 +116,8 @@ if __name__ == "__main__":
         ver = get_git_version()
         # checkout correct branch
         subprocess.check_output(
-            ['git', 'config', "--replace-all", "remote.origin.fetch",
-             '+refs/heads/*:refs/remotes/origin/*'])
-        subprocess.check_output(['git', 'fetch', '--no-tags', '--depth', '200'])
-        subprocess.check_output(
             ['git', 'checkout', branch])
-        update_version(ver)
+        update_version(ver, branch)
         if merge_to:
             merge(branch, merge_to)
             tag(ver)
