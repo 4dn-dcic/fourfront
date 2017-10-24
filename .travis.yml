@@ -70,8 +70,8 @@ before_install:
 - git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
 - git fetch
 - git checkout master
-- git checkout production
-- git merge master
+- eb use fourfront-staging 
+- travis_wait 30 python deploy/deploy_beanstalk.py
 - exit
 install:
 - curl -O  ${ES_DOWNLOAD_URL}
