@@ -67,7 +67,11 @@ before_install:
 - git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git
 - git config --global user.email "travis@builder.com"
 - git config --global user.name "Travis"
-- travis_wait 30 python deploy/deploy_beanstalk.py
+- git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+- git fetch
+- git checkout master
+- git checkout production
+- get merge master
 install:
 - curl -O  ${ES_DOWNLOAD_URL}
 - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb
