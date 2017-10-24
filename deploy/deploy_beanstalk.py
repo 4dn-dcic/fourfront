@@ -107,10 +107,6 @@ if __name__ == "__main__":
         ver = get_git_version()
         # checkout correct branch
         subprocess.check_output(
-            ['git', 'config', "--replace-all", "remote.origin.fetch",
-             "'+refs/heads/*:refs/remotes/origin/*'"])
-        subprocess.check_output(['git', 'fetch'])
-        subprocess.check_output(
             ['git', 'checkout', branch])
         update_version(ver)
         if merge_to:
