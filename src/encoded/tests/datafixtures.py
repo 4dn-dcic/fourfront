@@ -2,6 +2,16 @@ import pytest
 
 
 @pytest.fixture
+def wrangler_testapp(wrangler, app, external_tx, zsa_savepoints):
+    return remote_user_testapp(app, wrangler['uuid'])
+
+
+@pytest.fixture
+def submitter_testapp(submitter, app, external_tx, zsa_savepoints):
+    return remote_user_testapp(app, submitter['uuid'])
+
+
+@pytest.fixture
 def lab(testapp, award):
     item = {
         'name': 'encode-lab',
@@ -302,7 +312,7 @@ def experiment_project_review(testapp, lab, award, human_biosample):
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'micro-C',
-        'status': 'in review by project'
+        'status': 'submission in progress'
     }
     return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]
 

@@ -28,12 +28,6 @@ export function findNodeFromHref(href, nodes){
 
 export default class StateContainer extends React.Component {
 
-    static defaultProps = {
-        'checkHrefForSelectedNode' : true,
-        'checkWindowLocationHref' : true,
-        'onNodeClick' : null
-    }
-
     constructor(props){
         super(props);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
@@ -75,8 +69,8 @@ export default class StateContainer extends React.Component {
 
         // Update own selectedNode to latest v, if still exists & new one not otherwise set.
         if (typeof newState.selectedNode === 'undefined' && this.state.selectedNode){
-            var find = { 'name' : this.state.selectedNode.name };
-            if (this.state.selectedNode.id) find.id = this.state.selectedNode.id;
+            var find = { 'name' : this.state.selectedNode.name, 'type' : this.state.selectedNode.type };
+            if (this.state.selectedNode.id) find.id = this.state.selectedNode.id; // Case: IO Node
             foundNode = _.findWhere(this.props.nodes, find);
             if (foundNode){
                 newState.selectedNode = foundNode;
@@ -108,16 +102,25 @@ export default class StateContainer extends React.Component {
         }
     }
 
+    detailPane(){
+        if (typeof this.props.renderDetailPane === 'function'){
+            return this.props.renderDetailPane(this.state.selectedNode, this.props);
+        }
+        return null;
+    }
+
     render(){
+        var detailPane = null;
         return (
             <div className="state-container">
-            {
-                React.Children.map(this.props.children, (child)=>{
-                    return React.cloneElement(child, _.extend(
-                        _.omit(this.props, 'children'), { onNodeClick : this.handleNodeClick }, this.state
-                    ));
-                })
-            }
+                {
+                    React.Children.map(this.props.children, (child)=>{
+                        return React.cloneElement(child, _.extend(
+                            _.omit(this.props, 'children'), { onNodeClick : this.handleNodeClick }, this.state
+                        ));
+                    })
+                }
+                { this.detailPane() }
             </div>
         );
     }

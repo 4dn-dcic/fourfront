@@ -31,6 +31,9 @@ var TITLE_PATHNAME_MAP = {
             }
         }
     },
+    '/health' : {
+        'title' : "Health"
+    },
     '/users/\*' : {
         'title' : function(pathName, context){
             var myDetails = JWT.getUserDetails();
@@ -167,7 +170,8 @@ export default class PageTitle extends React.Component {
         var style = { marginTop : 45 };
         if (!QuickInfoBar.isInvisibleForHref(href)){
             // We're showing QuickInfoBar, lets extend margin top by height of QuickInfoBar (hardcoded in CSS 38px).
-            if (mounted && layout.responsiveGridState() === 'xs') {
+            var gridSize = mounted && layout.responsiveGridState();
+            if (mounted && (gridSize === 'xs' || gridSize === 'sm')) {
                 // don't do it; but do by default if not mounted (aka serverside) since desktop is more common than mobile for us
             } else {
                 style.marginTop += 38;
@@ -199,7 +203,7 @@ export default class PageTitle extends React.Component {
         if (PageTitle.isHomePage(href)){
             return (
                 <layout.WindowResizeUpdateTrigger>
-                    <HomePageTitleElement {..._.pick(this.props, 'context', 'href', 'mounted')}/>
+                    <HomePageTitleElement {..._.pick(this.props, 'context', 'href')} mounted={this.state.mounted} />
                 </layout.WindowResizeUpdateTrigger>
             );
         }

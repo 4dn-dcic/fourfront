@@ -662,6 +662,9 @@ $small-label-accession-font-size : 0.75rem;
 			font-weight: 500;
 			font-size: 0.9rem;
 			border-top: 1px solid #e8e8e8;
+			.rc-tabs-tabpane & {
+				border-top-color: #ccc;
+			}
 			//&:not(:last-child){
 			//	border-right: 1px solid #ddd;
 			//}
@@ -1084,6 +1087,7 @@ $small-label-accession-font-size : 0.75rem;
 /**********************/
 /**** Search Table ****/
 /**********************/
+
 
 // Common definitions
 @mixin search-result-column-block {
@@ -1618,9 +1622,6 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	min-height: 40px;
 	padding-bottom: 5px;
 	margin-top: 7px;
-	@media screen and (min-width: $screen-sm-min){
-		margin-top: -40px;
-	}
 
 	.search-result-config-panel {
 		margin-top: 7px;

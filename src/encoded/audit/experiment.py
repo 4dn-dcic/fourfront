@@ -12,13 +12,13 @@ from collections import defaultdict
 def audit_experiments_have_raw_files(value, system):
     '''
     experiments should have associated raw files whose status is one of
-    'uploaded', 'released', 'in review by project', 'released by project'
+    'uploaded', 'released', 'submission in progress', 'released by project'
     to be release ready
 
     warning is generated if files are missing and status is not 'released'
     error is generated if files are missing and status is 'released'
     '''
-    ok_stati = ['uploaded', 'released', 'in review by project', 'released by project']
+    ok_stati = ['uploaded', 'released', 'submission in progress', 'released by project']
     raw_types = ['fastq']
     files = value.get('files', None)
     has_raw = False

@@ -1,20 +1,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Checkbox } from 'react-bootstrap';
+import url from 'url';
+import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas } from './../util';
-import { WorkflowNodeElement } from './components';
+import { console, object, expFxn, ajax, Schemas, layout } from './../util';
+import { WorkflowNodeElement, TabbedView, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, RowSpacingTypeDropdown } from './WorkflowView';
+import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection, filterOutParametersFromGraphData } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
+import moment from 'moment';
+import ReactTooltip from 'react-tooltip';
 
 // Testing / Dummy data
 //import * as dummyFile from './../testdata/file-processed-4DNFIYIPFFUA-with-graph';
 //import { dummy_analysis_steps } from './../testdata/steps-for-e28632be-f968-4a2d-a28e-490b5493bdc2';
-//import { MORE_PARTIALLY_RELEASED_PROCESSED_FILES } from './../testdata/traced_workflow_runs/replicate-4DNESLLTENG9';
+//import { HISTORY } from './../testdata/traced_workflow_runs/file_processed-4DN';
+//import { PARTIALLY_RELEASED_PROCESSED_FILES, PARTIALLY_RELEASED_PROCESSED_FILES_ALL_RUNS } from './../testdata/traced_workflow_runs/replicate-4DNESLLTENG9';
 
 
 export function allFilesForWorkflowRunsMappedByUUID(items){
@@ -45,34 +49,6 @@ export function filterOutIndirectFilesFromGraphData(graphData){
     return { nodes, edges };
 }
 
-
-/**
- * For when "Show Parameters" UI setting === false.
- * 
- * @param {Object}      graphData 
- * @param {Object[]}    graphData.nodes
- * @param {Object[]}    graphData.edges
- * @returns {Object}    Copy of graphData with 'parameters' nodes and edges filtered out.
- */
-export function filterOutParametersFromGraphData(graphData){
-    var deleted = {  };
-    var nodes = _.filter(graphData.nodes, function(n, i){
-        if (n.type === 'input' && n.format === 'Workflow Parameter') {
-            deleted[n.id] = true;
-            return false;
-        }
-        return true;
-    });
-    var edges = _.filter(graphData.edges, function(e,i){
-        if (deleted[e.source.id] === true || deleted[e.target.id] === true) {
-            return false;
-        }
-        return true;
-    });
-    return { nodes, edges };
-}
-
-
 export function filterOutReferenceFilesFromGraphData(graphData){
     var deleted = {  };
     var nodes = _.filter(graphData.nodes, function(n, i){
@@ -97,6 +73,17 @@ export function filterOutReferenceFilesFromGraphData(graphData){
     return { nodes, edges };
 }
 
+export function isGraphSectionOpen(href, hash){
+    if (!href || typeof href !== 'string') return false;
+    if (typeof hash !== 'string' || !hash){
+        var parts = url.parse(href);
+        hash = parts.hash;
+    }
+    
+    if (typeof hash === 'string' && hash && hash.length > 1) return true;
+    return false;
+}
+
 
 export class WorkflowRunTracingView extends ItemBaseView {
     
@@ -104,7 +91,8 @@ export class WorkflowRunTracingView extends ItemBaseView {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
-        //var steps = MORE_PARTIALLY_RELEASED_PROCESSED_FILES;
+        this.tabbedView = this.tabbedView.bind(this);
+        //var steps = PARTIALLY_RELEASED_PROCESSED_FILES_ALL_RUNS;
         var steps = null;
         this.state = {
             'mounted' : false,
@@ -115,15 +103,28 @@ export class WorkflowRunTracingView extends ItemBaseView {
     }
 
     componentDidMount(){
+
+        var changeTabToGraphSectionIfHaveHash = function(){
+            if (isGraphSectionOpen(this.props.href)){
+                if (this.refs.tabbedView && this.refs.tabbedView.refs && this.refs.tabbedView.refs.tabs && typeof this.refs.tabbedView.refs.tabs.setActiveKey === 'function'){
+                    try {
+                        this.refs.tabbedView.refs.tabs.setActiveKey(TabbedView.getDefaultActiveKeyFromContents(this.getTabViewContents()));
+                    } catch (e) {
+                        console.warn('Could not automatically switch tabs to Graph section, perhaps no longer supported by rc-tabs.');
+                    }
+                }
+            }
+        }.bind(this);
+
         var state = { 'mounted' : true };
         if (!this.state.steps){
             state.loading = true;
             this.loadGraphSteps();
         }
-        this.setState(state);
+        this.setState(state, function(){ setTimeout(changeTabToGraphSectionIfHaveHash, 750); });
     }
 
-    loadGraphSteps(force = false, cb = null){
+    loadGraphSteps(force = false, cb = null, cache = false){
         var context = this.props.context;
         if (typeof context.uuid !== 'string') return;
         if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
@@ -148,8 +149,15 @@ export class WorkflowRunTracingView extends ItemBaseView {
         }.bind(this);
 
         var tracingHref = '/trace_workflow_run_steps/' + this.props.context.uuid + '/';
+        var opts = {};
+        if (!cache) {
+            opts['timestamp'] = moment.utc().unix();
+        }
         if (this.state.allRuns === true){
-            tracingHref += '?all_runs=True';
+            opts['all_runs'] = true;
+        }
+        if (_.keys(opts).length > 0){
+            tracingHref += '?' + _.map(_.pairs(opts), function(p){ return p[0] + '=' + p[1]; }).join('&');
         }
 
         ajax.load(tracingHref, callback, 'GET', callback);
@@ -161,11 +169,49 @@ export class WorkflowRunTracingView extends ItemBaseView {
         });
     }
 
+    tabbedView(){
+        return <TabbedView contents={this.getTabViewContents} ref="tabbedView" />;
+    }
+
 }
 
+export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
+    referenceFilesCheckbox(){
+        if (typeof this.props.showReferenceFiles !== 'boolean' || typeof this.props.onToggleReferenceFiles !== 'function') return null;
+        return (
+            <div className="inline-block show-params-checkbox-container">
+                <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles}>
+                    Show Reference Files
+                </Checkbox>
+            </div>
+        );
+    }
+    indirectFilesCheckbox(){
+        if (typeof this.props.showIndirectFiles !== 'boolean' || typeof this.props.onToggleIndirectFiles !== 'function') return null;
+        return (
+            <div className="inline-block show-params-checkbox-container">
+                <Checkbox checked={this.props.showIndirectFiles} onChange={this.props.onToggleIndirectFiles}>
+                    Show More Context
+                </Checkbox>
+            </div>
+        );
+    }
+    allRunsCheckbox(){
+        if (typeof this.props.allRuns !== 'boolean' || typeof this.props.onToggleAllRuns !== 'function') return null;
+        return (
+            <div className="inline-block show-params-checkbox-container">
+                <Checkbox checked={!this.props.allRuns && !this.props.isAllRunsCheckboxDisabled} onChange={this.props.onToggleAllRuns} disabled={this.props.isAllRunsCheckboxDisabled}>
+                    { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
+                </Checkbox>
+            </div>
+        );
+    }
+    render(){
+        return this.wrapper(this.referenceFilesCheckbox(), this.indirectFilesCheckbox(), /*this.parametersCheckbox(),*/ this.allRunsCheckbox(), this.rowSpacingTypeDropdown());
+    }
+}
 
-
-export class FileViewGraphSection extends React.Component {
+export class FileViewGraphSection extends WorkflowGraphSection {
     
     static getTabObject(props, state, onToggleAllRuns){
         var { loading, steps, mounted, allRuns } = state;
@@ -182,10 +228,13 @@ export class FileViewGraphSection extends React.Component {
         } else {
             iconClass += 'code-fork';
         }
+        var parts = url.parse(props.href);
+        var hash = (parts.hash && parts.hash.length > 1 && parts.hash.slice(1)) || null;
         return {
             tab : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
             key : 'graph',
             disabled : !Array.isArray(steps) || steps.length === 0,
+            isDefault : isGraphSectionOpen(props.href, hash),
             content : <FileViewGraphSection
                 {...props}
                 steps={steps}
@@ -194,6 +243,7 @@ export class FileViewGraphSection extends React.Component {
                 onToggleAllRuns={onToggleAllRuns}
                 allRuns={allRuns}
                 loading={loading}
+                urlHash={hash}
             />
         };
     }
@@ -217,38 +267,31 @@ export class FileViewGraphSection extends React.Component {
 
     constructor(props){
         super(props);
-        //this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.commonGraphProps = this.commonGraphProps.bind(this);
-        this.onToggleIndirectFiles = this.onToggleIndirectFiles.bind(this);
-        this.onToggleReferenceFiles = this.onToggleReferenceFiles.bind(this);
-        this.onToggleAllRuns = _.throttle(this.onToggleAllRuns.bind(this), 1000);
+        this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 250);
+        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
+        this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
             'showIndirectFiles' : false,
             'showReferenceFiles' : false,
-            'rowSpacingType' : 'stacked'
+            'rowSpacingType' : 'stacked',
+            'fullscreenViewEnabled' : false,
+            'showParameters' : false
         };
     }
-    /*
-    componentWillReceiveProps(nextProps){
-        if (nextProps.allRuns !== this.props.allRuns){
-            if (nextProps.allRuns && this.state.rowSpacingType !== 'stacked') {
-                this.setState({ 'rowSpacingType' : 'stacked' });
-            }
-            else if (!nextProps.allRuns && this.state.rowSpacingType !== 'wide') {
-                this.setState({ 'rowSpacingType' : 'wide' });
-            }
-        }
-    }
-    */
+
     commonGraphProps(){
 
         var steps = this.props.steps;
+
+        var legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
         
         var graphData = parseAnalysisSteps(this.props.steps);
         if (!this.state.showParameters){
             graphData = filterOutParametersFromGraphData(graphData);
+            delete legendItems['Input Parameter']; // Remove legend items which aren't relevant for this context.
         }
 
         this.anyGroupNodesExist = !this.props.allRuns && _.any(graphData.nodes, function(n){ return n.type === 'input-group' || n.type === 'output-group'; });
@@ -259,12 +302,19 @@ export class FileViewGraphSection extends React.Component {
         }
         if (!this.state.showReferenceFiles){
             graphData = filterOutReferenceFilesFromGraphData(graphData);
+            delete legendItems['Input Reference File'];
+        }
+        if (!this.anyGroupNodesExist || this.props.all_runs){
+            delete legendItems['Group of Similar Files'];
         }
         var fileMap = allFilesForWorkflowRunsMappedByUUID(
             (this.props.context.workflow_run_outputs || []).concat(this.props.context.workflow_run_inputs || [])
         );
         var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
-        return _.extend(commonGraphPropsFromProps(this.props), {
+
+
+
+        return _.extend(commonGraphPropsFromProps(_.extend({ legendItems }, this.props)), {
             'isNodeDisabled' : FileViewGraphSection.isNodeDisabled,
             'nodes' : nodes,
             'edges' : graphData.edges,
@@ -277,11 +327,11 @@ export class FileViewGraphSection extends React.Component {
     }
 
     onToggleIndirectFiles(){
-        this.setState({ showIndirectFiles : !this.state.showIndirectFiles });
+        this.setState({ 'showIndirectFiles' : !this.state.showIndirectFiles });
     }
 
     onToggleReferenceFiles(){
-        this.setState({ showReferenceFiles : !this.state.showReferenceFiles });
+        this.setState({ 'showReferenceFiles' : !this.state.showReferenceFiles });
     }
 
     onToggleAllRuns(){
@@ -294,37 +344,21 @@ export class FileViewGraphSection extends React.Component {
             graphProps = this.commonGraphProps();
         }
         var isAllRunsCheckboxDisabled = this.props.loading || (!this.props.allRuns && !this.anyGroupNodesExist ? true : false);
+
         return (
-            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
+            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart) + (this.state.fullscreenViewEnabled ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
-                    <div className="workflow-view-controls-container">
-                        <div className="inline-block show-params-checkbox-container">
-                            <Checkbox checked={this.state.showReferenceFiles} onChange={this.onToggleReferenceFiles}>
-                                Show Reference Files
-                            </Checkbox>
-                        </div>
-                        <div className="inline-block show-params-checkbox-container">
-                            <Checkbox checked={this.state.showIndirectFiles} onChange={this.onToggleIndirectFiles}>
-                                Show More Context
-                            </Checkbox>
-                        </div>
-                        { typeof this.props.allRuns === 'boolean' ? 
-                        <div className="inline-block show-params-checkbox-container">
-                            <Checkbox checked={!this.props.allRuns && !isAllRunsCheckboxDisabled} onChange={this.onToggleAllRuns} disabled={isAllRunsCheckboxDisabled}>
-                            { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
-                            </Checkbox>
-                        </div>
-                        : null }
-                        <div className="inline-block">
-                            <RowSpacingTypeDropdown currentKey={this.state.rowSpacingType} onSelect={(eventKey, evt)=>{
-                                requestAnimationFrame(()=>{
-                                    if (eventKey === this.state.rowSpacingType) return;
-                                    this.setState({ rowSpacingType : eventKey });
-                                });
-                            }}/>
-                        </div>
-                    </div>
+                    <TracedGraphSectionControls
+                        {...this.state}
+                        {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'loading')}
+                        onToggleReferenceFiles={this.onToggleReferenceFiles}
+                        onToggleIndirectFiles={this.onToggleIndirectFiles}
+                        onChangeRowSpacingType={this.onChangeRowSpacingType}
+                        onToggleFullScreenView={this.onToggleFullScreenView}
+                        onToggleShowParameters={this.onToggleShowParameters}
+                        isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled}
+                    />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }}>

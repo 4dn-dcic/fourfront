@@ -76,61 +76,50 @@ export class WorkflowNodeElement extends React.Component {
         var node = this.props.node;
         var output = '';
 
-        // Node Type
+        // Node Type -specific
         if (node.type === 'step'){
-            output += '<small>Step ' + ((node.column - 1) / 2 + 1) + '</small>';
-        } else {
-            var nodeType = node.type;
-            nodeType = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
-            output += '<small>' + nodeType + '</small>';
-        }
-
-        // Required
-        if (node.required){
-            output+= ' <small style="opacity: 0.66;"> - <em>Required</em></small>';
-        }
-
-        
-
-        // Title
-        output += '<h5 class="text-600 tooltip-title">' +
-            this.props.titleString +
-            '</h5>';
-
-        // Argument Type
-        if (node.type === 'input' || node.type === 'output'){
-            output += '<div><small>';
-            
-            if (Array.isArray(node.format) && node.format.length > 0){
-                var formats = node.format.map(function(f){
-                    if (f === 'File'){
-                        if (node.meta && node.meta['sbg:fileTypes']){
-                            var fileTypes = node.meta['sbg:fileTypes'].split(',').map(function(fType){
-                                return '.' + fType.trim();
-                            }).join(' | ');
-                            return fileTypes;
-                        }
-                    }
-                    return f;
-                });
-                output += 'Type: ' + formats.join(' | ') + '';
-            } else if (typeof node.format === 'string') {
-                output += 'Type: ' + node.format;
+            if (node.meta && node.meta.workflow){
+                output += '<small>Workflow Run</small>'; // Workflow Run
             } else {
-                output += '<em>Unknown Type</em>';
+                output += '<small>Step</small>'; // Reg Step
             }
-            output += '</small></div>';
+            // Step Title
+            output += '<h5 class="text-600 tooltip-title">' + ((node.meta && node.meta.display_title) || node.title || node.name) + '</h5>';
+        } else if (node.type === 'input-group'){
+            output += '<small>Input Argument</small>';
+        } else {
+            var title = node.type;
+            title = title.charAt(0).toUpperCase() + title.slice(1);
+            if (title === 'Input' || title === 'Output'){
+                title += ' Argument &nbsp; <b>' + node.name + '</b>';
+            }
+            output += '<small>' + title + '</small>';
         }
 
-        if (node.type === 'input'){
+        // If file, and has file-size, add it (idk, why not)
+        if (
+            (node.type === 'input' || node.type === 'output') &&
+            this.doesRunDataFileExist() &&
+            typeof node.meta.run_data.file.file_size === 'number'
+        ){
+            output += '<div><span class="text-300">Size:</span> ' + Schemas.Term.bytesToLargerUnit(node.meta.run_data.file.file_size) + '</div>';
+        }
+
+        // Workflow name, if any
+        if (node.type === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
+            //title 
+            output += '<hr class="mt-08 mb-05"/><div><span class="text-600">Workflow: </span><span class="text-400">' + node.meta.workflow.display_title + '</span></div>';
+        }
+
+        if (node.type === 'input'){ // Old/deprecated -- remove?
             if (node.meta && node.meta['sbg:toolDefaultValue']){
                 output += '<div><small>Default: "' + node.meta['sbg:toolDefaultValue'] + '"</small></div>';
             }
         }
 
         // Description
-        if (typeof node.description === 'string'){
-            output += '<div>' + node.description + '</div>';
+        if (typeof node.description === 'string' || (node.meta && typeof node.meta.description === 'string')){
+            output += '<div>' + (node.description || node.meta.description) + '</div>';
         }
 
         return output; 
@@ -160,12 +149,18 @@ export class WorkflowNodeElement extends React.Component {
 
         // If WorkflowRun & Workflow w/ steps w/ name
         if (node.type === 'step' && node.meta.workflow
-            && Array.isArray(node.meta.workflow.workflow_steps)
-            && node.meta.workflow.workflow_steps.length > 0
-            && typeof node.meta.workflow.workflow_steps[0].step_name === 'string'
+            && Array.isArray(node.meta.workflow.steps)
+            && node.meta.workflow.steps.length > 0
+            && typeof node.meta.workflow.steps[0].name === 'string'
         ){
             //elemProps.className += ' mono-text';
-            return <div {...elemProps}>{ _.pluck(node.meta.workflow.workflow_steps, 'step_name').join(', ') }</div>;
+            return <div {...elemProps}>{ _.pluck(node.meta.workflow.steps, 'name').join(', ') }</div>;
+        }
+
+        // If Parameter
+        if (this.doesRunDataValueExist()){
+            elemProps.className += ' mono-text';
+            return <div {...elemProps}>{ node.name }</div>;
         }
 
         // If File
@@ -185,6 +180,12 @@ export class WorkflowNodeElement extends React.Component {
             return <div {...elemProps}>{  node.meta.analysis_step_types.map(Schemas.Term.capitalize).join(', ') }</div>;
         }
 
+        // If IO Arg w/o file but w/ format
+        if ((node.type === 'input' || node.type === 'output') && node.meta && typeof node.meta.argument_format === 'string'){
+            return <div {...elemProps}>{ node.meta.argument_format }</div>;
+        }
+
+        // Default-ish
         if (typeof node.format === 'string') {
             return <div {...elemProps}>{ node.format }</div>;
         }
@@ -252,7 +253,8 @@ export class WorkflowNodeElement extends React.Component {
             return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
         }
 
-        return <span className="node-name">{ this.icon() }{ this.props.title }</span>;
+        // Fallback / Default - use node.name
+        return <span className="node-name">{ this.icon() }{ node.title || node.name }</span>;
     }
     
     render(){

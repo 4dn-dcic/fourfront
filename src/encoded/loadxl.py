@@ -19,6 +19,7 @@ ORDER = [
     'user',
     'award',
     'lab',
+    'page',
     'ontology',
     'ontology_term',
     'organism',

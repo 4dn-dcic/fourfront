@@ -119,17 +119,22 @@ def get_item_if_you_can(request, value, itype=None):
         svalue = str(value)
         if not svalue.startswith('/'):
             svalue = '/' + svalue
-        item = request.embed(svalue, '@@object')
         try:
-            item.get('uuid')
-            return item
-        except AttributeError:
-            if itype is not None:
-                svalue = '/' + itype + svalue + '/?datastore=database'
-                try:
-                    return request.embed(svalue, '@@object')
-                except:
-                    return value
+            item = request.embed(svalue, '@@object')
+        except:
+            pass
+        else:
+            try:
+                item.get('uuid')
+                return item
+            except AttributeError:
+                pass
+        if itype is not None:
+            svalue = '/' + itype + svalue + '/?datastore=database'
+            try:
+                return request.embed(svalue, '@@object')
+            except:
+                return value
 
 
 class AbstractCollection(snovault.AbstractCollection):
@@ -227,8 +232,9 @@ class Item(snovault.Item):
         'revoked': ALLOW_CURRENT,
         'deleted': DELETED,
         'replaced': DELETED,
+        'planned': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'in review by lab': ALLOW_LAB_SUBMITTER_EDIT,
-        'in review by project': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
+        'submission in progress': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'released to project': ALLOW_VIEWING_GROUP_VIEW,
         # for file
         'obsolete': DELETED,
@@ -244,7 +250,6 @@ class Item(snovault.Item):
     def __init__(self, registry, models):
         super().__init__(registry, models)
         self.STATUS_ACL = self.__class__.STATUS_ACL
-
 
     @property
     def __name__(self):
@@ -296,6 +301,28 @@ class Item(snovault.Item):
         if properties.get('status') != 'replaced' and 'accession' in properties:
             keys['accession'].append(properties['accession'])
         return keys
+
+    def is_update_by_admin_user(self):
+        # determine if the submitter in the properties is an admin user
+        userid = snovault.schema_utils.SERVER_DEFAULTS['userid']('blah', 'blah')
+        users = self.registry['collections']['User']
+        user = users.get(userid)
+        if 'groups' in user.properties:
+            if 'admin' in user.properties['groups']:
+                return True
+        return False
+
+    def _update(self, properties, sheets=None):
+        # if an item is status 'planned' and an update is submitted
+        # by a non-admin user then status should be changed to 'submission in progress'
+        try:
+            props = self.properties
+            if 'status' in props and props['status'] == 'planned':
+                if not self.is_update_by_admin_user():
+                    properties['status'] = 'submission in progress'
+        except KeyError:
+            pass
+        super(Item, self)._update(properties, sheets)
 
     @snovault.calculated_property(schema={
         "title": "External Reference URIs",
@@ -395,7 +422,6 @@ class Item(snovault.Item):
     def principals_allowed(self, request):
         principals = calc_principals(self)
         return principals
-
 
     def rev_link_atids(self, request, rev_name):
         conn = request.registry[CONNECTION]

@@ -2,6 +2,7 @@
 """
 from itertools import chain
 from collections import OrderedDict
+import copy
 from encoded.schema_formats import is_uuid
 #import gevent
 from pyramid.response import Response
@@ -17,130 +18,48 @@ from .base import (
 
 import cProfile, pstats, io
 
-
-
-# This is the schema used for both Workflow.analysis_steps and WorkflowRun.analysis_steps.
-workflow_analysis_steps_schema = {
-    "title": "Workflow Analysis Steps",
-    "type": "array",
-    "items": {
-        "title": "Analysis Step",
-        "type": "object",
-        "additionalProperties": True,
-        "properties": {
-            "uuid": {
-                "title": "UUID",
-                "description": "Unique Identifier for AnalysisStep",
-                "type": "string"
-            },
-            "inputs" : {
-                "title" : "Step Inputs",
-                "type" : "array",
-                "items" : {
-                    "type" : "object",
-                    "properties" : {
-                        "name" : {
-                            "title" : "Input Name",
-                            "type" : "string"
-                        },
-                        "source" : {
-                            "title" : "Source Step",
-                            "description" : "Where this input file came from.",
-                            "type" : "array",
-                            "items" : {
-                                "type" : "object",
-                                "properties" : {
-                                    "name" : { "type" : "string" },
-                                    "type" : { "type" : "string" },
-                                    "step" : { "type" : "string" }
-                                }
-                            }
-                        },
-                        "run_data" : {
-                            "type" : "object",
-                            "properties" : {
-                                "file" : {
-                                    "type" : "string",
-                                    "title" : "File",
-                                    # "linkTo" : "File"
-                                },
-                                "value" : {
-                                    "title" : "Value",
-                                    "type" : "string"
-                                },
-                                "type" : {
-                                    "type" : "string",
-                                    "title" : "I/O Type"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "outputs" : {
-                "title" : "Step Outputs",
-                "type" : "array",
-                "items" : {
-                    "type" : "object",
-                    "properties" : {
-                        "name" : {
-                            "title" : "Output Name",
-                            "type" : "string"
-                        },
-                        "target" : {
-                            "title" : "Target Step",
-                            "description" : "Where this output file should go next.",
-                            "type" : "array",
-                            "items" : {
-                                "type" : "object",
-                                "properties" : {
-                                    "name" : { "type" : "string" },
-                                    "type" : { "type" : "string" },
-                                    "step" : { "type" : "string" }
-                                }
-                            }
-                        },
-                        "run_data" : {
-                            "type" : "object",
-                            "properties" : {
-                                "file" : {
-                                    "type" : "string",
-                                    "title" : "File",
-                                    # "linkTo" : "File"
-                                },
-                                "value" : {
-                                    "title" : "Value",
-                                    "type" : "string"
-                                },
-                                "type" : {
-                                    "type" : "string",
-                                    "title" : "I/O Type"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "software_used": {
-                "title": "Software Used",
-                "description": "Reference to Software Used",
-                "type": "string",
-                "linkTo" : "Software"
-            },
-            "name" : {
-                "title" : "Step Name",
-                "type" : "string"
-            },
-            "analysis_step_types" : {
-                "title" : "Step Purposes",
-                "type" : "array",
-                "items" : {
-                    "type" : "string"
-                }
+steps_run_data_schema = {
+    "type" : "object",
+    "properties" : {
+        "file" : {
+            "type" : "array",
+            "title" : "File(s)",
+            "description" : "File(s) for this step input/output argument.",
+            "items" : {
+                "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
+                "linkTo" : "File" # TODO: (Med/High Priority) Make this work. Will likely wait until after embedding edits b.c. want to take break from WF stuff and current solution works.
             }
+        },
+        "meta" : {
+            "type" : "array",
+            "title" : "Additional metadata for input/output file(s)",
+            "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal.",
+            "items" : {
+                "type" : "object"
+            }
+        },
+        "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
+            "title" : "Value",
+            "type" : "string",
+            "description" : "Value used for this output argument."
+        },
+        "type" : {
+            "type" : "string",
+            "title" : "I/O Type"
         }
     }
 }
+
+workflow_schema = load_schema('encoded:schemas/workflow.json')
+workflow_steps_property_schema = workflow_schema.get('properties', {}).get('steps')
+
+# This is the schema used for WorkflowRun.steps. Extends Workflow.steps schema.
+workflow_run_steps_property_schema = copy.deepcopy(workflow_steps_property_schema)
+workflow_run_steps_property_schema['items']['properties']['inputs']['items']['properties']['run_data'] = steps_run_data_schema
+workflow_run_steps_property_schema['items']['properties']['outputs']['items']['properties']['run_data'] = steps_run_data_schema
+
+
+
 
 def get_unique_key_from_at_id(at_id):
     if not at_id:
@@ -149,8 +68,8 @@ def get_unique_key_from_at_id(at_id):
     return at_id_parts[2]
 
 DEFAULT_TRACING_OPTIONS = {
-    'max_depth_history' : 6,
-    'max_depth_future' : 6,
+    'max_depth_history' : 9,
+    'max_depth_future' : 9,
     "group_similar_workflow_runs" : True,
     "track_performance" : False,
     "trace_direction" : ["history"]
@@ -159,10 +78,11 @@ DEFAULT_TRACING_OPTIONS = {
 class WorkflowRunTracingException(Exception):
     pass
 
-#def trace_workflows(original_file_item_uuid, request, file_item_input_of_workflow_run_uuids, file_item_output_of_workflow_run_uuids, options=None):
 def trace_workflows(original_file_set_to_trace, request, options=None):
     '''
     Trace a set of files according to supplied options.
+
+    -- TODO: After grouping design: CLEANUP! Rename get_model to get_item, etc. Remove grouping. --
 
     :param original_file_set_to_trace: Must be a list of DICTIONARIES. If have Item instances, grab their model.source['object'] or similar. Each dict should have at minimum:
         - uuid, workflow_run_inputs, workflow_run_outputs
@@ -180,7 +100,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     uuidCacheTracedHistory = {}
     uuidCacheGroupSourcesByRun = {}
     steps = [] # Our output
-
 
     def get_model(uuid, key = None):
         model = None
@@ -205,6 +124,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         uuidCacheModels[cacheKey] = model
 
         return model
+
+    def get_model_obj(uuid, key = None):
+        return get_model(uuid, key).source.get('object', {})
 
 
     def group_files_by_workflow_argument_name(set_of_files):
@@ -251,13 +173,12 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             for out_file in workflow_run_model_obj.get('output_files', []):
                 out_file_atid = out_file.get('value', {})
                 if out_file_atid == in_file.get('@id', 'b'):
-                    step_name = workflow_run_model_obj.get('display_title')
                     step_uuid = workflow_run_uuid
                     if step_uuid:
                         step_uuids.add( (step_uuid, in_file_uuid) )
                     sources_for_in_file.append({
                         "name" : out_file.get('workflow_argument_name'),
-                        "step" : step_name,
+                        "step" : workflow_run_model_obj.get('@id'),
                         "type" : "Output file",
                         "for_file" : in_file_uuid,
                         "workflow" : workflow_run_model_obj.get('workflow')
@@ -286,6 +207,10 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             in_file['@type'] = input_file_model_obj.get('@type')
             in_file['file_type'] = input_file_model_obj.get('file_type')
             in_file['filename'] = input_file_model_obj.get('filename')
+            in_file['file_size'] = input_file_model_obj.get('file_size')
+            in_file['status'] = input_file_model_obj.get('status')
+            in_file['display_title'] = input_file_model_obj.get('display_title')
+
             # Get @ids from ES source.
             output_of_workflow_runs = input_file_model_obj.get('workflow_run_outputs', [])
             if len(output_of_workflow_runs) == 0:
@@ -295,10 +220,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             workflow_run_uuid = get_unique_key_from_at_id(last_workflow_run_output_of)
             if not workflow_run_uuid or uuidCacheTracedHistory.get(workflow_run_uuid):
                 continue
-            workflow_run_model = get_model(workflow_run_uuid)
-            if not workflow_run_model:
+            workflow_run_model_obj = get_model_obj(workflow_run_uuid)
+            if not workflow_run_model_obj:
                 continue
-            workflow_run_model_obj = workflow_run_model.source.get('object', {})
             all_workflow_runs.append( (workflow_run_uuid, in_file_uuid, workflow_run_model_obj, in_file) )
 
         # Filter WFRs by WF down to most recent WFR - working, but not enabled as no UI for it yet.
@@ -318,7 +242,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 source_for_in_file = {
                     "type" : "Input File Group",
                     "for_file" : in_file_uuid,
-                    "step" : workflow_run_model_obj.get('display_title'),
+                    "step" : workflow_run_model_obj.get('@id'),
                     "grouped_by" : "workflow",
                     "workflow" : workflow_run_model_obj.get('workflow')
                 }
@@ -345,7 +269,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             #futures = []
             for step_uuid, in_file_uuid in step_uuids:
                 #futures.append(gevent.spawn(trace_history, [s], depth + 1))
-                trace_history([step_uuid], get_model(in_file_uuid).source.get('object', {}), depth + 1)
+                trace_history([step_uuid], get_model_obj(in_file_uuid), depth + 1)
             #for f in futures:
                 #print('\n\n\nGOT', f.get())
         return sources
@@ -375,7 +299,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                                     if not exists:
                                         output['target'].append({
                                             "name" : argument_name,
-                                            "step" : target_workflow_run_model.get('display_title'),
+                                            "step" : target_workflow_run_model.get('@id'),
                                             "type" : "Input file",
                                             "for_file" : current_file_model_object['uuid']
                                         })
@@ -402,23 +326,22 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             return
 
         uuidCacheTracedHistory[last_workflow_run_uuid] = True
-        workflow_run_model = get_model(last_workflow_run_uuid)
 
-        if not workflow_run_model:
+        workflow_run_model_obj = get_model_obj(last_workflow_run_uuid)
+        if not workflow_run_model_obj:
             return
 
-        workflow_run_model_obj = workflow_run_model.source.get('object',{})
-
         step = {
-            "uuid" : last_workflow_run_uuid, # Gets moved to stepNode.meta.uuid on front-end
-            "name" : workflow_run_model_obj.get('display_title'), # Gets duplicated to stepNode.meta.name, and stepNode.name,
+            "name" : workflow_run_model_obj.get('@id'), # We use our front-end Node component to show display_title or something else from meta instead.
             "meta" : {
+                'display_title' : workflow_run_model_obj.get('display_title'),
                 "status" : workflow_run_model_obj.get('status'),
+                "run_status" : workflow_run_model_obj.get('run_status'),
                 '@type'  : workflow_run_model_obj.get('@type'),
                 '@id'    : workflow_run_model_obj.get('@id'),
-                'date_created' : workflow_run_model_obj.get('date_created')
+                'date_created' : workflow_run_model_obj.get('date_created'),
+                "analysis_step_types" : [],
             },
-            "analysis_step_types" : [], # Gets moved to stepNode.meta.analysis_step_types on front-end (we could put into meta here as well)
             "inputs" : [],
             "outputs" : []
         }
@@ -427,20 +350,18 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         workflow_uuid = get_unique_key_from_at_id(workflow_run_model_obj.get('workflow')) #workflow_run.properties.get('workflow')
         workflow_model = None
         if workflow_uuid:
-            workflow_model = get_model(workflow_uuid)
-            if workflow_model and hasattr(workflow_model, 'source'):
-                workflow_model_obj = workflow_model.source.get('object',{})
-                if workflow_model_obj.get('workflow_type'):
-                    step['analysis_step_types'].append(workflow_model_obj['workflow_type'])
-                    step['meta']['workflow'] = {
-                        '@id'               : workflow_model_obj.get('@id') or workflow_run_model_obj.get('workflow'),
-                        '@type'             : workflow_model_obj.get('@type'),
-                        'display_title'     : workflow_model_obj.get('display_title') or workflow_model_obj.get('title'),
-                        'accession'         : workflow_model_obj.get('accession'),
-                        'workflow_steps'    : workflow_model_obj.get('workflow_steps'),
-                        'uuid'              : workflow_uuid,
-                        'workflow_type'     : workflow_model_obj.get('workflow_type')
-                    }
+            workflow_model_obj = get_model_obj(workflow_uuid)
+            if workflow_model_obj and workflow_model_obj.get('workflow_type'):
+                step['meta']['analysis_step_types'].append(workflow_model_obj['workflow_type'])
+                step['meta']['workflow'] = {
+                    '@id'               : workflow_model_obj.get('@id') or workflow_run_model_obj.get('workflow'),
+                    '@type'             : workflow_model_obj.get('@type'),
+                    'display_title'     : workflow_model_obj.get('display_title') or workflow_model_obj.get('title'),
+                    'accession'         : workflow_model_obj.get('accession'),
+                    'steps'             : workflow_model_obj.get('steps'),
+                    'uuid'              : workflow_uuid,
+                    'workflow_type'     : workflow_model_obj.get('workflow_type')
+                }
 
 
         # Add Output Files, 1-level deep max (maybe change in future)
@@ -566,13 +487,19 @@ class Workflow(Item):
     """The Workflow class that describes a workflow and steps in it."""
 
     item_type = 'workflow'
-    schema = load_schema('encoded:schemas/workflow.json')
-    embedded_list = ['arguments.argument_type',
+    schema = workflow_schema
+    embedded_list = [
+                'steps.name',
+                'steps.inputs',
+                'steps.outputs',
+                'steps.meta.software_used.name',
+                'steps.meta.software_used.title',
+                'steps.meta.software_used.version',
+                'steps.meta.software_used.source_url',
+                'arguments.argument_type',
                 'arguments.argument_format',
-                'arguments.workflow_argument_name',
-                'arguments.argument_mapping.workflow_step',
-                'arguments.argument_mapping.step_argument_name',
-                'arguments.argument_mapping.step_argument_type']
+                'arguments.workflow_argument_name'
+            ]
 
     #rev = {
     #    'workflow_runs': ('WorkflowRun', 'workflow'),
@@ -591,185 +518,6 @@ class Workflow(Item):
     #def workflow_runs(self, request):
     #    return self.rev_link_atids(request, "workflow_runs")
 
-    @calculated_property(schema=workflow_analysis_steps_schema,
-                         category='page')
-    def analysis_steps(self, request):
-        '''
-        Uses this Workflow's linked Item list of AnalysisSteps in property 'workflow_steps', along with 'argument_mapping's of this Workflow's 'argument' property objects,
-        to 'extend' the 'workflow_steps' AnalysisSteps (in context of this Workflow) with lists of 'inputs' and 'outputs', which denote input and output argument nodes, and
-        themselves contain either a 'source' or a 'target' list of other AnalysisSteps out of which they were produced or are going into (as inputs).
-        This structure is enough to trace step->inputs->step->inputs or step->outputs->step->outputs and make proper node connections in the visualized workflow graph.
-
-        :returns: A list of AnalysisStep items, in plain dictionary form (as objects, not linked Items), and extended with 'inputs' and 'outputs'.
-        '''
-
-        if self.properties.get('arguments') is None:
-            return []
-
-        if self.properties.get('workflow_steps') is None:
-            return []
-
-
-        def getStepDict(stepContainer):
-            '''
-            This function is needed to convert an AnalysisStep UUID to a basic dictionary representation of the AnalysisStep, by grabbing it from the database.
-            Alternatively, request.embed(uuid, '@embedded') could work in lieu of self.collection.get(<uuid>), if can access it while embedding.
-
-            :param stepContainer: A dictionary containing 'step' - a UUID of an AnalysisStep, and 'step_name', a name for the step used within workflow (overrides AnalysisStep.properties.name).
-            '''
-            uuid = stepContainer['step']
-            resultStepProperties = ['software_used', '@id', 'link_id', 'display_title', 'description', 'status', '@type'] # props to leave in
-            step = self.collection.get(str(uuid))
-            stepDict = {
-                'uuid' : str(uuid),
-                'inputs' : step.properties.get('inputs', []), # Probably doesn't exist. We'll fill later.
-                'outputs' : step.properties.get('outputs', []),
-                'name' : step.properties.get('name') or step.properties.get('display_title'),
-                'analysis_step_types' : step.properties.get('analysis_step_types', []),
-                'meta' : {}
-            }
-            stepDict['meta'].update(step.properties)
-            stepKeys = list(stepDict['meta'].keys())
-            for key in stepKeys:
-                if key not in resultStepProperties:
-                    del stepDict['meta'][key]
-
-            # Use 'step_name' as provided in Workflow's 'workflow_steps', to override AnalysisStep 'name', in case step is renamed in Workflow.
-            # Is unlikely, but possible, to differ from AnalysisStep own name.
-            stepDict['name'] = stepContainer.get('step_name', stepDict.get('name'))
-            if stepDict['meta'].get('software_used') is not None:
-                stepDict['meta']['software_used'] = '/software/' + stepDict['meta']['software_used'] + '/' # Convert to '@id' form so is picked up for embedding.
-            stepDict['meta']['@id'] = step.jsonld_id(request)
-            return stepDict
-
-        def mergeIOForStep(outputArgs, argType = "output"):
-            '''
-            IMPORTANT:
-            Each 'argument' item has up to two argument_mappings in current Workflows data structure, though there could be many more mappings than that, so in practice there are
-            multiple 'argument' items for the same argument node. To handle this, we distribute arguments->argument_mappings among steps first, as inputs with sources or outputs with targets,
-            then in this function, combine them when step & step_argument_name are equal.
-
-            :param outputArgs: 'input' or 'output' items of a 'constructed' analysis_step item.
-            :param argType: Whether we are merging/combining inputs or outputs.
-            '''
-            argTargetsPropertyName = 'target' if argType == 'output' else 'source' # Inputs have a 'source', outputs have a 'target'.
-            seen_argument_names = {}
-            resultArgs = []
-            for arg in outputArgs:
-                argName = arg.get('name')
-                if argName:
-                    priorArgument = seen_argument_names.get(argName)
-                    if priorArgument and len(arg[argTargetsPropertyName]) > 0:
-                        for currentTarget in arg[argTargetsPropertyName]:
-                            foundExisting = False
-                            for existingTarget in priorArgument[argTargetsPropertyName]:
-                                if (
-                                    existingTarget['name'] == currentTarget['name']
-                                    and existingTarget.get('step','a') == currentTarget.get('step','b')
-                                ):
-                                    existingTarget.update(currentTarget)
-                                    foundExisting = True
-                            if not foundExisting:
-                                priorArgument[argTargetsPropertyName].append(currentTarget)
-                    else:
-                        resultArgs.append(arg)
-                        seen_argument_names[argName] = arg
-            return resultArgs
-
-
-        def buildIOFromMapping(currentArgument, currentArgumentMap, currentMapIndex, argumentType):
-            '''
-            Given an argument_mapping item & its index (currentArgumentMap, currentMapIndex),
-            its parent argument (currentArgument), and type of node to create ("input" or "output"; argumentType),
-            generates an input or output object for a step with "source" or "target" properties which reference the previous or next step, including if is a 'global' "Workflow Input/Output File".
-
-            :param currentArgument: Dictionary item from 'arguments' property list. Should have an 'argument_mapping' list with a maximum of 2 entries and/or 'workflow_argument_name' (if global input/output).
-            :param currentArgumentMap: Dictionary item from 'arguments' item's 'argument_mapping' list.
-            :param currentMapIndex: Index of currentArgumentMap within its parent 'arguments'->'argument_mapping' list.
-            :param argumentType: "input" or "output", to know what form of node is being created.
-            :returns: Dictionary representing an I/O node of a step, containing a list for "source" or "target" which directs to where I/O node came from or is going to next.
-            '''
-
-            # Input nodes have a 'source', output nodes have a 'target'
-            argTargetsPropertyName = 'target' if argumentType == 'output' else 'source'
-
-            io = {
-                "name" : currentArgument.get("workflow_argument_name",
-                    currentArgumentMap.get('step_argument_name')
-                ),
-                argTargetsPropertyName : []     # To become list of "source" or "target" steps.
-            }
-
-            mapping = currentArgument['argument_mapping'] # siblings, inclusive, of 'currentArgumentMap'
-
-            doesOppositeIOMappingExist = len([
-                mp for mp in mapping if (
-                    mp.get('step_argument_type').lower() == ('input' if argumentType == 'output' else 'output') + ' file' or
-                    mp.get('step_argument_type').lower() == ('input' if argumentType == 'output' else 'output') + ' file or parameter'
-                )
-            ]) > 0
-
-            # Confirmed Assumption : If a "workflow_argument_name" is present on argument, then it is a "global" "workflow output" or "workflow input" argument.
-            # So, we create/add an explicit source or target item to node to indicate this.
-            # 'doesOppositeIOMappingExist' check may not be necessary, operates on optimization assumption (comment in next if statement)
-            #  -- if doesOppositeIOMappingExist is **true** and workflow_argument_name is not None, we could throw an Exception.
-            if currentArgument.get("workflow_argument_name") is not None and not doesOppositeIOMappingExist:
-                argTargetsProperty = { "name" : currentArgument["workflow_argument_name"] }
-                if currentArgumentMap['step_argument_type'] == 'parameter':
-                    argTargetsProperty["type"] = "Workflow Parameter"
-                else:
-                    argTargetsProperty["type"] = "Workflow " + argumentType.capitalize() + " File"
-                io[argTargetsPropertyName].append(argTargetsProperty)
-            if len(mapping) > 1:
-                # Optimization. There is at most two mappings in argument_mapping. Use other 1 (not mapping of current step) to build "source" or "target" of where argument came from or is going to.
-                otherIndex = 0
-                if currentMapIndex == 0:
-                    otherIndex = 1
-                other_arg_type = mapping[otherIndex].get("step_argument_type")
-                io[argTargetsPropertyName].append({
-                    "name" : mapping[otherIndex]["step_argument_name"],
-                    "step" : mapping[otherIndex]["workflow_step"],
-                    "type" : other_arg_type
-                })
-
-            # Dump anything else defined on current arguments[] property item into 'meta' property of our input or output node.
-            # Info such as "cardinality", "argument_format" may be available from here.
-            io["meta"] = { k:v for (k,v) in currentArgument.items() if k not in ["argument_mapping", "workflow_argument_name"] }
-            return io
-
-
-        steps = map(getStepDict, self.properties['workflow_steps'])
-
-        resultSteps = []
-
-        # Distribute arguments into steps' "inputs" and "outputs" arrays.
-        # Transform 'argument_mapping' to be 'source' or 'target' of the 'input' or 'output' argument, re: context of step it is attached to (the other mapping). @see def buildIONodeFromMapping.
-        # Then combine them for each step where step_argument_name & step are equal. @see def mergeIOForStep.
-        for step in steps:
-            step['inputs'] = []
-            step['outputs'] = []
-
-            for arg in self.properties['arguments']:
-                mapping = arg.get('argument_mapping')
-                if mapping is None:
-                    continue
-                for mappingIndex, mappedArg in enumerate(mapping):
-                    mappedArgStepName = mappedArg.get('workflow_step')
-                    if mappedArgStepName == step['name'] or (is_uuid(mappedArgStepName) and mappedArgStepName == step['uuid']):
-                        step_argument_type = mappedArg.get('step_argument_type','').lower()
-                        # Deprecated, but some older Workflows might be using UUID for mappedArg.workflow_step instead of step_name.
-                        if is_uuid(mappedArgStepName):
-                            mappedArg['workflow_step'] = step['name']
-                        if   ( step_argument_type == 'input file'  or step_argument_type == 'input file or parameter' or step_argument_type == 'parameter' ):
-                            step["inputs"].append(buildIOFromMapping(arg, mappedArg, mappingIndex, 'input'))
-                        elif ( step_argument_type == 'output file' or step_argument_type == 'output file or parameter' ):
-                            step["outputs"].append(buildIOFromMapping(arg, mappedArg, mappingIndex, 'output'))
-            step['outputs'] = mergeIOForStep(step['outputs'], 'output')
-            step['inputs']  = mergeIOForStep( step['inputs'], 'input' )
-            resultSteps.append(step)
-
-        return resultSteps
-
 
 @collection(
     name='workflow-runs',
@@ -782,15 +530,14 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded_list = ['workflow.*',
-                #'analysis_steps.*',
-                #'analysis_steps.software_used.*',
-                #'analysis_steps.outputs.*',
-                #'analysis_steps.inputs.*',
-                #'analysis_steps.outputs.run_data.*',
-                #'analysis_steps.inputs.run_data.*',
-                #'analysis_steps.outputs.run_data.file.*',
-                #'analysis_steps.inputs.run_data.file.*',
+    embedded_list = [
+                #'workflow.*',
+                'workflow.steps.name',
+                'workflow.steps.meta.software_used.name',
+                'workflow.steps.meta.software_used.title',
+                'workflow.steps.meta.software_used.version',
+                'workflow.steps.meta.software_used.source_url',
+                'workflow.workflow_type',
                 'input_files.workflow_argument_name',
                 'input_files.value.filename',
                 'input_files.value.display_title',
@@ -798,21 +545,21 @@ class WorkflowRun(Item):
                 'input_files.value.uuid',
                 'input_files.value.accession',
                 'input_files.value.@type',
+                'input_files.value.file_size',
                 'output_files.workflow_argument_name',
                 'output_files.*',
                 'output_files.value.file_format',
                 'output_files.value.uuid',
                 'output_files.value.accession',
                 'output_files.value.@type',
+                'output_files.value.file_size',
                 'output_quality_metrics.name',
                 'output_quality_metrics.value.uuid',
-                'output_quality_metrics.value.@type',
-                #'output_quality_metrics.value'
+                'output_quality_metrics.value.@type'
                 ]
 
-    @calculated_property(schema=workflow_analysis_steps_schema,
-                        category='page')
-    def analysis_steps(self, request):
+    @calculated_property(schema=workflow_run_steps_property_schema, category='page')
+    def steps(self, request):
         '''
         Extends the 'inputs' & 'outputs' (lists of dicts) properties of calculated property 'analysis_steps' (list of dicts) from
         WorkflowRun's related Workflow with additional property 'run_data', which contains references to Files, Parameters, and Reports
@@ -824,10 +571,10 @@ class WorkflowRun(Item):
         if workflow is None:
             return []
 
-        workflow = self.collection.get(workflow)
-        analysis_steps = workflow.analysis_steps(request)
+        workflow = request.embed('/' + workflow)
+        analysis_steps = workflow.get('steps')
 
-        if not analysis_steps or len(analysis_steps) == 0:
+        if not isinstance(analysis_steps, list) or len(analysis_steps) == 0:
             return []
 
         # fileCache = {} # Unnecessary unless we'll convert file @id into plain embedded dictionary, in which case we use this to avoid re-requests for same file UUID.
