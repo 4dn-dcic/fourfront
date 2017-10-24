@@ -62,12 +62,13 @@ before_install:
 - node --version
 - npm config set python /usr/bin/python2.7
 - export tibanna_merge=production
+- export tibanna_deploy=fourfront-staging
 - pip install awsebcli
 - git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git
 - git config --global user.email "travis@builder.com"
 - git config --global user.name "Travis"
 - git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-- git fetch
+- git fetch --no-tags
 - git checkout master
 - eb use fourfront-staging
 - travis_wait 30 python deploy/deploy_beanstalk.py
