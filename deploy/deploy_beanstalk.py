@@ -19,11 +19,14 @@ def merge(source, merge_to):
     res = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
 
     print(res)
+    # handle temp changes from stuff like eb
+    subprocess.check_output(['git', 'stash'])
     res2 = subprocess.check_output(
         ['git', 'merge', source, '-m', 'merged']).decode('utf-8').strip()
     print(res2)
     subprocess.check_output(
         ['git', 'push', 'origin-travis', merge_to]).decode('utf-8').strip()
+    subprocess.check_output(['git', 'stash', 'pop'])
 
 
 def get_git_version():

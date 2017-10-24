@@ -71,7 +71,6 @@ before_install:
 - git fetch
 - git checkout master
 - eb use fourfront-staging 
-- git checkout -- .elastibeanstalk
 - travis_wait 30 python deploy/deploy_beanstalk.py
 - exit
 install:
