@@ -106,7 +106,7 @@ if __name__ == "__main__":
         # checkout correct branch
         subprocess.check_output(
             ['git', 'config', "--replace-all", "remote.origin.fetch",
-             "'+refs/heads/*:refs/remotes/origin/*'])
+             "'+refs/heads/*:refs/remotes/origin/*'"])
         subprocess.check_output(['git', 'fetch', '--no-tags', '--depth', '200'])
         subprocess.check_output(
             ['git', 'checkout', branch])
