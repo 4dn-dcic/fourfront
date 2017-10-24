@@ -16,11 +16,11 @@ def merge(source, merge_to):
     print("status on master is" + res1)
     subprocess.check_output(
         ['git', 'checkout', merge_to])
-    res = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
 
-    print(res)
-    # handle temp changes from stuff like eb
     subprocess.check_output(['git', 'stash'])
+    res = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
+    print("status on prod is " + res)
+
     res2 = subprocess.check_output(
         ['git', 'merge', source, '-m', 'merged']).decode('utf-8').strip()
     print(res2)
@@ -44,17 +44,17 @@ def get_git_version():
     return version
 
 
-def update_version(version):
+def update_version(version, branch):
     filename = 'buildout.cfg'
     regex = 's/encoded_version.*/encoded_version = %s/' % (version)
 
     print("updated buildout.cfg with version", version)
     subprocess.check_output(
         ['sed', '-i', regex, filename])
-    commit_with_previous_msg(filename)
+    commit_with_previous_msg(filename, branch)
 
 
-def commit_with_previous_msg(filename):
+def commit_with_previous_msg(filename, branch):
     print("adding file to git")
     subprocess.check_output(
         ['git', 'add', filename])
@@ -64,6 +64,9 @@ def commit_with_previous_msg(filename):
     print("git commit -m " + msg)
     subprocess.check_output(
         ['git', 'commit', '-m', 'version bump + ' + msg])
+
+    subprocess.check_output(
+        ['git', 'push', 'origin-travis', branch])
 
 
 def previous_git_commit():
@@ -114,7 +117,7 @@ if __name__ == "__main__":
         # checkout correct branch
         subprocess.check_output(
             ['git', 'checkout', branch])
-        update_version(ver)
+        update_version(ver, branch)
         if merge_to:
             merge(branch, merge_to)
             tag(ver)
