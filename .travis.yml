@@ -150,6 +150,8 @@ after_success:
              echo "Job succeeded! PUBLISHING to ${tibanna_deploy} environment..."
              eb use ${tibanna_deploy} --debug
           fi
+          git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+          git fetch
           travis_wait 30 python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
