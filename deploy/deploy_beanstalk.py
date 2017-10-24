@@ -30,18 +30,16 @@ def merge(source, merge_to):
 
 
 def get_git_version():
-    if (os.environ.get("TRAVIS_BRANCH") == "production"):
-        version = "1.0.0"  # Change this with new version
-    else:
-        version = os.environ.get("TRAVIS_COMMIT")
+    version = os.environ.get("TRAVIS_COMMIT")
     if not version:
         version = subprocess.check_output(
             ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
+        version = version[:7]
         diff = subprocess.check_output(
             ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
         if diff:
             version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
-    return version
+    return "v-" + version
 
 
 def update_version(version, branch):
