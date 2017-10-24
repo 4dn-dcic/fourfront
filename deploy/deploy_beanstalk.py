@@ -109,8 +109,7 @@ if __name__ == "__main__":
         subprocess.check_output(
             ['git', 'config', "--replace-all", "remote.origin.fetch",
              "'+refs/heads/*:refs/remotes/origin/*'"])
-        res = subprocess.check_output(['git', 'fetch'])
-        print(res)
+        subprocess.check_output(['git', 'fetch'])
         subprocess.check_output(
             ['git', 'checkout', branch])
         update_version(ver)
