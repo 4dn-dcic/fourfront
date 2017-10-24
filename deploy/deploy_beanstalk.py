@@ -108,21 +108,23 @@ if __name__ == "__main__":
     args = parser.parse_args()
     branch = os.environ.get("TRAVIS_BRANCH")
     merge_to = os.environ.get("tibanna_merge")
+    deploy_to = os.environ.get("tibanna_deploy")
 
     if not args.prod:
         try:
-            ver = get_git_version()
-            # checkout correct branch
-            subprocess.check_output(
-                ['git', 'checkout', branch])
-            update_version(ver, branch)
-            if merge_to:
-                merge(branch, merge_to)
-                tag(ver)
-        except Exception e:
+            if deploy_to == 'fourfront-staging':
+                ver = get_git_version()
+                # checkout correct branch
+                subprocess.check_output(
+                    ['git', 'checkout', branch])
+                update_version(ver, branch)
+                if merge_to:
+                    merge(branch, merge_to)
+                    tag(ver)
+        except Exception as e:
             # this can all go wrong if somebody pushes during the build
             # or what not, in which case we just won't update the tag / merge
-            rasie(e)
+            raise(e)
         deploy()
     if args.prod:
         print("args production")

@@ -67,7 +67,7 @@ before_install:
 - git config --global user.email "travis@builder.com"
 - git config --global user.name "Travis"
 - git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-- git fetch
+- git fetch --no-tags
 - git checkout master
 - eb use fourfront-staging
 - travis_wait 30 python deploy/deploy_beanstalk.py
