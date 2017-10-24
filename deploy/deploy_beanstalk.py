@@ -111,20 +111,16 @@ if __name__ == "__main__":
     deploy_to = os.environ.get("tibanna_deploy")
 
     if not args.prod:
-        try:
-            if deploy_to == 'fourfront-staging':
-                ver = get_git_version()
-                # checkout correct branch
-                subprocess.check_output(
-                    ['git', 'checkout', branch])
-                update_version(ver, branch)
-                if merge_to:
-                    merge(branch, merge_to)
-                    tag(ver)
-        except Exception as e:
-            # this can all go wrong if somebody pushes during the build
-            # or what not, in which case we just won't update the tag / merge
-            raise(e)
+        if deploy_to == 'fourfront-staging':
+            print("deploy to staging")
+            ver = get_git_version()
+            # checkout correct branch
+            subprocess.check_output(
+                ['git', 'checkout', branch])
+            update_version(ver, branch)
+            if merge_to:
+                merge(branch, merge_to)
+                tag(ver)
         deploy()
     if args.prod:
         print("args production")
