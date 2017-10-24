@@ -7,22 +7,19 @@ import argparse
 
 def tag(name):
     subprocess.check_output(['git', 'tag', name, '-m', 'version created for staging deploy'])
-    subprocess.check_output(['git', 'push', 'origin', name])
+    subprocess.check_output(['git', 'push', 'origin-travis', name])
 
 
 def merge(source, merge_to):
-    current = subprocess.check_output(
-        ['git', 'rev-parse', "HEAD"]).decode('utf-8').strip()
     subprocess.check_output(
-        ['git', 'config', "--replace-all", "remote.origin.fetch",
-         '+refs/heads/*:refs/remotes/origin/*'])
-    subprocess.check_output(['git', 'fetch', '--no-tags', '--depth', '200'])
+        ['git', 'checkout', merge_to])
+    res = subprocess.check_output(['git', 'stats'])
+    print(res)
+    res2 = subprocess.check_output(
+        ['git', 'merge', source, '-m', 'merged']).decode('utf-8').strip()
+    print(res2)
     subprocess.check_output(
-        ['git', 'checkout', merge_to]).decode('utf-8').strip()
-    subprocess.check_output(
-        ['git', 'merge', current, '-m', 'merged']).decode('utf-8').strip()
-    subprocess.check_output(
-        ['git', 'push', 'origin', merge_to]).decode('utf-8').strip()
+        ['git', 'push', 'origin-travis', merge_to]).decode('utf-8').strip()
 
 
 def get_git_version():
@@ -61,19 +58,21 @@ def commit_with_previous_msg(filename):
     subprocess.check_output(
         ['git', 'commit', '-m', 'version bump + ' + msg])
 
+
 def previous_git_commit():
     return subprocess.check_output(
         ['git', 'log', '-1']
     ).decode('utf-8').strip()
 
+
 def parse(commit):
-    author , msg = "", ""
+    author, msg = "", ""
     # parse up some commit lines
     commit_lines = commit.split('\n')
     author = commit_lines[1].split(":")[1].strip()
     msg = " ".join(l.strip() for l in commit_lines[3:] if l)
 
-    return  "%s - %s" % (author, msg)
+    return "%s - %s" % (author, msg)
 
 
 def deploy():
@@ -105,6 +104,9 @@ if __name__ == "__main__":
     if not args.prod:
         print("not production")
         ver = get_git_version()
+        # checkout correct branch
+        subprocess.check_output(
+            ['git', 'checkout', branch])
         update_version(ver)
         if merge_to:
             merge(branch, merge_to)
