@@ -12,7 +12,7 @@ def tag(name):
 
 def merge(source, merge_to):
     subprocess.check_output(
-        ['git', 'checkout', merge_to]).decode('utf-8').strip()
+        ['git', 'checkout', merge_to])
     res = subprocess.check_output(
         ['git', 'pull']).decode('utf-8').strip()
     print(res)
@@ -59,10 +59,12 @@ def commit_with_previous_msg(filename):
     subprocess.check_output(
         ['git', 'commit', '-m', 'version bump + ' + msg])
 
+
 def previous_git_commit():
     return subprocess.check_output(
         ['git', 'log', '-1']
     ).decode('utf-8').strip()
+
 
 def parse(commit):
     author, msg = "", ""
@@ -71,7 +73,7 @@ def parse(commit):
     author = commit_lines[1].split(":")[1].strip()
     msg = " ".join(l.strip() for l in commit_lines[3:] if l)
 
-    return  "%s - %s" % (author, msg)
+    return "%s - %s" % (author, msg)
 
 
 def deploy():
@@ -107,7 +109,8 @@ if __name__ == "__main__":
         subprocess.check_output(
             ['git', 'config', "--replace-all", "remote.origin.fetch",
              "'+refs/heads/*:refs/remotes/origin/*'"])
-        subprocess.check_output(['git', 'fetch', '--no-tags', '--depth', '200'])
+        res = subprocess.check_output(['git', 'fetch', '--no-tags', '--depth', '200'])
+        print(res)
         subprocess.check_output(
             ['git', 'checkout', branch])
         update_version(ver)
