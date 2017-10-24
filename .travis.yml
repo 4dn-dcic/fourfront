@@ -1,5 +1,6 @@
 language: python
 sudo: true
+if: tag IS blank
 cache:
   pip: true
   directories:

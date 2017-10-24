@@ -124,7 +124,8 @@ if __name__ == "__main__":
         except Exception as e:
             # this can all go wrong if somebody pushes during the build
             # or what not, in which case we just won't update the tag / merge
-            raise(e)
+            print("got the following expection but we will ignore it")
+            print(e)
         deploy()
     if args.prod:
         print("args production")
