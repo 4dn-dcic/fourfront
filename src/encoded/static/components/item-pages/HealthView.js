@@ -81,7 +81,7 @@ export class HealthView extends React.Component {
                         description : "Aggregations of ES-indexed data."
                     }
                 }} />
-                <AdminPanel context={context}/>
+            <FoursightPanel context={context}/>
             </div>
         );
     }
@@ -90,7 +90,7 @@ export class HealthView extends React.Component {
 content_views.register(HealthView, 'Health');
 
 
-class AdminPanel extends React.Component {
+class FoursightPanel extends React.Component {
 
     constructor(props){
         super(props);
@@ -166,7 +166,8 @@ class AdminPanel extends React.Component {
 
     render(){
         var userDetails = JWT.getUserDetails();
-        if (!userDetails || !userDetails.groups || !Array.isArray(userDetails.groups) || (userDetails.groups.indexOf('admin') === -1)) return null;
+        var is_admin = true;
+        if (!userDetails || !userDetails.groups || !Array.isArray(userDetails.groups) || (userDetails.groups.indexOf('admin') === -1)) is_admin = false;
         // get foursight checks
         var foursight_checks = null;
         var check_success = this.state.foursight_checks && !_.isEmpty(this.state.foursight_checks.checks);
@@ -183,7 +184,7 @@ class AdminPanel extends React.Component {
         return (
             <div className="admin-panel">
                 <h3 className="text-300 mt-3">{foursight_title}</h3>
-                {check_success ?
+                {(check_success && is_admin) ?
                     <div>
                         <Button style={{'marginRight': '10px'}} onClick={this.loadFoursight} disabled={this.state.working}>Refresh</Button>
                         <Button onClick={this.runFoursight} disabled={this.state.working}>Rerun</Button>
@@ -266,7 +267,7 @@ class FoursightCheck extends React.Component {
                     <span>{data.title}</span>
                     <span style={statStyle}>{data.status}</span>
                     <span className="pull-right">
-                        {DateUtility.format(data.timestamp, 'date-time-md', ' at ') + ' (UTC)'}
+                        <DateUtility.LocalizedTime timestamp={data.timestamp} formatType='date-time-md' dateTimeSeparator=" at " />
                     </span>
                 </h4>
                 <div style={commonStyle}>{data.description}</div>
