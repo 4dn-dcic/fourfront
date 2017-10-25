@@ -93,7 +93,7 @@ def deploy():
     while True:
         out = p.stderr.read(1)
         out = out.decode('utf-8')
-        if out == '' and p.poll() != None:
+        if out == '' and p.poll() is not None:
             break
         if out != '':
             sys.stdout.write(out)
@@ -107,25 +107,36 @@ if __name__ == "__main__":
     parser.add_argument('--prod', action="store_true", help="deploy to prod")
     args = parser.parse_args()
     branch = os.environ.get("TRAVIS_BRANCH")
-    merge_to = os.environ.get("tibanna_merge")
-    deploy_to = os.environ.get("tibanna_deploy")
+    merge_to = os.environ.get("tibanna_merge", "").strip()
+    deploy_to = os.environ.get("tibanna_deploy", "").strip()
 
     if not args.prod:
+        print("not production")
         try:
             if deploy_to == 'fourfront-staging':
+
+                print("deploy to staging")
                 ver = get_git_version()
                 # checkout correct branch
+                print("checkout master")
                 subprocess.check_output(
                     ['git', 'checkout', branch])
+
+                print("update version")
                 update_version(ver, branch)
                 if merge_to:
+                    print("merge from %s to %s" % (branch, merge_to))
                     merge(branch, merge_to)
+                    print("tag it")
                     tag(ver)
         except Exception as e:
             # this can all go wrong if somebody pushes during the build
             # or what not, in which case we just won't update the tag / merge
             print("got the following expection but we will ignore it")
             print(e)
+        print("now let's deploy, but first make sure we are still on the correct branch")
+        subprocess.check_output(
+            ['git', 'checkout', branch])
         deploy()
     if args.prod:
         print("args production")
