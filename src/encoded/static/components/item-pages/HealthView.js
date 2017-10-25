@@ -120,9 +120,6 @@ class FoursightPanel extends React.Component {
         this.setState({'working': true});
         var url = server + '/api/latest/' + environ + '/all';
         var callbackFxn = function(payload) {
-            console.on();
-            console.log('--Foursight checks found-->', payload);
-            console.off();
             this.setState({'foursight_checks': payload, 'working': false});
         }.bind(this);
         ajax.load(url, callbackFxn, 'GET', this.fallbackForAjax);
@@ -138,7 +135,6 @@ class FoursightPanel extends React.Component {
         this.setState({'working': true});
         var url = server + '/api/run/' + environ + '/all';
         var callbackFxn = function(payload) {
-            console.log('--Foursight checks run-->', payload);
             // automatically refresh after run
             this.setState({'foursight_run_resp': payload});
             this.loadFoursight();
@@ -176,7 +172,14 @@ class FoursightPanel extends React.Component {
         if(check_success){
             foursight_checks = this.state.foursight_checks.checks.map((check) => this.buildCheckEntry(check));
         }else{
-            foursight_checks = <div>{'Error loading foursight results; check the console.'}</div>;
+            foursight_checks = (
+                <div>
+                    <div>{'Error loading foursight results.'}</div>
+                    <div className="json-tree-wrapper">
+                        <JSONTree data={this.state.foursight_checks} />
+                    </div>
+                </div>
+            );
         }
         // format foursight title with environ
         var foursight_title = 'Foursight';
