@@ -83,13 +83,16 @@ def parse(commit):
     return "%s - %s" % (author, msg)
 
 
-def deploy():
+def deploy(deploy_to=None):
     '''
     run eb deploy and show the output
     '''
-    print("start deployment to elastic beanstalk")
+    print("start deployment to elastic beanstalk deploy to is %s" % str(deploy_to))
 
-    p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
+    if not deploy_to:
+        p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
+    else:
+        p = subprocess.Popen(['eb', 'deploy', deploy_to], stderr=subprocess.PIPE)
     while True:
         out = p.stderr.read(1)
         out = out.decode('utf-8')
@@ -135,9 +138,7 @@ if __name__ == "__main__":
             print("got the following expection but we will ignore it")
             print(e)
         print("now let's deploy, but first make sure we are still on the correct branch")
-        subprocess.check_output(
-            ['git', 'checkout', branch])
-        deploy()
+        deploy(deploy_to)
     if args.prod:
         print("args production")
         # only deploy if commint message has tibanna-deploy in it
