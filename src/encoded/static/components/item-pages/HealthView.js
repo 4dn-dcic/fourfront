@@ -81,7 +81,7 @@ export class HealthView extends React.Component {
                         description : "Aggregations of ES-indexed data."
                     }
                 }} />
-            <FoursightPanel context={context}/>
+                <FoursightPanel context={context}/>
             </div>
         );
     }
@@ -154,7 +154,7 @@ class FoursightPanel extends React.Component {
 
     fallbackForAjax = () => {
         this.setState({
-            'foursight_checks': null,
+            'foursight_checks': {'message': 'could not connect to foursight', 'checks': {}},
             'foursight_run_resp': null,
             'working': false
         });
