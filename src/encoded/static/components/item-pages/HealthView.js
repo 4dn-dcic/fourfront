@@ -94,8 +94,6 @@ class FoursightPanel extends React.Component {
 
     constructor(props){
         super(props);
-        this.loadFoursight = _.throttle(this.loadFoursight, 500);
-        this.runFoursight = _.throttle(this.runFoursight, 500);
         this.state = {
             'foursight_checks': null,
             'foursight_run_resp': null,
@@ -125,7 +123,13 @@ class FoursightPanel extends React.Component {
         ajax.load(url, callbackFxn, 'GET', this.fallbackForAjax);
     }
 
-    runFoursight = () => {
+    clickLoadFoursight = (e) => {
+        e.preventDefault();
+        this.loadFoursight();
+    }
+
+    clickRunFoursight = (e) => {
+        e.preventDefault();
         // Fetch foursight checks
         var environ = this.state.foursight_env;
         var server = this.state.foursight_server;
@@ -191,8 +195,8 @@ class FoursightPanel extends React.Component {
                 <h3 className="text-300 mt-3">{foursight_title}</h3>
                 {(check_success && is_admin) ?
                     <div>
-                        <Button style={{'marginRight': '10px'}} onClick={this.loadFoursight} disabled={this.state.working}>Refresh</Button>
-                        <Button onClick={this.runFoursight} disabled={this.state.working}>Rerun</Button>
+                        <Button style={{'marginRight': '10px'}} onClick={this.clickLoadFoursight} disabled={this.state.working}>Refresh</Button>
+                        <Button onClick={this.clickRunFoursight} disabled={this.state.working}>Rerun</Button>
                     </div>
                     :
                     null
@@ -272,7 +276,7 @@ class FoursightCheck extends React.Component {
                     <span>{data.title}</span>
                     <span style={statStyle}>{data.status}</span>
                     <span className="pull-right">
-                        <DateUtility.LocalizedTime timestamp={data.timestamp} formatType='date-time-md' dateTimeSeparator=" at " />
+                        {DateUtility.format(data.timestamp, 'date-time-md', ' at ', true)}
                     </span>
                 </h4>
                 <div style={commonStyle}>{data.description}</div>
