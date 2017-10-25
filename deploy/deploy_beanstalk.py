@@ -30,7 +30,7 @@ def merge(source, merge_to):
 
 
 def get_git_version():
-    version = os.environ.get("TRAVIS_COMMIT","")[:7]
+    version = os.environ.get("TRAVIS_COMMIT", "")[:7]
     if not version:
         version = subprocess.check_output(
             ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
