@@ -11,43 +11,48 @@ def tag(name):
 
 
 def merge(source, merge_to):
+    res1 = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
+
+    print("status on master is" + res1)
     subprocess.check_output(
         ['git', 'checkout', merge_to])
-    res = subprocess.check_output(['git', 'stats'])
-    print(res)
+
+    subprocess.check_output(['git', 'stash'])
+    res = subprocess.check_output(['git', 'status']).decode('utf-8').strip()
+    print("status on prod is " + res)
+
     res2 = subprocess.check_output(
         ['git', 'merge', source, '-m', 'merged']).decode('utf-8').strip()
     print(res2)
     subprocess.check_output(
         ['git', 'push', 'origin-travis', merge_to]).decode('utf-8').strip()
+    subprocess.check_output(['git', 'stash', 'pop'])
 
 
 def get_git_version():
-    if (os.environ.get("TRAVIS_BRANCH") == "production"):
-        version = "1.0.0"  # Change this with new version
-    else:
-        version = os.environ.get("TRAVIS_COMMIT")
+    version = os.environ.get("TRAVIS_COMMIT","")[:7]
     if not version:
         version = subprocess.check_output(
             ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
+        version = version[:7]
         diff = subprocess.check_output(
             ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
         if diff:
             version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
-    return version
+    return "v-" + version
 
 
-def update_version(version):
+def update_version(version, branch):
     filename = 'buildout.cfg'
     regex = 's/encoded_version.*/encoded_version = %s/' % (version)
 
     print("updated buildout.cfg with version", version)
     subprocess.check_output(
         ['sed', '-i', regex, filename])
-    commit_with_previous_msg(filename)
+    commit_with_previous_msg(filename, branch)
 
 
-def commit_with_previous_msg(filename):
+def commit_with_previous_msg(filename, branch):
     print("adding file to git")
     subprocess.check_output(
         ['git', 'add', filename])
@@ -57,6 +62,9 @@ def commit_with_previous_msg(filename):
     print("git commit -m " + msg)
     subprocess.check_output(
         ['git', 'commit', '-m', 'version bump + ' + msg])
+
+    subprocess.check_output(
+        ['git', 'push', 'origin-travis', branch])
 
 
 def previous_git_commit():
@@ -100,17 +108,24 @@ if __name__ == "__main__":
     args = parser.parse_args()
     branch = os.environ.get("TRAVIS_BRANCH")
     merge_to = os.environ.get("tibanna_merge")
+    deploy_to = os.environ.get("tibanna_deploy")
 
     if not args.prod:
-        print("not production")
-        ver = get_git_version()
-        # checkout correct branch
-        subprocess.check_output(
-            ['git', 'checkout', branch])
-        update_version(ver)
-        if merge_to:
-            merge(branch, merge_to)
-            tag(ver)
+        try:
+            if deploy_to == 'fourfront-staging':
+                ver = get_git_version()
+                # checkout correct branch
+                subprocess.check_output(
+                    ['git', 'checkout', branch])
+                update_version(ver, branch)
+                if merge_to:
+                    merge(branch, merge_to)
+                    tag(ver)
+        except Exception as e:
+            # this can all go wrong if somebody pushes during the build
+            # or what not, in which case we just won't update the tag / merge
+            print("got the following expection but we will ignore it")
+            print(e)
         deploy()
     if args.prod:
         print("args production")

@@ -1,0 +1,79 @@
+{
+    "title": "DAM-ID Seq Experiment",
+    "description": "",
+    "id": "/profiles/experiment_damid.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["experiment_type", "award", "lab", "biosample"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/sop_mapping"},
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "experiment.json#/properties"}
+    ],
+    "mixinFacets": [
+        { "$ref": "experiment.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "experiment.json#/columns"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "experiment_type": {
+            "title" : "Experiment Type",
+            "default": "DAM-ID seq",
+            "enum": [
+                "DAM-ID seq"
+            ]
+        },
+        "fusion": {
+            "title": "Fusion Protein",
+            "description": "The protein that is fused to the DAM enzyme, that for which the genomic targets of interaction are being probed.",
+            "comment": "Want a reproducible and recognizable format for the designation of the fusion/target",
+            "type": "string"
+
+        },
+        "sap_treatment": {
+            "title": "SAP Treatment",
+            "description": "Was the genomic DNA treated with shrimp alkaline phosphatase (SAP)",
+            "type": "string",
+            "enum": ["Yes", "No"]
+        },
+        "me_pcr_cycles": {
+            "title": "Methyl-PCR cycles",
+            "description": "Number of Methylation-specific PCR cycles performed",
+            "type": "integer"
+        },
+        "y_ligation_dna_input": {
+            "title": "Y-adaptor ligation input amount",
+            "description": "Amount of DNA (units ng) input to the Y-adaptor ligation step",
+            "type": "number"
+        },
+        "index_pcr_cycles": {
+            "title": "Index PCR cycles",
+            "description": "Number of PCR cycles performed with the indexed primers prior to sequencing",
+            "type": "integer"
+        },
+        "library_preparation_date": {
+            "title": "Library Preparation Date",
+            "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
+            "type": "string",
+            "format": "date"
+        }
+    },
+    "columns": {
+
+    }
+}
