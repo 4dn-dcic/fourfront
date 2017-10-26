@@ -1,4 +1,5 @@
 import os
+from time import sleep
 import sys
 import subprocess
 import hashlib
@@ -89,10 +90,19 @@ def deploy(deploy_to=None):
     '''
     print("start deployment to elastic beanstalk deploy to is %s" % str(deploy_to))
 
-    if not deploy_to:
-        p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
-    else:
-        p = subprocess.Popen(['eb', 'deploy', deploy_to], stderr=subprocess.PIPE)
+    wait = [20,40,60,120,120,120]
+    for time in wait:
+        try:
+            if not deploy_to:
+                p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
+            else:
+                p = subprocess.Popen(['eb', 'deploy', deploy_to], stderr=subprocess.PIPE)
+        except Exception:
+            # we often get errors due to timeouts
+            sleep(time)
+        else:
+            break
+
     while True:
         out = p.stderr.read(1)
         out = out.decode('utf-8')
