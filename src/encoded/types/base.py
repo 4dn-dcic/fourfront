@@ -30,6 +30,8 @@ from snovault.validators import (
 from snovault.interfaces import CONNECTION
 from snovault.etag import if_match_tid
 
+from datetime import date
+
 
 @lru_cache()
 def _award_viewing_group(award_uuid, root):
@@ -313,15 +315,25 @@ class Item(snovault.Item):
         return False
 
     def _update(self, properties, sheets=None):
-        # if an item is status 'planned' and an update is submitted
-        # by a non-admin user then status should be changed to 'submission in progress'
+        import pdb; pdb.set_trace()
+        props = {}
         try:
             props = self.properties
-            if 'status' in props and props['status'] == 'planned':
-                if not self.is_update_by_admin_user():
-                    properties['status'] = 'submission in progress'
         except KeyError:
             pass
+        if 'status' in props and props['status'] == 'planned':
+            # if an item is status 'planned' and an update is submitted
+            # by a non-admin user then status should be changed to 'submission in progress'
+            if not self.is_update_by_admin_user():
+                properties['status'] = 'submission in progress'
+
+        date2status = {'public_release': 'released', 'project_release': 'released to project'}
+        for datefield, status in date2status.items():
+            if datefield not in props:
+                if 'status' in props and props['status'] == status:
+                    # check the status and add the date if it's the right one
+                    properties[datefield] = date.today().isoformat()
+
         super(Item, self)._update(properties, sheets)
 
     @snovault.calculated_property(schema={

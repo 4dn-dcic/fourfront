@@ -26,16 +26,23 @@
         "accession": {
             "accessionType": "ES"
         },
-        "date_released": {
-            "title": "Date Released",
-            "comment": "Do not submit, value is assigned when released.",
+        "orig_proposed_submission_date": {
+            "title": "Original proposed submission date",
+            "description": "The original proposed date of submission of the dataset",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
-            ],
-            "exclude_from": ["submit4dn"],
-            "permission": "import_items"
+            ]
+        },
+        "curr_proposed_submission_date": {
+            "title": "Current proposed submission date",
+            "description": "The currently proposed date of submission of the dataset",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
         },
         "experiments_in_set": {
             "title": "Set of Experiments",
