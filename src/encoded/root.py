@@ -85,7 +85,6 @@ def health_check(config):
             "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
             "foursight_env": foursight_env,
-            "foursight_server": settings.get('foursight.server'),
             'ontology_updated': ont_date,
             "@type" : [ "Health", "Portal" ],
             "@context" : "/health",

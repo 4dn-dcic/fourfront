@@ -94,30 +94,36 @@ class FoursightPanel extends React.Component {
 
     constructor(props){
         super(props);
+        this.foursight_server_by_stage = {
+            'dev': 'https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com',
+            'prod': 'https://we0v248yi4.execute-api.us-east-1.amazonaws.com'
+        };
         this.state = {
             'foursight_checks': null,
             'foursight_run_resp': null,
             'working': false,
             'foursight_env': this.props.context.foursight_env || null,
-            'foursight_server': this.props.context.foursight_server || null
+            'foursight_stage': 'prod'
 
         };
     }
 
     componentDidMount(){
-        this.loadFoursight();
+        this.loadFoursight(this.state.foursight_stage);
     }
 
-    loadFoursight = () => {
+    loadFoursight = (stage) => {
         // Fetch foursight checks
+        // stage needed to be passed in as an arg for syncing clickSwitchStage
         var environ = this.state.foursight_env;
-        var server = this.state.foursight_server;
+        var server = this.foursight_server_by_stage[stage];
         if(environ === null || server === null){
             return;
         }
         this.setState({'working': true});
         var url = server + '/api/latest/' + environ + '/all';
         var callbackFxn = function(payload) {
+            console.log('-->', payload);
             this.setState({'foursight_checks': payload, 'working': false});
         }.bind(this);
         ajax.load(url, callbackFxn, 'GET', this.fallbackForAjax);
@@ -125,14 +131,14 @@ class FoursightPanel extends React.Component {
 
     clickLoadFoursight = (e) => {
         e.preventDefault();
-        this.loadFoursight();
+        this.loadFoursight(this.state.foursight_stage);
     }
 
     clickRunFoursight = (e) => {
         e.preventDefault();
         // Fetch foursight checks
         var environ = this.state.foursight_env;
-        var server = this.state.foursight_server;
+        var server = this.foursight_server_by_stage[this.state.foursight_stage];
         if(environ === null || server === null){
             return;
         }
@@ -141,9 +147,16 @@ class FoursightPanel extends React.Component {
         var callbackFxn = function(payload) {
             // automatically refresh after run
             this.setState({'foursight_run_resp': payload});
-            this.loadFoursight();
+            this.loadFoursight(this.state.foursight_stage);
         }.bind(this);
         ajax.load(url, callbackFxn, 'GET', this.fallbackForAjax);
+    }
+
+    clickSwitchStage = (e) => {
+        e.preventDefault();
+        var new_stage = this.state.foursight_stage === 'dev' ? 'prod' : 'dev';
+        this.setState({'foursight_stage': new_stage});
+        this.loadFoursight(new_stage);
     }
 
     onClickRunIndexing(){
@@ -196,7 +209,8 @@ class FoursightPanel extends React.Component {
                 {(check_success && is_admin) ?
                     <div>
                         <Button style={{'marginRight': '10px'}} onClick={this.clickLoadFoursight} disabled={this.state.working}>Refresh</Button>
-                        <Button onClick={this.clickRunFoursight} disabled={this.state.working}>Rerun</Button>
+                        <Button style={{'marginRight': '10px'}} onClick={this.clickRunFoursight} disabled={this.state.working}>Rerun</Button>
+                        <Button onClick={this.clickSwitchStage} disabled={this.state.working}>{'Stage: ' + this.state.foursight_stage}</Button>
                     </div>
                     :
                     null
