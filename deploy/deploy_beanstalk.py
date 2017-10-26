@@ -1,4 +1,5 @@
 import os
+from time import sleep
 import sys
 import subprocess
 import hashlib
@@ -30,7 +31,7 @@ def merge(source, merge_to):
 
 
 def get_git_version():
-    version = os.environ.get("TRAVIS_COMMIT","")[:7]
+    version = os.environ.get("TRAVIS_COMMIT", "")[:7]
     if not version:
         version = subprocess.check_output(
             ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
@@ -83,17 +84,29 @@ def parse(commit):
     return "%s - %s" % (author, msg)
 
 
-def deploy():
+def deploy(deploy_to=None):
     '''
     run eb deploy and show the output
     '''
-    print("start deployment to elastic beanstalk")
+    print("start deployment to elastic beanstalk deploy to is %s" % str(deploy_to))
 
-    p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
+    wait = [20,40,60,120,120,120]
+    for time in wait:
+        try:
+            if not deploy_to:
+                p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
+            else:
+                p = subprocess.Popen(['eb', 'deploy', deploy_to], stderr=subprocess.PIPE)
+        except Exception:
+            # we often get errors due to timeouts
+            sleep(time)
+        else:
+            break
+
     while True:
         out = p.stderr.read(1)
         out = out.decode('utf-8')
-        if out == '' and p.poll() != None:
+        if out == '' and p.poll() is not None:
             break
         if out != '':
             sys.stdout.write(out)
@@ -107,25 +120,35 @@ if __name__ == "__main__":
     parser.add_argument('--prod', action="store_true", help="deploy to prod")
     args = parser.parse_args()
     branch = os.environ.get("TRAVIS_BRANCH")
-    merge_to = os.environ.get("tibanna_merge")
-    deploy_to = os.environ.get("tibanna_deploy")
+    merge_to = os.environ.get("tibanna_merge", "").strip()
+    deploy_to = os.environ.get("tibanna_deploy", "").strip()
 
     if not args.prod:
+        print("not production")
         try:
             if deploy_to == 'fourfront-staging':
+
+                print("deploy to staging")
                 ver = get_git_version()
                 # checkout correct branch
+                print("checkout master")
                 subprocess.check_output(
                     ['git', 'checkout', branch])
+
+                print("update version")
                 update_version(ver, branch)
                 if merge_to:
+                    print("merge from %s to %s" % (branch, merge_to))
                     merge(branch, merge_to)
+                    print("tag it")
                     tag(ver)
         except Exception as e:
             # this can all go wrong if somebody pushes during the build
             # or what not, in which case we just won't update the tag / merge
-            raise(e)
-        deploy()
+            print("got the following expection but we will ignore it")
+            print(e)
+        print("now let's deploy, but first make sure we are still on the correct branch")
+        deploy(deploy_to)
     if args.prod:
         print("args production")
         # only deploy if commint message has tibanna-deploy in it

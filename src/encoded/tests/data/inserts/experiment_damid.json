@@ -1,0 +1,25 @@
+[
+    {
+        "accession":"4DNEX067BBB1",
+        "biosample":"111111bc-1111-4448-903e-854af460b123",
+        "experiment_type": "DAM-ID seq",
+        "fusion": "Lamin B1",
+        "sap_treatment": "No",
+        "me_pcr_cycles": 8,
+        "y_ligation_dna_input": 250,
+        "index_pcr_cycles": 12,
+        "library_preparation_date": "2017-07-17",
+        "lab": "test-4dn-lab",
+        "aliases": ["dcic:damid_alias"],
+        "files": ["4DNFIN232JC1", "4DNFIN232JC2"],
+        "description": "Test DAM-ID seq",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461224b",
+        "uuid": "66661e2f-3e43-4388-8bbb-e861f209c455",
+        "submitted_by": "4dndcic@gmail.com",
+        "authentication_docs": ["dcic:test_auth"],
+        "biosample_quantity": 50000,
+        "biosample_quantity_units": "cells",
+        "follows_sop": "Yes",
+        "status": "in review by lab"
+    }
+]

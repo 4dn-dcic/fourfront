@@ -1,5 +1,6 @@
 language: python
 sudo: true
+if: tag IS blank
 cache:
   pip: true
   directories:
@@ -50,29 +51,20 @@ notifications:
 before_install:
 - SNO_PATH="snovault = git https://github.com/$USER/$SNO_REPO.git branch="
 - SNO_BRANCH=$(grep "${SNO_PATH}" buildout.cfg | sed "s@$SNO_PATH@@")
-- SNO_STATUS=$(curl -s "https://api.travis-ci.org/$USER/$SNO_REPO.svg?branch=$SNO_BRANCH"
-  | grep pass)
-- ! "if [ -z \"$SNO_STATUS\" ]; then\n    echo \"Snovault branch build for $SNO_BRANCH
-  is failing; exiting build\"\n    travis_terminate\nelse\n    echo \"Snovault branch
-  $SNO_BRANCH is okay with build status: $SNO_STATUS\"\nfi\n"
+- SNO_STATUS=$(curl -s "https://api.travis-ci.org/$USER/$SNO_REPO.svg?branch=$SNO_BRANCH" | grep pass)
+- |
+    if [ -z "$SNO_STATUS" ]; then
+        echo "Snovault branch build for $SNO_BRANCH is failing; exiting build"
+        travis_terminate
+    else
+        echo "Snovault branch $SNO_BRANCH is okay with build status: $SNO_STATUS"
+    fi
 - echo $tibanna_deploy
 - postgres --version
 - initdb --version
 - nvm install 4
 - node --version
 - npm config set python /usr/bin/python2.7
-- export tibanna_merge=production
-- export tibanna_deploy=fourfront-staging
-- pip install awsebcli
-- git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git
-- git config --global user.email "travis@builder.com"
-- git config --global user.name "Travis"
-- git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-- git fetch --no-tags
-- git checkout master
-- eb use fourfront-staging
-- travis_wait 30 python deploy/deploy_beanstalk.py
-- exit
 install:
 - curl -O  ${ES_DOWNLOAD_URL}
 - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb
@@ -82,14 +74,23 @@ install:
 - pip install coveralls
 - pip install codacy-coverage
 before_script:
-- ! "if test -n \"$BROWSER\"; then\n  CONNECT_URL=https://saucelabs.com/downloads/sc-4.3.8-linux.tar.gz\n
-  \ CONNECT_DOWNLOAD=sc.tar.gz\n  SC_READYFILE=sauce-connect-ready-$RANDOM\n  SC_LOGFILE=$HOME/sauce-connect.log\n
-  \ SC_PIDFILE=$HOME/sauce-connect.pid\n  curl $CONNECT_URL > $CONNECT_DOWNLOAD\n
-  \ mkdir sc\n  tar -zxf $CONNECT_DOWNLOAD --strip 1 --directory sc\n  sc/bin/sc --readyfile
-  $SC_READYFILE \\\n    --logfile $SC_LOGFILE \\\n    --pidfile $SC_PIDFILE \\\n    --tunnel-identifier
-  $TRAVIS_JOB_NUMBER \\\n    --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY >
-  /dev/null &\n  while test -f \"$SC_PIDFILE\" && test ! -f \"$SC_READYFILE\"; do
-  sleep .5; done\nfi\n"
+- |
+  if test -n "$BROWSER"; then
+    CONNECT_URL=https://saucelabs.com/downloads/sc-4.3.8-linux.tar.gz
+    CONNECT_DOWNLOAD=sc.tar.gz
+    SC_READYFILE=sauce-connect-ready-$RANDOM
+    SC_LOGFILE=$HOME/sauce-connect.log
+    SC_PIDFILE=$HOME/sauce-connect.pid
+    curl $CONNECT_URL > $CONNECT_DOWNLOAD
+    mkdir sc
+    tar -zxf $CONNECT_DOWNLOAD --strip 1 --directory sc
+    sc/bin/sc --readyfile $SC_READYFILE \
+      --logfile $SC_LOGFILE \
+      --pidfile $SC_PIDFILE \
+      --tunnel-identifier $TRAVIS_JOB_NUMBER \
+      --user $SAUCE_USERNAME --api-key $SAUCE_ACCESS_KEY > /dev/null &
+    while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
+  fi
 - sudo service elasticsearch stop
 script:
 - if test -n "$NPM"; then npm test; fi
@@ -97,21 +98,32 @@ script:
   src/encoded; fi
 - if test -n "$UNIT"; then bin/test -v -v -m "working and not setone" --durations=40
   --cov src/encoded; fi
-- ! "if test -n \"$BROWSER\"; then\n  test -f \"$SC_PIDFILE\" && bin/test -v -v -m
-  \"bdd\" --tb=short \\\n    --splinter-implicit-wait 10 \\\n    --splinter-webdriver
-  remote \\\n    --splinter-remote-url \"http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub\"
-  \\\n    --splinter-socket-timeout 300 \\\n    --browser-arg tunnel-identifier \"$TRAVIS_JOB_NUMBER\"
-  \\\n    --browser-arg-int build  \"$TRAVIS_BUILD_NUMBER\" \\\n    --browser-arg-int
-  idleTimeout 300 \\\n    --browser-arg name \"$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT\"
-  \\\n    --browser-arg browser \"$BROWSER\"\n    --cov src/encoded\nfi\n"
+- |
+  if test -n "$BROWSER"; then
+    test -f "$SC_PIDFILE" && bin/test -v -v -m "bdd" --tb=short \
+      --splinter-implicit-wait 10 \
+      --splinter-webdriver remote \
+      --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub" \
+      --splinter-socket-timeout 300 \
+      --browser-arg tunnel-identifier "$TRAVIS_JOB_NUMBER" \
+      --browser-arg-int build  "$TRAVIS_BUILD_NUMBER" \
+      --browser-arg-int idleTimeout 300 \
+      --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
+      --browser-arg browser "$BROWSER"
+      --cov src/encoded
+  fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
-- ! "if test -f \"$SC_PIDFILE\"; then\n  SAUCE_JOB_ID=`grep -m 1 /session/ \"$HOME/sauce-connect.log\"
-  | cut -d / -f 7`\n  SAUCE_PASSED=`((TRAVIS_TEST_RESULT == 0)) && echo true || echo
-  false`\n  curl -H \"Content-Type:text/json\" -s -X PUT -d \"{\\\"passed\\\": $SAUCE_PASSED}\"
-  \\\n    \"http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@saucelabs.com/rest/v1/$SAUCE_USERNAME/jobs/$SAUCE_JOB_ID\"
-  > /dev/null\n  echo \"Sauce test page https://saucelabs.com/tests/$SAUCE_JOB_ID\"\n
-  \ kill $(cat \"$SC_PIDFILE\")\n  wait $(cat \"$SC_PIDFILE\")\nfi\n"
+- |
+  if test -f "$SC_PIDFILE"; then
+    SAUCE_JOB_ID=`grep -m 1 /session/ "$HOME/sauce-connect.log" | cut -d / -f 7`
+    SAUCE_PASSED=`((TRAVIS_TEST_RESULT == 0)) && echo true || echo false`
+    curl -H "Content-Type:text/json" -s -X PUT -d "{\"passed\": $SAUCE_PASSED}" \
+      "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@saucelabs.com/rest/v1/$SAUCE_USERNAME/jobs/$SAUCE_JOB_ID" > /dev/null
+    echo "Sauce test page https://saucelabs.com/tests/$SAUCE_JOB_ID"
+    kill $(cat "$SC_PIDFILE")
+    wait $(cat "$SC_PIDFILE")
+  fi
 after_success:
 - coveralls
 - ! "if test -n \"$NPM\"; then \n   cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\n
@@ -125,20 +137,34 @@ after_success:
 - echo $TRAVIS_PULL_REQUEST
 - echo $TRAVIS_BRANCH
 - echo $tibanna_deploy
-- ! "if [ \"$BUILD_LEADER\" = \"YES\" ]; then\n  if [ \"$BUILD_AGGREGATE_STATUS\"
-  = \"others_succeeded\" ]; then\n    if [ \"$TRAVIS_PULL_REQUEST\" = \"false\" ];
-  then\n      bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws\n
-  \     git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git\n
-  \     git config --global user.email \"travis@builder.com\"\n      git config --global
-  user.name \"Travis\"\n      if [ \"$TRAVIS_BRANCH\" = \"master\" ]; then\n        if
-  [ -z \"$tibanna_deploy\" ]; then \n           echo \"Job succeeded! PUBLISHING to
-  fourfront-mastertest environment...\"\n           eb use fourfront-mastertest --debug\n
-  \       else\n           echo \"Job succeeded! PUBLISHING to ${tibanna_deploy} environment...\"\n
-  \          eb use ${tibanna_deploy} --debug\n        fi\n        travis_wait 30
-  python deploy/deploy_beanstalk.py\n      fi\n      if [ \"$TRAVIS_BRANCH\" = \"production\"
-  ]; then\n          echo \"Tests passed! PUBLISHING to ${tibanna_deploy} environment...\"\n
-  \         eb use ${tibanna_deploy} --debug\n          travis_wait 30 python deploy/deploy_beanstalk.py
-  --prod\n        fi\n      fi\n   fi\n  fi\n"
+- |
+  if [ "$BUILD_LEADER" = "YES" ]; then
+    if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
+      if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
+        git remote add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git
+        git config --global user.email "travis@builder.com"
+        git config --global user.name "Travis"
+        if [ "$TRAVIS_BRANCH" = "master" ]; then
+           git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+           git fetch --no-tags
+           git checkout master
+           if [ -z "$tibanna_deploy" ]; then 
+              echo "Job succeeded! PUBLISHING to fourfront-mastertest environment..."
+              eb use fourfront-mastertest --debug
+           else
+              echo "Job succeeded! PUBLISHING to ${tibanna_deploy} environment..."
+              eb use ${tibanna_deploy} --debug
+           fi
+           travis_wait 30 python deploy/deploy_beanstalk.py
+        fi
+        if [ "$TRAVIS_BRANCH" = "production" ]; then
+            echo "Job succeeded! PUBLISHING to fourfront-webprod environment..."
+            travis_wait 30 python deploy/deploy_beanstalk.py --prod
+          fi
+        fi
+     fi
+    fi
 after_failure:
 - python deploy/travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
