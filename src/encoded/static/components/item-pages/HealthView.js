@@ -123,7 +123,6 @@ class FoursightPanel extends React.Component {
         this.setState({'working': true});
         var url = server + '/api/latest/' + environ + '/all';
         var callbackFxn = function(payload) {
-            console.log('-->', payload);
             this.setState({'foursight_checks': payload, 'working': false});
         }.bind(this);
         ajax.load(url, callbackFxn, 'GET', this.fallbackForAjax);
