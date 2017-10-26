@@ -544,12 +544,15 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
     used_filters = {'must': {}, 'must_not': {}}
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
+        exists_field = False # keep track of null values
         if field in ['limit', 'y.limit', 'x.limit', 'mode',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
                      'sort', 'from', 'referrer', 'q', 'before', 'after']:
             continue
         elif field == 'type' and term != 'Item':
             continue
+        elif term == 'No value':
+            exists_field = True
         # Add filter to result
         qs = urlencode([
             (k.encode('utf-8'), v.encode('utf-8'))
@@ -581,6 +584,12 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
             query_field = 'embedded.@type.raw'
         else:
             query_field = 'embedded.' + field + '.raw'
+
+        # handle case of filtering for null values
+        if exists_field:
+            this_filter = {'exists': {'field': query_field}}
+            not_query_filters.append(this_filter)
+            continue
 
         bool_used_filters = used_filters['must_not'] if not_field else used_filters['must']
         if field not in bool_used_filters:
@@ -700,6 +709,7 @@ def set_facets(search, facets, final_filters, string_query):
             'terms': {
                 'size': 100,
                 'field': query_field,
+                'missing': "No value"
             }
         }
 
