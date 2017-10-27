@@ -68,7 +68,7 @@ before_install:
 install:
 - curl -O  ${ES_DOWNLOAD_URL}
 - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb
-- python bootstrap.py --buildout-version 2.9.5 --setuptools-version 36.6.0 
+- python bootstrap.py --buildout-version 2.9.5 --setuptools-version 36.6.0
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip install awsebcli
 - pip install coveralls
@@ -149,7 +149,7 @@ after_success:
            git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
            git fetch --no-tags
            git checkout master
-           if [ -z "$tibanna_deploy" ]; then 
+           if [ -z "$tibanna_deploy" ]; then
               echo "Job succeeded! PUBLISHING to fourfront-mastertest environment..."
               eb use fourfront-mastertest --debug
            else
