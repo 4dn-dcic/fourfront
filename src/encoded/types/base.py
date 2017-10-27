@@ -315,7 +315,7 @@ class Item(snovault.Item):
         return False
 
     def _update(self, properties, sheets=None):
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         props = {}
         try:
             props = self.properties
@@ -327,11 +327,12 @@ class Item(snovault.Item):
             if not self.is_update_by_admin_user():
                 properties['status'] = 'submission in progress'
 
-        date2status = {'public_release': 'released', 'project_release': 'released to project'}
+        date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
         for datefield, status in date2status.items():
             if datefield not in props:
-                if 'status' in properties and properties['status'] == status:
-                    # check the status and add the date if it's the right status
+                if datefield in self.schema['properties'] and datefield not in properties \
+                   and 'status' in properties and properties['status'] in status:
+                    # check the status and add the date if it's not provided and item has right status
                     properties[datefield] = date.today().isoformat()
 
         super(Item, self)._update(properties, sheets)
