@@ -536,23 +536,23 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
     Sets filters in the query
     """
     # initialize query_filters with filters for principals and doc_types
-    query_filters = []
-    not_query_filters = [] # filters used in NOT case
-    query_filters.append({'terms': {'principals_allowed.view': principals}})
-    query_filters.append({'terms': {'embedded.@type.raw': doc_types}})
+    # the dictionaries below have keys equal to query_field and values
+    # of the ES terms query
+    query_filters = {}
+    not_query_filters = {} # filters used in NOT case
+    exists_filters = set() # for filters like: field!=No value
+    not_exists_filters = set() # for filters like: field=No value
+    query_filters['principals_allowed.view'] = {'terms': {'principals_allowed.view': principals}})
+    query_filters['embedded.@type.raw'] = {'terms': {'embedded.@type.raw': doc_types}})
 
-    used_filters = {'must': {}, 'must_not': {}}
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
-        exists_field = False # keep track of null values
         if field in ['limit', 'y.limit', 'x.limit', 'mode',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
                      'sort', 'from', 'referrer', 'q', 'before', 'after']:
             continue
         elif field == 'type' and term != 'Item':
             continue
-        elif term == 'No value':
-            exists_field = True
         # Add filter to result
         qs = urlencode([
             (k.encode('utf-8'), v.encode('utf-8'))
@@ -585,41 +585,72 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
         else:
             query_field = 'embedded.' + field + '.raw'
 
-        # handle case of filtering for null values
-        if exists_field:
-            this_filter = {'exists': {'field': query_field}}
-            not_query_filters.append(this_filter)
+        if term == 'No value':
+            if not_field:
+                exists_filters.add(query_field)
+            else:
+                not_exists_filters.add(query_field)
             continue
 
-        bool_used_filters = used_filters['must_not'] if not_field else used_filters['must']
-        if field not in bool_used_filters:
-            bool_used_filters[field] = [term]
-            this_filter = {'terms': {query_field: [term]}}
-            if not_field:
-                not_query_filters.append(this_filter)
+        if not_field:
+            if query_field in not_query_filters:
+                not_query_filters[query_field]['terms'][query_field].append(term)
             else:
-                query_filters.append(this_filter)
+                not_query_filters[query_field] = {'terms': {query_field: [term]}}
         else:
-            this_filter = {'terms': {query_field: bool_used_filters[field]}}
-            if not_field:
-                not_query_filters.remove(this_filter)
-                # update this_filter to reflect used_filters change
-                bool_used_filters[field].append(term)
-                not_query_filters.append(this_filter)
+            if query_field in query_filters:
+                query_filters[query_field]['terms'][query_field].append(term)
             else:
-                query_filters.remove(this_filter)
-                # update this_filter to reflect used_filters change
-                bool_used_filters[field].append(term)
-                query_filters.append(this_filter)
+                query_filters[query_field] = {'terms': {query_field: [term]}}
 
-    # lastly, add date limits to filters if given
+    # add date limits to filters if given
     if before_date or after_date:
         date_limits = {'format':'yyyy-MM-dd HH:mm'}
         if before_date:
             date_limits['lte'] = before_date # lte is >=
         if after_date:
             date_limits['gte'] = after_date # gte is <=
-        query_filters.append({'range':{'embedded.date_created': date_limits}})
+        query_filters['embedded.date_created'] = {'range':{'embedded.date_created': date_limits}})
+
+    # adjust filters to include _exists_ queries
+    # for field!=No value
+    for should_exist in exists_filters:
+        found = False
+        for idx, qf in enumerate(query_filters):
+            if should_exist in qf.get('terms', {}):
+                found = True
+                or_clause = {
+                    'should': {
+                        'exists': {'field', should_exist},
+                        qf
+                    }
+                }
+                query_filters[idx] = or_clause
+        if not found:
+            query_filters.append({
+                'exists': {
+                    'field': should_exist
+                }
+            })
+    # for field=No value
+    for should_not_exist in not_exists_filters:
+        found = False
+        for idx, qf in enumerate(not_query_filters):
+            if should_not_exist in qf.get('terms', {}):
+                found = True
+                or_clause = {
+                    'should': {
+                        'exists': {'field', should_not_exist},
+                        qf
+                    }
+                }
+                not_query_filters[idx] = or_clause
+        if not found:
+            not_query_filters.append({
+                'exists': {
+                    'field': should_not_exist
+                }
+            })
 
     # To modify filters of elasticsearch_dsl Search, must call to_dict(),
     # modify that, then update from the new dict
