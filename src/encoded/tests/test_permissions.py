@@ -86,6 +86,7 @@ def award_viewer(testapp, somelab_w_shared_award):
     return testapp.get(res.location).json
 
 
+# this user has the 4DN viewing group
 @pytest.fixture
 def viewing_group_member(testapp, award):
     item = {
@@ -93,6 +94,21 @@ def viewing_group_member(testapp, award):
         'last_name': 'Group',
         'email': 'viewing_group_member@example.org',
         'viewing_groups': [award['viewing_group']],
+        'status': 'current'
+    }
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
+
+# this user has the NOFIC viewing group
+@pytest.fixture
+def nofic_group_member(testapp, nofic_award):
+    item = {
+        'first_name': 'NOFIC',
+        'last_name': 'Group',
+        'email': 'viewing_group_member@example.org',
+        'viewing_groups': [nofic_award['viewing_group']],
         'status': 'current'
     }
     # User @@object view has keys omitted.
@@ -222,12 +238,20 @@ def award_viewer_testapp(award_viewer, app, external_tx, zsa_savepoints):
 
 @pytest.fixture
 def viewing_group_member_testapp(viewing_group_member, app, external_tx, zsa_savepoints):
+    # app for 4DN viewing group member
     return remote_user_testapp(app, viewing_group_member['uuid'])
 
 
 @pytest.fixture
 def multi_viewing_group_member_testapp(multi_viewing_group_member, app, external_tx, zsa_savepoints):
+    # app with both 4DN and NOFIC viewing group
     return remote_user_testapp(app, multi_viewing_group_member['uuid'])
+
+
+@pytest.fixture
+def nofic_group_member_testapp(nofic_group_member, app, external_tx, zsa_savepoints):
+    # app for 4DN viewing group member
+    return remote_user_testapp(app, nofic_group_member['uuid'])
 
 
 @pytest.fixture
@@ -799,3 +823,42 @@ def test_planned_item_status_is_changed_on_submitter_patch(
     res2 = submitter_testapp.patch_json(res1['@id'], {'description': desc}).json['@graph'][0]
     assert res2['description'] == desc
     assert res2['status'] == 'submission in progress'
+
+
+### tests for bogus nofic specific __ac_local_roles__
+def test_4dn_can_view_nofic_released_to_project(
+        planned_experiment_set_data, wrangler_testapp, viewing_group_member_testapp,
+        nofic_award):
+    eset_item = planned_experiment_set_data
+    eset_item['award'] = nofic_award['@id']
+    eset_item['status'] = 'released to project'
+    # import pdb; pdb.set_trace()
+    res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
+    viewing_group_member_testapp.get(res1['@id'], status=200)
+
+
+def test_4dn_cannot_view_nofic_not_joint_analysis_planned_and_in_progress(
+        planned_experiment_set_data, wrangler_testapp, viewing_group_member_testapp,
+        nofic_award):
+    statuses = ['planned', 'submission in progress']
+    eset_item = planned_experiment_set_data
+    eset_item['award'] = nofic_award['@id']
+    for status in statuses:
+        eset_item['status'] = status
+        # import pdb; pdb.set_trace()
+        res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
+        viewing_group_member_testapp.get(res1['@id'], status=403)
+
+
+def test_4dn_can_view_nofic_joint_analysis_planned_and_in_progress(
+        planned_experiment_set_data, wrangler_testapp, viewing_group_member_testapp,
+        nofic_award):
+    statuses = ['planned', 'submission in progress']
+    eset_item = planned_experiment_set_data
+    eset_item['award'] = nofic_award['@id']
+    eset_item['tags'] = ['Joint Analysis']
+    for status in statuses:
+        eset_item['status'] = status
+        # import pdb; pdb.set_trace()
+        res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
+        viewing_group_member_testapp.get(res1['@id'], status=200)
