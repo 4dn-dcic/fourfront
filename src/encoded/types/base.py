@@ -330,8 +330,8 @@ class Item(snovault.Item):
         date2status = {'public_release': 'released', 'project_release': 'released to project'}
         for datefield, status in date2status.items():
             if datefield not in props:
-                if 'status' in props and props['status'] == status:
-                    # check the status and add the date if it's the right one
+                if 'status' in properties and properties['status'] == status:
+                    # check the status and add the date if it's the right status
                     properties[datefield] = date.today().isoformat()
 
         super(Item, self)._update(properties, sheets)
