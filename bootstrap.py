@@ -59,9 +59,6 @@ if options.setuptools_version is not None:
 else:
     pip.main(['install', 'setuptools'])
 
-import setuptools
-import pkg_resources
-
 ######################################################################
 # Install buildout
 version = options.buildout_version
@@ -74,8 +71,6 @@ else:
 ######################################################################
 # Import and run buildout
 
-import zc.buildout.buildout
-
 if not [a for a in args if '=' not in a]:
     args.append('bootstrap')
 
@@ -83,4 +78,5 @@ if not [a for a in args if '=' not in a]:
 if options.config_file is not None:
     args[0:0] = ['-c', options.config_file]
 
+import zc.buildout.buildout
 zc.buildout.buildout.main(args)
