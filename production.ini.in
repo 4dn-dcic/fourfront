@@ -12,7 +12,6 @@ indexer.processes = ${indexer_processes}
 elasticsearch.server = ${elasticsearch_instance}
 snovault.app_version = ${encoded_version}
 snovault.elasticsearch.index = ${elasticsearch_index}
-foursight.server = https://m1kj6dypu3.execute-api.us-east-1.amazonaws.com
 env.name = ${env_name}
 
 snovault.load_test_data = ${load_test_data}

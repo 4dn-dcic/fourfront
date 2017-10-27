@@ -45,7 +45,8 @@
                 "in situ Hi-C",
                 "dilution Hi-C",
                 "micro-C",
-                "DNase Hi-C"
+                "DNase Hi-C",
+                "TCC"
             ]
         },
         "crosslinking_method": {

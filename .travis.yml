@@ -1,10 +1,11 @@
 language: python
 sudo: true
+if: tag IS blank
 cache:
   pip: true
   directories:
   - eggs
-  - ".npm"
+  - .npm
   - node_modules
 addons:
   apt:
@@ -14,7 +15,7 @@ addons:
     - build-essential
     - make
     - graphviz
-  postgresql: "9.4"
+  postgresql: '9.4'
 env:
   global:
   - JAVA_HOME=/usr/lib/jvm/java-8-oracle
@@ -36,6 +37,8 @@ env:
   - secure: cMK2zu7UgtF56IRBVCIQOoSn2Wcrf7sc955z+lRcUy5dNkdObRDpLUl/ZKB095DIJ4HWQVhZ+ONoGQmaM6f5Mp0yJ628tM2A2rSlqjPVhnFpwYrFYk+T3mRMYi6Ldwmp9nGBYxI5FPlN1nuUDN0M1Oz3U9WGlctxuR9nwix8nY6Glpt8JTSKcGn8J9VZ6ZpwQ0qKKTWdme7X+LAJHZoBL3+W0UCSArr8OIe3bgSkN+ec+bduzr2+WB6NzuXgYs/58fGQ1nD5Uf1L7Bwy0Z9aNm5ENr8A2+Dx9UPNMpXUdoDGLwvGC2IUOV2YTcnHtqghpudfH+hB3kiI8z/whbgOrWGr1Icm2NgNZ9tbCS1QG2T7WlPTmvml9hsde1+zwCzDx3NUsALAwJf4f1Qi7lW1QnbCprQ8sctH6xTQh6nkHpt7/eFo0rTob+z3+HGcoEHol6gVhRXJcKNRjVxbpZg8yTXyO9viT6HpvqJFf/0O4rARXHpx/olEvBBUxXQl7h6wEDWynNol2W4WyWwzIYU8cVXr6nivQI6sfArXNFiyEv4J02d0RROnmSbnCVZlXM1vcNknAzsHLI/TS6SRqcg49NNTLWPuVaknVAQpdz9j8TgwtIx9xO7Mkl8rAXYKvwuNyz61R5f6o+y3AL+8ZwRCjLZ7tv3iWdpTVXHKg9O4ADI=
   - secure: sMn4k+L9wspBTMYG0M8+n4ba1OY1ZtIG8zODm/dMHWPgodUwmC5E+HanKuTfo8URK7gYBOLpZ8OXzCTkOoCKqNYCKQihwaigAOx6sr1cC6TwFqppXhQGMe6Y9UlAaow2Xr10yIlZXMgKf6fJX3uXtdkXJ3XM7IqgB1zGCHACRFbR/aUzRjnachDV/XGmrMIfKi8MVJ1d6GK0VjIyIUFpAjDnfLf1q39xnq6vqeRIedB1wAdlLzFZ5tRNaPAK1j+a23VSwbqzAlg3cX2vBQ3b7IPeTU8a1hIoMh5IBP2ceEgwM2oWkvHmYzliVSn/SiWMYb7TRX/FxAwfqWws4uZ/mymOVQbCaBfK6RKF9UH/ldpAkA+AIxRLvQyN1UYWq2WweCmMiQtgmySBCzfmGrJMzRyZScW1kWzXOWTSzYqMEqU0xPk+vKYSwGHGctPqIsBrvhuow6dckHWssdWhGTtZIOb8bpePTOVGRCJcYPOUcZAX+VaJN2uT1wwUZ9vXiDKbXGxa5BuCqW1oOUC/fqSKVyrmxPXhA0TZUVDhDnzmcbHygvl5BlbpONIdUY/jYkM6LJpkkFivBsMSsEvVeEwUWT1kbo6apXpWLeD59zP6Hq/PAH+tXz0uer6SEcyo/M8XBUcWoZTniBjEI+WiCOnxcKeNLahxqZAbbnLJHl1OMF8=
   - secure: ZjL66xRfoBX5/IJ+ClFkXMOQ50gqwR4GdLK+v2EfADHhtiO+Q/xjqDFybVhkz4ra4MognkWDX4+t/Td8viwIDBKvfmNxmVOUQiEtvUFdEDOVS3w6PacT5RHrcyL/7wUnF5ZKc4CH8idwxtr0lCmo3xBWzlxQgXU887Ro/pQwFDpscyTElYtMQMe3T3rLvBzaKRWyaNGAUvqAB6D632ZLB/xCvnoaUKXgfqyV8Em9x5jbTO/++/S1qrQiPBhGK6Ggwh/xBtmRxLTeNtEJPqF6ntp7yV9HMLd8vyk1xsscdFH6xJ7wRTgsM0VC7jB+NvXjAdQgPybHZYw5+5Xg8C+D7fHPZbCrnF299QvGF8AAChKNR1rkOAXuPdttDyhTKYbZHnRFniiDQju3PDfdnQ6aqKh4VUViPcliLsV5pYodgo09ubpBvrQm7v8esgZDBtCPJALJPmlpL3cU9fRVc10l4qTRxFuG9mNAb0uRICocmQNwYdBaSgKCZHSkcnfSxUglLPT5tqT3JfPMlRCDEzb2AlIrjIOnxv0MJVvo4xUybJK/00bEFWq68mUqCq3HXM4pdthE9fxpZyYAHmaQNE5YpRwMdD2aJHA7C83eggx0zMqE+S9O2L97io4ytiOs0rTYHDLkcBhds3TOvIqZHRNgOj4xkiB3g1KsaZpXpRzkDkY=
+  - secure: HcTo9NWOMvQoUie/lL3tpSs4CjFguHyVK3F9pS7P592XH6pZ5Zn2NVI4KyasBaeX2mWFqTFwfOwo5NpZi3OZYBqFwfc/4LQGOyDowM9tgUiMwNIr884aEkt2U+QBuwMZyxFlOS55lRGVFugqWmgSy4y/vdmnPZrcRbs2tIhv9L+XJJq9AN9sl9Glwf+Czu6NPrmaez31mri+iZtbXR9yUE8CigYpoQFfKCJV+Ix4bSuO0kAHzzdsSxRKHXmoJ/v8G8Ge+LDYj0efzwXVNITbxeHwze4cGbpbUZcyUi6th7I9XmNa0XQt2kpoZjoRgGWAUJJd3fv87SY+w70eHn/W8GCys+wtYtP71u1+r+Yl2OS9u07jpm9GHJ6tdFmp+ytfuTwVPDgQdG0w3URiXrEXz/BDZGKBoN86f0/K7Q5i12o+17ohungJh1RdXtq2JQ5/H0E9P/dXTg7b+78jM6rT2HbS7ou82FtJS0AYJdZCYdbviBY8h5p4LLB5+JlMjyQujnzyZccbCzH/hVEu8JnCyTeaeu/1vZ39UpaA/B0LKJxbJkAgbMQ2uXjlw73qS2LvHgo9s3SE9lRT4yQjZxa/gQT4gciPmPvaMTsNmGf+DwdLlN2lCEN14fRJEzgAndTlHR2ATbr83txaMah53LfDqbW0/yinc3qyxqHePzlQuko=
+  - secure: i6C0l6inapwkgmwKT67liVcxjSL2y+LrICBd3KmpglH1ReuqqhlUZkgIt2TkW481hhhiCnbxDtPdArqwCzVOIAt+FJ9Ug/9CiJwBCuePujJWo5HMrnMNkdXKlopP73OiRoNuBnxYmzGVq30x0K+Wyvei0nJoUn0ZcOPRij+u0D7YuUk85fdCrfHSqjm/GVOypFWSm3lx0CzbbWPejmjCzllZebj2PkHJ6ydv9IFPLFDEb5MB2Rt4xodKFkZzABGnAJOroIVMYat14XUeeg2PxIHq9YXpA9ZRxFtYNrFolHMOpV3JY4XAcWUVpgH7DvQSUG0Jc6fMo8yEO2Cd3XKCwuTDNa4pmzzR0UUXYPVB9jVvSYXTWk+dtbOB3ehD8mTRPqbkXlzI5/IwcYbNMtr9hooQEXsLZQLSciiQPrMPNqKAiOcFAoEHqfDx0oURnnTmgzIdzjpd+2f+wLP3qRA8pUX9VXcBrseN20u0UigJrxOILSMHMM84jF6uuABmiBY8csV8XvKALVrUbQIFqepMti/9IItQQa5+SfyUSDv8onkzaqT+Hy24mNxifJJLErwfMFWmub0rOrq9KLMx1vkMnItqCG9rMPIDC6q3H60b5PD5eFnle2P3V92sE1y+V9rjo1YHf+FKx1Tgn3ceJ0Sm7R7kjMbGY8xsKocFzVDg7Jg=
 matrix:
   include:
   - python: '3.4'
@@ -123,7 +126,7 @@ after_script:
   fi
 after_success:
 - coveralls
-- "if test -n \"$NPM\"; then \n   cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\n
+- ! "if test -n \"$NPM\"; then \n   cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\n
   \  cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage\n   rm -rf ./coverage\nfi\n"
 - if test -n "$UNIT"; then python-codacy-coverage -r coverage.xml; fi
 - python deploy/travis_after_all.py https://api.travis-ci.org
@@ -143,20 +146,20 @@ after_success:
         git config --global user.email "travis@builder.com"
         git config --global user.name "Travis"
         if [ "$TRAVIS_BRANCH" = "master" ]; then
-          if [ -z "$tibanna_deploy" ]; then 
-             echo "Job succeeded! PUBLISHING to fourfront-mastertest environment..."
-             eb use fourfront-mastertest --debug
-          else
-             echo "Job succeeded! PUBLISHING to ${tibanna_deploy} environment..."
-             eb use ${tibanna_deploy} --debug
-          fi
-          git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-          git fetch
-          travis_wait 30 python deploy/deploy_beanstalk.py
+           git config --replace-all remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+           git fetch --no-tags
+           git checkout master
+           if [ -z "$tibanna_deploy" ]; then 
+              echo "Job succeeded! PUBLISHING to fourfront-mastertest environment..."
+              eb use fourfront-mastertest --debug
+           else
+              echo "Job succeeded! PUBLISHING to ${tibanna_deploy} environment..."
+              eb use ${tibanna_deploy} --debug
+           fi
+           travis_wait 30 python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-            echo "Tests passed! PUBLISHING to ${tibanna_deploy} environment..."
-            eb use ${tibanna_deploy} --debug
+            echo "Job succeeded! PUBLISHING to fourfront-webprod environment..."
             travis_wait 30 python deploy/deploy_beanstalk.py --prod
           fi
         fi

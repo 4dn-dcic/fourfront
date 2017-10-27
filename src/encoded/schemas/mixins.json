@@ -76,11 +76,11 @@
             "enum": [
                 "released",
                 "current",
+                "planned",
                 "revoked",
                 "deleted",
                 "obsolete",
                 "replaced",
-                "planned",
                 "in review by lab",
                 "submission in progress",
                 "released to project"

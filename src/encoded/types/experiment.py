@@ -393,6 +393,47 @@ class ExperimentChiapet(Experiment):
 
 
 @collection(
+    name='experiments-damid',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments DAM-ID',
+        'description': 'Listing DAM-ID Experiments',
+    })
+class ExperimentDamid(Experiment):
+    """The experiment class for DAM-ID experiments."""
+
+    item_type = 'experiment_damid'
+    schema = load_schema('encoded:schemas/experiment_damid.json')
+    embedded_list = Experiment.embedded_list
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, fusion=None):
+        sum_str = experiment_type
+
+        if fusion:
+            sum_str += (' with DAM-' + fusion)
+
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', biosample=None, fusion=None):
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, fusion))
+
+
+@collection(
     name='experiments-seq',
     unique_key='accession',
     properties={
