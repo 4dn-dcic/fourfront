@@ -61,7 +61,7 @@ else:
 
 ######################################################################
 # Install buildout
-if options.buildout_vesion is not None:
+if options.buildout_version is not None:
     pip.main(['install', '--upgrade', 'zc.buildout==%s' % options.buildout_version])
 else:
     pip.main(['install', '--upgrade', 'zc.buildout'])
