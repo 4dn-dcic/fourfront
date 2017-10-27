@@ -79,42 +79,12 @@ if options.version:
 
 ######################################################################
 # load/install setuptools
-
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib2 import urlopen
-
-ez = {}
-if os.path.exists('ez_setup.py'):
-    exec(open('ez_setup.py').read(), ez)
-else:
-    exec(urlopen('https://bootstrap.pypa.io/ez_setup.py').read(), ez)
-
-if not options.allow_site_packages:
-    # ez_setup imports site, which adds site packages
-    # this will remove them from the path to ensure that incompatible versions
-    # of setuptools are not in the path
-    import site
-    # inside a virtualenv, there is no 'getsitepackages'.
-    # We can't remove these reliably
-    if hasattr(site, 'getsitepackages'):
-        for sitepackage_path in site.getsitepackages():
-            # Strip all site-packages directories from sys.path that
-            # are not sys.prefix; this is because on Windows
-            # sys.prefix is a site-package directory.
-            if sitepackage_path != sys.prefix:
-                sys.path[:] = [x for x in sys.path
-                               if sitepackage_path not in x]
-
-setup_args = dict(to_dir=tmpeggs, download_delay=0)
-
+import pip
 if options.setuptools_version is not None:
-    setup_args['version'] = options.setuptools_version
-if options.setuptools_to_dir is not None:
-    setup_args['to_dir'] = options.setuptools_to_dir
+    pip.main(['install', 'setuptools==%s' % options.setuptools_version])
+else:
+    pip.main(['install', 'setuptools'])
 
-ez['use_setuptools'](**setup_args)
 import setuptools
 import pkg_resources
 
