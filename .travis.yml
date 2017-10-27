@@ -67,8 +67,8 @@ before_install:
 - npm config set python /usr/bin/python2.7
 install:
 - curl -O  ${ES_DOWNLOAD_URL}
+- pip install -U pip
 - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb
-- pip install zc.buildout==36.6.0
 - python bootstrap.py --buildout-version 2.9.5 --setuptools-version 36.6.0 
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip install awsebcli
