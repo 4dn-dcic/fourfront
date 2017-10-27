@@ -68,7 +68,7 @@ before_install:
 install:
 - curl -O  ${ES_DOWNLOAD_URL}
 - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb
-- python bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
+- python bootstrap.py --buildout-version 2.9.5 --setuptools-version 32.1.0 
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip install awsebcli
 - pip install coveralls
