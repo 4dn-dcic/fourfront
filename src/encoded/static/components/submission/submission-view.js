@@ -1568,7 +1568,8 @@ class IndividualObjectView extends React.Component{
     /*
     Exit out of the selection process and clean up state
     */
-    selectCancel = () => {
+    selectCancel = (e) => {
+        e.preventDefault();
         this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
         this.setState({
             'selectType': null,
@@ -1741,7 +1742,7 @@ class IndividualObjectView extends React.Component{
                     <div>
                         <div>
                             {selecting ?
-                                <Button style={{'marginBottom':'-50px'}} bsStyle="danger" onClick={this.selectCancel}>
+                                <Button bsStyle="danger" onClick={this.selectCancel}>
                                     {'Cancel selection'}
                                 </Button>
                                 : null
