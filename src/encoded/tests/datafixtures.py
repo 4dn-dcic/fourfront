@@ -443,7 +443,7 @@ def construct(testapp, lab, award):
     item = {
         'name': 'Awesome_Construct',
         'construct_type': 'tagging construct',
-        'tags': 'eGFP, C-terminal',
+        'protein_tags': ['eGFP, C-terminal'],
         'award': award['@id'],
         'lab': lab['@id'],
     }

@@ -20,6 +20,7 @@
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/library"},
         { "$ref": "mixins.json#/sop_mapping"},
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "experiment.json#/properties" }
     ],
     "mixinColumns": [
