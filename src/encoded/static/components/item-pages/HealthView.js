@@ -121,7 +121,7 @@ class FoursightPanel extends React.Component {
             return;
         }
         this.setState({'working': true});
-        var url = server + '/api/latest/' + environ + '/all';
+        var url = server + '/api/run/' + environ + '/all';
         var callbackFxn = function(payload) {
             this.setState({'foursight_checks': payload, 'working': false});
         }.bind(this);
@@ -148,7 +148,8 @@ class FoursightPanel extends React.Component {
             this.setState({'foursight_run_resp': payload});
             this.loadFoursight(this.state.foursight_stage);
         }.bind(this);
-        ajax.load(url, callbackFxn, 'GET', this.fallbackForAjax);
+        // PUT method causes run execution
+        ajax.load(url, callbackFxn, 'PUT', this.fallbackForAjax);
     }
 
     clickSwitchStage = (e) => {
@@ -184,8 +185,8 @@ class FoursightPanel extends React.Component {
         if (!userDetails || !userDetails.groups || !Array.isArray(userDetails.groups) || (userDetails.groups.indexOf('admin') === -1)) is_admin = false;
         // get foursight checks
         var foursight_checks = null;
-        var check_success = this.state.foursight_checks && !_.isEmpty(this.state.foursight_checks.checks);
-        if(check_success){
+        var check_success = this.state.foursight_checks && this.state.foursight_checks.status === "success";
+        if(check_success && !_.isEmpty(this.state.foursight_checks.checks)){
             foursight_checks = this.state.foursight_checks.checks.map((check) => this.buildCheckEntry(check));
         }else{
             foursight_checks = (
