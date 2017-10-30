@@ -11,6 +11,7 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/status" }
     ],
     "properties": {

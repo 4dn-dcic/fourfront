@@ -14,6 +14,7 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/release_dates" },
@@ -45,10 +46,14 @@
               "retroviral construct"
             ]
           },
-          "tags": {
-              "title": "Tags",
-              "description": "String describing tags the construct contains.",
-              "type":  "string"
+          "protein_tags": {
+              "title": "Fusion Protein Tags",
+              "type":  "array",
+              "items": {
+                  "title": "Fusion Tag",
+                  "description": "String describing fusion protein or other tag the construct contains.",
+                  "type": "string"
+              }
           },
           "designed_to_target": {
               "title": "Designed to Target",
