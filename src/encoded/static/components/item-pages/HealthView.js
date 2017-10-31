@@ -185,8 +185,7 @@ class FoursightPanel extends React.Component {
         if (!userDetails || !userDetails.groups || !Array.isArray(userDetails.groups) || (userDetails.groups.indexOf('admin') === -1)) is_admin = false;
         // get foursight checks
         var foursight_checks = null;
-        var check_success = this.state.foursight_checks && this.state.foursight_checks.status === "success";
-        if(check_success && !_.isEmpty(this.state.foursight_checks.checks)){
+        if(this.state.foursight_checks && !_.isEmpty(this.state.foursight_checks.checks)){
             foursight_checks = this.state.foursight_checks.checks.map((check) => this.buildCheckEntry(check));
         }else{
             foursight_checks = (
@@ -206,7 +205,7 @@ class FoursightPanel extends React.Component {
         return (
             <div className="admin-panel">
                 <h3 className="text-300 mt-3">{foursight_title}</h3>
-                {(check_success && is_admin) ?
+                {(this.state.foursight_checks !== null && is_admin) ?
                     <div>
                         <Button style={{'marginRight': '10px'}} onClick={this.clickLoadFoursight} disabled={this.state.working}>Refresh</Button>
                         <Button style={{'marginRight': '10px'}} onClick={this.clickRunFoursight} disabled={this.state.working}>Rerun</Button>
