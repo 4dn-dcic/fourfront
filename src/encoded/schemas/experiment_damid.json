@@ -1,7 +1,7 @@
 {
-    "title": "ATAC-seq Experiment",
-    "description": "Genome-wide chromosome chromatin-accessibility experiments ATAC-seq",
-    "id": "/profiles/experiment_atacseq.json",
+    "title": "DAM-ID Seq Experiment",
+    "description": "",
+    "id": "/profiles/experiment_damid.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["experiment_type", "award", "lab", "biosample"],
@@ -20,7 +20,6 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "mixins.json#/documents" },
-        { "$ref": "mixins.json#/tags" },
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [
@@ -35,53 +34,44 @@
         },
         "experiment_type": {
             "title" : "Experiment Type",
-            "default": "ATAC-seq",
+            "default": "DAM-ID seq",
             "enum": [
-                "ATAC-seq"
+                "DAM-ID seq"
             ]
         },
-        "transposase": {
-            "title": "Transposase",
-            "description": "The transposase used to 'insert' sequencing adapters.",
-            "type": "string",
-            "linkTo": "Enzyme"
-        },
-        "enzyme_lot_number": {
-            "title": "Transposase Lot Number",
-            "description": "Lot number of batch of enzyme used to digest DNA",
+        "fusion": {
+            "title": "Fusion Protein",
+            "description": "The protein that is fused to the DAM enzyme, that for which the genomic targets of interaction are being probed.",
+            "comment": "Want a reproducible and recognizable format for the designation of the fusion/target",
             "type": "string"
+
         },
-        "enzyme_incubation_time": {
-            "title": "Time (min) enzyme reaction",
-            "description": "Time of incubation with enzyme in minutes",
+        "sap_treatment": {
+            "title": "SAP Treatment",
+            "description": "Was the genomic DNA treated with shrimp alkaline phosphatase (SAP)",
+            "type": "string",
+            "enum": ["Yes", "No"]
+        },
+        "me_pcr_cycles": {
+            "title": "Methyl-PCR cycles",
+            "description": "Number of Methylation-specific PCR cycles performed",
+            "type": "integer"
+        },
+        "y_ligation_dna_input": {
+            "title": "Y-adaptor ligation input amount",
+            "description": "Amount of DNA (units ng) input to the Y-adaptor ligation step",
             "type": "number"
         },
-        "incubation_temperature": {
-            "title": "Incubation Temperature (°C)",
-            "description": "Temperature of transposase step in degrees Celsius",
-            "type": "number"
+        "index_pcr_cycles": {
+            "title": "Index PCR cycles",
+            "description": "Number of PCR cycles performed with the indexed primers prior to sequencing",
+            "type": "integer"
         },
         "library_preparation_date": {
             "title": "Library Preparation Date",
             "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
             "type": "string",
             "format": "date"
-        },
-        "pcr_cycles": {
-            "title": "PCR Cycles for Final amplification",
-            "description": "Number of PCR Cycles used for additional amplification after qPCR",
-            "type": "integer"
-        },
-        "primer_removal_method": {
-            "title": "Primer removal method",
-            "description": "A short description of the method used to remove the amplification primers.",
-            "type": "string",
-            "enum": [
-              "gel",
-              "see document",
-              "minelute column",
-              "SPRI beads"
-          ]
         }
     },
     "columns": {

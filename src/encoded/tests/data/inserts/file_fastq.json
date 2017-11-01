@@ -439,5 +439,27 @@
         "uuid": "0133955c-7cb6-4e56-a4d8-56fad52f114d",
         "status": "uploaded",
         "filename": "4DNFIN232JA5.fastq.gz"
+    },
+    {
+        "accession":"4DNFIN232JC1",
+        "notes": "dam-id b1 t1 f1",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0144955c-7cb6-4e56-a4d8-56fad52f114d",
+        "status": "uploaded",
+        "filename": "4DNFIN232JC1.fastq.gz"
+    },
+    {
+        "accession":"4DNFIN232JC2",
+        "notes": "dam-id b1 t1 f2",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "file_format": "fastq",
+        "uuid": "0145955c-7cb6-4e56-a4d8-56fad52f114d",
+        "status": "uploaded",
+        "filename": "4DNFIN232JC2.fastq.gz"
     }
 ]

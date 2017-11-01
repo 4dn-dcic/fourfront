@@ -76,11 +76,11 @@
             "enum": [
                 "released",
                 "current",
+                "planned",
                 "revoked",
                 "deleted",
                 "obsolete",
                 "replaced",
-                "planned",
                 "in review by lab",
                 "submission in progress",
                 "released to project"
@@ -107,6 +107,32 @@
             "type": "string",
             "linkTo": "User",
             "serverDefault": "userid",
+            "permission": "import_items"
+        }
+    },
+    "release_dates": {
+        "public_release": {
+            "title": "Public Release Date",
+            "description": "The date which the item was released to the public",
+            "comment": "Do not submit, value is assigned when released.",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ],
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items"
+        },
+        "project_release": {
+            "title": "Project Release Date",
+            "description": "The date which the item was released to the project",
+            "comment": "Do not submit, value is assigned when released to project.",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ],
+            "exclude_from": ["submit4dn"],
             "permission": "import_items"
         }
     },
