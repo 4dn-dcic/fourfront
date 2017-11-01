@@ -16,6 +16,7 @@
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/dbxrefs" }
     ],
     "properties": {

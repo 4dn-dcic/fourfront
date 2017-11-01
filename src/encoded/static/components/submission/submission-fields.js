@@ -1,17 +1,15 @@
 'use strict';
-var React = require('react');
-var globals = require('../globals');
-var _ = require('underscore');
-var { ajax, console, object, isServerSide, animateScrollTo } = require('../util');
-var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
-var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} = require('react-bootstrap');
-var Alerts = require('../alerts');
-import { getLargeMD5 } from '../util/file';
-var ReactTooltip = require('react-tooltip');
+
+import React from 'react';
+import * as globals from '../globals';
+import _ from 'underscore';
+import { ajax, console, object, isServerSide, animateScrollTo } from '../util';
+import {getS3UploadUrl, s3UploadFile} from '../util/aws';
+import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} from 'react-bootstrap';
+import ReactTooltip from 'react-tooltip';
 var ProgressBar = require('rc-progress').Line;
 
 var makeTitle = object.itemUtil.title;
-
 
 /*
 Individual component for each type of field. Contains the appropriate input
@@ -716,7 +714,7 @@ class S3FileInput extends React.Component{
 
     /*
     Handle the async file upload which is coordinated by the file_manager held
-    in this.props.upload. Call this.props.updateUpload on failure or completetion.
+    in this.props.upload. Call this.props.updateUpload on failure or completion.
     */
     handleAsyncUpload = (upload_manager) => {
         if(upload_manager === null){

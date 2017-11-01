@@ -2,6 +2,7 @@
  Fourfront Metadata Database
 ========================
 
+
 |Build status|_
 
 .. |Build status| image:: https://travis-ci.org/4dn-dcic/fourfront.png?branch=master
@@ -42,7 +43,7 @@ If you need to update dependencies::
 
 Step 3: Run buildout::
 
-    $ python3 bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
+    $ python3 bootstrap.py --buildout-version 2.9.5 --setuptools-version 36.6.0
     $ bin/buildout
 
     NOTE:

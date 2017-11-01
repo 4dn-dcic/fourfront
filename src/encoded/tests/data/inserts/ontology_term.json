@@ -732,21 +732,29 @@
         "uuid": "111188bc-8535-4448-903e-854af460a233"
     },
     {
-    "is_slim_for": "cell",
-    "namespace": "http://www.ebi.ac.uk/efo",
-    "term_id": "EFO:0000322",
-    "term_name": "cell line",
-    "uuid": "111189bc-8535-4448-903e-854af460a233",
-    "source_ontology": "530006bc-8535-4448-903e-854af460b254",
-    "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
+        "is_slim_for": "cell",
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "term_id": "EFO:0000322",
+        "term_name": "cell line",
+        "uuid": "111189bc-8535-4448-903e-854af460a233",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
     },
     {
-    "is_slim_for": "cell",
-    "namespace": "http://www.ebi.ac.uk/efo",
-    "term_id": "EFO:0003064",
-    "term_name": "primary cell line",
-    "uuid": "111190bc-8535-4448-903e-854af460a233",
-    "source_ontology": "530006bc-8535-4448-903e-854af460b254",
-    "term_url": "http://www.ebi.ac.uk/efo/EFO_0003064"
+        "is_slim_for": "cell",
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "term_id": "EFO:0003064",
+        "term_name": "primary cell line",
+        "uuid": "111190bc-8535-4448-903e-854af460a233",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0003064"
+    },
+    {
+        "namespace": "http://www.ebi.ac.uk/efo",
+        "term_id": "EFO:0002791",
+        "term_name": "HeLa-S3",
+        "uuid": "840525af-614c-4559-9997-23a30e288858",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0002791"
     }
 ]

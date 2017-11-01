@@ -70,6 +70,13 @@ def health_check(config):
         except:  # pylint:disable
             ont_date = "Never Generated"
 
+        # for foursight environment
+        foursight_env = settings.get('env.name', 'local').split('-')[-1]
+
+        app_url = request.application_url
+        if not app_url.endswith('/'):
+            app_url = ''.join([app_url, '/'])
+
         responseDict = {
             "file_upload_bucket" : settings.get('file_upload_bucket'),
             "blob_bucket" : settings.get('blob_bucket'),
@@ -77,12 +84,13 @@ def health_check(config):
             "elasticsearch" : settings.get('elasticsearch.server'),
             "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
+            "foursight_env": foursight_env,
             'ontology_updated': ont_date,
             "@type" : [ "Health", "Portal" ],
             "@context" : "/health",
             "@id" : "/health",
             "content" : None,
-            "display_title" : "Health Status",
+            "display_title" : "Fourfront Status and Foursight Monitoring",
             'db_es_total': db_es_total,
             'db_es_compare': db_es_compare
         }

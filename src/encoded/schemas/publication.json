@@ -15,6 +15,7 @@
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/attribution" }
     ],
     "properties": {

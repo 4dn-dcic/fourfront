@@ -120,7 +120,9 @@ class SubItemListView extends React.Component {
                 ])
             ),
             'columnDefinitions' : columnDefinitions,
-            'showJSONButton' : false
+            'showJSONButton' : false,
+            'hideButtons': true
+
         };
         return (
             <div className="sub-panel data-display panel-body-with-header">
@@ -1011,6 +1013,7 @@ export class ItemDetailList extends React.Component {
 
     static defaultProps = {
         'showJSONButton' : true,
+        'hideButtons': false,
         'columnDefinitions' : Detail.defaultColumnDefinitions
     }
 
@@ -1060,6 +1063,9 @@ export class ItemDetailList extends React.Component {
     }
 
     buttonsRow(){
+        if (this.props.hideButtons){
+            return null;
+        }
         if (!this.props.showJSONButton){
             return (
                 <div className="row">

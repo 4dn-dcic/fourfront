@@ -1,17 +1,18 @@
 'use strict';
-var React = require('react');
-var globals = require('../globals');
-var _ = require('underscore');
-var { ajax, console, JWT, object, isServerSide, layout, Schemas } = require('../util');
-var {getS3UploadUrl, s3UploadFile} = require('../util/aws');
-var { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} = require('react-bootstrap');
-var Search = require('./../browse/SearchView').default;
-var ReactTooltip = require('react-tooltip');
+
+import React from 'react';
+import * as globals from '../globals';
+import _ from 'underscore';
+import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
+import {getS3UploadUrl, s3UploadFile} from '../util/aws';
+import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} from 'react-bootstrap';
+import Search from './../browse/SearchView';
+import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
 import SubmissionTree from './expandable-tree';
 import BuildField from './submission-fields';
 import Alerts from '../alerts';
-var { Detail } = require('../item-pages/components');
+import { Detail } from '../item-pages/components';
 
 /*
 Key container component for Submission components.
@@ -109,7 +110,7 @@ export default class SubmissionView extends React.Component{
             'file': null,
             'upload': null,
             'uploadStatus': null
-        }
+        };
     }
 
     /*
@@ -1568,7 +1569,8 @@ class IndividualObjectView extends React.Component{
     /*
     Exit out of the selection process and clean up state
     */
-    selectCancel = () => {
+    selectCancel = (e) => {
+        e.preventDefault();
         this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
         this.setState({
             'selectType': null,
@@ -1741,7 +1743,7 @@ class IndividualObjectView extends React.Component{
                     <div>
                         <div>
                             {selecting ?
-                                <Button style={{'marginBottom':'-50px'}} bsStyle="danger" onClick={this.selectCancel}>
+                                <Button bsStyle="danger" onClick={this.selectCancel}>
                                     {'Cancel selection'}
                                 </Button>
                                 : null

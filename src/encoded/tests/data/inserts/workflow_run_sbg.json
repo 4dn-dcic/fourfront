@@ -133,7 +133,18 @@
             "value": "22"
         }
     ],
-    "input_files": [],
+    "input_files": [
+        {
+            "workflow_argument_name":"input_fastq1",
+            "ordinal":1,
+            "value":"46e82a90-49e5-4c33-afab-9ec90d65faa1"
+        },
+        {
+            "value":"/files-reference/4DNFI823LSII/",
+            "ordinal":1,
+            "workflow_argument_name":"chrlen_file"
+        }
+    ],
     "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
 },{
     "uuid": "d8a60edf-49e5-4c33-afab-9ec90d65fae4",
@@ -268,5 +279,64 @@
         "4dn_s30fv5thc4"
     ],
     "uuid":"e5927906-cf80-46da-8a81-1093926865af"
+},
+{
+    "workflow": "c6480905-49e5-4c33-afab-9ec90d65faf3",
+    "run_status":"complete",
+    "status":"released to project",
+    "lab":"/labs/4dn-dcic-lab/",
+    "title":"hi-c-processing-partc/8 run 2017-08-14 17:27:52.701358",
+    "sbg_task_id":"a99e804c-2cc9-4bef-ba4a-9ec2a39a80f6",
+    "parameters":[
+        {
+            "workflow_argument_name":"ncores",
+            "value":"8"
+        }
+    ],
+    "sbg_app_name":"hi-c-processing-partc/8",
+    "input_files":[
+        {
+            "workflow_argument_name":"input_hic",
+            "ordinal":1,
+            "value": "46e82a90-49e5-4c33-afab-9ec90d65faa0"
+        },
+        {
+            "workflow_argument_name":"input_cool",
+            "ordinal":1,
+            "value":"46e82a90-49e5-4c33-afab-9ec90d65faa1"
+        }
+    ],
+    "run_url":"https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:run_sbg_workflow_5:hic-partc_partC_rao26b22ed2d-7eee-4377-b85e-f43bb41747f1",
+
+    "award":"/awards/1U01CA200059-01/",
+    "uuid":"0fe19e8e-c565-4c0c-8058-effe5d81f53b",
+
+    "sbg_import_ids":[
+        "4DNFIU59TRDY.hic",
+        "4DNFIHKCL9SF.cool"
+    ],
+    "output_files":[
+        {
+            "status":"COMPLETED",
+            "extension":".mcool",
+            "value":"d273d710-6b6d-4e43-a84c-5658a891c033",
+            "workflow_argument_name":"output_mcool",
+            "format":"mcool",
+            "upload_key":"d273d710-6b6d-4e43-a84c-5658a891c033/4DNFIMCOOL02.mcool",
+            "export_id":"B9H2LpQuS5O4P61FlSUYQSfdurJbjRhM",
+            "type":"Output processed file"
+        },
+        {
+            "status":"COMPLETED",
+            "extension":".normvector.juicerformat.gz",
+            "value":"7f9eb396-5c1a-1111-aebf-28ea39d6a50f",
+            "workflow_argument_name":"output_normvector",
+            "format":"normvector_juicerformat",
+            "upload_key":"7f9eb396-5c1a-1111-aebf-28ea39d6a50f/4DNFIAAAAAA2.normvector.juicerformat.gz",
+            "export_id":"0NW3nlHzmPxL9fbL0Oh1BI9BERpu8HsQ",
+            "type":"Output processed file"
+        }
+    ],
+    "run_platform":"SBG"
 }
 ]

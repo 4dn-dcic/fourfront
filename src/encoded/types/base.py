@@ -279,12 +279,24 @@ class Item(snovault.Item):
             lab_member = 'lab.%s' % properties['lab']
             roles[lab_member] = 'role.lab_member'
         if 'award' in properties:
+            # import pdb; pdb.set_trace()
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
                 roles[viewing_group_members] = 'role.viewing_group_member'
                 award_group_members = 'award.%s' % properties['award']
                 roles[award_group_members] = 'role.award_member'
+
+                # special case for NOFIC viewing group - this is so bogus!!!!
+                # how can we generalize??????
+                if viewing_group == 'NOFIC':
+                    status = properties.get('status')
+                    if status:
+                        if status == 'released to project':
+                            roles['viewing_group.4DN'] = 'role.viewing_group_member'
+                        elif status in ['planned', 'submission in progress']:
+                            if 'tags' in properties and 'joint analysis' in [c.lower() for c in properties['tags']]:
+                                roles['viewing_group.4DN'] = 'role.viewing_group_member'
         return roles
 
     def add_accession_to_title(self, title):
