@@ -14,6 +14,7 @@
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/notes" }
