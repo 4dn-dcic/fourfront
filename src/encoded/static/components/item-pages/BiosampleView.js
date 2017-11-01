@@ -80,7 +80,7 @@ globals.content_views.register(BiosampleView, 'Biosample');
 export class IndividualItemTitle extends React.Component {
     render(){
         var indv = this.props.result || this.props.context;
-        if (!indv || !object.atIdFromObject(indv)) return 'None';
+        if (!indv || !object.atIdFromObject(indv)) return <span>None</span>;
         var href = object.atIdFromObject(indv);
         var sex = null;
         if (indv.sex && typeof indv.sex === 'string'){
@@ -97,7 +97,7 @@ export class IndividualItemTitle extends React.Component {
         }
         return (
             <span>{ sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
-                <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title }</a>
+                <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title || null }</a>
             </span>
         );
     }
@@ -219,7 +219,7 @@ class OverViewBody extends React.Component {
                         <div className="col-xs-6 col-md-4">
                             <OverViewBodyItem {...{ result, tips }} property='treatments' fallbackTitle="Treatment" titleRenderFxn={function(field, treatment){
                                 if (!treatment || !treatment.display_title || !object.atIdFromObject(treatment)){
-                                    return treatment || 'None';
+                                    return 'None';
                                 }
                                 return <div><a href={object.atIdFromObject(treatment)}>{ treatment.display_title }</a><div>({ treatment.treatment_type })</div></div>;
                             }} />
