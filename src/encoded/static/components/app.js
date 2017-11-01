@@ -20,7 +20,6 @@ import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
-import { getTitleStringFromContext } from './item-pages/item';
 import PageTitle from './PageTitle';
 
 /**
@@ -1163,7 +1162,7 @@ export default class App extends React.Component {
                             edit={actionList[0] === 'edit'}
                         />
                     );
-                    title = getTitleStringFromContext(context);
+                    title = object.itemUtil.getTitleStringFromContext(context);
                     if (title && title != 'Home') {
                         title = title + ' – ' + portal.portal_title;
                     } else {

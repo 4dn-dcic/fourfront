@@ -8,7 +8,6 @@
 
 
 export { FormattedInfoBlock } from './FormattedInfoBlock';
-export { ItemPageTitle } from './ItemPageTitle';
 
 import * as ih from './ItemHeader';
 export const ItemHeader = ih;

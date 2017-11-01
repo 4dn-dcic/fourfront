@@ -36,7 +36,7 @@ export default class FileMicroscopyView extends WorkflowRunTracingView {
 
 }
 
-globals.panel_views.register(FileMicroscopyView, 'FileMicroscopy');
+globals.content_views.register(FileMicroscopyView, 'FileMicroscopy');
 
 
 class FileMicroscopyViewOverview extends React.Component {

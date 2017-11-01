@@ -11,7 +11,6 @@ import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import Draggable from 'react-draggable';
 import { Sticky, StickyContainer } from 'react-sticky';
-import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
 import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
@@ -108,8 +107,8 @@ export const defaultColumnDefinitionMap = {
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
         'render' : function(result: Object, columnDefinition: Object, props: Object, width: number, popLink = false){
-            var title = getTitleStringFromContext(result);
-            var link = object.atIdFromObject(result);
+            var title = object.itemUtil.getTitleStringFromContext(result);
+            var link = object.itemUtil.atId(result);
             var tooltip;
             if (title && (title.length > 20 || width < 100)) tooltip = title;
             if (link){
