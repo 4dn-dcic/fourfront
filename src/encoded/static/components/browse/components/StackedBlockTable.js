@@ -706,6 +706,15 @@ export class FileEntryBlock extends React.Component {
         return this.props.selectedFiles[accessionTriple];
     }
 
+    fileTypeSummary(file = this.props.file){
+        var summary = file.file_type_detailed || ((file.file_type && file.file_format && (file.file_type + ' (' + file.file_format + ')')) || file.file_type) || file.file_format || '-' ;
+        // Remove 'other' because it just takes up horizontal space.
+        if (summary.slice(0, 6).toLowerCase() === 'other '){
+            return summary.slice(7).slice(0, -1);
+        }
+        return summary;
+    }
+
     filledFileRow (file = this.props.file){
 
         var row = [];
@@ -730,7 +739,7 @@ export class FileEntryBlock extends React.Component {
             }
 
             if (title === 'File Type'){
-                row.push(<div key="file-type" className={className} style={baseStyle}>{file.file_format || '-' }</div>);
+                row.push(<div key="file-type" className={className} style={baseStyle}>{ this.fileTypeSummary() }</div>);
                 continue;
             }
 
@@ -744,11 +753,9 @@ export class FileEntryBlock extends React.Component {
                 continue;
             }
 
-            if (title === 'File Info'){
+            if (title === 'File Info'){ // AKA Paired Info
                 if (typeof file.paired_end !== 'undefined') {
-                    row.push(<div key="file-info" className={className} style={baseStyle}>
-                        Paired end {file.paired_end}
-                    </div>);
+                    row.push(<div key="file-info" className={className} style={baseStyle}>Paired end {file.paired_end}</div>);
                 } else if (file.file_format === 'fastq' || file.file_format === 'fasta') {
                     row.push(<div key="file-info" className={className} style={baseStyle}>Unpaired</div>);
                 } else {

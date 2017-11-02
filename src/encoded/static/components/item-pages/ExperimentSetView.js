@@ -105,6 +105,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         ];
 
         if (processedFiles && processedFiles.length > 0){
+
+            // Processed Files Table Tab
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
@@ -116,6 +118,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 />
             });
 
+            // Graph Section Tab
             if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
                 tabs.push(FileViewGraphSection.getTabObject(
                     _.extend({}, this.props, {
