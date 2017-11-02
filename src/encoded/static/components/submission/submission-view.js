@@ -1,6 +1,7 @@
 'use strict';
+
 import React from 'react';
-import globals from '../globals';
+import * as globals from '../globals';
 import _ from 'underscore';
 import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
@@ -109,7 +110,7 @@ export default class SubmissionView extends React.Component{
             'file': null,
             'upload': null,
             'uploadStatus': null
-        }
+        };
     }
 
     /*

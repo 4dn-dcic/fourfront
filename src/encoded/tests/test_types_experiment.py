@@ -98,53 +98,6 @@ def test_calculated_experiment_summary(testapp, experiment, mboI):
     assert res.json['@graph'][0]['experiment_summary'] == summary
 
 
-# tests for Experiment class methodss
-# def test_generate_mapid(registry, experiment_data):
-#    uuid = UUID("0afb6080-1c08-11e4-8c21-0800200c9a44")
-#    print(uuid)
-#    etype = 'micro-C'
-#    my_expt = ExperimentHiC.create(registry, uuid, experiment_data)
-#    assert my_expt.generate_mapid(etype, suffnum) == 'ExperimentHiC_1'
-
-# tests for experiment_set _update add release_date if released
-def test_experiment_set_update_adds_release_date_if_released(
-        testapp, custom_experiment_set):
-    assert 'date_released' not in custom_experiment_set
-    res = testapp.patch_json(custom_experiment_set['@id'],
-                             {'status': 'released'}, status=200)
-    release_date = res.json['@graph'][0]['date_released']
-    assert release_date == datetime.datetime.now().strftime("%Y-%m-%d")
-
-
-def test_experiment_set_update_wont_add_release_date_if_already_there(
-        testapp, custom_experiment_set_data):
-    custom_experiment_set_data['date_released'] = '2016-12-31'
-    custom_experiment_set_data['status'] = 'revoked'
-    res = testapp.post_json('/experiment_set', custom_experiment_set_data)
-    expset = res.json['@graph'][0]
-    assert 'date_released' in expset
-    res2 = testapp.patch_json(expset['@id'], {'status': 'released'}, status=200)
-    release_date = res2.json['@graph'][0]['date_released']
-    assert release_date == '2016-12-31'
-
-
-def test_experiment_set_update_wont_add_release_date_if_status_not_released(
-        testapp, custom_experiment_set):
-    assert 'date_released' not in custom_experiment_set
-    res = testapp.patch_json(custom_experiment_set['@id'],
-                             {'status': 'released to project'}, status=200)
-    assert 'date_released' not in res.json['@graph'][0]
-
-
-def test_replicate_experiment_set_update_adds_release_date_if_released(
-        testapp, replicate_experiment_set):
-    assert 'date_released' not in replicate_experiment_set
-    res = testapp.patch_json(replicate_experiment_set['@id'],
-                             {'status': 'released'}, status=200)
-    release_date = res.json['@graph'][0]['date_released']
-    assert release_date == datetime.datetime.now().strftime("%Y-%m-%d")
-
-
 # test for experiment_set_replicate _update function
 def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experiment, replicate_experiment_set):
     assert not replicate_experiment_set['experiments_in_set']

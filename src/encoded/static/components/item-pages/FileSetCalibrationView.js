@@ -39,4 +39,4 @@ export default class FileSetCalibrationView extends ItemBaseView {
 
 }
 
-globals.panel_views.register(FileSetCalibrationView, 'FileSetCalibration');
+globals.content_views.register(FileSetCalibrationView, 'FileSetCalibration');

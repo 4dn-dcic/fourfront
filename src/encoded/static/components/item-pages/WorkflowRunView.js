@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { itemClass, panel_views } from './../globals';
+import { itemClass, panel_views, content_views } from './../globals';
 import _ from 'underscore';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ItemFooterRow, WorkflowDetailPane } from './components';
@@ -185,5 +185,5 @@ class GraphSection extends WorkflowGraphSection {
 
 }
 
-panel_views.register(WorkflowRunView, 'WorkflowRun');
-panel_views.register(WorkflowRunView, 'WorkflowRunSbg');
+content_views.register(WorkflowRunView, 'WorkflowRun');
+content_views.register(WorkflowRunView, 'WorkflowRunSbg');

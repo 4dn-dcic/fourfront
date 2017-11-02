@@ -4,7 +4,7 @@
         "name": "GFP_Construct",
         "description": "Inserts GFP in genome.",
         "construct_type":"crispr construct",
-        "tags": "GFP",
+        "protein_tags": ["GFP"],
         "designed_to_target": "CTCF",
         "vector_backbone": "pOT2",
         "insert_sequence": "ATGCATGC",

@@ -498,7 +498,9 @@ export default class TableOfContents extends React.Component {
                 .map(function(entryPair){
                     return _.extend(entryPair[1], { 'link' : entryPair[0] });
                 })
-                .sortBy('order')
+                .sortBy(function(s){
+                    return s.order || 0;
+                })
                 .filter((s)=>{
                     if (this.props.skipDepth && this.props.skipDepth > 0) return true;
                     if (typeof s.title === 'string' || typeof s['toc-title'] === 'string'){

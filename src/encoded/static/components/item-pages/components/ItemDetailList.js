@@ -9,7 +9,6 @@ import { console, object, Schemas } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { PartialList } from './PartialList';
 import { FilesInSetTable } from './FilesInSetTable';
-import { getTitleStringFromContext } from './../item';
 import JSONTree from 'react-json-tree';
 
 
@@ -445,8 +444,8 @@ class SubItemTable extends React.Component {
                                                     }
                                                 }
                                                 if (!renderedSubVal) {
-                                                    renderedSubVal = object.isAnItem(embeddedRow[k]) ?
-                                                        <a href={object.atIdFromObject(embeddedRow[k])}>{ getTitleStringFromContext(embeddedRow[k]) }</a>
+                                                    renderedSubVal = object.itemUtil.isAnItem(embeddedRow[k]) ?
+                                                        <a href={object.itemUtil.atId(embeddedRow[k])}>{ object.itemUtil.getTitleStringFromContext(embeddedRow[k]) }</a>
                                                         :
                                                         Schemas.Term.toName(k, embeddedRow[k]);
                                                 }
@@ -754,7 +753,7 @@ export class Detail extends React.Component {
                 </ol>
             );
         } else if (typeof item === 'object' && item !== null) {
-            var title = getTitleStringFromContext(item);
+            var title = object.itemUtil.getTitleStringFromContext(item);
 
             // if the following is true, we have an embedded object without significant other data
             if (item.display_title && (typeof item.link_id === 'string' || typeof item['@id'] === 'string') && _.keys(item).length < 4){

@@ -1,6 +1,8 @@
 import pytest
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
+from datetime import date
+
 
 @pytest.fixture
 def remc_lab(testapp):
@@ -796,6 +798,15 @@ def planned_experiment_set_data(lab, award):
     }
 
 
+@pytest.fixture
+def status2date():
+    return {
+        'released': 'public_release',
+        'current': 'public_release',
+        'released to project': 'project_release'
+    }
+
+
 def test_planned_item_status_can_be_updated_by_admin(
         submitter_testapp, wrangler_testapp, planned_experiment_set_data):
         # submitter cannot change status so wrangler needs to patch
@@ -823,6 +834,70 @@ def test_planned_item_status_is_changed_on_submitter_patch(
     res2 = submitter_testapp.patch_json(res1['@id'], {'description': desc}).json['@graph'][0]
     assert res2['description'] == desc
     assert res2['status'] == 'submission in progress'
+
+
+## these tests are for the item _update function as above so sticking them here
+def test_unreleased_item_does_not_get_release_date(
+        wrangler_testapp, planned_experiment_set_data, status2date):
+    res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    for datefield in status2date.values():
+        assert datefield not in res1
+
+
+def test_insert_of_released_item_does_get_release_date(
+        wrangler_testapp, planned_experiment_set_data, status2date):
+
+    for status, datefield in status2date.items():
+        planned_experiment_set_data['status'] = status
+        res = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
+        assert res['status'] == status
+        assert res[datefield] == date.today().isoformat()
+
+
+def test_update_of_item_to_released_status_adds_release_date(
+        wrangler_testapp, planned_experiment_set_data, status2date):
+    for status, datefield in status2date.items():
+        res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
+        assert res1['status'] == 'in review by lab'
+        assert datefield not in res1
+        res2 = wrangler_testapp.patch_json(res1['@id'], {'status': status}, status=200).json['@graph'][0]
+        assert res2['status'] == status
+        assert res2[datefield] == date.today().isoformat()
+
+
+def test_update_of_item_to_non_released_status_does_not_add_release_date(
+        wrangler_testapp, planned_experiment_set_data):
+    statuses = ["planned", "revoked", "deleted", "obsolete", "replaced", "in review by lab", "submission in progress"]
+    datefields = ['public_release', 'project_release']
+    for status in statuses:
+        res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
+        assert res1['status'] == 'in review by lab'
+        res2 = wrangler_testapp.patch_json(res1['@id'], {'status': status}, status=200).json['@graph'][0]
+        assert res2['status'] == status
+        for datefield in datefields:
+            assert datefield not in res1
+            assert datefield not in res2
+
+
+def test_update_of_item_that_has_release_date_does_not_change_release_date(
+        wrangler_testapp, planned_experiment_set_data, status2date):
+    test_date = '2001-01-01'
+    for status, datefield in status2date.items():
+        planned_experiment_set_data[datefield] = test_date
+        res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
+        assert res1['status'] == 'in review by lab'
+        assert res1[datefield] == test_date
+        res2 = wrangler_testapp.patch_json(res1['@id'], {'status': status}, status=200).json['@graph'][0]
+        assert res2['status'] == status
+        assert res2[datefield] == test_date
+
+
+def test_update_of_item_without_release_dates_mixin(wrangler_testapp, award):
+    assert award['status'] == 'current'
+    datefields = ['public_release', 'project_release']
+    for field in datefields:
+        assert field not in award
 
 
 ### tests for bogus nofic specific __ac_local_roles__
