@@ -38,6 +38,7 @@ _app_settings = {
     'multiauth.policy.auth0.base': 'encoded.authentication.Auth0AuthenticationPolicy',
     'load_test_only': True,
     'testing': True,
+    'should_index': True,
     'pyramid.debug_authorization': True,
     'postgresql.statement_timeout': 20,
     'tm.attempts': 3,
