@@ -20,7 +20,8 @@ sqlalchemy_url = {dbconn}
 env_name = {env_name}
 create_tables = true
 load_test_data = encoded.loadxl:{load_function}
-should_index = {should_index}
+mpindexer = {should_index}
+indexer = {should_index}
 '''
 
 
