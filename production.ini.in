@@ -14,6 +14,7 @@ snovault.app_version = ${encoded_version}
 snovault.elasticsearch.index = ${elasticsearch_index}
 env.name = ${env_name}
 encoded_version = ${encoded_version}
+should_index = ${env_name} 
 
 snovault.load_test_data = ${load_test_data}
 sqlalchemy.url = ${sqlalchemy_url}
