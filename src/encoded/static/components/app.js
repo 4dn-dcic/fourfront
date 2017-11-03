@@ -172,7 +172,6 @@ export default class App extends React.Component {
 
     static childContextTypes = {
         dropdownComponent: PropTypes.string,
-        currentResource: PropTypes.func,
         location_href: PropTypes.string,
         onDropdownChange: PropTypes.func,
         hidePublicAudits: PropTypes.bool,
@@ -188,7 +187,6 @@ export default class App extends React.Component {
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.getChildContext = this.getChildContext.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
-        this.currentResource = this.currentResource.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
         this.getStatsComponent = this.getStatsComponent.bind(this);
@@ -373,7 +371,6 @@ export default class App extends React.Component {
     getChildContext() {
         return {
             dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
-            currentResource: this.currentResource,
             location_href: this.props.href,
             onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
             hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
@@ -385,7 +382,7 @@ export default class App extends React.Component {
 
     listActionsFor(category) {
         if (category === 'context') {
-            var context = this.currentResource();
+            var context = this.props.context;
             var name = this.currentAction();
             var context_actions = [];
             Array.prototype.push.apply(context_actions, context.actions || []);
@@ -414,8 +411,6 @@ export default class App extends React.Component {
             return portal.global_sections;
         }
     }
-
-    currentResource() { return this.props.context; }
 
     currentAction() {
         var href_url = url.parse(this.props.href);
@@ -1077,7 +1072,7 @@ export default class App extends React.Component {
                 var navSplit = value.split("#");
                 lowerList.push(navSplit[0].toLowerCase());
                 if (navSplit[1].charAt(0) === '!'){
-                    actionList.push(navSplit[1].toLowerCase());
+                    actionList.push(navSplit[1].slice(1).toLowerCase());
                 }else{
                     scrollList.push(navSplit[1].toLowerCase());
                 }

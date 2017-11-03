@@ -92,8 +92,11 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         if (width) width -= 20;
 
-        var tabs = [
-            {
+        var tabs = [];
+        
+        // Raw files tab, if have experiments
+        if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0){
+            tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'experiments',
                 content : <RawFilesStackedTableSection
@@ -101,8 +104,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                     {..._.pick(this.props, 'context', 'schemas', 'facets', 'expSetFilters')}
                     {...this.state}
                 />
-            }
-        ];
+            });
+        }
 
         if (processedFiles && processedFiles.length > 0){
 
@@ -156,6 +159,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         if (this.props.debug) console.log('render ExperimentSet view');
 
+        var experimentsInSetExist = Array.isArray(this.props.context.experiments_in_set) && this.props.context.experiments_in_set.length > 0;
+
         return (
             <div className={itemClass}>
 
@@ -165,8 +170,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
                 <div className="row">
 
+                    { experimentsInSetExist ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
-                        { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ?
                         <ReduxExpSetFiltersInterface
                             experimentSets={this.props.context.experiments_in_set}
                             itemTypes={['Experiment']}
@@ -187,10 +192,10 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                                 }
                             />
                         </ReduxExpSetFiltersInterface>
-                        : <div>&nbsp;</div> }
                     </div>
+                    : null }
 
-                    <div className="col-sm-7 col-md-8 col-lg-9" ref="tabViewContainer">
+                    <div className={experimentsInSetExist ? "col-sm-7 col-md-8 col-lg-9" : "col-sm-12"} ref="tabViewContainer">
                         <layout.WindowResizeUpdateTrigger>
                             { this.tabbedView() }
                         </layout.WindowResizeUpdateTrigger>

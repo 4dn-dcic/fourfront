@@ -59,12 +59,14 @@
                 "header-depth": {
                     "title": "Header Depth",
                     "description": "Maximum depth for table of contents titles, 1-6",
-                    "type": "integer" 
+                    "type": "integer",
+                    "default" : 4
                 },
                 "skip-depth" : {
                     "title": "Skip Depth",
                     "description": "Skip header depths until this one, 0-6",
-                    "type": "integer"	
+                    "type": "integer",
+                    "default" : 1
                 },
                 "enabled" : {
                     "title": "Enabled",
@@ -86,6 +88,12 @@
                     "type": "boolean",
                     "default": false
                 }
+            },
+            "default" : {
+                "enabled" : false,
+                "include-top-link" : false,
+                "skip-depth" : 1,
+                "header-depth" : 4
             }
         },
         "directory": {

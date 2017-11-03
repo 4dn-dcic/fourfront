@@ -103,7 +103,7 @@
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
             "title": "Submitted By",
-            "exclude_from": ["submit4dn"],
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "linkTo": "User",
             "serverDefault": "userid",
@@ -120,7 +120,7 @@
                 {"format": "date-time"},
                 {"format": "date"}
             ],
-            "exclude_from": ["submit4dn"],
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "permission": "import_items"
         },
         "project_release": {
@@ -139,7 +139,7 @@
     "modified": {
       "lastmodified": {
           "title": "Last Modified",
-          "exclude_from": ["submit4dn"],
+          "exclude_from": ["submit4dn", "FFedit-create"],
           "type": "array",
           "items": {
               "date_modified": {

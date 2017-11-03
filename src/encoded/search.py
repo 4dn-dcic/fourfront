@@ -42,7 +42,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         'facets': [],
         '@graph': [],
         'notification': '',
-        'sort': {}
+        'sort': {},
+        'actions' : [] # Same form as for Items, e.g. in types/base.py
     }
     principals = effective_principals(request)
 
@@ -149,9 +150,16 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         else:
             result['@graph'] = list(graph)
             return result
-    else:
-        result['@graph'] = list(graph)
-        return result
+    
+    if request.has_permission('create'):
+        result['actions'].append({
+            'name': 'create',
+            'title': 'Create',
+            'profile': '/profiles/{ti.name}.json'.format(ti=types[doc_types[0]]),
+            'href': '/search/?type={ti.name}#!create'.format(ti=types[doc_types[0]]), # Use /search/, /browse/ will keep facet chart in it.
+        })
+    result['@graph'] = list(graph)
+    return result
 
 
 @view_config(route_name='browse', request_method='GET', permission='search')

@@ -3,6 +3,7 @@
 import React from 'react';
 import * as globals from '../globals';
 import _ from 'underscore';
+import url from 'url';
 import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} from 'react-bootstrap';
@@ -185,6 +186,12 @@ export default class SubmissionView extends React.Component{
         var initContext = {};
         var contextID = context['@id'] || null;
         var principalTypes = this.props.context['@type'];
+        if (principalTypes[0] === 'Search' || principalTypes[0] === 'Browse'){
+            // If we're creating from search or browse page, use type from href.
+            var typeFromHref = url.parse(this.props.href, true).query.type || 'Item';
+            if (Array.isArray(typeFromHref)) typeFromHref = _.without(typeFromHref, 'Item')[0];
+            if (typeFromHref && typeFromHref !== 'Item') principalTypes = [typeFromHref]; // e.g. ['ExperimentSetReplicate']
+        }
         var initType = {0: principalTypes[0]};
         var initValid = {0: 1};
         var principalDisplay = 'New ' + principalTypes[0];

@@ -205,14 +205,15 @@ export class AttributionTabView extends React.Component {
 
     render(){
         var attrInfo = this.getAttributionInfo();
+        var context = this.props.context;
         return (
             <div className="row info-area">
                 <div className="col-sm-12">
                     <div className="row">
 
-                        { this.props.context.produced_in_pub || Array.isArray(this.props.context.publications_of_set) ? 
+                        { context.produced_in_pub || (Array.isArray(context.publications_of_set) && context.publications_of_set.length > 0) ? 
                             <div className="col-sm-12 col-md-12 col-sm-float-right">
-                                <Publications context={this.props.context} />
+                                <Publications context={context} />
                                 <hr className="mt-05 mb-10"/>
                             </div>
                         : null }
