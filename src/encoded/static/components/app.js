@@ -1084,6 +1084,8 @@ export default class App extends React.Component {
                     actionList.push('create');
                 }else if (value === '#!clone'){
                     actionList.push('clone');
+                }else if (value === '#!add'){
+                    actionList.push('add');
                 }else{
                     lowerList.push(value.toLowerCase());
                 }
@@ -1153,7 +1155,7 @@ export default class App extends React.Component {
                         <SubmissionView
                             {...commonContentViewProps}
                             setIsSubmitting={this.setIsSubmitting}
-                            create={actionList[0] === 'create'}
+                            create={actionList[0] === 'create' || actionList[0] === 'add'}
                             edit={actionList[0] === 'edit'}
                         />
                     );

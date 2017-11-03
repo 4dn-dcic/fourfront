@@ -4,6 +4,7 @@ from pyramid.view import view_config
 from snovault import (
     AbstractCollection,
     TYPES,
+    COLLECTIONS
 )
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.resource_views import collection_view_listing_db
@@ -150,14 +151,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         else:
             result['@graph'] = list(graph)
             return result
+
+    if types[doc_types[0]].name in request.registry[COLLECTIONS]:
+        result['actions'] = request.registry[COLLECTIONS][types[doc_types[0]].name].actions(request)
     
-    if request.has_permission('create'):
-        result['actions'].append({
-            'name': 'create',
-            'title': 'Create',
-            'profile': '/profiles/{ti.name}.json'.format(ti=types[doc_types[0]]),
-            'href': '/search/?type={ti.name}#!create'.format(ti=types[doc_types[0]]), # Use /search/, /browse/ will keep facet chart in it.
-        })
     result['@graph'] = list(graph)
     return result
 
