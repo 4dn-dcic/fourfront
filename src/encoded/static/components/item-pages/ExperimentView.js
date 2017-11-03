@@ -105,7 +105,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
 }
 
-globals.panel_views.register(ExperimentView, 'Experiment');
+globals.content_views.register(ExperimentView, 'Experiment');
 
 
 class ExperimentViewOverview extends React.Component {

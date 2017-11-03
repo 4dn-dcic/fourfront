@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { panel_views, itemClass } from './../globals';
+import { panel_views, itemClass, content_views } from './../globals';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters, layout, Schemas } from './../util';
@@ -125,7 +125,7 @@ export default class DefaultItemView extends ItemBaseView {
 
 }
 
-panel_views.register(DefaultItemView, 'Item');
+content_views.register(DefaultItemView, 'Item');
 
 
 
@@ -154,6 +154,8 @@ export class OverViewBodyItem extends React.Component {
             });
         } else if (Array.isArray(items) && items.length === 1){
             items = titleRenderFxn(property, items[0], true);
+        } else if (Array.isArray(items) && items.length === 0){
+            return null;
         }
         return items;
     }
@@ -164,6 +166,10 @@ export class OverViewBodyItem extends React.Component {
 
     render(){
         var { result, property, fallbackValue, fallbackTitle, titleRenderFxn } = this.props;
+        
+        function fallbackify(val){
+            return val || fallbackValue || 'None';
+        }
 
         var resultPropertyValue = OverViewBodyItem.createList(object.getNestedProperty(result, property), property, titleRenderFxn);
 
@@ -175,7 +181,7 @@ export class OverViewBodyItem extends React.Component {
                         fallbackTitle={fallbackTitle + (resultPropertyValue && resultPropertyValue.length > 1 ? 's' : '')}
                         elementType="h5"
                     />
-                    { resultPropertyValue ? ( resultPropertyValue.length > 1 ? <ol>{ resultPropertyValue }</ol> : resultPropertyValue ) : 'None' }
+                    { resultPropertyValue ? ( resultPropertyValue.length > 1 ? <ol>{ fallbackify(resultPropertyValue) }</ol> : fallbackify(resultPropertyValue) ) : fallbackify(null) }
                 </div>
             );
         }
@@ -184,7 +190,7 @@ export class OverViewBodyItem extends React.Component {
             <div className="inner">
                 <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'property', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" />
                 <div>
-                    { titleRenderFxn(property, resultPropertyValue, true) || fallbackValue || 'None' }
+                    { fallbackify(titleRenderFxn(property, resultPropertyValue, true)) }
                 </div>
             </div>
         );

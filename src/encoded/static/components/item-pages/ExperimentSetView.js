@@ -149,8 +149,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     render() {
-
-        var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
 
         if (this.props.debug) console.log('render ExperimentSet view');
@@ -305,6 +303,6 @@ export class ProcessedFilesStackedTableSection extends React.Component {
 
 
 // Register ExperimentSetView to be the view for these @types.
-globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
-globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
+globals.content_views.register(ExperimentSetView, 'ExperimentSet');
+globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 

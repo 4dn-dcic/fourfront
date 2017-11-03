@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Fade } from 'react-bootstrap';
 import { console, object, layout, ajax, fileUtil, expFxn } from './../../../util';
-import { getTitleStringFromContext } from './../../item';
 import { FlexibleDescriptionBox } from './../FlexibleDescriptionBox';
 import { SimpleFilesTable } from './../SimpleFilesTable';
 import { ItemDetailList } from './../ItemDetailList';
@@ -109,7 +108,7 @@ export class FileDetailBody extends React.Component {
         } else if (typeof file === 'string') {
             if (file === 'Forbidden'){
                 if (this.props.file && typeof this.props.file !== 'string'){
-                    fileTitle = getTitleStringFromContext(this.props.file);
+                    fileTitle = object.itemUtil.getTitleStringFromContext(this.props.file);
                     var fileAtID = object.atIdFromObject(this.props.file);
                     fileTitleFormatted = fileAtID ? <a href={fileAtID}>{ fileTitle }</a> : fileTitle;
                 } else {
@@ -120,7 +119,7 @@ export class FileDetailBody extends React.Component {
                 fileTitleFormatted = <small><i className="icon icon-circle-o-notch icon-spin icon-fw"/></small>;
             }
         } else {
-            fileTitle = getTitleStringFromContext(file);
+            fileTitle = object.itemUtil.getTitleStringFromContext(file);
             if (!this.doesDescriptionOrNotesExist()){
                 colClassName = "col-sm-6 col-lg-6";
             }
