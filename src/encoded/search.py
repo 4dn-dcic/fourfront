@@ -93,8 +93,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # TODO: implement BOOST here?
 
     ### Set filters
-    search, query_filters, used_filters = set_filters(request, search, result, principals, doc_types, before_date, after_date)
-
+    search, query_filters = set_filters(request, search, result, principals, doc_types, before_date, after_date)
     ### Set starting facets
     facets = initialize_facets(types, doc_types, search_audit, principals, prepared_terms, schemas)
 
@@ -114,7 +113,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
-    result['facets'] = format_facets(es_results, facets, used_filters, total, search_frame)
+    result['facets'] = format_facets(es_results, facets, total, search_frame)
 
     # Add batch actions
     # TODO: figure out exactly what this does. Provide download URLs?
@@ -535,13 +534,19 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
     """
     Sets filters in the query
     """
-    # initialize query_filters with filters for principals and doc_types
-    query_filters = []
-    not_query_filters = [] # filters used in NOT case
-    query_filters.append({'terms': {'principals_allowed.view': principals}})
-    query_filters.append({'terms': {'embedded.@type.raw': doc_types}})
-
-    used_filters = {'must': {}, 'must_not': {}}
+    # these next two dictionaries should each have keys equal to query_field
+    # and values: must_terms: [<list of terms>], must_not_terms: [<list of terms>], add_no_value: True/False/None
+    field_filters = {}
+    field_filters['principals_allowed.view'] = {
+        'must_terms': principals,
+        'must_not_terms': [],
+        'add_no_value': None
+    }
+    field_filters['embedded.@type.raw'] = {
+        'must_terms': doc_types,
+        'must_not_terms': [],
+        'add_no_value': None
+    }
     for field, term in request.params.items():
         not_field = False # keep track if query is NOT (!)
         exists_field = False # keep track of null values
@@ -585,32 +590,42 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
         else:
             query_field = 'embedded.' + field + '.raw'
 
+        if query_field not in field_filters:
+            field_filters[query_field] = {
+                'must_terms': [],
+                'must_not_terms': [],
+                'add_no_value': None
+            }
+
         # handle case of filtering for null values
         if exists_field:
-            this_filter = {'exists': {'field': query_field}}
-            not_query_filters.append(this_filter)
+            # the value below is True when we want to include 'No value' as a filter
+            field_filters[query_field]['add_no_value'] = False if not_field else True
             continue
 
-        bool_used_filters = used_filters['must_not'] if not_field else used_filters['must']
-        if field not in bool_used_filters:
-            bool_used_filters[field] = [term]
-            this_filter = {'terms': {query_field: [term]}}
-            if not_field:
-                not_query_filters.append(this_filter)
-            else:
-                query_filters.append(this_filter)
+        if not_field:
+            field_filters[query_field]['must_not_terms'].append(term)
         else:
-            this_filter = {'terms': {query_field: bool_used_filters[field]}}
-            if not_field:
-                not_query_filters.remove(this_filter)
-                # update this_filter to reflect used_filters change
-                bool_used_filters[field].append(term)
-                not_query_filters.append(this_filter)
-            else:
-                query_filters.remove(this_filter)
-                # update this_filter to reflect used_filters change
-                bool_used_filters[field].append(term)
-                query_filters.append(this_filter)
+            field_filters[query_field]['must_terms'].append(term)
+
+    must_filters = []
+    must_not_filters = []
+    for query_field, filters in field_filters.items():
+        must_terms = {'terms': {query_field: filters['must_terms']}} if filters['must_terms'] else {}
+        must_not_terms = {'terms': {query_field: filters['must_not_terms']}} if filters['must_not_terms'] else {}
+        if filters['add_no_value'] is True:
+            # add to must_not in an OR case, which is equivalent to filtering on 'No value'
+            should_arr = [must_terms] if must_terms else []
+            should_arr.append({'bool': {'must_not': {'exists': {'field': query_field}}}})
+            must_filters.append({'bool': {'should': should_arr}})
+        elif filters['add_no_value'] is False:
+            # add to must_not in an OR case, which is equivalent to filtering on '! No value'
+            should_arr = [must_terms] if must_terms else []
+            should_arr.append({'exists': {'field': query_field}})
+            must_filters.append({'bool': {'should': should_arr}})
+        else: # no filtering on 'No value'
+            if must_terms: must_filters.append(must_terms)
+        if must_not_terms: must_not_filters.append(must_not_terms)
 
     # lastly, add date limits to filters if given
     if before_date or after_date:
@@ -619,17 +634,17 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
             date_limits['lte'] = before_date # lte is >=
         if after_date:
             date_limits['gte'] = after_date # gte is <=
-        query_filters.append({'range':{'embedded.date_created': date_limits}})
+        must_filters.append({'range':{'embedded.date_created': date_limits}})
 
     # To modify filters of elasticsearch_dsl Search, must call to_dict(),
     # modify that, then update from the new dict
     prev_search = search.to_dict()
     # initialize filter hierarchy
-    final_filters = {'bool': {'must': query_filters, 'must_not': not_query_filters}}
+    final_filters = {'bool': {'must': must_filters, 'must_not': must_not_filters}}
     prev_search['query']['bool']['filter'] = final_filters
     search.update_from_dict(prev_search)
 
-    return search, final_filters, used_filters
+    return search, final_filters
 
 
 def initialize_facets(types, doc_types, search_audit, principals, prepared_terms, schemas):
@@ -774,7 +789,7 @@ def execute_search(search):
     return es_results
 
 
-def format_facets(es_results, facets, used_filters, total, search_frame='embedded'):
+def format_facets(es_results, facets, total, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results
     These are stored within 'aggregations' of the result.
