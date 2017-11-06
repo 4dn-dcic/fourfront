@@ -204,13 +204,20 @@ export default class SubmissionView extends React.Component{
         if(!contextID || this.props.create){
             initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
             initBookmarks[0] = bookmarksList;
+            //var autoGenAlias = '';
+            //var userInfo = JWT.getUserInfo();
+            //var userHref = null;
+            //if (userInfo && Array.isArray(userInfo.user_actions)){
+            //    userHref = _.findWhere(userInfo.user_actions, {'id' : 'profile'}).href;
+            //}
             this.setState({
                 'keyContext': initContext,
                 'keyValid': initValid,
                 'keyTypes': initType,
                 'keyDisplay': initDisplay,
                 'currKey': 0,
-                'keyLinkBookmarks': initBookmarks
+                'keyLinkBookmarks': initBookmarks,
+                //'creatingAlias' : ''
             });
             this.initCreateObj(principalTypes[0], 0, 'Primary Object');
         }else{
@@ -1248,8 +1255,9 @@ export default class SubmissionView extends React.Component{
                                 id="aliasInput"
                                 type="text"
                                 inputMode="latin"
+                                //value={this.state.creatingAlias}
                                 autoFocus={true}
-                                placeholder={'Enter a new alias'}
+                                placeholder="Enter a new alias"
                                 onChange={this.handleAliasChange}
                             />
                         </div>
