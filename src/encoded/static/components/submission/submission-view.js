@@ -1,6 +1,7 @@
 'use strict';
+
 import React from 'react';
-import globals from '../globals';
+import * as globals from '../globals';
 import _ from 'underscore';
 import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
@@ -109,7 +110,7 @@ export default class SubmissionView extends React.Component{
             'file': null,
             'upload': null,
             'uploadStatus': null
-        }
+        };
     }
 
     /*
@@ -1568,7 +1569,8 @@ class IndividualObjectView extends React.Component{
     /*
     Exit out of the selection process and clean up state
     */
-    selectCancel = () => {
+    selectCancel = (e) => {
+        e.preventDefault();
         this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
         this.setState({
             'selectType': null,
@@ -1741,7 +1743,7 @@ class IndividualObjectView extends React.Component{
                     <div>
                         <div>
                             {selecting ?
-                                <Button style={{'marginBottom':'-50px'}} bsStyle="danger" onClick={this.selectCancel}>
+                                <Button bsStyle="danger" onClick={this.selectCancel}>
                                     {'Cancel selection'}
                                 </Button>
                                 : null

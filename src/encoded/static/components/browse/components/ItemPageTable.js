@@ -12,7 +12,6 @@ import {
     defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
     getColumnWidthFromDefinition, HeadersRow, TableRowToggleOpenButton } from './table-commons';
 import { SearchResultDetailPane } from './SearchResultDetailPane';
-import { getTitleStringFromContext, isDisplayTitleAccession } from './../../item-pages/item';
 
 
 
@@ -35,8 +34,8 @@ export class ItemPageTable extends React.Component {
         'columnDefinitionOverrideMap' : {
             'display_title' : {
                 'render' : function(result, columnDefinition, props, width){
-                    var title = getTitleStringFromContext(result);
-                    var link = object.atIdFromObject(result);
+                    var title = object.itemUtil.getTitleStringFromContext(result);
+                    var link = object.itemUtil.atId(result);
                     var tooltip;
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
                     var isAnAccession = false;// isDisplayTitleAccession(result, title, false);

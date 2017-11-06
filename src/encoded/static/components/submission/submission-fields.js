@@ -1,6 +1,7 @@
 'use strict';
+
 import React from 'react';
-import globals from '../globals';
+import * as globals from '../globals';
 import _ from 'underscore';
 import { ajax, console, object, isServerSide, animateScrollTo } from '../util';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
@@ -8,6 +9,7 @@ import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} from 'r
 import ReactTooltip from 'react-tooltip';
 var ProgressBar = require('rc-progress').Line;
 
+var makeTitle = object.itemUtil.title;
 
 /*
 Individual component for each type of field. Contains the appropriate input

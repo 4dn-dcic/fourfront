@@ -39,6 +39,7 @@ def main():
     options = {
         'embed_cache.capacity': '5000',
         'indexer': 'true',
+        'mpindexer': 'true',
     }
     app = get_app(args.config_uri, args.app_name, options)
 

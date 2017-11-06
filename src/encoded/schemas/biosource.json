@@ -15,7 +15,9 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {

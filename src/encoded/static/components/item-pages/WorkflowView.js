@@ -2,7 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { itemClass, panel_views } from './../globals';
+import { itemClass, panel_views, content_views } from './../globals';
 import _ from 'underscore';
 import { 
     ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
@@ -480,4 +480,4 @@ export class WorkflowGraphSection extends React.Component {
 }
 
 
-panel_views.register(WorkflowView, 'Workflow');
+content_views.register(WorkflowView, 'Workflow');

@@ -30,6 +30,8 @@ from snovault.validators import (
 from snovault.interfaces import CONNECTION
 from snovault.etag import if_match_tid
 
+from datetime import date
+
 
 @lru_cache()
 def _award_viewing_group(award_uuid, root):
@@ -279,12 +281,24 @@ class Item(snovault.Item):
             lab_member = 'lab.%s' % properties['lab']
             roles[lab_member] = 'role.lab_member'
         if 'award' in properties:
+            # import pdb; pdb.set_trace()
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
                 roles[viewing_group_members] = 'role.viewing_group_member'
                 award_group_members = 'award.%s' % properties['award']
                 roles[award_group_members] = 'role.award_member'
+
+                # special case for NOFIC viewing group - this is so bogus!!!!
+                # how can we generalize??????
+                if viewing_group == 'NOFIC':
+                    status = properties.get('status')
+                    if status:
+                        if status == 'released to project':
+                            roles['viewing_group.4DN'] = 'role.viewing_group_member'
+                        elif status in ['planned', 'submission in progress']:
+                            if 'tags' in properties and 'joint analysis' in [c.lower() for c in properties['tags']]:
+                                roles['viewing_group.4DN'] = 'role.viewing_group_member'
         return roles
 
     def add_accession_to_title(self, title):
@@ -313,15 +327,26 @@ class Item(snovault.Item):
         return False
 
     def _update(self, properties, sheets=None):
-        # if an item is status 'planned' and an update is submitted
-        # by a non-admin user then status should be changed to 'submission in progress'
+        # import pdb; pdb.set_trace()
+        props = {}
         try:
             props = self.properties
-            if 'status' in props and props['status'] == 'planned':
-                if not self.is_update_by_admin_user():
-                    properties['status'] = 'submission in progress'
         except KeyError:
             pass
+        if 'status' in props and props['status'] == 'planned':
+            # if an item is status 'planned' and an update is submitted
+            # by a non-admin user then status should be changed to 'submission in progress'
+            if not self.is_update_by_admin_user():
+                properties['status'] = 'submission in progress'
+
+        date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
+        for datefield, status in date2status.items():
+            if datefield not in props:
+                if datefield in self.schema['properties'] and datefield not in properties \
+                   and 'status' in properties and properties['status'] in status:
+                    # check the status and add the date if it's not provided and item has right status
+                    properties[datefield] = date.today().isoformat()
+
         super(Item, self)._update(properties, sheets)
 
     @snovault.calculated_property(schema={
