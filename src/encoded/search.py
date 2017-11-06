@@ -301,7 +301,7 @@ def build_type_filters(result, request, doc_types, types):
             ti = types[item_type]
             qs = urlencode([
                 (k.encode('utf-8'), v.encode('utf-8'))
-                for k, v in request.params.items() if not (k == 'type' and types.get('Item' if v == '*' else v) is ti)
+                for k, v in request.params.items() if not (k == 'type' and types.all.get('Item' if v == '*' else v) is ti)
             ])
             result['filters'].append({
                 'field': 'type',
