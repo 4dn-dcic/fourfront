@@ -5,6 +5,7 @@ import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
 import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
+import moment from 'moment';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal} from 'react-bootstrap';
 import Search from './../browse/SearchView';
@@ -14,6 +15,9 @@ import SubmissionTree from './expandable-tree';
 import BuildField from './submission-fields';
 import Alerts from '../alerts';
 import { Detail } from '../item-pages/components';
+
+
+let newItemCounter = 0;
 
 /*
 Key container component for Submission components.
@@ -110,7 +114,8 @@ export default class SubmissionView extends React.Component{
             'roundTwoKeys': [],
             'file': null,
             'upload': null,
-            'uploadStatus': null
+            'uploadStatus': null,
+            'currentSubmittingUser' : null
         };
     }
 
@@ -200,43 +205,23 @@ export default class SubmissionView extends React.Component{
         var bookmarksList = [];
         var schema = schemas[principalTypes[0]];
         var existingAlias = false;
-        // if @id cannot be found or we are creating from scratch, start with empty fields
-        if(!contextID || this.props.create){
-            initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
-            initBookmarks[0] = bookmarksList;
-            //var autoGenAlias = '';
-            //var userInfo = JWT.getUserInfo();
-            //var userHref = null;
-            //if (userInfo && Array.isArray(userInfo.user_actions)){
-            //    userHref = _.findWhere(userInfo.user_actions, {'id' : 'profile'}).href;
-            //}
-            this.setState({
-                'keyContext': initContext,
-                'keyValid': initValid,
-                'keyTypes': initType,
-                'keyDisplay': initDisplay,
-                'currKey': 0,
-                'keyLinkBookmarks': initBookmarks,
-                //'creatingAlias' : ''
-            });
-            this.initCreateObj(principalTypes[0], 0, 'Primary Object');
-        }else{
-            ajax.promise(contextID + '?frame=object').then(response => {
-                var initObjs = [];
-                if (response['@id'] && response['@id'] === contextID){
-                    initContext[0] = buildContext(response, schema, bookmarksList, this.props.edit, this.props.create, null, initObjs);
-                    initBookmarks[0] = bookmarksList;
-                    if(this.props.edit && response.aliases && response.aliases.length > 0){
-                        // we already have an alias for editing, so use it for title
-                        // setting creatingIdx and creatingType to null prevents alias creation
-                        initDisplay[0] = response.aliases[0];
-                        existingAlias = true;
-                    }
-                }else{
-                    // something went wrong with fetching context. Just use an empty object
-                    initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
-                    initBookmarks[0] = bookmarksList;
-                }
+
+        // Step A : Get labs from User, in order to autogenerate alias.
+        var userInfo = JWT.getUserInfo();
+        var userHref = null;
+        if (userInfo && Array.isArray(userInfo.user_actions)){
+            userHref = _.findWhere(userInfo.user_actions, {'id' : 'profile'}).href;
+        } else if (userInfo) {
+            userHref = '/me';
+        }
+
+        // Step B : Callback for after grabbing user w/ submits_for
+        var continueInitProcess = function(){
+            // if @id cannot be found or we are creating from scratch, start with empty fields
+            if(!contextID || this.props.create){
+                initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
+                initBookmarks[0] = bookmarksList;
+                
                 this.setState({
                     'keyContext': initContext,
                     'keyValid': initValid,
@@ -245,19 +230,61 @@ export default class SubmissionView extends React.Component{
                     'currKey': 0,
                     'keyLinkBookmarks': initBookmarks
                 });
-                if(initObjs.length > 0){
-                    initObjs.forEach((initObj, idx) => this.initExistingObj(initObj));
+                this.initCreateObj(principalTypes[0], 0, 'Primary Object');
+            }else{
+                ajax.promise(contextID + '?frame=object').then(response => {
+                    var initObjs = [];
+                    if (response['@id'] && response['@id'] === contextID){
+                        initContext[0] = buildContext(response, schema, bookmarksList, this.props.edit, this.props.create, null, initObjs);
+                        initBookmarks[0] = bookmarksList;
+                        if(this.props.edit && response.aliases && response.aliases.length > 0){
+                            // we already have an alias for editing, so use it for title
+                            // setting creatingIdx and creatingType to null prevents alias creation
+                            initDisplay[0] = response.aliases[0];
+                            existingAlias = true;
+                        }
+                    }else{
+                        // something went wrong with fetching context. Just use an empty object
+                        initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
+                        initBookmarks[0] = bookmarksList;
+                    }
+                    this.setState({
+                        'keyContext': initContext,
+                        'keyValid': initValid,
+                        'keyTypes': initType,
+                        'keyDisplay': initDisplay,
+                        'currKey': 0,
+                        'keyLinkBookmarks': initBookmarks
+                    });
+                    if(initObjs.length > 0){
+                        initObjs.forEach((initObj, idx) => this.initExistingObj(initObj));
+                    }
+                    // if we are cloning and there is not an existing alias
+                    // never prompt alias creation on edit
+                    // do not initiate ambiguous type lookup on edit or create
+                    if(!this.props.edit && !existingAlias){
+                        this.initCreateObj(principalTypes[0], 0, 'Primary Object', true);
+                    }
+                });
+            }
+            // set state in app to prevent accidental mid-submission navigation
+            this.props.setIsSubmitting(true);
+
+        }.bind(this);
+
+        // Grab current user via AJAX and store to state. To use for alias auto-generation using current user's top submits_for lab name.
+        if (userHref){
+            ajax.load(userHref, (r)=>{
+                if (Array.isArray(r.submits_for) && r.submits_for.length > 0 && typeof r.submits_for[0].name === 'string'){
+                    this.setState({ 'currentSubmittingUser' : r });
                 }
-                // if we are cloning and there is not an existing alias
-                // never prompt alias creation on edit
-                // do not initiate ambiguous type lookup on edit or create
-                if(!this.props.edit && !existingAlias){
-                    this.initCreateObj(principalTypes[0], 0, 'Primary Object', true);
-                }
-            });
+                continueInitProcess();
+            }, 'GET', continueInitProcess);
+        } else {
+            continueInitProcess();
         }
-        // set state in app to prevent accidental mid-submission navigation
-        this.props.setIsSubmitting(true);
+
+        
     }
 
     /*
@@ -295,11 +322,16 @@ export default class SubmissionView extends React.Component{
     */
     initCreateAlias = (type, newIdx, newLink) => {
         var schema = this.props.schemas[type] || null;
+        var autoSuggestedAlias = '';
+        if (this.state.currentSubmittingUser && Array.isArray(this.state.currentSubmittingUser.submits_for) && this.state.currentSubmittingUser.submits_for[0] && typeof this.state.currentSubmittingUser.submits_for[0].name === 'string'){
+            autoSuggestedAlias = this.state.currentSubmittingUser.submits_for[0].name + ':' + type + ('-' + ++newItemCounter);
+        }
         if(schema && schema.properties.aliases){
             this.setState({
                 'ambiguousIdx': null,
                 'ambiguousType': null,
                 'ambiguousSelected': null,
+                'creatingAlias' : autoSuggestedAlias,
                 'creatingIdx': newIdx,
                 'creatingType': type,
                 'creatingLink': newLink
@@ -429,7 +461,7 @@ export default class SubmissionView extends React.Component{
         var currAlias = keyDisplay[currKey];
         var aliases = this.state.keyContext[currKey].aliases || null;
         // no aliases
-        if(aliases === null || (aliases instanceof Array && aliases.length == 0)){
+        if(aliases === null || (Array.isArray(aliases) && aliases.length === 0)){
             keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
         }else if(!_.contains(aliases, currAlias)){
             var lastAlias = aliases[aliases.length-1];
@@ -1255,7 +1287,7 @@ export default class SubmissionView extends React.Component{
                                 id="aliasInput"
                                 type="text"
                                 inputMode="latin"
-                                //value={this.state.creatingAlias}
+                                value={this.state.creatingAlias}
                                 autoFocus={true}
                                 placeholder="Enter a new alias"
                                 onChange={this.handleAliasChange}
@@ -1417,12 +1449,12 @@ class IndividualObjectView extends React.Component{
                 console.log('PROBLEM CREATING NEW CONTEXT WITH: ', field, value);
                 return;
             }
-            if(pointer instanceof Array){
+            if(Array.isArray(pointer)){
                 pointer = pointer[arrayIdx[arrayIdxPointer]];
                 arrayIdxPointer += 1;
             }
         }
-        if(pointer[splitField[splitField.length-1]] instanceof Array && fieldType !== 'array'){
+        if(Array.isArray(pointer[splitField[splitField.length-1]]) && fieldType !== 'array'){
             // move pointer into array
             pointer = pointer[splitField[splitField.length-1]];
             prevValue = pointer[arrayIdx[arrayIdxPointer]];

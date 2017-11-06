@@ -5,7 +5,7 @@ import * as globals from '../globals';
 import _ from 'underscore';
 import { ajax, console, object, isServerSide, animateScrollTo } from '../util';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
-import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} from 'react-bootstrap';
+import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 var ProgressBar = require('rc-progress').Line;
 
@@ -65,6 +65,11 @@ export default class BuildField extends React.Component{
                     <input id="floatNumber" type="number" inputMode="latin" {...inputProps} />
                 </div>
             );
+            case 'boolean' : return (
+                <div className="input-wrapper" style={{'display':'inline'}}>
+                    <Checkbox id="boolInput" {...inputProps} />
+                </div>
+            );
             case 'enum' : return (
                 <span className="input-wrapper" style={{'display':'inline'}}>
                     <DropdownButton bsSize="xsmall" id="dropdown-size-extra-small" title={this.props.value || "No value"} onToggle={this.handleDropdownButtonToggle}>
@@ -119,11 +124,11 @@ export default class BuildField extends React.Component{
     handleChange = (e) => {
         var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var currValue = inputElement.value;
-        if (this.props.fieldType == 'integer'){
+        if (this.props.fieldType === 'integer'){
             if(!isNaN(parseInt(currValue))){
                 currValue = parseInt(currValue);
             }
-        } else if (this.props.fieldType == 'number'){
+        } else if (this.props.fieldType === 'number'){
             if(!isNaN(parseFloat(currValue))){
                 currValue = parseFloat(currValue);
             }
@@ -207,9 +212,7 @@ export default class BuildField extends React.Component{
                             : null
                         }
                         {this.props.fieldType === 'array' ?
-                            <Button bsSize="xsmall" onClick={this.pushArrayValue}>
-                                {'Add'}
-                            </Button>
+                            <Button bsSize="xsmall" onClick={this.pushArrayValue}>Add</Button>
                             :
                             null
                         }
@@ -317,15 +320,11 @@ class LinkedObj extends React.Component{
                 <Button bsSize="xsmall" style={style} onClick={function(e){
                     e.preventDefault();
                     this.props.selectObj(objType, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
-                }.bind(this)}>
-                    {'Select existing'}
-                </Button>
+                }.bind(this)}>Select existing</Button>
                 <Button bsSize="xsmall" style={style}onClick={function(e){
                     e.preventDefault();
                     this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, objType);
-                }.bind(this)}>
-                    {'Create new'}
-                </Button>
+                }.bind(this)}>Create new</Button>
             </div>
         );
     }
