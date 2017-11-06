@@ -1222,74 +1222,26 @@ export default class SubmissionView extends React.Component{
         }
     }
 
-    renderTypeSelectionModal(){
-        var ambiguousDescrip = null;
-        if(this.state.ambiguousSelected !== null && this.props.schemas[this.state.ambiguousSelected].description){
-            ambiguousDescrip = this.props.schemas[this.state.ambiguousSelected].description;
-        }
-        return (
-            <Modal show>
-                <Modal.Header>
-                    <Modal.Title>{'Multiple object types found for your new ' + this.state.ambiguousType}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <p style={{'marginBottom':'15px'}}>
-                        {'Please select a specific object type from the menu below.'}
-                    </p>
-                    <div className="input-wrapper" style={{'marginBottom':'15px'}}>
-                        <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={this.state.ambiguousSelected || "No value"}>
-                            {this.state.ambiguousType !== null ?
-                                Schemas.itemTypeHierarchy[this.state.ambiguousType].map((val) => this.buildAmbiguousEnumEntry(val))
-                                :
-                                null
-                            }
-                        </DropdownButton>
-                    </div>
-                    <Collapse in={ambiguousDescrip !== null}>
-                        <div style={{'marginBottom':'15px', 'fontSize':'1.2em'}}>
-                            {'Description: ' + ambiguousDescrip}
-                        </div>
-                    </Collapse>
-                    <Button bsSize="xsmall" bsStyle="success" disabled={this.state.ambiguousSelected === null} onClick={this.submitAmbiguousType}>
-                        Submit
-                    </Button>
-                </Modal.Body>
-            </Modal>
-        );
-    }
-
-    renderAliasSelectionModal(){
-        
-        return (
-            <Modal show>
-                <Modal.Header>
-                    <Modal.Title>{'Give your new ' + this.state.creatingType +' an alias'}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <p className="mt-0 mb-1">Aliases are lab specific identifiers to reference an object. The format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).</p>
-                    <p className="mt-0 mb-1">A sample alias has been generated for you from your primary lab and the current item type & timestamp; adjust it as you see fit.</p>
-                    <div className="input-wrapper mt-2 mb-2">
-                        <input
-                            id="aliasInput"
-                            type="text"
-                            inputMode="latin"
-                            value={this.state.creatingAlias}
-                            autoFocus={true}
-                            placeholder="Enter a new alias"
-                            onChange={this.handleAliasChange}
-                        />
-                    </div>
-                    <Collapse in={this.state.creatingAliasMessage !== null}>
-                        <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
-                            {this.state.creatingAliasMessage}
-                        </div>
-                    </Collapse>
-                    <Button bsSize="xsmall" bsStyle="success" disabled={this.state.creatingAlias.length == 0} onClick={this.submitAlias}>
-                        Submit
-                    </Button>
-                </Modal.Body>
-            </Modal>
-        );
+    cancelCreateNewObject = (field) => {
+        if (!this.state.creatingIdx) return;
+        var exIdx = this.state.creatingIdx;
+        var keyContext = _.clone(this.state.keyContext);
+        var currentContextPointer = this.state.keyContext[this.state.currKey];
+        _.pairs(currentContextPointer).forEach(function(p){
+            if (p[1] === exIdx){
+                currentContextPointer[p[0]] = null;
+            }
+        });
+        this.setState({
+            'ambiguousIdx': null,
+            'ambiguousType': null,
+            'ambiguousSelected': null,
+            'creatingAlias' : '',
+            'creatingIdx': null,
+            'creatingType': null,
+            'creatingLink': null,
+            'keyContext' : keyContext
+        });
     }
 
     /*
@@ -1305,8 +1257,8 @@ export default class SubmissionView extends React.Component{
         if(!this.state.keyContext || currKey === null){
             return null;
         }
-        var ambiguousModal = this.state.ambiguousIdx !== null && this.state.ambiguousType !== null;
-        var aliasModal = !ambiguousModal && this.state.creatingIdx !== null && this.state.creatingType !== null;
+        var showAmbiguousModal = this.state.ambiguousIdx !== null && this.state.ambiguousType !== null;
+        var showAliasModal = !showAmbiguousModal && this.state.creatingIdx !== null && this.state.creatingType !== null;
         var currType = this.state.keyTypes[currKey];
         var currContext = this.state.keyContext[currKey];
         var navCol = this.state.fullScreen ? 'submission-hidden-nav' : 'col-sm-2';
@@ -1324,8 +1276,10 @@ export default class SubmissionView extends React.Component{
         var currObjDisplay = this.state.keyDisplay[currKey] || currType;
         return(
             <div>
-                { ambiguousModal ? this.renderTypeSelectionModal() : null }
-                { aliasModal ? this.renderAliasSelectionModal() : null }
+                <TypeSelectModal show={showAmbiguousModal} {..._.pick(this.state, 'ambiguousType', 'ambiguousSelected', 'currKey', 'creatingIdx')} schemas={this.props.schemas}
+                    buildAmbiguousEnumEntry={this.buildAmbiguousEnumEntry} submitAmbiguousType={this.submitAmbiguousType} cancelCreateNewObject={this.cancelCreateNewObject}  />
+                <AliasSelectModal show={showAliasModal} {..._.pick(this.state, 'creatingAlias', 'creatingType', 'creatingAliasMessage', 'currKey', 'creatingIdx')}
+                    handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} />
                 <WarningBanner/>
                 <div className="clearfix row">
                     <div className={navCol}>
@@ -1382,6 +1336,113 @@ export default class SubmissionView extends React.Component{
                     </div>
                 </div>
             </div>
+        );
+    }
+}
+
+class TypeSelectModal extends React.Component { // TODO: Extend AliasSelectModal instead of React.Component and get rid of onHide/constructor redundant defs?
+
+    constructor(props){
+        super(props);
+        this.onHide = this.onHide.bind(this);
+    }
+
+    onHide(){
+        if (this.props.creatingIdx === 0){
+            console.warn('EXIT INIT. TODO: navigate to same href minus hash?');
+        } else if (this.props.creatingIdx > 0){
+            this.props.cancelCreateNewObject();
+        }
+    }
+
+    render(){
+        var { show, ambiguousType, ambiguousSelected, buildAmbiguousEnumEntry, submitAmbiguousType, schemas } = this.props;
+        if (!show) return null;
+        
+        var ambiguousDescrip = null;
+        if (ambiguousSelected !== null && schemas[ambiguousSelected].description){
+            ambiguousDescrip = schemas[ambiguousSelected].description;
+        }
+        return (
+            <Modal show onHide={this.onHide}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{'Multiple object types found for your new ' + ambiguousType}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p style={{'marginBottom':'15px'}}>
+                        {'Please select a specific object type from the menu below.'}
+                    </p>
+                    <div className="input-wrapper" style={{'marginBottom':'15px'}}>
+                        <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={ambiguousSelected || "No value"}>
+                            {ambiguousType !== null ?
+                                Schemas.itemTypeHierarchy[ambiguousType].map((val) => buildAmbiguousEnumEntry(val))
+                                :
+                                null
+                            }
+                        </DropdownButton>
+                    </div>
+                    <Collapse in={ambiguousDescrip !== null}>
+                        <div style={{'marginBottom':'15px', 'fontSize':'1.2em'}}>
+                            {'Description: ' + ambiguousDescrip}
+                        </div>
+                    </Collapse>
+                    <Button bsSize="xsmall" bsStyle="success" disabled={ambiguousSelected === null} onClick={submitAmbiguousType}>
+                        Submit
+                    </Button>
+                </Modal.Body>
+            </Modal>
+        );
+    }
+}
+
+class AliasSelectModal extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.onHide = this.onHide.bind(this);
+    }
+
+    onHide(){
+        if (this.props.creatingIdx === 0){
+            console.warn('EXIT INIT. TODO: navigate to same href minus hash?');
+        } else if (this.props.creatingIdx > 0){
+            this.props.cancelCreateNewObject();
+        }
+    }
+
+    render(){
+        var { show, creatingType, creatingAlias, handleAliasChange, creatingAliasMessage, submitAlias } = this.props;
+        if (!show) return null;
+
+        return (
+            <Modal show onHide={this.onHide}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{'Give your new ' + creatingType +' an alias'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mt-0 mb-1">Aliases are lab specific identifiers to reference an object. The format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).</p>
+                    <p className="mt-0 mb-1">A sample alias has been generated for you from your primary lab and the current item type & timestamp; adjust it as you see fit.</p>
+                    <div className="input-wrapper mt-2 mb-2">
+                        <input
+                            id="aliasInput"
+                            type="text"
+                            inputMode="latin"
+                            value={creatingAlias}
+                            autoFocus={true}
+                            placeholder="Enter a new alias"
+                            onChange={handleAliasChange}
+                        />
+                    </div>
+                    <Collapse in={creatingAliasMessage !== null}>
+                        <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
+                            {creatingAliasMessage}
+                        </div>
+                    </Collapse>
+                    <Button bsSize="xsmall" bsStyle="success" disabled={creatingAlias.length == 0} onClick={submitAlias}>
+                        Submit
+                    </Button>
+                </Modal.Body>
+            </Modal>
         );
     }
 }

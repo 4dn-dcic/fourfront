@@ -127,16 +127,14 @@ class SubmissionLeaf extends React.Component{
     }
 
     render() {
-        var key = this.props.keyIdx;
-        var keyValid = this.props.keyValid;
-        var keyTypes = this.props.keyTypes;
-        var keyComplete = this.props.keyComplete;
+        var { keyValid, keyIdx, keyTypes, keyComplete } = this.props;
+        var key = keyIdx;
         var placeholders;
         if(!isNaN(key)){
             placeholders = this.props.keyLinkBookmarks[key].map((link) => this.generatePlaceholder(link));
         }else{
             // must be a submitted object - plot directly
-            placeholders = Object.keys(this.props.hierarchy[this.props.keyIdx]).map((child) => this.generateChild(child));
+            placeholders = _.keys(this.props.hierarchy[key]).map((child) => this.generateChild(child));
         }
         var style = {
             'marginLeft': '-15px',
@@ -193,7 +191,7 @@ class SubmissionLeaf extends React.Component{
             }else if(keyValid[key] == 3){
                 style.backgroundColor = '#b7e1bb'; // light green
             }
-            if(key === this.props.currKey){
+            if(key === this.props.currKey){ // Current key selected
                 style.fontWeight = "bold";
                 style.border = "1px solid #000";
                 title = (<span style={{'padding':'1px 5px'}} >
