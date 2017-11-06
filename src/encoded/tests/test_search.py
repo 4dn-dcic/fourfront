@@ -305,3 +305,20 @@ def test_search_query_string_with_fields(workbook, testapp):
     idv_ids = [r['uuid'] for r in res_idv['@graph'] if 'uuid' in r]
     assert len(idv_ids) == 1
     assert idv_ids[0] == age_ids[0]
+
+
+def test_search_with_no_value(workbook, testapp):
+    search = '/search/?digestion_enzyme.name=No+value&digestion_enzyme.name=DNaseI&q=cell&type=Experiment'
+    res_json = testapp.get(search).json
+    res_ids = [r['uuid'] for r in res_json['@graph'] if 'uuid' in r]
+    assert len(res_ids) == 19
+    search2 = '/search/?digestion_enzyme.name=No%20value&digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No%20value&q=cell&type=Experiment'
+    res_json2 = testapp.get(search2).json
+    res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
+    assert len(res_ids2) == 19
+    assert(set(res_ids2) <= set(res_ids))
+    search3 = '/search/?digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No+value&q=cell&type=Experiment'
+    res_json3 = testapp.get(search3).json
+    res_ids4 = [r['uuid'] for r in res_json3['@graph'] if 'uuid' in r]
+    assert len(res_ids3) == 1
+    assert(set(res_ids3) <= set(res_ids))
