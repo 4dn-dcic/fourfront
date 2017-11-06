@@ -1227,9 +1227,17 @@ export default class SubmissionView extends React.Component{
         var exIdx = this.state.creatingIdx;
         var keyContext = _.clone(this.state.keyContext);
         var currentContextPointer = this.state.keyContext[this.state.currKey];
-        _.pairs(currentContextPointer).forEach(function(p){
+        _.pairs(currentContextPointer).forEach(function(p){ // Doesn't check field.
+            // Unset value to null
             if (p[1] === exIdx){
                 currentContextPointer[p[0]] = null;
+            }
+            // Remove value from array.
+            if (Array.isArray(p[1])){
+                var idxInArray = p[1].indexOf(exIdx);
+                if (idxInArray > -1){
+                    currentContextPointer[p[0]].splice(idxInArray, 1);
+                }
             }
         });
         this.setState({
