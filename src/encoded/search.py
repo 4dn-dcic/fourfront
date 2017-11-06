@@ -43,8 +43,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         'facets': [],
         '@graph': [],
         'notification': '',
-        'sort': {},
-        'actions' : [] # Same form as for Items, e.g. in types/base.py
+        'sort': {}
     }
     principals = effective_principals(request)
 
@@ -304,10 +303,13 @@ def build_type_filters(result, request, doc_types, types):
     else:
         for item_type in doc_types:
             ti = types[item_type]
-            qs = urlencode([
-                (k.encode('utf-8'), v.encode('utf-8'))
-                for k, v in request.params.items() if not (k == 'type' and types.get('Item' if v == '*' else v) is ti)
-            ])
+            try:
+                qs = urlencode([
+                    (k.encode('utf-8'), v.encode('utf-8'))
+                    for k, v in request.params.items() if not (k == 'type' and types['Item' if v == '*' else v] is ti)
+                ])
+            except:
+                qs = urlencode([])
             result['filters'].append({
                 'field': 'type',
                 'term': ti.name,
