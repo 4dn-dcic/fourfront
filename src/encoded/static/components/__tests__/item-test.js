@@ -48,7 +48,6 @@ describe('Testing DefaultItemView.js', function() {
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         ItemView = require('./../item-pages/DefaultItemView').default;
-        var Item = require('./../item-pages/item').default;
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');
         Wrapper = React.createClass({
@@ -60,7 +59,7 @@ describe('Testing DefaultItemView.js', function() {
         });
         testItem = TestUtils.renderIntoDocument(
             <Wrapper>
-                <Item schemas={schemas} context={context} />
+                <ItemView schemas={schemas} context={context} />
             </Wrapper>
         );
 

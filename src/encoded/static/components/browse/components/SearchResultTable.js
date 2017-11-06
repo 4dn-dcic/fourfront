@@ -12,7 +12,6 @@ import ReactTooltip from 'react-tooltip';
 //import Infinite from './../../lib/react-infinite/src/react-infinite';
 import Infinite from 'react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
-import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
 import { console, isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';

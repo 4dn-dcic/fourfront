@@ -2,7 +2,6 @@
  Fourfront Metadata Database
 ========================
 
-
 |Build status|_
 
 .. |Build status| image:: https://travis-ci.org/4dn-dcic/fourfront.png?branch=master

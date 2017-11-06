@@ -48,7 +48,7 @@ export default class FileView extends WorkflowRunTracingView {
 
 }
 
-globals.panel_views.register(FileView, 'File');
+globals.content_views.register(FileView, 'File');
 
 
 class FileViewOverview extends React.Component {
