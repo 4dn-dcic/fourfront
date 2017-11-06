@@ -274,7 +274,7 @@ export default class SubmissionView extends React.Component{
 
         // Grab current user via AJAX and store to state. To use for alias auto-generation using current user's top submits_for lab name.
         if (userHref){
-            ajax.load(userHref, (r)=>{
+            ajax.load(userHref + '?frame=embedded', (r)=>{
                 if (Array.isArray(r.submits_for) && r.submits_for.length > 0 && typeof r.submits_for[0].name === 'string'){
                     this.setState({ 'currentSubmittingUser' : r });
                 }
@@ -324,7 +324,7 @@ export default class SubmissionView extends React.Component{
         var schema = this.props.schemas[type] || null;
         var autoSuggestedAlias = '';
         if (this.state.currentSubmittingUser && Array.isArray(this.state.currentSubmittingUser.submits_for) && this.state.currentSubmittingUser.submits_for[0] && typeof this.state.currentSubmittingUser.submits_for[0].name === 'string'){
-            autoSuggestedAlias = this.state.currentSubmittingUser.submits_for[0].name + ':' + type + ('-' + ++newItemCounter);
+            autoSuggestedAlias = this.state.currentSubmittingUser.submits_for[0].name + ':' + type.toLowerCase() + ('-' + moment.utc().unix());
         }
         if(schema && schema.properties.aliases){
             this.setState({
@@ -978,13 +978,16 @@ export default class SubmissionView extends React.Component{
         var lab;
         var award;
         var finalizedContext = this.removeNullsFromContext(inKey);
+        var i;
         // get rid of any hanging errors
-        for(var i=0; i<this.state.errorCount; i++){
+        for(i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
             stateToSet.errorCount = 0;
         }
         this.setState({'processingFetch': true});
-        ajax.promise('/me?frame=embedded').then(me_data => {
+
+
+        var submitProcess = function(me_data){ // me_data = current user fields
             if(!me_data || !me_data.submits_for || me_data.submits_for.length == 0){
                 console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
                 keyValid[inKey] = 2;
@@ -993,7 +996,7 @@ export default class SubmissionView extends React.Component{
             }
             // use first lab for now
             var submits_for = me_data.submits_for[0];
-            lab = submits_for['@id'] ? submits_for['@id'] : submits_for.link_id.replace(/~/g, "/");
+            lab = object.atIdFromObject(submits_for);
             ajax.promise(lab).then(lab_data => {
                 if(!lab || !lab_data.awards || lab_data.awards.length == 0){
                     console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
@@ -1005,21 +1008,21 @@ export default class SubmissionView extends React.Component{
                 award = lab_data.awards[0];
                 // if editing, use pre-existing award, lab, and submitted_by
                 if(this.props.edit && propContext.award && propContext.lab){
-                    finalizedContext.award = propContext.award.link_id.replace(/~/g, "/");
-                    finalizedContext.lab = propContext.lab.link_id.replace(/~/g, "/");
+                    finalizedContext.award = object.atIdFromObject(propContext.award);
+                    finalizedContext.lab = object.atIdFromObject(propContext.lab);
                     // an admin is editing. Use the pre-existing submitted_by
                     // otherwise, permissions won't let us change this field
                     if(me_data.groups && _.contains(me_data.groups, 'admin')){
                         if(propContext.submitted_by){
-                            finalizedContext.submitted_by = propContext.submitted_by.link_id.replace(/~/g, "/");
+                            finalizedContext.submitted_by = object.atIdFromObject(propContext.submitted_by);
                         }else{
                             // use current user
-                            finalizedContext.submitted_by = me_data.link_id.replace(/~/g, "/");
+                            finalizedContext.submitted_by = object.atIdFromObject(me_data);
                         }
                     }
                 }else{ // use info of person creating/cloning unless values present
                     if(currSchema.properties.award && !('award' in finalizedContext)){
-                        finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
+                        finalizedContext.award = object.atIdFromObject(award);
                     }
                     if(currSchema.properties.lab && !('lab' in finalizedContext)){
                         finalizedContext.lab = lab;
@@ -1055,7 +1058,7 @@ export default class SubmissionView extends React.Component{
                             var errorList = response.errors || [response.detail] || [];
                             // make an alert for each error description
                             stateToSet.errorCount = errorList.length;
-                            for(var i=0; i<errorList.length; i++){
+                            for(i = 0; i<errorList.length; i++){
                                 var detail = errorList[i].description || errorList[i] || "Unidentified error";
                                 if(errorList[i].name && errorList[i].name.length > 0){
                                     detail += ('. See ' + errorList[i].name[0] + ' in ' + this.state.keyDisplay[inKey]);
@@ -1160,7 +1163,7 @@ export default class SubmissionView extends React.Component{
                                     stateToSet.roundTwo = true;
                                     stateToSet.currKey = roundTwoCopy[0];
                                     // reset validation state for all round two keys
-                                    for(var i=0; i < roundTwoCopy.length; i++){
+                                    for(i = 0; i < roundTwoCopy.length; i++){
                                         keyValid[roundTwoCopy[i]] = 0;
                                     }
                                     alert('Success! All objects were submitted. However, one or more have additional fields that can be only filled in second round submission. You will now be guided through this process for each object.');
@@ -1173,8 +1176,16 @@ export default class SubmissionView extends React.Component{
                         }
                     }
                 });
+
             });
-        });
+        }.bind(this);
+
+        if (this.state.currentSubmittingUser){ // We've already loaded user during initPrincipal().
+            submitProcess(this.state.currentSubmittingUser);
+        } else {
+            ajax.promise('/me?frame=embedded').then(submitProcess);
+        }
+        
     }
 
     /*
@@ -1211,6 +1222,76 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    renderTypeSelectionModal(){
+        var ambiguousDescrip = null;
+        if(this.state.ambiguousSelected !== null && this.props.schemas[this.state.ambiguousSelected].description){
+            ambiguousDescrip = this.props.schemas[this.state.ambiguousSelected].description;
+        }
+        return (
+            <Modal show>
+                <Modal.Header>
+                    <Modal.Title>{'Multiple object types found for your new ' + this.state.ambiguousType}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p style={{'marginBottom':'15px'}}>
+                        {'Please select a specific object type from the menu below.'}
+                    </p>
+                    <div className="input-wrapper" style={{'marginBottom':'15px'}}>
+                        <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={this.state.ambiguousSelected || "No value"}>
+                            {this.state.ambiguousType !== null ?
+                                Schemas.itemTypeHierarchy[this.state.ambiguousType].map((val) => this.buildAmbiguousEnumEntry(val))
+                                :
+                                null
+                            }
+                        </DropdownButton>
+                    </div>
+                    <Collapse in={ambiguousDescrip !== null}>
+                        <div style={{'marginBottom':'15px', 'fontSize':'1.2em'}}>
+                            {'Description: ' + ambiguousDescrip}
+                        </div>
+                    </Collapse>
+                    <Button bsSize="xsmall" bsStyle="success" disabled={this.state.ambiguousSelected === null} onClick={this.submitAmbiguousType}>
+                        Submit
+                    </Button>
+                </Modal.Body>
+            </Modal>
+        );
+    }
+
+    renderAliasSelectionModal(){
+        
+        return (
+            <Modal show>
+                <Modal.Header>
+                    <Modal.Title>{'Give your new ' + this.state.creatingType +' an alias'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p className="mt-0 mb-1">Aliases are lab specific identifiers to reference an object. The format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).</p>
+                    <p className="mt-0 mb-1">A sample alias has been generated for you from your primary lab and the current item type & timestamp; adjust it as you see fit.</p>
+                    <div className="input-wrapper mt-2 mb-2">
+                        <input
+                            id="aliasInput"
+                            type="text"
+                            inputMode="latin"
+                            value={this.state.creatingAlias}
+                            autoFocus={true}
+                            placeholder="Enter a new alias"
+                            onChange={this.handleAliasChange}
+                        />
+                    </div>
+                    <Collapse in={this.state.creatingAliasMessage !== null}>
+                        <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
+                            {this.state.creatingAliasMessage}
+                        </div>
+                    </Collapse>
+                    <Button bsSize="xsmall" bsStyle="success" disabled={this.state.creatingAlias.length == 0} onClick={this.submitAlias}>
+                        Submit
+                    </Button>
+                </Modal.Body>
+            </Modal>
+        );
+    }
+
     /*
     Render the navigable SubmissionTree and IndividualObjectView for the
     current key. Also render modals for ambiguous type selection or alias
@@ -1225,10 +1306,6 @@ export default class SubmissionView extends React.Component{
             return null;
         }
         var ambiguousModal = this.state.ambiguousIdx !== null && this.state.ambiguousType !== null;
-        var ambiguousDescrip = null;
-        if(this.state.ambiguousSelected !== null && this.props.schemas[this.state.ambiguousSelected].description){
-            ambiguousDescrip = this.props.schemas[this.state.ambiguousSelected].description;
-        }
         var aliasModal = !ambiguousModal && this.state.creatingIdx !== null && this.state.creatingType !== null;
         var currType = this.state.keyTypes[currKey];
         var currContext = this.state.keyContext[currKey];
@@ -1247,62 +1324,8 @@ export default class SubmissionView extends React.Component{
         var currObjDisplay = this.state.keyDisplay[currKey] || currType;
         return(
             <div>
-                <Modal show={ambiguousModal}>
-                    <Modal.Header>
-                        <Modal.Title>{'Multiple object types found for your new ' + this.state.ambiguousType}</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <p style={{'marginBottom':'15px'}}>
-                            {'Please select a specific object type from the menu below.'}
-                        </p>
-                        <div className="input-wrapper" style={{'marginBottom':'15px'}}>
-                            <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={this.state.ambiguousSelected || "No value"}>
-                                {this.state.ambiguousType !== null ?
-                                    Schemas.itemTypeHierarchy[this.state.ambiguousType].map((val) => this.buildAmbiguousEnumEntry(val))
-                                    :
-                                    null
-                                }
-                            </DropdownButton>
-                        </div>
-                        <Collapse in={ambiguousDescrip !== null}>
-                            <div style={{'marginBottom':'15px', 'fontSize':'1.2em'}}>
-                                {'Description: ' + ambiguousDescrip}
-                            </div>
-                        </Collapse>
-                        <Button bsSize="xsmall" bsStyle="success" disabled={this.state.ambiguousSelected === null} onClick={this.submitAmbiguousType}>
-                            Submit
-                        </Button>
-                    </Modal.Body>
-                </Modal>
-                <Modal show={aliasModal}>
-                    <Modal.Header>
-                        <Modal.Title>{'Give your new ' + this.state.creatingType +' an alias'}</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <p style={{'marginBottom':'15px'}}>
-                            {'Aliases are lab specific identifiers to reference an object. The format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).'}
-                        </p>
-                        <div className="input-wrapper" style={{'marginBottom':'15px'}}>
-                            <input
-                                id="aliasInput"
-                                type="text"
-                                inputMode="latin"
-                                value={this.state.creatingAlias}
-                                autoFocus={true}
-                                placeholder="Enter a new alias"
-                                onChange={this.handleAliasChange}
-                            />
-                        </div>
-                        <Collapse in={this.state.creatingAliasMessage !== null}>
-                            <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
-                                {this.state.creatingAliasMessage}
-                            </div>
-                        </Collapse>
-                        <Button bsSize="xsmall" bsStyle="success" disabled={this.state.creatingAlias.length == 0} onClick={this.submitAlias}>
-                            Submit
-                        </Button>
-                    </Modal.Body>
-                </Modal>
+                { ambiguousModal ? this.renderTypeSelectionModal() : null }
+                { aliasModal ? this.renderAliasSelectionModal() : null }
                 <WarningBanner/>
                 <div className="clearfix row">
                     <div className={navCol}>
