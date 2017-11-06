@@ -590,6 +590,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
         else:
             query_field = 'embedded.' + field + '.raw'
 
+<<<<<<< HEAD
         if query_field not in field_filters:
             field_filters[query_field] = {
                 'must_terms': [],
@@ -605,6 +606,22 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
 
         if not_field:
             field_filters[query_field]['must_not_terms'].append(term)
+=======
+        # handle case of filtering for null values
+        if exists_field:
+            this_filter = {'exists': {'field': query_field}}
+            not_query_filters.append(this_filter)
+            continue
+
+        bool_used_filters = used_filters['must_not'] if not_field else used_filters['must']
+        if field not in bool_used_filters:
+            bool_used_filters[field] = [term]
+            this_filter = {'terms': {query_field: [term]}}
+            if not_field:
+                not_query_filters.append(this_filter)
+            else:
+                query_filters.append(this_filter)
+>>>>>>> 30eaf65fb9c5056208ec6900a5c933105539173c
         else:
             field_filters[query_field]['must_terms'].append(term)
 
