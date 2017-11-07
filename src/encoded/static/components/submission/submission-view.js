@@ -278,7 +278,6 @@ export default class SubmissionView extends React.Component{
             continueInitProcess();
         }
 
-        
     }
 
     /**
@@ -1466,9 +1465,9 @@ class AliasSelectModal extends TypeSelectModal {
                         <span className="text-400"><small className="pull-left">Lab: </small><span>{ parts[0] }</span></span>
                     )) || 'Select a Lab'}
                 >
-                { _.map(submits_for_list, function(lab){
-                    return <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>;
-                }) }
+                    { _.map(submits_for_list, function(lab){
+                        return <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>;
+                    }) }
                 </DropdownButton>
             );
         }
@@ -2205,11 +2204,8 @@ var delvePreExistingObjects = function myself(initObjs, json, schema, listTerm, 
                 }
             });
         }
-    }else{
-        // non-array, non-object field. check schema to ensure there's a linkTo
-        if(_.contains(_.keys(schema),'linkTo')){
-            populateInitObjs(initObjs, json, listTerm, linked);
-        }
+    }else if (_.contains(_.keys(schema),'linkTo')) { // non-array, non-object field. check schema to ensure there's a linkTo
+        populateInitObjs(initObjs, json, listTerm, linked);
     }
 };
 
