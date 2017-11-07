@@ -312,10 +312,10 @@ def test_search_with_no_value(workbook, testapp):
     res_json = testapp.get(search).json
     res_ids = [r['uuid'] for r in res_json['@graph'] if 'uuid' in r]
     assert len(res_ids) == 19
-    search2 = '/search/?digestion_enzyme.name=No%20value&digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No%20value&q=cell&type=Experiment'
+    search2 = '/search/?digestion_enzyme.name=No+value&digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No+value&q=cell&type=Experiment'
     res_json2 = testapp.get(search2).json
     res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
-    assert len(res_ids2) == 19
+    assert len(res_ids2) == 11
     assert(set(res_ids2) <= set(res_ids))
     search3 = '/search/?digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No+value&q=cell&type=Experiment'
     res_json3 = testapp.get(search3).json
