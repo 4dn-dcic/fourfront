@@ -425,13 +425,25 @@ export default class BrowseView extends React.Component {
     render() {
         var context = this.props.context;
         //var fileFormats = findFormats(context['@graph']);
+        var results = context['@graph'];
+        var hrefParts = url.parse(this.props.href, true);
+        var searchBase = hrefParts.search || '';
 
         // no results found!
         if(context.total === 0 && context.notification){
-            return <div className="error-page text-center"><h4>{context.notification}</h4></div>;
+            var seeSearchResults = null;
+            var strippedQuery = (_.omit(hrefParts.query, 'type', 'experimentset_type'));
+            if (_.keys(strippedQuery).length > 0){
+                seeSearchResults = <h4 className="text-400 mt-05"><a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>Search all items</a> instead</h4>;
+            }
+            return (
+                <div className="error-page text-center">
+                    <h3 className="text-500 mb-0">{context.notification}</h3>
+                    { seeSearchResults }
+                </div>
+            );
         }
-        var results = context['@graph'];
-        var searchBase = url.parse(this.props.href).search || '';
+        
 
         // browse is only for experiment sets
         if(searchBase.indexOf('type=ExperimentSetReplicate') === -1){
@@ -448,17 +460,12 @@ export default class BrowseView extends React.Component {
 
         return (
             <div className="browse-page-container" id="browsePageContainer">
-            {/*
-                <h1 className="page-title">Data Browser</h1>
-                <h4 className="page-subtitle">Filter & browse experiments</h4>
-            */}
                 <ControlsAndResults
                     {...this.props}
                     //fileFormats={fileFormats}
                     href={this.props.href}
                     schemas={this.props.schemas}
                 />
-
             </div>
         );
     }

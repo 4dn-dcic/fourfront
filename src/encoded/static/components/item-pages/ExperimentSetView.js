@@ -93,7 +93,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         if (width) width -= 20;
 
         var tabs = [];
-        
+
         // Raw files tab, if have experiments
         if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0){
             tabs.push({
