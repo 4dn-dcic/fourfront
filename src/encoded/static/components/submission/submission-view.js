@@ -295,7 +295,7 @@ export default class SubmissionView extends React.Component{
     creation (initCreateAlias). If init (bool) is true, skip ambiguous type
     lookup even if applicable and move right to alias selection.
     */
-    initCreateObj = (type, newIdx, newLink, init=false) => {
+    initCreateObj = (type, newIdx, newLink, init=false, parentField=null) => {
         // check to see if we have an ambiguous linkTo type.
         // this means there could be multiple types of linked objects for a
         // given type. let the user choose one.
@@ -309,7 +309,7 @@ export default class SubmissionView extends React.Component{
                     'creatingLink': newLink
                 });
             }else{
-                this.initCreateAlias(type, newIdx, newLink);
+                this.initCreateAlias(type, newIdx, newLink, parentField);
             }
         }
     }
@@ -320,7 +320,7 @@ export default class SubmissionView extends React.Component{
     If the current object's schemas does not support aliases, finish out the
     creation process with createObj using a boilerplate placeholer obj name.
     */
-    initCreateAlias = (type, newIdx, newLink) => {
+    initCreateAlias = (type, newIdx, newLink, parentField=null) => {
         var schema = this.props.schemas[type] || null;
         var autoSuggestedAlias = '';
         if (this.state.currentSubmittingUser && Array.isArray(this.state.currentSubmittingUser.submits_for) && this.state.currentSubmittingUser.submits_for[0] && typeof this.state.currentSubmittingUser.submits_for[0].name === 'string'){
@@ -334,7 +334,8 @@ export default class SubmissionView extends React.Component{
                 'creatingAlias' : autoSuggestedAlias,
                 'creatingIdx': newIdx,
                 'creatingType': type,
-                'creatingLink': newLink
+                'creatingLink': newLink,
+                'creatingLinkForField' : parentField
             });
         }else{ // schema doesn't support aliases
             var fallbackAlias = 'My ' + type + ' ' + newIdx;
@@ -546,7 +547,8 @@ export default class SubmissionView extends React.Component{
             'creatingType': null,
             'creatingLink': null,
             'creatingAlias': '',
-            'creatingAliasMessage': null
+            'creatingAliasMessage': null,
+            'creatingLinkForField' : null
         });
     }
 
@@ -1222,21 +1224,24 @@ export default class SubmissionView extends React.Component{
         }
     }
 
-    cancelCreateNewObject = (field) => {
+    cancelCreateNewObject = () => {
         if (!this.state.creatingIdx) return;
         var exIdx = this.state.creatingIdx;
-        var keyContext = _.clone(this.state.keyContext);
+        var keyContext = this.state.keyContext;
         var currentContextPointer = this.state.keyContext[this.state.currKey];
-        _.pairs(currentContextPointer).forEach(function(p){ // Doesn't check field.
-            // Unset value to null
-            if (p[1] === exIdx){
-                currentContextPointer[p[0]] = null;
-            }
-            // Remove value from array.
-            if (Array.isArray(p[1])){
-                var idxInArray = p[1].indexOf(exIdx);
-                if (idxInArray > -1){
-                    currentContextPointer[p[0]].splice(idxInArray, 1);
+        var parentFieldToClear = typeof this.state.creatingLinkForField === 'string' && this.state.creatingLinkForField;
+        _.pairs(currentContextPointer).forEach(function(p){
+            if (p[0] === parentFieldToClear){
+                // Unset value to null
+                if (p[1] === exIdx){
+                    currentContextPointer[p[0]] = null;
+                }
+                // Remove value from array.
+                if (Array.isArray(p[1])){
+                    var idxInArray = p[1].indexOf(exIdx);
+                    if (idxInArray > -1){
+                        currentContextPointer[p[0]].splice(idxInArray, 1);
+                    }
                 }
             }
         });
@@ -1248,7 +1253,8 @@ export default class SubmissionView extends React.Component{
             'creatingIdx': null,
             'creatingType': null,
             'creatingLink': null,
-            'keyContext' : keyContext
+            'keyContext' : keyContext,
+            'creatingLinkForField' : null
         });
     }
 
@@ -1563,7 +1569,7 @@ class IndividualObjectView extends React.Component{
         this.props.modifyKeyContext(this.props.currKey, contextCopy);
         if(fieldType === 'new linked object'){
             // value is new key index in this case
-            this.props.initCreateObj(type, value, newLink);
+            this.props.initCreateObj(type, value, newLink, false, field);
         }
         if(fieldType === 'linked object'){
             this.checkObjectRemoval(value, prevValue);
