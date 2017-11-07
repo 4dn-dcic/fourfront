@@ -319,6 +319,6 @@ def test_search_with_no_value(workbook, testapp):
     assert(set(res_ids2) <= set(res_ids))
     search3 = '/search/?digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No+value&q=cell&type=Experiment'
     res_json3 = testapp.get(search3).json
-    res_ids4 = [r['uuid'] for r in res_json3['@graph'] if 'uuid' in r]
+    res_ids3 = [r['uuid'] for r in res_json3['@graph'] if 'uuid' in r]
     assert len(res_ids3) == 1
     assert(set(res_ids3) <= set(res_ids))
