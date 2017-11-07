@@ -409,12 +409,13 @@ export default class SubmissionView extends React.Component{
      */
     submitAlias = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         var type = this.state.creatingType;
         var schema = this.props.schemas[type];
         var newIdx = this.state.creatingIdx;
         var newLink = this.state.creatingLink;
         if(type === null || newIdx === null || newLink === null){
-            return;
+            return false;
         }
         var alias = this.state.creatingAlias;
         // check if created object supports aliases
@@ -426,14 +427,14 @@ export default class SubmissionView extends React.Component{
                 this.setState({
                     'creatingAliasMessage': 'ERROR. Aliases must be formatted as: <text>:<text> (e.g. dcic-lab:42).'
                 });
-                return;
+                return false;
             }
             for(var key in this.state.keyDisplay){
                 if(this.state.keyDisplay[key] === alias){
                     this.setState({
                         'creatingAliasMessage': 'You have already used this alias.'
                     });
-                    return;
+                    return false;
                 }
             }
             // see if the input alias is already being used
@@ -444,10 +445,11 @@ export default class SubmissionView extends React.Component{
                     this.setState({
                         'creatingAliasMessage': 'ERROR. That alias is already taken.'
                     });
-                    return;
+                    return false;
                 }
             });
         }
+        return false;
     }
 
     /**
@@ -1357,6 +1359,7 @@ class TypeSelectModal extends React.Component {
     constructor(props){
         super(props);
         this.onHide = this.onHide.bind(this);
+        this.onContainerKeyDown = this.onContainerKeyDown.bind(this);
     }
 
     onHide(){
@@ -1370,6 +1373,14 @@ class TypeSelectModal extends React.Component {
         }
     }
 
+    onContainerKeyDown(enterKeyCallback, event){
+        if (event.which == 13 || event.keyCode == 13) {
+            enterKeyCallback(event);
+            return false;
+        }
+        return true;
+    }
+
     render(){
         var { show, ambiguousType, ambiguousSelected, buildAmbiguousEnumEntry, submitAmbiguousType, schemas } = this.props;
         if (!show) return null;
@@ -1379,31 +1390,33 @@ class TypeSelectModal extends React.Component {
             ambiguousDescrip = schemas[ambiguousSelected].description;
         }
         return (
-            <Modal show onHide={this.onHide}>
+            <Modal show onHide={this.onHide} className="submission-view-modal">
                 <Modal.Header closeButton>
                     <Modal.Title>{'Multiple object types found for your new ' + ambiguousType}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p style={{'marginBottom':'15px'}}>
-                        {'Please select a specific object type from the menu below.'}
-                    </p>
-                    <div className="input-wrapper" style={{'marginBottom':'15px'}}>
-                        <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={ambiguousSelected || "No value"}>
-                            {ambiguousType !== null ?
-                                Schemas.itemTypeHierarchy[ambiguousType].map((val) => buildAmbiguousEnumEntry(val))
-                                :
-                                null
-                            }
-                        </DropdownButton>
-                    </div>
-                    <Collapse in={ambiguousDescrip !== null}>
-                        <div style={{'marginBottom':'15px', 'fontSize':'1.2em'}}>
-                            {'Description: ' + ambiguousDescrip}
+                    <div onKeyDown={this.onContainerKeyDown.bind(this, submitAmbiguousType)}>
+                        <p style={{'marginBottom':'15px'}}>
+                            {'Please select a specific object type from the menu below.'}
+                        </p>
+                        <div className="input-wrapper" style={{'marginBottom':'15px'}}>
+                            <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={ambiguousSelected || "No value"}>
+                                {ambiguousType !== null ?
+                                    Schemas.itemTypeHierarchy[ambiguousType].map((val) => buildAmbiguousEnumEntry(val))
+                                    :
+                                    null
+                                }
+                            </DropdownButton>
                         </div>
-                    </Collapse>
-                    <Button bsSize="xsmall" bsStyle="success" disabled={ambiguousSelected === null} onClick={submitAmbiguousType}>
-                        Submit
-                    </Button>
+                        <Collapse in={ambiguousDescrip !== null}>
+                            <div style={{'marginBottom':'15px', 'fontSize':'1.2em'}}>
+                                {'Description: ' + ambiguousDescrip}
+                            </div>
+                        </Collapse>
+                        <Button bsSize="xsmall" bsStyle="success" disabled={ambiguousSelected === null} onClick={submitAmbiguousType}>
+                            Submit
+                        </Button>
+                    </div>
                 </Modal.Body>
             </Modal>
         );
@@ -1439,13 +1452,20 @@ class AliasSelectModal extends TypeSelectModal {
     renderInput(){
         var firstPartSelect = null;
         var parts = this.props.creatingAlias.split(':');
-        console.log('PARTS', parts);
         var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
         if (submits_for_list && submits_for_list.length === 1){
             firstPartSelect = <InputGroup.Addon>{ submits_for_list[0] }</InputGroup.Addon>;
         } else if (submits_for_list.length > 1){
             firstPartSelect = (
-                <DropdownButton onSelect={this.onAliasFirstPartChange} style={{ paddingBottom: 7 }} componentClass={InputGroup.Button} id="aliasFirstPartInput" title={(parts.length > 1 && (<span className="text-400">{ parts[0] }</span>) ) || 'Select a Lab'}>
+                <DropdownButton
+                    className="alias-lab-select form-control"
+                    onSelect={this.onAliasFirstPartChange}
+                    componentClass={InputGroup.Button}
+                    id="aliasFirstPartInput"
+                    title={(parts.length > 1 && (
+                        <span className="text-400"><small className="pull-left">Lab: </small><span>{ parts[0] }</span></span>
+                    )) || 'Select a Lab'}
+                >
                 { _.map(submits_for_list, function(lab){
                     return <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>;
                 }) }
@@ -1456,14 +1476,14 @@ class AliasSelectModal extends TypeSelectModal {
             <FormGroup validationState={this.props.creatingAliasMessage ? 'error' : null}>
                 <InputGroup>
                     { firstPartSelect }
-                    { firstPartSelect ? <InputGroup.Addon><b>:</b></InputGroup.Addon> : null}
+                    { firstPartSelect ? <InputGroup.Addon className="colon-separator">:</InputGroup.Addon> : null}
                     <FormControl
                         id="aliasInput"
                         type="text"
                         inputMode="latin"
                         value={parts[1] || ''}
                         autoFocus={true}
-                        placeholder="Enter a new alias"
+                        placeholder="Type in a new identifier"
                         onChange={this.onAliasSecondPartChange}
                     />
                 </InputGroup>
@@ -1477,23 +1497,25 @@ class AliasSelectModal extends TypeSelectModal {
         if (!show) return null;
 
         return (
-            <Modal show onHide={this.onHide}>
+            <Modal show onHide={this.onHide} className="submission-view-modal">
                 <Modal.Header closeButton>
                     <Modal.Title>{'Give your new ' + creatingType +' an alias'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p className="mt-0 mb-1">Aliases are lab specific identifiers to reference an object. The format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).</p>
-                    <p className="mt-0 mb-1">Please create your own alias to help you to refer to this Item later.</p>
-                    <div className="input-wrapper mt-2 mb-2">
-                        { this.renderInput() }
-                    </div>
-                    <Collapse in={creatingAliasMessage !== null}>
-                        <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
-                            {creatingAliasMessage}
+                    <div onKeyDown={this.onContainerKeyDown.bind(this, submitAlias)}>
+                        <p className="mt-0 mb-1">Aliases are lab specific identifiers to reference an object. The format is <code>{'<lab-name>:<identifier>'}</code> - a lab name and an identifier separated by a colon, e.g. <code>dcic-lab:42</code>.</p>
+                        <p className="mt-0 mb-1">Please create your own alias to help you to refer to this Item later.</p>
+                        <div className="input-wrapper mt-2 mb-2">
+                            { this.renderInput() }
                         </div>
-                    </Collapse>
-                    <div className="text-right">
-                        <Button bsSize="medium" bsStyle="success" disabled={creatingAlias.length == 0} onClick={submitAlias}>Submit</Button>
+                        <Collapse in={creatingAliasMessage !== null}>
+                            <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
+                                {creatingAliasMessage}
+                            </div>
+                        </Collapse>
+                        <div className="text-right">
+                            <Button type="button" bsSize="medium" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
+                        </div>
                     </div>
                 </Modal.Body>
             </Modal>
@@ -1517,6 +1539,8 @@ class IndividualObjectView extends React.Component{
 
     constructor(props){
         super(props);
+        this.modifyNewContext = this.modifyNewContext.bind(this);
+
         /**
          * State in this component mostly has to do with selection of existing objs
          * 
@@ -1572,7 +1596,6 @@ class IndividualObjectView extends React.Component{
      * @param {!string} type        Type of Item we're linking to, if creating new Item/object only, if property is a linkTo. E.g. 'ExperimentSetReplicate', 'BiosampleCellCulture', etc.
      */
     modifyNewContext(field, value, fieldType, newLink, arrayIdx=null, type=null){
-        console.log('MODFFFF', type);
         if(fieldType === 'new linked object'){
             value = this.props.keyIter + 1;
             if(this.props.roundTwo){

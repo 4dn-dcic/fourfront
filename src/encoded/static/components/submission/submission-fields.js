@@ -65,11 +65,13 @@ export default class BuildField extends React.Component{
                     <input id="floatNumber" type="number" inputMode="latin" {...inputProps} />
                 </div>
             );
+            /*
             case 'boolean' : return (
                 <div className="input-wrapper" style={{'display':'inline'}}>
                     <Checkbox id="boolInput" {...inputProps} />
                 </div>
             );
+            */
             case 'enum' : return (
                 <span className="input-wrapper" style={{'display':'inline'}}>
                     <DropdownButton bsSize="xsmall" id="dropdown-size-extra-small" title={this.props.value || "No value"} onToggle={this.handleDropdownButtonToggle}>

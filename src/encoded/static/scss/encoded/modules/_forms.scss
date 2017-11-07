@@ -598,3 +598,63 @@ div.fieldset.editable-fields {
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
     right: 0px;
 }
+
+
+
+
+
+
+
+
+/***************************************************
+*********** Submission & Edit View	****************
+****************************************************/
+
+// Modal forms
+
+.submission-view-modal {
+	.modal-content {
+		.input-wrapper {
+			.input-group {
+				.dropdown.input-group-btn {
+					width: 20%;
+					> button {
+						width: 100%;
+						border-right: none;
+						box-shadow: none;
+						outline: none;
+						span.caret {
+							opacity: 0.33;
+						}
+						small.pull-left {
+							margin-top: 2px;
+							opacity: 0.5;
+						}
+					}
+					&:hover, &:focus, &:active, &.focus, &.active {
+						> button {
+							span.caret {
+								opacity: 1;
+							}
+							small.pull-left {
+								margin-top: 2px;
+								opacity: 1;
+							}
+						}
+					}
+				}
+				.input-group-addon.colon-separator {
+					font-weight: 700;
+					border-left: none;
+					border-right: none;
+					background-color: transparent;
+					padding-left: 3px;
+					padding-right: 3px;
+					& + input:not(:focus) {
+						border-left-color: transparent;
+					}
+				}
+			}
+		}
+	}
+}
