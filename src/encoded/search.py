@@ -300,7 +300,7 @@ def build_type_filters(result, request, doc_types, types):
             ti = types[item_type]
             qs = urlencode([
                 (k.encode('utf-8'), v.encode('utf-8'))
-                for k, v in request.params.items() if not (k == 'type' and types.get('Item' if v == '*' else v) is ti)
+                for k, v in request.params.items() if not (k == 'type' and types.all.get('Item' if v == '*' else v) is ti)
             ])
             result['filters'].append({
                 'field': 'type',
@@ -561,7 +561,7 @@ def set_filters(request, search, result, principals, doc_types, before_date=None
         # Add filter to result
         qs = urlencode([
             (k.encode('utf-8'), v.encode('utf-8'))
-            for k, v in request.params.items() if v != term
+            for k, v in request.params.items() if (k != field or v != term)
         ])
         remove_path = '{}?{}'.format(request.path, qs)
         # default to searching type=Item rather than empty filter path
@@ -738,7 +738,26 @@ def set_facets(search, facets, final_filters, string_query):
             if final_filters['bool'][filter_type] == []:
                 continue
             for compare_filter in final_filters['bool'][filter_type]:
-                # if not a terms filter, dont do anything (do use as a filter)
+                if 'bool' in compare_filter and 'should' in compare_filter['bool']:
+                    # handle No value case
+                    inner_bool = None
+                    inner_should = compare_filter.get('bool').get('should', [])
+                    for or_term in inner_should:
+                        # this may be naive, but assume first non-terms
+                        # filter is the No value quqery
+                        if 'terms' in or_term:
+                            continue
+                        else:
+                            inner_bool = or_term
+                            break
+                    if 'exists' in inner_bool:
+                        compare_field = inner_bool['exists'].get('field')
+                    else:
+                        # attempt to get the field from the alternative No value syntax
+                        compare_field = inner_bool.get('bool', {}).get('must_not', {}).get('exists', {}).get('field')
+                    if compare_field == query_field and field != 'type':
+                        facet_filters[filter_type].remove(compare_filter)
+                # else if not a terms filter, dont do anything (do use as a filter)
                 if 'terms' not in compare_filter:
                     continue
                 # there should only be one key here
