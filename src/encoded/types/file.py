@@ -190,14 +190,13 @@ class FileSetCalibration(FileSet):
         'title': 'Microscope QC File Sets',
         'description': 'Listing of File Sets',
     })
-class FileSetMicroscopeQC(ItemWithAttachment, FileSet):
+class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
     """Collection of files stored under fileset."""
     base_types = ['FileSet'] + Item.base_types
     item_type = 'file_set_microscope_qc'
     schema = load_schema('encoded:schemas/file_set_microscope_qc.json')
     name_key = 'accession'
     embedded_list = ['files_in_set.submitted_by.job_title',
-                     'files_in_set.wavelength'
                      'files_in_set.lab.title',
                      'files_in_set.accession',
                      "files_in_set.href",

@@ -38,5 +38,10 @@
                     "D1",
                     "D2"]
         }
+    },
+    "facets": {
+        "tier_level": {
+            "title": "Biosource Type"
+        }
     }
 }

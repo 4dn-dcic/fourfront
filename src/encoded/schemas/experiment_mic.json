@@ -58,7 +58,7 @@
         "microscope_qc":{
             "title": "Microscope QC Analysis",
             "type": "string",
-            "linkTo": "FileSetMicroscopeQC"
+            "linkTo": "FileSetMicroscopeQc"
         },
         "imaging_paths": {
             "title": "Imaging Paths",

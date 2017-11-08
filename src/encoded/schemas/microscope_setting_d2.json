@@ -26,15 +26,6 @@
         "schema_version": {
             "default": "1"
         },
-        "description": {
-            "title": "Description",
-            "description": "A short description of the labeling path",
-            "type": "string"
-        },
-        "tier_level":{
-            "default": "D2",
-            "exclude_from": ["submit4dn", "FFedit-create"]
-        },
         "objective_immersion_medium":{
             "title": "Objective immersion medium",
             "description": "",
@@ -68,7 +59,7 @@
         "ch01_integration_time":{
             "title": "Ch01 integration time (millisec)",
             "description": "the length of time the image is exposed to light for a single frame",
-            "type": "string"
+            "type": "number"
         },
         "ch02_filter_set":{
             "title": "Ch02 filter set",

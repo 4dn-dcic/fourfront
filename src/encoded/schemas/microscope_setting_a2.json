@@ -28,15 +28,6 @@
         "schema_version": {
             "default": "1"
         },
-        "description": {
-            "title": "Description",
-            "description": "A short description of the labeling path",
-            "type": "string"
-        },
-        "tier_level":{
-            "default": "A1",
-            "exclude_from": ["submit4dn", "FFedit-create"]
-        },
         "objective_ri_measured":{
             "title": "Objective RI (measured)",
             "description": " Measured refractive index of the objective",
