@@ -163,6 +163,7 @@ def skip_rows_in_excludes(**kw):
 
     return component
 
+
 def skip_rows_without_all_key_value(**kw):
     def component(dictrows):
         for row in dictrows:

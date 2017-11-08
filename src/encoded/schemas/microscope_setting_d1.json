@@ -93,7 +93,7 @@
         "ch00_light_source_center_wl":{
             "title": "Ch00 center wavelength",
             "description": "Center wavelength of the light source on ch00",
-            "type": "string"
+            "type": "number"
         },
         "ch00_detector_type":{
             "title": "Ch00 detector type",
@@ -113,7 +113,7 @@
         "ch01_light_source_center_wl":{
             "title": "Ch01 center wavelength",
             "description": "Center wavelength of the light source on ch01",
-            "type": "string"
+            "type": "number"
         },
         "ch01_detector_type":{
             "title": "Ch01 detector type",
@@ -133,7 +133,7 @@
         "ch02_light_source_center_wl":{
             "title": "Ch02 center wavelength",
             "description": "Center wavelength of the light source on ch02",
-            "type": "string"
+            "type": "number"
         },
         "ch02_detector_type":{
             "title": "Ch02 detector type",
@@ -153,7 +153,7 @@
         "ch03_light_source_center_wl":{
             "title": "Ch03 center wavelength",
             "description": "Center wavelength of the light source on ch03",
-            "type": "string"
+            "type": "number"
         },
         "ch03_detector_type":{
             "title": "Ch03 detector type",
