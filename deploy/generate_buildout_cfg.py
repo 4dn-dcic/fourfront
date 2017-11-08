@@ -2,6 +2,7 @@
 based on environment variables make a config file for build out
 '''
 import os
+import multiprocessing
 
 
 BASE = '''[buildout]
@@ -22,7 +23,9 @@ create_tables = true
 load_test_data = encoded.loadxl:{load_function}
 mpindexer = {should_index}
 indexer = {should_index}
+indexer.processes = {procs}
 '''
+# TODO: add in indexer.processes
 
 
 def dbconn_from_env():
@@ -45,6 +48,7 @@ def build_cfg_file():
     if os.environ.get('should_index'):
         data['should_index'] = 'true'
     data['load_function'] = 'load_test_data'
+    data['procs'] = str(multiprocessing.cpu_count() + 1)
     # this is temporary while we have environments switched, change back later
     # if 'prod' in data['env_name'].lower():
     if data['env_name'].lower() in ['4dn-web-dev', 'fourfront-webdev']:
