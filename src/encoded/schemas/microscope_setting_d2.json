@@ -44,7 +44,7 @@
         "ch00_integration_time":{
             "title": "Ch00 integration time (millisec)",
             "description": "the length of time the image is exposed to light for a single frame",
-            "type": "string"
+            "type": "number"
         },
         "ch01_filter_set":{
             "title": "Ch01 filter set",
@@ -74,7 +74,7 @@
         "ch02_integration_time":{
             "title": "Ch02 integration time (millisec)",
             "description": "the length of time the image is exposed to light for a single frame",
-            "type": "string"
+            "type": "number"
         },
         "ch03_filter_set":{
             "title": "Ch03 filter set",
@@ -89,7 +89,7 @@
         "ch03_integration_time":{
             "title": "Ch03 integration time (millisec)",
             "description": "the length of time the image is exposed to light for a single frame",
-            "type": "string"
+            "type": "number"
         },
         "embedding_RI":{
             "title": "Embedding medium RI",
