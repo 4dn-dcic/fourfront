@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
@@ -1257,6 +1258,16 @@ export default class SubmissionView extends React.Component{
         });
     }
 
+    /** Navigate to version of same page we're on, minus the '#!<action> hash. */
+    cancelCreatePrimaryObject = () => {
+        // Unset app's submitting state.
+        this.props.setIsSubmitting(false, ()=>{
+            // Then navigate out.
+            var parts = url.parse(this.props.href);
+            this.props.navigate(parts.path, { skipRequest : true });
+        });
+    }
+
     /**
      * Render the navigable SubmissionTree and IndividualObjectView for the
      * current key. Also render modals for ambiguous type selection or alias
@@ -1290,9 +1301,9 @@ export default class SubmissionView extends React.Component{
         return(
             <div>
                 <TypeSelectModal show={showAmbiguousModal} {..._.pick(this.state, 'ambiguousType', 'ambiguousSelected', 'currKey', 'creatingIdx')} schemas={this.props.schemas}
-                    buildAmbiguousEnumEntry={this.buildAmbiguousEnumEntry} submitAmbiguousType={this.submitAmbiguousType} cancelCreateNewObject={this.cancelCreateNewObject} navigate={this.props.navigate} href={this.props.href}  />
+                    buildAmbiguousEnumEntry={this.buildAmbiguousEnumEntry} submitAmbiguousType={this.submitAmbiguousType} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}  />
                 <AliasSelectModal show={showAliasModal} {..._.pick(this.state, 'creatingAlias', 'creatingType', 'creatingAliasMessage', 'currKey', 'creatingIdx', 'currentSubmittingUser')}
-                    handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} navigate={this.props.navigate} href={this.props.href} />
+                    handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} />
                 <WarningBanner/>
                 <div className="clearfix row">
                     <div className={navCol}>
@@ -1364,8 +1375,7 @@ class TypeSelectModal extends React.Component {
     onHide(){
         if (this.props.creatingIdx === 0){
             // If just starting (creating first item / idx), navigate to non-edit version of page we are currently on.
-            var parts = url.parse(this.props.href);
-            this.props.navigate(parts.path,  { skipRequest : true });
+            this.props.cancelCreatePrimaryObject();
         } else if (this.props.creatingIdx > 0){
             // Else cancel creating new object by unsetting temporary state & values.
             this.props.cancelCreateNewObject();
@@ -1423,7 +1433,52 @@ class TypeSelectModal extends React.Component {
 }
 
 /** Ordinary React Component which just inherits TypeSelectModal.onHide() */
-class AliasSelectModal extends TypeSelectModal {
+class AliasSelectModal extends TypeSelectModal {    
+
+    render(){
+        var { show, creatingType, creatingAlias, handleAliasChange, creatingAliasMessage, submitAlias, currentSubmittingUser } = this.props;
+        if (!show) return null;
+
+        return (
+            <Modal show onHide={this.onHide} className="submission-view-modal">
+                <Modal.Header closeButton>
+                    <Modal.Title>{'Give your new ' + creatingType +' an alias'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div onKeyDown={this.onContainerKeyDown.bind(this, submitAlias)}>
+                        <p className="mt-0 mb-1">Aliases are lab specific identifiers to reference an object. The format is <code>{'<lab-name>:<identifier>'}</code> - a lab name and an identifier separated by a colon, e.g. <code>dcic-lab:42</code>.</p>
+                        <p className="mt-0 mb-1">Please create your own alias to help you to refer to this Item later.</p>
+                        <div className="input-wrapper mt-2 mb-2">
+                            <AliasInputField value={creatingAlias} errorMessage={creatingAliasMessage} onAliasChange={handleAliasChange} currentSubmittingUser={currentSubmittingUser} />
+                        </div>
+                        <Collapse in={creatingAliasMessage !== null}>
+                            <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
+                                {creatingAliasMessage}
+                            </div>
+                        </Collapse>
+                        <div className="text-right">
+                            <Button type="button" bsSize="medium" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
+                        </div>
+                    </div>
+                </Modal.Body>
+            </Modal>
+        );
+    }
+}
+
+class AliasInputField extends React.Component {
+    
+    static propTypes = {
+        'value' : PropTypes.string.isRequired,
+        'onAliasChange' : PropTypes.func.isRequired,
+        'currentSubmittingUser' : PropTypes.shape({
+            'submits_for' : PropTypes.arrayOf(PropTypes.shape({
+                'name' : PropTypes.string,
+                'display_title' : PropTypes.string
+            }))
+        }).isRequired,
+        'errorMessage' : PropTypes.string // String or null
+    }
 
     constructor(props){
         super(props); // Inherits this.onHide() function.
@@ -1434,26 +1489,25 @@ class AliasSelectModal extends TypeSelectModal {
     onAliasFirstPartChange(evtKey, e){
         e.preventDefault();
         var firstPartOfAlias = evtKey;
-        var aliasParts = this.props.creatingAlias.split(':');
-        console.log('PARS3', aliasParts, firstPartOfAlias);
+        var aliasParts = this.props.value.split(':');
         aliasParts[0] = firstPartOfAlias;
-        this.props.handleAliasChange(aliasParts.join(':'));
+        this.props.onAliasChange(aliasParts.join(':'));
     }
 
     onAliasSecondPartChange(e){
         e.preventDefault();
         var secondPartOfAlias = e.target.value;
-        var aliasParts = this.props.creatingAlias.split(':');
+        var aliasParts = this.props.value.split(':');
         aliasParts[1] = secondPartOfAlias;
-        this.props.handleAliasChange(aliasParts.join(':'));
+        this.props.onAliasChange(aliasParts.join(':'));
     }
 
-    renderInput(){
+    render(){
         var firstPartSelect = null;
-        var parts = this.props.creatingAlias.split(':');
+        var parts = this.props.value.split(':');
         var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
         if (submits_for_list && submits_for_list.length === 1){
-            firstPartSelect = <InputGroup.Addon>{ submits_for_list[0] }</InputGroup.Addon>;
+            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ submits_for_list[0].name }</InputGroup.Addon>;
         } else if (submits_for_list.length > 1){
             firstPartSelect = (
                 <DropdownButton
@@ -1462,7 +1516,7 @@ class AliasSelectModal extends TypeSelectModal {
                     componentClass={InputGroup.Button}
                     id="aliasFirstPartInput"
                     title={(parts.length > 1 && (
-                        <span className="text-400"><small className="pull-left">Lab: </small><span>{ parts[0] }</span></span>
+                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right">{ parts[0] }</span></span>
                     )) || 'Select a Lab'}
                 >
                     { _.map(submits_for_list, function(lab){
@@ -1472,7 +1526,7 @@ class AliasSelectModal extends TypeSelectModal {
             );
         }
         return (
-            <FormGroup validationState={this.props.creatingAliasMessage ? 'error' : null}>
+            <FormGroup validationState={this.props.errorMessage ? 'error' : null}>
                 <InputGroup>
                     { firstPartSelect }
                     { firstPartSelect ? <InputGroup.Addon className="colon-separator">:</InputGroup.Addon> : null}
@@ -1491,35 +1545,6 @@ class AliasSelectModal extends TypeSelectModal {
         );
     }
 
-    render(){
-        var { show, creatingType, creatingAlias, handleAliasChange, creatingAliasMessage, submitAlias } = this.props;
-        if (!show) return null;
-
-        return (
-            <Modal show onHide={this.onHide} className="submission-view-modal">
-                <Modal.Header closeButton>
-                    <Modal.Title>{'Give your new ' + creatingType +' an alias'}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div onKeyDown={this.onContainerKeyDown.bind(this, submitAlias)}>
-                        <p className="mt-0 mb-1">Aliases are lab specific identifiers to reference an object. The format is <code>{'<lab-name>:<identifier>'}</code> - a lab name and an identifier separated by a colon, e.g. <code>dcic-lab:42</code>.</p>
-                        <p className="mt-0 mb-1">Please create your own alias to help you to refer to this Item later.</p>
-                        <div className="input-wrapper mt-2 mb-2">
-                            { this.renderInput() }
-                        </div>
-                        <Collapse in={creatingAliasMessage !== null}>
-                            <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
-                                {creatingAliasMessage}
-                            </div>
-                        </Collapse>
-                        <div className="text-right">
-                            <Button type="button" bsSize="medium" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
-                        </div>
-                    </div>
-                </Modal.Body>
-            </Modal>
-        );
-    }
 }
 
 /**

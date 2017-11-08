@@ -618,13 +618,17 @@ div.fieldset.editable-fields {
 			.input-group {
 				.dropdown.input-group-btn {
 					width: 20%;
-					> button {
+					> button#aliasFirstPartInput {
 						width: 100%;
 						border-right: none;
 						box-shadow: none;
 						outline: none;
+						padding-left: 24px;
+						padding-right: 8px;
 						span.caret {
 							opacity: 0.33;
+							left: 10px;
+							right: unset;
 						}
 						small.pull-left {
 							margin-top: 2px;
@@ -643,6 +647,11 @@ div.fieldset.editable-fields {
 						}
 					}
 				}
+				.input-group-addon.alias-lab-single-option {
+					background: transparent;
+					padding-left: 24px;
+					padding-right: 8px;
+				}
 				.input-group-addon.colon-separator {
 					font-weight: 700;
 					border-left: none;
@@ -650,8 +659,13 @@ div.fieldset.editable-fields {
 					background-color: transparent;
 					padding-left: 3px;
 					padding-right: 3px;
-					& + input:not(:focus) {
-						border-left-color: transparent;
+					& + input{
+						border-left: none;
+						padding-left: 8px;
+						&:focus {
+							border-color: #aaa;
+							box-shadow: inset -2px 1px 1px rgba(0,0,0,0.075), 3px 0 8px rgba(0,0,0,0.1);
+						}
 					}
 				}
 			}

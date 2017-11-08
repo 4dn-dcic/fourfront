@@ -1016,12 +1016,12 @@ export default class App extends React.Component {
         return data;
     }
 
-    // set isSubmitting in state. works with handleBeforeUnload
-    setIsSubmitting(bool){
-        this.setState({'isSubmitting': bool});
+    /** Set 'isSubmitting' in state. works with handleBeforeUnload **/
+    setIsSubmitting(bool, callback=null){
+        this.setState({'isSubmitting': bool}, callback);
     }
 
-    // catch user navigating away from page if in submission process.
+    /** Catch user navigating away from page if in submission process. */
     handleBeforeUnload(e){
         if(this.state.isSubmitting){
             var dialogText = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
