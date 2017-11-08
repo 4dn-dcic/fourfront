@@ -1,6 +1,6 @@
 {
-    "title": "Microscope QC Files",
-    "description": "File set dedicated to microscope qc files.",
+    "title": "Microscope QC with PSFj",
+    "description": "Stack images for QC with PSFj and final report.",
     "id": "/profiles/file_set_microscope_qc.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -73,7 +73,7 @@
             "items": {
                 "title": "Data File",
                 "type": "string",
-                "linkTo": "FileMicroscopeQC"
+                "linkTo": "FileMicroscopy"
             }
         },
         "fileset_type": {

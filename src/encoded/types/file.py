@@ -667,21 +667,6 @@ class FileCalibration(ItemWithAttachment, File):
 
 
 @collection(
-    name='files-microscope-qc',
-    unique_key='accession',
-    properties={
-        'title': 'Microscope QC Files',
-        'description': 'Listing of Microscope QC Files',
-    })
-class FileMicroscopeQC(File):
-    """Collection for individual microscope QC files."""
-    item_type = 'file_microscope_qc'
-    schema = load_schema('encoded:schemas/file_microscope_qc.json')
-    embedded_list = File.embedded_list
-    name_key = 'accession'
-
-
-@collection(
     name='files-microscopy',
     unique_key='accession',
     properties={

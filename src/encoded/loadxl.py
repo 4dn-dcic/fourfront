@@ -46,13 +46,16 @@ ORDER = [
     'quality_metric_fastqc',
     'quality_metric_bamqc',
     'quality_metric_pairsqc',
+    'microscope_setting_d1',
+    'microscope_setting_d2',
+    'microscope_setting_a1',
+    'microscope_setting_a2',
     'file_fastq',
     'file_fasta',
     'file_processed',
     'file_reference',
     'file_calibration',
     'file_microscopy',
-    'file_microscope_qc',
     'file_set',
     'file_set_calibration',
     'file_set_microscope_qc',
@@ -573,9 +576,6 @@ PHASE1_PIPELINES = {
     'file_calibration': [
         remove_keys('related_files'),
     ],
-    'file_microscope_qc': [
-        remove_keys('related_files'),
-    ],
     'file_microscopy': [
         remove_keys('related_files'),
     ],
@@ -654,9 +654,6 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('related_files'),
     ],
     'file_microscopy': [
-        skip_rows_missing_all_keys('related_files'),
-    ],
-    'file_microscope_qc': [
         skip_rows_missing_all_keys('related_files'),
     ],
     'file_set': [

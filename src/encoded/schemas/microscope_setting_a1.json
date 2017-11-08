@@ -1,0 +1,126 @@
+{
+    "title": "Microscopy Settings Tier A1",
+    "description": "Metadata fields required for Tier Analytical 1 level microscopy files",
+    "id": "/profiles/microscope_setting_a1.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab"],
+    "identifyingProperties": ["uuid", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/status"} ,
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "microscope_setting.json#/properties"},
+        { "$ref": "microscope_setting_d1.json#/properties"},
+        { "$ref": "microscope_setting_d2.json#/properties"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A short description of the labeling path",
+            "type": "string"
+        },
+        "tier_level":{
+            "default": "A1",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "objective_working_distance":{
+            "title": "Objective working distance (µm)",
+            "description": "",
+            "type": "number"
+        },
+        "objective_field_number":{
+            "title": "Objective field number (mm)",
+            "description": "",
+            "type": "number"
+        },
+        "ch00_power_output":{
+            "title": "Ch00 power output",
+            "description": "Nominal power output from ch00 light source",
+            "type": "number"
+        },
+        "ch00_lasers_diodes":{
+            "title": "Ch00 lasers/diodes",
+            "description": "",
+            "type": "string"
+        },
+        "ch00_filter_set_model":{
+            "title": "Ch00 filter set model",
+            "description": "Manufacturer and model for the filter set in ch00",
+            "type": "string"
+        },
+        "ch01_power_output":{
+            "title": "Ch01 power output",
+            "description": "Nominal power output from ch01 light source",
+            "type": "number"
+        },
+        "ch01_lasers_diodes":{
+            "title": "Ch01 lasers/diodes",
+            "description": "",
+            "type": "string"
+        },
+        "ch01_filter_set_model":{
+            "title": "Ch01 filter set model",
+            "description": "Manufacturer and model for the filter set in ch01",
+            "type": "string"
+        },
+        "ch02_power_output":{
+            "title": "Ch02 power output",
+            "description": "Nominal power output from ch02 light source",
+            "type": "number"
+        },
+        "ch02_lasers_diodes":{
+            "title": "Ch02 lasers/diodes",
+            "description": "",
+            "type": "string"
+        },
+        "ch02_filter_set_model":{
+            "title": "Ch02 filter set model",
+            "description": "Manufacturer and model for the filter set in ch02",
+            "type": "string"
+        },
+        "ch03_power_output":{
+            "title": "Ch03 power output",
+            "description": "Nominal power output from ch03 light source",
+            "type": "number"
+        },
+        "ch03_lasers_diodes":{
+            "title": "Ch03 lasers/diodes",
+            "description": "",
+            "type": "string"
+        },
+        "ch03_filter_set_model":{
+            "title": "Ch03 filter set model",
+            "description": "Manufacturer and model for the filter set in ch03",
+            "type": "string"
+        },
+        "camera_model":{
+            "title": "Camera model",
+            "description": "Manufacturer and model of the camera",
+            "type": "string"
+        },
+        "camera_serial":{
+            "title": "Camera serial",
+            "description": "Serial number of the camera",
+            "type": "string"
+        },
+        "flatfield_map":{
+            "title": "Flatfield map",
+            "description": "an image describing field dependent differences in response",
+            "type": "string",
+            "linkTo": "Image"
+        }
+    }
+}

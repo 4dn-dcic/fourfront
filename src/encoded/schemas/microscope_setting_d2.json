@@ -1,0 +1,109 @@
+{
+    "title": "Microscopy Settings Tier D2",
+    "description": "Metadata fields required for Tier Descriptive 2 level microscopy files",
+    "id": "/profiles/microscope_setting_d2.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab"],
+    "identifyingProperties": ["uuid", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/status"} ,
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "microscope_setting.json#/properties"},
+        { "$ref": "microscope_setting_d1.json#/properties"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A short description of the labeling path",
+            "type": "string"
+        },
+        "tier_level":{
+            "default": "D2",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "objective_immersion_medium":{
+            "title": "Objective immersion medium",
+            "description": "",
+            "type": "string"
+        },
+        "ch00_filter_set":{
+            "title": "Ch00 filter set",
+            "description": "",
+            "type": "string"
+        },
+        "ch00_detector_model":{
+            "title": "Ch00 detector model",
+            "description": "Manufacturer and model number for the detector on ch00",
+            "type": "string"
+        },
+        "ch00_integration_time":{
+            "title": "Ch00 integration time (millisec)",
+            "description": "the length of time the image is exposed to light for a single frame",
+            "type": "string"
+        },
+        "ch01_filter_set":{
+            "title": "Ch01 filter set",
+            "description": "",
+            "type": "string"
+        },
+        "ch01_detector_model":{
+            "title": "Ch01 detector model",
+            "description": "Manufacturer and model number for the detector on ch01",
+            "type": "string"
+        },
+        "ch01_integration_time":{
+            "title": "Ch01 integration time (millisec)",
+            "description": "the length of time the image is exposed to light for a single frame",
+            "type": "string"
+        },
+        "ch02_filter_set":{
+            "title": "Ch02 filter set",
+            "description": "",
+            "type": "string"
+        },
+        "ch02_detector_model":{
+            "title": "Ch02 detector model",
+            "description": "Manufacturer and model number for the detector on ch02",
+            "type": "string"
+        },
+        "ch02_integration_time":{
+            "title": "Ch02 integration time (millisec)",
+            "description": "the length of time the image is exposed to light for a single frame",
+            "type": "string"
+        },
+        "ch03_filter_set":{
+            "title": "Ch03 filter set",
+            "description": "",
+            "type": "string"
+        },
+        "ch03_detector_model":{
+            "title": "Ch03 detector model",
+            "description": "Manufacturer and model number for the detector on ch03",
+            "type": "string"
+        },
+        "ch03_integration_time":{
+            "title": "Ch03 integration time (millisec)",
+            "description": "the length of time the image is exposed to light for a single frame",
+            "type": "string"
+        },
+        "embedding_RI":{
+            "title": "Embedding medium RI",
+            "description": "Refractive index of embedding medium (nominal)",
+            "type": "number"
+        }
+    }
+}
