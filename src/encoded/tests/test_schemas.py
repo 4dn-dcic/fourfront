@@ -61,6 +61,7 @@ def test_load_schema(schema, master_mixins, registry):
     from snovault import COLLECTIONS
 
     abstract = [
+        'microscope_setting.json',
         'experiment.json',
         'file.json',
         'individual.json',
