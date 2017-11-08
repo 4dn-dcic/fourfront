@@ -18,7 +18,7 @@ region_search_instance = {es_server}
 elasticsearch_instance = {es_server}
 elasticsearch_index = {env_name}
 sqlalchemy_url = {dbconn}
-env_name = {env_name}
+env_name = {real_env_name}
 create_tables = true
 load_test_data = encoded.loadxl:{load_function}
 mpindexer = {should_index}
@@ -43,7 +43,12 @@ def dbconn_from_env():
 def build_cfg_file():
     data = {}
     data['dbconn'] = dbconn_from_env()
+    data['real_env_name'] = os.environ.get("ENV_NAME", "")
     data['env_name'] = os.environ.get("ENV_NAME", "")
+    # staging env points to prod buckets
+    if data['env_name'] == 'fourfront-staging':
+        data['env_name'] == 'fourfront-webprod'
+
     data['should_index'] = 'false'
     if os.environ.get('should_index'):
         data['should_index'] = 'true'
@@ -51,7 +56,7 @@ def build_cfg_file():
     data['procs'] = str(multiprocessing.cpu_count() + 1)
     # this is temporary while we have environments switched, change back later
     # if 'prod' in data['env_name'].lower():
-    if data['env_name'].lower() in ['4dn-web-dev', 'fourfront-webdev']:
+    if data['real_env_name'].lower() in ['4dn-web-dev', 'fourfront-webdev']:
         data['es_server'] = '172.31.49.128:9872'
         data['load_function'] = 'load_prod_data'
     else:  # this will soon be base case
