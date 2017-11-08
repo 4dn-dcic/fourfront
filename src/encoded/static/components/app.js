@@ -366,7 +366,14 @@ export default class App extends React.Component {
             }
         }
     }
-
+/*
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextState) {
+            return !(_.isEqual(nextState, this.state));
+        }
+        return false;
+    }
+*/
     // Retrieve current React context
     getChildContext() {
         return {
@@ -588,12 +595,17 @@ export default class App extends React.Component {
         var href = window.location.href; // Href which browser just navigated to, but maybe not yet set to this.props.href
 
         if (!this.confirmPopState(href)){
-            window.history.pushState(window.state, '', this.props.href);
+            try {
+                // Undo what we just did (hit the back button) by re-adding it to history and returning (not performing actual naivgate backward)
+                window.history.pushState(event.state, '', this.props.href);
+            } catch (e){ // Too large
+                console.warn('error pushing state (current, popped:)', this.props.context, event.state);
+                window.history.pushState(null, '', this.props.href);
+            }
             return;
         }
-
-        if (!this.confirmNavigation(href)) {
-            //window.history.pushState(window.state, '', this.props.href);
+        /*
+        if (!this.confirmNavigation(href)) { // Is this necessary still? It shouldn't ever return false at this stage, only in like doRequest().
             var d = {
                 'href': href
             };
@@ -605,6 +617,7 @@ export default class App extends React.Component {
             });
             return;
         }
+        */
         if (!this.historyEnabled) {
             window.location.reload();
             return;
@@ -820,9 +833,9 @@ export default class App extends React.Component {
 
             if (options.skipRequest) {
                 if (options.replace) {
-                    window.history.replaceState(window.state, '', href + fragment);
+                    window.history.replaceState(this.props.context, '', href + fragment);
                 } else {
-                    window.history.pushState(window.state, '', href + fragment);
+                    window.history.pushState(this.props.context, '', href + fragment);
                 }
                 var stuffToDispatch = _.clone(includeReduxDispatch);
                 if (!options.skipUpdateHref) {
@@ -928,7 +941,7 @@ export default class App extends React.Component {
                         return;
                     }
                 }
-                if (options.replace) {
+                if (options.replace) { // null gets replaced in this.receiveContextResponse w. actual JSON data. Redundant here?
                     window.history.replaceState(null, '', href + fragment);
                 } else {
                     window.history.pushState(null, '', href + fragment);

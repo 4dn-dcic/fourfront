@@ -1,7 +1,6 @@
 'use strict';
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
@@ -13,7 +12,7 @@ import Search from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
 import SubmissionTree from './expandable-tree';
-import BuildField from './submission-fields';
+import BuildField, { AliasInputField } from './submission-fields';
 import Alerts from '../alerts';
 import { Detail } from '../item-pages/components';
 
@@ -905,6 +904,12 @@ export default class SubmissionView extends React.Component{
         }
     }
 
+    generateCancelButton(){
+        return(
+            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'100px','marginLeft':'10px'}} onClick={this.cancelCreatePrimaryObject}>Cancel/Exit</Button>
+        ); 
+    }
+
     testPostNewContext = (e) => {
         e.preventDefault();
         this.submitObject(this.state.currKey, true);
@@ -1259,13 +1264,18 @@ export default class SubmissionView extends React.Component{
     }
 
     /** Navigate to version of same page we're on, minus the '#!<action> hash. */
-    cancelCreatePrimaryObject = () => {
-        // Unset app's submitting state.
-        this.props.setIsSubmitting(false, ()=>{
-            // Then navigate out.
+    cancelCreatePrimaryObject = (skipAskToLeave = false) => {
+        var leaveFunc = () =>{
+            // Navigate out.
             var parts = url.parse(this.props.href);
             this.props.navigate(parts.path, { skipRequest : true });
-        });
+        };
+
+        if (skipAskToLeave === true){
+            return this.props.setIsSubmitting(false, leaveFunc);
+        } else {
+            return leaveFunc();
+        }
     }
 
     /**
@@ -1299,12 +1309,12 @@ export default class SubmissionView extends React.Component{
         } = this.props;
         var currObjDisplay = this.state.keyDisplay[currKey] || currType;
         return(
-            <div>
+            <div className="submission-view-page-container">
                 <TypeSelectModal show={showAmbiguousModal} {..._.pick(this.state, 'ambiguousType', 'ambiguousSelected', 'currKey', 'creatingIdx')} schemas={this.props.schemas}
                     buildAmbiguousEnumEntry={this.buildAmbiguousEnumEntry} submitAmbiguousType={this.submitAmbiguousType} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}  />
                 <AliasSelectModal show={showAliasModal} {..._.pick(this.state, 'creatingAlias', 'creatingType', 'creatingAliasMessage', 'currKey', 'creatingIdx', 'currentSubmittingUser')}
                     handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} />
-                <WarningBanner/>
+                <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} />
                 <div className="clearfix row">
                     <div className={navCol}>
                         <SubmissionTree
@@ -1332,6 +1342,7 @@ export default class SubmissionView extends React.Component{
                             <div className="pull-right">
                                 {this.generateValidationButton()}
                                 {this.generateSubmitButton()}
+                                {this.generateCancelButton()}
                             </div>
                         </div>
                         <IndividualObjectView
@@ -1356,6 +1367,7 @@ export default class SubmissionView extends React.Component{
                             upload={this.state.upload}
                             uploadStatus={this.state.uploadStatus}
                             roundTwo={this.state.roundTwo}
+                            currentSubmittingUser={this.state.currentSubmittingUser}
                         />
                     </div>
                 </div>
@@ -1375,7 +1387,7 @@ class TypeSelectModal extends React.Component {
     onHide(){
         if (this.props.creatingIdx === 0){
             // If just starting (creating first item / idx), navigate to non-edit version of page we are currently on.
-            this.props.cancelCreatePrimaryObject();
+            this.props.cancelCreatePrimaryObject(true);
         } else if (this.props.creatingIdx > 0){
             // Else cancel creating new object by unsetting temporary state & values.
             this.props.cancelCreateNewObject();
@@ -1457,7 +1469,9 @@ class AliasSelectModal extends TypeSelectModal {
                             </div>
                         </Collapse>
                         <div className="text-right">
-                            <Button type="button" bsSize="medium" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
+                            <Button type="button" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
+                            &nbsp;
+                            <Button type="button" bsStyle="danger" onClick={this.onHide}>Cancel/Exit</Button>
                         </div>
                     </div>
                 </Modal.Body>
@@ -1466,86 +1480,7 @@ class AliasSelectModal extends TypeSelectModal {
     }
 }
 
-class AliasInputField extends React.Component {
-    
-    static propTypes = {
-        'value' : PropTypes.string.isRequired,
-        'onAliasChange' : PropTypes.func.isRequired,
-        'currentSubmittingUser' : PropTypes.shape({
-            'submits_for' : PropTypes.arrayOf(PropTypes.shape({
-                'name' : PropTypes.string,
-                'display_title' : PropTypes.string
-            }))
-        }).isRequired,
-        'errorMessage' : PropTypes.string // String or null
-    }
 
-    constructor(props){
-        super(props); // Inherits this.onHide() function.
-        this.onAliasSecondPartChange = this.onAliasSecondPartChange.bind(this);
-        this.onAliasFirstPartChange = this.onAliasFirstPartChange.bind(this);
-    }
-
-    onAliasFirstPartChange(evtKey, e){
-        e.preventDefault();
-        var firstPartOfAlias = evtKey;
-        var aliasParts = this.props.value.split(':');
-        aliasParts[0] = firstPartOfAlias;
-        this.props.onAliasChange(aliasParts.join(':'));
-    }
-
-    onAliasSecondPartChange(e){
-        e.preventDefault();
-        var secondPartOfAlias = e.target.value;
-        var aliasParts = this.props.value.split(':');
-        aliasParts[1] = secondPartOfAlias;
-        this.props.onAliasChange(aliasParts.join(':'));
-    }
-
-    render(){
-        var firstPartSelect = null;
-        var parts = this.props.value.split(':');
-        var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
-        if (submits_for_list && submits_for_list.length === 1){
-            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ submits_for_list[0].name }</InputGroup.Addon>;
-        } else if (submits_for_list.length > 1){
-            firstPartSelect = (
-                <DropdownButton
-                    className="alias-lab-select form-control"
-                    onSelect={this.onAliasFirstPartChange}
-                    componentClass={InputGroup.Button}
-                    id="aliasFirstPartInput"
-                    title={(parts.length > 1 && (
-                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right">{ parts[0] }</span></span>
-                    )) || 'Select a Lab'}
-                >
-                    { _.map(submits_for_list, function(lab){
-                        return <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>;
-                    }) }
-                </DropdownButton>
-            );
-        }
-        return (
-            <FormGroup validationState={this.props.errorMessage ? 'error' : null}>
-                <InputGroup>
-                    { firstPartSelect }
-                    { firstPartSelect ? <InputGroup.Addon className="colon-separator">:</InputGroup.Addon> : null}
-                    <FormControl
-                        id="aliasInput"
-                        type="text"
-                        inputMode="latin"
-                        value={parts[1] || ''}
-                        autoFocus={true}
-                        placeholder="Type in a new identifier"
-                        onChange={this.onAliasSecondPartChange}
-                    />
-                </InputGroup>
-                <FormControl.Feedback />
-            </FormGroup>
-        );
-    }
-
-}
 
 /**
  * Main view for editing a specific object. This includes all non-same level
@@ -1925,6 +1860,7 @@ class IndividualObjectView extends React.Component{
                 updateUpload={this.props.updateUpload}
                 upload={this.props.upload}
                 uploadStatus={this.props.uploadStatus}
+                currentSubmittingUser={this.props.currentSubmittingUser}
             />
         );
     }
@@ -1938,38 +1874,31 @@ class IndividualObjectView extends React.Component{
      * object.
      */
     render(){
-        var fields = this.props.currContext ? Object.keys(this.props.currContext) : [];
+        var fields = this.props.currContext ? _.keys(this.props.currContext) : [];
         var buildFields = [];
         var linkedObjs = [];
-        var open = false;
         var detailContext;
         var i;
         var built;
+        var fieldComponents = _.filter(
+            _.map(fields, this.initiateField),
+            function(f){ return !!f; } // Removes falsy (e.g. null) items.
+        );
         if(this.props.roundTwo){
-            open = true;
-            for(i=0; i<fields.length; i++){
-                built = this.initiateField(fields[i]);
-                buildFields.push(built);
-            }
             var path = this.props.keyComplete[this.props.currKey];
             detailContext = this.props.keyContext[path];
-        }else{ // only use buildFields for round two
-            for (i=0; i<fields.length; i++){
-                built = this.initiateField(fields[i]);
-                if (built && built.props.isLinked){
-                    linkedObjs.push(built);
-                }else if(built){
-                    buildFields.push(built);
-                }
-            }
         }
-        // sort fields first by requirement and secondly alphabetically
-        linkedObjs = sortPropFields(linkedObjs);
-        buildFields = sortPropFields(buildFields);
+        //}else{ // only use buildFields for round two
+        //    fieldComponents = _.map(fields, this.initiateField)
+        //}
+        // sort fields first by requirement and secondly alphabetically. These are JSX BuildField components.
+        //linkedObjs = sortPropFields(linkedObjs);
+        //buildFields = sortPropFields(buildFields);
         var selecting = false;
         if(this.state.selectData !== null){
             selecting = true;
         }
+        console.log('FIELDS', fieldComponents, buildFields, linkedObjs);
         return(
             <div>
                 <Fade in={selecting} transitionAppear={true}>
@@ -1994,8 +1923,7 @@ class IndividualObjectView extends React.Component{
                 </Fade>
                 <Fade in={!selecting || this.state.fadeState} transitionAppear={true}>
                     <div>
-                        <FieldPanel title='Fields' fields={buildFields} currKey={this.props.currKey} open={open}/>
-                        <FieldPanel title='Linked objects' fields={linkedObjs} currKey={this.props.currKey} open={open}/>
+                        <FormFieldsContainer children={fieldComponents} currKey={this.props.currKey}/>
                         {
                             this.props.roundTwo ?
                             <RoundTwoDetailPanel schemas={this.props.schemas} context={detailContext} open={true} />
@@ -2004,6 +1932,24 @@ class IndividualObjectView extends React.Component{
                         }
                     </div>
                 </Fade>
+            </div>
+        );
+    }
+}
+
+class FormFieldsContainer extends React.Component {
+    render(){
+        if(React.Children.count(this.props.children) === 0) return null;
+        return(
+            <div className="form-fields-container">
+                <h4 className="clearfix page-subtitle submission-field-header">
+                    <span>
+                        Fields & Dependencies
+                    </span>
+                </h4>
+                <div>
+                    { this.props.children }
+                </div>
             </div>
         );
     }
@@ -2100,21 +2046,20 @@ class WarningBanner extends React.Component {
 
     constructor(props){
         super(props);
+        this.state = { open : true };
     }
 
     render() {
-        var style = {
-            'fontWeight': 300,
-            'textAlign': 'center',
-            'marginBottom': '10px',
-            'paddingTop': '5px',
-            'paddingBottom': '5px',
-            'color': '#8b8b8b'
-        };
-        var textBody = 'Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. The submission process is under active development and features may change.';
+        if (!this.state.open) return null;
+        var closeButton = (
+            <div className="pull-right submission-exit-button" data-tip="Hide message" onClick={(e)=>{ this.setState({ 'open' : false }); }}>
+                <i className="icon icon-times"/>
+            </div>
+        );
         return(
-            <h5 style={style}>
-                {textBody}
+            <h5 className="mb-2 text-400 warning-banner">
+                {closeButton}
+                Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. <br/>The submission process is under active development and features may change.
             </h5>
         );
     }

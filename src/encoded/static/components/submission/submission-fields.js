@@ -1,11 +1,12 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import * as globals from '../globals';
 import _ from 'underscore';
 import { ajax, console, object, isServerSide, animateScrollTo } from '../util';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
-import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox } from 'react-bootstrap';
+import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 var ProgressBar = require('rc-progress').Line;
 
@@ -40,7 +41,7 @@ export default class BuildField extends React.Component{
 
     displayField = (field_case) => {
         var inputProps = {
-            'id' : this.props.field,
+            'id' : 'field_for_' + this.props.field,
             'disabled' : this.props.disabled || false,
             'ref' : "inputElement",
             'value' : this.props.value || '',
@@ -50,19 +51,28 @@ export default class BuildField extends React.Component{
             'placeholder': "No value"
         };
         switch(field_case){
-            case 'text' : return (
-                <div className="input-wrapper" style={{'display':'inline'}}>
-                    <input type="text" inputMode="latin" {...inputProps} />
-                </div>
-            );
+            case 'text' : 
+                if (this.props.field === 'aliases'){
+                    // IN PROGRESS - TODO: split only on first ":" and style up.
+                    return (
+                        <div className="input-wrapper" style={{'display':'inline-block'}}>
+                            <AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={this.props.currentSubmittingUser} />
+                        </div>
+                    );
+                }
+                return (
+                    <div className="input-wrapper" style={{'display':'inline'}}>
+                        <input type="text" inputMode="latin" {...inputProps} />
+                    </div>
+                );
             case 'integer' : return (
                 <div className="input-wrapper" style={{'display':'inline'}}>
-                    <input id="intNumber" type="number" inputMode="latin" {...inputProps} />
+                    <input type="number" inputMode="latin" {...inputProps} />
                 </div>
             );
             case 'number' : return (
                 <div className="input-wrapper" style={{'display':'inline'}}>
-                    <input id="floatNumber" type="number" inputMode="latin" {...inputProps} />
+                    <input type="number" inputMode="latin" {...inputProps} />
                 </div>
             );
             /*
@@ -135,6 +145,10 @@ export default class BuildField extends React.Component{
                 currValue = parseFloat(currValue);
             }
         }
+        this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+    }
+
+    handleAliasChange = (currValue) =>{
         this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
     }
 
@@ -388,26 +402,15 @@ class ArrayField extends React.Component{
                 <BuildField
                     value={value}
                     schema={fieldSchema}
-                    field={this.props.field}
                     fieldType={fieldType}
                     fieldTip={fieldTip}
                     title={title}
                     enumValues={enumValues}
                     disabled={false}
-                    modifyNewContext={this.props.modifyNewContext}
                     required={false}
-                    linkType={this.props.linkType}
-                    selectObj={this.props.selectObj}
                     arrayIdx={arrayIdxList}
-                    nestedField={this.props.nestedField}
                     isArray={true}
-                    keyDisplay={this.props.keyDisplay}
-                    keyComplete={this.props.keyComplete}
-                    setSubmissionState= {this.props.setSubmissionState}
-                    updateUpload={this.props.updateUpload}
-                    upload={this.props.upload}
-                    uploadStatus={this.props.uploadStatus}
-                    md5Progress={this.props.md5Progress}
+                    { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj', 'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser') }
                 />
             </div>
         );
@@ -626,7 +629,7 @@ class AttachmentInput extends React.Component{
         };
         return(
             <div style={{'display': 'inherit'}}>
-                <input id={this.props.field} type='file' onChange={this.handleChange} style={{'display':'none'}} accept={this.acceptedTypes()}/>
+                <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} style={{'display':'none'}} accept={this.acceptedTypes()}/>
                 <Button bsSize="xsmall" style={{'padding':'0px'}}>
                     <label htmlFor={this.props.field} style={labelStyle}>
                         {attach_title}
@@ -781,7 +784,7 @@ class S3FileInput extends React.Component{
         return(
             <div>
                 <div>
-                    <input id={this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
+                    <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
                     <Button disabled={disableFile} style={{'padding':'0px'}}>
                         <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
                             {filename_text}
@@ -833,6 +836,94 @@ class S3FileInput extends React.Component{
             </div>
         );
     }
+}
+
+/**
+ * Accepts a 'value' prop (which should contain a colon, at minimum) and present two fields for modifying its two parts.
+ * 
+ * First part is name of a "submits_for" lab, second part is any custom string identifier.
+ * Present a drop-down for submit_for lab selection, and text input box for identifier.
+ * On change of either inputs, calls 'onAliasChange' function callback, passing the new modified value (including colon) as parameter.
+ */
+export class AliasInputField extends React.Component {
+    
+    static propTypes = {
+        'value' : PropTypes.string.isRequired,
+        'onAliasChange' : PropTypes.func.isRequired,
+        'currentSubmittingUser' : PropTypes.shape({
+            'submits_for' : PropTypes.arrayOf(PropTypes.shape({
+                'name' : PropTypes.string,
+                'display_title' : PropTypes.string
+            }))
+        }).isRequired,
+        'errorMessage' : PropTypes.string // String or null
+    }
+
+    constructor(props){
+        super(props); // Inherits this.onHide() function.
+        this.onAliasSecondPartChange = this.onAliasSecondPartChange.bind(this);
+        this.onAliasFirstPartChange = this.onAliasFirstPartChange.bind(this);
+    }
+
+    onAliasFirstPartChange(evtKey, e){
+        e.preventDefault();
+        var firstPartOfAlias = evtKey;
+        var aliasParts = this.props.value.split(':');
+        aliasParts[0] = firstPartOfAlias;
+        this.props.onAliasChange(aliasParts.join(':'));
+    }
+
+    onAliasSecondPartChange(e){
+        e.preventDefault();
+        var secondPartOfAlias = e.target.value;
+        var aliasParts = this.props.value.split(':');
+        aliasParts[1] = secondPartOfAlias;
+        this.props.onAliasChange(aliasParts.join(':'));
+    }
+
+    render(){
+        var firstPartSelect = null;
+        var parts = this.props.value.split(':');
+        var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
+        if (submits_for_list && submits_for_list.length === 1){
+            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ submits_for_list[0].name }</InputGroup.Addon>;
+        } else if (submits_for_list.length > 1){
+            firstPartSelect = (
+                <DropdownButton
+                    className="alias-lab-select form-control"
+                    onSelect={this.onAliasFirstPartChange}
+                    componentClass={InputGroup.Button}
+                    id="aliasFirstPartInput"
+                    title={(parts.length > 1 && (
+                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right">{ parts[0] }</span></span>
+                    )) || 'Select a Lab'}
+                >
+                    { _.map(submits_for_list, function(lab){
+                        return <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>;
+                    }) }
+                </DropdownButton>
+            );
+        }
+        return (
+            <FormGroup className="mb-0" validationState={this.props.errorMessage ? 'error' : null}>
+                <InputGroup>
+                    { firstPartSelect }
+                    { firstPartSelect ? <InputGroup.Addon className="colon-separator">:</InputGroup.Addon> : null}
+                    <FormControl
+                        id="aliasInput"
+                        type="text"
+                        inputMode="latin"
+                        value={parts[1] || ''}
+                        autoFocus={true}
+                        placeholder="Type in a new identifier"
+                        onChange={this.onAliasSecondPartChange}
+                    />
+                </InputGroup>
+                <FormControl.Feedback />
+            </FormGroup>
+        );
+    }
+
 }
 
 class InfoIcon extends React.Component{
