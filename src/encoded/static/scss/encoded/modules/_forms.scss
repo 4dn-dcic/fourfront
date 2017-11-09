@@ -709,6 +709,16 @@ div.fieldset.editable-fields {
 		}
 	}
 
+	.submission-working-title {
+		font-weight: 300;
+		float: left;
+		> .working-subtitle{
+			font-weight: 200;
+			color: #8b8b8b;
+			padding-right: 10px;
+		}
+	}
+
 	.action-buttons-container {
 		button[disabled]{
 			pointer-events: all;
@@ -842,15 +852,6 @@ div.fieldset.editable-fields {
 	}
 }
 
-.submission-working-title{
-	display: inline;
-	font-weight: 300;
-	> .working-subtitle{
-		font-weight: 200;
-		color: #8b8b8b;
-		padding-right: 10px;
-	}
-}
 
 .submission-hidden-nav{
 	display: none;
