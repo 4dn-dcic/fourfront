@@ -802,17 +802,11 @@ export default class SubmissionView extends React.Component{
                     </Button>
                 );
             }else{
-                return(
-                    <Button bsStyle="warning" style={style} disabled>
-                        {'Skip'}
-                    </Button>
-                );
+                return <Button bsStyle="warning" style={style} disabled>Skip</Button>;
             }
         }else if(validity == 3 || validity == 4){
             return(
-                <Button bsStyle="info" style={style} disabled>
-                    {'Validated'}
-                </Button>
+                <Button bsStyle="info" style={style} disabled>Validated</Button>
             );
         }else if(validity == 2){
             if(this.state.processingFetch){
@@ -1181,6 +1175,7 @@ export default class SubmissionView extends React.Component{
                                 this.setState(stateToSet);
                             }
                         }
+                        ReactTooltip.rebuild();
                     }
                 });
 
@@ -1297,9 +1292,7 @@ export default class SubmissionView extends React.Component{
         var currContext = this.state.keyContext[currKey];
         var navCol = this.state.fullScreen ? 'submission-hidden-nav' : 'col-sm-2';
         var bodyCol = this.state.fullScreen ? 'col-sm-12' : 'col-sm-10';
-        if(this.state.fullScreen){
-            headerStyle.display = 'none';
-        }
+
         // remove context and navigate from this.props
         const{
             context,
@@ -1330,7 +1323,7 @@ export default class SubmissionView extends React.Component{
                     </div>
                     <div className={bodyCol}>
                         <div className="clearfix mb-1 mt-1">
-                            <h3 className="submission-working-title mt-05 mb-0">
+                            <h3 className="submission-working-title mt-05 mb-0" style={{ 'display' : this.state.fullScreen ? 'none' : 'block' }}>
                                 <span className='working-subtitle'>
                                     {currType}
                                 </span>

@@ -709,6 +709,12 @@ div.fieldset.editable-fields {
 		}
 	}
 
+	.action-buttons-container {
+		button[disabled]{
+			pointer-events: all;
+		}
+	}
+
 	.form-fields-container {
 
 		div.field-row {
