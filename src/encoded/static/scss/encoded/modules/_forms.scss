@@ -744,9 +744,11 @@ div.fieldset.editable-fields {
 				padding-top: 16px;
 			}
 
-			.remove-button-container {
-				> button {
-					font-weight: 400;
+			.remove-button-column {
+				.remove-button-container {
+					> button {
+						font-weight: 400;
+					}
 				}
 			}
 

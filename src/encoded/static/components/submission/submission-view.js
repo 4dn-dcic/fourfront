@@ -788,13 +788,13 @@ export default class SubmissionView extends React.Component{
      */
     generateValidationButton(){
         var validity = this.state.keyValid[this.state.currKey];
-        var style={'width':'100px'};
+        var style={'width':'100px','marginLeft':'10px'};
         // when roundTwo, replace the validation button with a Skip
         // button that completes the submission process for currKey
         if(this.state.roundTwo){
             if(this.state.upload === null && this.state.md5Progress === null){
                 return(
-                    <Button bsStyle="warning" bsSize="xsmall" style={style} onClick={function(e){
+                    <Button bsStyle="warning" style={style} onClick={function(e){
                         e.preventDefault();
                         this.finishRoundTwo();
                     }.bind(this)}>
@@ -803,27 +803,27 @@ export default class SubmissionView extends React.Component{
                 );
             }else{
                 return(
-                    <Button bsStyle="warning" bsSize="xsmall" style={style} disabled>
+                    <Button bsStyle="warning" style={style} disabled>
                         {'Skip'}
                     </Button>
                 );
             }
         }else if(validity == 3 || validity == 4){
             return(
-                <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
+                <Button bsStyle="info" style={style} disabled>
                     {'Validated'}
                 </Button>
             );
         }else if(validity == 2){
             if(this.state.processingFetch){
                 return(
-                    <Button bsSize="xsmall" bsStyle="danger" style={style} disabled>
+                    <Button bsStyle="danger" style={style} disabled>
                         <i className="icon icon-spin icon-circle-o-notch"></i>
                     </Button>
                 );
             }else{
                 return(
-                    <Button bsSize="xsmall" bsStyle="danger" style={style} onClick={this.testPostNewContext}>
+                    <Button bsStyle="danger" style={style} onClick={this.testPostNewContext}>
                         {'Validate'}
                     </Button>
                 );
@@ -831,20 +831,20 @@ export default class SubmissionView extends React.Component{
         }else if (validity == 1){
             if(this.state.processingFetch){
                 return(
-                    <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
+                    <Button bsStyle="info" style={style} disabled>
                         <i className="icon icon-spin icon-circle-o-notch"></i>
                     </Button>
                 );
             }else{
                 return(
-                    <Button bsSize="xsmall" bsStyle="info" style={style} onClick={this.testPostNewContext}>
+                    <Button bsStyle="info" style={style} onClick={this.testPostNewContext}>
                         {'Validate'}
                     </Button>
                 );
             }
         }else{
             return(
-                <Button bsSize="xsmall" bsStyle="info" style={style} disabled>
+                <Button bsStyle="info" style={style} disabled>
                     {'Validate'}
                 </Button>
             );
@@ -864,13 +864,13 @@ export default class SubmissionView extends React.Component{
         if(this.state.roundTwo){
             if(this.state.upload !== null || this.state.processingFetch || this.state.md5Progress !== null){
                 return(
-                    <Button bsSize="xsmall" bsStyle="success" style={style} disabled>
+                    <Button bsStyle="success" style={style} disabled>
                         <i className="icon icon-spin icon-circle-o-notch"></i>
                     </Button>
                 );
             }else{
                 return(
-                    <Button bsSize="xsmall" bsStyle="success" style={style} onClick={this.realPostNewContext}>
+                    <Button bsStyle="success" style={style} onClick={this.realPostNewContext}>
                         {'Submit'}
                     </Button>
                 );
@@ -878,26 +878,26 @@ export default class SubmissionView extends React.Component{
         }else if(validity == 3){
             if(this.state.processingFetch){
                 return(
-                    <Button bsSize="xsmall" bsStyle="success" style={style} disabled>
+                    <Button bsStyle="success" style={style} disabled>
                         <i className="icon icon-spin icon-circle-o-notch"></i>
                     </Button>
                 );
             }else{
                 return(
-                    <Button bsSize="xsmall" bsStyle="success" style={style} onClick={this.realPostNewContext}>
+                    <Button bsStyle="success" style={style} onClick={this.realPostNewContext}>
                         {'Submit'}
                     </Button>
                 );
             }
         }else if(validity == 4){
             return(
-                <Button bsSize="xsmall" bsStyle="success" style={style} disabled>
+                <Button bsStyle="success" style={style} disabled>
                     {'Submitted'}
                 </Button>
             );
         }else{
             return(
-                <Button bsSize="xsmall" bsStyle="success" style={style} disabled>
+                <Button bsStyle="success" style={style} disabled>
                     {'Submit'}
                 </Button>
             );
@@ -906,7 +906,7 @@ export default class SubmissionView extends React.Component{
 
     generateCancelButton(){
         return(
-            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'100px','marginLeft':'10px'}} onClick={this.cancelCreatePrimaryObject}>Cancel / Exit</Button>
+            <Button bsStyle="danger" style={{'width':'100px'}} onClick={this.cancelCreatePrimaryObject}>Cancel / Exit</Button>
         ); 
     }
 
@@ -1297,7 +1297,6 @@ export default class SubmissionView extends React.Component{
         var currContext = this.state.keyContext[currKey];
         var navCol = this.state.fullScreen ? 'submission-hidden-nav' : 'col-sm-2';
         var bodyCol = this.state.fullScreen ? 'col-sm-12' : 'col-sm-10';
-        var headerStyle = {'marginTop':'10px', 'marginBottom':'10px'};
         if(this.state.fullScreen){
             headerStyle.display = 'none';
         }
@@ -1330,8 +1329,8 @@ export default class SubmissionView extends React.Component{
                         />
                     </div>
                     <div className={bodyCol}>
-                        <div style={headerStyle}>
-                            <h3 className="submission-working-title">
+                        <div className="clearfix mb-1 mt-1">
+                            <h3 className="submission-working-title mt-05 mb-0">
                                 <span className='working-subtitle'>
                                     {currType}
                                 </span>
@@ -1339,11 +1338,7 @@ export default class SubmissionView extends React.Component{
                                     {this.state.keyDisplay[currKey]}
                                 </span>
                             </h3>
-                            <div className="pull-right">
-                                {this.generateValidationButton()}
-                                {this.generateSubmitButton()}
-                                {this.generateCancelButton()}
-                            </div>
+                            <div className="pull-right action-buttons-container" children={[this.generateCancelButton(), this.generateValidationButton(), this.generateSubmitButton()]} />
                         </div>
                         <IndividualObjectView
                             {...others}
@@ -1469,9 +1464,9 @@ class AliasSelectModal extends TypeSelectModal {
                             </div>
                         </Collapse>
                         <div className="text-right">
-                            <Button type="button" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
-                            &nbsp;
                             <Button type="button" bsStyle="danger" onClick={this.onHide}>Cancel / Exit</Button>
+                            {' '}
+                            <Button type="button" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
                         </div>
                     </div>
                 </Modal.Body>
@@ -1768,12 +1763,12 @@ class IndividualObjectView extends React.Component{
             // return a placeholder informing user that this field is for roundTwo
             return(
                 <div key={fieldTitle} className="row field-row" required={false} title={fieldTitle} style={{'overflow':'visible'}}>
-                    <div className="col-sm-12 col-md-3">
+                    <div className="col-sm-12 col-md-4">
                         <h5 className="facet-title submission-field-title">
                             {fieldTitle}
                         </h5>
                     </div>
-                    <div className="col-sm-12 col-md-9">
+                    <div className="col-sm-12 col-md-8">
                         <div className="field-container">
                             <div className="notice-message">This field is available after finishing initial submission.</div>
                         </div>

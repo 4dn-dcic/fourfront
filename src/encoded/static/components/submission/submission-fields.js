@@ -109,9 +109,7 @@ export default class BuildField extends React.Component{
                 </div>
             );
             case 'file upload' : return (
-                <div style={{'display':'inline'}}>
-                    <S3FileInput {...this.props}/>
-                </div>
+                <S3FileInput {...this.props}/>
             );
         }
         // Fallback
@@ -227,6 +225,8 @@ export default class BuildField extends React.Component{
         }
 
         var wrapFunc = this.wrapWithLabel;
+
+        var excludeRemoveButton = (this.props.fieldType === 'array' || this.props.fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
         
         if(this.props.isArray){
             wrapFunc = this.wrapWithNoLabel; // array items don't need fieldnames/tooltips
@@ -241,19 +241,21 @@ export default class BuildField extends React.Component{
             }
         }
 
+        console.log('FIELD IS WAT?', this.props.fieldType, this.props.field)
+
         return wrapFunc(
-            <div className={"col-sm-12" + (this.props.fieldType !== 'array' ? " col-md-10" : '')}>
+            <div className={"col-sm-12" + (excludeRemoveButton ? "": " col-md-10")}>
                 {this.displayField(this.props.fieldType)}
             </div>,
-            this.props.fieldType !== 'array' ? (
-                <div className="col-xs-12 col-md-2">
+            excludeRemoveButton ? null : (
+                <div className="col-xs-12 col-md-2 remove-button-column">
                     <Fade in={showDelete}>
                         <div className="pull-right remove-button-container">
                             <Button bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>Remove</Button>
                         </div>
                     </Fade>
                 </div>
-            ): null
+            )
         );
     }
 }
@@ -765,6 +767,7 @@ class S3FileInput extends React.Component{
     }
 
     render(){
+        console.log(this.props.value, this.props.field, 'ESTD');
         var statusTip = this.state.status;
         var showDelete = false;
         var filename_text = "No file chosen";
@@ -784,9 +787,7 @@ class S3FileInput extends React.Component{
                 <div>
                     <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
                     <Button disabled={disableFile} style={{'padding':'0px'}}>
-                        <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
-                            {filename_text}
-                        </label>
+                        <label children={filename_text} className="text-400" htmlFor={"field_for_" + this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}/>
                     </Button>
                     <Fade in={showDelete}>
                         <div className="pull-right">
