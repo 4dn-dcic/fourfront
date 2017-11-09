@@ -610,65 +610,70 @@ div.fieldset.editable-fields {
 *********** Submission & Edit View	****************
 ****************************************************/
 
+// Alias Input Multi-Field
+@mixin alias-input-fields {
+	.input-group {
+		.dropdown.input-group-btn {
+			width: 20%;
+			> button#aliasFirstPartInput {
+				width: 100%;
+				border-right: none;
+				box-shadow: none;
+				outline: none;
+				padding-left: 24px;
+				padding-right: 8px;
+				span.caret {
+					opacity: 0.33;
+					left: 10px;
+					right: unset;
+				}
+				small.pull-left {
+					margin-top: 2px;
+					opacity: 0.5;
+				}
+			}
+			&:hover, &:focus, &:active, &.focus, &.active {
+				> button {
+					span.caret {
+						opacity: 1;
+					}
+					small.pull-left {
+						margin-top: 2px;
+						opacity: 1;
+					}
+				}
+			}
+		}
+		.input-group-addon.alias-lab-single-option {
+			background: #fff;
+			padding-left: 24px;
+			padding-right: 5px;
+		}
+		.input-group-addon.colon-separator {
+			font-weight: 700;
+			border-left: none;
+			border-right: none;
+			background-color: #fff;
+			padding-left: 3px;
+			padding-right: 3px;
+			& + input{
+				border-left: none;
+				padding-left: 8px;
+				&:focus {
+					border-color: #aaa;
+					box-shadow: inset -2px 1px 1px rgba(0,0,0,0.075), 3px 0 8px rgba(0,0,0,0.1);
+				}
+			}
+		}
+	}
+}
+
 // Modal forms
 
 .submission-view-modal {
 	.modal-content {
 		.input-wrapper {
-			.input-group {
-				.dropdown.input-group-btn {
-					width: 20%;
-					> button#aliasFirstPartInput {
-						width: 100%;
-						border-right: none;
-						box-shadow: none;
-						outline: none;
-						padding-left: 24px;
-						padding-right: 8px;
-						span.caret {
-							opacity: 0.33;
-							left: 10px;
-							right: unset;
-						}
-						small.pull-left {
-							margin-top: 2px;
-							opacity: 0.5;
-						}
-					}
-					&:hover, &:focus, &:active, &.focus, &.active {
-						> button {
-							span.caret {
-								opacity: 1;
-							}
-							small.pull-left {
-								margin-top: 2px;
-								opacity: 1;
-							}
-						}
-					}
-				}
-				.input-group-addon.alias-lab-single-option {
-					background: transparent;
-					padding-left: 24px;
-					padding-right: 8px;
-				}
-				.input-group-addon.colon-separator {
-					font-weight: 700;
-					border-left: none;
-					border-right: none;
-					background-color: transparent;
-					padding-left: 3px;
-					padding-right: 3px;
-					& + input{
-						border-left: none;
-						padding-left: 8px;
-						&:focus {
-							border-color: #aaa;
-							box-shadow: inset -2px 1px 1px rgba(0,0,0,0.075), 3px 0 8px rgba(0,0,0,0.1);
-						}
-					}
-				}
-			}
+			@include alias-input-fields;
 		}
 	}
 }
@@ -703,4 +708,143 @@ div.fieldset.editable-fields {
 			}
 		}
 	}
+
+	.form-fields-container {
+
+		div.field-row {
+			position: relative;
+			&:hover {
+				z-index: 100;
+			}
+			&:not(:last-child){
+				border-bottom: 1px solid #f4f4f4;
+			}
+
+			&.in-array-field {
+				padding-top: 8px;
+				padding-bottom: 8px;
+			}
+
+			.field-container {
+				min-height: 50px;
+				padding-top: 8px;
+				padding-bottom: 8px;
+				.submitted-linked-object-display-container, .notice-message {
+					padding-top: 8px;
+					padding-bottom: 8px;
+				}
+				.notice-message {
+					color: #999;
+				}
+			}
+
+			.submission-field-title{
+				margin: 0 !important;
+				font-weight: 500;
+				padding-top: 16px;
+			}
+
+			.remove-button-container {
+				> button {
+					font-weight: 400;
+				}
+			}
+
+			// Fields containing arrays
+			.array-field-container {
+				min-height: 50px;
+				&.even {
+					background-color: #f4f4f4;
+				}
+				&:not(:last-child){
+					border-bottom: 1px solid #ddd;
+				}
+			}
+
+			// Override array-containing field style to have no padding as it recursively will render field items with their own padding (so don't double-pad).
+			&[data-field-type="array"] .row.field-container {
+				padding-top: 0;
+				padding-bottom: 0;
+			}
+
+			// Override aliases field style re: AliasInputField
+			&[data-field-name="aliases"]{
+				.input-wrapper {
+					@include alias-input-fields;
+					.dropdown.input-group-btn {
+						width: 30% !important;
+					}
+				}
+			}
+
+			.select-create-linked-item-button {
+				width: 160px;
+				margin-right: 10px;
+			}
+
+		}
+
+	}
+
 }
+
+// SUBMISSION STUFF
+
+.submission-field-header{
+	background-color: #e7e7e7;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	span {
+		margin-left: 12px;
+	}
+	margin-bottom: 0px !important;
+}
+
+.submission-nav-tree{
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	background-color: #fff;
+	> h4{
+		text-align: center;
+		font-weight: 300;
+		margin-top: 0px;
+	}
+}
+
+.submission-nav-leaf{
+	width: 100%;
+	> div > button{
+		border: none;
+		border-radius: 0px;
+		width: 20px;
+		height: 19px;
+		opacity: 1 !important;
+	}
+}
+
+.submission-pop-icon{
+	background-color: #fff;
+	padding: 1px 5px;
+	a:hover, a:active {
+		text-decoration: none !important;
+		color: #000000;
+	}
+	a{
+		padding: 3px 5px 0px 5px;
+	}
+}
+
+.submission-working-title{
+	display: inline;
+	font-weight: 300;
+	> .working-subtitle{
+		font-weight: 200;
+		color: #8b8b8b;
+		padding-right: 10px;
+	}
+}
+
+.submission-hidden-nav{
+	display: none;
+}
+

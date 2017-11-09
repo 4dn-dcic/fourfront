@@ -906,7 +906,7 @@ export default class SubmissionView extends React.Component{
 
     generateCancelButton(){
         return(
-            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'100px','marginLeft':'10px'}} onClick={this.cancelCreatePrimaryObject}>Cancel/Exit</Button>
+            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'100px','marginLeft':'10px'}} onClick={this.cancelCreatePrimaryObject}>Cancel / Exit</Button>
         ); 
     }
 
@@ -1471,7 +1471,7 @@ class AliasSelectModal extends TypeSelectModal {
                         <div className="text-right">
                             <Button type="button" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
                             &nbsp;
-                            <Button type="button" bsStyle="danger" onClick={this.onHide}>Cancel/Exit</Button>
+                            <Button type="button" bsStyle="danger" onClick={this.onHide}>Cancel / Exit</Button>
                         </div>
                     </div>
                 </Modal.Body>
@@ -1767,15 +1767,15 @@ class IndividualObjectView extends React.Component{
         }else if(!this.props.roundTwo && secondRoundField){
             // return a placeholder informing user that this field is for roundTwo
             return(
-                <div key={fieldTitle} className="row facet" required={false} title={fieldTitle} style={{'overflow':'visible'}}>
+                <div key={fieldTitle} className="row field-row" required={false} title={fieldTitle} style={{'overflow':'visible'}}>
                     <div className="col-sm-12 col-md-3">
                         <h5 className="facet-title submission-field-title">
                             {fieldTitle}
                         </h5>
                     </div>
                     <div className="col-sm-12 col-md-9">
-                        <div style={{'color':'#8b8b8b'}}>
-                            {'This field is available after finishing initial submission.'}
+                        <div className="field-container">
+                            <div className="notice-message">This field is available after finishing initial submission.</div>
                         </div>
                     </div>
                 </div>

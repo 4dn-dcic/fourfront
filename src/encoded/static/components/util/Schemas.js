@@ -32,7 +32,7 @@ export const itemTypeHierarchy = {
         'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
     ],
     'FileSet': [
-        'FileSet', 'FileSetCalibration'
+        'FileSet', 'FileSetCalibration', 'FileSetMicroscopyQc'
     ],
     'Individual': [
         'IndividualHuman', 'IndividualMouse'
@@ -45,6 +45,9 @@ export const itemTypeHierarchy = {
     ],
     'WorkflowRun' : [
         'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
+    ],
+    'MicroscopeSetting' : [
+        'MicroscopeSettingA1', 'MicroscopeSettingA2', 'MicroscopeSettingD1', 'MicroscopeSettingD2'
     ]
 };
 

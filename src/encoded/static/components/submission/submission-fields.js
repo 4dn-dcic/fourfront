@@ -22,6 +22,8 @@ export default class BuildField extends React.Component{
 
     constructor(props){
         super(props);
+        this.wrapWithLabel = this.wrapWithLabel.bind(this);
+        this.wrapWithNoLabel = this.wrapWithNoLabel.bind(this);
         this.state = {
             'dropdownOpen' : false
         };
@@ -53,26 +55,25 @@ export default class BuildField extends React.Component{
         switch(field_case){
             case 'text' : 
                 if (this.props.field === 'aliases'){
-                    // IN PROGRESS - TODO: split only on first ":" and style up.
                     return (
-                        <div className="input-wrapper" style={{'display':'inline-block'}}>
+                        <div className="input-wrapper">
                             <AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={this.props.currentSubmittingUser} />
                         </div>
                     );
                 }
                 return (
                     <div className="input-wrapper" style={{'display':'inline'}}>
-                        <input type="text" inputMode="latin" {...inputProps} />
+                        <FormControl type="text" inputMode="latin" {...inputProps} />
                     </div>
                 );
             case 'integer' : return (
                 <div className="input-wrapper" style={{'display':'inline'}}>
-                    <input type="number" inputMode="latin" {...inputProps} />
+                    <FormControl type="number" inputMode="latin" {...inputProps} />
                 </div>
             );
             case 'number' : return (
                 <div className="input-wrapper" style={{'display':'inline'}}>
-                    <input type="number" inputMode="latin" {...inputProps} />
+                    <FormControl type="number" inputMode="latin" {...inputProps} />
                 </div>
             );
             /*
@@ -84,7 +85,7 @@ export default class BuildField extends React.Component{
             */
             case 'enum' : return (
                 <span className="input-wrapper" style={{'display':'inline'}}>
-                    <DropdownButton bsSize="xsmall" id="dropdown-size-extra-small" title={this.props.value || "No value"} onToggle={this.handleDropdownButtonToggle}>
+                    <DropdownButton title={this.props.value || <span className="text-300">No value</span>} onToggle={this.handleDropdownButtonToggle}>
                         {this.props.enumValues.map((val) => this.buildEnumEntry(val))}
                     </DropdownButton>
                 </span>
@@ -95,10 +96,7 @@ export default class BuildField extends React.Component{
                 </div>
             );
             case 'array' : return (
-                <div style={{'display':'inline'}}>
-                    <ArrayField {...this.props}/>
-                </div>
-
+                <ArrayField {...this.props}/>
             );
             case 'object' : return (
                 <div style={{'display':'inline'}}>
@@ -169,6 +167,48 @@ export default class BuildField extends React.Component{
         this.props.modifyNewContext(this.props.nestedField, valueCopy, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
     }
 
+    commonRowProps(){
+        return {
+            'className' : "field-row" + (this.state.dropdownOpen ? ' active-submission-row' : '') + (this.props.isArray ? ' in-array-field' : ''),
+            'data-field-type' : this.props.fieldType,
+            'data-field-name' : this.props.field,
+            'style' : { 'overflow' : 'visible' }
+        };
+    }
+
+    wrapWithLabel(){
+        return(
+            <div {...this.commonRowProps()}>
+                <div className="row">
+                    <div className="col-sm-12 col-md-4">
+                        <h5 className="facet-title submission-field-title">
+                            <span style={{'marginRight': '6px'}} className="inline-block">{this.props.title}</span>
+                            <InfoIcon children={this.props.fieldTip}/>
+                            {this.props.required ?
+                                <span style={{'color':'#a94442', "marginRight":"6px"}}>Required</span>
+                                : null
+                            }
+                            {this.props.fieldType === 'array' ?
+                                <Button bsSize="xsmall" onClick={this.pushArrayValue}>Add</Button>
+                                :
+                                null
+                            }
+                        </h5>
+                    </div>
+                    <div className="col-sm-12 col-md-8">
+                        <div className="row field-container">
+                            { Array.prototype.slice.call(arguments) }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    wrapWithNoLabel(){
+        return <div {...this.commonRowProps()}>{ Array.prototype.slice.call(arguments) }</div>;
+    }
+
     render = () => {
         // TODO: come up with a schema based solution for code below?
         // hardcoded fields you can't delete
@@ -186,10 +226,10 @@ export default class BuildField extends React.Component{
             showDelete = false;
         }
 
-        var rowClassName = "row facet" + (this.state.dropdownOpen ? ' active-submission-row' : '');
-
-        // array items don't need fieldnames/tooltips
+        var wrapFunc = this.wrapWithLabel;
+        
         if(this.props.isArray){
+            wrapFunc = this.wrapWithNoLabel; // array items don't need fieldnames/tooltips
             // if we've got an object that's inside inside an array, only allow
             // the array to be deleted if ALL individual fields are null
             if(this.props.fieldType === 'object'){
@@ -199,54 +239,21 @@ export default class BuildField extends React.Component{
                     showDelete = false;
                 }
             }
-            return(
-                <div className={rowClassName} style={{'overflow':'visible'}}>
-                    <div className="col-sm-12">
-                        <div>
-                            {this.displayField(this.props.fieldType)}
-                            <Fade in={showDelete}>
-                                <div className="pull-right">
-                                    <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                        {'Remove'}
-                                    </Button>
-                                </div>
-                            </Fade>
-                        </div>
-                    </div>
-                </div>
-            );
         }
-        return(
 
-            <div className={rowClassName} style={{'overflow':'visible'}}>
-                <div className="col-sm-12 col-md-3">
-                    <h5 className="facet-title submission-field-title">
-                        <span style={{'marginRight': '6px'}} className="inline-block">{this.props.title}</span>
-                        <InfoIcon children={this.props.fieldTip}/>
-                        {this.props.required ?
-                            <span style={{'color':'#a94442', "marginRight":"6px"}}>Required</span>
-                            : null
-                        }
-                        {this.props.fieldType === 'array' ?
-                            <Button bsSize="xsmall" onClick={this.pushArrayValue}>Add</Button>
-                            :
-                            null
-                        }
-                    </h5>
+        return wrapFunc(
+            <div className={"col-sm-12" + (this.props.fieldType !== 'array' ? " col-md-10" : '')}>
+                {this.displayField(this.props.fieldType)}
+            </div>,
+            this.props.fieldType !== 'array' ? (
+                <div className="col-xs-12 col-md-2">
+                    <Fade in={showDelete}>
+                        <div className="pull-right remove-button-container">
+                            <Button bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>Remove</Button>
+                        </div>
+                    </Fade>
                 </div>
-                <div className="col-sm-12 col-md-9">
-                    <div>
-                        {this.displayField(this.props.fieldType)}
-                        <Fade in={showDelete}>
-                            <div className="pull-right">
-                                <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                    {'Remove'}
-                                </Button>
-                            </div>
-                        </Fade>
-                    </div>
-                </div>
-            </div>
+            ): null
         );
     }
 }
@@ -277,7 +284,6 @@ class LinkedObj extends React.Component{
 
     render(){
         var objType = this.props.schema.linkTo;
-        var style={'width':'160px', 'marginRight':'10px'};
         // object chosen or being created
         if(this.props.value){
             var keyDisplay = this.props.keyDisplay;
@@ -285,10 +291,10 @@ class LinkedObj extends React.Component{
             if(isNaN(this.props.value)){
                 thisDisplay = keyDisplay[this.props.value] || this.props.value;
                 return(
-                    <div>
+                    <div className="submitted-linked-object-display-container">
                         <a href={this.props.value} target="_blank">
                             <span>{thisDisplay}</span>
-                            <i style={{'paddingLeft':'4px'}} className={"icon icon-external-link"}></i>
+                            &nbsp;<i style={{'paddingLeft':'4px'}} className="icon icon-external-link"></i>
                         </a>
                     </div>
                 );
@@ -302,7 +308,7 @@ class LinkedObj extends React.Component{
                 if(this.props.keyComplete[intKey]){
                     return(
                         <div>
-                            <a href="" onClick={function(e){
+                            <a href="#" onClick={function(e){
                                 e.preventDefault();
                                 var win = window.open(this.props.keyComplete[intKey], '_blank');
                                 if(win){
@@ -333,11 +339,11 @@ class LinkedObj extends React.Component{
         // nothing chosen/created yet
         return(
             <div>
-                <Button bsSize="xsmall" style={style} onClick={function(e){
+                <Button className="select-create-linked-item-button" onClick={function(e){
                     e.preventDefault();
                     this.props.selectObj(objType, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
                 }.bind(this)}>Select existing</Button>
-                <Button bsSize="xsmall" style={style}onClick={function(e){
+                <Button className="select-create-linked-item-button" onClick={function(e){
                     e.preventDefault();
                     this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, objType);
                 }.bind(this)}>Create new</Button>
@@ -382,14 +388,6 @@ class ArrayField extends React.Component{
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
         }
-        var style = {};
-        // stripe every other item for ease of visibility
-        if(arrayIdx % 2 == 0){
-            style.backgroundColor = '#f4f4f4';
-        }else{
-            style.backgroundColor = '#fff';
-            style.border = "1px solid #ccc";
-        }
         var arrayIdxList;
         if(this.props.arrayIdx){
             arrayIdxList = this.props.arrayIdx.slice();
@@ -398,7 +396,7 @@ class ArrayField extends React.Component{
         }
         arrayIdxList.push(arrayIdx);
         return(
-            <div key={arrayIdx} style={style}>
+            <div key={arrayIdx} className={"array-field-container " + (arrayIdx % 2 === 0 ? 'even' : 'odd')}>
                 <BuildField
                     value={value}
                     schema={fieldSchema}
@@ -792,9 +790,7 @@ class S3FileInput extends React.Component{
                     </Button>
                     <Fade in={showDelete}>
                         <div className="pull-right">
-                            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                {'Remove'}
-                            </Button>
+                            <Button bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>Remove</Button>
                         </div>
                     </Fade>
                 </div>
@@ -859,31 +855,63 @@ export class AliasInputField extends React.Component {
         'errorMessage' : PropTypes.string // String or null
     }
 
+    static defaultProps = {
+        'value' : ':'
+    }
+
+    static splitInTwo(str){
+        var parts = (str || ':').split(':');
+        if (parts.length > 2){
+            return [ parts[0], parts.slice(1).join(':') ];
+        }
+        return parts;
+    }
+
     constructor(props){
         super(props); // Inherits this.onHide() function.
         this.onAliasSecondPartChange = this.onAliasSecondPartChange.bind(this);
         this.onAliasFirstPartChange = this.onAliasFirstPartChange.bind(this);
     }
 
+    getInitialSubmitsForPart(){
+        var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
+        if (submits_for_list && submits_for_list.length >= 1){
+            return submits_for_list[0].name;
+        }
+        return null;
+    }
+
+    finalizeAliasPartsChange(aliasParts){
+        // Also check to see if need to add first or second part, e.g. if original value passed in was '' or null.
+        if (!aliasParts[0]) {
+            aliasParts[0] = this.getInitialSubmitsForPart();
+        }
+        if (aliasParts.length === 1){
+            aliasParts[1] = '';
+        }
+        this.props.onAliasChange(aliasParts.join(':'));
+    }
+
     onAliasFirstPartChange(evtKey, e){
         e.preventDefault();
         var firstPartOfAlias = evtKey;
-        var aliasParts = this.props.value.split(':');
+        var aliasParts = AliasInputField.splitInTwo(this.props.value);
         aliasParts[0] = firstPartOfAlias;
-        this.props.onAliasChange(aliasParts.join(':'));
+        this.finalizeAliasPartsChange(aliasParts);
     }
 
     onAliasSecondPartChange(e){
         e.preventDefault();
         var secondPartOfAlias = e.target.value;
-        var aliasParts = this.props.value.split(':');
+        var aliasParts = AliasInputField.splitInTwo(this.props.value);
         aliasParts[1] = secondPartOfAlias;
-        this.props.onAliasChange(aliasParts.join(':'));
+        this.finalizeAliasPartsChange(aliasParts);
     }
 
     render(){
         var firstPartSelect = null;
-        var parts = this.props.value.split(':');
+        var parts = AliasInputField.splitInTwo(this.props.value);
+        console.log('VA:S', this.props.value, parts);
         var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
         if (submits_for_list && submits_for_list.length === 1){
             firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ submits_for_list[0].name }</InputGroup.Addon>;
@@ -895,7 +923,7 @@ export class AliasInputField extends React.Component {
                     componentClass={InputGroup.Button}
                     id="aliasFirstPartInput"
                     title={(parts.length > 1 && (
-                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right">{ parts[0] }</span></span>
+                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right">{ (parts[0] || this.getInitialSubmitsForPart()) }</span></span>
                     )) || 'Select a Lab'}
                 >
                     { _.map(submits_for_list, function(lab){
