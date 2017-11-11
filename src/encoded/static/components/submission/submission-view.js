@@ -2010,7 +2010,7 @@ class RoundTwoDetailPanel extends React.Component{
 
     render(){
         return(
-            <div>
+            <div className="current-item-properties round-two-panel">
                 <h4 className="clearfix page-subtitle submission-field-header">
                     <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
                         <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
@@ -2031,22 +2031,9 @@ class RoundTwoDetailPanel extends React.Component{
 }
 
 class WarningBanner extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.state = { open : true };
-    }
-
     render() {
-        if (!this.state.open) return null;
-        var closeButton = (
-            <div className="pull-right submission-exit-button" data-tip="Hide message" onClick={(e)=>{ this.setState({ 'open' : false }); }}>
-                <i className="icon icon-times"/>
-            </div>
-        );
         return(
             <h5 className="mb-2 text-400 warning-banner">
-                {closeButton}
                 Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. <br/>The submission process is under active development and features may change.
             </h5>
         );

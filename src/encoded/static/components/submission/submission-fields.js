@@ -96,7 +96,7 @@ export default class BuildField extends React.Component{
                 </div>
             );
             case 'array' : return (
-                <ArrayField {...this.props}/>
+                <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} />
             );
             case 'object' : return (
                 <div style={{'display':'inline'}}>
@@ -167,7 +167,7 @@ export default class BuildField extends React.Component{
 
     commonRowProps(){
         return {
-            'className' : "field-row" + (this.state.dropdownOpen ? ' active-submission-row' : '') + (this.props.isArray ? ' in-array-field' : ''),
+            'className' : "field-row" + (this.state.dropdownOpen ? ' active-submission-row' : '') + (this.props.isArray ? ' in-array-field clearfix' : ''),
             'data-field-type' : this.props.fieldType,
             'data-field-name' : this.props.field,
             'style' : { 'overflow' : 'visible' }
@@ -179,17 +179,12 @@ export default class BuildField extends React.Component{
             <div {...this.commonRowProps()}>
                 <div className="row">
                     <div className="col-sm-12 col-md-4">
-                        <h5 className="facet-title submission-field-title">
-                            <span style={{'marginRight': '6px'}} className="inline-block">{this.props.title}</span>
+                        <h5 className="submission-field-title">
+                            <span>{this.props.title}</span>
                             <InfoIcon children={this.props.fieldTip}/>
                             {this.props.required ?
-                                <span style={{'color':'#a94442', "marginRight":"6px"}}>Required</span>
+                                <span style={{'color':'#a94442', 'marginLeft' : 6}}>Required</span>
                                 : null
-                            }
-                            {this.props.fieldType === 'array' ?
-                                <Button bsSize="xsmall" onClick={this.pushArrayValue}>Add</Button>
-                                :
-                                null
                             }
                         </h5>
                     </div>
@@ -275,12 +270,14 @@ class LinkedObj extends React.Component{
     componentDidMount(){
         if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
             this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
+            ReactTooltip.rebuild();
         }
     }
 
     componentDidUpdate(){
         if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
             this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
+            ReactTooltip.rebuild();
         }
     }
 
@@ -293,11 +290,11 @@ class LinkedObj extends React.Component{
             if(isNaN(this.props.value)){
                 thisDisplay = keyDisplay[this.props.value] || this.props.value;
                 return(
-                    <div className="submitted-linked-object-display-container">
+                    <div className="submitted-linked-object-display-container" data-tip="This Item is already in the database">
                         <a href={this.props.value} target="_blank">
                             <span>{thisDisplay}</span>
-                            &nbsp;<i style={{'paddingLeft':'4px'}} className="icon icon-external-link"></i>
                         </a>
+                        &nbsp;<i style={{'marginLeft':'5px', 'fontSize' : '0.85rem'}} className="icon icon-external-link"/>
                     </div>
                 );
             }else{
@@ -326,8 +323,8 @@ class LinkedObj extends React.Component{
                     );
                 }else{
                     return(
-                        <div>
-                            <a href="" onClick={function(e){
+                        <div className="incomplete-linked-object-display-container" data-tip="Continue editing/submitting">
+                            <a href="#" onClick={function(e){
                                 e.preventDefault();
                                 this.props.setSubmissionState('currKey', intKey);
                             }.bind(this)}>
@@ -423,15 +420,13 @@ class ArrayField extends React.Component{
         for(var i=0; i<value.length; i++){
             arrayInfo.push([value[i], schema, i]);
         }
+
         return(
-            <div>
-                {this.props.value ?
-                    <div>
-                        {arrayInfo.map((entry) => this.initiateArrayField(entry))}
-                    </div>
-                    :
-                    null
-                }
+            <div className="list-of-array-items">
+                {this.props.value ? arrayInfo.map((entry) => this.initiateArrayField(entry)) : null }
+                <div className="add-array-item-button-container">
+                    <Button onClick={this.props.pushArrayValue}><i className="icon icon-fw icon-plus"/> Add</Button>
+                </div>
             </div>
         );
     }
@@ -964,7 +959,7 @@ class InfoIcon extends React.Component{
     render() {
         if (!this.props.children) return null;
         return (
-            <i style={{"marginRight":"6px",'marginLeft':'0px'}} className="icon icon-info-circle" data-tip={this.props.children}/>
+            <i style={{"marginRight":"0px",'marginLeft':'6px'}} className="icon icon-info-circle" data-tip={this.props.children}/>
         );
     }
 }

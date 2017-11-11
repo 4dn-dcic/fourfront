@@ -610,6 +610,33 @@ div.fieldset.editable-fields {
 *********** Submission & Edit View	****************
 ****************************************************/
 
+// FOR REUSE ELSEWHERE LATER - FILLS HEIGHT OF RELATIVE CONTAINER
+@mixin vertically-centered-content-button {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 56px;
+	text-align: center;
+	color: #333;
+	transition: background-color .5s;
+	&:hover {
+		cursor: pointer;
+		color: #000;
+	}
+	> i.icon {
+		font-size: 1.25rem;
+		position: absolute;
+		top: 50%;
+		margin-top: -9px;
+		left: 50%;
+		margin-left: -7px;
+	}
+}
+
+
+
+
 // Alias Input Multi-Field
 @mixin alias-input-fields {
 	.input-group {
@@ -680,33 +707,11 @@ div.fieldset.editable-fields {
 
 .submission-view-page-container {
 	.warning-banner {
-		padding: 12px 56px 12px 16px;
-		border: 1px solid #eee;
+		padding: 12px 56px 12px 0;
+		border-top: 1px solid #eee;
 		color: #606060;
-		background-color: #f8f8f8;
 		position: relative;
-		.submission-exit-button {
-			position: absolute;
-			top: 0px;
-			bottom: 0px;
-			right: 0px;
-			width: 56px;
-			text-align: center;
-			color: #333;
-			transition: background-color .5s;
-			&:hover {
-				cursor: pointer;
-				color: #000;
-			}
-			> i.icon {
-				font-size: 1.25rem;
-				position: absolute;
-				top: 50%;
-				margin-top: -9px;
-				left: 50%;
-				margin-left: -7px;
-			}
-		}
+		line-height: 1.25rem;
 	}
 
 	.submission-working-title {
@@ -725,7 +730,21 @@ div.fieldset.editable-fields {
 		}
 	}
 
-	.form-fields-container {
+	.form-fields-container,
+	.round-two-panel {
+
+		.submission-field-header {
+			border-bottom: 1px solid #ccc;
+			padding-bottom: 8px;
+			margin-bottom: 0px;
+			margin-top: 16px;
+			> button {
+				margin-right: 10px;
+				margin-top: -2px;
+				line-height: 19px;
+				border: none;
+			}
+		}
 
 		div.field-row {
 			position: relative;
@@ -745,19 +764,29 @@ div.fieldset.editable-fields {
 				min-height: 50px;
 				padding-top: 8px;
 				padding-bottom: 8px;
-				.submitted-linked-object-display-container, .notice-message {
+
+				.submitted-linked-object-display-container,
+				.incomplete-linked-object-display-container,
+				.notice-message {
 					padding-top: 8px;
 					padding-bottom: 8px;
 				}
+
 				.notice-message {
 					color: #999;
 				}
+
 			}
 
 			.submission-field-title{
 				margin: 0 !important;
 				font-weight: 500;
-				padding-top: 16px;
+				padding-top: 17px;
+				.add-array-item-button {
+					margin-top: -2px;
+					margin-bottom: -2px;
+					margin-left: 6px;
+				}
 			}
 
 			.remove-button-column {
@@ -768,21 +797,49 @@ div.fieldset.editable-fields {
 				}
 			}
 
-			// Fields containing arrays
-			.array-field-container {
-				min-height: 50px;
-				&.even {
-					background-color: #f4f4f4;
-				}
-				&:not(:last-child){
-					border-bottom: 1px solid #ddd;
-				}
-			}
+			
 
 			// Override array-containing field style to have no padding as it recursively will render field items with their own padding (so don't double-pad).
-			&[data-field-type="array"] .row.field-container {
-				padding-top: 0;
-				padding-bottom: 0;
+			&[data-field-type="array"] {
+				> div > div > .row.field-container {
+					padding-top: 0;
+					padding-bottom: 0;
+
+					// Fields containing arrays
+					.array-field-container {
+						min-height: 50px;
+						&.even {
+							background-color: #f4f4f4;
+						}
+						&:not(:last-child){
+							border-bottom: 1px solid #ddd;
+						}
+
+						// Row in field of in-array object rows
+						.in-array-field[data-field-type="object"] .field-row {
+							.submission-field-title {
+								padding-top: 8px;
+							}
+							button.select-create-linked-item-button {
+								width: 115px;
+							}
+
+							&:first-child {
+								.row.field-container {
+									padding-top: 0;
+									min-height: 0;
+								}
+							}
+						}
+					}
+
+					.add-array-item-button-container {
+						padding-top: 8px;
+						padding-bottom: 8px;
+						padding-right: 10px;
+					}
+
+				}
 			}
 
 			// Override aliases field style re: AliasInputField
@@ -808,15 +865,7 @@ div.fieldset.editable-fields {
 
 // SUBMISSION STUFF
 
-.submission-field-header{
-	background-color: #e7e7e7;
-	border: 1px solid #ccc;
-	border-radius: 2px;
-	span {
-		margin-left: 12px;
-	}
-	margin-bottom: 0px !important;
-}
+
 
 .submission-nav-tree{
 	border: 1px solid #ccc;
