@@ -901,7 +901,7 @@ export default class SubmissionView extends React.Component{
     generateCancelButton(){
         return(
             <Button bsStyle="danger" style={{'width':'100px'}} onClick={this.cancelCreatePrimaryObject}>Cancel / Exit</Button>
-        ); 
+        );
     }
 
     testPostNewContext = (e) => {
@@ -1187,7 +1187,7 @@ export default class SubmissionView extends React.Component{
         } else {
             ajax.promise('/me?frame=embedded').then(submitProcess);
         }
-        
+
     }
 
     /**
@@ -1433,7 +1433,7 @@ class TypeSelectModal extends React.Component {
 }
 
 /** Ordinary React Component which just inherits TypeSelectModal.onHide() */
-class AliasSelectModal extends TypeSelectModal {    
+class AliasSelectModal extends TypeSelectModal {
 
     render(){
         var { show, creatingType, creatingAlias, handleAliasChange, creatingAliasMessage, submitAlias, currentSubmittingUser } = this.props;

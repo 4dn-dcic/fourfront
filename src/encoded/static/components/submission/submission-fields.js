@@ -53,7 +53,7 @@ export default class BuildField extends React.Component{
             'placeholder': "No value"
         };
         switch(field_case){
-            case 'text' : 
+            case 'text' :
                 if (this.props.field === 'aliases'){
                     return (
                         <div className="input-wrapper">
@@ -222,7 +222,7 @@ export default class BuildField extends React.Component{
         var wrapFunc = this.wrapWithLabel;
 
         var excludeRemoveButton = (this.props.fieldType === 'array' || this.props.fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
-        
+
         if(this.props.isArray){
             wrapFunc = this.wrapWithNoLabel; // array items don't need fieldnames/tooltips
             // if we've got an object that's inside inside an array, only allow
@@ -235,8 +235,6 @@ export default class BuildField extends React.Component{
                 }
             }
         }
-
-        console.log('FIELD IS WAT?', this.props.fieldType, this.props.field)
 
         return wrapFunc(
             <div className={"col-sm-12" + (excludeRemoveButton ? "": " col-md-10")}>

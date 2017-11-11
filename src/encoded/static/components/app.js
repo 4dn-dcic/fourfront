@@ -366,14 +366,7 @@ export default class App extends React.Component {
             }
         }
     }
-/*
-    shouldComponentUpdate(nextProps, nextState) {
-        if (nextState) {
-            return !(_.isEqual(nextState, this.state));
-        }
-        return false;
-    }
-*/
+
     // Retrieve current React context
     getChildContext() {
         return {
