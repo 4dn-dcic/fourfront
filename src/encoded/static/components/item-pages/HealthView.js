@@ -27,7 +27,17 @@ export class HealthView extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
     }
+
+    componentDidMount(){
+        ReactTooltip.rebuild();
+        ajax.load('/counts', 
+          (resp)=>{ this.setState(
+                    { 'db_es_total' : resp.counts_for_x,
+                      'db_es_compare': resp.db_es_compare,
+                    }); }, 'GET',  null)     
+     }
 
     render() {
         var context = this.props.context;
