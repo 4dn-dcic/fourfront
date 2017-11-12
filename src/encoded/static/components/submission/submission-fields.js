@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as globals from '../globals';
 import _ from 'underscore';
-import { ajax, console, object, isServerSide, animateScrollTo } from '../util';
+import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
@@ -49,7 +49,6 @@ export default class BuildField extends React.Component{
             'value' : this.props.value || '',
             'onChange' : this.handleChange,
             'name' : this.props.field,
-            'autoFocus': true,
             'placeholder': "No value"
         };
         switch(field_case){
@@ -96,7 +95,7 @@ export default class BuildField extends React.Component{
                 </div>
             );
             case 'array' : return (
-                <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} />
+                <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} />
             );
             case 'object' : return (
                 <div style={{'display':'inline'}}>
@@ -141,6 +140,7 @@ export default class BuildField extends React.Component{
                 currValue = parseFloat(currValue);
             }
         }
+        console.log('VAL', currValue, this.props.fieldType, this.props.value, this.props.arrayIdx);
         this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
     }
 
@@ -156,7 +156,7 @@ export default class BuildField extends React.Component{
 
     // this needs to live in BuildField for styling purposes
     pushArrayValue = (e) => {
-        e.preventDefault();
+        e && e.preventDefault();
         if(this.props.fieldType !== 'array'){
             return;
         }
@@ -174,18 +174,24 @@ export default class BuildField extends React.Component{
         };
     }
 
+    labelTypeDescriptor(){
+        var type = Schemas.Term.capitalizeSentence(this.props.fieldType === 'array' ? ArrayField.typeOfItems(this.props.schema.items) : this.props.fieldType);
+        if (this.props.fieldType === 'array'){
+            type = [type, <span className="array-indicator">[]</span>];
+        }
+        return <div className="field-descriptor">{ type }{ this.props.required ? <span style={{'color':'#a94442', 'marginLeft' : 5}}> Required</span> : null }</div>;
+
+    }
+
     wrapWithLabel(){
         return(
             <div {...this.commonRowProps()}>
                 <div className="row">
                     <div className="col-sm-12 col-md-4">
                         <h5 className="submission-field-title">
+                            { this.labelTypeDescriptor() }
                             <span>{this.props.title}</span>
                             <InfoIcon children={this.props.fieldTip}/>
-                            {this.props.required ?
-                                <span style={{'color':'#a94442', 'marginLeft' : 6}}>Required</span>
-                                : null
-                            }
                         </h5>
                     </div>
                     <div className="col-sm-12 col-md-8">
@@ -356,10 +362,35 @@ unique to ArrayField, since it needs to update the arrayIdx*/
 
 class ArrayField extends React.Component{
 
+    static typeOfItems(itemSchema){
+        var fieldType = itemSchema.type ? itemSchema.type : "text";
+        // transform some types...
+        if (fieldType === 'string'){
+            fieldType = 'text';
+        }
+        // check if this is an enum
+        if(itemSchema.enum){
+            fieldType = 'enum';
+        }
+        // handle a linkTo object on the the top level
+        if(itemSchema.linkTo){
+            fieldType = 'linked object';
+        }
+        return fieldType;
+    }
+
     constructor(props){
         super(props);
     }
-
+    /*
+    componentDidMount(){
+        if (!this.props.value || (Array.isArray(this.props.value) && this.props.value.length === 0)){
+            if (this.props.field !== 'aliases') {
+                this.props.pushArrayValue();
+            }
+        }
+    }
+    */
     initiateArrayField = (arrayInfo) => {
         var value = arrayInfo[0] || null;
         var fieldSchema = arrayInfo[1];
@@ -370,21 +401,9 @@ class ArrayField extends React.Component{
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
         var title = fieldSchema.title || 'Item';
-        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
-        var enumValues = [];
-        // transform some types...
-        if(fieldType == 'string'){
-            fieldType = 'text';
-        }
-        // check if this is an enum
-        if(fieldSchema.enum){
-            fieldType = 'enum';
-            enumValues = fieldSchema.enum;
-        }
-        // handle a linkTo object on the the top level
-        if(fieldSchema.linkTo){
-            fieldType = 'linked object';
-        }
+        var fieldType = ArrayField.typeOfItems(fieldSchema);
+        var enumValues = fieldSchema.enum ? (fieldSchema.enum || []) : []; // check if this is an enum
+
         var arrayIdxList;
         if(this.props.arrayIdx){
             arrayIdxList = this.props.arrayIdx.slice();
@@ -421,7 +440,7 @@ class ArrayField extends React.Component{
 
         return(
             <div className="list-of-array-items">
-                {this.props.value ? arrayInfo.map((entry) => this.initiateArrayField(entry)) : null }
+                {arrayInfo.length > 0 ? arrayInfo.map((entry) => this.initiateArrayField(entry)) : null }
                 <div className="add-array-item-button-container">
                     <Button onClick={this.props.pushArrayValue}><i className="icon icon-fw icon-plus"/> Add</Button>
                 </div>
@@ -905,7 +924,6 @@ export class AliasInputField extends React.Component {
     render(){
         var firstPartSelect = null;
         var parts = AliasInputField.splitInTwo(this.props.value);
-        console.log('VA:S', this.props.value, parts);
         var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
         if (submits_for_list && submits_for_list.length === 1){
             firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ submits_for_list[0].name }</InputGroup.Addon>;
@@ -936,7 +954,7 @@ export class AliasInputField extends React.Component {
                         type="text"
                         inputMode="latin"
                         value={parts[1] || ''}
-                        autoFocus={true}
+                        autoFocus={!parts[1] ? true : false}
                         placeholder="Type in a new identifier"
                         onChange={this.onAliasSecondPartChange}
                     />
@@ -957,7 +975,7 @@ class InfoIcon extends React.Component{
     render() {
         if (!this.props.children) return null;
         return (
-            <i style={{"marginRight":"0px",'marginLeft':'6px'}} className="icon icon-info-circle" data-tip={this.props.children}/>
+            <i className="icon icon-info-circle" data-tip={this.props.children}/>
         );
     }
 }

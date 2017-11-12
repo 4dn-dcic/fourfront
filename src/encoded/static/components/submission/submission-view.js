@@ -392,7 +392,6 @@ export default class SubmissionView extends React.Component{
      */
     handleAliasLabChange = (e) => {
         var inputElement = e.target;
-        console.log('INPOUTELEMENHT', inputElement);
         var currValue = inputElement.value;
         this.setState({'creatingAlias': currValue});
     }
@@ -508,7 +507,7 @@ export default class SubmissionView extends React.Component{
         }else{
             keyIdx = this.state.keyIter + 1;
             if(newIdx !== keyIdx){
-                console.log('ERROR: KEY INDEX INCONSISTENCY!');
+                console.error('ERROR: KEY INDEX INCONSISTENCY!');
                 return;
             }
             newHierarchy = modifyHierarchy(hierarchy, keyIdx, parentKeyIdx);
@@ -750,7 +749,7 @@ export default class SubmissionView extends React.Component{
                 var payload = JSON.stringify({'md5sum': hash});
                 ajax.promise(destination, 'PATCH', {}, payload).then(data => {
                     if(data.status && data.status == 'success'){
-                        console.log('HASH SET TO:', hash, 'FOR', destination);
+                        console.info('HASH SET TO:', hash, 'FOR', destination);
                         stateToSet.upload = uploadInfo;
                         stateToSet.md5Progress = null;
                         stateToSet.uploadStatus = null;
@@ -990,7 +989,7 @@ export default class SubmissionView extends React.Component{
 
         var submitProcess = function(me_data){ // me_data = current user fields
             if(!me_data || !me_data.submits_for || me_data.submits_for.length == 0){
-                console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
+                console.error('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
                 keyValid[inKey] = 2;
                 this.setState(stateToSet);
                 return;
@@ -1000,7 +999,7 @@ export default class SubmissionView extends React.Component{
             lab = object.atIdFromObject(submits_for);
             ajax.promise(lab).then(lab_data => {
                 if(!lab || !lab_data.awards || lab_data.awards.length == 0){
-                    console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
+                    console.error('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
                     keyValid[inKey] = 2;
                     this.setState(stateToSet);
                     return;
@@ -1078,7 +1077,7 @@ export default class SubmissionView extends React.Component{
                     }else{
                         var responseData;
                         if(test){
-                            console.log('OBJECT SUCCESSFULLY TESTED!');
+                            console.info('OBJECT SUCCESSFULLY TESTED!');
                             keyValid[inKey] = 3;
                             this.setState(stateToSet);
                             return;
@@ -1513,7 +1512,7 @@ class IndividualObjectView extends React.Component{
     componentWillReceiveProps(nextProps){
         // scroll to top if worked-on object changes
         if(this.props.currKey !== nextProps.currKey){
-            setTimeout(layout.animateScrollTo(0), 100);
+            //setTimeout(layout.animateScrollTo(0), 100);
             this.setState({'fadeState': true});
         }else{
             this.setState({'fadeState': false});
@@ -1559,7 +1558,7 @@ class IndividualObjectView extends React.Component{
             if(pointer[splitField[i]]){
                 pointer = pointer[splitField[i]];
             }else{
-                console.log('PROBLEM CREATING NEW CONTEXT WITH: ', field, value);
+                console.error('PROBLEM CREATING NEW CONTEXT WITH: ', field, value);
                 return;
             }
             if(Array.isArray(pointer)){
@@ -1886,7 +1885,6 @@ class IndividualObjectView extends React.Component{
         if(this.state.selectData !== null){
             selecting = true;
         }
-        console.log('FIELDS', fieldComponents, buildFields, linkedObjs);
         return(
             <div>
                 <Fade in={selecting} transitionAppear={true}>
@@ -2301,7 +2299,7 @@ var removeNulls = function myself(context){
     _.keys(context).forEach(function(key, index){
         if(context[key] === null){
             delete context[key];
-        }else if(context[key] instanceof Array && context[key].length == 0){
+        }else if(Array.isArray(context[key]) && (context[key].length === 0 || (context[key].length === 1 && context[key][0] === null))){
             delete context[key];
         }else if(context[key] instanceof Object){
             if(_.keys(context[key]).length === 0){

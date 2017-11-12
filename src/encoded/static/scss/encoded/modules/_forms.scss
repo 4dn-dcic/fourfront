@@ -778,14 +778,46 @@ div.fieldset.editable-fields {
 
 			}
 
-			.submission-field-title{
+			.submission-field-title {
 				margin: 0 !important;
 				font-weight: 500;
 				padding-top: 17px;
+				text-align: right;
+
+				.field-descriptor {
+					position: absolute;
+					top: 4px;
+					font-size: 0.825rem;
+					color: rgba(0,0,0,0.25);
+					transition: color .5s; 
+					font-weight: 400;
+					.array-indicator {
+						margin-left: 2px;
+						opacity: 0.75;
+					}
+				}
+
 				.add-array-item-button {
 					margin-top: -2px;
 					margin-bottom: -2px;
 					margin-left: 6px;
+				}
+
+				i.icon-info-circle {
+					margin-left: 10px;
+					color: rgba(0,0,0,0.25);
+					transition: color .5s;
+				}
+			}
+
+			&:hover {
+				.submission-field-title {
+					.field-descriptor {
+						color: rgba(0,0,0,0.66);
+					}
+				}
+				i.icon-info-circle {
+					color: rgba(0,0,0,1);
 				}
 			}
 
@@ -837,6 +869,14 @@ div.fieldset.editable-fields {
 						padding-top: 8px;
 						padding-bottom: 8px;
 						padding-right: 10px;
+						> button {
+							padding-left: 9px;
+							font-weight: 400;
+							> i {
+								position: relative;
+								top: 1px;
+							}
+						}
 					}
 
 				}
