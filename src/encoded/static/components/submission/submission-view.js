@@ -1867,20 +1867,16 @@ class IndividualObjectView extends React.Component{
         var detailContext;
         var i;
         var built;
-        var fieldComponents = _.filter(
+        var fieldComponents = sortPropFields(_.filter(
             _.map(fields, this.initiateField),
             function(f){ return !!f; } // Removes falsy (e.g. null) items.
-        );
+        ));
         if(this.props.roundTwo){
             var path = this.props.keyComplete[this.props.currKey];
             detailContext = this.props.keyContext[path];
         }
-        //}else{ // only use buildFields for round two
-        //    fieldComponents = _.map(fields, this.initiateField)
-        //}
         // sort fields first by requirement and secondly alphabetically. These are JSX BuildField components.
-        //linkedObjs = sortPropFields(linkedObjs);
-        //buildFields = sortPropFields(buildFields);
+        //fieldComponents = sortPropFields(fieldComponents);
         var selecting = false;
         if(this.state.selectData !== null){
             selecting = true;
@@ -2152,32 +2148,43 @@ var delvePreExistingObjects = function myself(initObjs, json, schema, listTerm, 
     }
 };
 
-/** Sort a list of BuildFields first by required status, then by title */
+/** Sort a list of BuildFields first by required status, then by schema lookup order, then by title */
 function sortPropFields(fields){
     var reqFields = [];
     var optFields = [];
-    fields.map(function(field){
-        if(field === null){
-            return;
+
+    /** Compare by schema property 'lookup' meta-property, if available. */
+    function sortSchemaLookupFunc(a,b){
+        console.log(a.props.schema.lookup, typeof a.props.schema.lookup);
+        if (a.props.schema && b.props.schema){
+            var aLookup = a.props.schema.lookup || 750, bLookup = b.props.schema.lookup || 750;
+            if (typeof a.props.schema.lookup === 'number' && typeof b.props.schema.lookup === 'number') {
+                var diff = a.props.schema.lookup - b.props.schema.lookup;
+                if (diff !== 0) return diff;
+            }
         }
-        if(field.props.required){
+        return 0;
+    }
+
+    function sortTitle(a,b){
+        if (typeof a.props.title === 'string' && typeof b.props.title === 'string'){
+            if(a.props.title.toUpperCase() < b.props.title.toUpperCase()) return -1;
+            if(a.props.title.toUpperCase() > b.props.title.toUpperCase()) return 1;
+        }
+        return 0;
+    }
+
+    _.forEach(fields, function(field){
+        if (!field) return;
+        if (field.props.required) {
             reqFields.push(field);
-        }else{
+        } else {
             optFields.push(field);
         }
     });
-    reqFields.sort(function(a,b){
-        if(a.props.title.toUpperCase() < b.props.title.toUpperCase()) return -1;
-        if(a.props.title.toUpperCase() > b.props.title.toUpperCase()) return 1;
-        return 0;
-    });
-    optFields.sort(function(a,b){
-        if(a.props.title.toUpperCase() < b.props.title.toUpperCase()) return -1;
-        if(a.props.title.toUpperCase() > b.props.title.toUpperCase()) return 1;
-        return 0;
-    });
-    var retFields = reqFields.concat(optFields);
-    return retFields;
+    reqFields.sort(sortTitle).sort(sortSchemaLookupFunc);
+    optFields.sort(sortTitle).sort(sortSchemaLookupFunc);
+    return reqFields.concat(optFields);
 }
 
 /**
