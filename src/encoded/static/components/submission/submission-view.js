@@ -2155,13 +2155,15 @@ function sortPropFields(fields){
 
     /** Compare by schema property 'lookup' meta-property, if available. */
     function sortSchemaLookupFunc(a,b){
-        console.log(a.props.schema.lookup, typeof a.props.schema.lookup);
         if (a.props.schema && b.props.schema){
             var aLookup = a.props.schema.lookup || 750, bLookup = b.props.schema.lookup || 750;
             if (typeof a.props.schema.lookup === 'number' && typeof b.props.schema.lookup === 'number') {
                 var diff = a.props.schema.lookup - b.props.schema.lookup;
                 if (diff !== 0) return diff;
             }
+        } else {
+            if (a.props.schema && !b.props.schema) return -1;
+            if (b.props.schema && !a.props.schema) return 1;
         }
         return 0;
     }
