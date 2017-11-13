@@ -1321,7 +1321,7 @@ export default class SubmissionView extends React.Component{
                         />
                     </div>
                     <div className={bodyCol}>
-                        <div className="clearfix mb-1 mt-1">
+                        <div className="clearfix mb-2 mt-1">
                             <h3 className="submission-working-title mt-05 mb-0" style={{ 'display' : this.state.fullScreen ? 'none' : 'block' }}>
                                 <span className='working-subtitle'>
                                     {currType}
@@ -2157,9 +2157,8 @@ function sortPropFields(fields){
     function sortSchemaLookupFunc(a,b){
         if (a.props.schema && b.props.schema){
             var aLookup = a.props.schema.lookup || 750, bLookup = b.props.schema.lookup || 750;
-            if (typeof a.props.schema.lookup === 'number' && typeof b.props.schema.lookup === 'number') {
-                var diff = a.props.schema.lookup - b.props.schema.lookup;
-                if (diff !== 0) return diff;
+            if (typeof aLookup === 'number' && typeof bLookup === 'number') {
+                return aLookup - bLookup;
             }
         } else {
             if (a.props.schema && !b.props.schema) return -1;

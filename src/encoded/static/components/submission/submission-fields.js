@@ -140,7 +140,7 @@ export default class BuildField extends React.Component{
                 currValue = parseFloat(currValue);
             }
         }
-        console.log('VAL', currValue, this.props.fieldType, this.props.value, this.props.arrayIdx);
+        //console.log('VAL', this.props.nestedField, currValue, this.props.fieldType, this.props.value, this.props.arrayIdx);
         this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
     }
 
