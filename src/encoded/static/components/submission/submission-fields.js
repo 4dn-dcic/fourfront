@@ -161,7 +161,12 @@ export default class BuildField extends React.Component{
             return;
         }
         var valueCopy = this.props.value ? this.props.value.slice() : [];
-        valueCopy.push(null);
+        if(this.props.schema.items && this.props.schema.items.type === 'object'){
+            // initialize with empty obj in only this case
+            valueCopy.push({});
+        }else{
+            valueCopy.push(null);
+        }
         this.props.modifyNewContext(this.props.nestedField, valueCopy, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
     }
 
@@ -221,7 +226,10 @@ export default class BuildField extends React.Component{
         }
 
         // if there is no value in the field and non-array, hide delete button
-        if(this.props.value === null && !this.props.isArray){
+        if((this.props.value === null ||
+            _.isEmpty(this.props.value) ||
+            (Array.isArray(this.props.value) && this.props.value.length === 0))
+            && !this.props.isArray){
             showDelete = false;
         }
 
@@ -235,7 +243,11 @@ export default class BuildField extends React.Component{
             // the array to be deleted if ALL individual fields are null
             if(this.props.fieldType === 'object'){
                 var valueCopy = this.props.value ? JSON.parse(JSON.stringify(this.props.value)) : {};
-                var nullItems = Object.keys(valueCopy).filter(item => valueCopy[item] === null);
+                var nullItems = Object.keys(valueCopy).filter(item => (
+                    valueCopy[item] === null ||
+                    (Array.isArray(valueCopy[item]) && valueCopy[item].length === 0) ||
+                    _.isEmpty(valueCopy[item]))
+                );
                 if( Object.keys(valueCopy).length !== nullItems.length){
                     showDelete = false;
                 }
@@ -779,7 +791,6 @@ class S3FileInput extends React.Component{
     }
 
     render(){
-        console.log(this.props.value, this.props.field, 'ESTD');
         var statusTip = this.state.status;
         var showDelete = false;
         var filename_text = "No file chosen";
@@ -849,13 +860,13 @@ class S3FileInput extends React.Component{
 
 /**
  * Accepts a 'value' prop (which should contain a colon, at minimum) and present two fields for modifying its two parts.
- * 
+ *
  * First part is name of a "submits_for" lab, second part is any custom string identifier.
  * Present a drop-down for submit_for lab selection, and text input box for identifier.
  * On change of either inputs, calls 'onAliasChange' function callback, passing the new modified value (including colon) as parameter.
  */
 export class AliasInputField extends React.Component {
-    
+
     static propTypes = {
         'value' : PropTypes.string.isRequired,
         'onAliasChange' : PropTypes.func.isRequired,
