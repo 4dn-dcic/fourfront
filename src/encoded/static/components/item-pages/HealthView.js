@@ -28,19 +28,28 @@ export class HealthView extends React.Component {
         super(props);
         this.render = this.render.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.state = {
+            'db_es_total' : "loading...", 
+            'db_es_compare':{"loading": "..."}, 
+        }
     }
 
     componentDidMount(){
-        ReactTooltip.rebuild();
-        ajax.load('/counts', 
+        this.getCounts();
+     }
+
+     getCounts = () => {
+        ajax.load('/counts?format=json', 
           (resp)=>{ this.setState(
-                    { 'db_es_total' : resp.counts_for_x,
+                    { 'db_es_total' : resp.db_es_total,
                       'db_es_compare': resp.db_es_compare,
                     }); }, 'GET',  null)     
      }
 
+
     render() {
-        var context = this.props.context;
+        var context = _.clone(this.props.context);
+        context = _.extend(context, this.state);
         var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
         return (
             <div className="view-item">
