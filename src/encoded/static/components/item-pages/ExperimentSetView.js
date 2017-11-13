@@ -92,8 +92,11 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         if (width) width -= 20;
 
-        var tabs = [
-            {
+        var tabs = [];
+
+        // Raw files tab, if have experiments
+        if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0){
+            tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'experiments',
                 content : <RawFilesStackedTableSection
@@ -101,8 +104,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                     {..._.pick(this.props, 'context', 'schemas', 'facets', 'expSetFilters')}
                     {...this.state}
                 />
-            }
-        ];
+            });
+        }
 
         if (processedFiles && processedFiles.length > 0){
             tabs.push({
