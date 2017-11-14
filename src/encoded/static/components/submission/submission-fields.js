@@ -226,10 +226,13 @@ export default class BuildField extends React.Component{
         }
 
         // if there is no value in the field and non-array, hide delete button
-        if((this.props.value === null ||
-            _.isEmpty(this.props.value) ||
-            (Array.isArray(this.props.value) && this.props.value.length === 0))
-            && !this.props.isArray){
+        if(
+            (
+                this.props.value === null ||
+                (typeof this.props.value === 'object' && this.props.value !== null && _.isEmpty(this.props.value) ) ||
+                (Array.isArray(this.props.value) && this.props.value.length === 0)
+            ) && !this.props.isArray
+        ) {
             showDelete = false;
         }
 

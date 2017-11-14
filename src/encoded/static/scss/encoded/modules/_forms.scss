@@ -707,24 +707,84 @@ div.fieldset.editable-fields {
 
 .submission-view-page-container {
 	.warning-banner {
-		padding: 12px 56px 12px 0;
 		border-top: 1px solid #eee;
 		color: #606060;
 		position: relative;
 		line-height: 1.25rem;
-	}
-
-	.submission-working-title {
-		font-weight: 300;
-		float: left;
-		> .working-subtitle{
-			font-weight: 200;
-			color: #8b8b8b;
-			padding-right: 10px;
+		> .row > div {
+			padding-top: 12px;
+			padding-bottom: 12px;
 		}
 	}
 
+	.crumbs-title {
+
+		.subtitle-heading.small {
+			color: #333;
+		}
+
+		.submission-working-title {
+			font-weight: 300;
+			font-size: 1.45rem;
+			transform-origin: 0 50%;
+			transition: transform .5s, opacity 0.5s;
+			> span, > i {
+				vertical-align: middle;
+			}
+			.working-subtitle{
+				font-weight: 200;
+				color: #777;
+				padding-right: 5px;
+			}
+			> i.icon {
+				margin-right: 4px;
+				font-size: 1.2rem;
+			}
+		}
+
+		.title-crumb {
+			
+			&.mid-title {
+				.submission-working-title {
+					opacity: 0.75;
+					transform: scale3d(0.75, 0.75, 1) translate3d(0px, -3px, 0px);
+					i.icon-caret-right {
+						opacity: 0.5;
+					}
+					.next-property-name {
+						color: #777;
+						font-weight: 100;
+						font-size: 1.2rem;
+						> i.icon-angle-right {
+							margin-left: 3px;
+							margin-right: 3px;
+						}
+					}
+				}
+			}
+			&.last-title {
+				.submission-working-title {
+					font-weight: 400;
+					transform: translate3d(0px, 3px, 0px);
+				}
+			}
+		}
+
+		@for $i from 0 through 4 {
+			.title-crumb.depth-level-#{$i} {
+				padding-left: 8px * $i;
+			}
+		}
+
+	}
+
 	.action-buttons-container {
+		> button {
+			min-width: 100px;
+			&:not(:last-child){
+				margin-right: 10px;
+			}
+		}
 		button[disabled]{
 			pointer-events: all;
 		}
@@ -781,8 +841,10 @@ div.fieldset.editable-fields {
 			.submission-field-title {
 				margin: 0 !important;
 				font-weight: 500;
-				padding-top: 17px;
-				text-align: right;
+				padding-top: 18px;
+				@media screen and (min-width: $screen-md-min) {
+					text-align: right;
+				}
 
 				.field-descriptor {
 					position: absolute;

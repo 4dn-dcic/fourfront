@@ -564,6 +564,7 @@ export default class SubmissionView extends React.Component{
      * existing object amounts to removing it from keyHierarchy.
      */
     removeObj = (key) => {
+        console.log('REMOVING', key);
         var contextCopy = this.state.keyContext;
         var validCopy = this.state.keyValid;
         var typesCopy = this.state.keyTypes;
@@ -787,60 +788,37 @@ export default class SubmissionView extends React.Component{
      */
     generateValidationButton(){
         var validity = this.state.keyValid[this.state.currKey];
-        var style={'width':'100px','marginLeft':'10px'};
         // when roundTwo, replace the validation button with a Skip
         // button that completes the submission process for currKey
-        if(this.state.roundTwo){
+        if (this.state.roundTwo){
             if(this.state.upload === null && this.state.md5Progress === null){
                 return(
-                    <Button bsStyle="warning" style={style} onClick={function(e){
+                    <Button bsStyle="warning" onClick={function(e){
                         e.preventDefault();
                         this.finishRoundTwo();
-                    }.bind(this)}>
-                        {'Skip'}
-                    </Button>
+                    }.bind(this)}>Skip</Button>
                 );
             }else{
-                return <Button bsStyle="warning" style={style} disabled>Skip</Button>;
+                return <Button bsStyle="warning" disabled>Skip</Button>;
             }
-        }else if(validity == 3 || validity == 4){
+        } else if(validity == 3 || validity == 4){
             return(
-                <Button bsStyle="info" style={style} disabled>Validated</Button>
+                <Button bsStyle="info" disabled>Validated</Button>
             );
-        }else if(validity == 2){
-            if(this.state.processingFetch){
-                return(
-                    <Button bsStyle="danger" style={style} disabled>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
-                    </Button>
-                );
-            }else{
-                return(
-                    <Button bsStyle="danger" style={style} onClick={this.testPostNewContext}>
-                        {'Validate'}
-                    </Button>
-                );
+        } else if(validity == 2){
+            if (this.state.processingFetch) {
+                return <Button bsStyle="danger" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
+            } else {
+                return <Button bsStyle="danger" onClick={this.testPostNewContext}>Validate</Button>;
             }
-        }else if (validity == 1){
-            if(this.state.processingFetch){
-                return(
-                    <Button bsStyle="info" style={style} disabled>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
-                    </Button>
-                );
-            }else{
-                return(
-                    <Button bsStyle="info" style={style} onClick={this.testPostNewContext}>
-                        {'Validate'}
-                    </Button>
-                );
+        } else if (validity == 1){
+            if (this.state.processingFetch) {
+                return <Button bsStyle="info" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
+            } else {
+                return <Button bsStyle="info" onClick={this.testPostNewContext}>Validate</Button>;
             }
-        }else{
-            return(
-                <Button bsStyle="info" style={style} disabled>
-                    {'Validate'}
-                </Button>
-            );
+        } else {
+            return <Button bsStyle="info" disabled>Validate</Button>;
         }
     }
 
@@ -853,53 +831,28 @@ export default class SubmissionView extends React.Component{
      */
     generateSubmitButton(){
         var validity = this.state.keyValid[this.state.currKey];
-        var style={'width':'100px','marginLeft':'10px'};
-        if(this.state.roundTwo){
-            if(this.state.upload !== null || this.state.processingFetch || this.state.md5Progress !== null){
-                return(
-                    <Button bsStyle="success" style={style} disabled>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
-                    </Button>
-                );
-            }else{
-                return(
-                    <Button bsStyle="success" style={style} onClick={this.realPostNewContext}>
-                        {'Submit'}
-                    </Button>
-                );
+        if (this.state.roundTwo) {
+            if (this.state.upload !== null || this.state.processingFetch || this.state.md5Progress !== null) {
+                return <Button bsStyle="success" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
+            } else {
+                return <Button bsStyle="success" onClick={this.realPostNewContext}>Submit</Button>;
             }
-        }else if(validity == 3){
+        } else if (validity == 3) {
             if(this.state.processingFetch){
-                return(
-                    <Button bsStyle="success" style={style} disabled>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
-                    </Button>
-                );
+                return <Button bsStyle="success" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
             }else{
-                return(
-                    <Button bsStyle="success" style={style} onClick={this.realPostNewContext}>
-                        {'Submit'}
-                    </Button>
-                );
+                return <Button bsStyle="success" onClick={this.realPostNewContext}>Submit</Button>;
             }
-        }else if(validity == 4){
-            return(
-                <Button bsStyle="success" style={style} disabled>
-                    {'Submitted'}
-                </Button>
-            );
-        }else{
-            return(
-                <Button bsStyle="success" style={style} disabled>
-                    {'Submit'}
-                </Button>
-            );
+        } else if (validity == 4) {
+            return <Button bsStyle="success" disabled>Submitted</Button>;
+        } else {
+            return <Button bsStyle="success" disabled>Submit</Button>;
         }
     }
 
     generateCancelButton(){
         return(
-            <Button bsStyle="danger" style={{'width':'100px'}} onClick={this.cancelCreatePrimaryObject}>Cancel / Exit</Button>
+            <Button bsStyle="danger" onClick={this.cancelCreatePrimaryObject}>Cancel / Exit</Button>
         );
     }
 
@@ -1136,6 +1089,9 @@ export default class SubmissionView extends React.Component{
                             stateToSet.keyComplete = keyComplete;
                             stateToSet.keyDisplay = displayCopy;
                             stateToSet.keyContext = contextCopy;
+                            console.log('TT', this.state.keyHierarchy, inKey, destination);
+                            stateToSet.keyHierarchy = replaceInHierarchy(this.state.keyHierarchy, inKey, destination);
+                            console.log('TT', this.state.keyHierarchy, stateToSet.keyHierarchy, inKey, destination);
                             var needsRoundTwo = [];
                             // update context with response data and check if submitted object needs a round two
                             contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false, needsRoundTwo);
@@ -1305,7 +1261,9 @@ export default class SubmissionView extends React.Component{
                     buildAmbiguousEnumEntry={this.buildAmbiguousEnumEntry} submitAmbiguousType={this.submitAmbiguousType} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}  />
                 <AliasSelectModal show={showAliasModal} {..._.pick(this.state, 'creatingAlias', 'creatingType', 'creatingAliasMessage', 'currKey', 'creatingIdx', 'currentSubmittingUser')}
                     handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} />
-                <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} />
+                <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} actionButtons={[this.generateCancelButton(), this.generateValidationButton(), this.generateSubmitButton()]} />
+                <DetailTitleBanner currKey={currKey} keyDisplay={this.state.keyDisplay} hierarchy={this.state.keyHierarchy} keyTypes={this.state.keyTypes} keyContext={this.state.keyContext}
+                    fullScreen={this.state.fullScreen} />
                 <div className="clearfix row">
                     <div className={navCol}>
                         <SubmissionTree
@@ -1321,17 +1279,6 @@ export default class SubmissionView extends React.Component{
                         />
                     </div>
                     <div className={bodyCol}>
-                        <div className="clearfix mb-2 mt-1">
-                            <h3 className="submission-working-title mt-05 mb-0" style={{ 'display' : this.state.fullScreen ? 'none' : 'block' }}>
-                                <span className='working-subtitle'>
-                                    {currType}
-                                </span>
-                                <span>
-                                    {this.state.keyDisplay[currKey]}
-                                </span>
-                            </h3>
-                            <div className="pull-right action-buttons-container" children={[this.generateCancelButton(), this.generateValidationButton(), this.generateSubmitButton()]} />
-                        </div>
                         <IndividualObjectView
                             {...others}
                             currKey={currKey}
@@ -1359,6 +1306,105 @@ export default class SubmissionView extends React.Component{
                     </div>
                 </div>
             </div>
+        );
+    }
+}
+
+class WarningBanner extends React.Component {
+    render() {
+        return(
+            <div className="mb-2 text-400 warning-banner">
+                <div className="row">
+                    <div className="col-md-7 col-lg-8">
+                        Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. The submission process is under active development and features may change.
+                    </div>
+                    <div className="col-md-5 col-lg-4">
+                        <div className="action-buttons-container text-right" children={this.props.actionButtons} />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+class DetailTitleBanner extends React.Component {
+
+    /**
+     * Traverse keyHierarchy option to get a list of hierarchical keys, e.g. 0,1,4 if are on currKey 4 that is a child of currKey 1 that is a child of currKey 0.
+     * 
+     * @param {Object} hierachy - Hierarchy as defined on state of SubmissionView components. 
+     * @param {number} currKey - Current key of Object/Item we're editing.
+     * @returns {number[]} List of keys leading from 0 to currKey.
+     */
+    static getListOfKeysInPath(hierachy, currKey){
+        var keyList = [];
+        function findNestedKey(obj, key){
+            if (typeof obj[key] !== 'undefined'){
+                return [key];
+            } else {
+                var nestedFound = _.find(_.map(_.pairs(obj), function(p){ return [p[0], findNestedKey(p[1], key)]; }), function(p){ return (typeof p[1] !== 'undefined' || p[1] !== null); });
+                if (nestedFound){
+                    return [parseInt(nestedFound[0])].concat(nestedFound[1]);
+                }
+                
+            }
+        }
+        return findNestedKey(hierachy, currKey);
+    }
+
+    static getContextPropertyNameOfNextKey(context, nextKey){
+        var found = null;
+        _.pairs(context).forEach(function(p){
+            if (found) return;
+            if (p[1] === nextKey){
+                found = p[0];
+            }
+            // Remove value from array.
+            if (Array.isArray(p[1])){
+                var idxInArray = p[1].indexOf(nextKey);
+                if (idxInArray > -1){
+                    found = p[0];
+                }
+            }
+        });
+        return found;
+    }
+
+    render(){
+        var { currKey, keyTypes, keyDisplay, hierarchy, schemas, fullScreen, actionButtons, keyContext } = this.props;
+        if (fullScreen) return null;
+        var hierarchyKeyList = DetailTitleBanner.getListOfKeysInPath(hierarchy, currKey);
+        return (
+            <h3 className="crumbs-title mb-2">
+                <div className="subtitle-heading small mb-05">
+                    Currently Editing
+                </div>
+                {
+                    _.map(
+                        hierarchyKeyList,
+                        function(numKey, i){
+                            var icon = <i className="icon icon-fw icon-caret-right"/>;
+                            var isLast = i + 1 === hierarchyKeyList.length;
+                            var nextPropertyName = null;
+                            if (!isLast){
+                                try {
+                                    nextPropertyName = Schemas.Field.toName(DetailTitleBanner.getContextPropertyNameOfNextKey(keyContext[numKey], hierarchyKeyList[i + 1]), Schemas.get(), false, keyTypes[numKey]);
+                                } catch (e){ console.warn('Couldnt get property name for', keyContext[numKey], hierarchyKeyList[i + 1]); }
+                            }
+                            return (
+                                <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')}>
+                                    <div className="submission-working-title">
+                                        { icon }<span className='working-subtitle'>{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
+                                        {
+                                            nextPropertyName ? <span className="next-property-name"> <i className="icon icon-angle-right"/> { nextPropertyName }</span> : null
+                                        }
+                                    </div>
+                                </div>
+                            );
+                        }
+                    )
+                }
+            </h3>
         );
     }
 }
@@ -2024,17 +2070,6 @@ class RoundTwoDetailPanel extends React.Component{
     }
 }
 
-class WarningBanner extends React.Component {
-    render() {
-        return(
-            <h5 className="mb-2 text-400 warning-banner">
-                Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. <br/>The submission process is under active development and features may change.
-            </h5>
-        );
-    }
-
-}
-
 /***** MISC. FUNCIONS *****/
 
 /**
@@ -2272,8 +2307,9 @@ var findParentFromHierarchy = function myself(hierarchy, keyIdx){
 
 /** Replace a key with a different key in the hierarchy */
 var replaceInHierarchy = function myself(hierarchy, current, toReplace){
+    if (typeof current === 'number') current = current + '';
     _.keys(hierarchy).forEach(function(key, index){
-        if(key == current){
+        if(key === current){
             var downstream = hierarchy[key];
             hierarchy[toReplace] = downstream;
             delete hierarchy[key];
