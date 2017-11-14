@@ -331,7 +331,7 @@ def test_search_with_no_value(workbook, testapp):
     res_json3 = testapp.get(search3).json
     # just do 1 res here
     check_item = random.choice(res_json3['@graph'])
-    assert(not item.get('digestion_enzyme'))
-    assert(not item.get('publications_of_exp'))
+    assert(not check_item.get('digestion_enzyme'))
+    assert(not check_item.get('publications_of_exp'))
     res_ids3 = [r['uuid'] for r in res_json3['@graph'] if 'uuid' in r]
     assert(set(res_ids3) <= set(res_ids))
