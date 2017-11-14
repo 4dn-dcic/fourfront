@@ -1331,14 +1331,13 @@ class DetailTitleBanner extends React.Component {
      * @returns {number[]} List of keys leading from 0 to currKey.
      */
     static getListOfKeysInPath(hierachy, currKey){
-        var keyList = [];
         function findNestedKey(obj){
             if (typeof obj[currKey] !== 'undefined'){
                 return [currKey];
             } else {
                 var nestedFound = _.find(
                     _.map(
-                        _.pairs(obj),
+                        _.pairs(obj), // p[0] = key, p[1] = child obj with keys
                         function(p){ return [ p[0], findNestedKey(p[1]) ]; }
                     ),
                     function(p){
