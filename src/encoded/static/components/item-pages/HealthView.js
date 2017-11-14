@@ -28,34 +28,46 @@ export class HealthView extends React.Component {
         super(props);
         this.render = this.render.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.getCounts = _.throttle(this.getCounts.bind(this), 1000);
         this.state = {
             'db_es_total' : "loading...", 
-            'db_es_compare':{"loading": "..."}, 
-        }
+            'db_es_compare' : "loading..."
+        };
     }
 
     componentDidMount(){
         this.getCounts();
-     }
+    }
 
-     getCounts = () => {
-        ajax.load('/counts?format=json', 
-          (resp)=>{ this.setState(
-                    { 'db_es_total' : resp.db_es_total,
-                      'db_es_compare': resp.db_es_compare,
-                    }); }, 'GET',  null)     
-     }
-
+    getCounts(){
+        this.setState({
+            'db_es_total' : "loading...", 
+            'db_es_compare' : "loading..."
+        }, ()=>{
+            ajax.load('/counts?format=json', (resp)=>{
+                this.setState({
+                    'db_es_total' : resp.db_es_total,
+                    'db_es_compare': resp.db_es_compare,
+                });
+            }, 'GET', (resp)=>{
+                this.setState({
+                    'error' : resp.error || resp.message,
+                    'db_es_total' : null,
+                    'db_es_compare': null
+                });
+            });
+        });
+    }
 
     render() {
-        var context = _.clone(this.props.context);
-        context = _.extend(context, this.state);
+        var context = this.props.context;
         var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
         return (
             <div className="view-item">
                 <hr/>
+                <h3 className="text-400 mb-2">Configuration</h3>
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
-                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} context={context} hideButtons={true} schemas={this.props.schemas} keyTitleDescriptionMap={{
+                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={context} schemas={this.props.schemas} keyTitleDescriptionMap={{
                     'blob_bucket' : {
                         title : "Blob Bucket",
                         description : "Name of S3 bucket used for blob data."
@@ -67,7 +79,7 @@ export class HealthView extends React.Component {
                         title : "Database Location",
                         description : "URI used to connect to the back-end PgSQL DB."
                     },
-                    'elasticserach' : {
+                    'elasticsearch' : {
                         title : "ElasticSearch Location",
                         description : "URI used to connect to the back-end ES instance."
                     },
@@ -98,6 +110,23 @@ export class HealthView extends React.Component {
                     'aggregations' : {
                         title : 'Aggregations',
                         description : "Aggregations of ES-indexed data."
+                    },
+                    'foursight_env' : {
+                        title : 'Foursight Environment',
+                        description : "Current environment being monitored by foursight."
+                    }
+                }} />
+                <Button className="refresh-counts-button pull-right" onClick={this.getCounts}><i className="icon icon-refresh"/>&nbsp; Refresh Counts</Button>
+                <h3 className="text-400 mb-2">Database Counts</h3>
+                
+                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={this.state} schemas={this.props.schemas} keyTitleDescriptionMap={{
+                    'db_es_total' : {
+                        title : "DB and ES Counts",
+                        description : "Total counts of items in database and elasticsearch."
+                    },
+                    'db_es_compare' : {
+                        title : "DB and ES Counts by Type",
+                        description : "Counts of items in database and elasticsearch for each doc_type index."
                     }
                 }} />
                 <FoursightPanel context={context}/>
