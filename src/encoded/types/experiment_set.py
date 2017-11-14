@@ -74,8 +74,14 @@ class ExperimentSet(Item):
                 "lab.city",
                 "lab.title",
 
-                "produced_in_pub.*",
-                "publications_of_set.*",
+                "produced_in_pub.title",
+                "produced_in_pub.abstract",
+                "produced_in_pub.journal",
+                "produced_in_pub.authors",
+                "publications_of_set.title",
+                "publications_of_set.abstract",
+                "publications_of_set.journal",
+                "publications_of_set.authors",
 
                 "experiments_in_set.experiment_type",
                 "experiments_in_set.accession",
