@@ -265,7 +265,7 @@ export default class BuildField extends React.Component{
                 <div className="col-xs-12 col-md-2 remove-button-column">
                     <Fade in={showDelete}>
                         <div className="pull-right remove-button-container">
-                            <Button bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>Remove</Button>
+                            <Button tabIndex={2} bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>Remove</Button>
                         </div>
                     </Fade>
                 </div>
@@ -817,7 +817,7 @@ class S3FileInput extends React.Component{
                     </Button>
                     <Fade in={showDelete}>
                         <div className="pull-right">
-                            <Button bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>Remove</Button>
+                            <Button tabIndex={2} bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>Remove</Button>
                         </div>
                     </Fade>
                 </div>

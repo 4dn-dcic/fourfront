@@ -463,8 +463,14 @@ export default class SubmissionView extends React.Component{
         var currAlias = keyDisplay[currKey];
         var aliases = this.state.keyContext[currKey].aliases || null;
         // no aliases
-        if(aliases === null || (Array.isArray(aliases) && aliases.length === 0)){
-            keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
+        if (aliases === null || (Array.isArray(aliases) && aliases.length === 0)){
+            // Try 'name' & 'title', then fallback to 'My ItemType currKey'
+            var name = this.state.keyContext[currKey].name || this.state.keyContext[currKey].title || null;
+            if (name){
+                keyDisplay[currKey] = name;
+            } else {
+                keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
+            }
         }else if(!_.contains(aliases, currAlias)){
             var lastAlias = aliases[aliases.length-1];
             if(lastAlias !== null){
@@ -1596,11 +1602,12 @@ class IndividualObjectView extends React.Component{
             }
         }
         var splitField = field.split('.');
+        var splitFieldLeaf = splitField[splitField.length-1];
         var arrayIdxPointer = 0;
         var contextCopy = this.props.currContext;
         var pointer = contextCopy;
         var prevValue = null;
-        for (var i=0; i<(splitField.length-1); i++){
+        for (var i=0; i < splitField.length - 1; i++){
             if(pointer[splitField[i]]){
                 pointer = pointer[splitField[i]];
             }else{
@@ -1612,9 +1619,9 @@ class IndividualObjectView extends React.Component{
                 arrayIdxPointer += 1;
             }
         }
-        if(Array.isArray(pointer[splitField[splitField.length-1]]) && fieldType !== 'array'){
+        if(Array.isArray(pointer[splitFieldLeaf]) && fieldType !== 'array'){
             // move pointer into array
-            pointer = pointer[splitField[splitField.length-1]];
+            pointer = pointer[splitFieldLeaf];
             prevValue = pointer[arrayIdx[arrayIdxPointer]];
             if(value === null){ // delete this array item
                 pointer.splice(arrayIdx[arrayIdxPointer], 1);
@@ -1622,8 +1629,8 @@ class IndividualObjectView extends React.Component{
                 pointer[arrayIdx[arrayIdxPointer]] = value;
             }
         }else{ // value we're trying to set is not inside an array at this point
-            prevValue = pointer[splitField[splitField.length-1]];
-            pointer[splitField[splitField.length-1]] = value;
+            prevValue = pointer[splitFieldLeaf];
+            pointer[splitFieldLeaf] = value;
         }
         // actually change value
         this.props.modifyKeyContext(this.props.currKey, contextCopy);
@@ -1634,7 +1641,7 @@ class IndividualObjectView extends React.Component{
         if(fieldType === 'linked object'){
             this.checkObjectRemoval(value, prevValue);
         }
-        if(splitField[splitField.length-1] === 'aliases'){
+        if(splitFieldLeaf === 'aliases' || splitFieldLeaf === 'name' || splitFieldLeaf === 'title'){
             this.props.modifyAlias();
         }
     }
