@@ -18,7 +18,7 @@ import { Detail } from '../item-pages/components';
 
 /**
  * Key container component for Submission components.
- * 
+ *
  * Holds object values for all downstream components and owns the methods
  * for submitting data. Passes the appropriate data downwards to the individual
  * object views.
@@ -34,7 +34,7 @@ import { Detail } from '../item-pages/components';
  *
  * This component also holds submission logic and a few functions for generating
  * JSX to be rendered depending on state.
- * 
+ *
  * @class SubmissionView
  * @prop {string} href      Current browser URL/href. If a search href, should have a 'type=' query component to infer type of Item to create.
  * @prop {Object} [context] Current resource (Item) at our current href path. Used to get '@type' from, if not a search page.
@@ -581,8 +581,15 @@ export default class SubmissionView extends React.Component{
         var roundTwoCopy = this.state.roundTwoKeys.slice();
         var hierarchy = this.state.keyHierarchy;
         var dummyHierarchy = JSON.parse(JSON.stringify(hierarchy));
+        var hierKey = key;
+        // the key may be a @id string and not keyIdx if already submitted
+        Object.keys(keyComplete).forEach(function(compKey) {
+            if (keyComplete[compKey] == key) {
+                hierKey = compKey;
+            }
+        });
         // find hierachy below the object being deleted
-        dummyHierarchy = searchHierarchy(dummyHierarchy, key);
+        dummyHierarchy = searchHierarchy(dummyHierarchy, hierKey);
         if(dummyHierarchy === null){
             // occurs when keys cannot be found to delete
             return;
@@ -591,7 +598,7 @@ export default class SubmissionView extends React.Component{
         var toDelete = flattenHierarchy(dummyHierarchy);
         toDelete.push(key); // add this key
         // trimming the hierarchy effectively removes objects from creation process
-        var newHierarchy = trimHierarchy(hierarchy, key);
+        var newHierarchy = trimHierarchy(hierarchy, hierKey);
         // for housekeeping, remove the keys from keyLinkBookmarks, keyLinks, and keyComplete
         for(var i=0; i<toDelete.length; i++){
             // only remove creation data for non-sumbitted, non-preexisiting objs
@@ -666,7 +673,7 @@ export default class SubmissionView extends React.Component{
 
     /**
      * Takes a key and value and sets the corresponding state in this component to the value.
-     * 
+     *
      * Primarily used as a callback to change currKey, in which case we
      * ensure that there are no current uploads of md5 calculations running. If
      * allowed to change keys, attempt to automatically validate the key we are
@@ -717,7 +724,7 @@ export default class SubmissionView extends React.Component{
 
     /**
      * Function used to initialize uploads, complete them, and end them on failure.
-     * 
+     *
      * Sets the upload status, upload (which holds the s3 upload manager), and
      * also communicates to app.js that there is an upload occuring.
      * When upload is initialized, calculate the md5sum of the file before uploading.
@@ -831,7 +838,7 @@ export default class SubmissionView extends React.Component{
     /**
      * Generate JSX for the the button that allows users to submit their custom
      * objects. Only active when validation state == 3 (validation successful).
-     * 
+     *
      * In roundTwo, there is no validation step, so only inactive when there is
      * an active upload of md5 calculation.
      */
@@ -1095,9 +1102,6 @@ export default class SubmissionView extends React.Component{
                             stateToSet.keyComplete = keyComplete;
                             stateToSet.keyDisplay = displayCopy;
                             stateToSet.keyContext = contextCopy;
-                            console.log('TT', this.state.keyHierarchy, inKey, destination);
-                            stateToSet.keyHierarchy = replaceInHierarchy(this.state.keyHierarchy, inKey, destination);
-                            console.log('TT', this.state.keyHierarchy, stateToSet.keyHierarchy, inKey, destination);
                             var needsRoundTwo = [];
                             // update context with response data and check if submitted object needs a round two
                             contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false, needsRoundTwo);
@@ -1321,8 +1325,8 @@ class DetailTitleBanner extends React.Component {
 
     /**
      * Traverse keyHierarchy option to get a list of hierarchical keys, e.g. 0,1,4 if are on currKey 4 that is a child of currKey 1 that is a child of currKey 0.
-     * 
-     * @param {Object} hierachy - Hierarchy as defined on state of SubmissionView components. 
+     *
+     * @param {Object} hierachy - Hierarchy as defined on state of SubmissionView components.
      * @param {number} currKey - Current key of Object/Item we're editing.
      * @returns {number[]} List of keys leading from 0 to currKey.
      */
@@ -1344,7 +1348,7 @@ class DetailTitleBanner extends React.Component {
                 if (nestedFound){
                     return [parseInt(nestedFound[0])].concat(nestedFound[1]);
                 }
-                
+
             }
         }
         return findNestedKey(hierachy);
@@ -1437,7 +1441,7 @@ class TypeSelectModal extends React.Component {
     render(){
         var { show, ambiguousType, ambiguousSelected, buildAmbiguousEnumEntry, submitAmbiguousType, schemas } = this.props;
         if (!show) return null;
-        
+
         var ambiguousDescrip = null;
         if (ambiguousSelected !== null && schemas[ambiguousSelected].description){
             ambiguousDescrip = schemas[ambiguousSelected].description;
@@ -1521,7 +1525,7 @@ class AliasSelectModal extends TypeSelectModal {
  * to the correct BuildFields. Also interfaces with SubmissionView to change
  * the context for this specific object and create custom and/or pre-existing
  * objects. Render changes slightly for RoundTwo.
- * 
+ *
  * @class IndividualObjectView
  * @see SubmissionView
  * @prop {number} currKey - Current key being edited.
@@ -1534,7 +1538,7 @@ class IndividualObjectView extends React.Component{
 
         /**
          * State in this component mostly has to do with selection of existing objs
-         * 
+         *
          * @prop {!string} selectType           Type of existing object being selected (i.e. ExperimentHiC).
          * @prop {!Object} selectData           Initial collection context fed to Search, given by LinkedObj in submission-fields.js.
          * @prop {!string} selectQuery          Search query held by this component for in-place navigation
@@ -1578,7 +1582,7 @@ class IndividualObjectView extends React.Component{
      * array indeces used to reference the specific value of the field. For example,
      * if a value is submitted for the 3rd array element inside the 2nd array element
      * of a larger field, arrayIdx would be [1,2].
-     * 
+     *
      * @param {string} field        Name of field on parent Item for which a value is being changed.
      * @param {any} value           New value we are setting for this field.
      * @param {string} fieldType    Internal descriptor for field type we're editing.
@@ -2270,7 +2274,7 @@ var trimHierarchy = function myself(hierarchy, keyIdx){
     return hierarchy;
 };
 
-/** 
+/**
  * Returns the entire hierarchy below for the given keyIdx. keyIdx must be a
  * number (custom object). Recursive function.
  */
@@ -2335,7 +2339,7 @@ var flattenHierarchy = function myself(hierarchy){
 /**
  * Remove any field with a null value from given json context.
  * also remove empty arrays and objects
- * 
+ *
  * @param {Object} context - Object representing an Item, with properties & values.
  * @returns {Object} The same context which was passed in, minus null-y values.
  */
