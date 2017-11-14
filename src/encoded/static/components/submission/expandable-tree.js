@@ -1,5 +1,7 @@
 'use strict';
+
 import React from 'react';
+import PropTypes from 'prop-types';
 import globals from '../globals';
 import _ from 'underscore';
 import { ajax, console, object, isServerSide } from '../util';
@@ -8,7 +10,19 @@ import ReactTooltip from 'react-tooltip';
 
 // Create a custom tree to represent object hierarchy in front end submission.
 // Each leaf is clickable and will bring you to a view of the new object
-export default class SubmissionTree extends React.Component{
+export default class SubmissionTree extends React.Component {
+
+    static propTypes = {
+        'keyHierarchy'      : PropTypes.object.isRequired,
+        'keyValid'          : PropTypes.object.isRequired,
+        'keyTypes'          : PropTypes.object.isRequired,
+        'keyDisplay'        : PropTypes.object.isRequired,
+        'keyComplete'       : PropTypes.object.isRequired,
+        'currKey'           : PropTypes.number.isRequired,
+        'keyLinkBookmarks'  : PropTypes.object.isRequired,
+        'keyLinks'          : PropTypes.object.isRequired,
+        'setSubmissionState': PropTypes.func.isRequired
+    }
 
     constructor(props){
         super(props);
@@ -26,10 +40,7 @@ export default class SubmissionTree extends React.Component{
         } = this.props;
         return(
             <div className="submission-nav-tree" style={{'marginTop':'10px'}}>
-                <h4>
-                    {'Navigation'}
-                    <InfoIcon children={infoTip}/>
-                </h4>
+                <h4>Navigation <InfoIcon children={infoTip}/></h4>
                 <div>
                     <SubmissionLeaf {...others} keyIdx={0} open={true}/>
                 </div>

@@ -1275,20 +1275,12 @@ export default class SubmissionView extends React.Component{
                         <SubmissionTree
                             setSubmissionState={this.setSubmissionState}
                             hierarchy={this.state.keyHierarchy}
-                            keyValid={this.state.keyValid}
-                            keyTypes={this.state.keyTypes}
-                            keyDisplay={this.state.keyDisplay}
-                            keyComplete={this.state.keyComplete}
-                            currKey={this.state.currKey}
-                            keyLinkBookmarks={this.state.keyLinkBookmarks}
-                            keyLinks={this.state.keyLinks}
+                            {..._.pick(this.state, 'keyValid', 'keyTypes', 'keyDisplay', 'keyComplete', 'currKey', 'keyLinkBookmarks', 'keyLinks')}
                         />
                     </div>
                     <div className={bodyCol}>
                         <IndividualObjectView
                             {...others}
-                            currKey={currKey}
-                            keyIter={this.state.keyIter}
                             schemas={this.props.schemas}
                             currType={currType}
                             currContext={currContext}
@@ -1296,18 +1288,10 @@ export default class SubmissionView extends React.Component{
                             initCreateObj={this.initCreateObj}
                             removeObj={this.removeObj}
                             addExistingObj={this.addExistingObj}
-                            md5Progress={this.state.md5Progress}
-                            keyContext={this.state.keyContext}
-                            keyDisplay={this.state.keyDisplay}
                             setSubmissionState={this.setSubmissionState}
                             modifyAlias={this.modifyAlias}
-                            keyComplete={this.state.keyComplete}
-                            md5Progress={this.state.md5Progress}
                             updateUpload={this.updateUpload}
-                            upload={this.state.upload}
-                            uploadStatus={this.state.uploadStatus}
-                            roundTwo={this.state.roundTwo}
-                            currentSubmittingUser={this.state.currentSubmittingUser}
+                            {..._.pick(this.state, 'keyDisplay', 'keyComplete', 'keyIter', 'currKey', 'keyContext', 'upload', 'uploadStatus', 'md5progress', 'roundTwo', 'currentSubmittingUser')}
                         />
                     </div>
                 </div>
@@ -1344,18 +1328,26 @@ class DetailTitleBanner extends React.Component {
      */
     static getListOfKeysInPath(hierachy, currKey){
         var keyList = [];
-        function findNestedKey(obj, key){
-            if (typeof obj[key] !== 'undefined'){
-                return [key];
+        function findNestedKey(obj){
+            if (typeof obj[currKey] !== 'undefined'){
+                return [currKey];
             } else {
-                var nestedFound = _.find(_.map(_.pairs(obj), function(p){ return [p[0], findNestedKey(p[1], key)]; }), function(p){ return (typeof p[1] !== 'undefined' || p[1] !== null); });
+                var nestedFound = _.find(
+                    _.map(
+                        _.pairs(obj),
+                        function(p){ return [ p[0], findNestedKey(p[1]) ]; }
+                    ),
+                    function(p){
+                        return (typeof p[1] !== 'undefined' && p[1] !== null);
+                    }
+                );
                 if (nestedFound){
                     return [parseInt(nestedFound[0])].concat(nestedFound[1]);
                 }
                 
             }
         }
-        return findNestedKey(hierachy, currKey);
+        return findNestedKey(hierachy);
     }
 
     static getContextPropertyNameOfNextKey(context, nextKey){
@@ -1380,6 +1372,7 @@ class DetailTitleBanner extends React.Component {
         var { currKey, keyTypes, keyDisplay, hierarchy, schemas, fullScreen, actionButtons, keyContext } = this.props;
         if (fullScreen) return null;
         var hierarchyKeyList = DetailTitleBanner.getListOfKeysInPath(hierarchy, currKey);
+        console.log('HHH', hierarchyKeyList);
         return (
             <h3 className="crumbs-title mb-2">
                 <div className="subtitle-heading small mb-05">
@@ -1834,9 +1827,9 @@ class IndividualObjectView extends React.Component{
             fieldType = 'text';
         }
         // check if this is an enum
-        if(fieldSchema.enum){
+        if(fieldSchema.enum || fieldSchema.suggested_enum){
             fieldType = 'enum';
-            enumValues = fieldSchema.enum;
+            enumValues = fieldSchema.enum || fieldSchema.suggested_enum;
         }
         // check for linkTo if further down in object or array
         var linked = delveObject(fieldSchema);
