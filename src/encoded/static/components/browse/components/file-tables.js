@@ -60,7 +60,7 @@ export class RawFilesStackedTable extends React.Component {
         facets = null,  // Required if want to get ignored filters by missing facet(s).
         useSet = false  // Return as array instead of set.
     ){
-        if (!Array.isArray(allExperiments)){
+        if (!Array.isArray(allExperiments) || allExperiments.length === 0){
             // no experiments
             if (useSet) return new Set();
             return [];
