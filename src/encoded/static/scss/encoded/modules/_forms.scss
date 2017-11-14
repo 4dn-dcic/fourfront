@@ -724,7 +724,7 @@ div.fieldset.editable-fields {
 		}
 
 		.submission-working-title {
-			font-weight: 300;
+			font-weight: 400;
 			font-size: 1.45rem;
 			transform-origin: 0 50%;
 			transition: transform .5s, opacity 0.5s;
@@ -764,7 +764,7 @@ div.fieldset.editable-fields {
 			}
 			&.last-title {
 				.submission-working-title {
-					font-weight: 400;
+					font-weight: 500;
 					transform: translate3d(0px, 3px, 0px);
 				}
 			}
@@ -772,7 +772,7 @@ div.fieldset.editable-fields {
 
 		@for $i from 0 through 4 {
 			.title-crumb.depth-level-#{$i} {
-				padding-left: 8px * $i;
+				padding-left: 5px * $i;
 			}
 		}
 

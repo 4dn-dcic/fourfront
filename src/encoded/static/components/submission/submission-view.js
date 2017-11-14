@@ -1392,7 +1392,7 @@ class DetailTitleBanner extends React.Component {
                                 } catch (e){ console.warn('Couldnt get property name for', keyContext[numKey], hierarchyKeyList[i + 1]); }
                             }
                             return (
-                                <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')}>
+                                <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')} key={i}>
                                     <div className="submission-working-title">
                                         { icon }<span className='working-subtitle'>{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
                                         {
