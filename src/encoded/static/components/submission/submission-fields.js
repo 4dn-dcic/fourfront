@@ -425,7 +425,7 @@ class ArrayField extends React.Component{
             <div className="list-of-array-items">
                 {arrayInfo.length > 0 ? arrayInfo.map((entry) => this.initiateArrayField(entry)) : null }
                 <div className="add-array-item-button-container">
-                    <Button onClick={this.props.pushArrayValue}><i className="icon icon-fw icon-plus"/> Add</Button>
+                    <Button bsSize={arrayInfo.length > 0 ? 'small' : null} onClick={this.props.pushArrayValue}><i className="icon icon-fw icon-plus"/> Add</Button>
                 </div>
             </div>
         );
