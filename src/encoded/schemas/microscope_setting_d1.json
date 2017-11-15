@@ -36,14 +36,20 @@
             "type": "number"
         },
         "image_t_step":{
-            "title": "Image time step (millisecond)",
-            "description": "the time step between images / volumes in a series",
-            "type": "number"
+            "title": "Image time step",
+            "description": "the time step between images, e.g. 2 sec, 100 millisec",
+            "type": "string"
         },
         "image_channel_encoding":{
             "title": "Image channel encoding",
-            "description": "Order in file, e.g. t,z,ch1-n",
-            "type": "string"
+            "description": "Order of time, z, and channel frames",
+            "type": "string",
+            "enum":["xyzct",
+                    "xyztc",
+                    "xyczt",
+                    "xytcz",
+                    "xyctz",
+                    "xytzc"]
         },
         "microscope_model":{
             "title": "Microscope model",

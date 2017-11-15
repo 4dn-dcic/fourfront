@@ -36,19 +36,29 @@
             "description": "",
             "type": "string"
         },
+        "ch00_filter_additional":{
+            "title": "Ch00 additional filter",
+            "description": "If there are additional channels please indicate",
+            "type": "string"
+        },
         "ch00_detector_model":{
             "title": "Ch00 detector model",
             "description": "Manufacturer and model number for the detector on ch00",
             "type": "string"
         },
         "ch00_integration_time":{
-            "title": "Ch00 integration time (millisec)",
-            "description": "the length of time the image is exposed to light for a single frame",
-            "type": "number"
+            "title": "Ch00 integration time",
+            "description": "time the image is exposed to light for a single frame, e.g. 20 millisec",
+            "type": "string"
         },
         "ch01_filter_set":{
             "title": "Ch01 filter set",
             "description": "",
+            "type": "string"
+        },
+        "ch01_filter_additional":{
+            "title": "Ch01 additional filter",
+            "description": "If there are additional channels please indicate",
             "type": "string"
         },
         "ch01_detector_model":{
@@ -58,12 +68,17 @@
         },
         "ch01_integration_time":{
             "title": "Ch01 integration time (millisec)",
-            "description": "the length of time the image is exposed to light for a single frame",
-            "type": "number"
+            "description": "time the image is exposed to light for a single frame, e.g. 20 millisec",
+            "type": "string"
         },
         "ch02_filter_set":{
             "title": "Ch02 filter set",
             "description": "",
+            "type": "string"
+        },
+        "ch02_filter_additional":{
+            "title": "Ch02 additional filter",
+            "description": "If there are additional channels please indicate",
             "type": "string"
         },
         "ch02_detector_model":{
@@ -73,12 +88,17 @@
         },
         "ch02_integration_time":{
             "title": "Ch02 integration time (millisec)",
-            "description": "the length of time the image is exposed to light for a single frame",
-            "type": "number"
+            "description": "time the image is exposed to light for a single frame, e.g. 20 millisec",
+            "type": "string"
         },
         "ch03_filter_set":{
             "title": "Ch03 filter set",
             "description": "",
+            "type": "string"
+        },
+        "ch03_filter_additional":{
+            "title": "Ch03 additional filter",
+            "description": "If there are additional channels please indicate",
             "type": "string"
         },
         "ch03_detector_model":{
@@ -88,12 +108,17 @@
         },
         "ch03_integration_time":{
             "title": "Ch03 integration time (millisec)",
-            "description": "the length of time the image is exposed to light for a single frame",
-            "type": "number"
+            "description": "time the image is exposed to light for a single frame, e.g. 20 millisec",
+            "type": "string"
         },
         "embedding_RI":{
             "title": "Embedding medium RI",
             "description": "Refractive index of embedding medium (nominal)",
+            "type": "number"
+        },
+        "sample_temperature":{
+            "title": "Sample temperature",
+            "description": "Temperature of the sample under objective (°C)",
             "type": "number"
         }
     }

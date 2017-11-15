@@ -28,7 +28,7 @@
             "default": "1"
         },
         "objective_working_distance":{
-            "title": "Objective working distance (µm)",
+            "title": "Objective working distance (mm)",
             "description": "",
             "type": "number"
         },
@@ -40,7 +40,7 @@
         "ch00_power_output":{
             "title": "Ch00 power output",
             "description": "Nominal power output from ch00 light source",
-            "type": "number"
+            "type": "string"
         },
         "ch00_lasers_diodes":{
             "title": "Ch00 lasers/diodes",
@@ -55,7 +55,7 @@
         "ch01_power_output":{
             "title": "Ch01 power output",
             "description": "Nominal power output from ch01 light source",
-            "type": "number"
+            "type": "string"
         },
         "ch01_lasers_diodes":{
             "title": "Ch01 lasers/diodes",
@@ -70,7 +70,7 @@
         "ch02_power_output":{
             "title": "Ch02 power output",
             "description": "Nominal power output from ch02 light source",
-            "type": "number"
+            "type": "string"
         },
         "ch02_lasers_diodes":{
             "title": "Ch02 lasers/diodes",
@@ -85,7 +85,7 @@
         "ch03_power_output":{
             "title": "Ch03 power output",
             "description": "Nominal power output from ch03 light source",
-            "type": "number"
+            "type": "string"
         },
         "ch03_lasers_diodes":{
             "title": "Ch03 lasers/diodes",
@@ -100,6 +100,18 @@
         "camera_model":{
             "title": "Camera model",
             "description": "Manufacturer and model of the camera",
+            "type": "string"
+        },
+        "camera_chip_type":{
+            "title": "Camera chip type",
+            "type": "string",
+            "enum":["CCD",
+                    "sCMOS",
+                    "EMCCD"]
+        },
+        "camera_chip_size":{
+            "title": "Camera chip size",
+            "description": "Pixel dimensions of the chip, e.g. 1392x1040",
             "type": "string"
         },
         "camera_serial":{

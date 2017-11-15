@@ -21,7 +21,7 @@
         "ch00_detector_type": "spectral detector",
         "ch00_filter_set":"BP 530-585 FT 600 LP 615",
         "ch00_detector_model":"leica A002",
-        "ch00_integration_time":10,
+        "ch00_integration_time":"1 sec",
 
         "ch01_light_source_type":"laser",
         "ch01_light_source_model":"Leica argon laser 1XX",
@@ -29,7 +29,7 @@
         "ch01_detector_type":"spectral detector",
         "ch01_filter_set":"BP 365/12 FT 395 LP 397",
         "ch01_detector_model":"leica A002",
-        "ch01_integration_time":10,
+        "ch01_integration_time":"1 sec",
 
         "ch02_light_source_type":"laser",
         "ch02_light_source_model":"Leica argon laser 1XX",
@@ -37,7 +37,7 @@
         "ch02_detector_type":"spectral detector",
         "ch02_filter_set":"G 365 FT 395 LP 420",
         "ch02_detector_model":"leica A002",
-        "ch02_integration_time":10,
+        "ch02_integration_time":"1 sec",
         "embedding_RI":1.2
     }
 ]
