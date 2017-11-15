@@ -1,4 +1,4 @@
-"""The type file for the collection Individual (Encode Donor)."""
+"""The type file for the collection Microscope Settings."""
 from snovault import (
     abstract_collection,
     # calculated_property,

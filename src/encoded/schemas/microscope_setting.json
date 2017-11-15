@@ -1,6 +1,6 @@
 {
     "title": "Microscopy Settings",
-    "description": "Metadata fields required for Tier A1 level microscopy files",
+    "description": "Metadata fields required for microscopy files",
     "id": "/profiles/microscope_setting.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
