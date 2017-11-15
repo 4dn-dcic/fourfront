@@ -1416,15 +1416,17 @@ class DetailTitleBanner extends React.Component {
             } catch (e){ console.warn('Couldnt get property name for', keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i]); }
         }
         return (
-            <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')} key={i}>
-                <div className="submission-working-title">
-                    <span onClick={this.handleClick.bind(this, numKey)}>
-                        { icon }
-                        { parentPropertyName ? <span className="next-property-name">{ parentPropertyName }: </span> : null }
-                        <span className='working-subtitle'>{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
-                    </span>
+            <Collapse in transitionAppear={i !== 0} key={i}>
+                <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')}>
+                    <div className="submission-working-title">
+                        <span onClick={this.handleClick.bind(this, numKey)}>
+                            { icon }
+                            { parentPropertyName ? <span className="next-property-name">{ parentPropertyName }: </span> : null }
+                            <span className='working-subtitle'>{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
+                        </span>
+                    </div>
                 </div>
-            </div>
+            </Collapse>
         );
     }
 
@@ -1438,7 +1440,7 @@ class DetailTitleBanner extends React.Component {
             <h3 className="crumbs-title mb-2">
                 <div className="subtitle-heading form-section-heading mb-08">
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
-                        Currently Editing <i className={"icon icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} />
+                        Currently Editing { this.props.currKey > 0 ? <i className={"icon icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} /> : null }
                     </span>
                 </div>
                 { this.state.open ? this.generateHierarchicalTitles() : this.generateCrumbTitle(this.props.currKey) }
