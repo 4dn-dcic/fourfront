@@ -353,6 +353,10 @@ h3.submission-subtitle {
 	overflow: hidden;
 }
 
+.clickable {
+	cursor: pointer;
+}
+
 @media screen and (max-width: $screen-xs-max){
 
 	.text-left-xs {

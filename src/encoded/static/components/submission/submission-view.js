@@ -1254,8 +1254,8 @@ export default class SubmissionView extends React.Component{
         var showAliasModal = !showAmbiguousModal && this.state.creatingIdx !== null && this.state.creatingType !== null;
         var currType = this.state.keyTypes[currKey];
         var currContext = this.state.keyContext[currKey];
-        var navCol = this.state.fullScreen ? 'submission-hidden-nav' : 'col-sm-2';
-        var bodyCol = this.state.fullScreen ? 'col-sm-12' : 'col-sm-10';
+        var navCol = this.state.fullScreen ? 'submission-hidden-nav' : 'col-sm-3';
+        var bodyCol = this.state.fullScreen ? 'col-sm-12' : 'col-sm-9';
 
         // remove context and navigate from this.props
         const{
@@ -1266,13 +1266,19 @@ export default class SubmissionView extends React.Component{
         var currObjDisplay = this.state.keyDisplay[currKey] || currType;
         return(
             <div className="submission-view-page-container">
-                <TypeSelectModal show={showAmbiguousModal} {..._.pick(this.state, 'ambiguousType', 'ambiguousSelected', 'currKey', 'creatingIdx')} schemas={this.props.schemas}
-                    buildAmbiguousEnumEntry={this.buildAmbiguousEnumEntry} submitAmbiguousType={this.submitAmbiguousType} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}  />
-                <AliasSelectModal show={showAliasModal} {..._.pick(this.state, 'creatingAlias', 'creatingType', 'creatingAliasMessage', 'currKey', 'creatingIdx', 'currentSubmittingUser')}
-                    handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} />
+                <TypeSelectModal
+                    show={showAmbiguousModal} {..._.pick(this.state, 'ambiguousType', 'ambiguousSelected', 'currKey', 'creatingIdx')} schemas={this.props.schemas}
+                    buildAmbiguousEnumEntry={this.buildAmbiguousEnumEntry} submitAmbiguousType={this.submitAmbiguousType} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}
+                />
+                <AliasSelectModal
+                    show={showAliasModal} {..._.pick(this.state, 'creatingAlias', 'creatingType', 'creatingAliasMessage', 'currKey', 'creatingIdx', 'currentSubmittingUser')}
+                    handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}
+                />
                 <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} actionButtons={[this.generateCancelButton(), this.generateValidationButton(), this.generateSubmitButton()]} />
-                <DetailTitleBanner currKey={currKey} keyDisplay={this.state.keyDisplay} hierarchy={this.state.keyHierarchy} keyTypes={this.state.keyTypes} keyContext={this.state.keyContext}
-                    fullScreen={this.state.fullScreen} setSubmissionState={this.setSubmissionState} />
+                <DetailTitleBanner
+                    hierarchy={this.state.keyHierarchy} setSubmissionState={this.setSubmissionState}
+                    {..._.pick(this.state, 'keyContext', 'keyTypes', 'keyDisplay', 'currKey', 'fullScreen')}
+                />
                 <div className="clearfix row">
                     <div className={navCol}>
                         <SubmissionTree
@@ -1374,50 +1380,68 @@ class DetailTitleBanner extends React.Component {
         return foundPropertyName;
     }
 
+    constructor(props){
+        super(props);
+        this.generateCrumbTitle = this.generateCrumbTitle.bind(this);
+        this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 500);
+        this.generateHierarchicalTitles = this.generateHierarchicalTitles.bind(this);
+        this.state = { 'open' : true };
+    }
+
     handleClick(keyIdx, e){
         e.preventDefault();
         this.props.setSubmissionState('currKey', keyIdx);
     }
 
-    render(){
+    toggleOpen(e){
+        e.preventDefault();
+        this.setState({ 'open' : !this.state.open });
+    }
+
+    generateCrumbTitle(numKey, i = 0, hierarchyKeyList = null){
         var { currKey, keyTypes, keyDisplay, hierarchy, schemas, fullScreen, actionButtons, keyContext } = this.props;
-        if (fullScreen) return null;
-        var hierarchyKeyList = DetailTitleBanner.getListOfKeysInPath(hierarchy, currKey);
+        if (hierarchyKeyList === null){
+            hierarchyKeyList = [numKey];
+        }
+        var icon = i === 0 ? null : <i className="icon icon-fw">&crarr;</i>;
+        var isLast = i + 1 === hierarchyKeyList.length;
+        var parentPropertyName = null;
+        if (i !== 0){
+            try {
+                var [parentPropertyNameUnsanitized, parentPropertyValueIndex] = DetailTitleBanner.getContextPropertyNameOfNextKey(keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i], true);
+                parentPropertyName = Schemas.Field.toName(parentPropertyNameUnsanitized, Schemas.get(), false, keyTypes[hierarchyKeyList[i - 1]]);
+                if (parentPropertyValueIndex !== null){
+                    parentPropertyName += ' (Item #' + (parentPropertyValueIndex + 1) + ')';
+                }
+            } catch (e){ console.warn('Couldnt get property name for', keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i]); }
+        }
+        return (
+            <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')} key={i}>
+                <div className="submission-working-title">
+                    <span onClick={this.handleClick.bind(this, numKey)}>
+                        { icon }
+                        { parentPropertyName ? <span className="next-property-name">{ parentPropertyName }: </span> : null }
+                        <span className='working-subtitle'>{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
+                    </span>
+                </div>
+            </div>
+        );
+    }
+
+    generateHierarchicalTitles(){
+        return _.map(DetailTitleBanner.getListOfKeysInPath(this.props.hierarchy, this.props.currKey), this.generateCrumbTitle);
+    }
+
+    render(){
+        if (this.props.fullScreen) return null;
         return (
             <h3 className="crumbs-title mb-2">
-                <div className="subtitle-heading small mb-05">
-                    Currently Editing
+                <div className="subtitle-heading form-section-heading mb-08">
+                    <span className="inline-block clickable" onClick={this.toggleOpen}>
+                        Currently Editing <i className={"icon icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} />
+                    </span>
                 </div>
-                {
-                    _.map(
-                        hierarchyKeyList,
-                        (numKey, i) => {
-                            var icon = i === 0 ? null : <i className="icon icon-fw">&crarr;</i>;
-                            var isLast = i + 1 === hierarchyKeyList.length;
-                            var parentPropertyName = null;
-                            if (i !== 0){
-                                try {
-                                    var [parentPropertyNameUnsanitized, parentPropertyValueIndex] = DetailTitleBanner.getContextPropertyNameOfNextKey(keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i], true);
-                                    parentPropertyName = Schemas.Field.toName(parentPropertyNameUnsanitized, Schemas.get(), false, keyTypes[hierarchyKeyList[i - 1]]);
-                                    if (parentPropertyValueIndex !== null){
-                                        parentPropertyName += ' (Item #' + (parentPropertyValueIndex + 1) + ')';
-                                    }
-                                } catch (e){ console.warn('Couldnt get property name for', keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i]); }
-                            }
-                            return (
-                                <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')} key={i}>
-                                    <div className="submission-working-title">
-                                        <span onClick={this.handleClick.bind(this, numKey)}>
-                                            { icon }
-                                            { parentPropertyName ? <span className="next-property-name">{ parentPropertyName }: </span> : null }
-                                            <span className='working-subtitle'>{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            );
-                        }
-                    )
-                }
+                { this.state.open ? this.generateHierarchicalTitles() : this.generateCrumbTitle(this.props.currKey) }
             </h3>
         );
     }
@@ -1985,11 +2009,7 @@ class FormFieldsContainer extends React.Component {
         if(React.Children.count(this.props.children) === 0) return null;
         return(
             <div className="form-fields-container">
-                <h4 className="clearfix page-subtitle submission-field-header">
-                    <span>
-                        Fields & Dependencies
-                    </span>
-                </h4>
+                <h4 className="clearfix page-subtitle form-section-heading submission-field-header">Fields & Dependencies</h4>
                 <div>
                     { this.props.children }
                 </div>

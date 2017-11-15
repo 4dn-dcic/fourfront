@@ -717,11 +717,16 @@ div.fieldset.editable-fields {
 		}
 	}
 
-	.crumbs-title {
+	.form-section-heading {
+		font-size: 1.125rem;
+		font-weight: 500;
+		margin-top: 10px;
+		padding-bottom: 8px;
+		border-bottom: 1px solid #ccc;
+		color: #333;
+	}
 
-		.subtitle-heading.small {
-			color: #333;
-		}
+	.crumbs-title {
 
 		.submission-working-title {
 			font-weight: 400;
@@ -834,7 +839,7 @@ div.fieldset.editable-fields {
 			border-bottom: 1px solid #ccc;
 			padding-bottom: 8px;
 			margin-bottom: 0px;
-			margin-top: 16px;
+			margin-top: 10px;
 			> button {
 				margin-right: 10px;
 				margin-top: -2px;
