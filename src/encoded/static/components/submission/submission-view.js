@@ -570,7 +570,6 @@ export default class SubmissionView extends React.Component{
      * existing object amounts to removing it from keyHierarchy.
      */
     removeObj = (key) => {
-        console.log('REMOVING', key);
         var contextCopy = this.state.keyContext;
         var validCopy = this.state.keyValid;
         var typesCopy = this.state.keyTypes;
@@ -814,17 +813,17 @@ export default class SubmissionView extends React.Component{
             }else{
                 return <Button bsStyle="warning" disabled>Skip</Button>;
             }
-        } else if(validity == 3 || validity == 4){
+        } else if(validity === 3 || validity === 4){
             return(
                 <Button bsStyle="info" disabled>Validated</Button>
             );
-        } else if(validity == 2){
+        } else if(validity === 2){
             if (this.state.processingFetch) {
                 return <Button bsStyle="danger" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
             } else {
                 return <Button bsStyle="danger" onClick={this.testPostNewContext}>Validate</Button>;
             }
-        } else if (validity == 1){
+        } else if (validity === 1){
             if (this.state.processingFetch) {
                 return <Button bsStyle="info" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
             } else {
@@ -1273,7 +1272,7 @@ export default class SubmissionView extends React.Component{
                     handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} />
                 <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} actionButtons={[this.generateCancelButton(), this.generateValidationButton(), this.generateSubmitButton()]} />
                 <DetailTitleBanner currKey={currKey} keyDisplay={this.state.keyDisplay} hierarchy={this.state.keyHierarchy} keyTypes={this.state.keyTypes} keyContext={this.state.keyContext}
-                    fullScreen={this.state.fullScreen} />
+                    fullScreen={this.state.fullScreen} setSubmissionState={this.setSubmissionState} />
                 <div className="clearfix row">
                     <div className={navCol}>
                         <SubmissionTree
@@ -1353,29 +1352,37 @@ class DetailTitleBanner extends React.Component {
         return findNestedKey(hierachy);
     }
 
-    static getContextPropertyNameOfNextKey(context, nextKey){
-        var found = null;
+    static getContextPropertyNameOfNextKey(context, nextKey, getArrayIndex = false){
+        var foundPropertyName = null;
+        var arrayIdx = null;
         _.pairs(context).forEach(function(p){
-            if (found) return;
+            if (foundPropertyName) return;
             if (p[1] === nextKey){
-                found = p[0];
+                foundPropertyName = p[0];
             }
             // Remove value from array.
             if (Array.isArray(p[1])){
-                var idxInArray = p[1].indexOf(nextKey);
-                if (idxInArray > -1){
-                    found = p[0];
+                arrayIdx = p[1].indexOf(nextKey);
+                if (typeof arrayIdx === 'number' && arrayIdx > -1){
+                    foundPropertyName = p[0];
                 }
             }
         });
-        return found;
+        if (getArrayIndex){
+            return [foundPropertyName, arrayIdx];
+        }
+        return foundPropertyName;
+    }
+
+    handleClick(keyIdx, e){
+        e.preventDefault();
+        this.props.setSubmissionState('currKey', keyIdx);
     }
 
     render(){
         var { currKey, keyTypes, keyDisplay, hierarchy, schemas, fullScreen, actionButtons, keyContext } = this.props;
         if (fullScreen) return null;
         var hierarchyKeyList = DetailTitleBanner.getListOfKeysInPath(hierarchy, currKey);
-        console.log('HHH', hierarchyKeyList);
         return (
             <h3 className="crumbs-title mb-2">
                 <div className="subtitle-heading small mb-05">
@@ -1384,22 +1391,27 @@ class DetailTitleBanner extends React.Component {
                 {
                     _.map(
                         hierarchyKeyList,
-                        function(numKey, i){
-                            var icon = <i className="icon icon-fw icon-caret-right"/>;
+                        (numKey, i) => {
+                            var icon = i === 0 ? null : <i className="icon icon-fw">&crarr;</i>;
                             var isLast = i + 1 === hierarchyKeyList.length;
-                            var nextPropertyName = null;
-                            if (!isLast){
+                            var parentPropertyName = null;
+                            if (i !== 0){
                                 try {
-                                    nextPropertyName = Schemas.Field.toName(DetailTitleBanner.getContextPropertyNameOfNextKey(keyContext[numKey], hierarchyKeyList[i + 1]), Schemas.get(), false, keyTypes[numKey]);
-                                } catch (e){ console.warn('Couldnt get property name for', keyContext[numKey], hierarchyKeyList[i + 1]); }
+                                    var [parentPropertyNameUnsanitized, parentPropertyValueIndex] = DetailTitleBanner.getContextPropertyNameOfNextKey(keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i], true);
+                                    parentPropertyName = Schemas.Field.toName(parentPropertyNameUnsanitized, Schemas.get(), false, keyTypes[hierarchyKeyList[i - 1]]);
+                                    if (parentPropertyValueIndex !== null){
+                                        parentPropertyName += ' (Item #' + (parentPropertyValueIndex + 1) + ')';
+                                    }
+                                } catch (e){ console.warn('Couldnt get property name for', keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i]); }
                             }
                             return (
                                 <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')} key={i}>
                                     <div className="submission-working-title">
-                                        { icon }<span className='working-subtitle'>{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
-                                        {
-                                            nextPropertyName ? <span className="next-property-name"> <i className="icon icon-angle-right"/> { nextPropertyName }</span> : null
-                                        }
+                                        <span onClick={this.handleClick.bind(this, numKey)}>
+                                            { icon }
+                                            { parentPropertyName ? <span className="next-property-name">{ parentPropertyName }: </span> : null }
+                                            <span className='working-subtitle'>{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
+                                        </span>
                                     </div>
                                 </div>
                             );

@@ -728,36 +728,66 @@ div.fieldset.editable-fields {
 			font-size: 1.45rem;
 			transform-origin: 0 50%;
 			transition: transform .5s, opacity 0.5s;
-			> span, > i {
-				vertical-align: middle;
-			}
-			.working-subtitle{
-				font-weight: 200;
-				color: #777;
-				padding-right: 5px;
-			}
-			> i.icon {
-				margin-right: 4px;
-				font-size: 1.2rem;
+			> span {
+				/*
+				> span, > i {
+					vertical-align: middle;
+				}
+				*/
+				.working-subtitle {
+					font-weight: 300;
+					color: #777;
+					padding-right: 1px;
+				}
+				> i.icon {
+					margin-right: 3px;
+					font-size: 1.2rem;
+					transform: rotate3d(0,1,0,180deg);
+					margin-top: 0;
+					opacity: 0.5;
+					margin-left: -9px;
+				}
 			}
 		}
 
 		.title-crumb {
+
+			.next-property-name {
+				color: #777;
+				font-weight: 400;
+				font-size: 1rem;
+				transition: opacity .3s;
+				margin-top: -2px;
+				display: inline-block;
+				margin-right: 5px;
+				position: relative;
+				top: -1px;
+
+			}
 			
 			&.mid-title {
 				.submission-working-title {
+					> span {
+						cursor: pointer;
+					}
 					opacity: 0.75;
-					transform: scale3d(0.75, 0.75, 1) translate3d(0px, -3px, 0px);
+					transform: scale3d(0.8, 0.8, 1) translate3d(0px, -3px, 0px);
 					i.icon-caret-right {
 						opacity: 0.5;
 					}
-					.next-property-name {
-						color: #777;
-						font-weight: 100;
-						font-size: 1.2rem;
-						> i.icon-angle-right {
-							margin-left: 3px;
-							margin-right: 3px;
+					
+					&:hover {
+						opacity: 1;
+						i.icon-caret-right {
+							opacity: 1;
+						}
+					}
+					
+				}
+				&.depth-level-0 {
+					.submission-working-title {
+						.working-subtitle {
+							color: #000;
 						}
 					}
 				}
@@ -765,20 +795,25 @@ div.fieldset.editable-fields {
 			&.last-title {
 				.submission-working-title {
 					font-weight: 500;
-					transform: translate3d(0px, 3px, 0px);
+					transform: translate3d(0px, 1px, 0px);
 				}
 			}
+
+			@for $i from 0 through 4 {
+				&.depth-level-#{$i} {
+					padding-left: 5px * $i;
+				}
+			}
+
 		}
 
-		@for $i from 0 through 4 {
-			.title-crumb.depth-level-#{$i} {
-				padding-left: 5px * $i;
-			}
-		}
+		
 
 	}
 
 	.action-buttons-container {
+		position: relative;
+		z-index: 5;
 		> button {
 			min-width: 100px;
 			&:not(:last-child){
