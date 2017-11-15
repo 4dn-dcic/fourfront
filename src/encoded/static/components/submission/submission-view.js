@@ -1371,6 +1371,8 @@ class DetailTitleBanner extends React.Component {
                 arrayIdx = p[1].indexOf(nextKey);
                 if (typeof arrayIdx === 'number' && arrayIdx > -1){
                     foundPropertyName = p[0];
+                } else {
+                    arrayIdx = null;
                 }
             }
         });
@@ -1408,7 +1410,7 @@ class DetailTitleBanner extends React.Component {
         var parentPropertyName = null;
         if (i !== 0){
             try {
-                var [parentPropertyNameUnsanitized, parentPropertyValueIndex] = DetailTitleBanner.getContextPropertyNameOfNextKey(keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i], true);
+                var [ parentPropertyNameUnsanitized, parentPropertyValueIndex ] = DetailTitleBanner.getContextPropertyNameOfNextKey(  keyContext[hierarchyKeyList[i - 1]]  ,  hierarchyKeyList[i]  ,  true  );
                 parentPropertyName = Schemas.Field.toName(parentPropertyNameUnsanitized, Schemas.get(), false, keyTypes[hierarchyKeyList[i - 1]]);
                 if (parentPropertyValueIndex !== null){
                     parentPropertyName += ' (Item #' + (parentPropertyValueIndex + 1) + ')';

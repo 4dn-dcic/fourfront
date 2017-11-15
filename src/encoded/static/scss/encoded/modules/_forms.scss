@@ -715,8 +715,23 @@ div.fieldset.editable-fields {
 			padding-top: 12px;
 			padding-bottom: 12px;
 		}
+		// CANCEL, VALIDATE, SUBMIT BUTTONS
+		.action-buttons-container {
+			position: relative;
+			z-index: 5;
+			> button {
+				min-width: 100px;
+				&:not(:last-child){
+					margin-right: 10px;
+				}
+			}
+			button[disabled]{
+				pointer-events: all;
+			}
+		}
 	}
 
+	// SECTION TITLES
 	.form-section-heading {
 		font-size: 1.125rem;
 		font-weight: 500;
@@ -726,6 +741,7 @@ div.fieldset.editable-fields {
 		color: #333;
 	}
 
+	// TITLES
 	.crumbs-title {
 
 		min-height: 75px;
@@ -820,20 +836,9 @@ div.fieldset.editable-fields {
 
 	}
 
-	.action-buttons-container {
-		position: relative;
-		z-index: 5;
-		> button {
-			min-width: 100px;
-			&:not(:last-child){
-				margin-right: 10px;
-			}
-		}
-		button[disabled]{
-			pointer-events: all;
-		}
-	}
+	
 
+	// INNER FIELDS AREA
 	.form-fields-container,
 	.round-two-panel {
 
@@ -987,6 +992,10 @@ div.fieldset.editable-fields {
 								position: relative;
 								top: 1px;
 							}
+							&.btn-sm {
+								padding-top: 6px;
+								padding-bottom: 4px;
+							}
 						}
 					}
 
@@ -1012,33 +1021,73 @@ div.fieldset.editable-fields {
 
 	}
 
+	// NAV TREE
+	.submission-view-navigation-tree {
+
+		.submission-nav-leaf {
+			width: 100%;
+			> div > button {
+				border: none;
+				border-radius: 0px;
+				width: 20px;
+				height: 19px;
+				opacity: 1 !important;
+			}
+		}
+
+		.submission-nav-leaf.linked-item-title {
+
+			> .inner-title { // Item Name
+				margin-left: -15px;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				font-size: 0.8rem;
+				border: 1px solid transparent;
+				
+				&.pre-existing {
+					background-color: #4c994c;
+				}
+				&.not-complete {
+					background-color: #fcd19c;
+				}
+				&.complete-not-validated {
+					background-color: #acd1ec;
+				}
+				&.failed-validation {
+					background-color: #e2b6b6;
+				}
+				&.validated {
+					background-color: #b7e1bb;
+				}
+			}
+			
+			> .list-of-properties {
+				padding-left: 15px;
+				> .submission-nav-leaf.linked-item-type-name {
+					> .inner-title { // Item Type
+
+					}
+					> .children-container {
+
+					}
+				}
+			}
+
+			&.leaf-depth-0 {
+				> .inner-title {
+					margin-left: 0;
+				}
+			}
+		}
+		
+	}
 }
 
 // SUBMISSION STUFF
 
 
 
-.submission-nav-tree{
-	border: 1px solid #ccc;
-	border-radius: 2px;
-	background-color: #fff;
-	> h4{
-		text-align: center;
-		font-weight: 300;
-		margin-top: 0px;
-	}
-}
-
-.submission-nav-leaf{
-	width: 100%;
-	> div > button{
-		border: none;
-		border-radius: 0px;
-		width: 20px;
-		height: 19px;
-		opacity: 1 !important;
-	}
-}
 
 .submission-pop-icon{
 	background-color: #fff;
