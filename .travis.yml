@@ -159,7 +159,12 @@ after_success:
            travis_wait 30 python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-            echo "Job succeeded! PUBLISHING to fourfront-webprod environment..."
+           if [ -z "$tibanna_deploy" ]; then
+               echo "Job succeeded! PUBLISHING to fourfront-webprod environment..."
+           else
+               echo "Job succeeded! PUBLISHing to ${tibanna_deploy} environment..."
+               eb use ${tibanna_deploy} --debug
+           fi
             travis_wait 30 python deploy/deploy_beanstalk.py --prod
           fi
         fi
