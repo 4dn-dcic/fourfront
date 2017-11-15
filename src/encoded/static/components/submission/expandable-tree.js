@@ -39,10 +39,15 @@ export default class SubmissionTree extends React.Component {
             ...others
         } = this.props;
         return(
-            <div className="submission-nav-tree" style={{'marginTop':'10px'}}>
-                <h4>Navigation <InfoIcon children={infoTip}/></h4>
-                <div>
-                    <SubmissionLeaf {...others} keyIdx={0} open={true}/>
+            <div className="submission-view-navigation-tree">
+                <h3 className="form-section-heading mb-08">
+                        Navigation
+                        <InfoIcon children={infoTip} />
+                </h3>
+                <div className="submission-nav-tree" style={{'marginTop':'10px'}}>
+                    <div>
+                        <SubmissionLeaf {...others} keyIdx={0} open={true}/>
+                    </div>
                 </div>
             </div>
         );
@@ -251,7 +256,7 @@ class InfoIcon extends React.Component{
     render() {
         if (!this.props.children) return null;
         return (
-            <i style={{"marginLeft":"6px", 'fontSize':'0.8em'}} className="icon icon-info-circle" data-place="right" data-html={true} data-tip={this.props.children}/>
+            <i style={{"marginLeft":"6px", 'fontSize':'0.8em'}} className={"icon icon-info-circle" + (this.props.className ? ' ' + this.props.className : '')} data-place="right" data-html={true} data-tip={this.props.children}/>
         );
     }
 }

@@ -54,27 +54,11 @@ export default class BuildField extends React.Component{
         switch(field_case){
             case 'text' :
                 if (this.props.field === 'aliases'){
-                    return (
-                        <div className="input-wrapper">
-                            <AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={this.props.currentSubmittingUser} />
-                        </div>
-                    );
+                    return <div className="input-wrapper"><AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={this.props.currentSubmittingUser} /></div>;
                 }
-                return (
-                    <div className="input-wrapper" style={{'display':'inline'}}>
-                        <FormControl type="text" inputMode="latin" {...inputProps} />
-                    </div>
-                );
-            case 'integer' : return (
-                <div className="input-wrapper" style={{'display':'inline'}}>
-                    <FormControl type="number" inputMode="latin" {...inputProps} />
-                </div>
-            );
-            case 'number' : return (
-                <div className="input-wrapper" style={{'display':'inline'}}>
-                    <FormControl type="number" inputMode="latin" {...inputProps} />
-                </div>
-            );
+                return <FormControl type="text" inputMode="latin" {...inputProps} />;
+            case 'integer'          : return <FormControl type="number" inputMode="latin" {...inputProps} />;
+            case 'number'           : return <FormControl type="number" inputMode="latin" {...inputProps} />;
             /*
             case 'boolean' : return (
                 <div className="input-wrapper" style={{'display':'inline'}}>
@@ -82,34 +66,18 @@ export default class BuildField extends React.Component{
                 </div>
             );
             */
-            case 'enum' : return (
+            case 'enum'             : return (
                 <span className="input-wrapper" style={{'display':'inline'}}>
                     <DropdownButton title={this.props.value || <span className="text-300">No value</span>} onToggle={this.handleDropdownButtonToggle}>
                         {this.props.enumValues.map((val) => this.buildEnumEntry(val))}
                     </DropdownButton>
                 </span>
             );
-            case 'linked object' : return (
-                <div style={{'display':'inline-block'}}>
-                    <LinkedObj {...this.props}/>
-                </div>
-            );
-            case 'array' : return (
-                <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} />
-            );
-            case 'object' : return (
-                <div style={{'display':'inline'}}>
-                    <ObjectField {...this.props}/>
-                </div>
-            );
-            case 'attachment' : return (
-                <div style={{'display':'inline'}}>
-                    <AttachmentInput {...this.props}/>
-                </div>
-            );
-            case 'file upload' : return (
-                <S3FileInput {...this.props}/>
-            );
+            case 'linked object'    : return <div className="inline-block"><LinkedObj {...this.props}/></div>;
+            case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} />;
+            case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
+            case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
+            case 'file upload'      : return <S3FileInput {...this.props}/>;
         }
         // Fallback
         return <div>No field for this case yet.</div>;
@@ -258,14 +226,14 @@ export default class BuildField extends React.Component{
         }
 
         return wrapFunc(
-            <div className={"col-sm-12" + (excludeRemoveButton ? "": " col-md-10")}>
+            <div className={'col-xs-' + (excludeRemoveButton ? "12": "10")}>
                 {this.displayField(this.props.fieldType)}
             </div>,
             excludeRemoveButton ? null : (
-                <div className="col-xs-12 col-md-2 remove-button-column">
+                <div className="col-xs-2 remove-button-column">
                     <Fade in={showDelete}>
                         <div className="pull-right remove-button-container">
-                            <Button tabIndex={2} bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>Remove</Button>
+                            <Button tabIndex={2} bsStyle="danger" disabled={!showDelete} onClick={this.deleteField}><i className="icon icon-fw icon-times"/></Button>
                         </div>
                     </Fade>
                 </div>
@@ -813,7 +781,7 @@ class S3FileInput extends React.Component{
                     </Button>
                     <Fade in={showDelete}>
                         <div className="pull-right">
-                            <Button tabIndex={2} bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>Remove</Button>
+                            <Button tabIndex={2} bsStyle="danger" disabled={!showDelete} onClick={this.deleteField}><i className="icon icon-fw icon-times"/></Button>
                         </div>
                     </Fade>
                 </div>

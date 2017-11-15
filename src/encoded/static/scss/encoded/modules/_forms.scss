@@ -928,9 +928,14 @@ div.fieldset.editable-fields {
 			}
 
 			.remove-button-column {
+				padding-left: 0;
 				.remove-button-container {
+					width: 100%;
 					> button {
+						width: 100%;
 						font-weight: 400;
+						padding-left: 5px;
+						padding-right: 5px;
 					}
 				}
 			}
