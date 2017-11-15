@@ -745,7 +745,7 @@ div.fieldset.editable-fields {
 					transform: rotate3d(0,1,0,180deg);
 					margin-top: 0;
 					opacity: 0.5;
-					margin-left: -9px;
+					margin-left: -25px;
 				}
 			}
 		}
@@ -758,10 +758,12 @@ div.fieldset.editable-fields {
 				font-size: 1rem;
 				transition: opacity .3s;
 				margin-top: -2px;
-				display: inline-block;
+				/* display: inline-block; */
 				margin-right: 5px;
 				position: relative;
 				top: -1px;
+				display: block;
+				margin-top: -18px;
 
 			}
 			
@@ -795,13 +797,13 @@ div.fieldset.editable-fields {
 			&.last-title {
 				.submission-working-title {
 					font-weight: 500;
-					transform: translate3d(0px, 1px, 0px);
+					transform: translate3d(0px, 0px, 0px);
 				}
 			}
 
 			@for $i from 0 through 4 {
 				&.depth-level-#{$i} {
-					padding-left: 5px * $i;
+					padding-left: 20px * $i;
 				}
 			}
 

@@ -648,17 +648,13 @@ class AttachmentInput extends React.Component{
         }
         var labelStyle = {
             'paddingRight':'5px',
-            'paddingTop':'1px',
-            'paddingBottom':'1px',
-            'paddingLeft':'5px',
-            'marginBottom':'0px',
-            'fontWeight':'400'
+            'paddingLeft':'5px'
         };
         return(
             <div style={{'display': 'inherit'}}>
                 <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} style={{'display':'none'}} accept={this.acceptedTypes()}/>
-                <Button style={{'padding':'0px'}}>
-                    <label htmlFor={this.props.field} style={labelStyle}>
+                <Button>
+                    <label className="text-400 mb-0" htmlFor={"field_for_" + this.props.field} style={labelStyle}>
                         {attach_title}
                     </label>
                 </Button>

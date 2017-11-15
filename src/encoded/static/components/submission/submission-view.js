@@ -582,7 +582,7 @@ export default class SubmissionView extends React.Component{
         var dummyHierarchy = JSON.parse(JSON.stringify(hierarchy));
         var hierKey = key;
         // the key may be a @id string and not keyIdx if already submitted
-        Object.keys(keyComplete).forEach(function(compKey) {
+        _.keys(keyComplete).forEach(function(compKey) {
             if (keyComplete[compKey] == key) {
                 hierKey = compKey;
             }
