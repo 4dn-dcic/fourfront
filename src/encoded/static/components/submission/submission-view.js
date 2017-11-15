@@ -1416,7 +1416,7 @@ class DetailTitleBanner extends React.Component {
             } catch (e){ console.warn('Couldnt get property name for', keyContext[hierarchyKeyList[i - 1]], hierarchyKeyList[i]); }
         }
         return (
-            <Collapse in transitionAppear={i !== 0} key={i}>
+            <Collapse in transitionAppear={(hierarchyKeyList.length !== 1)} key={i}>
                 <div className={"title-crumb depth-level-" + i + (isLast ? ' last-title' : ' mid-title')}>
                     <div className="submission-working-title">
                         <span onClick={this.handleClick.bind(this, numKey)}>
