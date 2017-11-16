@@ -1,0 +1,43 @@
+[
+    {
+        "description": "Test microscope tier D2 info",
+        "tier_level": "D2",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "uuid": "47e82a90-49e5-4c33-afab-9ec90d62a002",
+        "image_pixel_size":6.5,
+        "image_z_step":0.1,
+        "image_channel_encoding":"xyztc",
+        "microscope_model":"Leica SP5",
+        "objective_model":"Plan-Apochromat 100x/1.40 Oil M27",
+        "objective_na":1.40,
+        "objective_magnification":100,
+        "microscope_modality": "confocal",
+
+        "ch00_light_source_type": "laser",
+        "ch00_light_source_model":"Leica argon laser 1XX",
+        "ch00_light_source_center_wl": 406,
+        "ch00_detector_type": "spectral detector",
+        "ch00_filter_set":"BP 530-585 FT 600 LP 615",
+        "ch00_detector_model":"leica A002",
+        "ch00_integration_time":"1 sec",
+
+        "ch01_light_source_type":"laser",
+        "ch01_light_source_model":"Leica argon laser 1XX",
+        "ch01_light_source_center_wl":510,
+        "ch01_detector_type":"spectral detector",
+        "ch01_filter_set":"BP 365/12 FT 395 LP 397",
+        "ch01_detector_model":"leica A002",
+        "ch01_integration_time":"1 sec",
+
+        "ch02_light_source_type":"laser",
+        "ch02_light_source_model":"Leica argon laser 1XX",
+        "ch02_light_source_center_wl":600,
+        "ch02_detector_type":"spectral detector",
+        "ch02_filter_set":"G 365 FT 395 LP 420",
+        "ch02_detector_model":"leica A002",
+        "ch02_integration_time":"1 sec",
+        "embedding_RI":1.2
+    }
+]
