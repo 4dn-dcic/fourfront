@@ -233,9 +233,8 @@ export const CSVParsingUtilities = {
             "titleCell" : [1,1],
             "yaxisCols" : [1,2],
             "xaxisRows" : [3],
-            "skipRows"  : [22,23,24],
-            "startCell" : [3,5],
-            "endCell"   : [8,32]
+            "skipRows"  : [],
+            "startCell" : [3,5]
         };
     },
 

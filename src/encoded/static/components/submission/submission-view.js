@@ -12,7 +12,7 @@ import Search from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
 import SubmissionTree from './expandable-tree';
-import BuildField, { AliasInputField } from './submission-fields';
+import BuildField, { AliasInputField, isValueNull } from './submission-fields';
 import Alerts from '../alerts';
 import { Detail } from '../item-pages/components';
 
@@ -2380,16 +2380,10 @@ var flattenHierarchy = function myself(hierarchy){
  */
 var removeNulls = function myself(context){
     _.keys(context).forEach(function(key, index){
-        if(context[key] === null){
+        if (isValueNull(context[key])){
             delete context[key];
-        }else if(Array.isArray(context[key]) && (context[key].length === 0 || (context[key].length === 1 && context[key][0] === null))){
-            delete context[key];
-        }else if(context[key] instanceof Object){
-            if(_.keys(context[key]).length === 0){
-                delete context[key];
-            }else{
-                context[key] = myself(context[key]);
-            }
+        } else if (context[key] instanceof Object) {
+            context[key] = myself(context[key]);
         }
     });
     return context;

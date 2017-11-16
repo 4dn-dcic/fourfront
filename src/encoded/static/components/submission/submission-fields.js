@@ -195,11 +195,7 @@ export default class BuildField extends React.Component{
 
         // if there is no value in the field and non-array, hide delete button
         if(
-            (
-                this.props.value === null ||
-                (typeof this.props.value === 'object' && this.props.value !== null && _.isEmpty(this.props.value) ) ||
-                (Array.isArray(this.props.value) && this.props.value.length === 0)
-            ) && !this.props.isArray
+            isValueNull(this.props.value) && !this.props.isArray
         ) {
             showDelete = false;
         }
@@ -208,19 +204,23 @@ export default class BuildField extends React.Component{
 
         var excludeRemoveButton = (this.props.fieldType === 'array' || this.props.fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
 
-        if(this.props.isArray){
-            wrapFunc = this.wrapWithNoLabel; // array items don't need fieldnames/tooltips
+        if (this.props.isArray) {
+            // array items don't need fieldnames/tooltips
+            wrapFunc = this.wrapWithNoLabel;
+
             // if we've got an object that's inside inside an array, only allow
             // the array to be deleted if ALL individual fields are null
-            if(this.props.fieldType === 'object'){
+            if (this.props.fieldType === 'object') {
                 var valueCopy = this.props.value ? JSON.parse(JSON.stringify(this.props.value)) : {};
-                var nullItems = Object.keys(valueCopy).filter(item => (
-                    valueCopy[item] === null ||
-                    (Array.isArray(valueCopy[item]) && valueCopy[item].length === 0) ||
-                    _.isEmpty(valueCopy[item]))
-                );
-                if( Object.keys(valueCopy).length !== nullItems.length){
+                var nullItems = _.filter( _.keys(valueCopy), isValueNull);
+                if( _.keys(valueCopy).length !== nullItems.length){
                     showDelete = false;
+                }
+            } else {
+                if (this.props.arrayIdx && typeof this.props.arrayIdx[0] === 'number' && this.props.arrayIdx[0] === 0){
+                    if (isValueNull(this.props.value)){
+                        showDelete = false;
+                    }
                 }
             }
         }
@@ -339,10 +339,11 @@ class LinkedObj extends React.Component{
 }
 
 
-/* Display fields that are arrays. To do this, make a BuildField for each
-object in the value and use a custom render method. initiateArrayField is
-unique to ArrayField, since it needs to update the arrayIdx*/
-
+/**
+ * Display fields that are arrays. To do this, make a BuildField for each
+ * object in the value and use a custom render method. initiateArrayField is
+ * unique to ArrayField, since it needs to update the arrayIdx
+ */
 class ArrayField extends React.Component{
 
     static typeOfItems(itemSchema){
@@ -365,7 +366,10 @@ class ArrayField extends React.Component{
     constructor(props){
         super(props);
     }
-    /*
+    
+    /**
+     * If empty array, add initial 'null' element. On Mount & Update.
+     */
     componentDidMount(){
         if (!this.props.value || (Array.isArray(this.props.value) && this.props.value.length === 0)){
             if (this.props.field !== 'aliases') {
@@ -373,7 +377,15 @@ class ArrayField extends React.Component{
             }
         }
     }
-    */
+
+    componentDidUpdate(prevProps, prevState){ // We can't do a comparison of props.value here because parent property mutates yet stays part of same obj.
+        if (!this.props.value || (Array.isArray(this.props.value) && this.props.value.length === 0)){
+            if (this.props.field !== 'aliases') {
+                this.props.pushArrayValue();
+            }
+        }
+    }
+    
     initiateArrayField = (arrayInfo) => {
         var value = arrayInfo[0] || null;
         var fieldSchema = arrayInfo[1];
@@ -413,29 +425,34 @@ class ArrayField extends React.Component{
         );
     }
 
+    generateAddButton(){
+        var values = this.props.value || [];
+        return (
+            <div className="add-array-item-button-container">
+                <Button bsSize={values.length > 0 ? 'small' : null} onClick={this.props.pushArrayValue}><i className="icon icon-fw icon-plus"/> Add</Button>
+            </div>
+        );
+    }
+
     render(){
         var schema = this.props.schema.items || {};
-        var value = this.props.value || [];
-        var arrayInfo = [];
-        for(var i=0; i<value.length; i++){
-            arrayInfo.push([value[i], schema, i]);
-        }
+        var values = this.props.value || [];
+        var valuesToRender = _.map( values.length === 0 ? [null] : values , function(v,i){ return [v, schema, i]; });
+        var showAddButton = !isValueNull(values[valuesToRender.length - 1]);
 
         return(
             <div className="list-of-array-items">
-                {arrayInfo.length > 0 ? arrayInfo.map((entry) => this.initiateArrayField(entry)) : null }
-                <div className="add-array-item-button-container">
-                    <Button bsSize={arrayInfo.length > 0 ? 'small' : null} onClick={this.props.pushArrayValue}><i className="icon icon-fw icon-plus"/> Add</Button>
-                </div>
+                { valuesToRender.map((entry) => this.initiateArrayField(entry)) }
+                { showAddButton ? this.generateAddButton() : null }
             </div>
         );
     }
 }
 
-/*
-Builds a field that represents a sub-object. Essentially serves to hold
-and coordinate BuildFields that correspond to the fields within the subfield.
-*/
+/**
+ * Builds a field that represents a sub-object. Essentially serves to hold
+ * and coordinate BuildFields that correspond to the fields within the subfield.
+ */
 class ObjectField extends React.Component{
 
     constructor(props){
@@ -549,11 +566,11 @@ class ObjectField extends React.Component{
     }
 }
 
-/*
-For version 1. A simple local file upload that gets the name, type,
-size, and b64 encoded stream in the form of a data url. Upon successful
-upload, adds this information to NewContext
-*/
+/**
+ * For version 1. A simple local file upload that gets the name, type,
+ * size, and b64 encoded stream in the form of a data url. Upon successful
+ * upload, adds this information to NewContext
+ */
 class AttachmentInput extends React.Component{
 
     constructor(props){
@@ -631,11 +648,11 @@ class AttachmentInput extends React.Component{
     }
 }
 
-/*
-Input for an s3 file upload. Context value set is local value of the filename.
-Also updates this.state.file for the overall component. Runs file uploads
-async using the upload_manager passed down in props.
-*/
+/**
+ * Input for an s3 file upload. Context value set is local value of the filename.
+ * Also updates this.state.file for the overall component. Runs file uploads
+ * async using the upload_manager passed down in props.
+ */
 class S3FileInput extends React.Component{
 
     constructor(props){
@@ -956,4 +973,22 @@ class InfoIcon extends React.Component{
             <i className="icon icon-info-circle" data-tip={this.props.children}/>
         );
     }
+}
+
+export function isValueNull(value){
+    if (value === null) return true;
+    if (typeof value === 'undefined') return true;
+    if (typeof value === 'number') return false;
+    if (value === '') return true;
+    if (Array.isArray(value)){
+        if (value.length === 0) return true;
+        else if (value.length === 1) {
+            return isValueNull(value[0]);
+        }
+        else if (value.length > 1) return false;
+    }
+    if (typeof value === 'object' && _.keys(value).length === 0){
+        return true;
+    }
+    return false;
 }
