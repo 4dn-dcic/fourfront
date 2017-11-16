@@ -55,7 +55,8 @@
         "award": "1U01CA200059-01",
         "uuid": "47e82a90-49e5-4c33-afab-9ec90d65fcc9",
         "status": "uploaded",
-        "file_type": "z-stack"
+        "file_type": "z-stack",
+        "microscope_settings": "47e82a90-49e5-4c33-afab-9ec90d62a002"
     },
     {
         "accession":"4DNFIATESTM2",
@@ -66,6 +67,7 @@
         "award": "1U01CA200059-01",
         "uuid": "47e82a90-49e5-4c33-afab-9ec90d65fcc1",
         "status": "uploaded",
-        "file_type": "z-stack"
+        "file_type": "z-stack",
+        "microscope_settings": "47e82a90-49e5-4c33-afab-9ec90d62a002"
     }
 ]
