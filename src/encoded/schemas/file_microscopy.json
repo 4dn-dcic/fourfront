@@ -49,6 +49,7 @@
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
+            "type": "string",
             "enum": [
                 "z-stack",
                 "time-series"
@@ -63,17 +64,11 @@
                 "Microscopy"
               ]
         },
-        "channel_number": {
-            "title": "Number of Channels (c)",
-            "type": "number"
-        },
-        "slice_number": {
-            "title": "Number of slices (z)",
-            "type": "number"
-        },
-        "time_frame_number": {
-            "title": "Number of Time Frames (t)",
-            "type": "number"
+        "microscope_settings": {
+            "type": "string",
+            "title": "Microscope settings",
+            "type": "string",
+            "linkTo": "MicroscopeSetting"
         },
         "related_files": {
             "exclude_from": ["submit4dn", "FFedit-create"]
@@ -88,23 +83,26 @@
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "attachment": {
-            "title": "Metadata Document",
+            "title": "Additional Metadata Document",
             "description": "Document (PDF/DOC/TXT) with information about the files"
         },
         "thumbnail": {
             "type": "string",
             "title": "Thumbnail",
-            "description": "link to thumbnail image"
+            "description": "link to thumbnail image",
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "omerolink": {
             "type": "string",
             "title": "OMERO Link",
-            "description": "link to Omero"
+            "description": "link to Omero",
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "imageid": {
             "type": "string",
             "title": "Image ID",
-            "description": "ID of image on Omero"
+            "description": "ID of image on Omero",
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "filename": {
             "title": "Microscopy Files (Zip/TIFF)",

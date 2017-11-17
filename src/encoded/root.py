@@ -24,23 +24,20 @@ from collections import OrderedDict
 
 def includeme(config):
     config.include(health_check)
+    config.include(item_counts)
     config.include(submissions_page)
     config.scan(__name__)
 
 
-def health_check(config):
-    """
-    Emulate a lite form of Alex's static page routing
-    """
+def item_counts(config):
     config.add_route(
-        'health-check',
-        '/health'
+        'item-counts',
+        '/counts'
     )
-    def health_page_view(request):
 
+    def counts_view(request):
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
-        settings = request.registry.settings
 
         # how much stuff in database
         db_total = 0
@@ -58,41 +55,60 @@ def health_check(config):
             db_total += db_count
             es_total += es_count
             db_es_compare[collection] = ("DB: %s   ES: %s %s" %
-                            (str(db_count), str(es_count), warn_str))
+                                         (str(db_count), str(es_count), warn_str))
         warn_str = build_warn_string(db_total, es_total)
         db_es_total = ("DB: %s   ES: %s %s" %
-                            (str(db_total), str(es_total), warn_str))
+                       (str(db_total), str(es_total), warn_str))
+
+        responseDict = {
+            'db_es_total': db_es_total,
+            'db_es_compare': db_es_compare
+        }
+
+        return responseDict
+
+    config.add_view(counts_view, route_name='item-counts')
+
+
+def health_check(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'health-check',
+        '/health'
+    )
+
+    def health_page_view(request):
+
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+        settings = request.registry.settings
 
         # when ontologies were imported
         try:
-            si =  request.embed('/sysinfos/ffsysinfo')
+            si = request.embed('/sysinfos/ffsysinfo')
             ont_date = si.json['ontology_updated']
         except:  # pylint:disable
             ont_date = "Never Generated"
-
-        # for foursight environment
-        foursight_env = settings.get('env.name', 'local').split('-')[-1]
 
         app_url = request.application_url
         if not app_url.endswith('/'):
             app_url = ''.join([app_url, '/'])
 
         responseDict = {
-            "file_upload_bucket" : settings.get('file_upload_bucket'),
-            "blob_bucket" : settings.get('blob_bucket'),
-            "system_bucket" : settings.get('system_bucket'),
-            "elasticsearch" : settings.get('elasticsearch.server'),
-            "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
+            "file_upload_bucket": settings.get('file_upload_bucket'),
+            "blob_bucket": settings.get('blob_bucket'),
+            "system_bucket": settings.get('system_bucket'),
+            "elasticsearch": settings.get('elasticsearch.server'),
+            "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
-            "foursight_env": foursight_env,
             'ontology_updated': ont_date,
-            "@type" : [ "Health", "Portal" ],
-            "@context" : "/health",
-            "@id" : "/health",
-            "content" : None,
-            "display_title" : "Fourfront Status and Foursight Monitoring",
-            'db_es_total': db_es_total,
-            'db_es_compare': db_es_compare
+            "@type": ["Health", "Portal"],
+            "@context": "/health",
+            "@id": "/health",
+            "content": None,
+            "display_title": "Fourfront Status and Foursight Monitoring",
         }
 
         return responseDict

@@ -46,6 +46,10 @@ ORDER = [
     'quality_metric_fastqc',
     'quality_metric_bamqc',
     'quality_metric_pairsqc',
+    'microscope_setting_d1',
+    'microscope_setting_d2',
+    'microscope_setting_a1',
+    'microscope_setting_a2',
     'file_fastq',
     'file_fasta',
     'file_processed',
@@ -54,6 +58,7 @@ ORDER = [
     'file_microscopy',
     'file_set',
     'file_set_calibration',
+    'file_set_microscope_qc',
     'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',
@@ -157,6 +162,7 @@ def skip_rows_in_excludes(**kw):
             yield row
 
     return component
+
 
 def skip_rows_without_all_key_value(**kw):
     def component(dictrows):
@@ -577,6 +583,12 @@ PHASE1_PIPELINES = {
     'file_set': [
         remove_keys('files_in_set'),
     ],
+    'file_set_calibration': [
+        remove_keys('files_in_set'),
+    ],
+    'file_set_microscope_qc': [
+        remove_keys('files_in_set'),
+    ],
     'experiment_hi_c': [
         remove_keys('experiment_relation'),
     ],
@@ -646,6 +658,12 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('related_files'),
     ],
     'file_set': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_calibration': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_microscope_qc': [
         skip_rows_missing_all_keys('files_in_set'),
     ],
     'experiment_hi_c': [

@@ -168,10 +168,33 @@ class FileSet(Item):
     })
 class FileSetCalibration(FileSet):
     """Collection of files stored under fileset."""
-
     base_types = ['FileSet'] + Item.base_types
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
+    name_key = 'accession'
+    embedded_list = ['files_in_set.submitted_by.job_title',
+                     'files_in_set.lab.title',
+                     'files_in_set.accession',
+                     "files_in_set.href",
+                     "files_in_set.file_size",
+                     "files_in_set.upload_key",
+                     "files_in_set.file_format",
+                     "files_in_set.file_classification"
+                     ]
+
+
+@collection(
+    name='file-set-microscope-qcs',
+    unique_key='accession',
+    properties={
+        'title': 'Microscope QC File Sets',
+        'description': 'Listing of File Sets',
+    })
+class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
+    """Collection of files stored under fileset."""
+    base_types = ['FileSet'] + Item.base_types
+    item_type = 'file_set_microscope_qc'
+    schema = load_schema('encoded:schemas/file_set_microscope_qc.json')
     name_key = 'accession'
     embedded_list = ['files_in_set.submitted_by.job_title',
                      'files_in_set.lab.title',
@@ -197,32 +220,31 @@ class File(Item):
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     embedded_list = ["award.project",
-                "lab.city",
-                "lab.state",
-                "lab.country",
-                "lab.postal_code",
-                "lab.city",
-                "lab.title",
-                'experiments.display_title',
-                'experiments.accession',
-                'experiments.experiment_type',
-                'experiments.experiment_sets.accession',
-                'experiments.experiment_sets.experimentset_type',
-                'experiments.experiment_sets.@type',
-                'experiments.biosample.biosource.display_title',
-                'experiments.biosample.biosource.biosource_type',
-                'experiments.biosample.biosource_summary',
-                'experiments.biosample.modifications_summary',
-                'experiments.biosample.treatments_summary',
-                'experiments.biosample.biosource.individual.organism.name',
-                'experiments.digestion_enzyme.name',
-                'related_files.relationship_type',
-                'related_files.file.accession']
+                     "lab.city",
+                     "lab.state",
+                     "lab.country",
+                     "lab.postal_code",
+                     "lab.city",
+                     "lab.title",
+                     'experiments.display_title',
+                     'experiments.accession',
+                     'experiments.experiment_type',
+                     'experiments.experiment_sets.accession',
+                     'experiments.experiment_sets.experimentset_type',
+                     'experiments.experiment_sets.@type',
+                     'experiments.biosample.biosource.display_title',
+                     'experiments.biosample.biosource.biosource_type',
+                     'experiments.biosample.biosource_summary',
+                     'experiments.biosample.modifications_summary',
+                     'experiments.biosample.treatments_summary',
+                     'experiments.biosample.biosource.individual.organism.name',
+                     'experiments.digestion_enzyme.name',
+                     'related_files.relationship_type',
+                     'related_files.file.accession']
     name_key = 'accession'
     rev = {
         'experiments': ('Experiment', 'files'),
     }
-
 
     @calculated_property(schema={
         "title": "Experiments",
@@ -237,7 +259,6 @@ class File(Item):
     def experiments(self, request):
         return self.rev_link_atids(request, "experiments")
 
-
     @calculated_property(schema={
         "title": "Display Title",
         "description": "Name of this File",
@@ -247,7 +268,6 @@ class File(Item):
         accession = accession or external_accession
         file_extension = self.schema['file_format_file_extension'][file_format]
         return '{}{}'.format(accession, file_extension)
-
 
     @calculated_property(schema={
         "title": "File Type",
@@ -259,11 +279,10 @@ class File(Item):
         if file_format is not None:
             outString = outString + ' (' + file_format + ')'
 
-        #accession = accession or external_accession
-        #file_extension = self.schema['file_format_file_extension'][file_format]
-        #return '{}{}'.format(accession, file_extension)
+        # accession = accession or external_accession
+        # file_extension = self.schema['file_format_file_extension'][file_format]
+        # return '{}{}'.format(accession, file_extension)
         return outString
-
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -362,7 +381,6 @@ class File(Item):
             return self.uuid
         return properties.get(self.name_key, None) or self.uuid
 
-
     def unique_keys(self, properties):
         keys = super(File, self).unique_keys(properties)
         if properties.get('status') != 'replaced':
@@ -371,7 +389,6 @@ class File(Item):
                 keys.setdefault('alias', []).append(value)
         return keys
 
-
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
@@ -379,7 +396,6 @@ class File(Item):
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
-
 
     @calculated_property(schema={
         "title": "Download URL",
@@ -390,7 +406,6 @@ class File(Item):
         file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
-
 
     @calculated_property(schema={
         "title": "Upload Key",
@@ -408,7 +423,6 @@ class File(Item):
                 return 'UPLOAD KEY FAILED'
         return external['key']
 
-
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
     })
@@ -416,7 +430,6 @@ class File(Item):
         external = self.propsheets.get('external', None)
         if external is not None:
             return external['upload_credentials']
-
 
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
@@ -431,11 +444,9 @@ class File(Item):
                 extras.append(extra)
             return extras
 
-
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
-
 
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
@@ -458,7 +469,6 @@ class File(Item):
 
         profile_name = registry.settings.get('file_upload_profile_name')
         return external_creds(bucket, key, name, profile_name)
-
 
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
