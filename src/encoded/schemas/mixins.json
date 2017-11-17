@@ -193,9 +193,14 @@
         },
         "contributing_labs": {
             "title": "Contributing Labs",
-             "description": "Other labs associated with the submitted data.",
-             "type": "string",
-             "linkTo": "Lab"
+            "description": "Other labs associated with the submitted data.",
+            "type": "array",
+            "items": {
+                "title": "Contributin Lab",
+                "description": "A lab that has contributed to the associated data.",
+                "type": "string",
+                "linkTo": "Lab"
+            }
         },
         "award": {
             "title": "Grant",

@@ -55,5 +55,30 @@
                "Tissue Preparation Methods"
             ]
         }
+    },
+    "facets": {
+        "protocol_type" : {
+            "title" : "Protocol Type"
+        },
+        "protocol_classification" : {
+            "title" : "Protocol Sub-type"
+        },
+        "award.project": {
+            "title": "Project"
+        },
+        "lab.title": {
+            "title": "Lab"
+        },
+        "tags": {
+            "title": "Certification"
+        }
+    },
+    "columns": {
+        "protocol_type" : {
+            "title" : "Protocol Type"
+        },
+        "tags": {
+            "title": "Certification"
+        }
     }
 }

@@ -187,7 +187,7 @@ class Protocol(Item, ItemWithAttachment):
 
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
-    embedded_list = []
+    embedded_list = ["award.project", "lab.title"]
 
     def display_title(self):
         if self.properties.get('attachment'):
