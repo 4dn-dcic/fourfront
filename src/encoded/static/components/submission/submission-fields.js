@@ -46,7 +46,7 @@ export default class BuildField extends React.Component{
             'id' : 'field_for_' + this.props.field,
             'disabled' : this.props.disabled || false,
             'ref' : "inputElement",
-            'value' : this.props.value || '',
+            'value' : (typeof this.props.value === 'number' ? this.props.value || 0 : this.props.value || ''),
             'onChange' : this.handleChange,
             'name' : this.props.field,
             'placeholder': "No value"
@@ -57,8 +57,8 @@ export default class BuildField extends React.Component{
                     return <div className="input-wrapper"><AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={this.props.currentSubmittingUser} /></div>;
                 }
                 return <FormControl type="text" inputMode="latin" {...inputProps} />;
-            case 'integer'          : return <FormControl type="number" inputMode="latin" {...inputProps} />;
-            case 'number'           : return <FormControl type="number" inputMode="latin" {...inputProps} />;
+            case 'integer'          : return <FormControl type="number" {...inputProps} step={1} />;
+            case 'number'           : return <FormControl type="number" {...inputProps} />;
             /*
             case 'boolean' : return (
                 <div className="input-wrapper" style={{'display':'inline'}}>
@@ -74,7 +74,7 @@ export default class BuildField extends React.Component{
                 </span>
             );
             case 'linked object'    : return <div className="inline-block"><LinkedObj {...this.props}/></div>;
-            case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} />;
+            case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} roundTwo={this.props.roundTwo} />;
             case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
             case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
             case 'file upload'      : return <S3FileInput {...this.props}/>;
@@ -100,12 +100,14 @@ export default class BuildField extends React.Component{
         var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var currValue = inputElement.value;
         if (this.props.fieldType === 'integer'){
-            if(!isNaN(parseInt(currValue))){
-                currValue = parseInt(currValue);
+            currValue = parseInt(currValue);
+            if (isNaN(currValue)){
+                currValue = null;
             }
         } else if (this.props.fieldType === 'number'){
-            if(!isNaN(parseFloat(currValue))){
-                currValue = parseFloat(currValue);
+            currValue = parseFloat(currValue);
+            if (isNaN(currValue)){
+                currValue = null;
             }
         }
         //console.log('VAL', this.props.nestedField, currValue, this.props.fieldType, this.props.value, this.props.arrayIdx);
@@ -140,7 +142,11 @@ export default class BuildField extends React.Component{
 
     commonRowProps(){
         return {
-            'className' : "field-row" + (this.state.dropdownOpen ? ' active-submission-row' : '') + (this.props.isArray ? ' in-array-field clearfix row' : ''),
+            'className' : (
+                "field-row" +
+                (this.state.dropdownOpen ? ' active-submission-row' : '') +
+                (this.props.isArray ? ' in-array-field clearfix row'  : '')
+            ),
             'data-field-type' : this.props.fieldType,
             'data-field-name' : this.props.field,
             'style' : { 'overflow' : 'visible' }
@@ -148,23 +154,20 @@ export default class BuildField extends React.Component{
     }
 
     labelTypeDescriptor(){
-        var type = Schemas.Term.capitalizeSentence(this.props.fieldType === 'array' ? ArrayField.typeOfItems(this.props.schema.items) : this.props.fieldType);
-        if (this.props.fieldType === 'array'){
-            type = [type, <span className="array-indicator">[]</span>];
-        }
-        return <div className="field-descriptor">{ type }{ this.props.required ? <span style={{'color':'#a94442', 'marginLeft' : 5}}> Required</span> : null }</div>;
+        return <div className="field-descriptor">{ this.props.required ? <span style={{'color':'#a94442'}}> Required</span> : null }</div>;
 
     }
 
     wrapWithLabel(){
+        var { fieldTip, title, fieldType, schema } = this.props;
         return(
             <div {...this.commonRowProps()}>
                 <div className="row">
                     <div className="col-sm-12 col-md-4">
-                        <h5 className="submission-field-title">
+                        <h5 className="submission-field-title text-ellipsis-container">
                             { this.labelTypeDescriptor() }
-                            <span>{this.props.title}</span>
-                            <InfoIcon children={this.props.fieldTip}/>
+                            { fieldTip ? [<InfoIcon children={fieldTip} title={title} fieldType={fieldType} schema={schema} />, <span>&nbsp;&nbsp; </span>] : null}
+                            <span>{ title }</span>
                         </h5>
                     </div>
                     <div className="col-sm-12 col-md-8">
@@ -186,6 +189,7 @@ export default class BuildField extends React.Component{
         // hardcoded fields you can't delete
         var cannot_delete = ['filename'];
         var showDelete = false;
+        var disableDelete = false;
         var extClass = '';
         // don't show delet button unless:
         // not in hardcoded cannot delete list AND is not an object or
@@ -209,17 +213,20 @@ export default class BuildField extends React.Component{
             // array items don't need fieldnames/tooltips
             wrapFunc = this.wrapWithNoLabel;
 
-            // if we've got an object that's inside inside an array, only allow
-            // the array to be deleted if ALL individual fields are null
-            if (this.props.fieldType === 'object') {
-                var valueCopy = this.props.value ? JSON.parse(JSON.stringify(this.props.value)) : {};
-                var nullItems = _.filter( _.keys(valueCopy), isValueNull);
-                if( _.keys(valueCopy).length !== nullItems.length){
-                    showDelete = false;
-                }
-            } else if (this.props.isLastItemInArray && isValueNull(this.props.value)){
+            if (this.props.isLastItemInArray && isValueNull(this.props.value)){
                 showDelete = false;
                 if (Array.isArray(this.props.arrayIdx) && this.props.arrayIdx[0] !== 0) extClass = "last-item-empty";
+            } else if (this.props.fieldType === 'object') {
+                // if we've got an object that's inside inside an array, only allow
+                // the array to be deleted if ALL individual fields are null
+                if (!isValueNull(this.props.value)){
+                    disableDelete = true;
+                }
+                //var valueCopy = this.props.value ? JSON.parse(JSON.stringify(this.props.value)) : {};
+                //var nullItems = _.filter( _.keys(valueCopy), isValueNull);
+                //if( _.keys(valueCopy).length !== nullItems.length){
+                //    showDelete = false;
+                //}
             }
         }
 
@@ -231,7 +238,7 @@ export default class BuildField extends React.Component{
                 <div className="col-xs-2 remove-button-column">
                     <Fade in={showDelete}>
                         <div className="pull-right remove-button-container">
-                            <Button tabIndex={2} bsStyle="danger" disabled={!showDelete} onClick={this.deleteField}><i className="icon icon-fw icon-times"/></Button>
+                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField}><i className="icon icon-fw icon-times"/></Button>
                         </div>
                     </Fade>
                 </div>
@@ -337,6 +344,8 @@ class LinkedObj extends React.Component{
 }
 
 
+var xCount = 0;
+
 /**
  * Display fields that are arrays. To do this, make a BuildField for each
  * object in the value and use a custom render method. initiateArrayField is
@@ -365,7 +374,7 @@ class ArrayField extends React.Component{
         if (!currentArr || 
             (
                 Array.isArray(currentArr) && (
-                    currentArr.length === 0 || currentArr[currentArr.length - 1] !== null
+                    currentArr.length === 0 || !isValueNull(currentArr[currentArr.length - 1])
                 )
             )
         ){
@@ -402,11 +411,6 @@ class ArrayField extends React.Component{
             }
         }
     }
-
-    getArrayItemType(){
-        var itemsSchema = this.props.schema.items || {};
-
-    }
     
     initiateArrayField = (arrayInfo, index, allItems) => {
         var value = arrayInfo[0] || null;
@@ -429,7 +433,7 @@ class ArrayField extends React.Component{
         }
         arrayIdxList.push(arrayIdx);
         return(
-            <div key={arrayIdx} className={"array-field-container " + (arrayIdx % 2 === 0 ? 'even' : 'odd')}>
+            <div key={arrayIdx} className={"array-field-container " + (arrayIdx % 2 === 0 ? 'even' : 'odd')} data-field-type={fieldType}>
                 <BuildField
                     value={value}
                     schema={fieldSchema}
@@ -442,7 +446,9 @@ class ArrayField extends React.Component{
                     arrayIdx={arrayIdxList}
                     isArray={true}
                     isLastItemInArray={allItems.length - 1 === index}
-                    { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj', 'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser') }
+                    { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj',
+                        'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState',
+                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo') }
                 />
             </div>
         );
@@ -521,7 +527,7 @@ class ObjectField extends React.Component{
         var title = fieldSchema.title || field;
         var fieldValue;
         if(this.props.value){
-            fieldValue = this.props.value[field] || null;
+            fieldValue = this.props.value[field];
         }else{
             fieldValue = null;
         }
@@ -986,14 +992,28 @@ export class AliasInputField extends React.Component {
 
 class InfoIcon extends React.Component{
 
-    constructor(props){
-        super(props);
+    fieldTypeDescriptor(){
+        if (typeof this.props.fieldType !== 'string' || this.props.fieldType.length === 0) return null;
+        
+        var type = Schemas.Term.capitalizeSentence(this.props.fieldType === 'array' ? ArrayField.typeOfItems(this.props.schema.items) : this.props.fieldType);
+        if (this.props.fieldType === 'array'){
+            type = type + ' <span class="array-indicator">[]</span>';
+        }
+        return type;
+
     }
 
     render() {
-        if (!this.props.children) return null;
+        if (!this.props.children || typeof this.props.children !== 'string') return null;
+        var tip = this.props.children;
+        if (typeof this.props.title === 'string' && this.props.title.length){
+            tip = '<h5 class="mt-03 mb-05 text-600">' + this.props.title + '</h5>' + tip;
+        }
+        if (typeof this.props.fieldType === 'string' && this.props.fieldType.length){
+            tip += '<h6 class="mt-07 text-300">Field Type: <span class="text-400">' + this.fieldTypeDescriptor() + '</span></h6>';
+        }
         return (
-            <i className="icon icon-info-circle" data-tip={this.props.children}/>
+            <i className="icon icon-info-circle" data-tip={tip} data-html/>
         );
     }
 }
@@ -1010,8 +1030,10 @@ export function isValueNull(value){
         }
         else return false;
     }
-    if (typeof value === 'object' && _.keys(value).length === 0){
-        return true;
+    if (typeof value === 'object'){
+        var keys = _.keys(value);
+        if (keys.length === 0) return true;
+        else if ( _.every(keys, function(k){ return isValueNull(value[k]); }) ) return true;
     }
     return false;
 }
