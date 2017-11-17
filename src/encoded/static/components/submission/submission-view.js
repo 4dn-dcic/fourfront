@@ -12,7 +12,7 @@ import Search from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
 import SubmissionTree from './expandable-tree';
-import BuildField, { AliasInputField } from './submission-fields';
+import BuildField, { AliasInputField, isValueNull } from './submission-fields';
 import Alerts from '../alerts';
 import { Detail } from '../item-pages/components';
 
@@ -1536,7 +1536,7 @@ class AliasSelectModal extends TypeSelectModal {
                         <p className="mt-0 mb-1">Aliases are lab specific identifiers to reference an object. The format is <code>{'<lab-name>:<identifier>'}</code> - a lab name and an identifier separated by a colon, e.g. <code>dcic-lab:42</code>.</p>
                         <p className="mt-0 mb-1">Please create your own alias to help you to refer to this Item later.</p>
                         <div className="input-wrapper mt-2 mb-2">
-                            <AliasInputField value={creatingAlias} errorMessage={creatingAliasMessage} onAliasChange={handleAliasChange} currentSubmittingUser={currentSubmittingUser} />
+                            <AliasInputField value={creatingAlias} errorMessage={creatingAliasMessage} onAliasChange={handleAliasChange} currentSubmittingUser={currentSubmittingUser} withinModal />
                         </div>
                         <Collapse in={creatingAliasMessage !== null}>
                             <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
@@ -2380,17 +2380,13 @@ var flattenHierarchy = function myself(hierarchy){
  */
 var removeNulls = function myself(context){
     _.keys(context).forEach(function(key, index){
-        if(context[key] === null){
+        if (isValueNull(context[key])){
             delete context[key];
-        }else if(Array.isArray(context[key]) && (context[key].length === 0 || (context[key].length === 1 && context[key][0] === null))){
-            delete context[key];
-        }else if(context[key] instanceof Object){
-            if(_.keys(context[key]).length === 0){
-                delete context[key];
-            }else{
-                context[key] = myself(context[key]);
-            }
-        }
+        } else if (Array.isArray(context[key])){
+            context[key] = _.filter(context[key], function(v){ return !isValueNull(v); });
+        } else if (context[key] instanceof Object) {
+            context[key] = myself(context[key]);
+        } 
     });
     return context;
 };

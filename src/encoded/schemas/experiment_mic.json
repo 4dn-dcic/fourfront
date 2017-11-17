@@ -55,6 +55,11 @@
                 "EM"
             ]
         },
+        "microscope_qc":{
+            "title": "Microscope QC Analysis",
+            "type": "string",
+            "linkTo": "FileSetMicroscopeQc"
+        },
         "imaging_paths": {
             "title": "Imaging Paths",
             "description": "Target to label connections in each channel",

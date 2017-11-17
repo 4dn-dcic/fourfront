@@ -861,18 +861,20 @@ div.fieldset.editable-fields {
 				z-index: 100;
 			}
 			&:not(:last-child){
-				border-bottom: 1px solid #f4f4f4;
+				border-bottom: 1px solid #eee;
 			}
 
 			&.in-array-field {
 				padding-top: 8px;
 				padding-bottom: 8px;
+				display: flex;
 			}
 
 			.field-container {
 				min-height: 50px;
 				padding-top: 8px;
 				padding-bottom: 8px;
+				display: flex;
 
 				.submitted-linked-object-display-container,
 				.incomplete-linked-object-display-container,
@@ -932,8 +934,19 @@ div.fieldset.editable-fields {
 				}
 			}
 
+			.field-column {
+				flex: 1;
+				opacity: 1;
+				transition: opacity 0.33s;
+				&.last-item-empty:not(:hover) {
+					opacity: 0.5;
+				}
+			}
+
 			.remove-button-column {
 				padding-left: 0;
+				width: 45px;
+				float: right;
 				.remove-button-container {
 					width: 100%;
 					> button {
@@ -956,11 +969,13 @@ div.fieldset.editable-fields {
 					// Fields containing arrays
 					.array-field-container {
 						min-height: 50px;
-						&.even {
-							background-color: #f4f4f4;
+						/*
+						&.odd {
+							background-color: #f8f8f8;
 						}
+						*/
 						&:not(:last-child){
-							border-bottom: 1px solid #ddd;
+							border-bottom: 1px solid #f4f4f4;
 						}
 
 						// Row in field of in-array object rows
