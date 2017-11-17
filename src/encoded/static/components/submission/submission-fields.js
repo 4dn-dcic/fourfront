@@ -140,7 +140,7 @@ export default class BuildField extends React.Component{
 
     commonRowProps(){
         return {
-            'className' : "field-row" + (this.state.dropdownOpen ? ' active-submission-row' : '') + (this.props.isArray ? ' in-array-field clearfix' : ''),
+            'className' : "field-row" + (this.state.dropdownOpen ? ' active-submission-row' : '') + (this.props.isArray ? ' in-array-field clearfix row' : ''),
             'data-field-type' : this.props.fieldType,
             'data-field-name' : this.props.field,
             'style' : { 'overflow' : 'visible' }
@@ -186,6 +186,7 @@ export default class BuildField extends React.Component{
         // hardcoded fields you can't delete
         var cannot_delete = ['filename'];
         var showDelete = false;
+        var extClass = '';
         // don't show delet button unless:
         // not in hardcoded cannot delete list AND is not an object or
         // non-empty array element (individual values get deleted)
@@ -216,17 +217,14 @@ export default class BuildField extends React.Component{
                 if( _.keys(valueCopy).length !== nullItems.length){
                     showDelete = false;
                 }
-            } else {
-                if (this.props.arrayIdx && typeof this.props.arrayIdx[0] === 'number' && this.props.arrayIdx[0] === 0){
-                    if (isValueNull(this.props.value)){
-                        showDelete = false;
-                    }
-                }
+            } else if (this.props.isLastItemInArray && isValueNull(this.props.value)){
+                showDelete = false;
+                if (Array.isArray(this.props.arrayIdx) && this.props.arrayIdx[0] !== 0) extClass = "last-item-empty";
             }
         }
 
         return wrapFunc(
-            <div className={'col-xs-' + (excludeRemoveButton ? "12": "10")}>
+            <div className={'field-column col-xs-' + (excludeRemoveButton ? "12": "10") + ' ' + extClass}>
                 {this.displayField(this.props.fieldType)}
             </div>,
             excludeRemoveButton ? null : (
@@ -363,6 +361,23 @@ class ArrayField extends React.Component{
         return fieldType;
     }
 
+    static shouldPushArrayValue(currentArr, field = null){
+        if (!currentArr || 
+            (
+                Array.isArray(currentArr) && (
+                    currentArr.length === 0 || currentArr[currentArr.length - 1] !== null
+                )
+            )
+        ){
+            if (field !== 'aliases') {
+                return true;
+            } else {
+                if (currentArr && currentArr.length >= 1) return true;
+            }
+        }
+        return false;
+    }
+
     constructor(props){
         super(props);
     }
@@ -371,22 +386,29 @@ class ArrayField extends React.Component{
      * If empty array, add initial 'null' element. On Mount & Update.
      */
     componentDidMount(){
-        if (!this.props.value || (Array.isArray(this.props.value) && this.props.value.length === 0)){
-            if (this.props.field !== 'aliases') {
-                this.props.pushArrayValue();
-            }
+        if (ArrayField.shouldPushArrayValue(this.props.value, this.props.field)){
+            this.props.pushArrayValue();
         }
     }
 
     componentDidUpdate(prevProps, prevState){ // We can't do a comparison of props.value here because parent property mutates yet stays part of same obj.
-        if (!this.props.value || (Array.isArray(this.props.value) && this.props.value.length === 0)){
-            if (this.props.field !== 'aliases') {
-                this.props.pushArrayValue();
+        if (ArrayField.shouldPushArrayValue(this.props.value, this.props.field)){
+            this.props.pushArrayValue();
+        } else {
+            if (Array.isArray(this.props.value) && this.props.value.length >= 2){
+                if (isValueNull(this.props.value[this.props.value.length - 1]) && isValueNull(this.props.value[this.props.value.length - 2])){
+                    this.props.modifyNewContext(this.props.nestedField, null, ArrayField.typeOfItems(this.props.schema.items || {}), this.props.linkType, [this.props.value.length - 2]);
+                }
             }
         }
     }
+
+    getArrayItemType(){
+        var itemsSchema = this.props.schema.items || {};
+
+    }
     
-    initiateArrayField = (arrayInfo) => {
+    initiateArrayField = (arrayInfo, index, allItems) => {
         var value = arrayInfo[0] || null;
         var fieldSchema = arrayInfo[1];
         // use arrayIdx as stand-in value for field
@@ -419,6 +441,7 @@ class ArrayField extends React.Component{
                     required={false}
                     arrayIdx={arrayIdxList}
                     isArray={true}
+                    isLastItemInArray={allItems.length - 1 === index}
                     { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj', 'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser') }
                 />
             </div>
@@ -442,7 +465,7 @@ class ArrayField extends React.Component{
 
         return(
             <div className="list-of-array-items">
-                { valuesToRender.map((entry) => this.initiateArrayField(entry)) }
+                { valuesToRender.map(this.initiateArrayField) }
                 { showAddButton ? this.generateAddButton() : null }
             </div>
         );
@@ -949,7 +972,7 @@ export class AliasInputField extends React.Component {
                         type="text"
                         inputMode="latin"
                         value={parts[1] || ''}
-                        autoFocus={!parts[1] ? true : false}
+                        autoFocus={this.props.withinModal && !parts[1] ? true : false}
                         placeholder="Type in a new identifier"
                         onChange={this.onAliasSecondPartChange}
                     />
@@ -982,10 +1005,10 @@ export function isValueNull(value){
     if (value === '') return true;
     if (Array.isArray(value)){
         if (value.length === 0) return true;
-        else if (value.length === 1) {
-            return isValueNull(value[0]);
+        else if (_.every(value, isValueNull)) {
+            return true;
         }
-        else if (value.length > 1) return false;
+        else return false;
     }
     if (typeof value === 'object' && _.keys(value).length === 0){
         return true;

@@ -1536,7 +1536,7 @@ class AliasSelectModal extends TypeSelectModal {
                         <p className="mt-0 mb-1">Aliases are lab specific identifiers to reference an object. The format is <code>{'<lab-name>:<identifier>'}</code> - a lab name and an identifier separated by a colon, e.g. <code>dcic-lab:42</code>.</p>
                         <p className="mt-0 mb-1">Please create your own alias to help you to refer to this Item later.</p>
                         <div className="input-wrapper mt-2 mb-2">
-                            <AliasInputField value={creatingAlias} errorMessage={creatingAliasMessage} onAliasChange={handleAliasChange} currentSubmittingUser={currentSubmittingUser} />
+                            <AliasInputField value={creatingAlias} errorMessage={creatingAliasMessage} onAliasChange={handleAliasChange} currentSubmittingUser={currentSubmittingUser} withinModal />
                         </div>
                         <Collapse in={creatingAliasMessage !== null}>
                             <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
@@ -2382,9 +2382,11 @@ var removeNulls = function myself(context){
     _.keys(context).forEach(function(key, index){
         if (isValueNull(context[key])){
             delete context[key];
+        } else if (Array.isArray(context[key])){
+            context[key] = _.filter(context[key], function(v){ return !isValueNull(v); });
         } else if (context[key] instanceof Object) {
             context[key] = myself(context[key]);
-        }
+        } 
     });
     return context;
 };
