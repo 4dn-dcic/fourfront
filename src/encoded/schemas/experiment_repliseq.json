@@ -29,11 +29,11 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "enum": [
-            "repliseq"
+            "Repli-seq"
           ]
         },
         "dna_label": {
