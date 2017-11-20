@@ -1,5 +1,7 @@
 'use strict';
+
 import React from 'react';
+import PropTypes from 'prop-types';
 import globals from '../globals';
 import _ from 'underscore';
 import { ajax, console, object, isServerSide } from '../util';
@@ -8,7 +10,19 @@ import ReactTooltip from 'react-tooltip';
 
 // Create a custom tree to represent object hierarchy in front end submission.
 // Each leaf is clickable and will bring you to a view of the new object
-export default class SubmissionTree extends React.Component{
+export default class SubmissionTree extends React.Component {
+
+    static propTypes = {
+        'keyHierarchy'      : PropTypes.object.isRequired,
+        'keyValid'          : PropTypes.object.isRequired,
+        'keyTypes'          : PropTypes.object.isRequired,
+        'keyDisplay'        : PropTypes.object.isRequired,
+        'keyComplete'       : PropTypes.object.isRequired,
+        'currKey'           : PropTypes.number.isRequired,
+        'keyLinkBookmarks'  : PropTypes.object.isRequired,
+        'keyLinks'          : PropTypes.object.isRequired,
+        'setSubmissionState': PropTypes.func.isRequired
+    }
 
     constructor(props){
         super(props);
@@ -25,13 +39,15 @@ export default class SubmissionTree extends React.Component{
             ...others
         } = this.props;
         return(
-            <div className="submission-nav-tree" style={{'marginTop':'10px'}}>
-                <h4>
-                    {'Navigation'}
-                    <InfoIcon children={infoTip}/>
-                </h4>
-                <div>
-                    <SubmissionLeaf {...others} keyIdx={0} open={true}/>
+            <div className="submission-view-navigation-tree">
+                <h3 className="form-section-heading mb-08">
+                        Navigation
+                        <InfoIcon children={infoTip} />
+                </h3>
+                <div className="submission-nav-tree" style={{'marginTop':'10px'}}>
+                    <div>
+                        <SubmissionLeaf {...others} keyIdx={0} open={true}/>
+                    </div>
                 </div>
             </div>
         );
@@ -127,16 +143,14 @@ class SubmissionLeaf extends React.Component{
     }
 
     render() {
-        var key = this.props.keyIdx;
-        var keyValid = this.props.keyValid;
-        var keyTypes = this.props.keyTypes;
-        var keyComplete = this.props.keyComplete;
+        var { keyValid, keyIdx, keyTypes, keyComplete } = this.props;
+        var key = keyIdx;
         var placeholders;
         if(!isNaN(key)){
             placeholders = this.props.keyLinkBookmarks[key].map((link) => this.generatePlaceholder(link));
         }else{
             // must be a submitted object - plot directly
-            placeholders = Object.keys(this.props.hierarchy[this.props.keyIdx]).map((child) => this.generateChild(child));
+            placeholders = _.keys(this.props.hierarchy[key]).map((child) => this.generateChild(child));
         }
         var style = {
             'marginLeft': '-15px',
@@ -193,7 +207,7 @@ class SubmissionLeaf extends React.Component{
             }else if(keyValid[key] == 3){
                 style.backgroundColor = '#b7e1bb'; // light green
             }
-            if(key === this.props.currKey){
+            if(key === this.props.currKey){ // Current key selected
                 style.fontWeight = "bold";
                 style.border = "1px solid #000";
                 title = (<span style={{'padding':'1px 5px'}} >
@@ -242,7 +256,7 @@ class InfoIcon extends React.Component{
     render() {
         if (!this.props.children) return null;
         return (
-            <i style={{"marginLeft":"6px", 'fontSize':'0.8em'}} className="icon icon-info-circle" data-place="right" data-html={true} data-tip={this.props.children}/>
+            <i style={{"marginLeft":"6px", 'fontSize':'0.8em'}} className={"icon icon-info-circle" + (this.props.className ? ' ' + this.props.className : '')} data-place="right" data-html={true} data-tip={this.props.children}/>
         );
     }
 }

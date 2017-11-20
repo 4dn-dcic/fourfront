@@ -32,7 +32,7 @@ export const itemTypeHierarchy = {
         'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
     ],
     'FileSet': [
-        'FileSet', 'FileSetCalibration'
+        'FileSet', 'FileSetCalibration', 'FileSetMicroscopyQc'
     ],
     'Individual': [
         'IndividualHuman', 'IndividualMouse'
@@ -45,6 +45,9 @@ export const itemTypeHierarchy = {
     ],
     'WorkflowRun' : [
         'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
+    ],
+    'MicroscopeSetting' : [
+        'MicroscopeSettingA1', 'MicroscopeSettingA2', 'MicroscopeSettingD1', 'MicroscopeSettingD2'
     ]
 };
 
@@ -156,11 +159,12 @@ export const Field = {
         'display_title' : "Title"
     },
 
-    toName : function(field, schemas, schemaOnly = false){
+    toName : function(field, schemas, schemaOnly = false, itemType = 'ExperimentSet'){
+        console.log('TN', field, itemType);
         if (!schemaOnly && Field.nameMap[field]){
             return Field.nameMap[field];
         } else {
-            var schemaProperty = Field.getSchemaProperty(field, schemas);
+            var schemaProperty = Field.getSchemaProperty(field, schemas, itemType);
             if (schemaProperty && schemaProperty.title){
                 Field.nameMap[field] = schemaProperty.title; // Cache in nameMap for faster lookups.
                 return schemaProperty.title;

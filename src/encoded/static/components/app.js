@@ -172,7 +172,6 @@ export default class App extends React.Component {
 
     static childContextTypes = {
         dropdownComponent: PropTypes.string,
-        currentResource: PropTypes.func,
         location_href: PropTypes.string,
         onDropdownChange: PropTypes.func,
         hidePublicAudits: PropTypes.bool,
@@ -188,7 +187,6 @@ export default class App extends React.Component {
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.getChildContext = this.getChildContext.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
-        this.currentResource = this.currentResource.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
         this.getStatsComponent = this.getStatsComponent.bind(this);
@@ -373,7 +371,6 @@ export default class App extends React.Component {
     getChildContext() {
         return {
             dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
-            currentResource: this.currentResource,
             location_href: this.props.href,
             onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
             hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
@@ -385,7 +382,7 @@ export default class App extends React.Component {
 
     listActionsFor(category) {
         if (category === 'context') {
-            var context = this.currentResource();
+            var context = this.props.context;
             var name = this.currentAction();
             var context_actions = [];
             Array.prototype.push.apply(context_actions, context.actions || []);
@@ -414,8 +411,6 @@ export default class App extends React.Component {
             return portal.global_sections;
         }
     }
-
-    currentResource() { return this.props.context; }
 
     currentAction() {
         var href_url = url.parse(this.props.href);
@@ -593,12 +588,17 @@ export default class App extends React.Component {
         var href = window.location.href; // Href which browser just navigated to, but maybe not yet set to this.props.href
 
         if (!this.confirmPopState(href)){
-            window.history.pushState(window.state, '', this.props.href);
+            try {
+                // Undo what we just did (hit the back button) by re-adding it to history and returning (not performing actual naivgate backward)
+                window.history.pushState(event.state, '', this.props.href);
+            } catch (e){ // Too large
+                console.warn('error pushing state (current, popped:)', this.props.context, event.state);
+                window.history.pushState(null, '', this.props.href);
+            }
             return;
         }
-
-        if (!this.confirmNavigation(href)) {
-            //window.history.pushState(window.state, '', this.props.href);
+        /*
+        if (!this.confirmNavigation(href)) { // Is this necessary still? It shouldn't ever return false at this stage, only in like doRequest().
             var d = {
                 'href': href
             };
@@ -610,6 +610,7 @@ export default class App extends React.Component {
             });
             return;
         }
+        */
         if (!this.historyEnabled) {
             window.location.reload();
             return;
@@ -825,9 +826,9 @@ export default class App extends React.Component {
 
             if (options.skipRequest) {
                 if (options.replace) {
-                    window.history.replaceState(window.state, '', href + fragment);
+                    window.history.replaceState(this.props.context, '', href + fragment);
                 } else {
-                    window.history.pushState(window.state, '', href + fragment);
+                    window.history.pushState(this.props.context, '', href + fragment);
                 }
                 var stuffToDispatch = _.clone(includeReduxDispatch);
                 if (!options.skipUpdateHref) {
@@ -933,7 +934,7 @@ export default class App extends React.Component {
                         return;
                     }
                 }
-                if (options.replace) {
+                if (options.replace) { // null gets replaced in this.receiveContextResponse w. actual JSON data. Redundant here?
                     window.history.replaceState(null, '', href + fragment);
                 } else {
                     window.history.pushState(null, '', href + fragment);
@@ -1021,12 +1022,12 @@ export default class App extends React.Component {
         return data;
     }
 
-    // set isSubmitting in state. works with handleBeforeUnload
-    setIsSubmitting(bool){
-        this.setState({'isSubmitting': bool});
+    /** Set 'isSubmitting' in state. works with handleBeforeUnload **/
+    setIsSubmitting(bool, callback=null){
+        this.setState({'isSubmitting': bool}, callback);
     }
 
-    // catch user navigating away from page if in submission process.
+    /** Catch user navigating away from page if in submission process. */
     handleBeforeUnload(e){
         if(this.state.isSubmitting){
             var dialogText = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
@@ -1077,7 +1078,7 @@ export default class App extends React.Component {
                 var navSplit = value.split("#");
                 lowerList.push(navSplit[0].toLowerCase());
                 if (navSplit[1].charAt(0) === '!'){
-                    actionList.push(navSplit[1].toLowerCase());
+                    actionList.push(navSplit[1].slice(1).toLowerCase());
                 }else{
                     scrollList.push(navSplit[1].toLowerCase());
                 }
@@ -1089,6 +1090,8 @@ export default class App extends React.Component {
                     actionList.push('create');
                 }else if (value === '#!clone'){
                     actionList.push('clone');
+                }else if (value === '#!add'){
+                    actionList.push('add');
                 }else{
                     lowerList.push(value.toLowerCase());
                 }
@@ -1158,7 +1161,7 @@ export default class App extends React.Component {
                         <SubmissionView
                             {...commonContentViewProps}
                             setIsSubmitting={this.setIsSubmitting}
-                            create={actionList[0] === 'create'}
+                            create={actionList[0] === 'create' || actionList[0] === 'add'}
                             edit={actionList[0] === 'edit'}
                         />
                     );

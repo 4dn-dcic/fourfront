@@ -36,6 +36,7 @@
             "title": "Alternate Accessions",
             "description": "Accessions previously assigned to objects that have been merged with this object.",
             "type": "array",
+            "lookup": 1000,
             "internal_comment":"Only admins are allowed to set or update this value.",
             "exclude_from": ["submit4dn"],
             "default": [],
@@ -91,6 +92,7 @@
         "date_created": {
             "rdfs:subPropertyOf": "dc:created",
             "title": "Date Created",
+            "lookup": 1000,
             "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "anyOf": [
@@ -103,9 +105,10 @@
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
             "title": "Submitted By",
-            "exclude_from": ["submit4dn"],
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "linkTo": "User",
+            "lookup": 1000,
             "serverDefault": "userid",
             "permission": "import_items"
         }
@@ -116,11 +119,12 @@
             "description": "The date which the item was released to the public",
             "comment": "Do not submit, value is assigned when released.",
             "type": "string",
+            "lookup": 1000,
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
             ],
-            "exclude_from": ["submit4dn"],
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "permission": "import_items"
         },
         "project_release": {
@@ -128,6 +132,7 @@
             "description": "The date which the item was released to the project",
             "comment": "Do not submit, value is assigned when released to project.",
             "type": "string",
+            "lookup": 1000,
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
@@ -139,8 +144,9 @@
     "modified": {
       "lastmodified": {
           "title": "Last Modified",
-          "exclude_from": ["submit4dn"],
+          "exclude_from": ["submit4dn", "FFedit-create"],
           "type": "array",
+          "lookup": 1000,
           "items": {
               "date_modified": {
                   "rdfs:subPropertyOf": "dc:modified",
@@ -172,6 +178,7 @@
             "description": "The publications that provide more information about the object.",
             "type": "array",
             "default": [],
+            "lookup": 1000,
             "uniqueItems": true,
             "items": {
                 "title": "Reference",

@@ -181,7 +181,7 @@ export function isHashPartOfHref(href, parts = null){
     if (!parts) parts = url.parse(href);
 
     // Edit Pages
-    if (parts.hash === '#!edit' || parts.hash === '#!create') return true;
+    if (parts.hash === '#!edit' || parts.hash === '#!create' || parts.hash === '#!add') return true;
 
     // Workflow Pages
     if (parts.path.slice(0,14) === '/workflow-runs' || parts.path.slice(0,11) === '/workflows/' ){

@@ -45,7 +45,7 @@ export default class Graph extends React.Component {
             'right'             : PropTypes.number.isRequired
         }).isRequired,
         'renderNodeElement' : PropTypes.func.isRequired,
-        'detailPane'        : PropTypes.element,
+        'renderDetailPane'  : PropTypes.func.isRequired,
         'nodes'             : PropTypes.arrayOf(PropTypes.shape({
             'column'            : PropTypes.number.isRequired,
             'name'              : PropTypes.string.isRequired,

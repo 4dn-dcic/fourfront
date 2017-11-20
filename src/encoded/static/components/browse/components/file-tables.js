@@ -49,6 +49,7 @@ export class RawFilesStackedTable extends React.Component {
     }
 
     /**
+     * @deprecated ?
      * Calculate amount of experiments out of provided experiments which match currently-set filters.
      * Use only for front-end faceting, e.g. on Exp-Set View page where all experiments are provided,
      * NOT (eventually) for /browse/ page where faceting results will be controlled by back-end.
