@@ -130,8 +130,6 @@ content_views.register(DefaultItemView, 'Item');
 
 
 /** Helper Components */
-
-
 export class OverViewBodyItem extends React.Component {
 
     static createList(items, property, titleRenderFxn){
@@ -161,7 +159,9 @@ export class OverViewBodyItem extends React.Component {
     }
 
     static defaultProps = {
-        'titleRenderFxn' : Schemas.Term.toName
+        'titleRenderFxn' : Schemas.Term.toName,
+        'hideIfNoValue' : false,
+        'wrapInColumn' : false
     }
 
     render(){
@@ -173,8 +173,14 @@ export class OverViewBodyItem extends React.Component {
 
         var resultPropertyValue = OverViewBodyItem.createList(object.getNestedProperty(result, property), property, titleRenderFxn);
 
+        if (this.props.hideIfNoValue && (!resultPropertyValue || (Array.isArray(resultPropertyValue) && resultPropertyValue.length === 0))){
+            return null;
+        }
+
+        var innerBlockReturned = null;
+
         if (Array.isArray(resultPropertyValue)){
-            return (
+            innerBlockReturned = (
                 <div className="inner">
                     <object.TooltipInfoIconContainerAuto
                         {..._.pick(this.props, 'result', 'property', 'tips', 'schemas')}
@@ -184,16 +190,20 @@ export class OverViewBodyItem extends React.Component {
                     { resultPropertyValue ? ( resultPropertyValue.length > 1 ? <ol>{ fallbackify(resultPropertyValue) }</ol> : fallbackify(resultPropertyValue) ) : fallbackify(null) }
                 </div>
             );
+        } else {
+            innerBlockReturned = (
+                <div className="inner">
+                    <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'property', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" />
+                    <div>
+                        { fallbackify(titleRenderFxn(property, resultPropertyValue, true)) }
+                    </div>
+                </div>
+            );
         }
 
-        return (
-            <div className="inner">
-                <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'property', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" />
-                <div>
-                    { fallbackify(titleRenderFxn(property, resultPropertyValue, true)) }
-                </div>
-            </div>
-        );
+        if (this.props.wrapInColumn) return <div className="col-xs-6 col-md-4">{ innerBlockReturned }</div>;
+        else return innerBlockReturned;
+
     }
 }
 

@@ -39,11 +39,19 @@ export function linkFromItem(item, propertyForTitle = 'display_title', elementPr
 
 /** Return the properties dictionary from a schema for use as tooltips */
 export function tipsFromSchema(schemas, content){
-    var tips = {};
-    if(content['@type'] && typeof schemas === 'object' && schemas !== null){
+    if(content['@type'] && Array.isArray(content['@type']) && content['@type'].length > 0){
         var type = content['@type'][0];
-        if(schemas[type]){
-            tips = schemas[type].properties;
+        return tipsFromSchemaByType(schemas, content['@type'][0]);
+    }
+    return {};
+}
+
+/** Return the properties dictionary from a schema for use as tooltips */
+export function tipsFromSchemaByType(schemas, itemType='ExperimentSet'){
+    var tips = {};
+    if(itemType && typeof schemas === 'object' && schemas !== null){
+        if (schemas[itemType]){
+            tips = schemas[itemType].properties;
         }
     }
     return tips;
@@ -243,14 +251,20 @@ export class TooltipInfoIconContainerAuto extends React.Component {
         'result' : PropTypes.shape({
             '@type' : PropTypes.array.isRequired
         }).isRequired,
+        'itemType' : PropTypes.string,
         'schemas' : PropTypes.object
     }
 
     render(){
-        var { elementType, title, property, result, schemas, tips, fallbackTitle } = this.props;
+        var { elementType, title, property, result, schemas, tips, fallbackTitle, itemType } = this.props;
         if (!tips){
-            tips = tipsFromSchema(schemas, result);
+            if (itemType) {
+                tips = tipsFromSchemaByType(schemas, itemType);
+            } else {
+                tips = tipsFromSchema(schemas, result);
+            }
         }
+        console.log('TIPSS', property, this.props.title, tips, tipsFromSchema(schemas, result));
         var tooltip = (tips && tips[property] && tips[property].description) || null;
         if (!title){
             title = (tips && tips[property] && tips[property].title) || null;
