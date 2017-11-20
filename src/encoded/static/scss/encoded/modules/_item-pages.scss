@@ -975,18 +975,16 @@ $download-button-width : 100px;
 						font-weight: 500;
 					}
 
-					ol {
+					ol.overview-list-elements-container {
 						margin-bottom: 0;
 					}
 
-					// Embedded Protocols w/ Attachments
+					// Embedded Items w/ Attachments
 					.embedded-item-with-attachment {
-						margin-top: 3px;
 						.link-to-item-col {
 							white-space: nowrap;
 							text-overflow: ellipsis;
 							overflow: hidden;
-							line-height: 28px;
 							&.in-array {
 								padding-left: 30px;
 							}
@@ -1010,6 +1008,25 @@ $download-button-width : 100px;
 							}
 						}
 					}
+
+					
+					> div.overview-list-elements-container {
+						> div.overview-list-element {
+							border-bottom: 1px solid #eee;
+							> .embedded-item-with-attachment {
+								padding: 2px 0;
+								.link-to-item-col {
+									line-height: 28px;
+								}
+								
+							}
+							&:last-child {
+								border-bottom: none;
+							}
+						}
+						
+					}
+
 				}
 			}
 		}

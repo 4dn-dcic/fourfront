@@ -154,7 +154,7 @@ export class OverViewBodyItem extends React.Component {
                 var fullProtocolDocumentHref = linkToProtocolItem + item.attachment.href;
                 viewAttachmentButton = (
                     <Button bsSize="small" href={fullProtocolDocumentHref} target="_blank" className="text-400 text-ellipsis-container btn-block">
-                        <i className="icon icon-fw icon-file-o"/>&nbsp; View File
+                        View File &nbsp;<i className="icon icon-fw icon-external-link"/>
                     </Button>
                 );
             }
@@ -211,6 +211,11 @@ export class OverViewBodyItem extends React.Component {
         function fallbackify(val){
             return val || fallbackValue || 'None';
         }
+
+        listItemElementProps = (listItemElementProps && _.clone(listItemElementProps)) || {};
+        listWrapperElementProps = (listWrapperElementProps && _.clone(listWrapperElementProps)) || {};
+        listItemElementProps.className = (listItemElementProps.className || '') + ' overview-list-element';
+        listWrapperElementProps.className = (listWrapperElementProps.className || '') + ' overview-list-elements-container';
 
         if (titleRenderFxn === OverViewBodyItem.titleRenderPresets.embedded_item_with_attachment){
             listItemElement = 'div';
