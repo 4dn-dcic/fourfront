@@ -1117,10 +1117,9 @@ export default class SubmissionView extends React.Component{
                                 // see if we need to go into round two submission
                                 if(roundTwoCopy.length === 0){
                                     // we're done!
-                                    this.props.setIsSubmitting(false);
-                                    setTimeout(()=>{
+                                    this.props.setIsSubmitting(false, ()=>{
                                         this.props.navigate(destination);
-                                    }, 500);
+                                    });
                                 }else{
                                     // break this out into another fxn?
                                     // roundTwo initiation
@@ -1179,11 +1178,11 @@ export default class SubmissionView extends React.Component{
         this.setState(stateToSet);
         if(roundTwoCopy.length == 0){
             // we're done!
-            this.props.setIsSubmitting(false);
             //alert('Success! Navigating to your new object.');
-            setTimeout(()=>{
+            this.props.setIsSubmitting(false, ()=>{
                 this.props.navigate(this.state.keyComplete[0]);
-            }, 500);
+            });
+            
         }
     }
 
