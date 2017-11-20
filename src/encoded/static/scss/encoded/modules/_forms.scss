@@ -864,12 +864,6 @@ div.fieldset.editable-fields {
 				border-bottom: 1px solid #eee;
 			}
 
-			&.in-array-field {
-				padding-top: 8px;
-				padding-bottom: 8px;
-				display: flex;
-			}
-
 			.field-container {
 				min-height: 50px;
 				padding-top: 8px;
@@ -917,20 +911,21 @@ div.fieldset.editable-fields {
 				}
 
 				i.icon-info-circle {
-					margin-left: 10px;
-					color: rgba(0,0,0,0.25);
+					color: rgba(0,0,0,0.15);
 					transition: color .5s;
 				}
 			}
 
 			&:hover {
-				.submission-field-title {
-					.field-descriptor {
-						color: rgba(0,0,0,0.66);
+				> .row > .col-md-4 {
+					.submission-field-title {
+						.field-descriptor {
+							color: rgba(0,0,0,0.66);
+						}
 					}
-				}
-				i.icon-info-circle {
-					color: rgba(0,0,0,1);
+					i.icon-info-circle {
+						color: rgba(0,0,0,1);
+					}
 				}
 			}
 
@@ -958,6 +953,11 @@ div.fieldset.editable-fields {
 				}
 			}
 
+			button:not(.btn-xs):not(.btn-sm):not(.btn-large):not(.btn-xlarge){
+				height: 34px;
+				padding-bottom: 7px;
+			}
+
 			
 
 			// Override array-containing field style to have no padding as it recursively will render field items with their own padding (so don't double-pad).
@@ -969,30 +969,53 @@ div.fieldset.editable-fields {
 					// Fields containing arrays
 					.array-field-container {
 						min-height: 50px;
-						/*
-						&.odd {
-							background-color: #f8f8f8;
-						}
-						*/
+
 						&:not(:last-child){
-							border-bottom: 1px solid #f4f4f4;
+							border-bottom: 1px dotted #f4f4f4;
+							&[data-field-type="object"]{
+								border-bottom: 2px solid #f4f4f4;
+							}
 						}
 
 						// Row in field of in-array object rows
-						.in-array-field[data-field-type="object"] .field-row {
-							.submission-field-title {
-								padding-top: 8px;
-							}
-							button.select-create-linked-item-button {
-								width: 115px;
-							}
+						.in-array-field {
 
-							&:first-child {
-								.row.field-container {
-									padding-top: 0;
-									min-height: 0;
+							padding-top: 8px;
+							padding-bottom: 8px;
+							display: flex;
+							
+							&[data-field-type="object"] {
+								padding-top: 0;
+								padding-bottom: 0;
+								
+								> .field-column {
+									 > div > div > .field-row {
+										.submission-field-title {
+											padding-top: 18px;
+										}
+										.field-container {
+											.linked-object-buttons-container {
+												display: flex;
+												> button.select-create-linked-item-button {
+													flex: 1;
+													&:last-child {
+														margin-right: 0;
+													}
+												}
+											}
+										}
+										
+									}
+								}
+
+								> .remove-button-column {
+									padding-top: 8px;
+									padding-left: 8px;
+									width: 53px;
+									border-left: 1px solid #eee;
 								}
 							}
+
 						}
 					}
 
@@ -1027,9 +1050,16 @@ div.fieldset.editable-fields {
 				}
 			}
 
-			.select-create-linked-item-button {
-				width: 160px;
-				margin-right: 10px;
+			.linked-object-buttons-container {
+				display: flex;
+				.select-create-linked-item-button {
+					width: 160px;
+					margin-right: 10px;
+					&:last-child {
+						margin-right: 0;
+					}
+					flex: 1;
+				}
 			}
 
 		}

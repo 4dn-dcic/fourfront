@@ -1113,9 +1113,9 @@ export default class SubmissionView extends React.Component{
                                 }
                             }
                             // inKey is 0 for the primary object
-                            if(inKey == 0){
+                            if(inKey === 0){
                                 // see if we need to go into round two submission
-                                if(roundTwoCopy.length == 0){
+                                if(roundTwoCopy.length === 0){
                                     // we're done!
                                     this.props.setIsSubmitting(false);
                                     alert('Success! Navigating to your new object.');
@@ -1300,7 +1300,8 @@ export default class SubmissionView extends React.Component{
                             setSubmissionState={this.setSubmissionState}
                             modifyAlias={this.modifyAlias}
                             updateUpload={this.updateUpload}
-                            {..._.pick(this.state, 'keyDisplay', 'keyComplete', 'keyIter', 'currKey', 'keyContext', 'upload', 'uploadStatus', 'md5progress', 'roundTwo', 'currentSubmittingUser')}
+                            {..._.pick(this.state, 'keyDisplay', 'keyComplete', 'keyIter', 'currKey', 'keyContext',
+                                'upload', 'uploadStatus', 'md5progress', 'roundTwo', 'currentSubmittingUser')}
                         />
                     </div>
                 </div>
@@ -1937,6 +1938,7 @@ class IndividualObjectView extends React.Component{
                 upload={this.props.upload}
                 uploadStatus={this.props.uploadStatus}
                 currentSubmittingUser={this.props.currentSubmittingUser}
+                roundTwo={this.props.roundTwo}
             />
         );
     }
