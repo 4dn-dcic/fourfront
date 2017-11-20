@@ -1298,8 +1298,7 @@ export default class SubmissionView extends React.Component{
                             setSubmissionState={this.setSubmissionState}
                             modifyAlias={this.modifyAlias}
                             updateUpload={this.updateUpload}
-                            {..._.pick(this.state, 'keyDisplay', 'keyComplete', 'keyIter', 'currKey', 'keyContext',
-                                'upload', 'uploadStatus', 'md5progress', 'roundTwo', 'currentSubmittingUser')}
+                            {..._.pick(this.state, 'keyDisplay', 'keyComplete', 'keyIter', 'currKey', 'keyContext', 'upload', 'uploadStatus', 'md5Progress', 'roundTwo', 'currentSubmittingUser')}
                         />
                     </div>
                 </div>
@@ -1572,7 +1571,9 @@ class IndividualObjectView extends React.Component{
 
     constructor(props){
         super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.modifyNewContext = this.modifyNewContext.bind(this);
+        this.initiateField = this.initiateField.bind(this);
 
         /**
          * State in this component mostly has to do with selection of existing objs
@@ -1831,7 +1832,7 @@ class IndividualObjectView extends React.Component{
      * make a BuildField component for that field. Different fields are returned
      * for roundOne and roundTwo.
      */
-    initiateField = (field) => {
+    initiateField(field) {
         var currSchema = this.props.schemas[this.props.currType];
         var fieldSchema = object.getNestedProperty(currSchema, ['properties', field], true);
         if(!fieldSchema) return null;
