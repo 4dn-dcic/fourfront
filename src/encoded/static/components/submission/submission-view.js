@@ -1078,9 +1078,9 @@ export default class SubmissionView extends React.Component{
                             // Perform final steps when object is submitted
                             // *** SHOULD THIS STUFF BE BROKEN OUT INTO ANOTHER FXN?
                             // find key of parent object, starting from top of hierarchy
-                            var parentKey = findParentFromHierarchy(this.state.keyHierarchy, inKey);
+                            var parentKey = parseInt(findParentFromHierarchy(this.state.keyHierarchy, inKey));
                             // navigate to parent obj if it was found. Else, go to top level
-                            stateToSet.currKey = parentKey !== null ? parentKey : 0;
+                            stateToSet.currKey = (parentKey !== null && !isNaN(parentKey) ? parentKey : 0);
                             var typesCopy = this.state.keyTypes;
                             var keyComplete = this.state.keyComplete;
                             var linksCopy = this.state.keyLinks;
@@ -1104,6 +1104,7 @@ export default class SubmissionView extends React.Component{
                             var needsRoundTwo = [];
                             // update context with response data and check if submitted object needs a round two
                             contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false, needsRoundTwo);
+                            console.log('PARENTKEY', parentKey);
                             // update roundTwoKeys if necessary
                             if(needsRoundTwo.length > 0){
                                 if(!_.contains(roundTwoCopy, inKey)){
@@ -1119,6 +1120,7 @@ export default class SubmissionView extends React.Component{
                                     // we're done!
                                     this.props.setIsSubmitting(false);
                                     alert('Success! Navigating to your new object.');
+                                    console.log('DESINTATION', destination);
                                     setTimeout(()=>{
                                         this.props.navigate(destination);
                                     }, 500);
