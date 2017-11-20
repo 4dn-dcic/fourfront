@@ -77,7 +77,7 @@ export default class BuildField extends React.Component{
             case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} roundTwo={this.props.roundTwo} />;
             case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
             case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
-            case 'file upload'      : return <S3FileInput {...this.props}/>;
+            case 'file upload'      : return <S3FileInput {...this.props} />;
         }
         // Fallback
         return <div>No field for this case yet.</div>;
@@ -343,8 +343,6 @@ class LinkedObj extends React.Component{
     }
 }
 
-
-var xCount = 0;
 
 /**
  * Display fields that are arrays. To do this, make a BuildField for each
@@ -817,6 +815,7 @@ class S3FileInput extends React.Component{
                 statusTip = 'Previous file: ' + this.props.value;
             }
         }
+        console.log('S3FILEINPUT', this.props.md5Progress, this.props.upload);
         var disableFile = this.props.md5Progress !== null || this.props.upload !== null;
         return(
             <div>
