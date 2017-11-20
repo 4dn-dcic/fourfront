@@ -90,7 +90,7 @@ def deploy(deploy_to=None):
     '''
     print("start deployment to elastic beanstalk deploy to is %s" % str(deploy_to))
 
-    wait = [20,40,60,120,120,120]
+    wait = [20, 40, 60, 120, 120, 120, 120]
     for time in wait:
         try:
             if not deploy_to:
@@ -126,8 +126,7 @@ if __name__ == "__main__":
     if not args.prod:
         print("not production")
         try:
-            if deploy_to == 'fourfront-staging':
-
+            if deploy_to in ['fourfront-staging', 'fourfront-webprod', 'fourfront-webprod2']:
                 print("deploy to staging")
                 ver = get_git_version()
                 # checkout correct branch
