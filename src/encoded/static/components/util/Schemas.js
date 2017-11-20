@@ -53,11 +53,11 @@ export const itemTypeHierarchy = {
 
 export const Term = {
 
-    toName : function(field, term, allowJSXOutput = false){
+    toName : function(field, term, allowJSXOutput = false, addDescriptionTipForLinkTos = true){
 
         if (allowJSXOutput && typeof term !== 'string' && term && typeof term === 'object'){
             // Object, probably an item.
-            return linkFromItem(term);
+            return linkFromItem(term, addDescriptionTipForLinkTos);
         }
 
         var name = null;
@@ -160,7 +160,6 @@ export const Field = {
     },
 
     toName : function(field, schemas, schemaOnly = false, itemType = 'ExperimentSet'){
-        console.log('TN', field, itemType);
         if (!schemaOnly && Field.nameMap[field]){
             return Field.nameMap[field];
         } else {

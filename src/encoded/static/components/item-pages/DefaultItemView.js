@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { panel_views, itemClass, content_views } from './../globals';
+import { Button } from 'react-bootstrap';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters, layout, Schemas } from './../util';
@@ -132,46 +133,90 @@ content_views.register(DefaultItemView, 'Item');
 /** Helper Components */
 export class OverViewBodyItem extends React.Component {
 
-    static createList(items, property, titleRenderFxn){
+    static titleRenderPresets = {
+        'biosample_treatments' : function(field, treatment){
+            if (!treatment || !treatment.display_title || !object.atIdFromObject(treatment)){
+                return 'None';
+            }
+            return <div key={object.atIdFromObject(treatment)} >{ object.itemUtil.generateLink(treatment, true) }<div>({ treatment.treatment_type })</div></div>;
+        },
+        'local_date_time' : function(field, timestamp){ return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-time-md" /> : 'None'; },
+        'local_date' : function(field, timestamp){ return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-md" /> : 'None'; },
+        'embedded_item_with_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null){
+            if (!item || !object.itemUtil.atId(item)){
+                return 'None';
+            }
+            var itemTitle = object.itemUtil.getTitleStringFromContext(item);
+            var linkToProtocolItem = object.itemUtil.atId(item);
+
+            var viewAttachmentButton = null;
+            if (item.attachment && item.attachment.href && typeof item.attachment.href === 'string'){
+                var fullProtocolDocumentHref = linkToProtocolItem + item.attachment.href;
+                viewAttachmentButton = (
+                    <Button bsSize="small" href={fullProtocolDocumentHref} target="_blank" className="text-400 text-ellipsis-container btn-block">
+                        <i className="icon icon-fw icon-file-o"/>&nbsp; View File
+                    </Button>
+                );
+            }
+
+            var linkToItem = object.itemUtil.generateLink(item, true);
+            
+            return (
+                <div className="embedded-item-with-attachment row" key={linkToProtocolItem}>
+                    <div className="col-xs-12 col-sm-7 col-lg-8 link-to-item-col">{ index !== null ? <span>{ index + 1 }. </span> : null}{ linkToItem }</div>
+                    <div className="col-xs-8 col-sm-5 col-lg-4 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
+                </div>
+            );
+        }
+    }
+
+    /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
+    static createList(items, property, titleRenderFxn, addDescriptionTipForLinkTos, listItemElement, listItemElementProps){
         if (Array.isArray(items) && items.length > 0 && items[0].display_title && object.atIdFromObject(items[0])){
-            items = _.map(_.uniq(items, false, function(b){ return object.atIdFromObject(b); }), function(b){
-                var link = null;
-                if (typeof titleRenderFxn === 'function' && titleRenderFxn !== Schemas.Term.toName){
-                    link = titleRenderFxn(property, b, true);
-                } else { 
-                    link = <a href={object.atIdFromObject(b)}>{ b.display_title }</a>;
-                }
+            items = _.map(_.uniq(items, false, function(b){ return object.atIdFromObject(b); }), function(b,i){
                 if (items.length > 1){
-                    return <li>{ link }</li>;
+                    return React.createElement(listItemElement, _.extend({ 'key' : object.atIdFromObject(b) || i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i) );
                 }
-                return link;
+                return titleRenderFxn(property, b, true, addDescriptionTipForLinkTos);
             });
         } else if (Array.isArray(items) && items.length > 1){
-            items = _.map(items, function(b){
-                return <li>{ titleRenderFxn(property, b, true) }</li>;
+            items = _.map(items, function(b,i){
+                return React.createElement(listItemElement, _.extend({ 'key' : i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i) );
             });
         } else if (Array.isArray(items) && items.length === 1){
-            items = titleRenderFxn(property, items[0], true);
+            items = titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos);
         } else if (Array.isArray(items) && items.length === 0){
             return null;
+        } else if (!Array.isArray(items)){
+            return titleRenderFxn(property, items, true, addDescriptionTipForLinkTos);
         }
         return items;
     }
 
     static defaultProps = {
-        'titleRenderFxn' : Schemas.Term.toName,
+        'titleRenderFxn' : function(field, value, jsxAllowed = true, addDescriptionTip = true, index = null ){ return Schemas.Term.toName(field, value, jsxAllowed, addDescriptionTip); },
         'hideIfNoValue' : false,
-        'wrapInColumn' : false
+        'wrapInColumn' : false,
+        'addDescriptionTipForLinkTos' : true,
+        'listWrapperElement' : 'ol',
+        'listWrapperElementProps' : null,
+        'listItemElement' : 'li',
+        'listItemElementProps' : null
     }
 
     render(){
-        var { result, property, fallbackValue, fallbackTitle, titleRenderFxn } = this.props;
+        var { result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos, listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps } = this.props;
         
         function fallbackify(val){
             return val || fallbackValue || 'None';
         }
 
-        var resultPropertyValue = OverViewBodyItem.createList(object.getNestedProperty(result, property), property, titleRenderFxn);
+        if (titleRenderFxn === OverViewBodyItem.titleRenderPresets.embedded_item_with_attachment){
+            listItemElement = 'div';
+            listWrapperElement = 'div';
+        }
+
+        var resultPropertyValue = OverViewBodyItem.createList(object.getNestedProperty(result, property), property, titleRenderFxn, addDescriptionTipForLinkTos, listItemElement, listItemElementProps);
 
         if (this.props.hideIfNoValue && (!resultPropertyValue || (Array.isArray(resultPropertyValue) && resultPropertyValue.length === 0))){
             return null;
@@ -181,27 +226,31 @@ export class OverViewBodyItem extends React.Component {
 
         if (Array.isArray(resultPropertyValue)){
             innerBlockReturned = (
-                <div className="inner">
+                <div className="inner" key="inner">
                     <object.TooltipInfoIconContainerAuto
                         {..._.pick(this.props, 'result', 'property', 'tips', 'schemas')}
                         fallbackTitle={fallbackTitle + (resultPropertyValue && resultPropertyValue.length > 1 ? 's' : '')}
                         elementType="h5"
                     />
-                    { resultPropertyValue ? ( resultPropertyValue.length > 1 ? <ol>{ fallbackify(resultPropertyValue) }</ol> : fallbackify(resultPropertyValue) ) : fallbackify(null) }
+                    { resultPropertyValue ? ( resultPropertyValue.length > 1 ?
+                        React.createElement(listWrapperElement, listWrapperElementProps || null, fallbackify(resultPropertyValue))
+                            : fallbackify(resultPropertyValue) )
+                                : fallbackify(null)
+                    }
                 </div>
             );
         } else {
             innerBlockReturned = (
-                <div className="inner">
+                <div className="inner" key="inner">
                     <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'property', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" />
-                    <div>
-                        { fallbackify(titleRenderFxn(property, resultPropertyValue, true)) }
+                    <div key="single-value">
+                        { fallbackify(resultPropertyValue) }
                     </div>
                 </div>
             );
         }
 
-        if (this.props.wrapInColumn) return <div className="col-xs-6 col-md-4">{ innerBlockReturned }</div>;
+        if (this.props.wrapInColumn) return <div className="col-xs-6 col-md-4" key="outer">{ innerBlockReturned }</div>;
         else return innerBlockReturned;
 
     }

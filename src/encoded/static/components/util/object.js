@@ -20,9 +20,9 @@ export function atIdFromObject(o){
 }
 
 
-export function linkFromItem(item, propertyForTitle = 'display_title', elementProps){
+export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps){
     var href = atIdFromObject(item);
-    var title = item[propertyForTitle] || item.display_title || item.title || item.name;
+    var title = (propertyForTitle && item[propertyForTitle]) || item.display_title || item.title || item.name;
     if (!href || !title){
         if (item && typeof item === 'object' && typeof item.error === 'string'){
             return <em>{ item.error }</em>;
@@ -31,8 +31,20 @@ export function linkFromItem(item, propertyForTitle = 'display_title', elementPr
         console.error("Could not get atId for Item", item);
         return null;
     }
+    
+    var propsToInclude = elementProps && _.clone(elementProps) || {};
+    
+    if (typeof propsToInclude.key === 'undefined'){
+        propsToInclude.key = href;
+    }
+    
+    if (addDescriptionTip && typeof propsToInclude['data-tip'] === 'undefined' && item.description){
+        propsToInclude['data-tip'] = item.description;
+        propsToInclude.className = (propsToInclude.className || '') + ' inline-block';
+    }
+    
     return (
-        <a href={href} {...elementProps}>{ title }</a>
+        <a href={href} {...propsToInclude}>{ title }</a>
     );
 }
 
@@ -264,7 +276,6 @@ export class TooltipInfoIconContainerAuto extends React.Component {
                 tips = tipsFromSchema(schemas, result);
             }
         }
-        console.log('TIPSS', property, this.props.title, tips, tipsFromSchema(schemas, result));
         var tooltip = (tips && tips[property] && tips[property].description) || null;
         if (!title){
             title = (tips && tips[property] && tips[property].title) || null;
