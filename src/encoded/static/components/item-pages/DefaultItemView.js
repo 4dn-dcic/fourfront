@@ -160,10 +160,11 @@ export class OverViewBodyItem extends React.Component {
             }
 
             var linkToItem = object.itemUtil.generateLink(item, true);
+            var isInArray = typeof index === 'number';
             
             return (
                 <div className="embedded-item-with-attachment row" key={linkToProtocolItem}>
-                    <div className="col-xs-12 col-sm-7 col-lg-8 link-to-item-col">{ index !== null ? <span>{ index + 1 }. </span> : null}{ linkToItem }</div>
+                    <div className={"col-xs-12 col-sm-7 col-lg-8 link-to-item-col" + (isInArray ? ' in-array' : '')} data-array-index={index}>{ isInArray ? <span>{ index + 1 }. </span> : null}{ linkToItem }</div>
                     <div className="col-xs-8 col-sm-5 col-lg-4 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
                 </div>
             );

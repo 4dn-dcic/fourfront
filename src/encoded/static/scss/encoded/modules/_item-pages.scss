@@ -987,7 +987,9 @@ $download-button-width : 100px;
 							text-overflow: ellipsis;
 							overflow: hidden;
 							line-height: 28px;
-							padding-left: 30px;
+							&.in-array {
+								padding-left: 30px;
+							}
 							> span, > a {
 								vertical-align: middle;
 							}
