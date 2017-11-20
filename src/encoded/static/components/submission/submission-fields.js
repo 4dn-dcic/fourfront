@@ -73,7 +73,7 @@ export default class BuildField extends React.Component{
                     </DropdownButton>
                 </span>
             );
-            case 'linked object'    : return <div className="inline-block"><LinkedObj {...this.props}/></div>;
+            case 'linked object'    : return <LinkedObj {...this.props}/>;
             case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} roundTwo={this.props.roundTwo} />;
             case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
             case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
@@ -329,7 +329,7 @@ class LinkedObj extends React.Component{
         }
         // nothing chosen/created yet
         return(
-            <div>
+            <div className="linked-object-buttons-container">
                 <Button className="select-create-linked-item-button" onClick={function(e){
                     e.preventDefault();
                     this.props.selectObj(objType, this.props.nestedField, this.props.linkType, this.props.arrayIdx);

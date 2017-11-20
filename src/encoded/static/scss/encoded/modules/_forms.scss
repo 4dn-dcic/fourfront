@@ -917,13 +917,15 @@ div.fieldset.editable-fields {
 			}
 
 			&:hover {
-				.submission-field-title {
-					.field-descriptor {
-						color: rgba(0,0,0,0.66);
+				> .row > .col-md-4 {
+					.submission-field-title {
+						.field-descriptor {
+							color: rgba(0,0,0,0.66);
+						}
 					}
-				}
-				i.icon-info-circle {
-					color: rgba(0,0,0,1);
+					i.icon-info-circle {
+						color: rgba(0,0,0,1);
+					}
 				}
 			}
 
@@ -951,6 +953,11 @@ div.fieldset.editable-fields {
 				}
 			}
 
+			button:not(.btn-xs):not(.btn-sm):not(.btn-large):not(.btn-xlarge){
+				height: 34px;
+				padding-bottom: 7px;
+			}
+
 			
 
 			// Override array-containing field style to have no padding as it recursively will render field items with their own padding (so don't double-pad).
@@ -964,7 +971,7 @@ div.fieldset.editable-fields {
 						min-height: 50px;
 
 						&:not(:last-child){
-							border-bottom: 1px solid #f4f4f4;
+							border-bottom: 1px dotted #f4f4f4;
 							&[data-field-type="object"]{
 								border-bottom: 2px solid #f4f4f4;
 							}
@@ -986,9 +993,18 @@ div.fieldset.editable-fields {
 										.submission-field-title {
 											padding-top: 18px;
 										}
-										button.select-create-linked-item-button {
-											width: 115px;
+										.field-container {
+											.linked-object-buttons-container {
+												display: flex;
+												> button.select-create-linked-item-button {
+													flex: 1;
+													&:last-child {
+														margin-right: 0;
+													}
+												}
+											}
 										}
+										
 									}
 								}
 
@@ -1034,9 +1050,16 @@ div.fieldset.editable-fields {
 				}
 			}
 
-			.select-create-linked-item-button {
-				width: 160px;
-				margin-right: 10px;
+			.linked-object-buttons-container {
+				display: flex;
+				.select-create-linked-item-button {
+					width: 160px;
+					margin-right: 10px;
+					&:last-child {
+						margin-right: 0;
+					}
+					flex: 1;
+				}
 			}
 
 		}
