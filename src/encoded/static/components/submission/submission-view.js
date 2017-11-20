@@ -1104,7 +1104,6 @@ export default class SubmissionView extends React.Component{
                             var needsRoundTwo = [];
                             // update context with response data and check if submitted object needs a round two
                             contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false, needsRoundTwo);
-                            console.log('PARENTKEY', parentKey);
                             // update roundTwoKeys if necessary
                             if(needsRoundTwo.length > 0){
                                 if(!_.contains(roundTwoCopy, inKey)){
@@ -1119,8 +1118,6 @@ export default class SubmissionView extends React.Component{
                                 if(roundTwoCopy.length === 0){
                                     // we're done!
                                     this.props.setIsSubmitting(false);
-                                    alert('Success! Navigating to your new object.');
-                                    console.log('DESINTATION', destination);
                                     setTimeout(()=>{
                                         this.props.navigate(destination);
                                     }, 500);
@@ -1183,7 +1180,7 @@ export default class SubmissionView extends React.Component{
         if(roundTwoCopy.length == 0){
             // we're done!
             this.props.setIsSubmitting(false);
-            alert('Success! Navigating to your new object.');
+            //alert('Success! Navigating to your new object.');
             setTimeout(()=>{
                 this.props.navigate(this.state.keyComplete[0]);
             }, 500);
