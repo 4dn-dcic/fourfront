@@ -21,6 +21,7 @@ import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
+import { setTimeout } from 'timers';
 
 /**
  * The top-level component for this application.
@@ -1289,7 +1290,7 @@ export default class App extends React.Component {
                         var node = ReactDOM.findDOMNode(_tooltip);
                         node.style.left = null;
                         node.style.top = null;
-                    }} />
+                    }} globalEventOff="click" />
                     <ChartDetailCursor
                         href={this.props.href}
                         schemas={this.state.schemas}

@@ -246,9 +246,9 @@ export class IndividualItemTitle extends React.Component {
         var sex = null;
         if (indv.sex && typeof indv.sex === 'string'){
             if (indv.sex.toLowerCase() === 'female'){
-                sex = <i className="icon icon-fw icon-venus"/>;
+                sex = <i className="icon icon-fw icon-venus" data-tip="Sex: Female" />;
             } else if (indv.sex.toLowerCase() === 'male'){
-                sex = <i className="icon icon-fw icon-mars"/>;
+                sex = <i className="icon icon-fw icon-mars" data-tip="Sex: Male" />;
             }
         }
         var title = indv.display_title;
