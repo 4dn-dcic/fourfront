@@ -20,7 +20,7 @@ export function atIdFromObject(o){
 }
 
 
-export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps){
+export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps, suppressErrors = false){
     var href = atIdFromObject(item);
     var title = (propertyForTitle && item[propertyForTitle]) || item.display_title || item.title || item.name;
     if (!href || !title){
@@ -28,12 +28,12 @@ export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 
             return <em>{ item.error }</em>;
         }
         // Uh oh, probably not an Item
-        console.error("Could not get atId for Item", item);
+        if (!suppressErrors) console.error("Could not get atId for Item", item);
         return null;
     }
     
     var propsToInclude = elementProps && _.clone(elementProps) || {};
-    
+
     if (typeof propsToInclude.key === 'undefined'){
         propsToInclude.key = href;
     }
@@ -281,7 +281,7 @@ export class TooltipInfoIconContainerAuto extends React.Component {
             title = (tips && tips[property] && tips[property].title) || null;
         }
 
-        return <TooltipInfoIconContainer tooltip={tooltip} title={title || fallbackTitle || property} elementType={this.props.elementType} />;
+        return <TooltipInfoIconContainer {...this.props} tooltip={tooltip} title={title || fallbackTitle || property} elementType={this.props.elementType} />;
     }
 }
 

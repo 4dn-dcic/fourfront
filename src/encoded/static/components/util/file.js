@@ -47,7 +47,7 @@ export class FileDownloadButton extends React.Component {
     render(){
         var { href, className, disabled, title, filename } = this.props;
         return (
-            <a href={ href } className={(className || '') + " btn btn-default btn-info download-button " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
+            <a href={ href } className={(className || '') + " btn btn-default btn-primary download-button btn-block " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
                 <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
@@ -97,7 +97,7 @@ export class FileDownloadButtonAuto extends React.Component {
             'filename' : file.filename,
             'disabled' : !this.canDownload()
         };
-        return <FileDownloadButton {...props} {...this.props} />;
+        return <FileDownloadButton {...this.props} {...props} />;
     }
 }
 

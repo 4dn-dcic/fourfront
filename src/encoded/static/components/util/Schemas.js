@@ -182,6 +182,8 @@ export const Field = {
         if (field.slice(0,5) === 'audit') return null;
         var fieldParts = field.split('.');
 
+        
+
         function getNextSchemaProperties(linkToName){
 
             function combineSchemaPropertiesFor(relatedLinkToNames){
@@ -205,7 +207,6 @@ export const Field = {
             var property = propertiesObj[fieldParts[fieldPartIndex]];
             if (fieldPartIndex >= fieldParts.length - 1) return property;
             var nextSchemaProperties = null;
-            //console.log(propertiesObj, fieldParts, fieldPartIndex);
             if (property.type === 'array' && property.items && property.items.linkTo){
                 nextSchemaProperties = getNextSchemaProperties(property.items.linkTo);
             } else if (property.type === 'array' && property.items && property.items.linkFrom){
@@ -214,6 +215,8 @@ export const Field = {
                 nextSchemaProperties = getNextSchemaProperties(property.linkTo);
             } else if (property.linkFrom) {
                 nextSchemaProperties = getNextSchemaProperties(property.linkFrom);
+            } else if (property.type === 'object'){ // Embedded
+                nextSchemaProperties = property.properties;
             }
 
             if (nextSchemaProperties) return getProperty(nextSchemaProperties, fieldPartIndex + 1);

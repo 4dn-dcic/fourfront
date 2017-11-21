@@ -14,50 +14,6 @@ import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 
 export default class BiosampleView extends ItemBaseView {
 
-    getFilesTabs(width){
-        var context = this.props.context;
-        
-        /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
-        var expTableColumnHeaders = [
-        ];
-
-        
-
-        var tabs = [];
-
-        if (Array.isArray(context.files) && context.files.length > 0) {
-            
-            tabs.push({
-                tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
-                key : 'raw-files',
-                content : <RawFilesTableSection
-                    rawFiles={context.files}
-                    width={width}
-                    {..._.pick(this.props, 'context', 'schemas')}
-                    {...this.state}
-                />
-            });
-
-        }
-
-        if (Array.isArray(context.processed_files) && context.processed_files.length > 0) {
-            
-            tabs.push({
-                tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
-                key : 'processed-files',
-                content : <ProcessedFilesTableSection
-                    processedFiles={context.processed_files}
-                    width={width}
-                    {..._.pick(this.props, 'context', 'schemas')}
-                    {...this.state}
-                />
-            });
-
-        }
-
-        return tabs;
-    }
-
     getTabViewContents(){
 
         var initTabs = [];
@@ -144,7 +100,7 @@ class BiosampleViewOverview extends React.Component {
     static getTabObject(context, schemas, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
-            'key' : 'experiments-info',
+            'key' : 'biosample-info',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (
                 <div className="overflow-hidden">

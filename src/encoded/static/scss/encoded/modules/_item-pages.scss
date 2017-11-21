@@ -866,17 +866,29 @@ $download-button-width : 100px;
 		color: #999;
 	}
 
-	div.more-details {
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+	div.details-col {
 
-		&.error-message {
-			white-space: pre-line;
-			white-space: normal;
-			opacity: 0.5;
+		&.no-more-details {
+			h5.block-title {
+				margin-top: 8px;
+			}
 		}
+
+		div.more-details {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+	
+			&.error-message {
+				white-space: pre-line;
+				white-space: normal;
+				opacity: 0.5;
+			}
+		}
+
 	}
+
+	
 
 	@include icon-container-child();
 
@@ -961,7 +973,7 @@ $download-button-width : 100px;
 				> .inner {
 					padding: 15px 0 5px;
 
-					> .tooltip-info-container {
+					.tooltip-info-container {
 						> span {
 							> i.icon-info-circle {
 								margin-left: 5px;
@@ -975,8 +987,18 @@ $download-button-width : 100px;
 						font-weight: 500;
 					}
 
-					ol.overview-list-elements-container {
+					ol.overview-list-elements-container,
+					ul.overview-list-elements-container {
 						margin-bottom: 0;
+						padding-left: 30px;
+					}
+
+					a.btn {
+						i.icon-external-link {
+							margin-left: 5px;
+							position: relative;
+							top: 1px;
+						}
 					}
 
 					// Embedded Items w/ Attachments
@@ -1001,10 +1023,7 @@ $download-button-width : 100px;
 						}
 						.view-attachment-button-col {
 							> a.btn {
-								> i.icon-external-link {
-									position: relative;
-									top: 1px;
-								}
+
 							}
 						}
 					}
@@ -1264,7 +1283,7 @@ $download-button-width : 100px;
 
 }
 
-/**** File VIew ****/
+/**** File View ****/
 
 .item-page-container.type-File {
 
@@ -1277,7 +1296,6 @@ $download-button-width : 100px;
 			padding-top: 20px;
 
 			@media screen and (min-width: $screen-md-min){
-				float: right;
 				padding-top: 16px;
 				margin-top: 0;
 				border-top: none;

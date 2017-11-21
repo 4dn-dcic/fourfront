@@ -133,7 +133,9 @@ content_views.register(DefaultItemView, 'Item');
 /** Helper Components */
 export class OverViewBodyItem extends React.Component {
 
+    /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
     static titleRenderPresets = {
+        'default' : function(field, value, jsxAllowed = true, addDescriptionTip = true, index = null ){ return Schemas.Term.toName(field, value, jsxAllowed, addDescriptionTip); },
         'biosample_treatments' : function(field, treatment){
             if (!treatment || !treatment.display_title || !object.atIdFromObject(treatment)){
                 return 'None';
@@ -172,7 +174,7 @@ export class OverViewBodyItem extends React.Component {
     }
 
     /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
-    static createList(items, property, titleRenderFxn, addDescriptionTipForLinkTos, listItemElement, listItemElementProps){
+    static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null){
         if (Array.isArray(items) && items.length > 0 && items[0].display_title && object.atIdFromObject(items[0])){
             items = _.map(_.uniq(items, false, function(b){ return object.atIdFromObject(b); }), function(b,i){
                 if (items.length > 1){
@@ -195,18 +197,24 @@ export class OverViewBodyItem extends React.Component {
     }
 
     static defaultProps = {
-        'titleRenderFxn' : function(field, value, jsxAllowed = true, addDescriptionTip = true, index = null ){ return Schemas.Term.toName(field, value, jsxAllowed, addDescriptionTip); },
+        'titleRenderFxn' : OverViewBodyItem.titleRenderPresets.default,
         'hideIfNoValue' : false,
         'wrapInColumn' : false,
         'addDescriptionTipForLinkTos' : true,
         'listWrapperElement' : 'ol',
         'listWrapperElementProps' : null,
         'listItemElement' : 'li',
-        'listItemElementProps' : null
+        'listItemElementProps' : null,
+        'columnExtraClassName' : null
+    }
+
+    /** Feeds params + props into static function */
+    createList(valueForProperty, listItemElement, listItemElementProps){
+        return OverViewBodyItem.createList(valueForProperty, this.props.property, this.props.titleRenderFxn, this.props.addDescriptionTipForLinkTos, listItemElement, listItemElementProps);
     }
 
     render(){
-        var { result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos, listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps } = this.props;
+        var { result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos, listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps, wrapInColumn, columnExtraClassName } = this.props;
         
         function fallbackify(val){
             return val || fallbackValue || 'None';
@@ -222,7 +230,7 @@ export class OverViewBodyItem extends React.Component {
             listWrapperElement = 'div';
         }
 
-        var resultPropertyValue = OverViewBodyItem.createList(object.getNestedProperty(result, property), property, titleRenderFxn, addDescriptionTipForLinkTos, listItemElement, listItemElementProps);
+        var resultPropertyValue = this.createList( object.getNestedProperty(result, property), listItemElement, listItemElementProps );
 
         if (this.props.hideIfNoValue && (!resultPropertyValue || (Array.isArray(resultPropertyValue) && resultPropertyValue.length === 0))){
             return null;
@@ -235,7 +243,7 @@ export class OverViewBodyItem extends React.Component {
                 <div className="inner" key="inner">
                     <object.TooltipInfoIconContainerAuto
                         {..._.pick(this.props, 'result', 'property', 'tips', 'schemas')}
-                        fallbackTitle={fallbackTitle + (resultPropertyValue && resultPropertyValue.length > 1 ? 's' : '')}
+                        fallbackTitle={fallbackTitle}
                         elementType="h5"
                     />
                     { resultPropertyValue ? ( resultPropertyValue.length > 1 ?
@@ -256,7 +264,9 @@ export class OverViewBodyItem extends React.Component {
             );
         }
 
-        if (this.props.wrapInColumn) return <div className="col-xs-6 col-md-4" key="outer">{ innerBlockReturned }</div>;
+        if (wrapInColumn) return (
+            <div className={(typeof wrapInColumn === 'string' ? wrapInColumn : "col-xs-6 col-md-4") + (columnExtraClassName ? ' ' + columnExtraClassName : '')} key="outer" children={innerBlockReturned} />
+        );
         else return innerBlockReturned;
 
     }

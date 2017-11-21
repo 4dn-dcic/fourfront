@@ -24,10 +24,6 @@ export default class ExperimentView extends WorkflowRunTracingView {
         );
     }
 
-    constructor(props){
-        super(props);
-    }
-
     getFilesTabs(width){
         var context = this.props.context;
         
