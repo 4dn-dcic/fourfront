@@ -28,49 +28,49 @@ class Experiment(Item):
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
     embedded_list = ["award.project",
-                "lab.city",
-                "lab.state",
-                "lab.country",
-                "lab.postal_code",
-                "lab.city",
-                "lab.title",
+                     "lab.city",
+                     "lab.state",
+                     "lab.country",
+                     "lab.postal_code",
+                     "lab.city",
+                     "lab.title",
 
-                "experiment_sets.experimentset_type",
-                "experiment_sets.@type",
-                "experiment_sets.accession",
+                     "experiment_sets.experimentset_type",
+                     "experiment_sets.@type",
+                     "experiment_sets.accession",
 
-                "produced_in_pub.*",
-                "publications_of_exp.*",
+                     "produced_in_pub.*",
+                     "publications_of_exp.*",
 
-                "biosample.accession",
-                "biosample.modifications_summary",
-                "biosample.treatments_summary",
-                "biosample.biosource_summary",
-                "biosample.biosource.biosource_type",
-                "biosample.biosource.cell_line.slim_terms",
-                "biosample.biosource.cell_line.synonyms",
-                "biosample.biosource.tissue.slim_terms",
-                "biosample.biosource.tissue.synonyms",
-                "biosample.biosource.individual.organism.name",
-                'biosample.modifications.modification_type',
-                'biosample.treatments.treatment_type',
+                     "biosample.accession",
+                     "biosample.modifications_summary",
+                     "biosample.treatments_summary",
+                     "biosample.biosource_summary",
+                     "biosample.biosource.biosource_type",
+                     "biosample.biosource.cell_line.slim_terms",
+                     "biosample.biosource.cell_line.synonyms",
+                     "biosample.biosource.tissue.slim_terms",
+                     "biosample.biosource.tissue.synonyms",
+                     "biosample.biosource.individual.organism.name",
+                     'biosample.modifications.modification_type',
+                     'biosample.treatments.treatment_type',
 
-                "files.href",
-                "files.accession",
-                "files.uuid",
-                "files.file_size",
-                "files.upload_key",
-                "files.file_format",
-                "files.file_classification",
-                "files.paired_end",
+                     "files.href",
+                     "files.accession",
+                     "files.uuid",
+                     "files.file_size",
+                     "files.upload_key",
+                     "files.file_format",
+                     "files.file_classification",
+                     "files.paired_end",
 
-                "processed_files.href",
-                "processed_files.accession",
-                "processed_files.uuid",
-                "processed_files.file_size",
-                "processed_files.upload_key",
-                "processed_files.file_format",
-                "processed_files.file_classification"]
+                     "processed_files.href",
+                     "processed_files.accession",
+                     "processed_files.uuid",
+                     "processed_files.file_size",
+                     "processed_files.upload_key",
+                     "processed_files.file_format",
+                     "processed_files.file_classification"]
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
@@ -241,8 +241,8 @@ class ExperimentCaptureC(Experiment):
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
     embedded_list = Experiment.embedded_list + ["digestion_enzyme.name",
-                                      "targeted_regions.target.target_summary",
-                                      "targeted_regions.oligo_file.href"]
+                                                "targeted_regions.target.target_summary",
+                                                "targeted_regions.oligo_file.href"]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -276,11 +276,11 @@ class ExperimentCaptureC(Experiment):
     name='experiments-repliseq',
     unique_key='accession',
     properties={
-        'title': 'Experiments Repliseq',
-        'description': 'Listing of Repliseq Experiments',
+        'title': 'Experiments Repli-seq',
+        'description': 'Listing of Repli-seq Experiments',
     })
 class ExperimentRepliseq(Experiment):
-    """The experiment class for Repliseq experiments."""
+    """The experiment class for Repli-seq experiments."""
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
     embedded_list = Experiment.embedded_list
