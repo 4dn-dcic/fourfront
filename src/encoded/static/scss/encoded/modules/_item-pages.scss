@@ -1065,6 +1065,7 @@ $download-button-width : 100px;
 					> div.overview-single-element {
 						&.block {
 							padding: 0;
+							margin-bottom: 0;
 							&:not(.no-value){
 								margin-top: 10px;
 								@include overview-block-value-block;

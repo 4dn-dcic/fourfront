@@ -242,7 +242,7 @@ export class OverViewBodyItem extends React.Component {
 
     render(){
         var { 
-            result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos,
+            result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos, propertyForLabel,
             listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps, wrapInColumn, columnExtraClassName, singleItemClassName
         } = this.props;
         
@@ -267,13 +267,14 @@ export class OverViewBodyItem extends React.Component {
         }
 
         var innerBlockReturned = null;
+        propertyForLabel = propertyForLabel || property;
 
         if (Array.isArray(resultPropertyValue)){
             innerBlockReturned = (
                 <div className="inner" key="inner">
                     <object.TooltipInfoIconContainerAuto
-                        {..._.pick(this.props, 'result', 'property', 'tips', 'schemas')}
-                        fallbackTitle={fallbackTitle}
+                        {..._.pick(this.props, 'result', 'tips', 'schemas', 'fallbackTitle')}
+                        property={propertyForLabel}
                         elementType="h5"
                     />
                     { resultPropertyValue ? ( resultPropertyValue.length > 1 ?
@@ -286,7 +287,7 @@ export class OverViewBodyItem extends React.Component {
         } else {
             innerBlockReturned = (
                 <div className="inner" key="inner">
-                    <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'property', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" />
+                    <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" property={propertyForLabel} />
                         <div key="single-value" className={"overview-single-element" + (singleItemClassName ? ' ' + singleItemClassName : '') + (!resultPropertyValue ? ' no-value' : '')}>
                             { fallbackify(resultPropertyValue) }
                         </div>

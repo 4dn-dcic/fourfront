@@ -3,6 +3,7 @@
 import _ from 'underscore';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Field } from './Schemas';
 
 
 /**
@@ -269,17 +270,23 @@ export class TooltipInfoIconContainerAuto extends React.Component {
 
     render(){
         var { elementType, title, property, result, schemas, tips, fallbackTitle, itemType } = this.props;
-        if (!tips){
-            if (itemType) {
-                tips = tipsFromSchemaByType(schemas, itemType);
-            } else {
-                tips = tipsFromSchema(schemas, result);
+        var schemaProperty = null;
+        var tooltip = null;
+        if (tips){
+            tooltip = (tips && tips[property] && tips[property].description) || null;
+            if (!title) title = (tips && tips[property] && tips[property].title) || null;
+        }
+        if (!title || !tooltip) {
+            try {
+                schemaProperty = Field.getSchemaProperty(property, schemas, itemType || result['@type'][0]);
+            } catch (e){
+                console.warn('Failed to get schemaProperty', itemType, property);
             }
+            tooltip = (schemaProperty && schemaProperty.description) || null;
+            if (!title) title = (schemaProperty && schemaProperty.title) || null;
         }
-        var tooltip = (tips && tips[property] && tips[property].description) || null;
-        if (!title){
-            title = (tips && tips[property] && tips[property].title) || null;
-        }
+        
+        
 
         return <TooltipInfoIconContainer {...this.props} tooltip={tooltip} title={title || fallbackTitle || property} elementType={this.props.elementType} />;
     }
