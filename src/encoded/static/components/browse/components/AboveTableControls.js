@@ -122,7 +122,7 @@ class SelectedFilesDownloadButton extends React.Component {
                     <form method="POST" action="/metadata/type=ExperimentSet&sort=accession/metadata.tsv">
                         <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleObjects())} />
                         <input type="hidden" name="download_file_name" value={JSON.stringify(meta_download_filename)} />
-                        <Button type="submit" name="Download" bsStyle="info" data-tip="Details for each individual file in the 'files.txt' download list below.">
+                        <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual file in the 'files.txt' download list below.">
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
                         </Button>
                         {' '}
@@ -213,7 +213,7 @@ class SelectAllFilesButton extends React.Component {
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button bsStyle="secondary" onClick={this.handleSelect.bind(this, isAllSelected)}>
+                    <Button onClick={this.handleSelect.bind(this, isAllSelected)}>
                         { buttonContent }
                     </Button>
                 </ButtonGroup>
@@ -652,7 +652,7 @@ export class AboveTableControls extends React.Component {
 
         function expandLayoutButton(){
             return (
-                <Button bsStyle="secondary" key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
+                <Button bsStyle="primary" key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')} onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
                     <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'arrows-alt' : 'crop')}></i>
                 </Button>
             );
