@@ -8,7 +8,10 @@
         "protocol_type": "Other",
         "submitted_by": "wrangler@wrangler.com",
         "attachment": "test.pdf",
-        "status": "in review by lab"
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "status": "in review by lab",
+        "tags": ["4DN Standard"]
     },
     {
         "uuid": "132206bc-8535-4448-903e-854af460b244",
@@ -19,6 +22,8 @@
         "protocol_type": "Authentication document",
         "submitted_by": "wrangler@wrangler.com",
         "attachment": "test.pdf",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "status": "in review by lab"
     }
 ]

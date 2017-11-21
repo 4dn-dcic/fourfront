@@ -16,7 +16,7 @@ import { FacetList, ReduxExpSetFiltersInterface, RawFilesStackedTable, Processed
  * @module item-pages/experiment-set-view
  */
 
-
+ 
 /**
  * ExperimentSet Item view/page.
  * 
@@ -92,30 +92,38 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         if (width) width -= 20;
 
-        var tabs = [
-            {
+        var tabs = [];
+
+        // Raw files tab, if have experiments
+        if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0){
+            tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'experiments',
                 content : <RawFilesStackedTableSection
                     width={width}
-                    {..._.pick(this.props, 'context', 'schemas', 'facets', 'expSetFilters')}
+                    context={context}
+                    {..._.pick(this.props, 'schemas', 'facets', 'expSetFilters')}
                     {...this.state}
                 />
-            }
-        ];
+            });
+        }
 
         if (processedFiles && processedFiles.length > 0){
+
+            // Processed Files Table Tab
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
                 content : <ProcessedFilesStackedTableSection
                     processedFiles={processedFiles}
                     width={width}
-                    {..._.pick(this.props, 'context', 'schemas', 'expSetFilters')}
+                    context={context}
+                    {..._.pick(this.props, 'schemas', 'expSetFilters')}
                     {...this.state}
                 />
             });
 
+            // Graph Section Tab
             if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
                 tabs.push(FileViewGraphSection.getTabObject(
                     _.extend({}, this.props, {
@@ -150,22 +158,24 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
     render() {
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
-
+        var context = this.props.context;
         if (this.props.debug) console.log('render ExperimentSet view');
+
+        var experimentsInSetExist = Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0;
 
         return (
             <div className={itemClass}>
 
                 <ExperimentSetHeader {...this.props} />
 
-                <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />
+                <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={context.produced_in_pub} />
 
                 <div className="row">
 
+                    { experimentsInSetExist ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
-                        { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ?
                         <ReduxExpSetFiltersInterface
-                            experimentSets={this.props.context.experiments_in_set}
+                            experimentSets={context.experiments_in_set}
                             itemTypes={['Experiment']}
                             expSetFilters={this.props.expSetFilters}
                             experimentsOrSets="experiments"
@@ -184,10 +194,10 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                                 }
                             />
                         </ReduxExpSetFiltersInterface>
-                        : <div>&nbsp;</div> }
                     </div>
+                    : null }
 
-                    <div className="col-sm-7 col-md-8 col-lg-9" ref="tabViewContainer">
+                    <div className={experimentsInSetExist ? "col-sm-7 col-md-8 col-lg-9" : "col-sm-12"} ref="tabViewContainer">
                         <layout.WindowResizeUpdateTrigger>
                             { this.tabbedView() }
                         </layout.WindowResizeUpdateTrigger>
@@ -305,4 +315,3 @@ export class ProcessedFilesStackedTableSection extends React.Component {
 // Register ExperimentSetView to be the view for these @types.
 globals.content_views.register(ExperimentSetView, 'ExperimentSet');
 globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
-

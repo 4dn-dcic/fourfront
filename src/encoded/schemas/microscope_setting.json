@@ -1,0 +1,47 @@
+{
+    "title": "Microscopy Settings",
+    "description": "Metadata fields required for microscopy files",
+    "id": "/profiles/microscope_setting.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab"],
+    "identifyingProperties": ["uuid", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/status"} ,
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/dbxrefs" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A short description of the labeling path",
+            "type": "string"
+        },
+        "tier_level":{
+            "title": "Microscopy Tier Level",
+            "description": "Tier level for the required metadata for microscopy experiments",
+            "type": "string",
+            "enum":["A1",
+                    "A2",
+                    "D1",
+                    "D2"]
+        }
+    },
+    "facets": {
+        "tier_level": {
+            "title": "Biosource Type"
+        }
+    }
+}

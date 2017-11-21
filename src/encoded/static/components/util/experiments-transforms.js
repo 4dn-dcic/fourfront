@@ -295,6 +295,10 @@ export function allProcessedFilesFromExperiments(experiments){
     }, []);
 }
 
+/**
+ * @param {Object} experiment_set - Representation of ExperimentSet Item
+ * @returns {Object[]} List of ProcessedFile Items, cloned & extended from param expset with '[from_experiment.]from_experiment_set' property.
+ */
 export function allProcessedFilesFromExperimentSet(experiment_set){
 
     // Add in Exp Bio & Tec Rep Nos, if available.

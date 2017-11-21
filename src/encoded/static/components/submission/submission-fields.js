@@ -1,11 +1,12 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import * as globals from '../globals';
 import _ from 'underscore';
-import { ajax, console, object, isServerSide, animateScrollTo } from '../util';
+import { ajax, console, object, isServerSide, animateScrollTo, Schemas } from '../util';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
-import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade} from 'react-bootstrap';
+import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 var ProgressBar = require('rc-progress').Line;
 
@@ -21,6 +22,8 @@ export default class BuildField extends React.Component{
 
     constructor(props){
         super(props);
+        this.wrapWithLabel = this.wrapWithLabel.bind(this);
+        this.wrapWithNoLabel = this.wrapWithNoLabel.bind(this);
         this.state = {
             'dropdownOpen' : false
         };
@@ -40,64 +43,41 @@ export default class BuildField extends React.Component{
 
     displayField = (field_case) => {
         var inputProps = {
-            'id' : this.props.field,
+            'id' : 'field_for_' + this.props.field,
             'disabled' : this.props.disabled || false,
             'ref' : "inputElement",
-            'value' : this.props.value || '',
+            'value' : (typeof this.props.value === 'number' ? this.props.value || 0 : this.props.value || ''),
             'onChange' : this.handleChange,
             'name' : this.props.field,
-            'autoFocus': true,
             'placeholder': "No value"
         };
         switch(field_case){
-            case 'text' : return (
+            case 'text' :
+                if (this.props.field === 'aliases'){
+                    return <div className="input-wrapper"><AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={this.props.currentSubmittingUser} /></div>;
+                }
+                return <FormControl type="text" inputMode="latin" {...inputProps} />;
+            case 'integer'          : return <FormControl type="number" {...inputProps} step={1} />;
+            case 'number'           : return <FormControl type="number" {...inputProps} />;
+            /*
+            case 'boolean' : return (
                 <div className="input-wrapper" style={{'display':'inline'}}>
-                    <input type="text" inputMode="latin" {...inputProps} />
+                    <Checkbox id="boolInput" {...inputProps} />
                 </div>
             );
-            case 'integer' : return (
-                <div className="input-wrapper" style={{'display':'inline'}}>
-                    <input id="intNumber" type="number" inputMode="latin" {...inputProps} />
-                </div>
-            );
-            case 'number' : return (
-                <div className="input-wrapper" style={{'display':'inline'}}>
-                    <input id="floatNumber" type="number" inputMode="latin" {...inputProps} />
-                </div>
-            );
-            case 'enum' : return (
+            */
+            case 'enum'             : return (
                 <span className="input-wrapper" style={{'display':'inline'}}>
-                    <DropdownButton bsSize="xsmall" id="dropdown-size-extra-small" title={this.props.value || "No value"} onToggle={this.handleDropdownButtonToggle}>
+                    <DropdownButton title={this.props.value || <span className="text-300">No value</span>} onToggle={this.handleDropdownButtonToggle}>
                         {this.props.enumValues.map((val) => this.buildEnumEntry(val))}
                     </DropdownButton>
                 </span>
             );
-            case 'linked object' : return (
-                <div style={{'display':'inline-block'}}>
-                    <LinkedObj {...this.props}/>
-                </div>
-            );
-            case 'array' : return (
-                <div style={{'display':'inline'}}>
-                    <ArrayField {...this.props}/>
-                </div>
-
-            );
-            case 'object' : return (
-                <div style={{'display':'inline'}}>
-                    <ObjectField {...this.props}/>
-                </div>
-            );
-            case 'attachment' : return (
-                <div style={{'display':'inline'}}>
-                    <AttachmentInput {...this.props}/>
-                </div>
-            );
-            case 'file upload' : return (
-                <div style={{'display':'inline'}}>
-                    <S3FileInput {...this.props}/>
-                </div>
-            );
+            case 'linked object'    : return <LinkedObj {...this.props}/>;
+            case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} roundTwo={this.props.roundTwo} />;
+            case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
+            case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
+            case 'file upload'      : return <S3FileInput {...this.props} />;
         }
         // Fallback
         return <div>No field for this case yet.</div>;
@@ -119,15 +99,22 @@ export default class BuildField extends React.Component{
     handleChange = (e) => {
         var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var currValue = inputElement.value;
-        if (this.props.fieldType == 'integer'){
-            if(!isNaN(parseInt(currValue))){
-                currValue = parseInt(currValue);
+        if (this.props.fieldType === 'integer'){
+            currValue = parseInt(currValue);
+            if (isNaN(currValue)){
+                currValue = null;
             }
-        } else if (this.props.fieldType == 'number'){
-            if(!isNaN(parseFloat(currValue))){
-                currValue = parseFloat(currValue);
+        } else if (this.props.fieldType === 'number'){
+            currValue = parseFloat(currValue);
+            if (isNaN(currValue)){
+                currValue = null;
             }
         }
+        //console.log('VAL', this.props.nestedField, currValue, this.props.fieldType, this.props.value, this.props.arrayIdx);
+        this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+    }
+
+    handleAliasChange = (currValue) =>{
         this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
     }
 
@@ -139,13 +126,62 @@ export default class BuildField extends React.Component{
 
     // this needs to live in BuildField for styling purposes
     pushArrayValue = (e) => {
-        e.preventDefault();
+        e && e.preventDefault();
         if(this.props.fieldType !== 'array'){
             return;
         }
         var valueCopy = this.props.value ? this.props.value.slice() : [];
-        valueCopy.push(null);
+        if(this.props.schema.items && this.props.schema.items.type === 'object'){
+            // initialize with empty obj in only this case
+            valueCopy.push({});
+        }else{
+            valueCopy.push(null);
+        }
         this.props.modifyNewContext(this.props.nestedField, valueCopy, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+    }
+
+    commonRowProps(){
+        return {
+            'className' : (
+                "field-row" +
+                (this.state.dropdownOpen ? ' active-submission-row' : '') +
+                (this.props.isArray ? ' in-array-field clearfix row'  : '')
+            ),
+            'data-field-type' : this.props.fieldType,
+            'data-field-name' : this.props.field,
+            'style' : { 'overflow' : 'visible' }
+        };
+    }
+
+    labelTypeDescriptor(){
+        return <div className="field-descriptor">{ this.props.required ? <span style={{'color':'#a94442'}}> Required</span> : null }</div>;
+
+    }
+
+    wrapWithLabel(){
+        var { fieldTip, title, fieldType, schema } = this.props;
+        return(
+            <div {...this.commonRowProps()}>
+                <div className="row">
+                    <div className="col-sm-12 col-md-4">
+                        <h5 className="submission-field-title text-ellipsis-container">
+                            { this.labelTypeDescriptor() }
+                            { fieldTip ? [<InfoIcon children={fieldTip} title={title} fieldType={fieldType} schema={schema} />, <span>&nbsp;&nbsp; </span>] : null}
+                            <span>{ title }</span>
+                        </h5>
+                    </div>
+                    <div className="col-sm-12 col-md-8">
+                        <div className="row field-container">
+                            { Array.prototype.slice.call(arguments) }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    wrapWithNoLabel(){
+        return <div {...this.commonRowProps()}>{ Array.prototype.slice.call(arguments) }</div>;
     }
 
     render = () => {
@@ -153,6 +189,8 @@ export default class BuildField extends React.Component{
         // hardcoded fields you can't delete
         var cannot_delete = ['filename'];
         var showDelete = false;
+        var disableDelete = false;
+        var extClass = '';
         // don't show delet button unless:
         // not in hardcoded cannot delete list AND is not an object or
         // non-empty array element (individual values get deleted)
@@ -161,73 +199,50 @@ export default class BuildField extends React.Component{
         }
 
         // if there is no value in the field and non-array, hide delete button
-        if(this.props.value === null && !this.props.isArray){
+        if(
+            isValueNull(this.props.value) && !this.props.isArray
+        ) {
             showDelete = false;
         }
 
-        var rowClassName = "row facet" + (this.state.dropdownOpen ? ' active-submission-row' : '');
+        var wrapFunc = this.wrapWithLabel;
 
-        // array items don't need fieldnames/tooltips
-        if(this.props.isArray){
-            // if we've got an object that's inside inside an array, only allow
-            // the array to be deleted if ALL individual fields are null
-            if(this.props.fieldType === 'object'){
-                var valueCopy = this.props.value ? JSON.parse(JSON.stringify(this.props.value)) : {};
-                var nullItems = Object.keys(valueCopy).filter(item => valueCopy[item] === null);
-                if( Object.keys(valueCopy).length !== nullItems.length){
-                    showDelete = false;
+        var excludeRemoveButton = (this.props.fieldType === 'array' || this.props.fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
+
+        if (this.props.isArray) {
+            // array items don't need fieldnames/tooltips
+            wrapFunc = this.wrapWithNoLabel;
+
+            if (this.props.isLastItemInArray && isValueNull(this.props.value)){
+                showDelete = false;
+                if (Array.isArray(this.props.arrayIdx) && this.props.arrayIdx[0] !== 0) extClass = "last-item-empty";
+            } else if (this.props.fieldType === 'object') {
+                // if we've got an object that's inside inside an array, only allow
+                // the array to be deleted if ALL individual fields are null
+                if (!isValueNull(this.props.value)){
+                    disableDelete = true;
                 }
+                //var valueCopy = this.props.value ? JSON.parse(JSON.stringify(this.props.value)) : {};
+                //var nullItems = _.filter( _.keys(valueCopy), isValueNull);
+                //if( _.keys(valueCopy).length !== nullItems.length){
+                //    showDelete = false;
+                //}
             }
-            return(
-                <div className={rowClassName} style={{'overflow':'visible'}}>
-                    <div className="col-sm-12">
-                        <div>
-                            {this.displayField(this.props.fieldType)}
-                            <Fade in={showDelete}>
-                                <div className="pull-right">
-                                    <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                        {'Remove'}
-                                    </Button>
-                                </div>
-                            </Fade>
-                        </div>
-                    </div>
-                </div>
-            );
         }
-        return(
 
-            <div className={rowClassName} style={{'overflow':'visible'}}>
-                <div className="col-sm-12 col-md-3">
-                    <h5 className="facet-title submission-field-title">
-                        <span style={{'marginRight': '6px'}} className="inline-block">{this.props.title}</span>
-                        <InfoIcon children={this.props.fieldTip}/>
-                        {this.props.required ?
-                            <span style={{'color':'#a94442', "marginRight":"6px"}}>Required</span>
-                            : null
-                        }
-                        {this.props.fieldType === 'array' ?
-                            <Button bsSize="xsmall" onClick={this.pushArrayValue}>
-                                {'Add'}
-                            </Button>
-                            :
-                            null
-                        }
-                    </h5>
+        return wrapFunc(
+            <div className={'field-column col-xs-' + (excludeRemoveButton ? "12": "10") + ' ' + extClass}>
+                {this.displayField(this.props.fieldType)}
+            </div>,
+            excludeRemoveButton ? null : (
+                <div className="col-xs-2 remove-button-column">
+                    <Fade in={showDelete}>
+                        <div className="pull-right remove-button-container">
+                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField}><i className="icon icon-fw icon-times"/></Button>
+                        </div>
+                    </Fade>
                 </div>
-                <div className="col-sm-12 col-md-9">
-                    <div>
-                        {this.displayField(this.props.fieldType)}
-                        <Fade in={showDelete}>
-                            <div className="pull-right">
-                                <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                    {'Remove'}
-                                </Button>
-                            </div>
-                        </Fade>
-                    </div>
-                </div>
-            </div>
+            )
         );
     }
 }
@@ -247,18 +262,19 @@ class LinkedObj extends React.Component{
     componentDidMount(){
         if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
             this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
+            ReactTooltip.rebuild();
         }
     }
 
     componentDidUpdate(){
         if(this.props.keyComplete[this.props.value] && !isNaN(this.props.value)){
             this.props.modifyNewContext(this.props.nestedField, this.props.keyComplete[this.props.value], 'finished linked object', this.props.linkType, this.props.arrayIdx);
+            ReactTooltip.rebuild();
         }
     }
 
     render(){
         var objType = this.props.schema.linkTo;
-        var style={'width':'160px', 'marginRight':'10px'};
         // object chosen or being created
         if(this.props.value){
             var keyDisplay = this.props.keyDisplay;
@@ -266,11 +282,11 @@ class LinkedObj extends React.Component{
             if(isNaN(this.props.value)){
                 thisDisplay = keyDisplay[this.props.value] || this.props.value;
                 return(
-                    <div>
+                    <div className="submitted-linked-object-display-container" data-tip="This Item is already in the database">
                         <a href={this.props.value} target="_blank">
                             <span>{thisDisplay}</span>
-                            <i style={{'paddingLeft':'4px'}} className={"icon icon-external-link"}></i>
                         </a>
+                        &nbsp;<i style={{'marginLeft':'5px', 'fontSize' : '0.85rem'}} className="icon icon-external-link"/>
                     </div>
                 );
             }else{
@@ -283,7 +299,7 @@ class LinkedObj extends React.Component{
                 if(this.props.keyComplete[intKey]){
                     return(
                         <div>
-                            <a href="" onClick={function(e){
+                            <a href="#" onClick={function(e){
                                 e.preventDefault();
                                 var win = window.open(this.props.keyComplete[intKey], '_blank');
                                 if(win){
@@ -299,8 +315,8 @@ class LinkedObj extends React.Component{
                     );
                 }else{
                     return(
-                        <div>
-                            <a href="" onClick={function(e){
+                        <div className="incomplete-linked-object-display-container" data-tip="Continue editing/submitting">
+                            <a href="#" onClick={function(e){
                                 e.preventDefault();
                                 this.props.setSubmissionState('currKey', intKey);
                             }.bind(this)}>
@@ -313,36 +329,88 @@ class LinkedObj extends React.Component{
         }
         // nothing chosen/created yet
         return(
-            <div>
-                <Button bsSize="xsmall" style={style} onClick={function(e){
+            <div className="linked-object-buttons-container">
+                <Button className="select-create-linked-item-button" onClick={function(e){
                     e.preventDefault();
                     this.props.selectObj(objType, this.props.nestedField, this.props.linkType, this.props.arrayIdx);
-                }.bind(this)}>
-                    {'Select existing'}
-                </Button>
-                <Button bsSize="xsmall" style={style}onClick={function(e){
+                }.bind(this)}>Select existing</Button>
+                <Button className="select-create-linked-item-button" onClick={function(e){
                     e.preventDefault();
                     this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, objType);
-                }.bind(this)}>
-                    {'Create new'}
-                </Button>
+                }.bind(this)}>Create new</Button>
             </div>
         );
     }
 }
 
 
-/* Display fields that are arrays. To do this, make a BuildField for each
-object in the value and use a custom render method. initiateArrayField is
-unique to ArrayField, since it needs to update the arrayIdx*/
-
+/**
+ * Display fields that are arrays. To do this, make a BuildField for each
+ * object in the value and use a custom render method. initiateArrayField is
+ * unique to ArrayField, since it needs to update the arrayIdx
+ */
 class ArrayField extends React.Component{
+
+    static typeOfItems(itemSchema){
+        var fieldType = itemSchema.type ? itemSchema.type : "text";
+        // transform some types...
+        if (fieldType === 'string'){
+            fieldType = 'text';
+        }
+        // check if this is an enum
+        if(itemSchema.enum){
+            fieldType = 'enum';
+        }
+        // handle a linkTo object on the the top level
+        if(itemSchema.linkTo){
+            fieldType = 'linked object';
+        }
+        return fieldType;
+    }
+
+    static shouldPushArrayValue(currentArr, field = null){
+        if (!currentArr || 
+            (
+                Array.isArray(currentArr) && (
+                    currentArr.length === 0 || !isValueNull(currentArr[currentArr.length - 1])
+                )
+            )
+        ){
+            if (field !== 'aliases') {
+                return true;
+            } else {
+                if (currentArr && currentArr.length >= 1) return true;
+            }
+        }
+        return false;
+    }
 
     constructor(props){
         super(props);
     }
+    
+    /**
+     * If empty array, add initial 'null' element. On Mount & Update.
+     */
+    componentDidMount(){
+        if (ArrayField.shouldPushArrayValue(this.props.value, this.props.field)){
+            this.props.pushArrayValue();
+        }
+    }
 
-    initiateArrayField = (arrayInfo) => {
+    componentDidUpdate(prevProps, prevState){ // We can't do a comparison of props.value here because parent property mutates yet stays part of same obj.
+        if (ArrayField.shouldPushArrayValue(this.props.value, this.props.field)){
+            this.props.pushArrayValue();
+        } else {
+            if (Array.isArray(this.props.value) && this.props.value.length >= 2){
+                if (isValueNull(this.props.value[this.props.value.length - 1]) && isValueNull(this.props.value[this.props.value.length - 2])){
+                    this.props.modifyNewContext(this.props.nestedField, null, ArrayField.typeOfItems(this.props.schema.items || {}), this.props.linkType, [this.props.value.length - 2]);
+                }
+            }
+        }
+    }
+    
+    initiateArrayField = (arrayInfo, index, allItems) => {
         var value = arrayInfo[0] || null;
         var fieldSchema = arrayInfo[1];
         // use arrayIdx as stand-in value for field
@@ -352,29 +420,9 @@ class ArrayField extends React.Component{
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
         var title = fieldSchema.title || 'Item';
-        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
-        var enumValues = [];
-        // transform some types...
-        if(fieldType == 'string'){
-            fieldType = 'text';
-        }
-        // check if this is an enum
-        if(fieldSchema.enum){
-            fieldType = 'enum';
-            enumValues = fieldSchema.enum;
-        }
-        // handle a linkTo object on the the top level
-        if(fieldSchema.linkTo){
-            fieldType = 'linked object';
-        }
-        var style = {};
-        // stripe every other item for ease of visibility
-        if(arrayIdx % 2 == 0){
-            style.backgroundColor = '#f4f4f4';
-        }else{
-            style.backgroundColor = '#fff';
-            style.border = "1px solid #ccc";
-        }
+        var fieldType = ArrayField.typeOfItems(fieldSchema);
+        var enumValues = fieldSchema.enum ? (fieldSchema.enum || []) : []; // check if this is an enum
+
         var arrayIdxList;
         if(this.props.arrayIdx){
             arrayIdxList = this.props.arrayIdx.slice();
@@ -383,60 +431,55 @@ class ArrayField extends React.Component{
         }
         arrayIdxList.push(arrayIdx);
         return(
-            <div key={arrayIdx} style={style}>
+            <div key={arrayIdx} className={"array-field-container " + (arrayIdx % 2 === 0 ? 'even' : 'odd')} data-field-type={fieldType}>
                 <BuildField
                     value={value}
                     schema={fieldSchema}
-                    field={this.props.field}
                     fieldType={fieldType}
                     fieldTip={fieldTip}
                     title={title}
                     enumValues={enumValues}
                     disabled={false}
-                    modifyNewContext={this.props.modifyNewContext}
                     required={false}
-                    linkType={this.props.linkType}
-                    selectObj={this.props.selectObj}
                     arrayIdx={arrayIdxList}
-                    nestedField={this.props.nestedField}
                     isArray={true}
-                    keyDisplay={this.props.keyDisplay}
-                    keyComplete={this.props.keyComplete}
-                    setSubmissionState= {this.props.setSubmissionState}
-                    updateUpload={this.props.updateUpload}
-                    upload={this.props.upload}
-                    uploadStatus={this.props.uploadStatus}
-                    md5Progress={this.props.md5Progress}
+                    isLastItemInArray={allItems.length - 1 === index}
+                    { ..._.pick(this.props, 'field', 'modifyNewContext', 'linkType', 'selectObj',
+                        'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState',
+                        'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo') }
                 />
+            </div>
+        );
+    }
+
+    generateAddButton(){
+        var values = this.props.value || [];
+        return (
+            <div className="add-array-item-button-container">
+                <Button bsSize={values.length > 0 ? 'small' : null} onClick={this.props.pushArrayValue}><i className="icon icon-fw icon-plus"/> Add</Button>
             </div>
         );
     }
 
     render(){
         var schema = this.props.schema.items || {};
-        var value = this.props.value || [];
-        var arrayInfo = [];
-        for(var i=0; i<value.length; i++){
-            arrayInfo.push([value[i], schema, i]);
-        }
+        var values = this.props.value || [];
+        var valuesToRender = _.map( values.length === 0 ? [null] : values , function(v,i){ return [v, schema, i]; });
+        var showAddButton = !isValueNull(values[valuesToRender.length - 1]);
+
         return(
-            <div>
-                {this.props.value ?
-                    <div>
-                        {arrayInfo.map((entry) => this.initiateArrayField(entry))}
-                    </div>
-                    :
-                    null
-                }
+            <div className="list-of-array-items">
+                { valuesToRender.map(this.initiateArrayField) }
+                { showAddButton ? this.generateAddButton() : null }
             </div>
         );
     }
 }
 
-/*
-Builds a field that represents a sub-object. Essentially serves to hold
-and coordinate BuildFields that correspond to the fields within the subfield.
-*/
+/**
+ * Builds a field that represents a sub-object. Essentially serves to hold
+ * and coordinate BuildFields that correspond to the fields within the subfield.
+ */
 class ObjectField extends React.Component{
 
     constructor(props){
@@ -482,7 +525,7 @@ class ObjectField extends React.Component{
         var title = fieldSchema.title || field;
         var fieldValue;
         if(this.props.value){
-            fieldValue = this.props.value[field] || null;
+            fieldValue = this.props.value[field];
         }else{
             fieldValue = null;
         }
@@ -550,11 +593,11 @@ class ObjectField extends React.Component{
     }
 }
 
-/*
-For version 1. A simple local file upload that gets the name, type,
-size, and b64 encoded stream in the form of a data url. Upon successful
-upload, adds this information to NewContext
-*/
+/**
+ * For version 1. A simple local file upload that gets the name, type,
+ * size, and b64 encoded stream in the form of a data url. Upon successful
+ * upload, adds this information to NewContext
+ */
 class AttachmentInput extends React.Component{
 
     constructor(props){
@@ -617,17 +660,13 @@ class AttachmentInput extends React.Component{
         }
         var labelStyle = {
             'paddingRight':'5px',
-            'paddingTop':'1px',
-            'paddingBottom':'1px',
-            'paddingLeft':'5px',
-            'marginBottom':'0px',
-            'fontWeight':'400'
+            'paddingLeft':'5px'
         };
         return(
             <div style={{'display': 'inherit'}}>
-                <input id={this.props.field} type='file' onChange={this.handleChange} style={{'display':'none'}} accept={this.acceptedTypes()}/>
-                <Button bsSize="xsmall" style={{'padding':'0px'}}>
-                    <label htmlFor={this.props.field} style={labelStyle}>
+                <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} style={{'display':'none'}} accept={this.acceptedTypes()}/>
+                <Button>
+                    <label className="text-400 mb-0" htmlFor={"field_for_" + this.props.field} style={labelStyle}>
                         {attach_title}
                     </label>
                 </Button>
@@ -636,11 +675,11 @@ class AttachmentInput extends React.Component{
     }
 }
 
-/*
-Input for an s3 file upload. Context value set is local value of the filename.
-Also updates this.state.file for the overall component. Runs file uploads
-async using the upload_manager passed down in props.
-*/
+/**
+ * Input for an s3 file upload. Context value set is local value of the filename.
+ * Also updates this.state.file for the overall component. Runs file uploads
+ * async using the upload_manager passed down in props.
+ */
 class S3FileInput extends React.Component{
 
     constructor(props){
@@ -776,21 +815,18 @@ class S3FileInput extends React.Component{
                 statusTip = 'Previous file: ' + this.props.value;
             }
         }
+        console.log('S3FILEINPUT', this.props.md5Progress, this.props.upload);
         var disableFile = this.props.md5Progress !== null || this.props.upload !== null;
         return(
             <div>
                 <div>
-                    <input id={this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
+                    <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
                     <Button disabled={disableFile} style={{'padding':'0px'}}>
-                        <label htmlFor={this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}>
-                            {filename_text}
-                        </label>
+                        <label children={filename_text} className="text-400" htmlFor={"field_for_" + this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}/>
                     </Button>
                     <Fade in={showDelete}>
                         <div className="pull-right">
-                            <Button bsSize="xsmall" bsStyle="danger" style={{'width':'80px'}} disabled={!showDelete} onClick={this.deleteField}>
-                                {'Remove'}
-                            </Button>
+                            <Button tabIndex={2} bsStyle="danger" disabled={!showDelete} onClick={this.deleteField}><i className="icon icon-fw icon-times"/></Button>
                         </div>
                     </Fade>
                 </div>
@@ -834,16 +870,169 @@ class S3FileInput extends React.Component{
     }
 }
 
-class InfoIcon extends React.Component{
+/**
+ * Accepts a 'value' prop (which should contain a colon, at minimum) and present two fields for modifying its two parts.
+ *
+ * First part is name of a "submits_for" lab, second part is any custom string identifier.
+ * Present a drop-down for submit_for lab selection, and text input box for identifier.
+ * On change of either inputs, calls 'onAliasChange' function callback, passing the new modified value (including colon) as parameter.
+ */
+export class AliasInputField extends React.Component {
+
+    static propTypes = {
+        'value' : PropTypes.string.isRequired,
+        'onAliasChange' : PropTypes.func.isRequired,
+        'currentSubmittingUser' : PropTypes.shape({
+            'submits_for' : PropTypes.arrayOf(PropTypes.shape({
+                'name' : PropTypes.string,
+                'display_title' : PropTypes.string
+            }))
+        }).isRequired,
+        'errorMessage' : PropTypes.string // String or null
+    }
+
+    static defaultProps = {
+        'value' : ':'
+    }
+
+    static splitInTwo(str){
+        var parts = (str || ':').split(':');
+        if (parts.length > 2){
+            return [ parts[0], parts.slice(1).join(':') ];
+        }
+        return parts;
+    }
 
     constructor(props){
-        super(props);
+        super(props); // Inherits this.onHide() function.
+        this.onAliasSecondPartChange = this.onAliasSecondPartChange.bind(this);
+        this.onAliasFirstPartChange = this.onAliasFirstPartChange.bind(this);
+    }
+
+    getInitialSubmitsForPart(){
+        var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
+        if (submits_for_list && submits_for_list.length >= 1){
+            return submits_for_list[0].name;
+        }
+        return null;
+    }
+
+    finalizeAliasPartsChange(aliasParts){
+        // Also check to see if need to add first or second part, e.g. if original value passed in was '' or null.
+        if (!aliasParts[0]) {
+            aliasParts[0] = this.getInitialSubmitsForPart();
+        }
+        if (aliasParts.length === 1){
+            aliasParts[1] = '';
+        }
+        this.props.onAliasChange(aliasParts.join(':'));
+    }
+
+    onAliasFirstPartChange(evtKey, e){
+        e.preventDefault();
+        var firstPartOfAlias = evtKey;
+        var aliasParts = AliasInputField.splitInTwo(this.props.value);
+        aliasParts[0] = firstPartOfAlias;
+        this.finalizeAliasPartsChange(aliasParts);
+    }
+
+    onAliasSecondPartChange(e){
+        e.preventDefault();
+        var secondPartOfAlias = e.target.value;
+        var aliasParts = AliasInputField.splitInTwo(this.props.value);
+        aliasParts[1] = secondPartOfAlias;
+        this.finalizeAliasPartsChange(aliasParts);
+    }
+
+    render(){
+        var firstPartSelect = null;
+        var parts = AliasInputField.splitInTwo(this.props.value);
+        var submits_for_list = (this.props.currentSubmittingUser && Array.isArray(this.props.currentSubmittingUser.submits_for) && this.props.currentSubmittingUser.submits_for.length > 0 && this.props.currentSubmittingUser.submits_for) || null;
+        if (submits_for_list && submits_for_list.length === 1){
+            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ submits_for_list[0].name }</InputGroup.Addon>;
+        } else if (submits_for_list.length > 1){
+            firstPartSelect = (
+                <DropdownButton
+                    className="alias-lab-select form-control"
+                    onSelect={this.onAliasFirstPartChange}
+                    componentClass={InputGroup.Button}
+                    id="aliasFirstPartInput"
+                    title={(parts.length > 1 && (
+                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right">{ (parts[0] || this.getInitialSubmitsForPart()) }</span></span>
+                    )) || 'Select a Lab'}
+                >
+                    { _.map(submits_for_list, function(lab){
+                        return <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>;
+                    }) }
+                </DropdownButton>
+            );
+        }
+        return (
+            <FormGroup className="mb-0" validationState={this.props.errorMessage ? 'error' : null}>
+                <InputGroup>
+                    { firstPartSelect }
+                    { firstPartSelect ? <InputGroup.Addon className="colon-separator">:</InputGroup.Addon> : null}
+                    <FormControl
+                        id="aliasInput"
+                        type="text"
+                        inputMode="latin"
+                        value={parts[1] || ''}
+                        autoFocus={this.props.withinModal && !parts[1] ? true : false}
+                        placeholder="Type in a new identifier"
+                        onChange={this.onAliasSecondPartChange}
+                    />
+                </InputGroup>
+                <FormControl.Feedback />
+            </FormGroup>
+        );
+    }
+
+}
+
+class InfoIcon extends React.Component{
+
+    fieldTypeDescriptor(){
+        if (typeof this.props.fieldType !== 'string' || this.props.fieldType.length === 0) return null;
+        
+        var type = Schemas.Term.capitalizeSentence(this.props.fieldType === 'array' ? ArrayField.typeOfItems(this.props.schema.items) : this.props.fieldType);
+        if (this.props.fieldType === 'array'){
+            type = type + ' <span class="array-indicator">[]</span>';
+        }
+        return type;
+
     }
 
     render() {
-        if (!this.props.children) return null;
+        if (!this.props.children || typeof this.props.children !== 'string') return null;
+        var tip = this.props.children;
+        if (typeof this.props.title === 'string' && this.props.title.length){
+            tip = '<h5 class="mt-03 mb-05 text-600">' + this.props.title + '</h5>' + tip;
+        }
+        if (typeof this.props.fieldType === 'string' && this.props.fieldType.length){
+            tip += '<h6 class="mt-07 text-300">Field Type: <span class="text-400">' + this.fieldTypeDescriptor() + '</span></h6>';
+        }
         return (
-            <i style={{"marginRight":"6px",'marginLeft':'0px'}} className="icon icon-info-circle" data-tip={this.props.children}/>
+            <i className="icon icon-info-circle" data-tip={tip} data-html/>
         );
     }
+}
+
+export function isValueNull(value){
+    if (value === null) return true;
+    if (typeof value === 'undefined') return true;
+    if (typeof value === 'number') return false;
+    if (value === '') return true;
+    if (Array.isArray(value)){
+        if (value.length === 0) return true;
+        else if (_.every(value, isValueNull)) {
+            return true;
+        }
+        else return false;
+    }
+    if (typeof value === 'object'){
+        var keys = _.keys(value);
+        if (keys.length === 0) return true;
+        else if ( _.every(keys, function(k){ return isValueNull(value[k]); }) ) return true;
+    }
+    return false;
 }

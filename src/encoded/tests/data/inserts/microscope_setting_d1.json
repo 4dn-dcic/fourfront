@@ -1,0 +1,33 @@
+[
+    {
+        "description": "Test microscope tier D1 info",
+        "tier_level": "D1",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "award": "1U01CA200059-01",
+        "uuid": "47e82a90-49e5-4c33-afab-9ec90d62a001",
+        "image_pixel_size":6.5,
+        "image_z_step":0.1,
+        "image_channel_encoding":"xyztc",
+        "microscope_model":"Leica SP5",
+        "objective_model":"Plan-Apochromat 100x/1.40 Oil M27",
+        "objective_na":1.40,
+        "objective_magnification":100,
+        "microscope_modality": "confocal",
+
+        "ch00_light_source_type": "laser",
+        "ch00_light_source_model":"Leica argon laser 1XX",
+        "ch00_light_source_center_wl": 406,
+        "ch00_detector_type": "spectral detector",
+
+        "ch01_light_source_type":"laser",
+        "ch01_light_source_model":"Leica argon laser 1XX",
+        "ch01_light_source_center_wl":510,
+        "ch01_detector_type":"spectral detector",
+
+        "ch02_light_source_type":"laser",
+        "ch02_light_source_model":"Leica argon laser 1XX",
+        "ch02_light_source_center_wl":600,
+        "ch02_detector_type":"spectral detector"
+    }
+]

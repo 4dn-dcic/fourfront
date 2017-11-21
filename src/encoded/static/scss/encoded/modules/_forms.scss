@@ -598,3 +598,556 @@ div.fieldset.editable-fields {
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
     right: 0px;
 }
+
+
+
+
+
+
+
+
+/***************************************************
+*********** Submission & Edit View	****************
+****************************************************/
+
+// FOR REUSE ELSEWHERE LATER - FILLS HEIGHT OF RELATIVE CONTAINER
+@mixin vertically-centered-content-button {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 56px;
+	text-align: center;
+	color: #333;
+	transition: background-color .5s;
+	&:hover {
+		cursor: pointer;
+		color: #000;
+	}
+	> i.icon {
+		font-size: 1.25rem;
+		position: absolute;
+		top: 50%;
+		margin-top: -9px;
+		left: 50%;
+		margin-left: -7px;
+	}
+}
+
+
+
+
+// Alias Input Multi-Field
+@mixin alias-input-fields {
+	.input-group {
+		.dropdown.input-group-btn {
+			width: 20%;
+			> button#aliasFirstPartInput {
+				width: 100%;
+				border-right: none;
+				box-shadow: none;
+				outline: none;
+				padding-left: 24px;
+				padding-right: 8px;
+				span.caret {
+					opacity: 0.33;
+					left: 10px;
+					right: unset;
+				}
+				small.pull-left {
+					margin-top: 2px;
+					opacity: 0.5;
+				}
+			}
+			&:hover, &:focus, &:active, &.focus, &.active {
+				> button {
+					span.caret {
+						opacity: 1;
+					}
+					small.pull-left {
+						margin-top: 2px;
+						opacity: 1;
+					}
+				}
+			}
+		}
+		.input-group-addon.alias-lab-single-option {
+			background: #fff;
+			padding-left: 24px;
+			padding-right: 5px;
+		}
+		.input-group-addon.colon-separator {
+			font-weight: 700;
+			border-left: none;
+			border-right: none;
+			background-color: #fff;
+			padding-left: 3px;
+			padding-right: 3px;
+			& + input{
+				border-left: none;
+				padding-left: 8px;
+				&:focus {
+					border-color: #aaa;
+					box-shadow: inset -2px 1px 1px rgba(0,0,0,0.075), 3px 0 8px rgba(0,0,0,0.1);
+				}
+			}
+		}
+	}
+}
+
+// Modal forms
+
+.submission-view-modal {
+	.modal-content {
+		.input-wrapper {
+			@include alias-input-fields;
+		}
+	}
+}
+
+.submission-view-page-container {
+	.warning-banner {
+		border-top: 1px solid #eee;
+		color: #606060;
+		position: relative;
+		line-height: 1.25rem;
+		> .row > div {
+			padding-top: 12px;
+			padding-bottom: 12px;
+		}
+		// CANCEL, VALIDATE, SUBMIT BUTTONS
+		.action-buttons-container {
+			position: relative;
+			z-index: 5;
+			> button {
+				min-width: 100px;
+				&:not(:last-child){
+					margin-right: 10px;
+				}
+			}
+			button[disabled]{
+				pointer-events: all;
+			}
+		}
+	}
+
+	// SECTION TITLES
+	.form-section-heading {
+		font-size: 1.125rem;
+		font-weight: 500;
+		margin-top: 10px;
+		padding-bottom: 8px;
+		border-bottom: 1px solid #ccc;
+		color: #333;
+	}
+
+	// TITLES
+	.crumbs-title {
+
+		min-height: 75px;
+
+		.submission-working-title {
+			font-weight: 400;
+			font-size: 1.45rem;
+			transform-origin: 0 50%;
+			transition: transform .5s, opacity 0.5s;
+			> span {
+				/*
+				> span, > i {
+					vertical-align: middle;
+				}
+				*/
+				.working-subtitle {
+					font-weight: 300;
+					color: #777;
+					padding-right: 1px;
+				}
+				> i.icon {
+					margin-right: 3px;
+					font-size: 1.2rem;
+					transform: rotate3d(0,1,0,180deg);
+					margin-top: 0;
+					opacity: 0.5;
+					margin-left: -25px;
+				}
+			}
+		}
+
+		.title-crumb {
+
+			.next-property-name {
+				color: #777;
+				font-weight: 400;
+				font-size: 1rem;
+				transition: opacity .3s;
+				margin-top: -2px;
+				/* display: inline-block; */
+				margin-right: 5px;
+				position: relative;
+				top: -1px;
+				display: block;
+				margin-top: -18px;
+
+			}
+			
+			&.mid-title {
+				.submission-working-title {
+					> span {
+						cursor: pointer;
+					}
+					opacity: 0.75;
+					transform: scale3d(0.8, 0.8, 1) translate3d(0px, -3px, 0px);
+					i.icon-caret-right {
+						opacity: 0.5;
+					}
+					
+					&:hover {
+						opacity: 1;
+						i.icon-caret-right {
+							opacity: 1;
+						}
+					}
+					
+				}
+				&.depth-level-0 {
+					.submission-working-title {
+						.working-subtitle {
+							color: #000;
+						}
+					}
+				}
+			}
+			&.last-title {
+				.submission-working-title {
+					font-weight: 500;
+					transform: translate3d(0px, 0px, 0px);
+				}
+			}
+
+			@for $i from 0 through 4 {
+				&.depth-level-#{$i} {
+					padding-left: 20px * $i;
+				}
+			}
+
+		}
+
+		
+
+	}
+
+	
+
+	// INNER FIELDS AREA
+	.form-fields-container,
+	.round-two-panel {
+
+		.submission-field-header {
+			border-bottom: 1px solid #ccc;
+			padding-bottom: 8px;
+			margin-bottom: 0px;
+			margin-top: 10px;
+			> button {
+				margin-right: 10px;
+				margin-top: -2px;
+				line-height: 19px;
+				border: none;
+			}
+		}
+
+		div.field-row {
+			position: relative;
+			&:hover {
+				z-index: 100;
+			}
+			&:not(:last-child){
+				border-bottom: 1px solid #eee;
+			}
+
+			.field-container {
+				min-height: 50px;
+				padding-top: 8px;
+				padding-bottom: 8px;
+				display: flex;
+
+				.submitted-linked-object-display-container,
+				.incomplete-linked-object-display-container,
+				.notice-message {
+					padding-top: 8px;
+					padding-bottom: 8px;
+				}
+
+				.notice-message {
+					color: #999;
+				}
+
+			}
+
+			.submission-field-title {
+				margin: 0 !important;
+				font-weight: 500;
+				padding-top: 18px;
+				@media screen and (min-width: $screen-md-min) {
+					text-align: right;
+				}
+
+				.field-descriptor {
+					position: absolute;
+					top: 4px;
+					font-size: 0.825rem;
+					color: rgba(0,0,0,0.25);
+					transition: color .5s; 
+					font-weight: 400;
+					.array-indicator {
+						margin-left: 2px;
+						opacity: 0.75;
+					}
+				}
+
+				.add-array-item-button {
+					margin-top: -2px;
+					margin-bottom: -2px;
+					margin-left: 6px;
+				}
+
+				i.icon-info-circle {
+					color: rgba(0,0,0,0.15);
+					transition: color .5s;
+				}
+			}
+
+			&:hover {
+				> .row > .col-md-4 {
+					.submission-field-title {
+						.field-descriptor {
+							color: rgba(0,0,0,0.66);
+						}
+					}
+					i.icon-info-circle {
+						color: rgba(0,0,0,1);
+					}
+				}
+			}
+
+			.field-column {
+				flex: 1;
+				opacity: 1;
+				transition: opacity 0.33s;
+				&.last-item-empty:not(:hover) {
+					opacity: 0.5;
+				}
+			}
+
+			.remove-button-column {
+				padding-left: 0;
+				width: 45px;
+				float: right;
+				.remove-button-container {
+					width: 100%;
+					> button {
+						width: 100%;
+						font-weight: 400;
+						padding-left: 5px;
+						padding-right: 5px;
+					}
+				}
+			}
+
+			button:not(.btn-xs):not(.btn-sm):not(.btn-large):not(.btn-xlarge){
+				height: 34px;
+				padding-bottom: 7px;
+			}
+
+			
+
+			// Override array-containing field style to have no padding as it recursively will render field items with their own padding (so don't double-pad).
+			&[data-field-type="array"] {
+				> div > div > .row.field-container {
+					padding-top: 0;
+					padding-bottom: 0;
+
+					// Fields containing arrays
+					.array-field-container {
+						min-height: 50px;
+
+						&:not(:last-child){
+							border-bottom: 1px dotted #f4f4f4;
+							&[data-field-type="object"]{
+								border-bottom: 2px solid #f4f4f4;
+							}
+						}
+
+						// Row in field of in-array object rows
+						.in-array-field {
+
+							padding-top: 8px;
+							padding-bottom: 8px;
+							display: flex;
+							
+							&[data-field-type="object"] {
+								padding-top: 0;
+								padding-bottom: 0;
+								
+								> .field-column {
+									 > div > div > .field-row {
+										.submission-field-title {
+											padding-top: 18px;
+										}
+										.field-container {
+											.linked-object-buttons-container {
+												display: flex;
+												> button.select-create-linked-item-button {
+													flex: 1;
+													&:last-child {
+														margin-right: 0;
+													}
+												}
+											}
+										}
+										
+									}
+								}
+
+								> .remove-button-column {
+									padding-top: 8px;
+									padding-left: 8px;
+									width: 53px;
+									border-left: 1px solid #eee;
+								}
+							}
+
+						}
+					}
+
+					.add-array-item-button-container {
+						padding-top: 8px;
+						padding-bottom: 8px;
+						padding-right: 10px;
+						> button {
+							padding-left: 9px;
+							font-weight: 400;
+							> i {
+								position: relative;
+								top: 1px;
+							}
+							&.btn-sm {
+								padding-top: 6px;
+								padding-bottom: 4px;
+							}
+						}
+					}
+
+				}
+			}
+
+			// Override aliases field style re: AliasInputField
+			&[data-field-name="aliases"]{
+				.input-wrapper {
+					@include alias-input-fields;
+					.dropdown.input-group-btn {
+						width: 30% !important;
+					}
+				}
+			}
+
+			.linked-object-buttons-container {
+				display: flex;
+				.select-create-linked-item-button {
+					width: 160px;
+					margin-right: 10px;
+					&:last-child {
+						margin-right: 0;
+					}
+					flex: 1;
+				}
+			}
+
+		}
+
+	}
+
+	// NAV TREE
+	.submission-view-navigation-tree {
+
+		.submission-nav-leaf {
+			width: 100%;
+			> div > button {
+				border: none;
+				border-radius: 0px;
+				width: 20px;
+				height: 19px;
+				opacity: 1 !important;
+			}
+		}
+
+		.submission-nav-leaf.linked-item-title {
+
+			> .inner-title { // Item Name
+				margin-left: -15px;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				font-size: 0.8rem;
+				border: 1px solid transparent;
+				
+				&.pre-existing {
+					background-color: #4c994c;
+				}
+				&.not-complete {
+					background-color: #fcd19c;
+				}
+				&.complete-not-validated {
+					background-color: #acd1ec;
+				}
+				&.failed-validation {
+					background-color: #e2b6b6;
+				}
+				&.validated {
+					background-color: #b7e1bb;
+				}
+			}
+			
+			> .list-of-properties {
+				padding-left: 15px;
+				> .submission-nav-leaf.linked-item-type-name {
+					> .inner-title { // Item Type
+
+					}
+					> .children-container {
+
+					}
+				}
+			}
+
+			&.leaf-depth-0 {
+				> .inner-title {
+					margin-left: 0;
+				}
+			}
+		}
+		
+	}
+}
+
+// SUBMISSION STUFF
+
+
+
+
+.submission-pop-icon{
+	background-color: #fff;
+	padding: 1px 5px;
+	a:hover, a:active {
+		text-decoration: none !important;
+		color: #000000;
+	}
+	a{
+		padding: 3px 5px 0px 5px;
+	}
+}
+
+
+.submission-hidden-nav{
+	display: none;
+}
+

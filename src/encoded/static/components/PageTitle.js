@@ -19,15 +19,8 @@ var TITLE_PATHNAME_MAP = {
     '/search/' : {
         'title' : 'Search',
         'calloutTitle' : function(pathName, context){
-            var thisType = _.pluck(_.filter(context.filters || [], function(o){
-                if (o.field === 'type' && o.term !== 'Item') return true;
-                return false;
-            }), 'term')[0] || null;
-            if (thisType){
-                var thisTypeTitle = Schemas.getTitleForType(thisType);
-                return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>for</small> { thisTypeTitle }</span>: 'Search';
-                //return thisTypeTitle || null;
-            }
+            var thisTypeTitle = getSchemaTypeFromSearchContext(context);
+            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>for</small> { thisTypeTitle }</span>: null;
         }
     },
     '/health' : {
@@ -55,6 +48,17 @@ var TITLE_PATHNAME_MAP = {
 
 // Duplicates
 TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP['/'];
+
+export function getSchemaTypeFromSearchContext(context){
+    var thisType = _.pluck(_.filter(context.filters || [], function(o){
+        if (o.field === 'type' && o.term !== 'Item') return true;
+        return false;
+    }), 'term')[0] || null;
+    if (thisType){
+        return Schemas.getTitleForType(thisType);
+    }
+    return null;
+}
 
 export default class PageTitle extends React.Component {
 
@@ -91,6 +95,35 @@ export default class PageTitle extends React.Component {
             currentPathName = currentHrefParts.pathname;
         }
 
+        /**** Pre-mapping overrides ****/
+
+        // For Edit, Create, Add titles:
+        if (currentHrefParts.hash && currentHrefParts.hash.length > 1 && (object.isAnItem(context) || currentPathName.indexOf('/search/') > -1)){
+            if (currentHrefParts.hash === '#!edit'){
+                return {
+                    'title' : "Editing",
+                    'calloutTitle' : object.itemUtil.getTitleStringFromContext(context) // We can only edit on current context, so this should always be correct/relevant context.
+                };
+            }
+
+            if (currentHrefParts.hash === '#!create') {
+                return {
+                    'title' : "Creating",
+                    'calloutTitle' : Schemas.getItemTypeTitle(context, schemas) // Create is called from current item view.
+                };
+            }
+
+            if (currentHrefParts.hash === '#!add') {
+                return {
+                    'title' : "Creating",
+                    'calloutTitle' : (currentPathName.indexOf('/search/') > -1 ? getSchemaTypeFromSearchContext(context) : Schemas.getItemTypeTitle(context, schemas) )
+                };
+            }
+
+        }
+
+
+        /**** Titles from mapping ****/
         title = TITLE_PATHNAME_MAP[currentPathName] && TITLE_PATHNAME_MAP[currentPathName].title;
 
         if (!title) {
@@ -120,27 +153,11 @@ export default class PageTitle extends React.Component {
             return { 'title' : object.itemUtil.getTitleStringFromContext(context) };
         }
 
+        /**** Post-mapping overrides ****/
         if (object.isAnItem(context)){ // If Item
-
-            
-            
-            if (currentHrefParts.hash === '#!edit'){
-                return {
-                    'title' : "Editing",
-                    'calloutTitle' : object.itemUtil.getTitleStringFromContext(context)
-                };
-            }
-
             
             title = object.itemUtil.getTitleStringFromContext(context);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
-
-            if (currentHrefParts.hash === '#!create') {
-                return {
-                    'title' : "Creating",
-                    'calloutTitle' : itemTypeTitle
-                };
-            }
 
             if (object.itemUtil.isDisplayTitleAccession(context, title, true)){ // Don't show Accessions in titles.
 

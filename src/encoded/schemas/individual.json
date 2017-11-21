@@ -17,16 +17,20 @@
             "title": "Organism",
             "description": "Organism of the individual.",
             "type": "string",
+            "lookup": 1,
             "linkTo": "Organism"
         },
         "age": {
             "title": "Age of the Individual",
             "description": " The age of the individual when biological material was sampled.",
-            "type": "number"
+            "type": "number",
+            "lookup":2
         },
         "age_units": {
             "title": "Age units",
             "type": "string",
+            "lookup" :2,
+
             "enum": [
                 "day",
                 "week",
@@ -38,6 +42,7 @@
             "title": "Sex",
             "type": "string",
             "default": "unknown",
+            "lookup" : 4,
             "enum": [
                 "male",
                 "female",
@@ -47,6 +52,7 @@
         },
         "url": {
             "title": "URL",
+            "lookup" : 1000,
             "description": "An external resource with additional information about the individual.",
             "type": "string",
             "format": "uri"

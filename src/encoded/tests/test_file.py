@@ -191,6 +191,31 @@ def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading):
     assert resobj['href'] == res_put.json['@graph'][0]['href']
 
 
+def test_s3_filename_validation(testapp, fastq_uploading):
+    """
+    s3 won't allow certain characters in filenames, hence the regex validator
+    created in file.json schema. Required regex is: "^[\\w+=,.@-]*$"
+    """
+    # first a working one
+    fastq_uploading['filename'] = 'test_file.fastq.gz'
+    fastq_uploading['file_format'] = 'fastq'
+    testapp.post_json('/file_fastq', fastq_uploading, status=201)
+    # now some bad boys that don't pass
+    fastq_uploading['filename'] = 'test file.fastq.gz'
+    fastq_uploading['file_format'] = 'fastq'
+    testapp.post_json('/file_fastq', fastq_uploading, status=422)
+    fastq_uploading['filename'] = 'test|file.fastq.gz'
+    fastq_uploading['file_format'] = 'fastq'
+    testapp.post_json('/file_fastq', fastq_uploading, status=422)
+    fastq_uploading['filename'] = 'test~file.fastq.gz'
+    fastq_uploading['file_format'] = 'fastq'
+    testapp.post_json('/file_fastq', fastq_uploading, status=422)
+    fastq_uploading['filename'] = 'test#file.fastq.gz'
+    fastq_uploading['file_format'] = 'fastq'
+    testapp.post_json('/file_fastq', fastq_uploading, status=422)
+
+
+
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
     fastq_uploading.pop('filename')
     res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
