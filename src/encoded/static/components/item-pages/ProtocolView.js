@@ -8,8 +8,6 @@ import { Button } from 'react-bootstrap';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
 import { FormattedInfoBlock } from './components';
 import { ItemBaseView, OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
-import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 
 
 
@@ -165,7 +163,7 @@ export class ItemFileAttachment extends React.Component {
                 { title }
                 <div className={"row" + (includeTitle ? ' mt-1' : '')}>
                     <div className="col-xs-12">
-                        <ViewFileButton filename={attachment.download || null} href={object.itemUtil.atId(context) + attachment.href} disabled={typeof attachment.href !== 'string' || attachment.href.length === 0} className={ViewFileButton.defaultProps.className + ' btn-block'} />
+                        <fileUtil.ViewFileButton filename={attachment.download || null} href={object.itemUtil.atId(context) + attachment.href} disabled={typeof attachment.href !== 'string' || attachment.href.length === 0} className={fileUtil.ViewFileButton.defaultProps.className + ' btn-block'} />
                     </div>
                     <div className="col-xs-12">{ this.size() }{ this.md5sum() }{ this.attachmentType() }</div>
                 </div>
@@ -175,35 +173,4 @@ export class ItemFileAttachment extends React.Component {
         return this.props.wrapInColumn ? this.wrapInColumn(elems) : elems; 
     }
 
-}
-
-export class ViewFileButton extends React.Component {
-
-    static defaultProps = {
-        'className' : "text-ellipsis-container mb-1",
-        'target' : "_blank",
-        'bsStyle' : "primary"
-    }
-
-    render(){
-        var { filename, href, target } = this.props;
-        var action = 'View or Download', extLink = null, preLink = null;
-
-        preLink = <i className="icon icon-fw icon-cloud-download" />;
-        var fileNameLower = (filename && filename.length > 0 && filename.toLowerCase()) || '';
-        if (fileNameLower.indexOf('.pdf') > -1){
-            action = 'View';
-            if (target === '_blank') extLink = <i className="icon icon-fw icon-external-link"/>;
-            preLink = null;
-        } else if (fileNameLower.indexOf('.gz') > -1 || fileNameLower.indexOf('.zip') > -1 || fileNameLower.indexOf('.tgz') > -1){
-            action = 'Download';
-        }
-        return (
-            <Button download={action === 'Download' ? true : null} {..._.omit(this.props, 'filename')}>
-                <span className="text-400">
-                    { preLink } { action } { (filename && <span className="text-600">{ filename }</span>) || 'File' } { extLink }
-                </span>
-            </Button>
-        );
-    }
 }

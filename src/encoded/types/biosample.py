@@ -41,7 +41,6 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'modifications.description',
         'treatments.treatment_type',
         'treatments.description',
-        'biosample_protocols.protocol_type',
         'biosample_protocols.attachment.href',
         'biosample_protocols.attachment.type',
         'biosample_protocols.attachment.md5sum',

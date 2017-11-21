@@ -5,7 +5,7 @@ import { panel_views, itemClass, content_views } from './../globals';
 import { Button } from 'react-bootstrap';
 import _ from 'underscore';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
-import { console, object, DateUtility, Filters, layout, Schemas } from './../util';
+import { console, object, DateUtility, Filters, layout, Schemas, fileUtil } from './../util';
 
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
@@ -135,29 +135,49 @@ export class OverViewBodyItem extends React.Component {
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
     static titleRenderPresets = {
-        'default' : function(field, value, jsxAllowed = true, addDescriptionTip = true, index = null ){ return Schemas.Term.toName(field, value, jsxAllowed, addDescriptionTip); },
-        'biosample_treatments' : function(field, treatment){
-            if (!treatment || !treatment.display_title || !object.atIdFromObject(treatment)){
-                return 'None';
+        'default' : function(field, value, jsxAllowed = true, addDescriptionTip = true, index = null, wrapperElementType = 'li' ){
+            var calcdName = Schemas.Term.toName(field, value, jsxAllowed, addDescriptionTip);
+            if (wrapperElementType === 'div' && typeof index === 'number') {
+                return [((index + 1) + '. '), calcdName];
             }
-            return <div key={object.atIdFromObject(treatment)} >{ object.itemUtil.generateLink(treatment, true) }<div>({ treatment.treatment_type })</div></div>;
+            return calcdName;
         },
-        'local_date_time' : function(field, timestamp){ return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-time-md" /> : 'None'; },
-        'local_date' : function(field, timestamp){ return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-md" /> : 'None'; },
-        'embedded_item_with_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null){
+        'biosample_treatments' : function(field, treatment, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li' ){
+            if (!treatment || !treatment.display_title || !object.atIdFromObject(treatment)){
+                return null;
+            }
+            return (
+                <div key={object.atIdFromObject(treatment)} >
+                    { wrapperElementType === 'div' && typeof index === 'number' ? (index + 1) + '. ' : null }
+                    { object.itemUtil.generateLink(treatment, true) }
+                    <div>({ treatment.treatment_type })</div>
+                </div>
+            );
+        },
+        'local_date_time' : function(field, timestamp){
+            return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-time-md" /> : null;
+        },
+        'local_date' : function(field, timestamp){
+            return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-md" /> : null;
+        },
+        'embedded_item_with_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li' ){
             if (!item || !object.itemUtil.atId(item)){
-                return 'None';
+                return null;
             }
             var itemTitle = object.itemUtil.getTitleStringFromContext(item);
             var linkToProtocolItem = object.itemUtil.atId(item);
 
             var viewAttachmentButton = null;
-            if (item.attachment && item.attachment.href && typeof item.attachment.href === 'string'){
+            var haveAttachment = (item.attachment && item.attachment.href && typeof item.attachment.href === 'string');
+            if (haveAttachment){
                 var fullProtocolDocumentHref = linkToProtocolItem + item.attachment.href;
                 viewAttachmentButton = (
-                    <Button bsSize="small" href={fullProtocolDocumentHref} target="_blank" className="text-400 text-ellipsis-container btn-block">
+                    <Button bsSize="small" bsStyle="primary" href={fullProtocolDocumentHref} target="_blank" className="text-400 text-ellipsis-container btn-block">
                         View File &nbsp;<i className="icon icon-fw icon-external-link"/>
                     </Button>
+                );
+                viewAttachmentButton = (
+                    <fileUtil.ViewFileButton title="File" bsSize="small" mimeType={(haveAttachment && item.attachment.type) || null} filename={itemTitle || null} href={fullProtocolDocumentHref} disabled={!haveAttachment} className={'text-ellipsis-container btn-block'} />
                 );
             }
 
@@ -165,9 +185,15 @@ export class OverViewBodyItem extends React.Component {
             var isInArray = typeof index === 'number';
             
             return (
-                <div className="embedded-item-with-attachment row" key={linkToProtocolItem}>
-                    <div className={"col-xs-12 col-sm-7 col-lg-8 link-to-item-col" + (isInArray ? ' in-array' : '')} data-array-index={index}>{ isInArray ? <span>{ index + 1 }. </span> : null}{ linkToItem }</div>
-                    <div className="col-xs-8 col-sm-5 col-lg-4 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
+                <div className={"embedded-item-with-attachment" + (isInArray ? ' in-array' : '')} key={linkToProtocolItem}>
+                    <div className="row">
+                        <div className={"col-xs-12 col-sm-6 col-md-7 link-to-item-col" + (isInArray ? ' in-array' : '')} data-array-index={index}>
+                            <div className="inner">
+                                { isInArray ? <span>{ index + 1 }. </span> : null}{ linkToItem }
+                            </div>
+                        </div>
+                        <div className="col-xs-12 col-sm-6 col-md-5 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
+                    </div>
                 </div>
             );
         }
@@ -175,23 +201,23 @@ export class OverViewBodyItem extends React.Component {
 
     /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
     static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null){
-        if (Array.isArray(items) && items.length > 0 && items[0].display_title && object.atIdFromObject(items[0])){
+        // Item List
+        if (Array.isArray(items) && items.length > 1 && items[0].display_title && object.atIdFromObject(items[0])){
             items = _.map(_.uniq(items, false, function(b){ return object.atIdFromObject(b); }), function(b,i){
-                if (items.length > 1){
-                    return React.createElement(listItemElement, _.extend({ 'key' : object.atIdFromObject(b) || i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i) );
-                }
-                return titleRenderFxn(property, b, true, addDescriptionTipForLinkTos);
+                return React.createElement(listItemElement, _.extend({ 'key' : object.atIdFromObject(b) || i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement) );
             });
+        } else if (Array.isArray(items) && items.length === 1 && items[0].display_title && object.atIdFromObject(items[0])) {
+            return titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
         } else if (Array.isArray(items) && items.length > 1){
             items = _.map(items, function(b,i){
-                return React.createElement(listItemElement, _.extend({ 'key' : i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i) );
+                return React.createElement(listItemElement, _.extend({ 'key' : i }, listItemElementProps || {}), titleRenderFxn(property, b, true, addDescriptionTipForLinkTos, i, listItemElement) );
             });
         } else if (Array.isArray(items) && items.length === 1){
-            items = titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos);
+            items = titleRenderFxn(property, items[0], true, addDescriptionTipForLinkTos, null, 'div');
         } else if (Array.isArray(items) && items.length === 0){
             return null;
         } else if (!Array.isArray(items)){
-            return titleRenderFxn(property, items, true, addDescriptionTipForLinkTos);
+            return titleRenderFxn(property, items, true, addDescriptionTipForLinkTos, 'div');
         }
         return items;
     }
@@ -205,7 +231,8 @@ export class OverViewBodyItem extends React.Component {
         'listWrapperElementProps' : null,
         'listItemElement' : 'li',
         'listItemElementProps' : null,
-        'columnExtraClassName' : null
+        'columnExtraClassName' : null,
+        'singleItemClassName' : null
     }
 
     /** Feeds params + props into static function */
@@ -214,7 +241,10 @@ export class OverViewBodyItem extends React.Component {
     }
 
     render(){
-        var { result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos, listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps, wrapInColumn, columnExtraClassName } = this.props;
+        var { 
+            result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos,
+            listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps, wrapInColumn, columnExtraClassName, singleItemClassName
+        } = this.props;
         
         function fallbackify(val){
             return val || fallbackValue || 'None';
@@ -223,7 +253,7 @@ export class OverViewBodyItem extends React.Component {
         listItemElementProps = (listItemElementProps && _.clone(listItemElementProps)) || {};
         listWrapperElementProps = (listWrapperElementProps && _.clone(listWrapperElementProps)) || {};
         listItemElementProps.className = (listItemElementProps.className || '') + ' overview-list-element';
-        listWrapperElementProps.className = (listWrapperElementProps.className || '') + ' overview-list-elements-container';
+        listWrapperElementProps.className = (listWrapperElementProps.className || '') + ' overview-list-elements-container embedded-item-with-attachment-container';
 
         if (titleRenderFxn === OverViewBodyItem.titleRenderPresets.embedded_item_with_attachment){
             listItemElement = 'div';
@@ -257,9 +287,9 @@ export class OverViewBodyItem extends React.Component {
             innerBlockReturned = (
                 <div className="inner" key="inner">
                     <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'property', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" />
-                    <div key="single-value">
-                        { fallbackify(resultPropertyValue) }
-                    </div>
+                        <div key="single-value" className={"overview-single-element" + (singleItemClassName ? ' ' + singleItemClassName : '') + (!resultPropertyValue ? ' no-value' : '')}>
+                            { fallbackify(resultPropertyValue) }
+                        </div>
                 </div>
             );
         }

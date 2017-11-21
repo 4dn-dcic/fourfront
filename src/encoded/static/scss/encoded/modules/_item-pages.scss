@@ -965,6 +965,11 @@ $download-button-width : 100px;
 
 /************** OverviewBody ***********/
 
+@mixin overview-block-value-block {
+	background-color: #f8f8f8;
+	padding: 6px 12px;
+}
+
 .item-page-container {
 	.rc-tabs-content {
 		
@@ -998,52 +1003,102 @@ $download-button-width : 100px;
 							margin-left: 5px;
 							position: relative;
 							top: 1px;
+							&.small {
+								font-size: .65rem;
+								top: -1px;
+							}
+						}
+						i.icon-cloud-download,
+						i.icon-picture-o,
+						i.icon-file-pdf-o {
+							margin-right: 3px;
+						}
+						&.btn-block {
+							padding-left: 4px;
+							padding-right: 4px;
+						}
+						&.btn-sm {
+							padding-bottom: 4px; // Overrides 5
+							i.icon-external-link {
+								//top: 0px;
+							}
 						}
 					}
 
 					// Embedded Items w/ Attachments
 					.embedded-item-with-attachment {
+						background-color: #f8f8f8;
+						border-radius: 3px;
+						&:not(.in-array){
+						}
 						.link-to-item-col {
 							white-space: nowrap;
 							text-overflow: ellipsis;
 							overflow: hidden;
 							&.in-array {
-								padding-left: 30px;
+								//> .inner {
+								//	padding-left: 30px;
+								//}
 							}
-							> span, > a {
-								vertical-align: middle;
-							}
-							> a {
-								display: inline-block;
-								white-space: nowrap;
-								text-overflow: ellipsis;
-								overflow: hidden;
-								max-width: 100%;
+							> .inner {
+								line-height: 28px;
+								> span, > a {
+									vertical-align: middle;
+								}
+								> a {
+									display: inline-block;
+									white-space: nowrap;
+									text-overflow: ellipsis;
+									overflow: hidden;
+									max-width: 100%;
+								}
 							}
 						}
 						.view-attachment-button-col {
+							padding-right: 4px;
 							> a.btn {
 
 							}
 						}
 					}
 
+					> div.overview-single-element {
+						&.block {
+							padding: 0;
+							&:not(.no-value){
+								margin-top: 10px;
+								@include overview-block-value-block;
+							}
+						}
+					}
+
 					
 					> div.overview-list-elements-container {
+						margin-top: 10px;
+
 						> div.overview-list-element {
-							border-bottom: 1px solid #eee;
-							> .embedded-item-with-attachment {
-								padding: 2px 0;
-								.link-to-item-col {
-									line-height: 28px;
-								}
-								
-							}
+							@include overview-block-value-block;
+							margin-bottom: 5px;
 							&:last-child {
 								border-bottom: none;
 							}
 						}
+
+						&.embedded-item-with-attachment-container {
+							> div.overview-list-element {
+								
+							}
+						}
 						
+					}
+
+					> ul.overview-list-elements-container,
+					> ol.overview-list-elements-container {
+						> li {
+							> div {
+								
+							}
+						}
 					}
 
 				}

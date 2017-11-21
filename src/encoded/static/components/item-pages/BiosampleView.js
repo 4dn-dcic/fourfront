@@ -7,6 +7,7 @@ import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
 import { FormattedInfoBlock } from './components';
 import { ItemBaseView, OverViewBodyItem } from './DefaultItemView';
+import { IndividualItemTitle } from './BiosourceView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 
@@ -31,32 +32,6 @@ export default class BiosampleView extends ItemBaseView {
 globals.content_views.register(BiosampleView, 'Biosample');
 
 
-
-export class IndividualItemTitle extends React.Component {
-    render(){
-        var indv = this.props.result || this.props.context;
-        if (!indv || !object.atIdFromObject(indv)) return <span>None</span>;
-        var href = object.atIdFromObject(indv);
-        var sex = null;
-        if (indv.sex && typeof indv.sex === 'string'){
-            if (indv.sex.toLowerCase() === 'female'){
-                sex = <i className="icon icon-fw icon-venus"/>;
-            } else if (indv.sex.toLowerCase() === 'male'){
-                sex = <i className="icon icon-fw icon-mars"/>;
-            }
-        }
-        var title = indv.display_title;
-        var organism = null;
-        if (indv.organism && indv.organism.name && typeof indv.organism.name === 'string' && title.indexOf(indv.organism.name) === -1){
-            organism = Schemas.Term.capitalizeSentence(indv.organism.name);
-        }
-        return (
-            <span>{ sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
-                <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title || null }</a>
-            </span>
-        );
-    }
-}
 
 export class BiosourcesTable extends React.Component {
 
@@ -162,16 +137,25 @@ class OverViewBody extends React.Component {
         var result = this.props.result;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), result);
 
+        var commonProps = {
+            //'listItemElement' : 'div',
+            //'listWrapperElement' : 'div',
+            'result' : result,
+            'tips' : tips,
+            'wrapInColumn' : true,
+            //'singleItemClassName' : 'block'
+        };
+
         return (
             <div className="row">
                 <div className="col-md-12 col-xs-12">
                     <div className="row overview-blocks">
 
-                        <OverViewBodyItem {...{ result, tips }} property='modifications' fallbackTitle="Stable Genomic Modifications" wrapInColumn />
+                        <OverViewBodyItem {...commonProps} property='modifications' fallbackTitle="Stable Genomic Modifications" />
 
-                        <OverViewBodyItem {...{ result, tips }} property='treatments' fallbackTitle="Treatment" wrapInColumn titleRenderFxn={OverViewBodyItem.titleRenderPresets.biosample_treatments} />
+                        <OverViewBodyItem {...commonProps} property='treatments' fallbackTitle="Treatment" titleRenderFxn={OverViewBodyItem.titleRenderPresets.biosample_treatments} />
 
-                        <OverViewBodyItem {...{ result, tips }} property='biosample_protocols' fallbackTitle="Biosample Protocols" wrapInColumn titleRenderFxn={OverViewBodyItem.titleRenderPresets.embedded_item_with_attachment} />
+                        <OverViewBodyItem {...commonProps} property='biosample_protocols' listItemElement='div' listWrapperElement='div' singleItemClassName="block" fallbackTitle="Biosample Protocols" titleRenderFxn={OverViewBodyItem.titleRenderPresets.embedded_item_with_attachment} />
 
                     </div>
                 </div>
