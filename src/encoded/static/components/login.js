@@ -113,14 +113,18 @@ export default class Login extends React.Component {
             // Handle Errors
             console.error("Error during login: ", error.description);
             console.log(error);
+
+            this.props.setIsLoadingIcon(false);
+            
             if (error.code === 403) {
                 navigate('/error/login-failed');
             } else {
-                navigate('/');
-                Alerts.queue(Alerts.LoginFailed);
+                navigate('/', ()=>{
+                    setTimeout( Alerts.queue.bind(Alerts, Alerts.LoginFailed), 500);
+                });
             }
             Alerts.deQueue(Alerts.LoggedOut);
-            this.props.setIsLoadingIcon.bind(this.props.setIsLoadingIcon, false);
+            
         });
 
     }

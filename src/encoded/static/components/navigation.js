@@ -438,7 +438,7 @@ class UserActions extends React.Component {
         }
 
         if (this.state.isLoading){
-            acctTitle = <span class><i className="icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
+            acctTitle = <span><i className="icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
         } else acctTitle = (
             <span>
                 <i title={session ? "Signed In" : null} className={"account-icon icon icon-user" + (session ? "" : "-o")}></i>&nbsp; { acctTitle }
