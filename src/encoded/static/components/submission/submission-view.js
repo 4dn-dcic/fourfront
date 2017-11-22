@@ -1310,7 +1310,7 @@ export default class SubmissionView extends React.Component{
 class WarningBanner extends React.Component {
     render() {
         return(
-            <div className="mb-2 text-400 warning-banner">
+            <div className="mb-2 mt-1 text-400 warning-banner">
                 <div className="row">
                     <div className="col-md-7 col-lg-8">
                         Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. The submission process is under active development and features may change.

@@ -13,75 +13,44 @@ import JSONTree from 'react-json-tree';
 
 
 /**
- * Contains and toggles visibility/mounting of a Subview.
+ * Contains and toggles visibility/mounting of a Subview. Renders title for the Subview.
  *
  * @class SubItem
  * @extends {React.Component}
  */
 class SubItem extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.toggleLink = this.toggleLink.bind(this);
-        this.render = this.render.bind(this);
-        if (typeof props.onToggle !== 'function'){
-            this.onToggle = this.handleToggleFallback.bind(this);
-        } else {
-            this.onToggle = this.props.onToggle;
-        }
-        this.state = {
-            isOpen : false
-        };
-
+    static propTypes = {
+        'onToggle' : PropTypes.func,
+        'isOpen' : PropTypes.bool,
+        'title' : PropTypes.string
     }
 
     componentDidMount(){
         ReactTooltip.rebuild();
     }
 
-    /**
-     * Handler for rendered title element. Toggles visiblity of Subview.
-     *
-     * @param {React.SyntheticEvent} e - Mouse click event. Its preventDefault() method is called.
-     * @returns {Object} 'isOpen' : false
-     */
-    handleToggleFallback (e) {
-        e.preventDefault();
-        this.setState({
-            isOpen: !this.state.isOpen,
-        });
-    }
-
-    /**
-     * Renders title for the Subview.
-     *
-     * @param {string} title - Title of panel, e.g. display_title of object for which SubIPanel is being used.
-     * @param {boolean} isOpen - Whether state.isOpen is true or not. Used for if plus or minus icon.
-     * @returns {Element} <span> element.
-     */
-    toggleLink(title = this.props.title, isOpen = (this.props.isOpen || this.state.isOpen)){
-        var iconType = isOpen ? 'icon-minus' : 'icon-plus';
-        if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
-            title = isOpen ? "Collapse" : "Expand";
+    componentDidUpdate(pastProps){
+        if (!pastProps.isOpen && this.props.isOpen){
+            ReactTooltip.rebuild();
         }
-        return (
-            <span className="subitem-toggle">
-                <span className="link" onClick={this.onToggle}>
-                    <i style={{'color':'black', 'paddingRight': 10, 'paddingLeft' : 5}} className={"icon " + iconType}/>
-                    { title }
-                </span>
-            </span>
-        );
     }
 
     /**
      * @returns {JSX.Element} React Span element containing expandable link, and maybe open panel below it.
      */
     render() {
+        var { isOpen, title, onToggle, countProperties } = this.props;
+        var iconType = isOpen ? 'icon-minus' : 'icon-plus';
+        if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
+            title = isOpen ? "Collapse" : "Expand";
+        }
         return (
-            <span>
-                { this.toggleLink(this.props.title, this.props.isOpen || this.state.isOpen) }
-                { this.state.isOpen ? <SubItemListView {...this.props} isOpen /> : <div/> }
+            <span className="subitem-toggle">
+                <span className="link" onClick={onToggle}>
+                    <i style={{'color':'black', 'paddingRight': 10, 'paddingLeft' : 5}} className={"icon " + iconType}/>
+                    { title } { countProperties && !isOpen ? <span>({ countProperties })</span> : null }
+                </span>
             </span>
         );
     }
@@ -102,14 +71,11 @@ class SubItemListView extends React.Component {
 
     render(){
         if (!this.props.isOpen) return null;
-        var schemas = this.props.schemas;
         var item = this.props.content;
-        var popLink = this.props.popLink;
-        var columnDefinitions = this.props.columnDefinitions || {};
         var props = {
             'context' : item,
-            'schemas' : schemas,
-            'popLink' : popLink,
+            'schemas' : this.props.schemas,
+            'popLink' : this.props.popLink,
             'alwaysCollapsibleKeys' : [],
             'excludedKeys' : (this.props.excludedKeys || _.without(Detail.defaultProps.excludedKeys,
                 // Remove
@@ -119,7 +85,7 @@ class SubItemListView extends React.Component {
                     'schema_version', 'uuid'
                 ])
             ),
-            'columnDefinitions' : columnDefinitions,
+            'columnDefinitions' : this.props.columnDefinitions || {},
             'showJSONButton' : false,
             'hideButtons': true
 
@@ -127,7 +93,7 @@ class SubItemListView extends React.Component {
         return (
             <div className="sub-panel data-display panel-body-with-header">
                 <div className="key-value sub-descriptions">
-                    { React.createElement(typeof item.display_title === 'string' ? ItemDetailList : Detail, props) }
+                    { React.createElement((typeof item.display_title === 'string' ? ItemDetailList : Detail), props) }
                 </div>
             </div>
         );
@@ -649,7 +615,7 @@ class DetailRow extends React.Component {
                         popLink={this.props.popLink}
                         content={this.props.item}
                         schemas={this.props.schemas}
-                        columnDefinitions={this.props.columnDefinitions}
+                        columnDefinitions={value.props.columnDefinitions || this.props.columnDefinitions} // Recursively pass these down
                         isOpen={this.state.isOpen}
                     />
                 </div>
@@ -753,53 +719,31 @@ export class Detail extends React.Component {
                 </ol>
             );
         } else if (typeof item === 'object' && item !== null) {
-            var title = object.itemUtil.getTitleStringFromContext(item);
+            var linkElement = object.itemUtil.generateLink(item, true, 'display_title', { 'target' : (popLink ? '_blank' : null) }, true);
 
-            // if the following is true, we have an embedded object without significant other data
-            if (item.display_title && (typeof item.link_id === 'string' || typeof item['@id'] === 'string') && _.keys(item).length < 4){
-                //var format_id = item.link_id.replace(/~/g, "/");
-                var link = object.atIdFromObject(item);
-                if(popLink){
-                    return (
-                        <a href={link} target="_blank">
-                            {title}
-                        </a>
-                    );
-                } else {
-                    return (
-                        <a href={link}>
-                            { title }
-                        </a>
-                    );
-                }
+            // if the following is true, we have an embedded Item. Link to it.
+            if (linkElement){
+                return linkElement;
             } else { // it must be an embedded sub-object (not Item)
+                var releventProperties = _.object(
+                    _.map(_.filter(_.pairs(columnDefinitions), function(c){ return c[0].indexOf(keyPrefix + '.') === 0; }), function(c){ c[0] = c[0].replace(keyPrefix + '.', ''); return c; })
+                );
                 return (
                     <SubItem
                         schemas={schemas}
                         content={item}
-                        key={title}
-                        title={title}
+                        key={keyPrefix}
+                        countProperties={_.keys(item).length}
                         popLink={popLink}
-                        columnDefinitions={columnDefinitions}
+                        columnDefinitions={releventProperties}
                     />
                 );
             }
         } else if (typeof item === 'string'){
+
             if (keyPrefix === '@id' || keyPrefix === 'link_id'){
                 var href = (keyPrefix === 'link_id' ? item.replace(/~/g, "/") : item);
-                if(popLink){
-                    return (
-                        <a key={item} href={href} target="_blank">
-                            {href}
-                        </a>
-                    );
-                }else{
-                    return (
-                        <a key={item} href={href}>
-                            {href}
-                        </a>
-                    );
-                }
+                return <a key={item} href={href} target={popLink ? "_blank" : null}>{href}</a>;
             }
 
             if(item.indexOf('@@download') > -1/* || item.charAt(0) === '/'*/){
@@ -943,7 +887,7 @@ export class Detail extends React.Component {
         var schemas = this.props.schemas || Schemas.get();
 
         var colDefsFromSchema = Schemas.flattenSchemaPropertyToColumnDefinition(schemas ? object.tipsFromSchema(schemas, context) : {});
-        var columnDefinitions = _.extend(colDefsFromSchema, this.props.columnDefinitions || Detail.defaultColumnDefinitions || {});
+        var columnDefinitions = _.extend(colDefsFromSchema, this.props.columnDefinitions || Detail.defaultColumnDefinitions || {}); // { <property> : { 'title' : ..., 'description' : ... } }
 
         // Sort applicable persistent keys by original persistent keys sort order.
         var stickyKeysObj = _.object(

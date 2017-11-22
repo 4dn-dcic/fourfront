@@ -1,6 +1,8 @@
 var CryptoJS = require('crypto-js');
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'underscore';
+import { Button } from 'react-bootstrap';
 import { isServerSide } from './misc';
 
 
@@ -47,7 +49,7 @@ export class FileDownloadButton extends React.Component {
     render(){
         var { href, className, disabled, title, filename } = this.props;
         return (
-            <a href={ href } className={(className || '') + " btn btn-default btn-info download-button " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
+            <a href={ href } className={(className || '') + " btn btn-default btn-primary download-button btn-block " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
                 <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
@@ -97,7 +99,52 @@ export class FileDownloadButtonAuto extends React.Component {
             'filename' : file.filename,
             'disabled' : !this.canDownload()
         };
-        return <FileDownloadButton {...props} {...this.props} />;
+        return <FileDownloadButton {...this.props} {...props} />;
+    }
+}
+
+export class ViewFileButton extends React.Component {
+    
+    static defaultProps = {
+        'className' : "text-ellipsis-container mb-1",
+        'target' : "_blank",
+        'bsStyle' : "primary",
+        'href' : null,
+        'disabled' : false,
+        'title' : null,
+        'mimeType' : null
+    }
+
+    render(){
+        var { filename, href, target, title, mimeType } = this.props;
+        var action = 'View', extLink = null, preLink = null;
+
+        preLink = <i className="icon icon-fw icon-cloud-download" />;
+
+        var fileNameLower = (filename && filename.length > 0 && filename.toLowerCase()) || '';
+        var fileNameLowerEnds = {
+            '3' : fileNameLower.slice(-3),
+            '4' : fileNameLower.slice(-4),
+            '5' : fileNameLower.slice(-5)
+        };
+        if (fileNameLowerEnds['5'] === '.tiff' || fileNameLowerEnds['5'] === '.jpg' || fileNameLowerEnds['5'] === '.jpeg' || fileNameLowerEnds['5'] === '.png' || fileNameLowerEnds['5'] === '.bmp' || fileNameLowerEnds['5'] === '.gif'){
+            action = 'View';
+            preLink = <i className="icon icon-fw icon-picture-o" />;
+        } else if (fileNameLowerEnds['4'] === '.pdf'){
+            action = 'View';
+            //if (target === '_blank') extLink = <i className="icon icon-fw icon-external-link"/>;
+            preLink = <i className="icon icon-fw icon-file-pdf-o" />;
+        } else if (fileNameLowerEnds['3'] === '.gz' || fileNameLowerEnds['4'] === '.zip' || fileNameLowerEnds['4'] === '.tgx'){
+            action = 'Download';
+        }
+
+        return (
+            <Button download={action === 'Download' ? true : null} {..._.omit(this.props, 'filename', 'title')} title={filename} data-tip={mimeType}>
+                <span className={title ? null : "text-400"}>
+                    { preLink } { action } { title || (filename && <span className="text-600">{ filename }</span>) || 'File' } { extLink }
+                </span>
+            </Button>
+        );
     }
 }
 

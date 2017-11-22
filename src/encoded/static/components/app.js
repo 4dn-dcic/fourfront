@@ -1289,7 +1289,7 @@ export default class App extends React.Component {
                         var node = ReactDOM.findDOMNode(_tooltip);
                         node.style.left = null;
                         node.style.top = null;
-                    }} />
+                    }} globalEventOff="click" />
                     <ChartDetailCursor
                         href={this.props.href}
                         schemas={this.state.schemas}
