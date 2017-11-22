@@ -21,7 +21,6 @@ import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
-import { setTimeout } from 'timers';
 
 /**
  * The top-level component for this application.

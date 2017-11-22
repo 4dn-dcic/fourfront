@@ -116,7 +116,7 @@ export class ItemFileAttachment extends React.Component {
 
     size(){
         var attachment = (this.props.context && this.props.context.attachment) || null;
-        if (!attachment.size || typeof attachment.size !== 'number') return null;
+        if (!attachment || !attachment.size || typeof attachment.size !== 'number') return null;
         var tip = this.attachmentTips().size;
         return (
             <div className="mb-1"><i className="icon icon-fw icon-hdd-o" data-tip={(tip && tip.description) || null} />&nbsp; { Schemas.Term.bytesToLargerUnit(attachment.size) }</div>
@@ -158,15 +158,28 @@ export class ItemFileAttachment extends React.Component {
             <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'tips', 'schemas')} fallbackTitle="Attachment" property={this.props.property || "attachment"} result={context} elementType="h5" />
         );
 
-        var elems = (
-            <div className="item-file-attachment inner">
-                { title }
+        var contents = null;
+        if (attachment){
+            contents = (
                 <div className={"row" + (includeTitle ? ' mt-1' : '')}>
                     <div className="col-xs-12">
-                        <fileUtil.ViewFileButton filename={attachment.download || null} href={object.itemUtil.atId(context) + attachment.href} disabled={typeof attachment.href !== 'string' || attachment.href.length === 0} className={fileUtil.ViewFileButton.defaultProps.className + ' btn-block'} />
+                        <fileUtil.ViewFileButton
+                            filename={(attachment && attachment.download) || null}
+                            href={object.itemUtil.atId(context) + attachment.href}
+                            disabled={typeof attachment.href !== 'string' || attachment.href.length === 0}
+                            className={fileUtil.ViewFileButton.defaultProps.className + ' btn-block'}
+                        />
                     </div>
                     <div className="col-xs-12">{ this.size() }{ this.md5sum() }{ this.attachmentType() }</div>
                 </div>
+            );
+        } else {
+            contents = <div className="overview-single-element no-value">None</div>;
+        }
+
+        var elems = (
+            <div className="item-file-attachment inner">
+                { title } { contents }
             </div>
         );
 
