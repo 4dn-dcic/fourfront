@@ -7,6 +7,7 @@ import * as store from '../store';
 import { JWT, ajax, navigate, isServerSide } from './util';
 import { MenuItem } from 'react-bootstrap';
 import Alerts from './alerts';
+import Auth0Lock from 'auth0-lock';
 
 /** Component that contains auth0 functions */
 export default class Login extends React.Component {
@@ -28,15 +29,14 @@ export default class Login extends React.Component {
     }
 
     componentWillMount () {
-        var lock_;
         if (isServerSide()) {
             return;
-        } else {
-            lock_ = require('auth0-lock').default;
         }
+
         // Login / logout actions must be deferred until Auth0 is ready.
         // TODO: these should be read in from base and production.ini
-        this.lock = new lock_('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
+        this.lock = new Auth0Lock(
+            'DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
             'hms-dbmi.auth0.com', {
                 auth: {
                     sso: false,
@@ -45,14 +45,11 @@ export default class Login extends React.Component {
                     params: {scope: 'openid email', prompt: 'select_account'}
                 },
                 socialButtonStyle: 'big',
-                languageDictionary: {
-                    title: "Log in"
-                },
-                theme: {
-                    logo: '/static/img/4dn_logo.svg'
-                },
+                languageDictionary: { title: "Log in" },
+                theme: { logo: '/static/img/4dn_logo.svg' },
                 allowedConnections: ['github', 'google-oauth2']
-            });
+            }
+        );
         this.lock.on("authenticated", this.handleAuth0Login);
     }
 
@@ -84,35 +81,48 @@ export default class Login extends React.Component {
         if (!idToken) return;
 
         JWT.save(idToken); // We just got token from Auth0 so probably isn't outdated.
+        
+        this.props.setIsLoadingIcon(true);
+        this.lock.hide();
 
-        ajax.fetch('/login', {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer '+idToken },
-            body: JSON.stringify({id_token: idToken})
-        })
-        .then(response => {
+        var race = Promise.race([
+            ajax.fetch('/login', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer '+idToken },
+                body: JSON.stringify({id_token: idToken})
+            }),
+            new Promise(function(resolve, reject){
+                setTimeout(function(){ reject({ 'description' : 'timed out', 'type' : 'timed-out' }); }, 60000);
+            })
+        ]).then(response => {
+            // Add'l Error Check (will throw to be caught)
             if (response.code || response.status) throw response;
             return response;
         })
-        .then(response => {
-            JWT.saveUserInfoLocalStorage(response);
+        .then((r) => {
+            JWT.saveUserInfoLocalStorage(r);
             this.props.updateUserInfo();
             Alerts.deQueue(Alerts.LoggedOut);
-            if(this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
-                navigate('/', {'inPlace':true}, this.lock.hide.bind(this.lock));
+            console.info('Login completed');
+            if (this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
+                navigate('/', {'inPlace':true}, this.props.setIsLoadingIcon.bind(this.props.setIsLoadingIcon, false));
             }else{
-                navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
+                navigate('', {'inPlace':true}, this.props.setIsLoadingIcon.bind(this.props.setIsLoadingIcon, false));
             }
-        }, error => {
-            console.log("got an error: ", error.description);
+        }).catch((error)=>{
+            // Handle Errors
+            console.error("Error during login: ", error.description);
             console.log(error);
-            var errorPageHref = '/';
             if (error.code === 403) {
-                errorPageHref = '/error/login-failed';
+                navigate('/error/login-failed');
+            } else {
+                navigate('/');
+                Alerts.queue(Alerts.LoginFailed);
             }
-            navigate(errorPageHref);
-            this.lock.hide.call(this.lock);
+            Alerts.deQueue(Alerts.LoggedOut);
+            this.props.setIsLoadingIcon.bind(this.props.setIsLoadingIcon, false);
         });
+
     }
 
     render() {

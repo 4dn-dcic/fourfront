@@ -699,7 +699,7 @@ export default class App extends React.Component {
 
         var stateChange = {};
         if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
-        if (session != this.state.session) stateChange.session = session;
+        if (session !== this.state.session) stateChange.session = session;
 
         if (Object.keys(stateChange).length > 0){
             this.setState(stateChange, typeof callback === 'function' ? callback.bind(this, session, userInfo) : null);

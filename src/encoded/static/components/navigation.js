@@ -391,7 +391,7 @@ class SearchBar extends React.Component{
         
         return (
             <form
-                className={"navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (this.hasInput() ? ' has-input' : '')}
+                className={"navbar-search-form-container navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (this.hasInput() ? ' has-input' : '')}
                 action={searchAllItems ? "/search/" : "/browse/" }
                 method="GET"
             >
@@ -416,6 +416,14 @@ class UserActions extends React.Component {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
+        this.setIsLoading = this.setIsLoading.bind(this);
+        this.state = {
+            'isLoading' : false
+        };
+    }
+
+    setIsLoading(isLoading = !this.state.isLoading){
+        this.setState({ 'isLoading' : isLoading });
     }
 
     render() {
@@ -429,9 +437,11 @@ class UserActions extends React.Component {
             }
         }
 
-        acctTitle = (
+        if (this.state.isLoading){
+            acctTitle = <span class><i className="icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
+        } else acctTitle = (
             <span>
-                <i title={session ? "Signed In" : null} className={"account-icon icon icon-user" + (session ? "" : "-o")}></i> { acctTitle }
+                <i title={session ? "Signed In" : null} className={"account-icon icon icon-user" + (session ? "" : "-o")}></i>&nbsp; { acctTitle }
             </span>
         );
 
@@ -445,6 +455,7 @@ class UserActions extends React.Component {
                         session={this.props.session}
                         href={this.props.href}
                         updateUserInfo={this.props.updateUserInfo}
+                        setIsLoadingIcon={this.setIsLoading}
                     />
                 );
             } else if (action.id === "accountactions-menu-item"){
@@ -471,7 +482,7 @@ class UserActions extends React.Component {
 
         return (
             <Nav className="navbar-acct" pullRight>
-                <NavDropdown id="context" label="context" title={acctTitle} >
+                <NavDropdown id="user_actions_dropdown" label="context" title={acctTitle} >
                     { actions }
                 </NavDropdown>
             </Nav>

@@ -214,7 +214,7 @@ export class IndividualItemTitle extends React.Component {
 
     toggleIcon(){
         if (!this.moreInfoExists()) return null;
-        return [<i className={"icon icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} onClick={this.toggle} />, <span>&nbsp;</span>];
+        return [<i className={"icon clickable icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} onClick={this.toggle} />, <span>&nbsp;</span>];
     }
 
     moreInfoExists(){
