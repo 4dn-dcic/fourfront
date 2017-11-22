@@ -63,6 +63,7 @@ export default class Login extends React.Component {
         if (!this.props.session) return;
         if (typeof this.props.navCloseMobileMenu === 'function') this.props.navCloseMobileMenu();
 
+        this.props.setIsLoadingIcon(true);
         ajax.fetch('/logout?redirect=false')
         .then(data => {
             if(typeof document !== 'undefined'){
@@ -71,6 +72,7 @@ export default class Login extends React.Component {
                 document.dispatchEvent(new MouseEvent('click'));
 
                 this.props.updateUserInfo();
+                this.props.setIsLoadingIcon(false);
                 navigate('', {'inPlace':true});
             }
         });
@@ -85,7 +87,7 @@ export default class Login extends React.Component {
         this.props.setIsLoadingIcon(true);
         this.lock.hide();
 
-        var race = Promise.race([
+        Promise.race([
             ajax.fetch('/login', {
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer '+idToken },
@@ -104,10 +106,11 @@ export default class Login extends React.Component {
             this.props.updateUserInfo();
             Alerts.deQueue(Alerts.LoggedOut);
             console.info('Login completed');
+            this.props.setIsLoadingIcon(false);
             if (this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
-                navigate('/', {'inPlace':true}, this.props.setIsLoadingIcon.bind(this.props.setIsLoadingIcon, false));
+                navigate('/', {'inPlace':true});
             }else{
-                navigate('', {'inPlace':true}, this.props.setIsLoadingIcon.bind(this.props.setIsLoadingIcon, false));
+                navigate('', {'inPlace':true});
             }
         }).catch((error)=>{
             // Handle Errors
@@ -116,11 +119,13 @@ export default class Login extends React.Component {
 
             this.props.setIsLoadingIcon(false);
             
-            if (error.code === 403) {
+            if (!error.code && error.type === 'timed-out'){
+                Alerts.queue(Alerts.LoginFailed);
+            } else if (error.code === 403) {
                 navigate('/error/login-failed');
             } else {
                 navigate('/', ()=>{
-                    setTimeout( Alerts.queue.bind(Alerts, Alerts.LoginFailed), 500);
+                    setTimeout( Alerts.queue.bind(Alerts, Alerts.LoginFailed), 1000);
                 });
             }
             Alerts.deQueue(Alerts.LoggedOut);
