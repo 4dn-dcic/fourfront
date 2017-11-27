@@ -46,7 +46,7 @@ requires = [
     'subprocess_middleware',
     'xlrd',
     'zope.sqlalchemy',
-    'pyJWT',
+    'pyJWT>=1.5.3',
     # add it here for some command line tools
     'pytest>=2.4.0',
 ]
