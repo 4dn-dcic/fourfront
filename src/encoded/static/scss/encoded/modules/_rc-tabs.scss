@@ -529,7 +529,12 @@
 .tab-section-title {
     font-weight: 300;
     margin: 0;
-    padding: 27px 0 16px;
+    padding: 27px 0 16px; // 67px height
+}
+
+h4.tab-section-title {
+  padding-top: 36px;
+  padding-bottom: 12px;
 }
 
 .tab-section-title-horiz-divider {
@@ -687,7 +692,7 @@
   border-bottom: none;
   border-left: none;
   border-right: none;
-  background-color: #fcfcfc;
+  background-color: #fff;
 }
 
 

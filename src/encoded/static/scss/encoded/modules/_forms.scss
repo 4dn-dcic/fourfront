@@ -27,9 +27,10 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 }
 
 // Navbar search
-.navbar-form.navbar-right {
+.navbar-search-form-container {
 	position: relative;
 	margin-top: -1px;
+	float: left;
 	#navbar-search {
 		font-size: 1em;
 		width: 140px;
@@ -63,7 +64,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		}
 		&.has-input #navbar-search,
 		#navbar-search:focus {
-			width: 180px;
+			width: 155px;
 			color: rgba(0,0,0,1.0);
 			border-color: rgba(125,125,125,1.0);
 			@include transition(width 0.3s ease-out);

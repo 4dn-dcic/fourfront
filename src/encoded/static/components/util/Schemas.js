@@ -53,11 +53,11 @@ export const itemTypeHierarchy = {
 
 export const Term = {
 
-    toName : function(field, term, allowJSXOutput = false){
+    toName : function(field, term, allowJSXOutput = false, addDescriptionTipForLinkTos = true){
 
         if (allowJSXOutput && typeof term !== 'string' && term && typeof term === 'object'){
             // Object, probably an item.
-            return linkFromItem(term);
+            return linkFromItem(term, addDescriptionTipForLinkTos);
         }
 
         var name = null;
@@ -85,7 +85,7 @@ export const Term = {
         }
 
         switch (standardizedFieldKey) {
-            case 'biosource.biosource_type':
+            case 'biosource_type':
             case 'biosample.biosource.individual.organism.name':
                 name = Term.capitalize(term);
                 break;
@@ -95,7 +95,6 @@ export const Term = {
             case 'files.file_type':
             case 'files.file_classification':
             case 'files.file_type_detailed':
-            case 'biosample.biosource.biosource_type':
                 name = Term.capitalizeSentence(term);
                 break;
             case 'file_size':
@@ -160,7 +159,6 @@ export const Field = {
     },
 
     toName : function(field, schemas, schemaOnly = false, itemType = 'ExperimentSet'){
-        console.log('TN', field, itemType);
         if (!schemaOnly && Field.nameMap[field]){
             return Field.nameMap[field];
         } else {
@@ -182,6 +180,8 @@ export const Field = {
         if (!baseSchemaProperties) return null;
         if (field.slice(0,5) === 'audit') return null;
         var fieldParts = field.split('.');
+
+        
 
         function getNextSchemaProperties(linkToName){
 
@@ -206,7 +206,6 @@ export const Field = {
             var property = propertiesObj[fieldParts[fieldPartIndex]];
             if (fieldPartIndex >= fieldParts.length - 1) return property;
             var nextSchemaProperties = null;
-            //console.log(propertiesObj, fieldParts, fieldPartIndex);
             if (property.type === 'array' && property.items && property.items.linkTo){
                 nextSchemaProperties = getNextSchemaProperties(property.items.linkTo);
             } else if (property.type === 'array' && property.items && property.items.linkFrom){
@@ -215,6 +214,8 @@ export const Field = {
                 nextSchemaProperties = getNextSchemaProperties(property.linkTo);
             } else if (property.linkFrom) {
                 nextSchemaProperties = getNextSchemaProperties(property.linkFrom);
+            } else if (property.type === 'object'){ // Embedded
+                nextSchemaProperties = property.properties;
             }
 
             if (nextSchemaProperties) return getProperty(nextSchemaProperties, fieldPartIndex + 1);

@@ -866,17 +866,29 @@ $download-button-width : 100px;
 		color: #999;
 	}
 
-	div.more-details {
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+	div.details-col {
 
-		&.error-message {
-			white-space: pre-line;
-			white-space: normal;
-			opacity: 0.5;
+		&.no-more-details {
+			h5.block-title {
+				margin-top: 8px;
+			}
 		}
+
+		div.more-details {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+	
+			&.error-message {
+				white-space: pre-line;
+				white-space: normal;
+				opacity: 0.5;
+			}
+		}
+
 	}
+
+	
 
 	@include icon-container-child();
 
@@ -953,6 +965,11 @@ $download-button-width : 100px;
 
 /************** OverviewBody ***********/
 
+@mixin overview-block-value-block {
+	background-color: #f8f8f8;
+	padding: 6px 12px;
+}
+
 .item-page-container {
 	.rc-tabs-content {
 		
@@ -960,33 +977,132 @@ $download-button-width : 100px;
 			> div {
 				> .inner {
 					padding: 15px 0 5px;
+
+					.tooltip-info-container {
+						> span {
+							> i.icon-info-circle {
+								margin-left: 5px;
+							}
+						}
+					}
+
 					h5 {
 						margin-top: 0;
 						margin-bottom: 5px;
 						font-weight: 500;
 					}
-					ol {
+
+					ol.overview-list-elements-container,
+					ul.overview-list-elements-container {
 						margin-bottom: 0;
+						padding-left: 30px;
 					}
-				}
-				/*
-				&.col-md-4:nth-child(n + 4){
-					> .inner {
-						@media screen and (min-width: $screen-md-min){
-							border-top: 1px solid #eee;
-							//margin-top: 4px;
+
+					a.btn {
+						i.icon-external-link {
+							margin-left: 5px;
+							position: relative;
+							top: 1px;
+							&.small {
+								font-size: .65rem;
+								top: -1px;
+							}
+						}
+						i.icon-cloud-download,
+						i.icon-picture-o,
+						i.icon-file-pdf-o {
+							margin-right: 3px;
+						}
+						&.btn-block {
+							padding-left: 4px;
+							padding-right: 4px;
+						}
+						&.btn-sm {
+							padding-bottom: 4px; // Overrides 5
+							i.icon-external-link {
+								//top: 0px;
+							}
 						}
 					}
-				}
-				&.col-md-3:nth-child(n + 5){
-					> .inner {
-						@media screen and (min-width: $screen-md-min){
-							border-top: 1px solid #eee;
-							//margin-top: 4px;
+
+					// Embedded Items w/ Attachments
+					.embedded-item-with-attachment {
+						background-color: #f8f8f8;
+						border-radius: 3px;
+						&:not(.in-array){
+						}
+						.link-to-item-col {
+							white-space: nowrap;
+							text-overflow: ellipsis;
+							overflow: hidden;
+							&.in-array {
+								//> .inner {
+								//	padding-left: 30px;
+								//}
+							}
+							> .inner {
+								line-height: 28px;
+								> span, > a {
+									vertical-align: middle;
+								}
+								> a {
+									display: inline-block;
+									white-space: nowrap;
+									text-overflow: ellipsis;
+									overflow: hidden;
+									max-width: 100%;
+								}
+							}
+						}
+						.view-attachment-button-col {
+							padding-right: 4px;
+							> a.btn {
+
+							}
 						}
 					}
+
+					> div.overview-single-element {
+						&.block {
+							padding: 0;
+							margin-bottom: 0;
+							&:not(.no-value){
+								margin-top: 10px;
+								@include overview-block-value-block;
+							}
+						}
+					}
+
+					
+					> div.overview-list-elements-container {
+						margin-top: 10px;
+
+						> div.overview-list-element {
+							@include overview-block-value-block;
+							margin-bottom: 5px;
+							&:last-child {
+								border-bottom: none;
+							}
+						}
+
+						&.embedded-item-with-attachment-container {
+							> div.overview-list-element {
+								
+							}
+						}
+						
+					}
+
+					> ul.overview-list-elements-container,
+					> ol.overview-list-elements-container {
+						> li {
+							> div {
+								
+							}
+						}
+					}
+
 				}
-				*/
 			}
 		}
 	}
@@ -1223,7 +1339,7 @@ $download-button-width : 100px;
 
 }
 
-/**** File VIew ****/
+/**** File View ****/
 
 .item-page-container.type-File {
 
@@ -1236,7 +1352,6 @@ $download-button-width : 100px;
 			padding-top: 20px;
 
 			@media screen and (min-width: $screen-md-min){
-				float: right;
 				padding-top: 16px;
 				margin-top: 0;
 				border-top: none;

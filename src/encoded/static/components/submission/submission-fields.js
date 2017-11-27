@@ -684,6 +684,7 @@ class S3FileInput extends React.Component{
 
     constructor(props){
         super(props);
+        this.getFileExtensionRequired = this.getFileExtensionRequired.bind(this);
         this.state = {
             'percentDone': null,
             'sizeUploaded': null,
@@ -716,27 +717,31 @@ class S3FileInput extends React.Component{
         }
     }
 
-    /*
-    Handle file selection. Store the file in SubmissionView state and change
-    the filename context using modifyNewContext
-    */
-    handleChange = (e) => {
-        var req_type = null;
-        var file = e.target.files[0];
+    getFileExtensionRequired(){
         // get the current context and overall schema for the file object
         var currContext = this.props.getCurrContext();
         var currSchema = this.props.getCurrSchema();
         var schema_extensions = object.getNestedProperty(currSchema, ['file_format_file_extension'], true);
         var extension;
         // find the extension the file should have
-        if(currContext.file_format in schema_extensions){
+        if (currContext.file_format in schema_extensions) {
             extension = schema_extensions[currContext.file_format];
-        }else{
+        } else {
             alert('Internal file extension conflict.');
-            return;
+            return null;
         }
+        return extension;
+    }
+
+    /*
+    Handle file selection. Store the file in SubmissionView state and change
+    the filename context using modifyNewContext
+    */
+    handleChange = (e) => {
+        var extension = this.getFileExtensionRequired();
+        var file = e.target.files[0];
         // file was not chosen
-        if(!file){
+        if(!file || !extension){
             return;
         }else{
             var filename = file.name ? file.name : "unknown";
@@ -815,12 +820,11 @@ class S3FileInput extends React.Component{
                 statusTip = 'Previous file: ' + this.props.value;
             }
         }
-        console.log('S3FILEINPUT', this.props.md5Progress, this.props.upload);
         var disableFile = this.props.md5Progress !== null || this.props.upload !== null;
         return(
             <div>
                 <div>
-                    <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
+                    <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}} />
                     <Button disabled={disableFile} style={{'padding':'0px'}}>
                         <label children={filename_text} className="text-400" htmlFor={"field_for_" + this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}/>
                     </Button>

@@ -256,6 +256,7 @@
     "attachment": {
         "attachment": {
             "title": "Attached File",
+            "description" : "File attached to this Item.",
             "type": "object",
             "additionalProperties": false,
             "formInput": "file",
@@ -264,10 +265,13 @@
             "properties": {
                 "download": {
                     "title": "File Name",
+                    "description" : "File Name of the attachment.",
                     "type": "string"
                 },
                 "href": {
                     "internal_comment": "Internal webapp URL for document file",
+                    "title" : "href",
+                    "description" : "Path to download the file attached to this Item.",
                     "type": "string"
                 },
                 "type": {
@@ -289,20 +293,24 @@
                     ]
                 },
                 "md5sum": {
-                    "title": "MD5sum",
+                    "title": "MD5 Checksum",
+                    "description" : "Use this to ensure that your file was downloaded without errors or corruption.",
                     "type": "string",
                     "format": "md5sum"
                 },
                 "size": {
                     "title": "File size",
+                    "description" : "Size of the file on disk",
                     "type": "integer"
                 },
                 "width": {
                     "title": "Image width",
+                    "description" : "Width of the image attached, in pixels.",
                     "type": "integer"
                 },
                 "height": {
                     "title": "Image height",
+                    "description" : "Height of the image attached, in pixels.",
                     "type": "integer"
                 },
                 "blob_id":{
