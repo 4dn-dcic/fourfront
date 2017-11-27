@@ -59,12 +59,13 @@ if options.setuptools_version is not None:
 else:
     pip.main(['install', 'setuptools'])
 
+
 ######################################################################
 # Install buildout
 if options.buildout_version is not None:
-    pip.main(['install', '--upgrade', 'zc.buildout==%s' % options.buildout_version])
+    pip.main(['install',  '--no-deps', '--upgrade', 'zc.buildout==%s' % options.buildout_version])
 else:
-    pip.main(['install', '--upgrade', 'zc.buildout'])
+    pip.main(['install', '--no-deps', '--upgrade', 'zc.buildout'])
 
 ######################################################################
 # Import and run buildout
