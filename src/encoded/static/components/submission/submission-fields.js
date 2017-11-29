@@ -546,7 +546,7 @@ class ObjectField extends React.Component{
         // format field as <this_field>.<next_field> so top level modification
         // happens correctly
         var nestedField = this.props.nestedField + '.' + field;
-        return(
+        return (
             <BuildField
                 value={fieldValue}
                 key={field}

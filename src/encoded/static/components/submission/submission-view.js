@@ -39,6 +39,8 @@ import { Detail } from '../item-pages/components';
  * @prop {string} href      Current browser URL/href. If a search href, should have a 'type=' query component to infer type of Item to create.
  * @prop {Object} [context] Current resource (Item) at our current href path. Used to get '@type' from, if not a search page.
  * @prop {Object} schemas   Schemas as returned from back-end via /profiles/ endpoint. Required.
+ * @prop {boolean} create   Is this a new Item being created?
+ * @prop {boolean} edit     Is this an Item being edited?
  */
 export default class SubmissionView extends React.Component{
 
@@ -172,6 +174,23 @@ export default class SubmissionView extends React.Component{
         return validationReturn;
     }
 
+    principalTitle(context = null, itemType = null){
+        if (context === null) {
+            context = this.props.context;
+        }
+        var principalDisplay; // Name of our current Item being created.
+        if (this.props.create === true && !this.props.edit){
+            principalDisplay = 'New ' + itemType;
+        } else if (this.props.edit === true && !this.props.create){
+            if (typeof context.accession === 'string'){
+                principalDisplay = context.accession;
+            } else {
+                principalDisplay = itemType;
+            }
+        }
+        return principalDisplay;
+    }
+
     /**
      * Initialize state for the principal object (i.e. the primary object we
      * are creating/editing/cloning). It has the index of 0.
@@ -191,10 +210,9 @@ export default class SubmissionView extends React.Component{
             if (Array.isArray(typeFromHref)) typeFromHref = _.without(typeFromHref, 'Item')[0];
             if (typeFromHref && typeFromHref !== 'Item') principalTypes = [typeFromHref]; // e.g. ['ExperimentSetReplicate']
         }
-        var initType = {0: principalTypes[0]};
-        var initValid = {0: 1};
-        var principalDisplay = 'New ' + principalTypes[0];
-        var initDisplay = {0: principalDisplay};
+        var initType = { 0 : principalTypes[0] };
+        var initValid = { 0 : 1 };
+        var initDisplay = { 0 : this.principalTitle(context, principalTypes[0]) };
         var initBookmarks = {};
         var bookmarksList = [];
         var schema = schemas[principalTypes[0]];
@@ -462,22 +480,15 @@ export default class SubmissionView extends React.Component{
         var currKey = this.state.currKey;
         var currAlias = keyDisplay[currKey];
         var aliases = this.state.keyContext[currKey].aliases || null;
-        // no aliases
-        if (aliases === null || (Array.isArray(aliases) && aliases.length === 0)){
-            // Try 'name' & 'title', then fallback to 'My ItemType currKey'
-            var name = this.state.keyContext[currKey].name || this.state.keyContext[currKey].title || null;
-            if (name){
-                keyDisplay[currKey] = name;
-            } else {
-                keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
-            }
-        }else if(!_.contains(aliases, currAlias)){
-            var lastAlias = aliases[aliases.length-1];
-            if(lastAlias !== null){
-                keyDisplay[currKey] = lastAlias;
-            }else{
-                keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
-            }
+
+        // Try to get 'alias' > 'name' > 'title' > then fallback to 'My ItemType currKey'
+        var name = (( Array.isArray(aliases) && aliases.length > 1 && aliases[aliases.length - 2] ) || this.state.keyContext[currKey].name || this.state.keyContext[currKey].title || null);
+        if (name) {
+            keyDisplay[currKey] = name;
+        } else if (currKey === 0) {
+            keyDisplay[currKey] = this.principalTitle(null, keyTypes[currKey]);
+        } else {
+            keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
         }
         this.setState({'keyDisplay': keyDisplay});
     }
