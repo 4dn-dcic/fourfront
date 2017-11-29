@@ -84,6 +84,20 @@ class Award(Item):
 
 
 @collection(
+    name='badges',
+    unique_key='badge:badgename',
+    properties={
+        'title': 'Badges',
+        'description': 'Listing of badges for 4DN items',
+    })
+class Badge(Item):
+    """The Badge class that descrbes a badge that can be associated with an item."""
+
+    item_type = 'badge'
+    schema = load_schema('encoded:schemas/badge.json')
+
+
+@collection(
     name='biosample-cell-cultures',
     properties={
         'title': 'Biosample Cell Culture Information',
