@@ -297,8 +297,10 @@ class Item(snovault.Item):
                         if status == 'released to project':
                             roles['viewing_group.4DN'] = 'role.viewing_group_member'
                         elif status in ['planned', 'submission in progress']:
-                            if 'tags' in properties and 'joint analysis' in [c.lower() for c in properties['tags']]:
-                                roles['viewing_group.4DN'] = 'role.viewing_group_member'
+                            for t in properties.get('tags', []):
+                                if 'joint analysis' in t.lower():
+                                    roles['viewing_group.4DN'] = 'role.viewing_group_member'
+                                    break
         return roles
 
     def add_accession_to_title(self, title):

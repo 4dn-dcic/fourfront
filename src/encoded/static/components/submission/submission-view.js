@@ -39,6 +39,8 @@ import { Detail } from '../item-pages/components';
  * @prop {string} href      Current browser URL/href. If a search href, should have a 'type=' query component to infer type of Item to create.
  * @prop {Object} [context] Current resource (Item) at our current href path. Used to get '@type' from, if not a search page.
  * @prop {Object} schemas   Schemas as returned from back-end via /profiles/ endpoint. Required.
+ * @prop {boolean} create   Is this a new Item being created?
+ * @prop {boolean} edit     Is this an Item being edited?
  */
 export default class SubmissionView extends React.Component{
 
@@ -172,6 +174,23 @@ export default class SubmissionView extends React.Component{
         return validationReturn;
     }
 
+    principalTitle(context = null, itemType = null){
+        if (context === null) {
+            context = this.props.context;
+        }
+        var principalDisplay; // Name of our current Item being created.
+        if (this.props.create === true && !this.props.edit){
+            principalDisplay = 'New ' + itemType;
+        } else if (this.props.edit === true && !this.props.create){
+            if (context && typeof context.accession === 'string'){
+                principalDisplay = context.accession;
+            } else {
+                principalDisplay = itemType;
+            }
+        }
+        return principalDisplay;
+    }
+
     /**
      * Initialize state for the principal object (i.e. the primary object we
      * are creating/editing/cloning). It has the index of 0.
@@ -191,10 +210,9 @@ export default class SubmissionView extends React.Component{
             if (Array.isArray(typeFromHref)) typeFromHref = _.without(typeFromHref, 'Item')[0];
             if (typeFromHref && typeFromHref !== 'Item') principalTypes = [typeFromHref]; // e.g. ['ExperimentSetReplicate']
         }
-        var initType = {0: principalTypes[0]};
-        var initValid = {0: 1};
-        var principalDisplay = 'New ' + principalTypes[0];
-        var initDisplay = {0: principalDisplay};
+        var initType = { 0 : principalTypes[0] };
+        var initValid = { 0 : 1 };
+        var initDisplay = { 0 : this.principalTitle(context, principalTypes[0]) };
         var initBookmarks = {};
         var bookmarksList = [];
         var schema = schemas[principalTypes[0]];
@@ -462,22 +480,15 @@ export default class SubmissionView extends React.Component{
         var currKey = this.state.currKey;
         var currAlias = keyDisplay[currKey];
         var aliases = this.state.keyContext[currKey].aliases || null;
-        // no aliases
-        if (aliases === null || (Array.isArray(aliases) && aliases.length === 0)){
-            // Try 'name' & 'title', then fallback to 'My ItemType currKey'
-            var name = this.state.keyContext[currKey].name || this.state.keyContext[currKey].title || null;
-            if (name){
-                keyDisplay[currKey] = name;
-            } else {
-                keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
-            }
-        }else if(!_.contains(aliases, currAlias)){
-            var lastAlias = aliases[aliases.length-1];
-            if(lastAlias !== null){
-                keyDisplay[currKey] = lastAlias;
-            }else{
-                keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
-            }
+
+        // Try to get 'alias' > 'name' > 'title' > then fallback to 'My ItemType currKey'
+        var name = (( Array.isArray(aliases) && aliases.length > 1 && aliases[aliases.length - 2] ) || this.state.keyContext[currKey].name || this.state.keyContext[currKey].title || null);
+        if (name) {
+            keyDisplay[currKey] = name;
+        } else if (currKey === 0) {
+            keyDisplay[currKey] = this.principalTitle(null, keyTypes[currKey]);
+        } else {
+            keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
         }
         this.setState({'keyDisplay': keyDisplay});
     }
@@ -1078,9 +1089,9 @@ export default class SubmissionView extends React.Component{
                             // Perform final steps when object is submitted
                             // *** SHOULD THIS STUFF BE BROKEN OUT INTO ANOTHER FXN?
                             // find key of parent object, starting from top of hierarchy
-                            var parentKey = findParentFromHierarchy(this.state.keyHierarchy, inKey);
+                            var parentKey = parseInt(findParentFromHierarchy(this.state.keyHierarchy, inKey));
                             // navigate to parent obj if it was found. Else, go to top level
-                            stateToSet.currKey = parentKey !== null ? parentKey : 0;
+                            stateToSet.currKey = (parentKey !== null && !isNaN(parentKey) ? parentKey : 0);
                             var typesCopy = this.state.keyTypes;
                             var keyComplete = this.state.keyComplete;
                             var linksCopy = this.state.keyLinks;
@@ -1117,11 +1128,9 @@ export default class SubmissionView extends React.Component{
                                 // see if we need to go into round two submission
                                 if(roundTwoCopy.length === 0){
                                     // we're done!
-                                    this.props.setIsSubmitting(false);
-                                    alert('Success! Navigating to your new object.');
-                                    setTimeout(()=>{
+                                    this.props.setIsSubmitting(false, ()=>{
                                         this.props.navigate(destination);
-                                    }, 500);
+                                    });
                                 }else{
                                     // break this out into another fxn?
                                     // roundTwo initiation
@@ -1180,11 +1189,11 @@ export default class SubmissionView extends React.Component{
         this.setState(stateToSet);
         if(roundTwoCopy.length == 0){
             // we're done!
-            this.props.setIsSubmitting(false);
-            alert('Success! Navigating to your new object.');
-            setTimeout(()=>{
+            //alert('Success! Navigating to your new object.');
+            this.props.setIsSubmitting(false, ()=>{
                 this.props.navigate(this.state.keyComplete[0]);
-            }, 500);
+            });
+            
         }
     }
 
@@ -1300,8 +1309,7 @@ export default class SubmissionView extends React.Component{
                             setSubmissionState={this.setSubmissionState}
                             modifyAlias={this.modifyAlias}
                             updateUpload={this.updateUpload}
-                            {..._.pick(this.state, 'keyDisplay', 'keyComplete', 'keyIter', 'currKey', 'keyContext',
-                                'upload', 'uploadStatus', 'md5progress', 'roundTwo', 'currentSubmittingUser')}
+                            {..._.pick(this.state, 'keyDisplay', 'keyComplete', 'keyIter', 'currKey', 'keyContext', 'upload', 'uploadStatus', 'md5Progress', 'roundTwo', 'currentSubmittingUser')}
                         />
                     </div>
                 </div>
@@ -1313,7 +1321,7 @@ export default class SubmissionView extends React.Component{
 class WarningBanner extends React.Component {
     render() {
         return(
-            <div className="mb-2 text-400 warning-banner">
+            <div className="mb-2 mt-1 text-400 warning-banner">
                 <div className="row">
                     <div className="col-md-7 col-lg-8">
                         Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. The submission process is under active development and features may change.
@@ -1574,7 +1582,9 @@ class IndividualObjectView extends React.Component{
 
     constructor(props){
         super(props);
+        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.modifyNewContext = this.modifyNewContext.bind(this);
+        this.initiateField = this.initiateField.bind(this);
 
         /**
          * State in this component mostly has to do with selection of existing objs
@@ -1833,7 +1843,7 @@ class IndividualObjectView extends React.Component{
      * make a BuildField component for that field. Different fields are returned
      * for roundOne and roundTwo.
      */
-    initiateField = (field) => {
+    initiateField(field) {
         var currSchema = this.props.schemas[this.props.currType];
         var fieldSchema = object.getNestedProperty(currSchema, ['properties', field], true);
         if(!fieldSchema) return null;
@@ -1862,17 +1872,13 @@ class IndividualObjectView extends React.Component{
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
-        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        var fieldType = BuildField.fieldTypeFromFieldSchema(fieldSchema);
         var fieldValue = this.props.currContext[field] || null;
         var enumValues = [];
         var isLinked = false;
-        // transform some types...
-        if(fieldType == 'string'){
-            fieldType = 'text';
-        }
+
         // check if this is an enum
-        if(fieldSchema.enum || fieldSchema.suggested_enum){
-            fieldType = 'enum';
+        if(fieldType === 'enum'){
             enumValues = fieldSchema.enum || fieldSchema.suggested_enum;
         }
         // check for linkTo if further down in object or array
@@ -1883,11 +1889,7 @@ class IndividualObjectView extends React.Component{
         }
         // handle a linkTo object on the the top level
         // check if any schema-specific adjustments need to made:
-        if(fieldSchema.linkTo){
-            fieldType = 'linked object';
-        }else if (fieldSchema.attachment && fieldSchema.attachment === true){
-            fieldType = 'attachment';
-        }else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
+        if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
             // only render file upload input if status is 'uploading' or 'upload_failed'
             // when editing a File principal object.
             // there may be a bug where status automatically gets reset to uploading

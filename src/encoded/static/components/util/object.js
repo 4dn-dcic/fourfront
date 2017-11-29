@@ -3,6 +3,7 @@
 import _ from 'underscore';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Field } from './Schemas';
 
 
 /**
@@ -20,30 +21,50 @@ export function atIdFromObject(o){
 }
 
 
-export function linkFromItem(item, propertyForTitle = 'display_title', elementProps){
+export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps, suppressErrors = false){
     var href = atIdFromObject(item);
-    var title = item[propertyForTitle] || item.display_title || item.title || item.name;
+    var title = (propertyForTitle && item[propertyForTitle]) || item.display_title || item.title || item.name || href;
     if (!href || !title){
         if (item && typeof item === 'object' && typeof item.error === 'string'){
             return <em>{ item.error }</em>;
         }
         // Uh oh, probably not an Item
-        console.error("Could not get atId for Item", item);
+        if (!suppressErrors) console.error("Could not get atId for Item", item);
         return null;
     }
+    
+    var propsToInclude = elementProps && _.clone(elementProps) || {};
+
+    if (typeof propsToInclude.key === 'undefined'){
+        propsToInclude.key = href;
+    }
+    
+    if (addDescriptionTip && typeof propsToInclude['data-tip'] === 'undefined' && item.description){
+        propsToInclude['data-tip'] = item.description;
+        propsToInclude.className = (propsToInclude.className || '') + ' inline-block';
+    }
+    
     return (
-        <a href={href} {...elementProps}>{ title }</a>
+        <a href={href} {...propsToInclude}>{ title }</a>
     );
 }
 
 
 /** Return the properties dictionary from a schema for use as tooltips */
 export function tipsFromSchema(schemas, content){
-    var tips = {};
-    if(content['@type'] && typeof schemas === 'object' && schemas !== null){
+    if(content['@type'] && Array.isArray(content['@type']) && content['@type'].length > 0){
         var type = content['@type'][0];
-        if(schemas[type]){
-            tips = schemas[type].properties;
+        return tipsFromSchemaByType(schemas, content['@type'][0]);
+    }
+    return {};
+}
+
+/** Return the properties dictionary from a schema for use as tooltips */
+export function tipsFromSchemaByType(schemas, itemType='ExperimentSet'){
+    var tips = {};
+    if(itemType && typeof schemas === 'object' && schemas !== null){
+        if (schemas[itemType]){
+            tips = schemas[itemType].properties;
         }
     }
     return tips;
@@ -243,20 +264,31 @@ export class TooltipInfoIconContainerAuto extends React.Component {
         'result' : PropTypes.shape({
             '@type' : PropTypes.array.isRequired
         }).isRequired,
+        'itemType' : PropTypes.string,
         'schemas' : PropTypes.object
     }
 
     render(){
-        var { elementType, title, property, result, schemas, tips, fallbackTitle } = this.props;
-        if (!tips){
-            tips = tipsFromSchema(schemas, result);
+        var { elementType, title, property, result, schemas, tips, fallbackTitle, itemType } = this.props;
+        var schemaProperty = null;
+        var tooltip = null;
+        if (tips){
+            tooltip = (tips && tips[property] && tips[property].description) || null;
+            if (!title) title = (tips && tips[property] && tips[property].title) || null;
         }
-        var tooltip = (tips && tips[property] && tips[property].description) || null;
-        if (!title){
-            title = (tips && tips[property] && tips[property].title) || null;
+        if (!title || !tooltip) {
+            try {
+                schemaProperty = Field.getSchemaProperty(property, schemas, itemType || result['@type'][0]);
+            } catch (e){
+                console.warn('Failed to get schemaProperty', itemType, property);
+            }
+            tooltip = (schemaProperty && schemaProperty.description) || null;
+            if (!title) title = (schemaProperty && schemaProperty.title) || null;
         }
+        
+        
 
-        return <TooltipInfoIconContainer tooltip={tooltip} title={title || fallbackTitle || property} elementType={this.props.elementType} />;
+        return <TooltipInfoIconContainer {...this.props} tooltip={tooltip} title={title || fallbackTitle || property} elementType={this.props.elementType} />;
     }
 }
 

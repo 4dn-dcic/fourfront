@@ -18,7 +18,29 @@ if it is a simple number/text/enum, or generates a child component for
 attachment, linked object, array, object, and file fields. Contains delete
 logic for the field as well (deleting is done by setting value to null).
 */
-export default class BuildField extends React.Component{
+export default class BuildField extends React.Component {
+
+    /**
+     * @param {{ 'type' : string }} fieldSchema - Schema definition for this property. Should be same as `app.state.schemas[CurrentItemType].properties[currentField]`.
+     */
+    static fieldTypeFromFieldSchema(fieldSchema){
+        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        // transform some types...
+        if(fieldType === 'string'){
+            fieldType = 'text';
+        }
+        // check if this is an enum
+        if(fieldSchema.enum || fieldSchema.suggested_enum){
+            fieldType = 'enum';
+        }
+        // handle a linkTo object on the the top level
+        if(fieldSchema.linkTo){
+            fieldType = 'linked object';
+        } else if (fieldSchema.attachment && fieldSchema.attachment === true){
+            fieldType = 'attachment';
+        }
+        return fieldType;
+    }
 
     constructor(props){
         super(props);
@@ -77,7 +99,7 @@ export default class BuildField extends React.Component{
             case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={this.props.value || null} roundTwo={this.props.roundTwo} />;
             case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
             case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
-            case 'file upload'      : return <S3FileInput {...this.props}/>;
+            case 'file upload'      : return <S3FileInput {...this.props} />;
         }
         // Fallback
         return <div>No field for this case yet.</div>;
@@ -247,9 +269,7 @@ export default class BuildField extends React.Component{
     }
 }
 
-/*
-Case for a linked object.
-*/
+/** Case for a linked object. */
 class LinkedObj extends React.Component{
 
     constructor(props){
@@ -343,8 +363,6 @@ class LinkedObj extends React.Component{
     }
 }
 
-
-var xCount = 0;
 
 /**
  * Display fields that are arrays. To do this, make a BuildField for each
@@ -482,7 +500,7 @@ class ArrayField extends React.Component{
  * Builds a field that represents a sub-object. Essentially serves to hold
  * and coordinate BuildFields that correspond to the fields within the subfield.
  */
-class ObjectField extends React.Component{
+class ObjectField extends React.Component {
 
     constructor(props){
         super(props);
@@ -523,7 +541,7 @@ class ObjectField extends React.Component{
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
-        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        var fieldType = BuildField.fieldTypeFromFieldSchema(fieldSchema);
         var title = fieldSchema.title || field;
         var fieldValue;
         if(this.props.value){
@@ -532,23 +550,14 @@ class ObjectField extends React.Component{
             fieldValue = null;
         }
         var enumValues = [];
-        // transform some types...
-        if(fieldType == 'string'){
-            fieldType = 'text';
-        }
         // check if this is an enum
-        if(fieldSchema.enum){
-            fieldType = 'enum';
-            enumValues = fieldSchema.enum;
-        }
-        // handle a linkTo object on the the top level
-        if(fieldSchema.linkTo){
-            fieldType = 'linked object';
+        if(fieldType === 'enum'){
+            enumValues = fieldSchema.enum || fieldSchema.suggested_enum || [];
         }
         // format field as <this_field>.<next_field> so top level modification
         // happens correctly
         var nestedField = this.props.nestedField + '.' + field;
-        return(
+        return (
             <BuildField
                 value={fieldValue}
                 key={field}
@@ -579,7 +588,7 @@ class ObjectField extends React.Component{
 
     render(){
         var schema = this.props.schema;
-        var fields = schema['properties'] ? Object.keys(schema['properties']) : [];
+        var fields = schema['properties'] ? _.keys(schema['properties']) : [];
         var buildFields = [];
         for (var i=0; i<fields.length; i++){
             var fieldSchema = this.includeField(schema, fields[i]);
@@ -588,7 +597,7 @@ class ObjectField extends React.Component{
             }
         }
         return(
-            <div>
+            <div className="object-field-container">
                 {buildFields.map((field) => this.initiateField(field))}
             </div>
         );
@@ -686,6 +695,7 @@ class S3FileInput extends React.Component{
 
     constructor(props){
         super(props);
+        this.getFileExtensionRequired = this.getFileExtensionRequired.bind(this);
         this.state = {
             'percentDone': null,
             'sizeUploaded': null,
@@ -718,27 +728,31 @@ class S3FileInput extends React.Component{
         }
     }
 
-    /*
-    Handle file selection. Store the file in SubmissionView state and change
-    the filename context using modifyNewContext
-    */
-    handleChange = (e) => {
-        var req_type = null;
-        var file = e.target.files[0];
+    getFileExtensionRequired(){
         // get the current context and overall schema for the file object
         var currContext = this.props.getCurrContext();
         var currSchema = this.props.getCurrSchema();
         var schema_extensions = object.getNestedProperty(currSchema, ['file_format_file_extension'], true);
         var extension;
         // find the extension the file should have
-        if(currContext.file_format in schema_extensions){
+        if (currContext.file_format in schema_extensions) {
             extension = schema_extensions[currContext.file_format];
-        }else{
+        } else {
             alert('Internal file extension conflict.');
-            return;
+            return null;
         }
+        return extension;
+    }
+
+    /*
+    Handle file selection. Store the file in SubmissionView state and change
+    the filename context using modifyNewContext
+    */
+    handleChange = (e) => {
+        var extension = this.getFileExtensionRequired();
+        var file = e.target.files[0];
         // file was not chosen
-        if(!file){
+        if(!file || !extension){
             return;
         }else{
             var filename = file.name ? file.name : "unknown";
@@ -821,7 +835,7 @@ class S3FileInput extends React.Component{
         return(
             <div>
                 <div>
-                    <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}}/>
+                    <input id={"field_for_" + this.props.field} type='file' onChange={this.handleChange} disabled={disableFile} style={{'display':'none'}} />
                     <Button disabled={disableFile} style={{'padding':'0px'}}>
                         <label children={filename_text} className="text-400" htmlFor={"field_for_" + this.props.field} style={{'paddingRight':'12px','paddingTop':'6px','paddingBottom':'6px','paddingLeft':'12px','marginBottom':'0px'}}/>
                     </Button>

@@ -93,6 +93,13 @@ export default class Alerts extends React.Component {
         'navigateDisappearThreshold' : 1
     }
 
+    static LoginFailed = {
+        "title" : "Login Failed",
+        "message" : "Your attempt to login failed - please check your credentials or try again later.",
+        "style" : "danger",
+        'navigateDisappearThreshold' : 1
+    }
+
 
     constructor(props){
         super(props);

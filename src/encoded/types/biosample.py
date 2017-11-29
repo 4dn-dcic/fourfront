@@ -38,7 +38,13 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "biosource.tissue.synonyms",
         'cell_culture_details.*',
         'modifications.modification_type',
-        'treatments.treatment_type'
+        'modifications.description',
+        'treatments.treatment_type',
+        'treatments.description',
+        'biosample_protocols.attachment.href',
+        'biosample_protocols.attachment.type',
+        'biosample_protocols.attachment.md5sum',
+        'biosample_protocols.description'
     ]
     name_key = 'accession'
 

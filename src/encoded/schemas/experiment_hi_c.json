@@ -47,7 +47,9 @@
                 "dilution Hi-C",
                 "micro-C",
                 "DNase Hi-C",
-                "TCC"
+                "TCC",
+                "single cell Hi-C",
+                "sciHi-C"
             ]
         },
         "crosslinking_method": {

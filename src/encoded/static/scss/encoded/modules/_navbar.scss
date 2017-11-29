@@ -672,3 +672,28 @@ $navbar-transition-easing: ease-out;
     fill: #000000;
     stroke: #000000;
 }
+
+// User Actions Dropwdown
+
+.navbar-acct {
+    margin-left: 15px;
+    margin-right: 0px; // Align w/ right-most container edge.
+}
+
+#user_actions_dropdown {
+    max-width: 115px;
+    min-width: 65px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 25px;
+    > span.caret {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        margin-top: -3px;
+    }
+    @media screen and (min-width: $screen-lg-min) {
+        max-width: 150px;
+    }
+}

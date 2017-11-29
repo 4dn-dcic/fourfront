@@ -1,5 +1,5 @@
 {
-    "title": "Repliseq Experiment",
+    "title": "Repli-seq Experiment",
     "description": "Genome-wide analysis of replication timing by next-generation sequencing.",
     "id": "/profiles/experiment_repliseq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -29,11 +29,11 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "enum": [
-            "repliseq"
+            "Repli-seq"
           ]
         },
         "dna_label": {

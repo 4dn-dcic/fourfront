@@ -61,4 +61,5 @@ def test_update_publication_doi_biorxiv(testapp, publication_doi_biorxiv):
 
 
 def test_publication_diplay_title(testapp, publication_PMID):
-    assert publication_PMID['display_title'].startswith('Kirli K et al. (2016) A deep proteomics')
+    print(publication_PMID)
+    assert publication_PMID['display_title'].startswith('Kirli K et al. (2015) A deep proteomics')
