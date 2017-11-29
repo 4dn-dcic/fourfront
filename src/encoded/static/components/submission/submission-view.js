@@ -182,7 +182,7 @@ export default class SubmissionView extends React.Component{
         if (this.props.create === true && !this.props.edit){
             principalDisplay = 'New ' + itemType;
         } else if (this.props.edit === true && !this.props.create){
-            if (typeof context.accession === 'string'){
+            if (context && typeof context.accession === 'string'){
                 principalDisplay = context.accession;
             } else {
                 principalDisplay = itemType;
@@ -1872,17 +1872,13 @@ class IndividualObjectView extends React.Component{
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
-        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        var fieldType = BuildField.fieldTypeFromFieldSchema(fieldSchema);
         var fieldValue = this.props.currContext[field] || null;
         var enumValues = [];
         var isLinked = false;
-        // transform some types...
-        if(fieldType == 'string'){
-            fieldType = 'text';
-        }
+
         // check if this is an enum
-        if(fieldSchema.enum || fieldSchema.suggested_enum){
-            fieldType = 'enum';
+        if(fieldType === 'enum'){
             enumValues = fieldSchema.enum || fieldSchema.suggested_enum;
         }
         // check for linkTo if further down in object or array
@@ -1893,11 +1889,7 @@ class IndividualObjectView extends React.Component{
         }
         // handle a linkTo object on the the top level
         // check if any schema-specific adjustments need to made:
-        if(fieldSchema.linkTo){
-            fieldType = 'linked object';
-        }else if (fieldSchema.attachment && fieldSchema.attachment === true){
-            fieldType = 'attachment';
-        }else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
+        if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
             // only render file upload input if status is 'uploading' or 'upload_failed'
             // when editing a File principal object.
             // there may be a bug where status automatically gets reset to uploading

@@ -18,7 +18,29 @@ if it is a simple number/text/enum, or generates a child component for
 attachment, linked object, array, object, and file fields. Contains delete
 logic for the field as well (deleting is done by setting value to null).
 */
-export default class BuildField extends React.Component{
+export default class BuildField extends React.Component {
+
+    /**
+     * @param {{ 'type' : string }} fieldSchema - Schema definition for this property. Should be same as `app.state.schemas[CurrentItemType].properties[currentField]`.
+     */
+    static fieldTypeFromFieldSchema(fieldSchema){
+        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        // transform some types...
+        if(fieldType === 'string'){
+            fieldType = 'text';
+        }
+        // check if this is an enum
+        if(fieldSchema.enum || fieldSchema.suggested_enum){
+            fieldType = 'enum';
+        }
+        // handle a linkTo object on the the top level
+        if(fieldSchema.linkTo){
+            fieldType = 'linked object';
+        } else if (fieldSchema.attachment && fieldSchema.attachment === true){
+            fieldType = 'attachment';
+        }
+        return fieldType;
+    }
 
     constructor(props){
         super(props);
@@ -247,9 +269,7 @@ export default class BuildField extends React.Component{
     }
 }
 
-/*
-Case for a linked object.
-*/
+/** Case for a linked object. */
 class LinkedObj extends React.Component{
 
     constructor(props){
@@ -480,7 +500,7 @@ class ArrayField extends React.Component{
  * Builds a field that represents a sub-object. Essentially serves to hold
  * and coordinate BuildFields that correspond to the fields within the subfield.
  */
-class ObjectField extends React.Component{
+class ObjectField extends React.Component {
 
     constructor(props){
         super(props);
@@ -521,7 +541,7 @@ class ObjectField extends React.Component{
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
-        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        var fieldType = BuildField.fieldTypeFromFieldSchema(fieldSchema);
         var title = fieldSchema.title || field;
         var fieldValue;
         if(this.props.value){
@@ -530,18 +550,9 @@ class ObjectField extends React.Component{
             fieldValue = null;
         }
         var enumValues = [];
-        // transform some types...
-        if(fieldType == 'string'){
-            fieldType = 'text';
-        }
         // check if this is an enum
-        if(fieldSchema.enum){
-            fieldType = 'enum';
-            enumValues = fieldSchema.enum;
-        }
-        // handle a linkTo object on the the top level
-        if(fieldSchema.linkTo){
-            fieldType = 'linked object';
+        if(fieldType === 'enum'){
+            enumValues = fieldSchema.enum || fieldSchema.suggested_enum || [];
         }
         // format field as <this_field>.<next_field> so top level modification
         // happens correctly
@@ -577,7 +588,7 @@ class ObjectField extends React.Component{
 
     render(){
         var schema = this.props.schema;
-        var fields = schema['properties'] ? Object.keys(schema['properties']) : [];
+        var fields = schema['properties'] ? _.keys(schema['properties']) : [];
         var buildFields = [];
         for (var i=0; i<fields.length; i++){
             var fieldSchema = this.includeField(schema, fields[i]);
@@ -586,7 +597,7 @@ class ObjectField extends React.Component{
             }
         }
         return(
-            <div>
+            <div className="object-field-container">
                 {buildFields.map((field) => this.initiateField(field))}
             </div>
         );
