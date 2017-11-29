@@ -946,10 +946,18 @@ div.fieldset.editable-fields {
 				.remove-button-container {
 					width: 100%;
 					> button {
+						background: transparent;
+						color: #843a39;
+						
 						width: 100%;
 						font-weight: 400;
 						padding-left: 5px;
 						padding-right: 5px;
+						border-color: transparent;
+						&:hover {
+							border-color: #9f3c3b;
+							color: #B24342;
+						}
 					}
 				}
 			}
@@ -1081,18 +1089,27 @@ div.fieldset.editable-fields {
 			}
 		}
 
+		//.....
 		.submission-nav-leaf.linked-item-title {
 
 			> .inner-title { // Item Name
-				margin-left: -15px;
 				overflow: hidden;
 				white-space: nowrap;
 				text-overflow: ellipsis;
-				font-size: 0.8rem;
-				border: 1px solid transparent;
+				font-size: 0.925rem;
+				border: 1px solid rgba(0,0,0,0.1);
+				cursor: pointer;
+				vertical-align: middle;
+
+				> .toggle-icon-button {
+					vertical-align: middle;
+					padding-left: 7px;
+					padding-right: 2px;
+				}
 				
-				&.pre-existing {
+				&.pre-existing, &.existing-item {
 					background-color: #4c994c;
+					color: #fff;
 				}
 				&.not-complete {
 					background-color: #fcd19c;
@@ -1106,23 +1123,74 @@ div.fieldset.editable-fields {
 				&.validated {
 					background-color: #b7e1bb;
 				}
+
+				> span.title-text {
+					display: inline-block;
+					padding: 1px 5px;
+				}
 			}
 			
 			> .list-of-properties {
 				padding-left: 15px;
+				border-left: 1px dotted transparent;
+				border-right: 1px dotted transparent;
+				border-bottom: 1px dotted transparent;
 				> .submission-nav-leaf.linked-item-type-name {
 					> .inner-title { // Item Type
-
+						opacity: 0.6;
+						overflow: hidden;
+						white-space: nowrap;
+						text-overflow: ellipsis;
+						font-size: 0.8em;
+						&:before {
+							content: '-';
+							display: inline-block;
+							margin-right: 6px;
+						}
+					}
+					&.is-important {
+						> .inner-title {
+							opacity: 1;
+						}
 					}
 					> .children-container {
+						padding-left: 18px;
+						//......
+						> .submission-nav-leaf.linked-item-title {
 
+						}
+						//.....
 					}
+				}
+			}
+
+			&.active {
+				> .inner-title {
+					font-weight: 700;
+					border: 1px solid #333;
+					cursor: default;
+					&:before {
+						content: "Editing";
+						//font-size: 0.8rem;
+						display: block;
+						font-weight: 400;
+						padding: 3px 5px 0px;
+					}
+					> span.title-text {
+						padding-top: 2px;
+						padding-bottom: 2px;
+					}
+				}
+				> .list-of-properties {
+					border-color: #ddd;
 				}
 			}
 
 			&.leaf-depth-0 {
 				> .inner-title {
 					margin-left: 0;
+					//font-size: 1.125rem;
+					//padding-top: 1px;
 				}
 			}
 		}

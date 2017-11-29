@@ -102,7 +102,7 @@ class OverViewBody extends React.Component {
                 <div className="col-md-12 col-xs-12">
                     <div className="row overview-blocks mb-2">
 
-                        <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-6 col-md-6" listItemElement='div' listWrapperElement='div' singleItemClassName="block" property='individual' propertyForLabel='individual.organism' fallbackTitle="Individual" titleRenderFxn={function(field, val){
+                        <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-6 col-md-6" listItemElement='div' listWrapperElement='div' singleItemClassName="block" property='individual' overrideTitle="Organism - Individual" fallbackTitle="Individual" titleRenderFxn={function(field, val){
                             return <IndividualItemTitle context={val} defaultOpen />;
                         }} />
 
@@ -113,10 +113,11 @@ class OverViewBody extends React.Component {
                     </div>
                     
                     { this.cellLineDetails(commonProps) }
-                    
+                    { result.modifications || result.url || result.biosource_vendor ? 
                     <h4 className="tab-section-title">
                         <span>Other</span>
                     </h4>
+                    : null }
                     <hr className="tab-section-title-horiz-divider"/>
                     <div className="row overview-blocks">
                         <OverViewBodyItem {...commonProps} property='modifications' fallbackTitle="Modifications" hideIfNoValue />

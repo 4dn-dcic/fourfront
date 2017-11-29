@@ -69,6 +69,7 @@ class SubmissionLeaf extends React.Component{
 
     handleToggle(e){
         e.preventDefault();
+        e.stopPropagation();
         this.setState({'open': !this.state.open});
     }
 
@@ -97,26 +98,18 @@ class SubmissionLeaf extends React.Component{
      * @returns {JSX.Element} Visible leaf/branch-representing element.
      */
     generatePlaceholder(bookmark){
-        var children = _.map(
-            _.keys(this.props.hierarchy[this.props.keyIdx]),
-            (childKey) => this.props.keyLinks[childKey] === bookmark ? this.generateChild(childKey) : null
-        );
-        var style = {
-            'marginLeft': '-15px',
-            'overflow': 'hidden',
-            'whiteSpace': 'nowrap',
-            'textOverflow': 'ellipsis',
-            'fontSize': '0.8em'
-        };
-        var buttonStyle = {
-            'height': '15px',
-            'width': '15px',
-            'padding':'4px 7px 0px 3px'
-        };
+
+        var itemSchema = this.props.schemas[this.props.keyTypes[this.props.keyIdx]];
+        var propertySchema = _.findWhere(_.values(this.props.schemas[this.props.keyTypes[this.props.keyIdx]].properties), {'title' : bookmark});
+
+
+        console.log('PROPP', propertySchema);
+        console.log('BOOLKM ARKS', bookmark, this.props.hierarchy, this.props.keyLinkBookmarks, this.props.keyIdx, this.props.keyTypes, this.props.keyLinks);
+        var children = _.map(_.filter(_.keys(this.props.hierarchy[this.props.keyIdx]), (childKey) => this.props.keyLinks[childKey] === bookmark), this.generateChild);
         return(
-            <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + this.props.depth}>
-                <div className="clearfix inner-title" style={style}>
-                    <span>{ bookmark }</span>
+            <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + this.props.depth + (children.length > 0 || propertySchema.required ? ' is-important' : '')}>
+                <div className="clearfix inner-title">
+                    <span>{ bookmark } { children.length > 0 ? <span className="text-300"> ({ children.length })</span> : null }</span>
                 </div>
                 <div className="children-container" children={children} />
             </div>
@@ -138,51 +131,31 @@ class SubmissionLeaf extends React.Component{
             // must be a submitted object - plot directly
             placeholders = _.keys(this.props.hierarchy[keyIdx]).map((child) => this.generateChild(child));
         }
-        var style = {
-            
-        };
-        var buttonStyle = {
-            'height': '15px',
-            'width': '15px',
-            'padding':'3px 6px 1px 4px'
-        };
-        var iconStyle = {
-            'fontSize': '0.8em',
-            'verticalAlign': 'super'
-        };
         var title;
         var leftButton = null;
         var titleText = this.props.keyDisplay[keyIdx] || keyIdx;
         var statusClass = null;
         var isCurrentlySelected = false;
+
+        var clickHandler = this.handleClick;
+
         // if key is not a number (i.e. path), the object is not a custom one.
         // format the leaf as the following if pre-existing obj or submitted
         // custom object.
         if(isNaN(keyIdx) || (keyValid[keyIdx] == 4 && keyComplete[keyIdx])){
 
             statusClass = 'existing-item';
+            /** Open a new tab on click */
+            clickHandler = function(e){
+                e.preventDefault();
+                var win = window.open(isNaN(keyIdx) ? keyIdx : keyComplete[keyIdx], '_blank');
+                if(win){
+                    win.focus();
+                }else{
+                    alert('Object page popup blocked!');
+                }
+            }.bind(this);
 
-            // dark green bg with white text
-            style.backgroundColor = '#4c994c';
-            style.color = '#fff';
-            var popDestination;
-            if(isNaN(keyIdx)){
-                popDestination = keyIdx;
-            }else{
-                popDestination = keyComplete[keyIdx];
-            }
-            // open a new tab on click
-            title = (
-                <span style={{'padding':'1px 5px','cursor': 'pointer'}} onClick={function(e){
-                    e.preventDefault();
-                    var win = window.open(popDestination, '_blank');
-                    if(win){
-                        win.focus();
-                    }else{
-                        alert('Object page popup blocked!');
-                    }
-                }.bind(this)}>{ titleText }</span>
-            );
         }else{
             switch (keyValid[keyIdx]){
                 case 0: statusClass = 'not-complete'; break;
@@ -191,48 +164,16 @@ class SubmissionLeaf extends React.Component{
                 case 3: statusClass = 'validated'; break;
                 default: statusClass = 'status-not-determined'; break;
             }
-            /*
-            if(keyValid[keyIdx] === 0){
-                statusClass = 'not-complete';
-                //style.backgroundColor = '#fcd19c'; // orange
-            }else if(keyValid[keyIdx] === 1){
-                statusClass = 'complete-not-validated';
-                //style.backgroundColor = '#acd1ec'; // blue
-            }else if(keyValid[keyIdx] === 2){
-                statusClass = 'failed-validation';
-                //style.backgroundColor = '#e2b6b6'; // red
-            }else if(keyValid[keyIdx] === 3){
-                statusClass = 'validated';
-                //style.backgroundColor = '#b7e1bb'; // light green
-            }
-            */
-            if(keyIdx === this.props.currKey){ // Current key selected
-                isCurrentlySelected = true;
-                style.fontWeight = "bold";
-                style.border = "1px solid #000";
-                title = (<span style={{'padding':'1px 5px'}} >
-                            {titleText}
-                        </span>);
-            }else{
-                title = (<span style={{'padding':'1px 5px','cursor': 'pointer'}} onClick={this.handleClick}>
-                            {titleText}
-                        </span>);
-            }
         }
 
         if (keyIdx !== 0 && placeholders.length > 0) {
-            leftButton = (
-                <Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
-                    <i style={iconStyle} className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
-                </Button>
-            );
+            leftButton = <i className={"icon toggle-icon-button " + (this.state.open ? "icon-minus" : "icon-plus")} onClick={this.handleToggle}/>;
         }
 
         return(
-            <div className={"submission-nav-leaf linked-item-title leaf-depth-" + (this.props.depth)}>
-                <div className={"clearfix inner-title " + statusClass + (isCurrentlySelected ? ' active' : '')} style={style}>
-                    {leftButton}
-                    {title}
+            <div className={"submission-nav-leaf linked-item-title leaf-depth-" + (this.props.depth) + (keyIdx === this.props.currKey ? ' active' : '')}>
+                <div className={"clearfix inner-title " + statusClass} onClick={clickHandler}>
+                    {leftButton}<span className="title-text">{titleText}</span>
                 </div>
                 <Collapse in={this.state.open}><div className="list-of-properties">{ placeholders }</div></Collapse>
             </div>

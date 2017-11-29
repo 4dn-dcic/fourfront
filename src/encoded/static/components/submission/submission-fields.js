@@ -259,8 +259,8 @@ export default class BuildField extends React.Component {
             excludeRemoveButton ? null : (
                 <div className="col-xs-2 remove-button-column">
                     <Fade in={showDelete}>
-                        <div className="pull-right remove-button-container">
-                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField}><i className="icon icon-fw icon-times"/></Button>
+                        <div className={"pull-right remove-button-container" + (!showDelete ? ' hidden' : '')}>
+                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField} data-tip={this.props.isArray ? 'Remove Item' : 'Clear Value'}><i className="icon icon-fw icon-times"/></Button>
                         </div>
                     </Fade>
                 </div>
@@ -302,8 +302,8 @@ class LinkedObj extends React.Component{
             if(isNaN(this.props.value)){
                 thisDisplay = keyDisplay[this.props.value] || this.props.value;
                 return(
-                    <div className="submitted-linked-object-display-container" data-tip="This Item is already in the database">
-                        <a href={this.props.value} target="_blank">
+                    <div className="submitted-linked-object-display-container">
+                        <a href={this.props.value} target="_blank" className="inline-block" data-tip="This Item is already in the database">
                             <span>{thisDisplay}</span>
                         </a>
                         &nbsp;<i style={{'marginLeft':'5px', 'fontSize' : '0.85rem'}} className="icon icon-external-link"/>

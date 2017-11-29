@@ -982,10 +982,17 @@ export default class SubmissionView extends React.Component{
                 }
                 // should we really always use the first award?
                 award = lab_data.awards[0];
+                console.log('PROPCONTEXT', propContext, finalizedContext);
+
                 // if editing, use pre-existing award, lab, and submitted_by
                 if(this.props.edit && propContext.award && propContext.lab){
-                    finalizedContext.award = object.atIdFromObject(propContext.award);
-                    finalizedContext.lab = object.atIdFromObject(propContext.lab);
+                    if(currSchema.properties.award && !('award' in finalizedContext)){
+                        finalizedContext.award = object.atIdFromObject(propContext.award);
+                    }
+                    if(currSchema.properties.lab && !('lab' in finalizedContext)){
+                        finalizedContext.lab = object.atIdFromObject(propContext.lab);
+                    }
+
                     // an admin is editing. Use the pre-existing submitted_by
                     // otherwise, permissions won't let us change this field
                     if(me_data.groups && _.contains(me_data.groups, 'admin')){
@@ -1293,6 +1300,7 @@ export default class SubmissionView extends React.Component{
                         <SubmissionTree
                             setSubmissionState={this.setSubmissionState}
                             hierarchy={this.state.keyHierarchy}
+                            schemas={this.props.schemas}
                             {..._.pick(this.state, 'keyValid', 'keyTypes', 'keyDisplay', 'keyComplete', 'currKey', 'keyLinkBookmarks', 'keyLinks')}
                         />
                     </div>
