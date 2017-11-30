@@ -141,10 +141,13 @@ export default class SubmissionView extends React.Component{
     /**
      * Function that modifies new context and sets validation state whenever
      * a modification occurs
+     * 
+     * @param {number} objKey - Key of Item being modified.
+     * @param {Object} newContext - New Context/representation for this Item to be saved.
      */
     modifyKeyContext = (objKey, newContext) => {
-        var contextCopy = this.state.keyContext;
-        var validCopy = this.state.keyValid;
+        var contextCopy = _.clone(this.state.keyContext);
+        var validCopy = _.clone(this.state.keyValid);
         contextCopy[objKey] = newContext;
         validCopy[objKey] = this.findValidationState(objKey);
         this.setState({
@@ -162,9 +165,9 @@ export default class SubmissionView extends React.Component{
     findValidationState = (keyIdx) => {
         var hierarchy = JSON.parse(JSON.stringify(this.state.keyHierarchy));
         var keyHierarchy = searchHierarchy(hierarchy, keyIdx);
-        if(keyHierarchy === null) return 0;
+        if (keyHierarchy === null) return 0;
         var validationReturn = 1;
-        Object.keys(keyHierarchy).forEach(function(key, index){
+        _.keys(keyHierarchy).forEach(function(key, index){
             if(!isNaN(key)){
                 if(!this.state.keyComplete[key] && this.state.keyContext[key]){
                     validationReturn = 0;
@@ -580,11 +583,13 @@ export default class SubmissionView extends React.Component{
      * it since other occurences of that object may be used in the creation
      * process and those should not be affected. Effectively, removing a pre-
      * existing object amounts to removing it from keyHierarchy.
+     * 
+     * @param {number} key - Key of item to remove. 
      */
     removeObj = (key) => {
-        var contextCopy = this.state.keyContext;
-        var validCopy = this.state.keyValid;
-        var typesCopy = this.state.keyTypes;
+        var contextCopy = _.clone(this.state.keyContext);
+        var validCopy = _.clone(this.state.keyValid);
+        var typesCopy = _.clone(this.state.keyTypes);
         var keyDisplay = this.state.keyDisplay;
         var keyComplete = this.state.keyComplete;
         var bookmarksCopy = this.state.keyLinkBookmarks;
@@ -593,45 +598,47 @@ export default class SubmissionView extends React.Component{
         var hierarchy = this.state.keyHierarchy;
         var dummyHierarchy = JSON.parse(JSON.stringify(hierarchy));
         var hierKey = key;
+
         // the key may be a @id string and not keyIdx if already submitted
         _.keys(keyComplete).forEach(function(compKey) {
-            if (keyComplete[compKey] == key) {
+            if (keyComplete[compKey] === key) {
                 hierKey = compKey;
             }
         });
+
         // find hierachy below the object being deleted
         dummyHierarchy = searchHierarchy(dummyHierarchy, hierKey);
         if(dummyHierarchy === null){
             // occurs when keys cannot be found to delete
             return;
         }
+
         // get a list of all keys to remove
         var toDelete = flattenHierarchy(dummyHierarchy);
         toDelete.push(key); // add this key
         // trimming the hierarchy effectively removes objects from creation process
         var newHierarchy = trimHierarchy(hierarchy, hierKey);
+
         // for housekeeping, remove the keys from keyLinkBookmarks, keyLinks, and keyComplete
-        for(var i=0; i<toDelete.length; i++){
-            // only remove creation data for non-sumbitted, non-preexisiting objs
-            if(!isNaN(toDelete[i])){
-                // remove key from roundTwoKeys if necessary
-                // NOTE: submitted custom objects will NOT be removed from this
-                // after deletion. Still give user opportunity for second round edits
-                if(_.contains(roundTwoCopy, toDelete[i])){
-                    var rmIdx = roundTwoCopy.indexOf(toDelete[i]);
-                    if(rmIdx > -1){
-                        roundTwoCopy.splice(rmIdx,1);
-                    }
+        _.forEach(toDelete, (keyToDelete)=>{
+            if (isNaN(keyToDelete)) return; // only remove creation data for non-sumbitted, non-preexisiting objs
+            
+            // remove key from roundTwoKeys if necessary
+            // NOTE: submitted custom objects will NOT be removed from this
+            // after deletion. Still give user opportunity for second round edits
+            if(_.contains(roundTwoCopy, keyToDelete)){
+                var rmIdx = roundTwoCopy.indexOf(keyToDelete);
+                if(rmIdx > -1){
+                    roundTwoCopy.splice(rmIdx,1);
                 }
-                delete typesCopy[toDelete[i]];
-                delete validCopy[toDelete[i]];
-                delete contextCopy[toDelete[i]];
-                delete typesCopy[toDelete[i]];
-                delete linksCopy[toDelete[i]];
-                delete bookmarksCopy[toDelete[i]];
-                delete keyComplete[toDelete[i]];
             }
-        }
+            delete typesCopy[keyToDelete];
+            delete validCopy[keyToDelete];
+            delete contextCopy[keyToDelete];
+            delete linksCopy[keyToDelete];
+            delete bookmarksCopy[keyToDelete];
+            delete keyComplete[keyToDelete];
+        });
         this.setState({
             'keyHierarchy': newHierarchy,
             'keyDisplay': keyDisplay,
@@ -983,7 +990,6 @@ export default class SubmissionView extends React.Component{
                 }
                 // should we really always use the first award?
                 award = lab_data.awards[0];
-                console.log('PROPCONTEXT', propContext, finalizedContext);
 
                 // if editing, use pre-existing award, lab, and submitted_by
                 if(this.props.edit && propContext.award && propContext.lab){
@@ -1318,6 +1324,7 @@ export default class SubmissionView extends React.Component{
                             setSubmissionState={this.setSubmissionState}
                             modifyAlias={this.modifyAlias}
                             updateUpload={this.updateUpload}
+                            hierarchy={this.state.keyHierarchy}
                             {..._.pick(this.state, 'keyDisplay', 'keyComplete', 'keyIter', 'currKey', 'keyContext', 'upload', 'uploadStatus', 'md5Progress', 'roundTwo', 'currentSubmittingUser')}
                         />
                     </div>
@@ -1688,16 +1695,18 @@ class IndividualObjectView extends React.Component{
             prevValue = pointer[splitFieldLeaf];
             pointer[splitFieldLeaf] = value;
         }
-        // actually change value
-        this.props.modifyKeyContext(this.props.currKey, contextCopy);
-        if(fieldType === 'new linked object'){
-            // value is new key index in this case
-            console.log('FIELD WE GOT', field, newLink);
-            this.props.initCreateObj(type, value, field, false, field);
-        }
-        if(fieldType === 'linked object'){
+        
+        if (fieldType === 'linked object'){
             this.checkObjectRemoval(value, prevValue);
         }
+        if (fieldType === 'new linked object'){
+            // value is new key index in this case
+            this.props.initCreateObj(type, value, field, false, field);
+        } else {
+            // actually change value
+            this.props.modifyKeyContext(this.props.currKey, contextCopy);
+        }
+        
         if(splitFieldLeaf === 'aliases' || splitFieldLeaf === 'name' || splitFieldLeaf === 'title'){
             this.props.modifyAlias();
         }
@@ -2261,6 +2270,7 @@ function sortPropFields(fields){
         return 0;
     }
 
+    /** Compare by property title, alphabetically. */
     function sortTitle(a,b){
         if (typeof a.props.title === 'string' && typeof b.props.title === 'string'){
             if(a.props.title.toUpperCase() < b.props.title.toUpperCase()) return -1;
@@ -2277,6 +2287,8 @@ function sortPropFields(fields){
             optFields.push(field);
         }
     });
+
+    // Do the sorting magic - title then by schema.
     reqFields.sort(sortTitle).sort(sortSchemaLookupFunc);
     optFields.sort(sortTitle).sort(sortSchemaLookupFunc);
     return reqFields.concat(optFields);

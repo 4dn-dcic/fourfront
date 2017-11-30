@@ -34,7 +34,7 @@ export default class SubmissionTree extends React.Component {
     }
 
     render() {
-        var infoTip = 'This panel is for navigating between objects in the creation process. Colors correspond to the state of each object: <br>  <br> Orange: has incomplete children, cannot yet be validated <br> Blue: all children are complete, can be validated <br> Red: validation failed. Fix fields and try again <br> Light green: validation passed, ready for submission <br> Dark green: successfully submitted or pre-existing <br> White: bookmarks organizing child object types <br>  <br> Click on object titles to navigate around and edit individually.';
+        var infoTip = '<h5>This panel is for navigating between objects in the creation process</h5> Click on Item/dependency titles to navigate around and edit each individually. Dependencies must be submitted before their parent can be.';
         const{
             keyIdx,
             ...others
@@ -48,25 +48,12 @@ export default class SubmissionTree extends React.Component {
     }
 }
 
-/*
-Generate an entry in SubmissionTree that corresponds to an object. When clicked
-on, either change the currKey to that object's key if a custom object, or
-open that object's page in a new tab if a pre-existing or submitted object.
-*/
-class SubmissionLeaf extends React.Component{
-
-    static defaultProps = {
-        'depth' : 0
-    }
+class SubmissionProperty extends React.Component {
 
     constructor(props){
         super(props);
         this.handleToggle = _.throttle(this.handleToggle.bind(this), 500, { 'trailing' : false });
-        this.handleClick = _.throttle(this.handleClick.bind(this), 500, { 'trailing' : false });
-        this.generateAllPlaceholders = this.generateAllPlaceholders.bind(this);
-        this.placeholderSortFxn = this.placeholderSortFxn.bind(this);
         this.generateChild = this.generateChild.bind(this);
-        this.generatePlaceholder = this.generatePlaceholder.bind(this);
         this.state = { 'open' : typeof this.props.open === 'boolean' ? this.props.open : true };
     }
 
@@ -92,30 +79,62 @@ class SubmissionLeaf extends React.Component{
         );
     }
 
-    /**
-     * Generate placeholders in the SubmissionTree for every linkTo name and
-     * create a SubmissionLeaf for each child object under its corresponding
-     * placholder.
-     * 
-     * @param {string} bookmark - Name of the leaf/view we're on.
-     * @returns {JSX.Element} Visible leaf/branch-representing element.
-     */
-    generatePlaceholder(field){
+    render(){
+        var { field, schemas, keyTypes, keyIdx, hierarchy, keyLinks, depth } = this.props;
 
-        var itemSchema = this.props.schemas[this.props.keyTypes[this.props.keyIdx]];
+        var itemSchema = schemas[keyTypes[keyIdx]];
         var isRequired = Array.isArray(itemSchema.required) && _.contains(itemSchema.required, field);
         var fieldBase = field.split('.')[0];
         var fieldSchema = itemSchema.properties[fieldBase];
 
         var bookmark = (fieldSchema && fieldSchema.title) || delveObject(fieldSchema);
-        var children = _.map(_.filter(_.keys(this.props.hierarchy[this.props.keyIdx]), (childKey) => this.props.keyLinks[childKey] === field), this.generateChild);
+        var children = _.map(_.filter(_.keys(hierarchy[keyIdx]), (childKey) => keyLinks[childKey] === field), this.generateChild);
         return(
-            <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + this.props.depth + (children.length > 0 || isRequired ? ' is-important' : '')}>
+            <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + depth + (isRequired ? ' is-required' : '') + (children.length > 0 ? ' has-children' : '' )}>
                 <div className="clearfix inner-title">
+                    <i className={"icon property-expand-icon clickable icon-" + (this.state.open ? 'minus' : 'plus')} onClick={this.handleToggle}/>
                     <span>{ children.length } { bookmark || field }</span>
                 </div>
-                <div className="children-container" children={children} />
+                <Collapse in={this.state.open}><div className="children-container" children={children} /></Collapse>
             </div>
+        );
+    }
+
+}
+
+/*
+Generate an entry in SubmissionTree that corresponds to an object. When clicked
+on, either change the currKey to that object's key if a custom object, or
+open that object's page in a new tab if a pre-existing or submitted object.
+*/
+class SubmissionLeaf extends React.Component{
+
+    static defaultProps = {
+        'depth' : 0
+    }
+
+    constructor(props){
+        super(props);
+        this.handleClick = _.throttle(this.handleClick.bind(this), 500, { 'trailing' : false });
+        this.generateAllPlaceholders = this.generateAllPlaceholders.bind(this);
+        this.placeholderSortFxn = this.placeholderSortFxn.bind(this);
+        this.generateChild = this.generateChild.bind(this);
+        this.state = { 'open' : typeof this.props.open === 'boolean' ? this.props.open : true };
+    }
+
+    generateChild(childKey){
+        if(!isNaN(childKey)) childKey = parseInt(childKey);
+
+        // replace key and hierarchy in props
+        return(
+            <SubmissionLeaf
+                {...this.props}
+                key={childKey}
+                keyIdx={childKey}
+                hierarchy={this.props.hierarchy[this.props.keyIdx]}
+                open
+                depth={this.props.depth + 1}
+            />
         );
     }
 
@@ -141,12 +160,21 @@ class SubmissionLeaf extends React.Component{
 
     }
 
+    /**
+     * Generate placeholders in the SubmissionTree for every linkTo name and
+     * create a SubmissionLeaf for each child object under its corresponding
+     * placholder.
+     * 
+     * @param {string} bookmark - Name of the leaf/view we're on.
+     * @returns {JSX.Element} Visible leaf/branch-representing element.
+     */
     generateAllPlaceholders(){
         var { keyValid, keyIdx, keyTypes, keyComplete, schemas } = this.props;
         var placeholders;
+        
         var fieldsWithLinkTosToShow = this.props.keyLinkBookmarks[keyIdx].sort(this.placeholderSortFxn);
 
-        return _.map(fieldsWithLinkTosToShow, this.generatePlaceholder);
+        return _.map(fieldsWithLinkTosToShow, (field) => <SubmissionProperty {...this.props} field={field} /> );
     }
 
     /** Change the currKey of submissionView to that of props.keyIdx */
@@ -167,8 +195,7 @@ class SubmissionLeaf extends React.Component{
             placeholders = _.keys(this.props.hierarchy[keyIdx]).map(this.generateChild);
             console.log('TEST24543', placeholders); // Haven't hit this yet??
         }
-        var title;
-        var leftButton = null;
+        var editIcon;
         var titleText = this.props.keyDisplay[keyIdx] || keyIdx;
         var statusClass = null;
         var isCurrentlySelected = false;
@@ -192,34 +219,44 @@ class SubmissionLeaf extends React.Component{
                 }
             }.bind(this);
             
-            icon = <i className="icon icon-hdd-o" data-tip="This item already exists in the database."/>;
+            icon = <i className="icon icon-hdd-o" data-tip="Successfully submitted or pre-existing. This item already exists in the database."/>;
 
         }else{
             switch (keyValid[keyIdx]){
-                case 0: statusClass = 'not-complete'; break;
-                case 1: statusClass = 'complete-not-validated'; break;
-                case 2: statusClass = 'failed-validation'; break;
-                case 3: statusClass = 'validated'; break;
-                default: statusClass = 'status-not-determined'; break;
+                case 0:
+                    statusClass = 'not-complete';
+                    icon = <i className="icon icon-stop-circle-o" data-tip="Has incomplete children, cannot yet be validated." />;
+                    break;
+                case 1:
+                    statusClass = 'complete-not-validated';
+                    icon = <i className="icon icon-circle-o" data-tip="All children are complete, can be validated." />;
+                    break;
+                case 2:
+                    statusClass = 'failed-validation';
+                    icon = <i className="icon icon-times" data-tip="Validation failed. Fix fields and try again."/>;
+                    break;
+                case 3:
+                    statusClass = 'validated';
+                    icon = <i className="icon icon-check" data-tip="Validation passed, ready for submission"/>;
+                    break;
+                default:
+                    statusClass = 'status-not-determined';
+                    break;
             }
-        }
-
-        if (keyIdx !== 0 && placeholders.length > 0) {
-            //leftButton = <i className={"icon toggle-icon-button " + (this.state.open ? "icon-caret-down" : "icon-caret-right")} onClick={this.handleToggle}/>;
         }
 
         var icon;
         if (keyIdx === this.props.currKey){ // We're currently on this Item
             isCurrentlySelected = true;
-            icon = <i className="icon icon-pencil"/>;
+            editIcon = <i className="icon icon-pencil pull-right" data-tip="Item which you are currently editing." />;
         }
 
         return(
             <div className={"submission-nav-leaf linked-item-title leaf-depth-" + (this.props.depth) + (isCurrentlySelected ? ' active' : '')}>
                 <div className={"clearfix inner-title " + statusClass} onClick={clickHandler}>
-                    {icon}{leftButton}<span className="title-text">{titleText}</span>
+                    {editIcon}{icon}<span className="title-text">{titleText}</span>
                 </div>
-                <Collapse in={this.state.open}><div className="list-of-properties">{ placeholders }</div></Collapse>
+                <div className="list-of-properties">{ placeholders }</div>
             </div>
         );
     }
