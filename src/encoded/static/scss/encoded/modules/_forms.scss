@@ -1100,11 +1100,19 @@ div.fieldset.editable-fields {
 				border: 1px solid rgba(0,0,0,0.1);
 				cursor: pointer;
 				vertical-align: middle;
+				font-weight: 500;
+
+				> i.icon.icon-pencil,
+				> i.icon.icon-check,
+				> i.icon.icon-hdd-o {
+					padding-left: 7px;
+					//padding-right: 2px;
+				}
 
 				> .toggle-icon-button {
 					vertical-align: middle;
 					padding-left: 7px;
-					padding-right: 2px;
+					//padding-right: 2px;
 				}
 				
 				&.pre-existing, &.existing-item {
@@ -1126,7 +1134,7 @@ div.fieldset.editable-fields {
 
 				> span.title-text {
 					display: inline-block;
-					padding: 1px 5px;
+					padding: 3px 7px;
 				}
 			}
 			
@@ -1137,7 +1145,7 @@ div.fieldset.editable-fields {
 				border-bottom: 1px dotted transparent;
 				> .submission-nav-leaf.linked-item-type-name {
 					> .inner-title { // Item Type
-						opacity: 0.6;
+						opacity: 0.5;
 						overflow: hidden;
 						white-space: nowrap;
 						text-overflow: ellipsis;
@@ -1151,6 +1159,7 @@ div.fieldset.editable-fields {
 					&.is-important {
 						> .inner-title {
 							opacity: 1;
+							font-weight: 500;
 						}
 					}
 					> .children-container {
@@ -1169,16 +1178,22 @@ div.fieldset.editable-fields {
 					font-weight: 700;
 					border: 1px solid #333;
 					cursor: default;
+					
+					/*
 					&:before {
 						content: "Editing";
-						//font-size: 0.8rem;
-						display: block;
+						//content: "\f040";
+						font-family: FontAwesome;
+						font-style: italic;
+						margin-bottom: -3px;
+						display: inline-block;
 						font-weight: 400;
 						padding: 3px 5px 0px;
 					}
+					*/
 					> span.title-text {
-						padding-top: 2px;
-						padding-bottom: 2px;
+						padding-top: 3px;
+						padding-bottom: 3px;
 					}
 				}
 				> .list-of-properties {

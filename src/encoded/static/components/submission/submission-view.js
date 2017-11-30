@@ -11,7 +11,7 @@ import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, 
 import Search from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
-import SubmissionTree from './expandable-tree';
+import SubmissionTree, { delveObject, delveObjectProperty } from './expandable-tree';
 import BuildField, { AliasInputField, isValueNull } from './submission-fields';
 import Alerts from '../alerts';
 import { Detail } from '../item-pages/components';
@@ -233,6 +233,7 @@ export default class SubmissionView extends React.Component{
             if(!contextID || this.props.create){
                 initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
                 initBookmarks[0] = bookmarksList;
+                console.log('MY BOOKMARKZ', bookmarksList);
 
                 this.setState({
                     'keyContext': initContext,
@@ -513,7 +514,7 @@ export default class SubmissionView extends React.Component{
         var hierarchy = this.state.keyHierarchy;
         var keyDisplay = this.state.keyDisplay;
         var bookmarksCopy = this.state.keyLinkBookmarks;
-        var linksCopy = this.state.keyLinks;
+        var linksCopy = _.clone(this.state.keyLinks);
         var bookmarksList = [];
         // increase key iter by 1 for a new unique key
         var keyIdx;
@@ -1691,7 +1692,8 @@ class IndividualObjectView extends React.Component{
         this.props.modifyKeyContext(this.props.currKey, contextCopy);
         if(fieldType === 'new linked object'){
             // value is new key index in this case
-            this.props.initCreateObj(type, value, newLink, false, field);
+            console.log('FIELD WE GOT', field, newLink);
+            this.props.initCreateObj(type, value, field, false, field);
         }
         if(fieldType === 'linked object'){
             this.checkObjectRemoval(value, prevValue);
@@ -2130,7 +2132,7 @@ class RoundTwoDetailPanel extends React.Component{
  * If initObjs provided (edit or clone functionality), pre-existing objs will be added.
  * Also checks user info to see if user is admin, which affects which fields are displayed.
  */
-export function buildContext(context, schema, objList=null, edit=false, create=true, roundTwoSwitch=null, initObjs=null){
+export function buildContext(context, itemSchema, objList=null, edit=false, create=true, roundTwoSwitch=null, initObjs=null){
     var built = {};
     var userInfo = JWT.getUserInfo();
     var userGroups = [];
@@ -2140,10 +2142,10 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
             userGroups = currGroups;
         }
     }
-    var fields = schema['properties'] ? Object.keys(schema['properties']) : [];
-    for(var i=0; i<fields.length; i++){
-        if(schema.properties[fields[i]]){
-            var fieldSchema = object.getNestedProperty(schema, ['properties', fields[i]], true);
+    var fields = itemSchema.properties ? _.keys(itemSchema.properties) : [];
+    for (var i=0; i<fields.length; i++){
+        if(itemSchema.properties[fields[i]]){
+            var fieldSchema = object.getNestedProperty(itemSchema, ['properties', fields[i]], true);
             if (!fieldSchema){
                 continue;
             }
@@ -2182,15 +2184,24 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
             }else{
                 built[fields[i]] = null;
             }
-            if(objList !== null){
-                var linked = delveObject(fieldSchema);
+
+            if (objList !== null) {
+                var linkedProperty = delveObjectProperty(fieldSchema); // Is it a linkTo (recursively or not)?
+                //console.log('LINKEDPROPSIS', linkedProperty);
                 var roundTwoExclude = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
-                if(linked !== null && !roundTwoExclude){
-                    var listTerm = fieldSchema.title ? fieldSchema.title : linked;
-                    if(!_.contains(objList, listTerm)) objList.push(listTerm);
+                if((linkedProperty !== null && typeof linkedProperty !== 'undefined') && !roundTwoExclude){ // If linkTo, add to our list, selecting a nice name for it first.
+                    //var listTerm = fieldSchema.title ? fieldSchema.title : linked;
+                    var fieldToStore = fields[i];
+                    linkedProperty = _.reject(linkedProperty, function(p){ return p === 'items' || p === 'properties'; });
+                    if (linkedProperty.length > 0){
+                        fieldToStore += '.' + linkedProperty.join('.');
+                    }
+                    if(!_.contains(objList, fieldToStore)){
+                        objList.push(fieldToStore);
+                    }
                     // add pre-existing linkTo objects
                     if(initObjs !== null && built[fields[i]] !== null){
-                        delvePreExistingObjects(initObjs, built[fields[i]], fieldSchema, listTerm, linked);
+                        delvePreExistingObjects(initObjs, built[fields[i]], fieldSchema, fields[i]);
                     }
                 }
                 objList.sort();
@@ -2206,31 +2217,28 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
  * object in an edit/clone situation. json is json content for the field,
  * schema is the individual fields schema. Recursively handles objects and arrays
  */
-var delvePreExistingObjects = function myself(initObjs, json, schema, listTerm, linked){
-    var populateInitObjs = function(initObjs, data, listTerm, linked){
-        var initData = {};
-        initData.path = data;
-        initData.display = data;
-        initData.newLink = listTerm;
-        initData.type = linked;
-        initObjs.push(initData);
-    };
+var delvePreExistingObjects = function myself(initObjs, json, fieldSchema, listTerm){
     if(Array.isArray(json)){
         for(var j=0; j < json.length; j++){
-            if(schema.items){
-                delvePreExistingObjects(initObjs, json[j], schema.items, listTerm, linked);
+            if(fieldSchema.items){
+                delvePreExistingObjects(initObjs, json[j], fieldSchema.items, listTerm);
             }
         }
     }else if (json instanceof Object && json){
-        if(schema.properties){
+        if(fieldSchema.properties){
             _.keys(json).forEach(function(key, idx){
-                if(schema.properties[key]){
-                    delvePreExistingObjects(initObjs, json[key], schema.properties[key], listTerm, linked);
+                if(fieldSchema.properties[key]){
+                    delvePreExistingObjects(initObjs, json[key], fieldSchema.properties[key], listTerm);
                 }
             });
         }
-    }else if (_.contains(_.keys(schema),'linkTo')) { // non-array, non-object field. check schema to ensure there's a linkTo
-        populateInitObjs(initObjs, json, listTerm, linked);
+    } else if (_.contains(_.keys(fieldSchema),'linkTo')) { // non-array, non-object field. check schema to ensure there's a linkTo
+        initObjs.push({
+            'path' : json,
+            'display' : json,
+            'newLink' : listTerm,
+            'type' : delveObject(fieldSchema)
+        });
     }
 };
 
@@ -2274,24 +2282,7 @@ function sortPropFields(fields){
     return reqFields.concat(optFields);
 }
 
-/**
- * Function to recursively find whether a json object contains a linkTo fields
- * anywhere in its nested structure. Returns object type if found, null otherwise.
- */
-var delveObject = function myself(json){
-    var found_obj = null;
-    _.keys(json).forEach(function(key, index){
-        if(key == 'linkTo'){
-            found_obj = json[key];
-        }else if(json[key] !== null && typeof json[key] === 'object'){
-            var test = myself(json[key]);
-            if(test !== null){
-                found_obj = test;
-            }
-        }
-    });
-    return found_obj;
-};
+
 
 /**
  * Given the parent object key and a new object key, return a version

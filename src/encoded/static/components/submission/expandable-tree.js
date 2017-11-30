@@ -21,7 +21,8 @@ export default class SubmissionTree extends React.Component {
         'currKey'           : PropTypes.number.isRequired,
         'keyLinkBookmarks'  : PropTypes.object.isRequired,
         'keyLinks'          : PropTypes.object.isRequired,
-        'setSubmissionState': PropTypes.func.isRequired
+        'setSubmissionState': PropTypes.func.isRequired,
+        'schemas'           : PropTypes.object,
     }
 
     constructor(props){
@@ -62,6 +63,8 @@ class SubmissionLeaf extends React.Component{
         super(props);
         this.handleToggle = _.throttle(this.handleToggle.bind(this), 500, { 'trailing' : false });
         this.handleClick = _.throttle(this.handleClick.bind(this), 500, { 'trailing' : false });
+        this.generateAllPlaceholders = this.generateAllPlaceholders.bind(this);
+        this.placeholderSortFxn = this.placeholderSortFxn.bind(this);
         this.generateChild = this.generateChild.bind(this);
         this.generatePlaceholder = this.generatePlaceholder.bind(this);
         this.state = { 'open' : typeof this.props.open === 'boolean' ? this.props.open : true };
@@ -97,23 +100,53 @@ class SubmissionLeaf extends React.Component{
      * @param {string} bookmark - Name of the leaf/view we're on.
      * @returns {JSX.Element} Visible leaf/branch-representing element.
      */
-    generatePlaceholder(bookmark){
+    generatePlaceholder(field){
 
         var itemSchema = this.props.schemas[this.props.keyTypes[this.props.keyIdx]];
-        var propertySchema = _.findWhere(_.values(this.props.schemas[this.props.keyTypes[this.props.keyIdx]].properties), {'title' : bookmark});
+        var isRequired = Array.isArray(itemSchema.required) && _.contains(itemSchema.required, field);
+        var fieldBase = field.split('.')[0];
+        var fieldSchema = itemSchema.properties[fieldBase];
 
-
-        console.log('PROPP', propertySchema);
-        console.log('BOOLKM ARKS', bookmark, this.props.hierarchy, this.props.keyLinkBookmarks, this.props.keyIdx, this.props.keyTypes, this.props.keyLinks);
-        var children = _.map(_.filter(_.keys(this.props.hierarchy[this.props.keyIdx]), (childKey) => this.props.keyLinks[childKey] === bookmark), this.generateChild);
+        var bookmark = (fieldSchema && fieldSchema.title) || delveObject(fieldSchema);
+        var children = _.map(_.filter(_.keys(this.props.hierarchy[this.props.keyIdx]), (childKey) => this.props.keyLinks[childKey] === field), this.generateChild);
         return(
-            <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + this.props.depth + (children.length > 0 || propertySchema.required ? ' is-important' : '')}>
+            <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + this.props.depth + (children.length > 0 || isRequired ? ' is-important' : '')}>
                 <div className="clearfix inner-title">
-                    <span>{ bookmark } { children.length > 0 ? <span className="text-300"> ({ children.length })</span> : null }</span>
+                    <span>{ children.length } { bookmark || field }</span>
                 </div>
                 <div className="children-container" children={children} />
             </div>
         );
+    }
+
+    placeholderSortFxn(fieldA, fieldB){
+        var itemSchema = this.props.schemas[this.props.keyTypes[this.props.keyIdx]];
+        var fieldABase = fieldA.split('.')[0];
+        var fieldBBase = fieldB.split('.')[0];
+
+        if (Array.isArray(itemSchema.required)){
+            if (_.contains(itemSchema.required, fieldA)) return -1;
+            if (_.contains(itemSchema.required, fieldB)) return 1;
+            if (_.contains(itemSchema.required, fieldABase)) return -1;
+            if (_.contains(itemSchema.required, fieldBBase)) return -1;
+        }
+
+        var fieldASchema = itemSchema.properties[fieldABase];
+        var fieldBSchema = itemSchema.properties[fieldBBase];
+
+        if (fieldASchema.lookup || 750 > fieldBSchema.lookup || 750) return -1; 
+        if (fieldASchema.lookup || 750 < fieldBSchema.lookup || 750) return 1;
+        
+        return 0;
+
+    }
+
+    generateAllPlaceholders(){
+        var { keyValid, keyIdx, keyTypes, keyComplete, schemas } = this.props;
+        var placeholders;
+        var fieldsWithLinkTosToShow = this.props.keyLinkBookmarks[keyIdx].sort(this.placeholderSortFxn);
+
+        return _.map(fieldsWithLinkTosToShow, this.generatePlaceholder);
     }
 
     /** Change the currKey of submissionView to that of props.keyIdx */
@@ -123,13 +156,16 @@ class SubmissionLeaf extends React.Component{
     }
 
     render() {
-        var { keyValid, keyIdx, keyTypes, keyComplete } = this.props;
+        var { keyValid, keyIdx, keyTypes, keyComplete, schemas } = this.props;
+        var itemSchema = schemas[keyTypes[keyIdx]];
+
         var placeholders;
         if (!isNaN(keyIdx)) {
-            placeholders = this.props.keyLinkBookmarks[keyIdx].map((link) => this.generatePlaceholder(link));
+            placeholders = this.generateAllPlaceholders();
         } else {
             // must be a submitted object - plot directly
-            placeholders = _.keys(this.props.hierarchy[keyIdx]).map((child) => this.generateChild(child));
+            placeholders = _.keys(this.props.hierarchy[keyIdx]).map(this.generateChild);
+            console.log('TEST24543', placeholders); // Haven't hit this yet??
         }
         var title;
         var leftButton = null;
@@ -142,7 +178,7 @@ class SubmissionLeaf extends React.Component{
         // if key is not a number (i.e. path), the object is not a custom one.
         // format the leaf as the following if pre-existing obj or submitted
         // custom object.
-        if(isNaN(keyIdx) || (keyValid[keyIdx] == 4 && keyComplete[keyIdx])){
+        if(isNaN(keyIdx) || (keyValid[keyIdx] === 4 && keyComplete[keyIdx])){
 
             statusClass = 'existing-item';
             /** Open a new tab on click */
@@ -155,6 +191,8 @@ class SubmissionLeaf extends React.Component{
                     alert('Object page popup blocked!');
                 }
             }.bind(this);
+            
+            icon = <i className="icon icon-hdd-o" data-tip="This item already exists in the database."/>;
 
         }else{
             switch (keyValid[keyIdx]){
@@ -167,13 +205,19 @@ class SubmissionLeaf extends React.Component{
         }
 
         if (keyIdx !== 0 && placeholders.length > 0) {
-            leftButton = <i className={"icon toggle-icon-button " + (this.state.open ? "icon-minus" : "icon-plus")} onClick={this.handleToggle}/>;
+            //leftButton = <i className={"icon toggle-icon-button " + (this.state.open ? "icon-caret-down" : "icon-caret-right")} onClick={this.handleToggle}/>;
+        }
+
+        var icon;
+        if (keyIdx === this.props.currKey){ // We're currently on this Item
+            isCurrentlySelected = true;
+            icon = <i className="icon icon-pencil"/>;
         }
 
         return(
-            <div className={"submission-nav-leaf linked-item-title leaf-depth-" + (this.props.depth) + (keyIdx === this.props.currKey ? ' active' : '')}>
+            <div className={"submission-nav-leaf linked-item-title leaf-depth-" + (this.props.depth) + (isCurrentlySelected ? ' active' : '')}>
                 <div className={"clearfix inner-title " + statusClass} onClick={clickHandler}>
-                    {leftButton}<span className="title-text">{titleText}</span>
+                    {icon}{leftButton}<span className="title-text">{titleText}</span>
                 </div>
                 <Collapse in={this.state.open}><div className="list-of-properties">{ placeholders }</div></Collapse>
             </div>
@@ -194,3 +238,43 @@ class InfoIcon extends React.Component{
         );
     }
 }
+
+
+/**
+ * Function to recursively find whether a json object contains a linkTo fields
+ * anywhere in its nested structure. Returns object type if found, null otherwise.
+ */
+export const delveObject = function myself(json, getProperty=false){
+    var found_obj = null;
+    _.keys(json).forEach(function(key, index){
+        if(key === 'linkTo'){
+            found_obj = json[key];
+        }else if(json[key] !== null && typeof json[key] === 'object'){
+            var test = myself(json[key]);
+            if(test !== null){
+                found_obj = test;
+            }
+        }
+    });
+    return found_obj;
+};
+
+export const delveObjectProperty = function myself(json){
+    var jsonKeys = _.keys(json);
+    var key;
+    for (var i = 0; i < jsonKeys.length; i++){
+        key = jsonKeys[i];
+        if (key === 'linkTo') {
+            return true;
+        } else if (json[key] !== null && typeof json[key] === 'object') {
+            var test = myself(json[key]);
+            if (test === true){
+                return [key];
+            } else if (Array.isArray(test)){
+                return [key].concat(test);
+            } else {
+                continue;
+            }
+        }
+    }
+};

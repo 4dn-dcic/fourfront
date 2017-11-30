@@ -356,6 +356,7 @@ class LinkedObj extends React.Component{
                 }.bind(this)}>Select existing</Button>
                 <Button className="select-create-linked-item-button" onClick={function(e){
                     e.preventDefault();
+                    console.log('CLICK CREATE NEU', this.props.linkType, objType);
                     this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, objType);
                 }.bind(this)}>Create new</Button>
             </div>
