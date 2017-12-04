@@ -113,8 +113,14 @@ def validate_biosource_tissue(context, request):
     ontology_name = None
     try:
         termuid = get_item_if_you_can(request, tissue, 'ontology-terms').get('uuid')
-        term = context.get(termuid)
-        ontology = context.get(term.properties['source_ontology'])
+        try:
+            # checking to see if our context is a collection or an item to set get
+            context.get('blah')
+            getter = context
+        except AttributeError:
+            getter = context.collection
+        term = getter.get(termuid)
+        ontology = getter.get(term.properties['source_ontology'])
         ontology_name = ontology.properties.get('ontology_name')
     except AttributeError:
         pass
@@ -140,12 +146,18 @@ def validate_biosource_cell_line(context, request):
     term_ok = False
     cell_line = data['cell_line']
     termuid = get_item_if_you_can(request, cell_line, 'ontology-terms').get('uuid')
-    term = context.get(termuid)
+    try:
+        # checking to see if our context is a collection or an item to set get
+        context.get('blah')
+        getter = context
+    except AttributeError:
+        getter = context.collection
     slimfor = None
     try:
+        term = getter.get(termuid)
         slims = term.properties.get('slim_terms', [])
         for slim in slims:
-            slim_term = context.get(slim)
+            slim_term = getter.get(slim)
             slimfor = slim_term.properties.get('is_slim_for')
             if slimfor is not None and slimfor == 'cell':
                 term_ok = True
