@@ -921,8 +921,6 @@ class DimensioningContainer extends React.Component {
                     <div className="search-results-container">
                         <div className="inner-container" ref="innerContainer" onScroll={this.onHorizontalScroll}>
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
-
-                                {
                                     <Sticky topOffset={stickyHeaderTopOffset} >{
                                         ({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}) =>
                                         <HeadersRow
@@ -945,8 +943,6 @@ class DimensioningContainer extends React.Component {
                                             isSticky={isSticky}
                                         />
                                     }</Sticky>
-
-                                }
                                 <LoadMoreAsYouScroll
                                     results={this.state.results}
                                     mounted={this.state.mounted}

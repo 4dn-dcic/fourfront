@@ -113,7 +113,7 @@ export default class Login extends React.Component {
             this.props.setIsLoadingIcon(false);
             if (this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
                 navigate('/', {'inPlace':true}); // Navigate home -- perhaps we should remove this and leave them on login failed page? idk
-            }else{
+            } else {
                 //navigate('', {'inPlace':true}); // We've done this already above.
             }
         }).catch((error)=>{
