@@ -72,7 +72,7 @@
   },
   "dependencies": {
     "auth0-lock": "^10.24.1",
-    "aws-sdk": "^2.24.0",
+    "aws-sdk": "^2.162.0",
     "babel-polyfill": "^6.23.0",
     "brace": "^0.3.0",
     "ckeditor": "file:node_shims/ckeditor",
@@ -90,8 +90,8 @@
     "jsonwebtoken": "^7.1.9",
     "lodash": "^4.17.4",
     "lodash.isfinite": "^3.3.2",
-    "marked": "^0.3.6",
     "markdown-to-jsx": "^5.4.2",
+    "marked": "^0.3.7",
     "moment": "^2.18.1",
     "prop-types": "^15.5.10",
     "qs": "^6.5.0",

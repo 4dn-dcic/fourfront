@@ -45,6 +45,7 @@ class Biosource(Item):
         "individual.health_status",
         "tissue.slim_terms",
         "tissue.synonyms",
+        "tissue.source_ontology.ontology_name",
         "cell_line.slim_terms",
         "cell_line.synonyms",
         'SOP_cell_line.attachment.href',
@@ -104,6 +105,7 @@ class Biosource(Item):
 
 # validator for tissue field
 def validate_biosource_tissue(context, request):
+    import pdb; pdb.set_trace()
     data = request.json
     if 'tissue' not in data:
         return
