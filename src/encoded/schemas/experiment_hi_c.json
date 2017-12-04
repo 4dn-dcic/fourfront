@@ -22,6 +22,7 @@
         { "$ref": "mixins.json#/library"},
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/badges" },
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [
