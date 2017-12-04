@@ -105,27 +105,19 @@ class Biosource(Item):
 
 # validator for tissue field
 def validate_biosource_tissue(context, request):
-    import pdb; pdb.set_trace()
     data = request.json
     if 'tissue' not in data:
         return
     term_ok = False
     tissue = data['tissue']
-    # print(tissue)
-    tissue = get_item_if_you_can(request, tissue, 'ontology-terms')
-    ontology = None
     ontology_name = None
     try:
-        ontology = tissue.get('source_ontology')
+        termuid = get_item_if_you_can(request, tissue, 'ontology-terms').get('uuid')
+        term = context.get(termuid)
+        ontology = context.get(term.properties['source_ontology'])
+        ontology_name = ontology.properties.get('ontology_name')
     except AttributeError:
         pass
-
-    if ontology is not None:
-        ontology = get_item_if_you_can(request, ontology, 'ontologys')
-        try:
-            ontology_name = ontology.get('ontology_name')
-        except AttributeError:
-            pass
 
     if ontology_name is not None and (
             ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
@@ -147,23 +139,19 @@ def validate_biosource_cell_line(context, request):
         return
     term_ok = False
     cell_line = data['cell_line']
-    cell_line = get_item_if_you_can(request, cell_line, 'ontology-terms')
-    slims = None
+    termuid = get_item_if_you_can(request, cell_line, 'ontology-terms').get('uuid')
+    term = context.get(termuid)
+    slimfor = None
     try:
-        slims = cell_line.get('slim_terms')
-    except AttributeError:
-        pass
-
-    if slims is not None:
+        slims = term.properties.get('slim_terms', [])
         for slim in slims:
-            slim_term = get_item_if_you_can(request, slim, 'ontology-terms')
-            try:
-                slimfor = slim_term.get('is_slim_for')
-            except AttributeError:
-                pass
-
+            slim_term = context.get(slim)
+            slimfor = slim_term.properties.get('is_slim_for')
             if slimfor is not None and slimfor == 'cell':
                 term_ok = True
+                break
+    except AttributeError:
+        pass
 
     if not term_ok:
         try:
