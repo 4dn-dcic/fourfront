@@ -1238,6 +1238,15 @@ div.fieldset.editable-fields {
 	}
 }
 
+// SELECT EXISTING MODAL
+
+.submission-view-modal.select-existing-item-modal {
+	> .modal-dialog {
+		width: auto;
+		margin: 30px;
+	}
+}
+
 // SUBMISSION STUFF
 
 

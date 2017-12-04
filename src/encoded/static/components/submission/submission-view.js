@@ -1169,7 +1169,8 @@ export default class SubmissionView extends React.Component{
             });
         }.bind(this);
 
-        if (this.state.currentSubmittingUser){ // We've already loaded user during initPrincipal().
+        if (this.state.currentSubmittingUser){
+            // We've already loaded user during initPrincipal().
             submitProcess(this.state.currentSubmittingUser);
         } else {
             ajax.promise('/me?frame=embedded').then(submitProcess);
@@ -1495,7 +1496,7 @@ class TypeSelectModal extends React.Component {
     }
 
     onContainerKeyDown(enterKeyCallback, event){
-        if (event.which == 13 || event.keyCode == 13) {
+        if (event.which === 13 || event.keyCode === 13) {
             enterKeyCallback(event);
             return false;
         }
@@ -1554,7 +1555,7 @@ class AliasSelectModal extends TypeSelectModal {
         return (
             <Modal show onHide={this.onHide} className="submission-view-modal">
                 <Modal.Header closeButton>
-                    <Modal.Title>{'Give your new ' + creatingType +' an alias'}</Modal.Title>
+                    <Modal.Title>Give your new { creatingType } an alias</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <div onKeyDown={this.onContainerKeyDown.bind(this, submitAlias)}>
@@ -1580,6 +1581,50 @@ class AliasSelectModal extends TypeSelectModal {
     }
 }
 
+class SelectExistingItemModal extends React.Component {
+
+    render(){
+        var { onCancel, selectData, navigate  } = this.props;
+
+        var selecting = false;
+        if(selectData !== null){
+            selecting = true;
+        }
+
+        if (!selecting) return null;
+
+        /*
+        return (
+            <Modal bsSize="xlarge" show onHide={onCancel} className="submission-view-modal select-existing-item-modal">
+                <Modal.Header closeButton>
+                    <Modal.Title>Select an existing Item</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="text-right">
+                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
+                    </div>
+                    <SearchView
+                        {..._.pick(this.props, 'navigate', 'selectCallback', 'submissionBase')}
+                        context={selectData}
+                    />
+                </Modal.Body>
+            </Modal>
+        );
+        */
+
+        return(
+            <Fade in transitionAppear>
+                <div>
+                    <div className="text-right">
+                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
+                    </div>
+                    <SearchView {...this.props} context={selectData}/>
+                </div>
+            </Fade>
+        );
+    }
+
+}
 
 
 /**
@@ -1601,6 +1646,7 @@ class IndividualObjectView extends React.Component{
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.modifyNewContext = this.modifyNewContext.bind(this);
         this.initiateField = this.initiateField.bind(this);
+        this.selectCancel = this.selectCancel.bind(this);
 
         /**
          * State in this component mostly has to do with selection of existing objs
@@ -1802,11 +1848,8 @@ class IndividualObjectView extends React.Component{
         this.props.setSubmissionState('fullScreen', false);
     }
 
-    /**
-     * Exit out of the selection process and clean up state
-     */
-    selectCancel = (e) => {
-        e.preventDefault();
+    /** Exit out of the selection process and clean up state */
+    selectCancel(e){
         this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
         this.setState({
             'selectType': null,
@@ -1982,90 +2025,20 @@ class IndividualObjectView extends React.Component{
     }
 }
 
-class SelectExistingItemModal extends React.Component {
-
-    render(){
-        var { onCancel, selectData, navigate  } = this.props;
-
-        var selecting = false;
-        if(selectData !== null){
-            selecting = true;
-        }
-
-        if (!selecting) return null;
-
-        return(
-            <Fade in transitionAppear={true}>
-                <div>
-                    <div className="text-right">
-                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
-                    </div>
-                    <SearchView {...this.props} context={selectData}/>
-                </div>
-            </Fade>
-        );
-    }
-
-}
-
 
 class FormFieldsContainer extends React.Component {
+
+    static defaultProps = {
+        'title' : 'Fields & Dependencies',
+        'currKey' : 0
+    }
+
     render(){
         if(React.Children.count(this.props.children) === 0) return null;
         return(
             <div className="form-fields-container">
-                <h4 className="clearfix page-subtitle form-section-heading submission-field-header">Fields & Dependencies</h4>
-                <div>
-                    { this.props.children }
-                </div>
-            </div>
-        );
-    }
-}
-
-/**
- * Simple Component that holds open/close logic and renders the BuildFields passed
- * to it.
- */
-class FieldPanel extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            'open': this.props.open || false
-        };
-    }
-
-    componentWillReceiveProps(nextProps){
-        // scroll to top if worked-on object changes
-        if(this.props.currKey !== nextProps.currKey){
-            this.setState({'open': false});
-        }
-    }
-
-    handleToggle = (e) => {
-        e.preventDefault();
-        this.setState({'open': !this.state.open});
-    }
-
-    render(){
-        if(this.props.fields.length == 0){
-            return null;
-        }
-        return(
-            <div>
-                <h4 className="clearfix page-subtitle submission-field-header">
-                    <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
-                        <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
-                    </Button>
-                    <span>
-                        {this.props.title}
-                    </span>
-                </h4>
-                <Collapse in={this.state.open}>
-                    <div>
-                        {this.props.fields}
-                    </div>
-                </Collapse>
+                <h4 className="clearfix page-subtitle form-section-heading submission-field-header">{ this.props.title }</h4>
+                <div className="form-section-body">{ this.props.children }</div>
             </div>
         );
     }
@@ -2095,9 +2068,7 @@ class RoundTwoDetailPanel extends React.Component{
                     <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
                         <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                     </Button>
-                    <span>
-                        {'Object attributes'}
-                    </span>
+                    <span>Object Attributes</span>
                 </h4>
                 <Collapse in={this.state.open}>
                     <div className="item-page-detail">

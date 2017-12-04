@@ -199,7 +199,7 @@ class SubmissionLeaf extends React.Component{
         } else {
             // must be a submitted object - plot directly
             placeholders = _.keys(this.props.hierarchy[keyIdx]).map(this.generateChild);
-            console.log('TEST24543', placeholders); // Haven't hit this yet??
+            console.log('TEST24543', placeholders); // Haven't hit this yet?? XX Have hit this at selecting a sub-object linkTo
         }
         var extIcon;
         var titleText = this.props.keyDisplay[keyIdx] || keyIdx;
