@@ -141,7 +141,7 @@ export default class SubmissionView extends React.Component{
     /**
      * Function that modifies new context and sets validation state whenever
      * a modification occurs
-     * 
+     *
      * @param {number} objKey - Key of Item being modified.
      * @param {Object} newContext - New Context/representation for this Item to be saved.
      */
@@ -251,7 +251,7 @@ export default class SubmissionView extends React.Component{
                 ajax.promise(contextID + '?frame=object').then(response => {
                     var initObjs = [];
                     if (response['@id'] && response['@id'] === contextID){
-                        initContext[0] = buildContext(response, schema, bookmarksList, this.props.edit, this.props.create, null, initObjs);
+                        initContext[0] = buildContext(response, schema, bookmarksList, this.props.edit, this.props.create, initObjs);
                         initBookmarks[0] = bookmarksList;
                         if(this.props.edit && response.aliases && response.aliases.length > 0){
                             // we already have an alias for editing, so use it for title
@@ -583,8 +583,8 @@ export default class SubmissionView extends React.Component{
      * it since other occurences of that object may be used in the creation
      * process and those should not be affected. Effectively, removing a pre-
      * existing object amounts to removing it from keyHierarchy.
-     * 
-     * @param {number} key - Key of item to remove. 
+     *
+     * @param {number} key - Key of item to remove.
      */
     removeObj = (key) => {
         var contextCopy = _.clone(this.state.keyContext);
@@ -622,7 +622,7 @@ export default class SubmissionView extends React.Component{
         // for housekeeping, remove the keys from keyLinkBookmarks, keyLinks, and keyComplete
         _.forEach(toDelete, (keyToDelete)=>{
             if (isNaN(keyToDelete)) return; // only remove creation data for non-sumbitted, non-preexisiting objs
-            
+
             // remove key from roundTwoKeys if necessary
             // NOTE: submitted custom objects will NOT be removed from this
             // after deletion. Still give user opportunity for second round edits
@@ -909,20 +909,71 @@ export default class SubmissionView extends React.Component{
     }
 
     /**
-     * Adds the accession and uuid from the already submitted context (stored in
-     * keyContext under the path of the submitted object) to the context used to
-     * patch the same object in roundTwo.
+     * Returns true if the given schema has a round two flag within it
+     * Used within the submission process to see if items will need second round submission.
      */
-    addSubmittedContext = (newContext) => {
-        var path = this.state.keyComplete[this.state.currKey];
-        if(path){
-            var alreadySubmittedContext = this.state.keyContext[path];
-            newContext.uuid = alreadySubmittedContext.uuid;
-            if(alreadySubmittedContext.accession){
-                newContext.accession = alreadySubmittedContext.accession;
+    checkRoundTwo = (schema) => {
+        var fields = schema.properties ? _.keys(schema.properties) : [];
+        for (var i=0; i<fields.length; i++){
+            if(schema.properties[fields[i]]){
+                var fieldSchema = object.getNestedProperty(schema, ['properties', fields[i]], true);
+                if (!fieldSchema){
+                    continue;
+                }
+                if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
+                    // this object needs second round submission
+                    return true;
+                }
             }
         }
-        return newContext;
+        return false;
+    }
+
+    /**
+     * Add the fields to given editContext from origContext that were removed
+     * from the sumbission process due to schema flags
+     * (exclude_from or permissions)
+     * Used when editing (this.props.edit == true) or in second-round submission,
+     * which can also be thought of as editing the submitted first round items
+     * (since fields like uuid and accession that are excluded from the
+     * creation process must be included)
+     *
+     * Use this when editing or in round two. Returns the revised context
+     */
+    mergeEditedContext = (editContext, origContext, schema) => {
+        var userGroups = getUserGroups();
+        _.keys(origContext).forEach(function(field, index){
+            // if editContext already has a value (such as admin edited
+            // import_items fields), don't overwrite
+            if(editContext[field]){
+                return;
+            }
+            if(schema.properties[field]){
+                var fieldSchema = object.getNestedProperty(schema, ['properties', field], true);
+                if (!fieldSchema){
+                    return;
+                }
+                // skip calculated properties
+                if (fieldSchema.calculatedProperty && fieldSchema.calculatedProperty === true){
+                    return;
+                }
+                if (fieldSchema.exclude_from && (_.contains(fieldSchema.exclude_from,'FFedit-create') || fieldSchema.exclude_from == 'FFedit-create')){
+                    console.log('Added edit context:', field, ' -//- ', origContext[field]);
+                    editContext[field] = origContext[field];
+                    return;
+                }
+                // if the user is admin, they already have these fields
+                // available; don't change unless they aren't
+                if (fieldSchema.permission && fieldSchema.permission == "import_items"){
+                    if(!_.contains(userGroups, 'admin')){
+                        console.log('Added edit context:', field, ' _//_ ', origContext[field]);
+                        editContext[field] = origContext[field];
+                        return;
+                    }
+                }
+            }
+        });
+        return editContext;
     }
 
     /** Set md5Progress in state to val. Passed as callback to getLargeMD5 */
@@ -1026,21 +1077,19 @@ export default class SubmissionView extends React.Component{
                     if(this.state.roundTwo){
                         actionMethod = 'PUT';
                         destination = this.state.keyComplete[inKey];
-                        // add uuid and accession from submitted context
-                        finalizedContext = this.addSubmittedContext(finalizedContext);
-                    }else if(this.props.edit && inKey == 0){ // PUT for principal obj on edit
+                        var alreadySubmittedContext = this.state.keyContext[destination];
+                        finalizedContext = this.mergeEditedContext(finalizedContext, alreadySubmittedContext, currSchema);
+                    }else if(this.props.edit && inKey == 0){
+                        // PUT for principal obj on edit
+                        // this is because fields cannot be deleted with PATCH
                         actionMethod = 'PUT';
                         destination = propContext['@id'];
-                        // must add uuid (and accession, if available) to PUT body
-                        finalizedContext.uuid = propContext.uuid;
-                        // not all objects have accessions
-                        if(propContext.accession){
-                            finalizedContext.accession = propContext.accession;
-                        }
+                        finalizedContext = this.mergeEditedContext(finalizedContext, propContext, currSchema);
                     }
 
                 }
                 var payload = JSON.stringify(finalizedContext);
+                console.log('Submission payload:', finalizedContext);
                 ajax.promise(destination, actionMethod, {}, payload).then(response => {
                     if (response.status && response.status !== 'success'){ // error
                         keyValid[inKey] = 2;
@@ -1121,21 +1170,18 @@ export default class SubmissionView extends React.Component{
                             typesCopy[destination] = currType;
                             displayCopy[destination] = displayCopy[inKey];
                             contextCopy[destination] = responseData;
+                            contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false);
                             stateToSet.keyLinks = linksCopy;
                             stateToSet.keyTypes = typesCopy;
                             stateToSet.keyComplete = keyComplete;
                             stateToSet.keyDisplay = displayCopy;
                             stateToSet.keyContext = contextCopy;
-                            var needsRoundTwo = [];
-                            // update context with response data and check if submitted object needs a round two
-                            contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false, needsRoundTwo);
                             // update roundTwoKeys if necessary
-                            if(needsRoundTwo.length > 0){
-                                if(!_.contains(roundTwoCopy, inKey)){
-                                    // was getting an error where this could be str
-                                    roundTwoCopy.push(parseInt(inKey));
-                                    stateToSet.roundTwoKeys = roundTwoCopy;
-                                }
+                            var needsRoundTwo = this.checkRoundTwo(currSchema);
+                            if(needsRoundTwo && !_.contains(roundTwoCopy, inKey)){
+                                // was getting an error where this could be str
+                                roundTwoCopy.push(parseInt(inKey));
+                                stateToSet.roundTwoKeys = roundTwoCopy;
                             }
                             // inKey is 0 for the primary object
                             if(inKey === 0){
@@ -1207,7 +1253,7 @@ export default class SubmissionView extends React.Component{
             this.props.setIsSubmitting(false, ()=>{
                 this.props.navigate(this.state.keyComplete[0]);
             });
-            
+
         }
     }
 
@@ -1695,7 +1741,7 @@ class IndividualObjectView extends React.Component{
             prevValue = pointer[splitFieldLeaf];
             pointer[splitFieldLeaf] = value;
         }
-        
+
         if (fieldType === 'linked object'){
             this.checkObjectRemoval(value, prevValue);
         }
@@ -1706,7 +1752,7 @@ class IndividualObjectView extends React.Component{
             // actually change value
             this.props.modifyKeyContext(this.props.currKey, contextCopy);
         }
-        
+
         if(splitFieldLeaf === 'aliases' || splitFieldLeaf === 'name' || splitFieldLeaf === 'title'){
             this.props.modifyAlias();
         }
@@ -2113,14 +2159,10 @@ class RoundTwoDetailPanel extends React.Component{
 /***** MISC. FUNCIONS *****/
 
 /**
- * Build context based off an object's and populate values from
- * pre-existing context. Empty fields are given null value.
- * All linkTo fields are added to objList.
- * If initObjs provided (edit or clone functionality), pre-existing objs will be added.
- * Also checks user info to see if user is admin, which affects which fields are displayed.
+ * Return an array of user groups the current user belongs to
+ * Based off of the current JWT
  */
-export function buildContext(context, itemSchema, objList=null, edit=false, create=true, roundTwoSwitch=null, initObjs=null){
-    var built = {};
+function getUserGroups(){
     var userInfo = JWT.getUserInfo();
     var userGroups = [];
     if (userInfo){
@@ -2129,6 +2171,19 @@ export function buildContext(context, itemSchema, objList=null, edit=false, crea
             userGroups = currGroups;
         }
     }
+    return userGroups;
+}
+
+/**
+ * Build context based off an object's and populate values from
+ * pre-existing context. Empty fields are given null value.
+ * All linkTo fields are added to objList.
+ * If initObjs provided (edit or clone functionality), pre-existing objs will be added.
+ * Also checks user info to see if user is admin, which affects which fields are displayed.
+ */
+export function buildContext(context, itemSchema, objList=null, edit=false, create=true, initObjs=null){
+    var built = {};
+    var userGroups = getUserGroups();
     var fields = itemSchema.properties ? _.keys(itemSchema.properties) : [];
     for (var i=0; i<fields.length; i++){
         if(itemSchema.properties[fields[i]]){
@@ -2149,10 +2204,6 @@ export function buildContext(context, itemSchema, objList=null, edit=false, crea
                 if(!_.contains(userGroups, 'admin')){
                     continue;
                 }
-            }
-            if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
-                // register that this object will need round 2 submission
-                if(roundTwoSwitch !== null) roundTwoSwitch.push(fieldSchema);
             }
             // set value to context value if editing/cloning.
             // if creating or value not present, set to null
@@ -2379,7 +2430,7 @@ var removeNulls = function myself(context){
             context[key] = _.filter(context[key], function(v){ return !isValueNull(v); });
         } else if (context[key] instanceof Object) {
             context[key] = myself(context[key]);
-        } 
+        }
     });
     return context;
 };

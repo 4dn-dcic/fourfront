@@ -426,7 +426,7 @@
             "description": "Key words that can tag an item - useful for filtering.",
             "type": "array",
             "uniqueItems": true,
-            "ff_clear": "clone",
+            "ff_flag": "clear clone",
             "items": {
                 "title": "Tag",
                 "description": "A tag for the item.",
