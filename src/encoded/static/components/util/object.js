@@ -14,10 +14,11 @@ import { Field } from './Schemas';
  * @returns {string|null} The Item's '@id'.
  */
 export function atIdFromObject(o){
-    return (
-        o && typeof o === 'object' &&
-            ((o.link_id && o.link_id.replace(/~/g, "/")) || o['@id']) 
-        ) || null;
+    if (!o) return null;
+    if (typeof o !== 'object') return null;
+    if (typeof o['@id'] === 'string') return o['@id'];
+    if (typeof o.link_id === 'string') return o.link_id.replace(/~/g, "/");
+    return null;
 }
 
 
