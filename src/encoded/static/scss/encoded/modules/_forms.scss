@@ -1109,8 +1109,14 @@ div.fieldset.editable-fields {
 				}
 
 				> i.icon-pencil {
-					padding-top: 6px;
-					padding-right: 6px;
+					padding-top: 3px;
+					padding-right: 4px;
+					font-size: 1.2rem;
+				}
+
+				> i.icon-external-link {
+					padding-right: 5px;
+					padding-top: 7px;
 				}
 
 				> .toggle-icon-button {
@@ -1120,8 +1126,12 @@ div.fieldset.editable-fields {
 				}
 				
 				&.pre-existing, &.existing-item {
-					background-color: #4c994c;
-					color: #fff;
+					//background-color: #4c994c;
+					//color: #fff;
+					background-color: #f4f4f4;
+					//> .indicator-icon {
+					//	color: #4c994c;
+					//}
 				}
 				&.not-complete {
 					background-color: #fcd19c;
@@ -1147,7 +1157,7 @@ div.fieldset.editable-fields {
 				border-left: 1px dotted transparent;
 				border-right: 1px dotted transparent;
 				border-bottom: 1px dotted transparent;
-				margin-bottom: 5px;
+				//margin-bottom: 5px;
 				padding-top: 2px;
 				padding-bottom: 2px;
 				> .submission-nav-leaf.linked-item-type-name {
@@ -1170,16 +1180,18 @@ div.fieldset.editable-fields {
 						}
 					}
 					&.has-children {
-						> .inner-title {
-							padding-bottom: 2px;
+						//> .inner-title {
+						//	padding-bottom: 2px;
 							//padding-top: 2px;
-						}
+						//}
 					}
 					> .children-container {
 						padding-left: 18px;
+						padding-bottom: 4px;
+						padding-top: 2px;
 						//......
 						> .submission-nav-leaf.linked-item-title {
-
+							margin: 1px 0;
 						}
 						//.....
 					}
@@ -1188,9 +1200,10 @@ div.fieldset.editable-fields {
 
 			&.active {
 				> .inner-title {
-					font-weight: 700;
+					font-weight: 600;
 					border: 1px solid #333;
 					cursor: default;
+					box-shadow: inset 0 0px 2px rgba(0,0,0,0.5);
 					
 					/*
 					&:before {

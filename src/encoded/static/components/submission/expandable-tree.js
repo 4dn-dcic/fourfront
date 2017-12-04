@@ -88,14 +88,20 @@ class SubmissionProperty extends React.Component {
         var fieldSchema = itemSchema.properties[fieldBase];
 
         var bookmark = (fieldSchema && fieldSchema.title) || delveObject(fieldSchema);
-        var children = _.map(_.filter(_.keys(hierarchy[keyIdx]), (childKey) => keyLinks[childKey] === field), this.generateChild);
+        var children = _.map(
+            _.filter(
+                _.keys(hierarchy[keyIdx]),
+                function(childKey){ return keyLinks[childKey] === field; }
+            ),
+            this.generateChild
+        );
         return(
             <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + depth + (isRequired ? ' is-required' : '') + (children.length > 0 ? ' has-children' : '' )}>
                 <div className="clearfix inner-title">
                     <i className={"icon property-expand-icon clickable icon-" + (this.state.open ? 'minus' : 'plus')} onClick={this.handleToggle}/>
                     <span>{ children.length } { bookmark || field }</span>
                 </div>
-                <Collapse in={this.state.open}><div className="children-container" children={children} /></Collapse>
+                { children.length > 0 ? <Collapse in={this.state.open}><div className="children-container" children={children} /></Collapse> : null }
             </div>
         );
     }
@@ -195,10 +201,11 @@ class SubmissionLeaf extends React.Component{
             placeholders = _.keys(this.props.hierarchy[keyIdx]).map(this.generateChild);
             console.log('TEST24543', placeholders); // Haven't hit this yet??
         }
-        var editIcon;
+        var extIcon;
         var titleText = this.props.keyDisplay[keyIdx] || keyIdx;
         var statusClass = null;
         var isCurrentlySelected = false;
+        var tip = null;
 
         var clickHandler = this.handleClick;
 
@@ -219,25 +226,31 @@ class SubmissionLeaf extends React.Component{
                 }
             }.bind(this);
             
-            icon = <i className="icon icon-hdd-o" data-tip="Successfully submitted or pre-existing. This item already exists in the database."/>;
+            icon = <i className="icon icon-hdd-o indicator-icon"/>;
+            tip = "Successfully submitted or pre-existing item; already exists in the database.<br>Click to view this item/dependency in new tab/window.";
+            extIcon = <i className="icon icon-external-link pull-right" />;
 
         }else{
             switch (keyValid[keyIdx]){
                 case 0:
                     statusClass = 'not-complete';
-                    icon = <i className="icon icon-stop-circle-o" data-tip="Has incomplete children, cannot yet be validated." />;
+                    icon = <i className="icon icon-stop-circle-o indicator-icon" />;
+                    tip = "Has incomplete children, cannot yet be validated.";
                     break;
                 case 1:
                     statusClass = 'complete-not-validated';
-                    icon = <i className="icon icon-circle-o" data-tip="All children are complete, can be validated." />;
+                    icon = <i className="icon icon-circle-o indicator-icon" />;
+                    tip = "All children are complete, can be validated.";
                     break;
                 case 2:
                     statusClass = 'failed-validation';
-                    icon = <i className="icon icon-times" data-tip="Validation failed. Fix fields and try again."/>;
+                    icon = <i className="icon icon-times indicator-icon" />;
+                    tip = "Validation failed. Fix fields and try again.";
                     break;
                 case 3:
                     statusClass = 'validated';
-                    icon = <i className="icon icon-check" data-tip="Validation passed, ready for submission"/>;
+                    icon = <i className="icon icon-check indicator-icon" />;
+                    tip = "Validation passed, ready for submission.";
                     break;
                 default:
                     statusClass = 'status-not-determined';
@@ -248,15 +261,15 @@ class SubmissionLeaf extends React.Component{
         var icon;
         if (keyIdx === this.props.currKey){ // We're currently on this Item
             isCurrentlySelected = true;
-            editIcon = <i className="icon icon-pencil pull-right" data-tip="Item which you are currently editing." />;
+            extIcon = <i className="icon icon-pencil pull-right" data-tip="Item which you are currently editing." />;
         }
 
         return(
             <div className={"submission-nav-leaf linked-item-title leaf-depth-" + (this.props.depth) + (isCurrentlySelected ? ' active' : '')}>
-                <div className={"clearfix inner-title " + statusClass} onClick={clickHandler}>
-                    {editIcon}{icon}<span className="title-text">{titleText}</span>
+                <div className={"clearfix inner-title " + statusClass} onClick={clickHandler} data-tip={tip} data-html>
+                    {extIcon}{icon}<span className="title-text">{titleText}</span>
                 </div>
-                <div className="list-of-properties">{ placeholders }</div>
+                { placeholders && placeholders.length > 0 ? <div className="list-of-properties" children={placeholders} /> : null }
             </div>
         );
     }

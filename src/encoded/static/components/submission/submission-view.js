@@ -8,7 +8,7 @@ import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../ut
 import moment from 'moment';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
-import Search from './../browse/SearchView';
+import SearchView from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
 import SubmissionTree, { delveObject, delveObjectProperty } from './expandable-tree';
@@ -153,7 +153,7 @@ export default class SubmissionView extends React.Component{
         this.setState({
             'keyContext': contextCopy,
             'keyValid': validCopy
-        });
+        }, ReactTooltip.rebuild);
     }
 
     /**
@@ -723,9 +723,9 @@ export default class SubmissionView extends React.Component{
                         this.submitObject(this.state.currKey, true, true);
                     }
                     // see if newly-navigated obj is ready for validation
-                    if(keyValid[value] == 0){
+                    if(keyValid[value] === 0){
                         var validState = this.findValidationState(value);
-                        if(validState == 1){
+                        if(validState === 1){
                             keyValid[value] = 1;
                             stateToSet['keyValid'] = keyValid;
                         }
@@ -1748,44 +1748,6 @@ class IndividualObjectView extends React.Component{
     }
 
     /**
-     * Navigation function passed to Search so that faceting can be done in-place
-     * through ajax. If no results are returned from the search, abort.
-     */
-    inPlaceNavigate = (destination, options, callback) => {
-        if(this.state.selectQuery){
-            var dest = destination;
-            // ensure destination is formatted correctly when clearing/removing filters
-            if(destination == '/'){
-                dest = '/search/?type=' + this.state.selectType;
-            }else if(destination.slice(0,8) != '/search/' && destination.slice(0,1) == '?'){
-                dest = '/search/' + destination;
-            }
-            ajax.promise(dest).then(data => {
-                if (data && data['@graph']){
-                    this.setState({
-                        'selectData': data,
-                        'selectQuery': dest
-                    });
-                }else{
-                    this.setState({
-                        'selectType': null,
-                        'selectData': null,
-                        'selectQuery': null,
-                        'selectField': null,
-                        'selectLink': null,
-                        'selectArrayIdx': null
-                    });
-                    this.props.setSubmissionState('fullScreen', false);
-                }
-            }).then(data => {
-                if (typeof callback === 'function'){
-                    callback(data);
-                }
-            });
-        }
-    }
-
-    /**
      * Initializes the first search (with just type=<type>) and sets state
      * accordingly. Set the fullScreen state in SubmissionView to alter its render
      * and hide the object navigation tree.
@@ -1801,7 +1763,7 @@ class IndividualObjectView extends React.Component{
                         'selectData': data,
                         'selectQuery': '/search/?type=' + collection,
                         'selectField': field,
-                        'selectLink': newLink,
+                        'selectLink': field,
                         'selectArrayIdx': array
                     });
                     this.props.setSubmissionState('fullScreen', true);
@@ -1995,26 +1957,15 @@ class IndividualObjectView extends React.Component{
         }
         return(
             <div>
-                <Fade in={selecting} transitionAppear={true}>
-                    <div>
-                        <div>
-                            {selecting ?
-                                <Button bsStyle="danger" onClick={this.selectCancel}>
-                                    {'Cancel selection'}
-                                </Button>
-                                : null
-                            }
-                        </div>
-                        {selecting ?
-                            <Search {...this.props}
-                                context={this.state.selectData}
-                                navigate={this.inPlaceNavigate}
-                                selectCallback={this.selectComplete}
-                                submissionBase={this.state.selectQuery}/>
-                            : null
-                        }
-                    </div>
-                </Fade>
+                <SelectExistingItemModal
+                    {...this.props}
+                    navigate={this.inPlaceNavigate}         // Override global navigate func
+                    selectCallback={this.selectComplete}
+                    submissionBase={this.state.selectQuery} // Base HREF used, overrides props.href
+                    onCancel={this.selectCancel}
+                    selectData={this.state.selectData}
+                    selectObj={this.selectObj}
+                />
                 <Fade in={!selecting || this.state.fadeState} transitionAppear={true}>
                     <div>
                         <FormFieldsContainer children={fieldComponents} currKey={this.props.currKey}/>
@@ -2030,6 +1981,33 @@ class IndividualObjectView extends React.Component{
         );
     }
 }
+
+class SelectExistingItemModal extends React.Component {
+
+    render(){
+        var { onCancel, selectData, navigate  } = this.props;
+
+        var selecting = false;
+        if(selectData !== null){
+            selecting = true;
+        }
+
+        if (!selecting) return null;
+
+        return(
+            <Fade in transitionAppear={true}>
+                <div>
+                    <div className="text-right">
+                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
+                    </div>
+                    <SearchView {...this.props} context={selectData}/>
+                </div>
+            </Fade>
+        );
+    }
+
+}
+
 
 class FormFieldsContainer extends React.Component {
     render(){
