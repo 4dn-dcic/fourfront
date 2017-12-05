@@ -22,6 +22,7 @@ ORDER = [
     'page',
     'ontology',
     'ontology_term',
+    'badge',
     'organism',
     'genomic_region',
     'target',
