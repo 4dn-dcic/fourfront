@@ -123,6 +123,9 @@
         "namespace": {
             "title": "Namespace"
         },
+        "slim_terms.term_name": {
+            "title": "Slim Terms"
+        },
         "is_slim_for": {
             "title": "Slim Category"
         }
