@@ -968,27 +968,16 @@ export default class SubmissionView extends React.Component{
                 // if the user is admin, they already have these fields available;
                 // only register as removed if admin did it intentionally
                 if (fieldSchema.permission && fieldSchema.permission == "import_items"){
-                    if(_.contains(userGroups, 'admin')){
-                        deleteFields.push(field);
-                        return;
-                    }else{
-                        return;
-                    }
+                    if(_.contains(userGroups, 'admin')) deleteFields.push(field);
+                    return;
                 }
                 // check round two fields if the parameter roundTwo is set
                 if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
-                    if(this.state.roundTwo){
-                        deleteFields.push(field);
-                        return;
-                    }else{
-                        return;
-                    }
-                }
-                // if we're here, the submission field was legitimately deleted
-                if(!this.state.roundTwo){
-                    deleteFields.push(field);
+                    if(this.state.roundTwo) deleteFields.push(field);
                     return;
                 }
+                // if we're here, the submission field was legitimately deleted
+                if(!this.state.roundTwo) deleteFields.push(field);
             }
         }.bind(this));
         return deleteFields;
