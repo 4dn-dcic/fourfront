@@ -67,7 +67,11 @@
                         &.height-at-least-0,
                         &.height-at-least-30 {
                             > .part-2 {
-                                display: none;
+                                //display: none;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                max-width: 50%;
                             }
                         }
                     }

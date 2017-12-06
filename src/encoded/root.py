@@ -11,6 +11,7 @@ from snovault import (
 )
 from snovault.elasticsearch.create_mapping import get_db_es_counts_and_db_uuids
 from .schema_formats import is_accession
+from .types.page import get_local_file_contents
 from pyramid.security import (
     ALL_PERMISSIONS,
     Allow,
@@ -22,165 +23,21 @@ from collections import OrderedDict
 
 
 def includeme(config):
-    config.include(static_pages)
     config.include(health_check)
+    config.include(item_counts)
     config.include(submissions_page)
     config.scan(__name__)
 
 
-cachedFileContents = {} # Should we cache in RAM like this (?), let perform file I/O, or something else?
-pageLocations = None
-
-def get_local_file_contents(filename, directory, contentFilesLocation):
-    cachedName = directory + '/' + filename.split('.')[0]
-    output = cachedFileContents.get(cachedName)
-    if output:
-        #print("\n\n\nGot cached output for " + filename)     # Works
-        return output
-    file = open(contentFilesLocation + '/' + filename, encoding="utf-8")
-    output = file.read()
-    file.close()
-    cachedFileContents[cachedName] = output
-    return output
-
-def get_remote_file_contents(uri, cached_remote_files):
-    if cached_remote_files.get(uri) is not None:
-        return cached_remote_files[uri]
-    resp = requests.get(uri)
-    cached_remote_files[uri] = resp.text
-    return resp.text
-
-def listFilesInInDirectory(dirLocation):
-    return [ fn for fn in os.listdir(dirLocation) if os.path.isfile(dirLocation + '/' + fn) ]
-
-def static_pages(config):
-    '''Setup static routes & content from static files (HTML or Markdown)'''
-
-    try:
-        contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-        pageLocations = json.loads(get_local_file_contents("static_pages.json", "/static/data", contentFilesLocation + "/static/data")).get('pages', {})
-    except Exception as e:
-        print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
-
-
+def item_counts(config):
     config.add_route(
-        'static-page',
-        '/{page:(' + '|'.join( map(escape, pageLocations.keys() )) + ')}'
+        'item-counts',
+        '/counts'
     )
 
-    def static_page(request):
-
-        page = request.matchdict.get('page','none')
-        content = None
-        contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-
-        cached_remote_files = {}
-
-        pageMeta = pageLocations.get(page, None)
-
-        if isinstance(pageMeta, dict) and pageMeta.get('directory', None) is not None:
-            contentFilesLocation += "/../.." # get us to root of Git repo.
-            contentFilesLocation += pageMeta['directory']
-
-            if pageMeta.get('sections', None) is not None:
-                sections = pageMeta['sections']
-            else:
-                sections = [ { 'filename' : fn } for fn in listFilesInInDirectory(contentFilesLocation) ]
-
-            # Set order (as py dicts don't maintain order)
-            i = 0
-            for s in sections:
-                s.update(order = i)
-                i += 1
-
-            try:
-                content = {}
-                for s in sections:
-                    sectionID = s.get('id') # use section 'id', or 'filename' minus extension ('.*')
-                    if sectionID is None:
-                        sectionID = s['filename'].split('.')[0]
-                    if s.get('content', None) is not None: # We have content defined in JSON definition file already, skip any fetching.
-                        content[sectionID] = {
-                            'content' : s['content'],
-                            'title'   : s.get('title', None),
-                            'order'   : s['order'],
-                            'filetype': 'txt'
-                        }
-                    else:
-                        content_for_section = None
-                        if s['filename'][0:4] == 'http' and '://' in s['filename'][4:8]:
-                            # Remote File
-                            content_for_section = get_remote_file_contents(s['filename'], cached_remote_files)
-                        else:
-                            content_for_section = get_local_file_contents(s['filename'], pageMeta['directory'], contentFilesLocation)
-                        filenameParts = s['filename'].split('.')
-                        content[sectionID] = {
-                            'content' : content_for_section,
-                            'title'   : s.get('title', None),
-                            'order'   : s['order'],
-                            'filetype': filenameParts[len(filenameParts) - 1]
-                        }
-                    if s.get('title', None):
-                        content[sectionID]['title'] = s['title']
-                    if s.get('toc-title', None):
-                        content[sectionID]['toc-title'] = s['toc-title']
-
-                    content[sectionID].update({
-                        k : v for k,v in s.items() if k not in ['id', 'title', 'toc-title', 'order', 'filetype', 'filename']
-                    })
-
-            except Exception as e:
-                print(e)
-                print('Could not get contents from ' + contentFilesLocation)
-
-        else:
-            print("No directory set for page \"" + page + "\" in /static/data/directories.json, checking default (/static/data)")
-            try:
-                contentFilesLocation += "/static/data/"     # Where the static files be stored by default.
-                contentFilesLocation += page
-                content = { fn.split('.')[0] : get_local_file_contents(fn, page, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
-            except FileNotFoundError as e:
-                print("No files found for static page: \"" + page + "\"")
-
-        # Dummy-like 'context' JSON response
-        pathParts = request.matchdict.get('page','').split('/')
-        atTypes = [
-            ''.join([ pgType.capitalize() for pgType in list(reversed(pathParts))[pathIndex:] ]) + 'Page' for pathIndex in range(0, len(pathParts))
-        ] # creates e.g. SubmittingHelpPage, HelpPage
-
+    def counts_view(request):
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
-
-        responseDict = {
-            "title" : (isinstance(pageMeta, dict) and pageMeta.get('title')) or request.matchdict.get('page','').capitalize(),
-            "notification" : "success",
-            "@type" : atTypes + [ "StaticPage", "Portal" ],
-            "@context" : "/" + request.matchdict.get('page','static-pages'),
-            "@id" : "/" + request.matchdict.get('page',''),
-            "content" : content
-        }
-
-        if isinstance(pageMeta, dict) and pageMeta.get('table-of-contents'):
-            responseDict['toc'] = pageMeta['table-of-contents']
-
-        return responseDict
-
-    config.add_view(static_page, route_name='static-page')
-
-
-def health_check(config):
-    """
-    Emulate a lite form of Alex's static page routing
-    """
-    config.add_route(
-        'health-check',
-        '/health'
-    )
-    def health_page_view(request):
-
-        response = request.response
-        response.content_type = 'application/json; charset=utf-8'
-        settings = request.registry.settings
 
         # how much stuff in database
         db_total = 0
@@ -193,38 +50,65 @@ def health_check(config):
         db_es_compare = OrderedDict()
         all_collections = list(request.registry[COLLECTIONS].by_item_type.keys())
         for collection in all_collections:
-            db_count, es_count, _ = get_db_es_counts_and_db_uuids(request, es, collection)
+            db_count, es_count, _, _ = get_db_es_counts_and_db_uuids(request, es, collection)
             warn_str = build_warn_string(db_count, es_count)
             db_total += db_count
             es_total += es_count
             db_es_compare[collection] = ("DB: %s   ES: %s %s" %
-                            (str(db_count), str(es_count), warn_str))
+                                         (str(db_count), str(es_count), warn_str))
         warn_str = build_warn_string(db_total, es_total)
         db_es_total = ("DB: %s   ES: %s %s" %
-                            (str(db_total), str(es_total), warn_str))
+                       (str(db_total), str(es_total), warn_str))
+
+        responseDict = {
+            'db_es_total': db_es_total,
+            'db_es_compare': db_es_compare
+        }
+
+        return responseDict
+
+    config.add_view(counts_view, route_name='item-counts')
+
+
+def health_check(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'health-check',
+        '/health'
+    )
+
+    def health_page_view(request):
+
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+        settings = request.registry.settings
 
         # when ontologies were imported
         try:
-            si =  request.embed('/sysinfos/ffsysinfo')
+            si = request.embed('/sysinfos/ffsysinfo')
             ont_date = si.json['ontology_updated']
         except:  # pylint:disable
             ont_date = "Never Generated"
 
+        app_url = request.application_url
+        if not app_url.endswith('/'):
+            app_url = ''.join([app_url, '/'])
+
         responseDict = {
-            "file_upload_bucket" : settings.get('file_upload_bucket'),
-            "blob_bucket" : settings.get('blob_bucket'),
-            "system_bucket" : settings.get('system_bucket'),
-            "elasticsearch" : settings.get('elasticsearch.server'),
-            "database" : settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
+            "file_upload_bucket": settings.get('file_upload_bucket'),
+            "blob_bucket": settings.get('blob_bucket'),
+            "system_bucket": settings.get('system_bucket'),
+            "elasticsearch": settings.get('elasticsearch.server'),
+            "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
             'ontology_updated': ont_date,
-            "@type" : [ "Health", "Portal" ],
-            "@context" : "/health",
-            "@id" : "/health",
-            "content" : None,
-            "display_title" : "Health Status",
-            'db_es_total': db_es_total,
-            'db_es_compare': db_es_compare
+            "@type": ["Health", "Portal"],
+            "@context": "/health",
+            "@id": "/health",
+            "content": None,
+            "display_title": "Fourfront Status and Foursight Monitoring",
         }
 
         return responseDict
@@ -234,9 +118,9 @@ def health_check(config):
 
 def build_warn_string(db_count, es_count):
     if db_count > es_count:
-        warn_str = '  < WARNING: DB has %s more items >' % (str(db_count - es_count))
+        warn_str = '  < DB has %s more items >' % (str(db_count - es_count))
     elif db_count < es_count:
-        warn_str = '  < WARNING: ES has %s more items >' % (str(es_count - db_count))
+        warn_str = '  < ES has %s more items >' % (str(es_count - db_count))
     else:
         warn_str = ''
     return warn_str
@@ -346,7 +230,7 @@ class EncodedRoot(Root):
         try:
             contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
             contentFilesLocation += "/static/data/home" # Where the static files be stored. TODO: Put in .ini file
-            return { fn.split('.')[0] : get_local_file_contents(fn, 'home', contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
+            return { fn.split('.')[0] : get_local_file_contents(fn, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
         except FileNotFoundError as e:
             print("No content files found for Root object (aka Home, '/').")
             return {}

@@ -4,7 +4,7 @@
 ***********************************************************/
 
 .fourDN-header{
-	font-family: 'Work Sans', sans-serif;
+	font-family: $font-family-sans-serif;
 	font-weight: 300;
 	margin-bottom: 20px;
 	margin-top: 20px;
@@ -45,38 +45,42 @@ h5.fourDN-header {
 }
 
 .fourDN-section{
-	font-family: 'Work Sans', sans-serif;
-	padding-bottom: 10px;
-	margin-top: 20px;
-}
-
-.announcement {
-	font-family: 'Work Sans', sans-serif;
 	padding-bottom: 10px;
 	margin-top: 20px;
 
-	.announcement-title {
-		font-weight: 300;
-		font-size: 1.35rem;
-		border-bottom: 2px solid #168369;
-		padding-bottom: 5px;
-		margin-bottom: 5px;
-	}
+	&.announcement {
+		padding-bottom: 10px;
+		margin-top: 20px;
 
-	.announcement-subtitle {
-		color: #b3b3b3;
-		font-weight: 400;
-		font-size: 0.925rem;
-	}
+		.announcement-title {
+			font-weight: 300;
+			font-size: 1.35rem;
+			border-bottom: 2px solid #168369;
+			padding-bottom: 5px;
+			margin-bottom: 5px;
+			i.icon.icon-minus,
+			i.icon.icon-plus {
+				margin-right: 5px;
+			}
+		}
 
-	.announcement-content {
-		margin-top: 10px;
-		font-size: 1.25rem;
+		.announcement-subtitle {
+			color: #999;
+			font-weight: 400;
+			font-size: 0.9rem;
+		}
+
+		.announcement-content {
+			margin-top: 10px;
+			font-size: 1.25rem;
+		}
 	}
 }
+
+
 
 .fourDN-section-toggle{
-	color: #999999;
+	color: #555;
 	text-decoration: none !important;
 	&:hover,
 	&:focus {
@@ -85,14 +89,13 @@ h5.fourDN-header {
 }
 
 .fourDN-section-info{
-	color: #b3b3b3 !important;
+	color: #999 !important;
 	font-weight: 300;
 	font-size: 1.2em;
 }
 
 
 .fourDN-content{
-	font-family: 'Yrsa', serif;
 	line-height: 130%;
 	font-size: 1.375rem;
 
@@ -114,6 +117,13 @@ h5.fourDN-header {
 		max-width: 100%;
 	}
 
+}
+
+.help-entry.static-section-entry {
+	// Revert eventually & adjust HTML of static pages, then style up.
+	.fourDN-content{
+		font-family: $font-family-serif;
+	}
 }
 
 .fourDN-content-panel{
@@ -313,23 +323,49 @@ h5.fourDN-header {
 }
 
 .homepage-links-row {
-	
-	.link-block {
-		width: 25%;
-		float: left;
-		text-align: center;
-		font-weight: 500;
-		padding: 4px 8px;
-		//border-left: 1px solid #ddd;
 
-		&:not(:first-child){
-			border-left: 1px solid #eee;
+	.links-wrapper {
+
+		display: flex;
+
+		.link-block {
+			
+			> a {
+				background: #f8f8f8;
+				padding: 8px 10px;
+				display: block;
+				/* text-align: center; */
+				font-weight: 400;
+				height: 100%;
+				border: 1px solid rgba(0,0,0,0.05);
+				/*
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				*/
+
+				&:hover {
+					background-color: #f4f4f4;
+				}
+
+				> span {
+					display: inline-block;
+					vertical-align: middle;
+				}
+			}
+			
+			
+			&:not(:first-child){
+				border-left: 1px solid #eee;
+			}
+			
+			/*
+			&:last-child {
+				border-right: 1px solid #ddd;
+			}
+			*/
 		}
-		/*
-		&:last-child {
-			border-right: 1px solid #ddd;
-		}
-		*/
+
 	}
 
 }
@@ -342,7 +378,6 @@ h5.fourDN-header {
 
 .error-page{
 	margin-top: 50px;
-	text-align: center;
 }
 
 // Help > Get Started
@@ -606,26 +641,9 @@ h5.fourDN-header {
 
 #content.container,
 #legend.static-section-entry {
-	div.rm-cell.cellType-submitted, div.color-patch.cellType-submitted {
-		background-color: #53a74e !important;
-	}
-	div.rm-cell.cellType-planned, div.color-patch.cellType-planned {
-		background-color: rgba(143, 143, 169, 0.5) !important;
-	}
-	div.rm-cell.cellType-in-submission, div.color-patch.cellType-in-submission {
-		background-color: rgba(143, 143, 169, 0.5) !important;
-		overflow: hidden;
-		&:before {
-			content: '';
-			display: block;
-			width: 150%;
-			height: 150%;
-			background-color: #53a74e;
-			transform: rotate3d(0,0,1, 45deg) translate3d(-74%, 0px, 0px);
-		}
-	}
-	div.rm-cell.cellType-none, div.color-patch.cellType-none {
-		background-color: transparent !important;
+
+	div.rm-cell, div.color-patch {
+		@include planned-submitted-cell-styles;
 	}
 }
 
@@ -634,7 +652,6 @@ h5.fourDN-header {
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
 	.section-joint-anlysis-data-legend {
-		font-family: "Work Sans",Helvetica,Arial,sans-serif;
 		font-size: 1rem;
 		> .col-sm-3 {
 			text-align: center;

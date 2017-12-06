@@ -70,7 +70,7 @@ export class TopRow extends React.Component {
         switch (this.props.context.status){
 
             case 'in review by lab':
-            case 'in review by project':
+            case 'submission in progress':
                 iconClass = 'icon ss-stopwatch';
                 break;
 

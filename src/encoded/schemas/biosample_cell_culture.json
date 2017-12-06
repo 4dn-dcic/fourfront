@@ -14,6 +14,8 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/dbxrefs" }
     ],
@@ -97,13 +99,6 @@
         "morphology_image": {
             "title": "Morphology Image",
             "description": "Photo of Cell Morphology at the time of collection",
-            "type": "string",
-            "linkTo": "Image"
-        },
-        "karyotype_image": {
-            "title": "Karyotype Image",
-            "description": "Image of the karyotype of potentially genomically unstable lines",
-            "comment":"If passage number is more then 10, please supply a karyotype image, or karyotype information from sequencing data.",
             "type": "string",
             "linkTo": "Image"
         },

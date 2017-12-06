@@ -1,9 +1,15 @@
 var CryptoJS = require('crypto-js');
 import React from 'react';
+import PropTypes from 'prop-types';
+import _ from 'underscore';
+import { Button } from 'react-bootstrap';
+import { isServerSide } from './misc';
 
 
 /**
- * Use presence of 'status' property to determine if File object/Item we have
+ * Pass a File Item through this function to determine whether to fetch more of it via AJAX or not.
+ * 
+ * Use presence of 'status', '@type', and 'display_title' property to determine if File object/Item we have
  * is complete in its properties or not.
  * 
  * @param {Object} file - Object representing an embedded file. Should have display_title, at minimum.
@@ -12,7 +18,16 @@ import React from 'react';
  */
 export function isFileDataComplete(file){
     if (!file || typeof file !== 'object') throw new Error('File param is not an object.');
-    if (typeof file.display_title === 'string' && typeof file.status !== 'string') {
+    if (isServerSide() || !window || !document){
+        return true; // For tests, primarily. 
+    }
+    if (typeof file.status !== 'string') {
+        return false;
+    }
+    if (typeof file.display_title !== 'string') {
+        return false;
+    }
+    if (!Array.isArray(file['@type'])) {
         return false;
     }
     return true;
@@ -24,6 +39,114 @@ export function isFileDataComplete(file){
 
 /*** Common React Classes ***/
 
+export class FileDownloadButton extends React.Component {
+
+    static defaultProps = {
+        'title' : 'Download',
+        'disabled' : false
+    }
+
+    render(){
+        var { href, className, disabled, title, filename } = this.props;
+        return (
+            <a href={ href } className={(className || '') + " btn btn-default btn-primary download-button btn-block " + (disabled ? ' disabled' : '')} download data-tip={filename || null}>
+                <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
+            </a>
+        );
+    }
+}
+
+export class FileDownloadButtonAuto extends React.Component {
+
+    static propTypes = {
+        'result' : PropTypes.shape({
+            'href' : PropTypes.string.isRequired,
+            'filename' : PropTypes.string.isRequired,
+        })
+    }
+
+    static defaultProps = {
+        'canDownloadStatuses' : [
+            'uploaded',
+            'released',
+            'replaced',
+            'submission in progress',
+            'released to project'
+        ]
+    }
+
+    canDownload(){
+        var file = this.props.result;
+        if (!file || typeof file !== 'object'){
+            console.error("Incorrect data type");
+            return false;
+        }
+        if (typeof file.status !== 'string'){
+            console.error("No 'status' property on file:", file);
+            return false;
+        }
+
+        if (this.props.canDownloadStatuses.indexOf(file.status) > -1){
+            return true;
+        }
+        return false;
+    }
+
+    render(){
+        var file = this.props.result;
+        var props = {
+            'href' : file.href,
+            'filename' : file.filename,
+            'disabled' : !this.canDownload()
+        };
+        return <FileDownloadButton {...this.props} {...props} />;
+    }
+}
+
+export class ViewFileButton extends React.Component {
+    
+    static defaultProps = {
+        'className' : "text-ellipsis-container mb-1",
+        'target' : "_blank",
+        'bsStyle' : "primary",
+        'href' : null,
+        'disabled' : false,
+        'title' : null,
+        'mimeType' : null
+    }
+
+    render(){
+        var { filename, href, target, title, mimeType } = this.props;
+        var action = 'View', extLink = null, preLink = null;
+
+        preLink = <i className="icon icon-fw icon-cloud-download" />;
+
+        var fileNameLower = (filename && filename.length > 0 && filename.toLowerCase()) || '';
+        var fileNameLowerEnds = {
+            '3' : fileNameLower.slice(-3),
+            '4' : fileNameLower.slice(-4),
+            '5' : fileNameLower.slice(-5)
+        };
+        if (fileNameLowerEnds['5'] === '.tiff' || fileNameLowerEnds['5'] === '.jpg' || fileNameLowerEnds['5'] === '.jpeg' || fileNameLowerEnds['5'] === '.png' || fileNameLowerEnds['5'] === '.bmp' || fileNameLowerEnds['5'] === '.gif'){
+            action = 'View';
+            preLink = <i className="icon icon-fw icon-picture-o" />;
+        } else if (fileNameLowerEnds['4'] === '.pdf'){
+            action = 'View';
+            //if (target === '_blank') extLink = <i className="icon icon-fw icon-external-link"/>;
+            preLink = <i className="icon icon-fw icon-file-pdf-o" />;
+        } else if (fileNameLowerEnds['3'] === '.gz' || fileNameLowerEnds['4'] === '.zip' || fileNameLowerEnds['4'] === '.tgx'){
+            action = 'Download';
+        }
+
+        return (
+            <Button download={action === 'Download' ? true : null} {..._.omit(this.props, 'filename', 'title')} title={filename} data-tip={mimeType}>
+                <span className={title ? null : "text-400"}>
+                    { preLink } { action } { title || (filename && <span className="text-600">{ filename }</span>) || 'File' } { extLink }
+                </span>
+            </Button>
+        );
+    }
+}
 
 
 

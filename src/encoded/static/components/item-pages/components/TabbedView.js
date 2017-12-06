@@ -13,11 +13,22 @@ import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
 
 export class TabbedView extends React.Component {
 
+    static getDefaultActiveKeyFromContents(contents){
+        var defaultActiveTab = _.findWhere(contents, { 'isDefault' : true });
+        if (typeof defaultActiveTab !== 'undefined' && typeof defaultActiveTab.key !== 'undefined'){
+            return defaultActiveTab.key;
+        }
+        if (contents.length > 0){
+            return contents[0].key;
+        }
+        return null;
+    }
+
     static propTypes = {
-        'contents' : PropTypes.arrayOf(PropTypes.shape({
+        'contents' : PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.shape({
             'tab' : PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
             'content' : PropTypes.element.isRequired
-        })).isRequired
+        }))  ]).isRequired
     }
 
     static defaultProps = {
@@ -34,7 +45,9 @@ export class TabbedView extends React.Component {
     }
 
     render(){
-        if (!Array.isArray(this.props.contents)) {
+        var contents = this.props.contents;
+        if (typeof contents === 'function') contents = contents();
+        if (!Array.isArray(contents)) {
             return null;
         }
         var tabsProps = {
@@ -46,17 +59,15 @@ export class TabbedView extends React.Component {
                 />,
             'renderTabContent'      : () => <TabContent animated={this.props.animated} />,
             'onChange'              : this.props.onChange,
-            'destroyInactiveTabPane': this.props.destroyInactiveTabPane
+            'destroyInactiveTabPane': this.props.destroyInactiveTabPane,
+            'ref' : 'tabs',
+            'defaultActiveKey' : TabbedView.getDefaultActiveKeyFromContents(contents)
         };
         if (this.props.activeKey) tabsProps.activeKey = this.props.activeKey;
-        var defaultActiveTab = _.findWhere(this.props.contents, { 'isDefault' : true });
-        if (typeof defaultActiveTab !== 'undefined' && typeof defaultActiveTab.key !== 'undefined'){
-            tabsProps.defaultActiveKey = defaultActiveTab.key;
-        }
         return (
             <Tabs {...tabsProps} >
                 {
-                    this.props.contents.map(function(t){
+                    contents.map(function(t){
                         return (
                             <Tabs.TabPane
                                 key={t.key || t.tab || t.title}

@@ -15,6 +15,7 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "workflow_run.json#/properties" }
     ],
@@ -57,9 +58,9 @@
                "type": "string"
             }
         },
-		"sbg_app_name": {
-				"title": "SBG App Name",
-				"type": "string"
-		}
+	"sbg_app_name": {
+			"title": "SBG App Name",
+			"type": "string"
+	}
     }
 }

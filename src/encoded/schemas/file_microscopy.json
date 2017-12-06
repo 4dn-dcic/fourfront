@@ -1,0 +1,120 @@
+{
+    "title": "Microscopy Files",
+    "description": "Imaging Files of Microscopy",
+    "id": "/profiles/file_microscopy.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["file_format", "award", "lab"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/attachment" },
+        { "$ref": "file.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "description": {
+            "type": "string",
+            "title": "Description"
+        },
+        "file_format": {
+            "title": "File Format",
+            "type": "string",
+            "default": "zip",
+            "enum": [
+                "zip",
+                "tiff",
+                "ome.tiff",
+                "flex",
+                "other"
+            ]
+        },
+        "file_type": {
+            "title": "File Type",
+            "description": "The type of file based on the information in the file.",
+            "type": "string",
+            "enum": [
+                "z-stack",
+                "time-series"
+            ]
+        },
+        "file_classification": {
+            "title": "General Classification",
+            "type": "string",
+            "default": "Microscopy",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "enum": [
+                "Microscopy"
+              ]
+        },
+        "microscope_settings": {
+            "type": "string",
+            "title": "Microscope settings",
+            "type": "string",
+            "linkTo": "MicroscopeSetting"
+        },
+        "related_files": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "file_format_specifications": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "quality_metric": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "dbxrefs": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "attachment": {
+            "title": "Additional Metadata Document",
+            "description": "Document (PDF/DOC/TXT) with information about the files"
+        },
+        "thumbnail": {
+            "type": "string",
+            "title": "Thumbnail",
+            "description": "link to thumbnail image",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "omerolink": {
+            "type": "string",
+            "title": "OMERO Link",
+            "description": "link to Omero",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "imageid": {
+            "type": "string",
+            "title": "Image ID",
+            "description": "ID of image on Omero",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "filename": {
+            "title": "Microscopy Files (Zip/TIFF)",
+            "description": "Single zipped file with microscopy files, or a single TIFF file"
+        }
+    },
+    "file_format_file_extension": {
+        "other": "",
+        "zip": ".zip",
+        "tiff": ".tiff",
+        "ome.tiff": ".ome.tiff",
+        "flex": ".flex",
+        "other": ""
+    }
+}

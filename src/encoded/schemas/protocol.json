@@ -14,7 +14,9 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/attachment" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
@@ -52,6 +54,31 @@
                "Instrument Authentication",
                "Tissue Preparation Methods"
             ]
+        }
+    },
+    "facets": {
+        "protocol_type" : {
+            "title" : "Protocol Type"
+        },
+        "protocol_classification" : {
+            "title" : "Protocol Sub-type"
+        },
+        "award.project": {
+            "title": "Project"
+        },
+        "lab.title": {
+            "title": "Lab"
+        },
+        "tags": {
+            "title": "Certification"
+        }
+    },
+    "columns": {
+        "protocol_type" : {
+            "title" : "Protocol Type"
+        },
+        "tags": {
+            "title": "Certification"
         }
     }
 }

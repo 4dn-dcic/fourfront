@@ -109,10 +109,10 @@ export function promise(url, method = 'GET', headers = {}, data = null, cache = 
 /**
  * Wrapper around function promise() which is slightly more relevant for navigation.
  * Strips hash from URL, sets same origin police.
- * 
+ *
  * @export
- * @param {any} url 
- * @param {any} options 
+ * @param {any} url
+ * @param {any} options
  */
 export function fetch(url, options){
     options = _.extend({credentials: 'same-origin'}, options);

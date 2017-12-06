@@ -71,7 +71,7 @@
     "webpack": "^1.13.3"
   },
   "dependencies": {
-    "auth0-lock": "^10.19.0",
+    "auth0-lock": "^10.24.1",
     "aws-sdk": "^2.24.0",
     "babel-polyfill": "^6.23.0",
     "brace": "^0.3.0",
@@ -91,6 +91,7 @@
     "lodash": "^4.17.4",
     "lodash.isfinite": "^3.3.2",
     "marked": "^0.3.6",
+    "markdown-to-jsx": "^5.4.2",
     "moment": "^2.18.1",
     "prop-types": "^15.5.10",
     "qs": "^6.5.0",
@@ -103,7 +104,7 @@
     "react-cookie": "^0.4.9",
     "react-dom": "^15.6.1",
     "react-draggable": "^2.2.6",
-    "react-infinite": "^0.11.0",
+    "react-infinite": "^0.12.1",
     "react-json-tree": "^0.10.7",
     "react-matrix-viz": "^0.2.2",
     "react-redux": "^4.4.8",

@@ -9,80 +9,48 @@ import { console, object, Schemas } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { PartialList } from './PartialList';
 import { FilesInSetTable } from './FilesInSetTable';
-import { getTitleStringFromContext } from './../item';
 import JSONTree from 'react-json-tree';
 
 
 /**
- * Contains and toggles visibility/mounting of a Subview.
+ * Contains and toggles visibility/mounting of a Subview. Renders title for the Subview.
  *
  * @class SubItem
  * @extends {React.Component}
  */
 class SubItem extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.toggleLink = this.toggleLink.bind(this);
-        this.render = this.render.bind(this);
-        if (typeof props.onToggle !== 'function'){
-            this.onToggle = this.handleToggleFallback.bind(this);
-        } else {
-            this.onToggle = this.props.onToggle;
-        }
-        this.state = {
-            isOpen : false
-        };
-        
+    static propTypes = {
+        'onToggle' : PropTypes.func,
+        'isOpen' : PropTypes.bool,
+        'title' : PropTypes.string
     }
 
     componentDidMount(){
         ReactTooltip.rebuild();
     }
 
-    /**
-     * Handler for rendered title element. Toggles visiblity of Subview.
-     *
-     * @param {React.SyntheticEvent} e - Mouse click event. Its preventDefault() method is called.
-     * @returns {Object} 'isOpen' : false
-     */
-    handleToggleFallback (e) {
-        e.preventDefault();
-        this.setState({
-            isOpen: !this.state.isOpen,
-        });
-    }
-
-    /**
-     * Renders title for the Subview.
-     *
-     * @param {string} title - Title of panel, e.g. display_title of object for which SubIPanel is being used.
-     * @param {boolean} isOpen - Whether state.isOpen is true or not. Used for if plus or minus icon.
-     * @returns {Element} <span> element.
-     */
-    toggleLink(title = this.props.title, isOpen = (this.props.isOpen || this.state.isOpen)){
-        var iconType = isOpen ? 'icon-minus' : 'icon-plus';
-        if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
-            title = isOpen ? "Collapse" : "Expand";
+    componentDidUpdate(pastProps){
+        if (!pastProps.isOpen && this.props.isOpen){
+            ReactTooltip.rebuild();
         }
-        return (
-            <span className="subitem-toggle">
-                <span className="link" onClick={this.onToggle}>
-                    <i style={{'color':'black', 'paddingRight': 10, 'paddingLeft' : 5}} className={"icon " + iconType}/>
-                    { title }
-                </span>
-            </span>
-        );
     }
 
     /**
      * @returns {JSX.Element} React Span element containing expandable link, and maybe open panel below it.
      */
     render() {
+        var { isOpen, title, onToggle, countProperties } = this.props;
+        var iconType = isOpen ? 'icon-minus' : 'icon-plus';
+        if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
+            title = isOpen ? "Collapse" : "Expand";
+        }
         return (
-            <span>
-                { this.toggleLink(this.props.title, this.props.isOpen || this.state.isOpen) }
-                { this.state.isOpen ? <SubItemListView {...this.props} isOpen /> : <div/> }
+            <span className="subitem-toggle">
+                <span className="link" onClick={onToggle}>
+                    <i style={{'color':'black', 'paddingRight': 10, 'paddingLeft' : 5}} className={"icon " + iconType}/>
+                    { title } { countProperties && !isOpen ? <span>({ countProperties })</span> : null }
+                </span>
             </span>
         );
     }
@@ -103,14 +71,11 @@ class SubItemListView extends React.Component {
 
     render(){
         if (!this.props.isOpen) return null;
-        var schemas = this.props.schemas;
         var item = this.props.content;
-        var popLink = this.props.popLink;
-        var columnDefinitions = this.props.columnDefinitions || {};
         var props = {
             'context' : item,
-            'schemas' : schemas,
-            'popLink' : popLink,
+            'schemas' : this.props.schemas,
+            'popLink' : this.props.popLink,
             'alwaysCollapsibleKeys' : [],
             'excludedKeys' : (this.props.excludedKeys || _.without(Detail.defaultProps.excludedKeys,
                 // Remove
@@ -120,13 +85,15 @@ class SubItemListView extends React.Component {
                     'schema_version', 'uuid'
                 ])
             ),
-            'columnDefinitions' : columnDefinitions,
-            'showJSONButton' : false
+            'columnDefinitions' : this.props.columnDefinitions || {},
+            'showJSONButton' : false,
+            'hideButtons': true
+
         };
         return (
             <div className="sub-panel data-display panel-body-with-header">
                 <div className="key-value sub-descriptions">
-                    { React.createElement(typeof item.display_title === 'string' ? ItemDetailList : Detail, props) }
+                    { React.createElement((typeof item.display_title === 'string' ? ItemDetailList : Detail), props) }
                 </div>
             </div>
         );
@@ -135,7 +102,7 @@ class SubItemListView extends React.Component {
 
 /**
  *  Messiness.
- * 
+ *
  * @class SubItemTable
  * @extends {React.Component}
  */
@@ -144,7 +111,7 @@ class SubItemTable extends React.Component {
     /**
      * This code could look better.
      * Essentially, checks each property in first object of param 'list' and if no values fail a rough validation wherein there must be no too-deeply nested objects or lists, returns true.
-     * 
+     *
      * @param {Object[]} list - List of objects
      * @returns {boolean} True if a table would be good for showing these items.
      */
@@ -187,7 +154,7 @@ class SubItemTable extends React.Component {
 
         var rootKeys = _.keys(objectWithAllItemKeys);
         var embeddedKeys, i, j, k, embeddedListItem, embeddedListItemKeys;
-        
+
 
         for (i = 0; i < rootKeys.length; i++){
 
@@ -201,7 +168,7 @@ class SubItemTable extends React.Component {
                 var listNotItems = _.filter(listObjects, function(v){ return !object.isAnItem(v); });
                 if (listNotItems.length === 0) continue; // List of Items that can be rendered as links. Continue.
 
-                // Else, we have list of Objects. Assert that each sub-object has only strings, numbers, or Item (object with link), or list of such -- no other sub-objects. 
+                // Else, we have list of Objects. Assert that each sub-object has only strings, numbers, or Item (object with link), or list of such -- no other sub-objects.
                 for (k = 0; k < listNotItems.length; k++){
                     embeddedListItem = listNotItems[k];
                     embeddedListItemKeys = _.keys(embeddedListItem);
@@ -235,24 +202,29 @@ class SubItemTable extends React.Component {
                     continue;
                 }
                 embeddedKeys = _.keys(objectWithAllItemKeys[rootKeys[i]]);
+
                 if (embeddedKeys.length > 5) return false; // 5 properties to flatten up feels like a good limit. Lets render objects with more than that as lists or own table (not flattened up to another 1).
                 // Run some checks against the embedded object's properties. Ensure all nested lists contain plain strings or numbers, as will flatten to simple comma-delimited list.
                 for (j = 0; j < embeddedKeys.length; j++){
 
                     if (typeof objectWithAllItemKeys[ rootKeys[i] ][ embeddedKeys[j] ] === 'string' || typeof objectWithAllItemKeys[ rootKeys[i] ][ embeddedKeys[j] ] === 'number') continue;
-
                     // Ensure if property on embedded object's is an array, that is a simple array of strings or numbers - no objects. Will be converted to comma-delimited list.
                     if ( Array.isArray(  objectWithAllItemKeys[ rootKeys[i] ][ embeddedKeys[j] ]  ) ){
                         if (
                             objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]].length < 4 &&
-                            _.filter(objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]][0], function(v){
+                            _.filter(objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]], function(v){
                                 if (typeof v === 'string' || typeof v === 'number') { return false; }
+                                else if (v && typeof v === 'object' && _.keys(v).length < 2) { return false; }
                                 else { return true; }
                             }).length === 0
                             //(typeof objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]][0] === 'string' || typeof objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]][0] === 'number')
-                        ) { continue; } else { return false; }
+                        ) {
+                            continue;
+                        } else {
+                            return false;
+                        }
                     }
-                    
+
                     // Ensure that if is not an array, it is a simple string or number (not another embedded object).
                     if (
                         !Array.isArray(objectWithAllItemKeys[rootKeys[i]][embeddedKeys[j]]) &&
@@ -316,7 +288,7 @@ class SubItemTable extends React.Component {
                         columnKeys.push({
                             'key' : rootKeys[i],
                             'childKeys' : _.keys(
-                                _.reduce(this.props.items, function(m1,v1){ 
+                                _.reduce(this.props.items, function(m1,v1){
                                     return _.extend(
                                         m1,
                                         _.reduce(v1[rootKeys[i]], function(m2,v2) {
@@ -438,8 +410,8 @@ class SubItemTable extends React.Component {
                                                     }
                                                 }
                                                 if (!renderedSubVal) {
-                                                    renderedSubVal = object.isAnItem(embeddedRow[k]) ? 
-                                                        <a href={object.atIdFromObject(embeddedRow[k])}>{ getTitleStringFromContext(embeddedRow[k]) }</a>
+                                                    renderedSubVal = object.itemUtil.isAnItem(embeddedRow[k]) ?
+                                                        <a href={object.itemUtil.atId(embeddedRow[k])}>{ object.itemUtil.getTitleStringFromContext(embeddedRow[k]) }</a>
                                                         :
                                                         Schemas.Term.toName(k, embeddedRow[k]);
                                                 }
@@ -512,7 +484,7 @@ class SubItemTable extends React.Component {
                                 return (
                                     <th key={"header-for-" + colKey} className={hasChildren ? 'has-children' : null}>
                                         <object.TooltipInfoIconContainer title={title} tooltip={tooltip}/>
-                                        { 
+                                        {
                                             hasChildren ? (()=>{
                                                 //var subKeyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
                                                 //var subKeyTitleDescriptionMap = keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey] || {};
@@ -540,11 +512,27 @@ class SubItemTable extends React.Component {
                                         }
                                     </th>
                                 );
-                            })) 
+                            }))
                         }</tr>
                     </thead>
                     <tbody>{
                         rowData.map(function(row,i){
+
+                            function jsonify(val, key){
+                                var newVal;
+                                try {
+                                    newVal = JSON.stringify(val);
+                                    if (_.keys(val).length > 1){
+                                        console.error("ERROR: Value for table cell is not a string, number, or JSX element.\nKey: " + key + '; Value: ' + newVal);
+                                    }
+                                    newVal = <code>{ newVal.length <= 25 ? newVal : newVal.slice(0,25) + '...' }</code>;
+                                } catch (e){
+                                    console.error(e, val);
+                                    newVal = <em>{'{obj}'}</em>;
+                                }
+                                return newVal;
+                            }
+
                             return (
                                 <tr key={"row-" + i}>{
                                     [<td key="rowNumber">{ i + 1 }.</td>].concat(row.map(function(colVal, j){
@@ -553,14 +541,10 @@ class SubItemTable extends React.Component {
                                             val = <a href={val}>{ val }</a>;
                                         }
                                         if (val && typeof val === 'object' && !React.isValidElement(val) && !Array.isArray(val)) {
-                                            try {
-                                                val = JSON.stringify(val);
-                                                console.error("ERROR: Value for table cell is not a string, number, or JSX element.\nKey: " + columnKeys[j].key + '; Value: ' + val);
-                                                val = <code>{ val.length <= 25 ? val : val.slice(0,25) + '...' }</code>;
-                                            } catch (e){
-                                                console.error(e, val);
-                                                val = <em>{'{obj}'}</em>;
-                                            }
+                                            val = jsonify(val, columnKeys[j].key);
+                                        }
+                                        if (Array.isArray(val) && val.length > 0 && !React.isValidElement(val[0])){
+                                            val = _.map(val, jsonify);
                                         }
                                         return (
                                             <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>
@@ -623,7 +607,7 @@ class DetailRow extends React.Component {
         if (value.type === SubItem) {
             // What we have here is an embedded object of some sort. Lets override its 'isOpen' & 'onToggle' functions.
             value = React.cloneElement(value, { onToggle : this.handleToggle, isOpen : this.state.isOpen });
-            
+
             return (
                 <div>
                     <PartialList.Row label={label} children={value} className={(this.props.className || '') + (this.state.isOpen ? ' open' : '')} />
@@ -631,7 +615,7 @@ class DetailRow extends React.Component {
                         popLink={this.props.popLink}
                         content={this.props.item}
                         schemas={this.props.schemas}
-                        columnDefinitions={this.props.columnDefinitions}
+                        columnDefinitions={value.props.columnDefinitions || this.props.columnDefinitions} // Recursively pass these down
                         isOpen={this.state.isOpen}
                     />
                 </div>
@@ -735,53 +719,31 @@ export class Detail extends React.Component {
                 </ol>
             );
         } else if (typeof item === 'object' && item !== null) {
-            var title = getTitleStringFromContext(item);
+            var linkElement = object.itemUtil.generateLink(item, true, 'display_title', { 'target' : (popLink ? '_blank' : null) }, true);
 
-            // if the following is true, we have an embedded object without significant other data
-            if (item.display_title && (typeof item.link_id === 'string' || typeof item['@id'] === 'string') && _.keys(item).length < 4){
-                //var format_id = item.link_id.replace(/~/g, "/");
-                var link = object.atIdFromObject(item);
-                if(popLink){
-                    return (
-                        <a href={link} target="_blank">
-                            {title}
-                        </a>
-                    );
-                } else {
-                    return (
-                        <a href={link}>
-                            { title }
-                        </a>
-                    );
-                }
+            // if the following is true, we have an embedded Item. Link to it.
+            if (linkElement){
+                return linkElement;
             } else { // it must be an embedded sub-object (not Item)
+                var releventProperties = _.object(
+                    _.map(_.filter(_.pairs(columnDefinitions), function(c){ return c[0].indexOf(keyPrefix + '.') === 0; }), function(c){ c[0] = c[0].replace(keyPrefix + '.', ''); return c; })
+                );
                 return (
                     <SubItem
                         schemas={schemas}
                         content={item}
-                        key={title}
-                        title={title}
+                        key={keyPrefix}
+                        countProperties={_.keys(item).length}
                         popLink={popLink}
-                        columnDefinitions={columnDefinitions}
+                        columnDefinitions={releventProperties}
                     />
                 );
             }
         } else if (typeof item === 'string'){
+
             if (keyPrefix === '@id' || keyPrefix === 'link_id'){
-                var href = (keyPrefix === 'link_id' ? item.replace(/~/g, "/") : item); 
-                if(popLink){
-                    return (
-                        <a key={item} href={href} target="_blank">
-                            {href}
-                        </a>
-                    );
-                }else{
-                    return (
-                        <a key={item} href={href}>
-                            {href}
-                        </a>
-                    );
-                }
+                var href = (keyPrefix === 'link_id' ? item.replace(/~/g, "/") : item);
+                return <a key={item} href={href} target={popLink ? "_blank" : null}>{href}</a>;
             }
 
             if(item.indexOf('@@download') > -1/* || item.charAt(0) === '/'*/){
@@ -925,7 +887,7 @@ export class Detail extends React.Component {
         var schemas = this.props.schemas || Schemas.get();
 
         var colDefsFromSchema = Schemas.flattenSchemaPropertyToColumnDefinition(schemas ? object.tipsFromSchema(schemas, context) : {});
-        var columnDefinitions = _.extend(colDefsFromSchema, this.props.columnDefinitions || Detail.defaultColumnDefinitions || {});
+        var columnDefinitions = _.extend(colDefsFromSchema, this.props.columnDefinitions || Detail.defaultColumnDefinitions || {}); // { <property> : { 'title' : ..., 'description' : ... } }
 
         // Sort applicable persistent keys by original persistent keys sort order.
         var stickyKeysObj = _.object(
@@ -986,7 +948,7 @@ export class ItemDetailList extends React.Component {
                     <h3 className="tab-section-title">
                         <span>Details</span>
                     </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
+                    <hr className="tab-section-title-horiz-divider mb-05"/>
                     <ItemDetailList context={context} schemas={schemas} />
                 </div>
             )
@@ -995,6 +957,7 @@ export class ItemDetailList extends React.Component {
 
     static defaultProps = {
         'showJSONButton' : true,
+        'hideButtons': false,
         'columnDefinitions' : Detail.defaultColumnDefinitions
     }
 
@@ -1044,12 +1007,15 @@ export class ItemDetailList extends React.Component {
     }
 
     buttonsRow(){
+        if (this.props.hideButtons){
+            return null;
+        }
         if (!this.props.showJSONButton){
             return (
                 <div className="row">
                     <div className="col-xs-12">{ this.seeMoreButton() }</div>
                 </div>
-            ); 
+            );
         }
         return (
             <div className="row">
@@ -1073,6 +1039,7 @@ export class ItemDetailList extends React.Component {
                         <Detail
                             context={this.props.context}
                             schemas={this.props.schemas}
+                            popLink={this.props.popLink}
                             open={!collapsed}
                             columnDefinitions={columnDefinitions}
                             excludedKeys={this.props.excludedKeys || Detail.defaultProps.excludedKeys}

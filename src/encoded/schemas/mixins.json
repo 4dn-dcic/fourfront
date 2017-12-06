@@ -36,6 +36,7 @@
             "title": "Alternate Accessions",
             "description": "Accessions previously assigned to objects that have been merged with this object.",
             "type": "array",
+            "lookup": 1000,
             "internal_comment":"Only admins are allowed to set or update this value.",
             "exclude_from": ["submit4dn"],
             "default": [],
@@ -76,12 +77,13 @@
             "enum": [
                 "released",
                 "current",
+                "planned",
                 "revoked",
                 "deleted",
                 "obsolete",
                 "replaced",
                 "in review by lab",
-                "in review by project",
+                "submission in progress",
                 "released to project"
             ]
         }
@@ -90,7 +92,8 @@
         "date_created": {
             "rdfs:subPropertyOf": "dc:created",
             "title": "Date Created",
-            "exclude_from": ["submit4dn"],
+            "lookup": 1000,
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -102,18 +105,48 @@
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
             "title": "Submitted By",
-            "exclude_from": ["submit4dn"],
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "linkTo": "User",
+            "lookup": 1000,
             "serverDefault": "userid",
+            "permission": "import_items"
+        }
+    },
+    "release_dates": {
+        "public_release": {
+            "title": "Public Release Date",
+            "description": "The date which the item was released to the public",
+            "comment": "Do not submit, value is assigned when released.",
+            "type": "string",
+            "lookup": 1000,
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ],
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "permission": "import_items"
+        },
+        "project_release": {
+            "title": "Project Release Date",
+            "description": "The date which the item was released to the project",
+            "comment": "Do not submit, value is assigned when released to project.",
+            "type": "string",
+            "lookup": 1000,
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ],
+            "exclude_from": ["submit4dn"],
             "permission": "import_items"
         }
     },
     "modified": {
       "lastmodified": {
           "title": "Last Modified",
-          "exclude_from": ["submit4dn"],
+          "exclude_from": ["submit4dn", "FFedit-create"],
           "type": "array",
+          "lookup": 1000,
           "items": {
               "date_modified": {
                   "rdfs:subPropertyOf": "dc:modified",
@@ -145,6 +178,7 @@
             "description": "The publications that provide more information about the object.",
             "type": "array",
             "default": [],
+            "lookup": 1000,
             "uniqueItems": true,
             "items": {
                 "title": "Reference",
@@ -163,6 +197,17 @@
              "linkTo": "Lab",
              "linkSubmitsFor": true,
              "default":""
+        },
+        "contributing_labs": {
+            "title": "Contributing Labs",
+            "description": "Other labs associated with the submitted data.",
+            "type": "array",
+            "items": {
+                "title": "Contributin Lab",
+                "description": "A lab that has contributed to the associated data.",
+                "type": "string",
+                "linkTo": "Lab"
+            }
         },
         "award": {
             "title": "Grant",
@@ -211,6 +256,7 @@
     "attachment": {
         "attachment": {
             "title": "Attached File",
+            "description" : "File attached to this Item.",
             "type": "object",
             "additionalProperties": false,
             "formInput": "file",
@@ -219,10 +265,13 @@
             "properties": {
                 "download": {
                     "title": "File Name",
+                    "description" : "File Name of the attachment.",
                     "type": "string"
                 },
                 "href": {
                     "internal_comment": "Internal webapp URL for document file",
+                    "title" : "href",
+                    "description" : "Path to download the file attached to this Item.",
                     "type": "string"
                 },
                 "type": {
@@ -244,20 +293,24 @@
                     ]
                 },
                 "md5sum": {
-                    "title": "MD5sum",
+                    "title": "MD5 Checksum",
+                    "description" : "Use this to ensure that your file was downloaded without errors or corruption.",
                     "type": "string",
                     "format": "md5sum"
                 },
                 "size": {
                     "title": "File size",
+                    "description" : "Size of the file on disk",
                     "type": "integer"
                 },
                 "width": {
                     "title": "Image width",
+                    "description" : "Width of the image attached, in pixels.",
                     "type": "integer"
                 },
                 "height": {
                     "title": "Image height",
+                    "description" : "Height of the image attached, in pixels.",
                     "type": "integer"
                 },
                 "blob_id":{
@@ -373,11 +426,25 @@
             "description": "Key words that can tag an item - useful for filtering.",
             "type": "array",
             "uniqueItems": true,
-            "ff_clear": "clone",
             "items": {
                 "title": "Tag",
                 "description": "A tag for the item.",
                 "type":  "string"
+            }
+        }
+    },
+    "badges": {
+        "badges": {
+            "title": "Badges",
+            "description": "Badges that can be added to an item.",
+            "type": "array",
+            "ff_flag": "clear clone",
+            "permission": "import-items",
+            "items": {
+                "title": "Badge",
+                "description": "A badge for the item.",
+                "type":  "string",
+                "linkTo": "Badge"
             }
         }
     }

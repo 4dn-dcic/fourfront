@@ -30,6 +30,8 @@ from snovault.validators import (
 from snovault.interfaces import CONNECTION
 from snovault.etag import if_match_tid
 
+from datetime import date
+
 
 @lru_cache()
 def _award_viewing_group(award_uuid, root):
@@ -119,17 +121,22 @@ def get_item_if_you_can(request, value, itype=None):
         svalue = str(value)
         if not svalue.startswith('/'):
             svalue = '/' + svalue
-        item = request.embed(svalue, '@@object')
         try:
-            item.get('uuid')
-            return item
-        except AttributeError:
-            if itype is not None:
-                svalue = '/' + itype + svalue + '/?datastore=database'
-                try:
-                    return request.embed(svalue, '@@object')
-                except:
-                    return value
+            item = request.embed(svalue, '@@object')
+        except:
+            pass
+        else:
+            try:
+                item.get('uuid')
+                return item
+            except AttributeError:
+                pass
+        if itype is not None:
+            svalue = '/' + itype + svalue + '/?datastore=database'
+            try:
+                return request.embed(svalue, '@@object')
+            except:
+                return value
 
 
 class AbstractCollection(snovault.AbstractCollection):
@@ -227,8 +234,9 @@ class Item(snovault.Item):
         'revoked': ALLOW_CURRENT,
         'deleted': DELETED,
         'replaced': DELETED,
+        'planned': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'in review by lab': ALLOW_LAB_SUBMITTER_EDIT,
-        'in review by project': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
+        'submission in progress': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
         'released to project': ALLOW_VIEWING_GROUP_VIEW,
         # for file
         'obsolete': DELETED,
@@ -244,10 +252,6 @@ class Item(snovault.Item):
     def __init__(self, registry, models):
         super().__init__(registry, models)
         self.STATUS_ACL = self.__class__.STATUS_ACL
-        # update self.embedded here
-        self.update_embeds(registry[snovault.TYPES])
-        # update registry embedded
-        self.registry.embedded = self.embedded
 
     @property
     def __name__(self):
@@ -277,13 +281,32 @@ class Item(snovault.Item):
             lab_member = 'lab.%s' % properties['lab']
             roles[lab_member] = 'role.lab_member'
         if 'award' in properties:
+            # import pdb; pdb.set_trace()
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
                 roles[viewing_group_members] = 'role.viewing_group_member'
                 award_group_members = 'award.%s' % properties['award']
                 roles[award_group_members] = 'role.award_member'
+
+                # special case for NOFIC viewing group - this is so bogus!!!!
+                # how can we generalize??????
+                if viewing_group == 'NOFIC':
+                    status = properties.get('status')
+                    if status:
+                        if status == 'released to project':
+                            roles['viewing_group.4DN'] = 'role.viewing_group_member'
+                        elif status in ['planned', 'submission in progress']:
+                            for t in properties.get('tags', []):
+                                if 'joint analysis' in t.lower():
+                                    roles['viewing_group.4DN'] = 'role.viewing_group_member'
+                                    break
         return roles
+
+    def add_accession_to_title(self, title):
+        if self.properties.get('accession') is not None:
+            return title + ' - ' + self.properties.get('accession')
+        return title
 
     def unique_keys(self, properties):
         """smth."""
@@ -294,6 +317,39 @@ class Item(snovault.Item):
         if properties.get('status') != 'replaced' and 'accession' in properties:
             keys['accession'].append(properties['accession'])
         return keys
+
+    def is_update_by_admin_user(self):
+        # determine if the submitter in the properties is an admin user
+        userid = snovault.schema_utils.SERVER_DEFAULTS['userid']('blah', 'blah')
+        users = self.registry['collections']['User']
+        user = users.get(userid)
+        if 'groups' in user.properties:
+            if 'admin' in user.properties['groups']:
+                return True
+        return False
+
+    def _update(self, properties, sheets=None):
+        # import pdb; pdb.set_trace()
+        props = {}
+        try:
+            props = self.properties
+        except KeyError:
+            pass
+        if 'status' in props and props['status'] == 'planned':
+            # if an item is status 'planned' and an update is submitted
+            # by a non-admin user then status should be changed to 'submission in progress'
+            if not self.is_update_by_admin_user():
+                properties['status'] = 'submission in progress'
+
+        date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
+        for datefield, status in date2status.items():
+            if datefield not in props:
+                if datefield in self.schema['properties'] and datefield not in properties \
+                   and 'status' in properties and properties['status'] in status:
+                    # check the status and add the date if it's not provided and item has right status
+                    properties[datefield] = date.today().isoformat()
+
+        super(Item, self)._update(properties, sheets)
 
     @snovault.calculated_property(schema={
         "title": "External Reference URIs",
@@ -350,6 +406,8 @@ class Item(snovault.Item):
             # special case for user: concatenate first and last names
             display_title = self.properties.get(field, None)
             if display_title:
+                if field != 'accession':
+                    display_title = self.add_accession_to_title(display_title)
                 return display_title
         # if none of the existing terms are available, use @type + date_created
         try:
@@ -391,22 +449,6 @@ class Item(snovault.Item):
     def principals_allowed(self, request):
         principals = calc_principals(self)
         return principals
-
-    def update_embeds(self, types):
-        """
-        extend self.embedded to have link_id and display_title for every linkTo
-        field in the properties schema and the schema of all calculated properties
-        (this is created here)
-        """
-        total_schema = self.schema['properties'].copy() if self.schema else {}
-        self.calc_props_schema = {}
-        if self.registry and self.registry['calculated_properties']:
-            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
-                if calc_props_val.schema:
-                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
-        total_schema.update(self.calc_props_schema)
-        this_type = self.type_info.item_type
-        self.embedded = add_default_embeds(this_type, types, self.embedded, total_schema)
 
     def rev_link_atids(self, request, rev_name):
         conn = request.registry[CONNECTION]

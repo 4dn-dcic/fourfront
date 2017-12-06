@@ -1,5 +1,5 @@
 {
-    "title": "Repliseq Experiment",
+    "title": "Repli-seq Experiment",
     "description": "Genome-wide analysis of replication timing by next-generation sequencing.",
     "id": "/profiles/experiment_repliseq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -14,12 +14,15 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/library"},
         { "$ref": "mixins.json#/sop_mapping"},
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/badges" },
         { "$ref": "experiment.json#/properties" }
     ],
     "mixinColumns": [
@@ -27,11 +30,11 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "enum": [
-            "repliseq"
+            "Repli-seq"
           ]
         },
         "dna_label": {

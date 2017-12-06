@@ -1,0 +1,62 @@
+{
+    "title": "Microscopy Settings Tier A2",
+    "description": "Metadata fields required for Tier Analytical 2 level microscopy files",
+    "id": "/profiles/microscope_setting_a2.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab"],
+    "identifyingProperties": ["uuid", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/status"} ,
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "microscope_setting.json#/properties"},
+        { "$ref": "microscope_setting_d1.json#/properties"},
+        { "$ref": "microscope_setting_d2.json#/properties"},
+        { "$ref": "microscope_setting_a1.json#/properties"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "objective_ri_measured":{
+            "title": "Objective RI (measured)",
+            "description": " Measured refractive index of the objective",
+            "type": "number"
+        },
+        "ch00_coupling":{
+            "title": "Ch00 light source coupling",
+            "description": "e.g. fiber, light guide, direct",
+            "type": "string"
+        },
+        "ch01_coupling":{
+            "title": "Ch01 light source coupling",
+            "description": "e.g. fiber, light guide, direct",
+            "type": "string"
+        },
+        "ch02_coupling":{
+            "title": "Ch02 light source coupling",
+            "description": "e.g. fiber, light guide, direct",
+            "type": "string"
+        },
+        "ch03_coupling":{
+            "title": "Ch03 light source coupling",
+            "description": "e.g. fiber, light guide, direct",
+            "type": "string"
+        },
+        "embedding_RI_measured":{
+            "title": "Embedding medium RI (measured)",
+            "description": "Refractive index of embedding medium (measured)",
+            "type": "number"
+        }
+    }
+}

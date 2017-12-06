@@ -147,7 +147,7 @@ def test_search_parameter_name_and_value(workbook, testapp):
 def mboI_dts(testapp, workbook):
     # returns a dictionary of strings of various date and datetimes
     # relative to the creation date of the mboI one object in test inserts
-    from datetime import datetime
+    from datetime import (datetime, timedelta)
     enz = testapp.get('/search/?type=Enzyme&name=MboI').json['@graph'][0]
 
     cdate = enz['date_created']
@@ -162,10 +162,10 @@ def mboI_dts(testapp, workbook):
     return {
         'creationdatetime': ':'.join(str(createdate).replace(' ', '+').split(':')[:-1]),
         'creationdate': str(createdate.date()) + '+00:00',
-        'daybefore': ':'.join(str(createdate.replace(day=(createdate.day - 1))).replace(' ', '+').split(':')[:-1]),
-        'dayafter': ':'.join(str(createdate.replace(day=(createdate.day + 1))).replace(' ', '+').split(':')[:-1]),
-        'hourbefore': ':'.join(str(createdate.replace(hour=(createdate.hour - 1))).replace(' ', '+').split(':')[:-1]),
-        'hourafter': ':'.join(str(createdate.replace(hour=(createdate.hour + 1))).replace(' ', '+').split(':')[:-1])
+        'daybefore': ':'.join(str(createdate - timedelta(days=1)).replace(' ', '+').split(':')[:-1]),
+        'dayafter': ':'.join(str(createdate + timedelta(days=1)).replace(' ', '+').split(':')[:-1]),
+        'hourbefore': ':'.join(str(createdate - timedelta(hours=1)).replace(' ', '+').split(':')[:-1]),
+        'hourafter': ':'.join(str(createdate + timedelta(hours=1)).replace(' ', '+').split(':')[:-1])
     }
 
 
@@ -271,7 +271,7 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     test_type = 'biosample'
     type_info = registry[TYPES].by_item_type[test_type]
     schema = type_info.schema
-    embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded, schema)
+    embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded_list, schema)
     # we're looking for this specific facet, which is not in the schema
     assert 'treatments.rnai_vendor.display_title' in embeds
     res = testapp.get('/search/?type=Biosample&treatments.rnai_vendor.display_title=Worthington+Biochemical').json
@@ -305,3 +305,33 @@ def test_search_query_string_with_fields(workbook, testapp):
     idv_ids = [r['uuid'] for r in res_idv['@graph'] if 'uuid' in r]
     assert len(idv_ids) == 1
     assert idv_ids[0] == age_ids[0]
+
+
+def test_search_with_no_value(workbook, testapp):
+    import random
+    search = '/search/?digestion_enzyme.name=No+value&digestion_enzyme.name=DNaseI&q=cell&type=Experiment'
+    res_json = testapp.get(search).json
+    # grab some random results
+    check_items = random.sample(res_json['@graph'], 4)
+    for item in check_items:
+        maybe_null = item.get('digestion_enzyme', {}).get('name')
+        assert( maybe_null is None or maybe_null == 'DNaseI')
+    res_ids = [r['uuid'] for r in res_json['@graph'] if 'uuid' in r]
+    search2 = '/search/?digestion_enzyme.name=No+value&digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No+value&q=cell&type=Experiment'
+    res_json2 = testapp.get(search2).json
+    # grab some random results
+    check_items = random.sample(res_json2['@graph'], 4)
+    for item in check_items:
+        maybe_null = item.get('digestion_enzyme', {}).get('name')
+        assert(maybe_null is None or maybe_null == 'DNaseI')
+        assert(not item.get('publications_of_exp'))
+    res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
+    assert(set(res_ids2) <= set(res_ids))
+    search3 = '/search/?digestion_enzyme.name=DNaseI&publications_of_exp.display_title=No+value&q=cell&type=Experiment'
+    res_json3 = testapp.get(search3).json
+    # just do 1 res here
+    check_item = random.choice(res_json3['@graph'])
+    assert(check_item.get('digestion_enzyme', {}).get('name') == 'DNaseI')
+    assert(not check_item.get('publications_of_exp'))
+    res_ids3 = [r['uuid'] for r in res_json3['@graph'] if 'uuid' in r]
+    assert(set(res_ids3) <= set(res_ids))

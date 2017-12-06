@@ -1,14 +1,18 @@
 'use strict';
 
 import React from 'react';
-import { itemClass, panel_views } from './../globals';
+import { itemClass, panel_views, content_views } from './../globals';
 import _ from 'underscore';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ItemFooterRow, WorkflowDetailPane } from './components';
 import { ItemBaseView } from './DefaultItemView';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { commonGraphPropsFromProps, graphBodyMixin, parseAnalysisStepsMixin, uiControlsMixin, doValidAnalysisStepsExist } from './WorkflowView';
+import { commonGraphPropsFromProps, parseAnalysisStepsMixin, doValidAnalysisStepsExist, WorkflowGraphSection, WorkflowGraphSectionControls } from './WorkflowView';
+
+// Test/Debug Data
+//import { WFR_JSON } from './../testdata/traced_workflow_runs/WorkflowRunSBG-4DNWF06BPEF2';
+
 
 /**
  * N.B. CAUSES SIDE EFFECTS (PURPOSELY)
@@ -77,11 +81,9 @@ export function allFilesForWorkflowRunMappedByUUID(item){
 
 /**
  * @export
- * @class WorkflowRunView
- * @memberof module:item-pages
  * @extends module:item-pages/DefaultItemView.ItemBaseView
  */
-export class WorkflowRunView extends React.Component {
+export class WorkflowRunView extends ItemBaseView {
 
     constructor(props){
         super(props);
@@ -98,7 +100,7 @@ export class WorkflowRunView extends React.Component {
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.analysis_steps) ? [] : [
+        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
             {
                 tab : <span><i className="icon icon-code-fork icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
@@ -111,46 +113,31 @@ export class WorkflowRunView extends React.Component {
             AuditTabView.getTabObject(this.props.context)
         ]).map((tabObj)=>{ // Common properties
             return _.extend(tabObj, {
-                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 650 }
+                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
             });
         });
     }
 
-    render() {
-        var schemas = this.props.schemas || {};
+    itemHeader(){
         var context = this.props.context;
-        var ic = itemClass(this.props.context, 'view-detail item-page-container');
-
+        var topRightTitle = (context.workflow && context.workflow.display_title) || null;
+        if (topRightTitle && context.workflow.workflow_type){
+            topRightTitle = (
+                <span><span className="text-400">{ topRightTitle }</span> | { context.workflow.workflow_type }</span>
+            );
+        }
         return (
-            <div className={ic}>
-                
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
-                    <ItemHeader.TopRow typeInfo={{ title : context.workflow_type, description : 'Workflow Type' }} />
-                    <ItemHeader.MiddleRow />
-                    <ItemHeader.BottomRow />
-                </ItemHeader.Wrapper>
-
-                <br/>
-
-                <div className="row">
-
-                    <div className="col-xs-12 col-md-12 tab-view-container">
-
-                        <TabbedView contents={this.getTabViewContents()} />
-
-                    </div>
-
-                </div>
-
-                <ItemFooterRow context={context} schemas={schemas} />
-
-            </div>
+            <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
+                <ItemHeader.TopRow typeInfo={{ title : topRightTitle, description : 'Workflow Type' }} />
+                <ItemHeader.MiddleRow />
+                <ItemHeader.BottomRow />
+            </ItemHeader.Wrapper>
         );
     }
 
 }
 
-class GraphSection extends React.Component {
+class GraphSection extends WorkflowGraphSection {
 
     static isNodeDisabled(node){
         if (node.type === 'step') return false;
@@ -163,70 +150,40 @@ class GraphSection extends React.Component {
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
-        this.basicGraph = this.basicGraph.bind(this);
-        this.detailGraph = this.detailGraph.bind(this);
-        this.body = graphBodyMixin.bind(this);
-        this.parseAnalysisSteps = parseAnalysisStepsMixin.bind(this);
-        this.uiControls = uiControlsMixin.bind(this);
         this.render = this.render.bind(this);
         this.state = {
             'showChart' : 'detail',
-            'showParameters' : false
+            'showParameters' : false,
+            'rowSpacingType' : 'compact',
+            'fullscreenViewEnabled' : false
         };
     }
 
     commonGraphProps(){
         var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
-        return _.extend(commonGraphPropsFromProps(this.props), {
+
+        var legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
+        // Remove Items which aren't relevant for this context.
+        delete legendItems['Current Context'];
+        delete legendItems['Group of Similar Files'];
+        if (!this.state.showParameters){
+            delete legendItems['Input Parameter'];
+        }
+        if (this.state.showChart === 'basic'){
+            delete legendItems['Intermediate File'];
+        }
+
+        return _.extend(commonGraphPropsFromProps(
+            _.extend({ legendItems }, this.props)
+        ), {
             'isNodeDisabled' : GraphSection.isNodeDisabled,
             'nodes' : mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, allFilesForWorkflowRunMappedByUUID(this.props.context) ),
-            'edges' : graphData.edges
+            'edges' : graphData.edges,
+            'rowSpacingType' : this.state.rowSpacingType
         });
-    }
-
-    basicGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
-        return (
-            <Graph
-                { ...this.commonGraphProps() }
-                edgeStyle="curve"
-                columnWidth={this.props.mounted && this.refs.container ?
-                    (this.refs.container.offsetWidth - 180) / 3
-                : 180}
-            />
-        );
-    }
-
-    detailGraph(){
-        if (!Array.isArray(this.props.context.analysis_steps)) return null;
-        return (
-            <Graph
-                { ...this.commonGraphProps() }
-            />
-        );
-    }
-
-    static keyTitleMap = {
-        'detail' : 'Analysis Steps',
-        'basic' : 'Basic Inputs & Outputs',
-    }
-
-    render(){
-
-        return (
-            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart)}>
-                <h3 className="tab-section-title">
-                    <span>Graph</span>
-                    { this.uiControls() }
-                </h3>
-                <hr className="tab-section-title-horiz-divider"/>
-                { this.body() }
-            </div>
-        );
-
     }
 
 }
 
-panel_views.register(WorkflowRunView, 'WorkflowRun');
-panel_views.register(WorkflowRunView, 'WorkflowRunSbg');
+content_views.register(WorkflowRunView, 'WorkflowRun');
+content_views.register(WorkflowRunView, 'WorkflowRunSbg');

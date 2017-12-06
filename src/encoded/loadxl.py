@@ -19,8 +19,10 @@ ORDER = [
     'user',
     'award',
     'lab',
+    'page',
     'ontology',
     'ontology_term',
+    'badge',
     'organism',
     'genomic_region',
     'target',
@@ -45,18 +47,25 @@ ORDER = [
     'quality_metric_fastqc',
     'quality_metric_bamqc',
     'quality_metric_pairsqc',
+    'microscope_setting_d1',
+    'microscope_setting_d2',
+    'microscope_setting_a1',
+    'microscope_setting_a2',
     'file_fastq',
     'file_fasta',
     'file_processed',
     'file_reference',
     'file_calibration',
+    'file_microscopy',
     'file_set',
     'file_set_calibration',
+    'file_set_microscope_qc',
     'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',
     'experiment_atacseq',
     'experiment_chiapet',
+    'experiment_damid',
     'experiment_seq',
     'experiment_mic',
     'experiment_set',
@@ -65,7 +74,6 @@ ORDER = [
     'analysis_step',
     'workflow',
     'workflow_mapping',
-    'workflow_run',
     'workflow_run_sbg',
     'workflow_run_awsem'
 ]
@@ -155,6 +163,7 @@ def skip_rows_in_excludes(**kw):
             yield row
 
     return component
+
 
 def skip_rows_without_all_key_value(**kw):
     def component(dictrows):
@@ -561,12 +570,24 @@ PHASE1_PIPELINES = {
         remove_keys('related_files'),
     ],
     'file_processed': [
-        remove_keys('related_files', "workflow_run"),
+        remove_keys('related_files', "workflow_run", "source_experiments"),
     ],
     'file_reference': [
         remove_keys('related_files'),
     ],
+    'file_calibration': [
+        remove_keys('related_files'),
+    ],
+    'file_microscopy': [
+        remove_keys('related_files'),
+    ],
     'file_set': [
+        remove_keys('files_in_set'),
+    ],
+    'file_set_calibration': [
+        remove_keys('files_in_set'),
+    ],
+    'file_set_microscope_qc': [
         remove_keys('files_in_set'),
     ],
     'experiment_hi_c': [
@@ -582,6 +603,9 @@ PHASE1_PIPELINES = {
         remove_keys('experiment_relation'),
     ],
     'experiment_chiapet': [
+        remove_keys('experiment_relation'),
+    ],
+    'experiment_damid': [
         remove_keys('experiment_relation'),
     ],
     'experiment_seq': [
@@ -623,12 +647,24 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('related_files'),
     ],
     'file_processed': [
-        skip_rows_missing_all_keys('related_files', "workflow_run"),
+        skip_rows_missing_all_keys('related_files', "workflow_run", "source_experiments"),
     ],
     'file_reference': [
         skip_rows_missing_all_keys('related_files'),
     ],
+    'file_calibration': [
+        skip_rows_missing_all_keys('related_files'),
+    ],
+    'file_microscopy': [
+        skip_rows_missing_all_keys('related_files'),
+    ],
     'file_set': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_calibration': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
+    'file_set_microscope_qc': [
         skip_rows_missing_all_keys('files_in_set'),
     ],
     'experiment_hi_c': [
@@ -644,6 +680,9 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('experiment_relation'),
     ],
     'experiment_chiapet': [
+        skip_rows_missing_all_keys('experiment_relation'),
+    ],
+    'experiment_damid': [
         skip_rows_missing_all_keys('experiment_relation'),
     ],
     'experiment_seq': [
@@ -690,6 +729,7 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
         for result in processed_data:
             if result.get('_response') and result.get('_response').status_code not in [200, 201]:
                 exclude_list.append(result['uuid'])
+                print("excluding uuid %s do to error" % result['uuid'])
     if force_return:
         return
 
@@ -800,6 +840,24 @@ def load_prod_data(app, access_key_loc=None):
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
                                server="https://data.4dnucleome.org")
+    store_keys(app, access_key_loc, keys)
+
+
+def load_jin_data(app, access_key_loc=None):
+    """smth."""
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+
+    from pkg_resources import resource_filename
+    inserts = resource_filename('encoded', 'tests/data/jin_inserts/')
+    docsdir = []
+    load_all(testapp, inserts, docsdir)
+    keys = generate_access_key(testapp, access_key_loc,
+                               server="https://mastertest.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
 
 

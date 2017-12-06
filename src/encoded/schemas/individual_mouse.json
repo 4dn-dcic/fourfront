@@ -16,7 +16,9 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/notes" }
     ],
     "dependencies": {
@@ -29,6 +31,7 @@
         "mouse_life_stage": {
             "title": "Mouse Life Stage",
             "type": "string",
+            "lookup": 3,
             "enum": [
               "pup",
               "fetus",
@@ -38,17 +41,20 @@
         "organism": {
             "default": "3413218c-3d86-498b-a0a2-9a406638e786",
             "exclude_from": ["submit4dn", "FFedit-create"],
+            "lookup": 1,
             "linkEnum": ["3413218c-3d86-498b-a0a2-9a406638e786"]
         },
         "mouse_strain":{
           "title": "Mouse Strain",
+          "lookup": 2,
           "type": "string",
           "description": "Can be an object of straing with dbxref for strain"
         },
         "mouse_vendor":{
           "title": "Vendor for the Mouse Individual",
           "type": "string",
-          "linkTo": "Vendor"
+          "linkTo": "Vendor",
+          "lookup": 4
         },
         "dbxrefs": {
             "@type": "@id",
@@ -57,6 +63,7 @@
             "description": "Unique identifiers from external resources.",
             "type": "array",
             "default": [],
+            "lookup": 1000,
             "uniqueItems": true,
             "items": {
                 "title": "External identifier",

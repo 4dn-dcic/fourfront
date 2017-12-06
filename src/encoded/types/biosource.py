@@ -33,14 +33,25 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
-    embedded = ["individual.age",
-                "individual.age_units",
-                "individual.sex",
-                "individual.organism.name",
-                "tissue.slim_terms",
-                "tissue.synonyms",
-                "cell_line.slim_terms",
-                "cell_line.synonyms"]
+    embedded_list = [
+        "individual.age",
+        "individual.age_units",
+        "individual.sex",
+        "individual.organism.name",
+        "individual.life_stage",
+        "individual.mouse_life_stage",
+        "individual.mouse_strain",
+        "individual.ethnicity",
+        "individual.health_status",
+        "tissue.slim_terms",
+        "tissue.synonyms",
+        "cell_line.slim_terms",
+        "cell_line.synonyms",
+        'SOP_cell_line.attachment.href',
+        'SOP_cell_line.attachment.type',
+        'SOP_cell_line.attachment.md5sum',
+        'SOP_cell_line.description'
+    ]
 
     @calculated_property(schema={
         "title": "Biosource name",
@@ -54,14 +65,21 @@ class Biosource(Item):
                            'induced pluripotent stem cell line', 'stem cell']
         if biosource_type == "tissue":
             if tissue:
-                return request.embed(tissue, '@@object').get('term_name')
+                tissue_props = request.embed(tissue, '@@object')
+                if tissue_props.get('term_name') is not None:
+                    return tissue_props.get('term_name')
+                else:
+                    return biosource_type
         elif biosource_type in cell_line_types:
             if cell_line:
-                cell_line_name = request.embed(cell_line, '@@object').get('term_name')
-                if cell_line_tier:
-                    if cell_line_tier != 'Unclassified':
-                        return cell_line_name + ' (' + cell_line_tier + ')'
-                return cell_line_name
+                cell_line_props = request.embed(cell_line, '@@object')
+                if cell_line_props.get('term_name') is not None:
+                    cell_line_name = cell_line_props.get('term_name')
+                    if cell_line_tier:
+                        if cell_line_tier != 'Unclassified':
+                            return cell_line_name + ' (' + cell_line_tier + ')'
+                    return cell_line_name
+            return biosource_type
         elif biosource_type == "whole organisms":
             if individual:
                 individual_props = request.embed(individual, '@@object')
@@ -78,7 +96,7 @@ class Biosource(Item):
     })
     def display_title(self, request, biosource_type, individual=None,
                       cell_line=None, cell_line_tier=None, tissue=None):
-        return self.biosource_name(request, biosource_type, individual, cell_line, cell_line_tier, tissue)
+        return self.add_accession_to_title(self.biosource_name(request, biosource_type, individual, cell_line, cell_line_tier, tissue))
 
     class Collection(Item.Collection):
         pass
@@ -86,7 +104,6 @@ class Biosource(Item):
 
 # validator for tissue field
 def validate_biosource_tissue(context, request):
-    # import pdb; pdb.set_trace()
     data = request.json
     if 'tissue' not in data:
         return
@@ -123,7 +140,6 @@ def validate_biosource_tissue(context, request):
 
 # validator for cell_line field
 def validate_biosource_cell_line(context, request):
-    # import pdb; pdb.set_trace()
     data = request.json
     if 'cell_line' not in data:
         return

@@ -15,6 +15,7 @@
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/attribution" }
     ],
     "properties": {
@@ -49,7 +50,7 @@
             "items": {
                 "title": "Type",
                 "type": "string",
-                "enum": [
+                "suggested_enum": [
                     "docker container",
                     "aligner",
                     "aggregator",
@@ -78,6 +79,7 @@
             "title": "Docker Container Information",
             "description": "A short description of the docker container",
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "docker_registry_url": {
                     "title": "Docker Registry URL",
@@ -124,7 +126,7 @@
             "items": {
                 "title": "Purpose",
                 "type": "string",
-                "enum": [
+                "suggested_enum": [
                     "Hi-C",
                     "Imaging",
                     "Data QC",

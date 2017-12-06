@@ -39,6 +39,24 @@ log = logging.getLogger(__name__)
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
+file_workflow_run_embeds = [
+    'workflow_run_inputs.input_files.workflow_argument_name',
+    'workflow_run_inputs.input_files.value.filename',
+    'workflow_run_inputs.input_files.value.display_title',
+    'workflow_run_inputs.input_files.value.file_format',
+    'workflow_run_inputs.input_files.value.uuid',
+    'workflow_run_inputs.input_files.value.accession',
+    'workflow_run_inputs.output_files.workflow_argument_name',
+    'workflow_run_inputs.output_files.value.display_title',
+    'workflow_run_inputs.output_files.value.file_format',
+    'workflow_run_inputs.output_files.value.uuid',
+    'workflow_run_inputs.output_files.value.accession',
+    'workflow_run_inputs.output_quality_metrics.name',
+    'workflow_run_inputs.output_quality_metrics.value.uuid'
+]
+
+file_workflow_run_embeds_processed = file_workflow_run_embeds + [e.replace('workflow_run_inputs.', 'workflow_run_outputs.') for e in file_workflow_run_embeds]
+
 
 def show_upload_credentials(request=None, context=None, status=None):
     if request is None or status not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
@@ -138,7 +156,7 @@ class FileSet(Item):
     item_type = 'file_set'
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
-    embedded = []
+    embedded_list = []
 
 
 @collection(
@@ -150,20 +168,43 @@ class FileSet(Item):
     })
 class FileSetCalibration(FileSet):
     """Collection of files stored under fileset."""
-
     base_types = ['FileSet'] + Item.base_types
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded = ['files_in_set.submitted_by.job_title',
-                'files_in_set.lab.title',
-                'files_in_set.accession',
-                "files_in_set.href",
-                "files_in_set.file_size",
-                "files_in_set.upload_key",
-                "files_in_set.file_format",
-                "files_in_set.file_classification"
-                ]
+    embedded_list = ['files_in_set.submitted_by.job_title',
+                     'files_in_set.lab.title',
+                     'files_in_set.accession',
+                     "files_in_set.href",
+                     "files_in_set.file_size",
+                     "files_in_set.upload_key",
+                     "files_in_set.file_format",
+                     "files_in_set.file_classification"
+                     ]
+
+
+@collection(
+    name='file-set-microscope-qcs',
+    unique_key='accession',
+    properties={
+        'title': 'Microscope QC File Sets',
+        'description': 'Listing of File Sets',
+    })
+class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
+    """Collection of files stored under fileset."""
+    base_types = ['FileSet'] + Item.base_types
+    item_type = 'file_set_microscope_qc'
+    schema = load_schema('encoded:schemas/file_set_microscope_qc.json')
+    name_key = 'accession'
+    embedded_list = ['files_in_set.submitted_by.job_title',
+                     'files_in_set.lab.title',
+                     'files_in_set.accession',
+                     "files_in_set.href",
+                     "files_in_set.file_size",
+                     "files_in_set.upload_key",
+                     "files_in_set.file_format",
+                     "files_in_set.file_classification"
+                     ]
 
 
 @abstract_collection(
@@ -178,33 +219,32 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ["award.project",
-                "lab.city",
-                "lab.state",
-                "lab.country",
-                "lab.postal_code",
-                "lab.city",
-                "lab.title",
-                'experiments.display_title',
-                'experiments.accession',
-                'experiments.experiment_type',
-                'experiments.experiment_sets.accession',
-                'experiments.experiment_sets.experimentset_type',
-                'experiments.experiment_sets.@type',
-                'experiments.biosample.biosource.display_title',
-                'experiments.biosample.biosource.biosource_type',
-                'experiments.biosample.biosource_summary',
-                'experiments.biosample.modifications_summary',
-                'experiments.biosample.treatments_summary',
-                'experiments.biosample.biosource.individual.organism.name',
-                'experiments.digestion_enzyme.name',
-                'related_files.relationship_type',
-                'related_files.file.accession']
+    embedded_list = ["award.project",
+                     "lab.city",
+                     "lab.state",
+                     "lab.country",
+                     "lab.postal_code",
+                     "lab.city",
+                     "lab.title",
+                     'experiments.display_title',
+                     'experiments.accession',
+                     'experiments.experiment_type',
+                     'experiments.experiment_sets.accession',
+                     'experiments.experiment_sets.experimentset_type',
+                     'experiments.experiment_sets.@type',
+                     'experiments.biosample.biosource.display_title',
+                     'experiments.biosample.biosource.biosource_type',
+                     'experiments.biosample.biosource_summary',
+                     'experiments.biosample.modifications_summary',
+                     'experiments.biosample.treatments_summary',
+                     'experiments.biosample.biosource.individual.organism.name',
+                     'experiments.digestion_enzyme.name',
+                     'related_files.relationship_type',
+                     'related_files.file.accession']
     name_key = 'accession'
     rev = {
-        'experiments': ('Experiment', 'files')
+        'experiments': ('Experiment', 'files'),
     }
-
 
     @calculated_property(schema={
         "title": "Experiments",
@@ -219,7 +259,6 @@ class File(Item):
     def experiments(self, request):
         return self.rev_link_atids(request, "experiments")
 
-
     @calculated_property(schema={
         "title": "Display Title",
         "description": "Name of this File",
@@ -229,7 +268,6 @@ class File(Item):
         accession = accession or external_accession
         file_extension = self.schema['file_format_file_extension'][file_format]
         return '{}{}'.format(accession, file_extension)
-
 
     @calculated_property(schema={
         "title": "File Type",
@@ -241,11 +279,10 @@ class File(Item):
         if file_format is not None:
             outString = outString + ' (' + file_format + ')'
 
-        #accession = accession or external_accession
-        #file_extension = self.schema['file_format_file_extension'][file_format]
-        #return '{}{}'.format(accession, file_extension)
+        # accession = accession or external_accession
+        # file_extension = self.schema['file_format_file_extension'][file_format]
+        # return '{}{}'.format(accession, file_extension)
         return outString
-
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -344,7 +381,6 @@ class File(Item):
             return self.uuid
         return properties.get(self.name_key, None) or self.uuid
 
-
     def unique_keys(self, properties):
         keys = super(File, self).unique_keys(properties)
         if properties.get('status') != 'replaced':
@@ -353,7 +389,6 @@ class File(Item):
                 keys.setdefault('alias', []).append(value)
         return keys
 
-
     @calculated_property(schema={
         "title": "Title",
         "type": "string",
@@ -361,7 +396,6 @@ class File(Item):
     })
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
-
 
     @calculated_property(schema={
         "title": "Download URL",
@@ -372,7 +406,6 @@ class File(Item):
         file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
-
 
     @calculated_property(schema={
         "title": "Upload Key",
@@ -390,7 +423,6 @@ class File(Item):
                 return 'UPLOAD KEY FAILED'
         return external['key']
 
-
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
     })
@@ -398,7 +430,6 @@ class File(Item):
         external = self.propsheets.get('external', None)
         if external is not None:
             return external['upload_credentials']
-
 
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
@@ -413,11 +444,9 @@ class File(Item):
                 extras.append(extra)
             return extras
 
-
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
-
 
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
@@ -441,7 +470,6 @@ class File(Item):
         profile_name = registry.settings.get('file_upload_profile_name')
         return external_creds(bucket, key, name, profile_name)
 
-
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
         if properties.get('status') in ('uploading', 'to be uploaded by workflow'):
@@ -464,7 +492,7 @@ class FileFastq(File):
     """Collection for individual fastq files."""
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list + file_workflow_run_embeds
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -509,7 +537,7 @@ class FileFasta(File):
     """Collection for individual fasta files."""
     item_type = 'file_fasta'
     schema = load_schema('encoded:schemas/file_fasta.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -554,11 +582,13 @@ class FileProcessed(File):
     """Collection for individual processed files."""
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list + file_workflow_run_embeds_processed
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
+        'experiments': ('Experiment', 'processed_files'),
+        'experiment_sets': ('ExperimentSet', 'processed_files')
     })
 
     @classmethod
@@ -591,6 +621,19 @@ class FileProcessed(File):
     def workflow_run_outputs(self, request):
         return self.rev_link_atids(request, "workflow_run_outputs")
 
+    @calculated_property(schema={
+        "title": "Experiment Sets",
+        "description": "All Experiment Sets that this file belongs to",
+        "type": "array",
+        "items": {
+            "title": "Experiment Set",
+            "type": "string",
+            "linkTo": "ExperimentSet"
+        }
+    })
+    def experiment_sets(self, request):
+        return self.rev_link_atids(request, "experiment_sets")
+
 
 @collection(
     name='files-reference',
@@ -603,7 +646,7 @@ class FileReference(File):
     """Collection for individual reference files."""
     item_type = 'file_reference'
     schema = load_schema('encoded:schemas/file_reference.json')
-    embedded = File.embedded
+    embedded_list = File.embedded_list
     name_key = 'accession'
 
 
@@ -618,6 +661,21 @@ class FileCalibration(ItemWithAttachment, File):
     """Collection for individual calibration files."""
     item_type = 'file_calibration'
     schema = load_schema('encoded:schemas/file_calibration.json')
+    embedded_list = File.embedded_list
+    name_key = 'accession'
+
+
+@collection(
+    name='files-microscopy',
+    unique_key='accession',
+    properties={
+        'title': 'Microscopy Files',
+        'description': 'Listing of Microscopy Files',
+    })
+class FileMicroscopy(ItemWithAttachment, File):
+    """Collection for individual microscopy files."""
+    item_type = 'file_microscopy'
+    schema = load_schema('encoded:schemas/file_microscopy.json')
     embedded = File.embedded
     name_key = 'accession'
 

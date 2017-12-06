@@ -77,6 +77,14 @@
         "version": "0.1.8"
     },
     {
+        "uuid": "e17c3e9c-8882-4478-93da-062c5213341d",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "pairix",
+        "software_type": ["file format converter", "indexer"],
+        "version": "0.2.6"
+    },
+    {
         "uuid": "02d636b9-d82d-4da9-950c-2ca994a13131",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
@@ -139,6 +147,15 @@
         "name":"mcool2hic",
         "software_type":["file format converter"],
         "title":"hic2cool_34b5430e8b9cfd8f01203e0821b68efe4897b18f",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab"
+    },
+    {
+        "uuid":"c9bf856d-0356-4a8e-8141-2fea6a0ac550",
+        "commit":"0c42928f384ba6d7360021293654919f12872b6c",
+        "name":"pairsamtools",
+        "software_type":["file format converter", "sorter", "annotater", "filter"],
+        "title":"pairsamtools",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab"
     }

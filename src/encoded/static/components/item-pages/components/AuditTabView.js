@@ -156,6 +156,7 @@ export class AuditTabView extends React.Component {
         return (
             <div className="audits-view">
                 <h3 className="tab-section-title">Audits</h3>
+                <hr className="tab-section-title-horiz-divider mb-1"/>
                 { _.sortBy(_.pairs(this.props.audits), function(auditLevelPair){
                     return -auditLevelPair[1][0].level;
                 }).map((auditLevelPair, i) =>
@@ -205,8 +206,7 @@ class AuditLevelGrouping extends React.Component {
 
         return (
             <div className={"audits-view-" + level}>
-                
-                <hr className="tab-section-title-horiz-divider"/>
+
                 <div className="row">
 
                     <div className="col-sm-2 col-md-1">

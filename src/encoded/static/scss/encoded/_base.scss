@@ -25,6 +25,10 @@ $audit-color-warning : #e29302;
 $audit-color-error : #bd0000;
 $audit-color-internal-action: #d0d0d0;
 
+$font-family-sans-serif     : "Mada", "Work Sans", Helvetica, Arial, sans-serif;
+$font-family-serif          : "Yrsa", "Times New Roman", Georgia, Times, serif;
+$font-family-monospace      : "Source Code Pro", Consolas, monospace;
+
 // Pass value with CSS units and get just the value back
 @function strip-units($value) {
     @return $value / ($value * 0 + 1);
@@ -46,6 +50,39 @@ $audit-color-internal-action: #d0d0d0;
     font-size: round($size * strip-units($font-size-base)) + px + (if($important, ' !important',''));
     font-size: $size + rem + (if($important, ' !important',''));
 }
+
+
+@mixin planned-submitted-cell-styles {
+	&.cellType-submitted {
+		background-color: #53a74e !important;
+	}
+	&.cellType-planned {
+		background-color: rgba(191, 191, 191, 0.5) !important;
+	}
+	&.cellType-in-submission {
+		background-color: rgba(191, 191, 191, 0.5) !important;
+		overflow: hidden;
+		&:before {
+			content: '';
+			display: block;
+			width: 150%;
+			height: 150%;
+			background-color: #53a74e;
+			transform: rotate3d(0,0,1, 45deg) translate3d(-74%, 0px, 0px);
+		}
+	}
+	&.cellType-none {
+		background-color: transparent !important;
+	}
+}
+
+
+
+
+
+
+
+
 
 
 /* BASE STYLES */

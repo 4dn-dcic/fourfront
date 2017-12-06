@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
 import * as globals from './../globals';
-import { getElementTop, animateScrollTo } from './../util/layout';
+import { getElementTop, animateScrollTo, getScrollingOuterElement, getPageVerticalScrollPosition } from './../util/layout';
 import { isServerSide, console, navigate } from './../util';
 
 
@@ -84,7 +84,7 @@ class TableEntry extends React.Component {
 
     handleClick(){
 
-        var elementTop;
+        var pageScrollTop, elementTop;
         if (this.props.link === "top") {
             elementTop = 0;
         } else if (typeof this.props.link === 'string'){
@@ -93,13 +93,15 @@ class TableEntry extends React.Component {
             return null;
         }
 
+        pageScrollTop = getPageVerticalScrollPosition();
+
         animateScrollTo(elementTop, 750, this.props.offsetBeforeTarget, ()=>{
             if (typeof this.props.navigate === 'function'){
                 var link = this.props.link;
                 setTimeout(()=>{
                     if (link === 'top' || link === 'bottom') link = '';
                     this.props.navigate('#' + link, { 'replace' : true, 'skipRequest' : true });
-                }, link === 'top' || (document && document.body && document.body.scrollTop <= 40) ? 800 : 0);
+                }, link === 'top' || (typeof pageScrollTop === 'number' && pageScrollTop <= 40) ? 800 : 0);
             }
         });
 
@@ -111,16 +113,18 @@ class TableEntry extends React.Component {
 
         if (!props.mounted) return false;
 
-        var targetElem, elemTop;
-        
+        var scrollingOuterElement, targetElem, elemTop;
+        scrollingOuterElement = getScrollingOuterElement();
+
+
         if (props.depth === 0 && props.mounted){
             elemTop = 0;
         } else {
             targetElem = this.getTargetElement(props.link);
             elemTop = getElementTop(targetElem);
-            if (props.mounted && document && document.body && document.body.scrollHeight && window && window.innerHeight){
+            if (props.mounted && scrollingOuterElement && scrollingOuterElement.scrollHeight && window && window.innerHeight){
                 // Try to prevent from trying to scroll past max scrollable height.
-                elemTop = Math.min(document.body.scrollHeight - window.innerHeight, elemTop);
+                elemTop = Math.min(scrollingOuterElement.scrollHeight - window.innerHeight, elemTop);
             }
         }
 
@@ -448,9 +452,9 @@ export default class TableOfContents extends React.Component {
     }
 
     componentDidMount(e){
-        if (window && document && document.body){
+        if (window && !isServerSide()){
             this.setState(
-                { 'mounted' : true, 'scrollTop' : parseInt(document.body.scrollTop) },
+                { 'mounted' : true, 'scrollTop' : parseInt(getPageVerticalScrollPosition()) },
                 () => { 
                     window.addEventListener('scroll', this.onPageScroll);
                     window.addEventListener('resize', this.onResize);
@@ -473,13 +477,13 @@ export default class TableOfContents extends React.Component {
 
     onPageScroll(e){
         setTimeout(()=>{
-            this.setState({ 'scrollTop' : parseInt(document.body.scrollTop) });
+            this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
         }, 0);
     }
 
     onResize(e){
         setTimeout(()=>{
-            this.setState({ 'scrollTop' : parseInt(document.body.scrollTop) });
+            this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
         }, 0);
     }
 
@@ -494,7 +498,9 @@ export default class TableOfContents extends React.Component {
                 .map(function(entryPair){
                     return _.extend(entryPair[1], { 'link' : entryPair[0] });
                 })
-                .sortBy('order')
+                .sortBy(function(s){
+                    return s.order || 0;
+                })
                 .filter((s)=>{
                     if (this.props.skipDepth && this.props.skipDepth > 0) return true;
                     if (typeof s.title === 'string' || typeof s['toc-title'] === 'string'){

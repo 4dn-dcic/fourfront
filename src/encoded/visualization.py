@@ -1,7 +1,14 @@
 from pyramid.response import Response
 from pyramid.view import view_config
-from snovault import Item
+from pyramid.httpexceptions import (
+    HTTPBadRequest
+)
+from snovault import (
+    CONNECTION,
+    Item as SnowyItem
+)
 from collections import OrderedDict
+from copy import copy
 import cgi
 from urllib.parse import (
     parse_qs,
@@ -9,11 +16,20 @@ from urllib.parse import (
 )
 
 from .search import _ASSEMBLY_MAPPER
+#from .types.file import File
+from .types.base import Item
+from .types.workflow import (
+    trace_workflows,
+    get_unique_key_from_at_id,
+    DEFAULT_TRACING_OPTIONS,
+    WorkflowRunTracingException
+)
 
 
 def includeme(config):
     config.add_route('batch_hub', '/batch_hub/{search_params}/{txt}')
     config.add_route('batch_hub:trackdb', '/batch_hub/{search_params}/{assembly}/{txt}')
+    config.add_route('trace_workflow_runs', '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
     config.scan(__name__)
 
 
@@ -357,7 +373,7 @@ def generate_batch_hubs(context, request):
         return g_text
 
 
-@view_config(name='hub', context=Item, request_method='GET', permission='view')
+@view_config(name='hub', context=SnowyItem, request_method='GET', permission='view')
 def hub(context, request):
     ''' Creates trackhub on fly for a given experiment '''
 
@@ -394,3 +410,85 @@ def hub(context, request):
 def batch_hub(context, request):
     ''' View for batch track hubs '''
     return Response(generate_batch_hubs(context, request), content_type='text/plain')
+
+
+# TODO: figure out how to make one of those cool /file/ACCESSION/@@download/-like URLs for this.
+@view_config(route_name='trace_workflow_runs', request_method='GET', permission='view', context=Item)
+def trace_workflow_runs(context, request):
+
+    options = copy(DEFAULT_TRACING_OPTIONS)
+    if request.params.get('all_runs'):
+        options['group_similar_workflow_runs'] = False
+    if request.params.get('track_performance'):
+        options['track_performance'] = True
+
+    itemTypes = context.jsonld_type()
+    item_model = context.model
+
+    if not hasattr(item_model, 'source') or item_model.source.get('object') is None:
+        raise HTTPBadRequest(detail="Item not yet finished indexing.")
+
+    item_model_obj = item_model.source.get('object', {})
+
+    if 'File' in itemTypes:
+        try:
+            return trace_workflows(
+                [item_model_obj],
+                request,
+                options
+            )
+        except WorkflowRunTracingException as e:
+            raise HTTPBadRequest(detail=e.args[0])
+
+    elif 'ExperimentSet' in itemTypes:
+
+        processed_file_atids_to_trace_from_experiments = []
+        for exp_atid in item_model_obj.get('experiments_in_set', []):
+            experiment_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(exp_atid))
+            if not hasattr(experiment_model, 'source') or experiment_model.source.get('object') is None:
+                raise HTTPBadRequest(detail="Item not yet finished indexing.")
+            processed_file_atids_to_trace_from_experiments = processed_file_atids_to_trace_from_experiments + experiment_model.source.get('object', {}).get('processed_files', [])
+
+
+        processed_file_atids_to_trace_from_experiment_set = item_model_obj.get('processed_files', []) # @ids
+
+        processed_files_to_trace = []
+        for file_at_id in processed_file_atids_to_trace_from_experiments + processed_file_atids_to_trace_from_experiment_set:
+            file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))
+            if not hasattr(file_model, 'source') or file_model.source.get('object') is None:
+                raise HTTPBadRequest(detail="At least 1 Processed File in ExperimentSet not done indexing yet.")
+            processed_files_to_trace.append( file_model.source.get('object', {}) )
+        processed_files_to_trace.reverse()
+
+        try:
+            return trace_workflows(
+                processed_files_to_trace,
+                request,
+                options
+            )
+        except WorkflowRunTracingException as e:
+            raise HTTPBadRequest(detail=e.args[0])
+
+    elif 'Experiment' in itemTypes:
+
+        processed_file_atids_to_trace_from_experiment = item_model_obj.get('processed_files', []) # @ids
+
+        processed_files_to_trace = []
+        for file_at_id in processed_file_atids_to_trace_from_experiment:
+            file_model = request.registry[CONNECTION].storage.get_by_unique_key('accession', get_unique_key_from_at_id(file_at_id))
+            if not hasattr(file_model, 'source') or file_model.source.get('object') is None:
+                raise HTTPBadRequest(detail="At least 1 Processed File in ExperimentSet not done indexing yet.")
+            processed_files_to_trace.append( file_model.source.get('object', {}) )
+        processed_files_to_trace.reverse()
+
+        try:
+            return trace_workflows(
+                processed_files_to_trace,
+                request,
+                options
+            )
+        except WorkflowRunTracingException as e:
+            raise HTTPBadRequest(detail=e.args[0])
+
+    else:
+        raise HTTPBadRequest(detail="This type of Item is not traceable: " + ', '.join(itemTypes))

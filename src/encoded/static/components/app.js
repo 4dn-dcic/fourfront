@@ -15,12 +15,11 @@ import SubmissionView from './submission/submission-view';
 import Footer from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
-import { getTitleStringFromContext } from './item-pages/item';
 import PageTitle from './PageTitle';
 
 /**
@@ -173,7 +172,6 @@ export default class App extends React.Component {
 
     static childContextTypes = {
         dropdownComponent: PropTypes.string,
-        currentResource: PropTypes.func,
         location_href: PropTypes.string,
         onDropdownChange: PropTypes.func,
         hidePublicAudits: PropTypes.bool,
@@ -189,7 +187,6 @@ export default class App extends React.Component {
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.getChildContext = this.getChildContext.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
-        this.currentResource = this.currentResource.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
         this.getStatsComponent = this.getStatsComponent.bind(this);
@@ -214,7 +211,7 @@ export default class App extends React.Component {
         this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
         this.render = this.render.bind(this);
 
-        console.log('APP FILTERS', Filters.hrefToFilters(props.href));
+        console.log('APP FILTERS', Filters.hrefToFilters(props.href, (props.context && Array.isArray(props.context.filters) && props.context.filters) || null));
 
         this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
 
@@ -374,7 +371,6 @@ export default class App extends React.Component {
     getChildContext() {
         return {
             dropdownComponent: this.state.dropdownComponent, // ID of component with visible dropdown
-            currentResource: this.currentResource,
             location_href: this.props.href,
             onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
             hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
@@ -386,7 +382,7 @@ export default class App extends React.Component {
 
     listActionsFor(category) {
         if (category === 'context') {
-            var context = this.currentResource();
+            var context = this.props.context;
             var name = this.currentAction();
             var context_actions = [];
             Array.prototype.push.apply(context_actions, context.actions || []);
@@ -415,8 +411,6 @@ export default class App extends React.Component {
             return portal.global_sections;
         }
     }
-
-    currentResource() { return this.props.context; }
 
     currentAction() {
         var href_url = url.parse(this.props.href);
@@ -536,7 +530,18 @@ export default class App extends React.Component {
         // through the navigate method.
         if (this.historyEnabled) {
             event.preventDefault();
-            navigate(href, navOpts);
+            navigate(href, navOpts, ()=>{
+                var hrefParts = url.parse(href);
+                var hrefHash = hrefParts.hash;
+                if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1){
+                    hrefHash = hrefHash.slice(1); // Strip out '#'
+                    setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
+                }
+                if (hrefParts.pathname.indexOf('/browse/') > -1){
+                    var filters = Filters.hrefToFilters(href, null, false);
+                    Filters.saveChangedFilters(filters, false);
+                }
+            });
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
             }
@@ -583,12 +588,17 @@ export default class App extends React.Component {
         var href = window.location.href; // Href which browser just navigated to, but maybe not yet set to this.props.href
 
         if (!this.confirmPopState(href)){
-            window.history.pushState(window.state, '', this.props.href);
+            try {
+                // Undo what we just did (hit the back button) by re-adding it to history and returning (not performing actual naivgate backward)
+                window.history.pushState(event.state, '', this.props.href);
+            } catch (e){ // Too large
+                console.warn('error pushing state (current, popped:)', this.props.context, event.state);
+                window.history.pushState(null, '', this.props.href);
+            }
             return;
         }
-
-        if (!this.confirmNavigation(href)) {
-            //window.history.pushState(window.state, '', this.props.href);
+        /*
+        if (!this.confirmNavigation(href)) { // Is this necessary still? It shouldn't ever return false at this stage, only in like doRequest().
             var d = {
                 'href': href
             };
@@ -600,6 +610,7 @@ export default class App extends React.Component {
             });
             return;
         }
+        */
         if (!this.historyEnabled) {
             window.location.reload();
             return;
@@ -688,7 +699,7 @@ export default class App extends React.Component {
 
         var stateChange = {};
         if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
-        if (session != this.state.session) stateChange.session = session;
+        if (session !== this.state.session) stateChange.session = session;
 
         if (Object.keys(stateChange).length > 0){
             this.setState(stateChange, typeof callback === 'function' ? callback.bind(this, session, userInfo) : null);
@@ -815,9 +826,9 @@ export default class App extends React.Component {
 
             if (options.skipRequest) {
                 if (options.replace) {
-                    window.history.replaceState(window.state, '', href + fragment);
+                    window.history.replaceState(this.props.context, '', href + fragment);
                 } else {
-                    window.history.pushState(window.state, '', href + fragment);
+                    window.history.pushState(this.props.context, '', href + fragment);
                 }
                 var stuffToDispatch = _.clone(includeReduxDispatch);
                 if (!options.skipUpdateHref) {
@@ -923,7 +934,7 @@ export default class App extends React.Component {
                         return;
                     }
                 }
-                if (options.replace) {
+                if (options.replace) { // null gets replaced in this.receiveContextResponse w. actual JSON data. Redundant here?
                     window.history.replaceState(null, '', href + fragment);
                 } else {
                     window.history.pushState(null, '', href + fragment);
@@ -1011,12 +1022,12 @@ export default class App extends React.Component {
         return data;
     }
 
-    // set isSubmitting in state. works with handleBeforeUnload
-    setIsSubmitting(bool){
-        this.setState({'isSubmitting': bool});
+    /** Set 'isSubmitting' in state. works with handleBeforeUnload **/
+    setIsSubmitting(bool, callback=null){
+        this.setState({'isSubmitting': bool}, callback);
     }
 
-    // catch user navigating away from page if in submission process.
+    /** Catch user navigating away from page if in submission process. */
     handleBeforeUnload(e){
         if(this.state.isSubmitting){
             var dialogText = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
@@ -1067,7 +1078,7 @@ export default class App extends React.Component {
                 var navSplit = value.split("#");
                 lowerList.push(navSplit[0].toLowerCase());
                 if (navSplit[1].charAt(0) === '!'){
-                    actionList.push(navSplit[1].toLowerCase());
+                    actionList.push(navSplit[1].slice(1).toLowerCase());
                 }else{
                     scrollList.push(navSplit[1].toLowerCase());
                 }
@@ -1079,6 +1090,8 @@ export default class App extends React.Component {
                     actionList.push('create');
                 }else if (value === '#!clone'){
                     actionList.push('clone');
+                }else if (value === '#!add'){
+                    actionList.push('add');
                 }else{
                     lowerList.push(value.toLowerCase());
                 }
@@ -1089,18 +1102,21 @@ export default class App extends React.Component {
         var status;
         var route = currRoute[currRoute.length-1];
 
-        if(context.code && context.code == 404){
-            // check to ensure we're not looking at a static page
-            if(route != 'help' && route != 'about' && route != 'home' && route != 'submissions'){
-                status = 'not_found';
-            }
-        }else if(context.code && context.code == 403){
-            if(context.title && (context.title.toLowerCase() == 'login failure' || context.title == 'No Access')){
+        var isPlannedSubmissionsPage = href_url.pathname.indexOf('/planned-submissions') > -1; // TEMP EXTRA CHECK WHILE STATIC_PAGES RETURN 404 (vs 403)
+        if (context.code && (context.code === 403 || (isPlannedSubmissionsPage && context.code === 404))){
+            if (isPlannedSubmissionsPage){
+                status = 'forbidden';
+            } else if (context.title && (context.title.toLowerCase() === 'login failure' || context.title === 'No Access')){
                 status = 'invalid_login';
-            }else if(context.title && context.title == 'Forbidden'){
+            } else if (context.title && context.title === 'Forbidden'){
                 status = 'forbidden';
             }
-        }else if(route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
+        } else if (context.code && context.code === 404){
+            // check to ensure we're not looking at a static page
+            if (route != 'help' && route != 'about' && route !== 'home' && route !== 'submissions'){
+                status = 'not_found';
+            }
+        } else if (route == 'submissions' && !_.contains(this.state.user_actions.map(action => action.id), 'submissions')){
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
@@ -1145,11 +1161,11 @@ export default class App extends React.Component {
                         <SubmissionView
                             {...commonContentViewProps}
                             setIsSubmitting={this.setIsSubmitting}
-                            create={actionList[0] === 'create'}
+                            create={actionList[0] === 'create' || actionList[0] === 'add'}
                             edit={actionList[0] === 'edit'}
                         />
                     );
-                    title = getTitleStringFromContext(context);
+                    title = object.itemUtil.getTitleStringFromContext(context);
                     if (title && title != 'Home') {
                         title = title + ' – ' + portal.portal_title;
                     } else {
@@ -1202,8 +1218,7 @@ export default class App extends React.Component {
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
-                    <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,300,400,500,600,700" rel="stylesheet" />
-                    <link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />
+                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
                     <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}></script>
@@ -1243,8 +1258,11 @@ export default class App extends React.Component {
                                     ref="navigation"
                                     schemas={this.state.schemas}
                                 />
-                                <div id="content" className="container">
+                                <div id="pre-content-placeholder"/>
+                                <div id="page-title-container" className="container">
                                     <PageTitle context={this.props.context} href={this.props.href} schemas={this.state.schemas} />
+                                </div>
+                                <div id="facet-charts-container" className="container">
                                     <FacetCharts
                                         href={this.props.href}
                                         context={this.props.context}
@@ -1254,6 +1272,8 @@ export default class App extends React.Component {
                                         schemas={this.state.schemas}
                                         session={this.state.session}
                                     />
+                                </div>
+                                <div id="content" className="container">
                                     <Alerts alerts={this.props.alerts} />
                                     { content }
                                 </div>
@@ -1269,7 +1289,7 @@ export default class App extends React.Component {
                         var node = ReactDOM.findDOMNode(_tooltip);
                         node.style.left = null;
                         node.style.top = null;
-                    }} />
+                    }} globalEventOff="click" />
                     <ChartDetailCursor
                         href={this.props.href}
                         schemas={this.state.schemas}

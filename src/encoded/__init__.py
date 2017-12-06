@@ -311,8 +311,8 @@ def main(global_config, **local_config):
     config.include('.renderers')
     config.include('.authentication')
     config.include('.server_defaults')
-    config.include('.types')
     config.include('.root')
+    config.include('.types')
     config.include('.batch_download')
     config.include('.visualization')
 
@@ -320,6 +320,8 @@ def main(global_config, **local_config):
         config.include('snovault.elasticsearch')
         config.include('.search')
 
+    # this contains fall back url, so make sure it comes just before static_resoruces
+    config.include('.types.page')
     config.include(static_resources)
     config.include(changelogs)
 
@@ -346,5 +348,6 @@ def main(global_config, **local_config):
         docsdir = [path.strip() for path in docsdir.strip().split('\n')]
     if workbook_filename:
         load_workbook(app, workbook_filename, docsdir, test=load_test_only)
+
 
     return app

@@ -98,53 +98,6 @@ def test_calculated_experiment_summary(testapp, experiment, mboI):
     assert res.json['@graph'][0]['experiment_summary'] == summary
 
 
-# tests for Experiment class methodss
-# def test_generate_mapid(registry, experiment_data):
-#    uuid = UUID("0afb6080-1c08-11e4-8c21-0800200c9a44")
-#    print(uuid)
-#    etype = 'micro-C'
-#    my_expt = ExperimentHiC.create(registry, uuid, experiment_data)
-#    assert my_expt.generate_mapid(etype, suffnum) == 'ExperimentHiC_1'
-
-# tests for experiment_set _update add release_date if released
-def test_experiment_set_update_adds_release_date_if_released(
-        testapp, custom_experiment_set):
-    assert 'date_released' not in custom_experiment_set
-    res = testapp.patch_json(custom_experiment_set['@id'],
-                             {'status': 'released'}, status=200)
-    release_date = res.json['@graph'][0]['date_released']
-    assert release_date == datetime.datetime.now().strftime("%Y-%m-%d")
-
-
-def test_experiment_set_update_wont_add_release_date_if_already_there(
-        testapp, custom_experiment_set_data):
-    custom_experiment_set_data['date_released'] = '2016-12-31'
-    custom_experiment_set_data['status'] = 'revoked'
-    res = testapp.post_json('/experiment_set', custom_experiment_set_data)
-    expset = res.json['@graph'][0]
-    assert 'date_released' in expset
-    res2 = testapp.patch_json(expset['@id'], {'status': 'released'}, status=200)
-    release_date = res2.json['@graph'][0]['date_released']
-    assert release_date == '2016-12-31'
-
-
-def test_experiment_set_update_wont_add_release_date_if_status_not_released(
-        testapp, custom_experiment_set):
-    assert 'date_released' not in custom_experiment_set
-    res = testapp.patch_json(custom_experiment_set['@id'],
-                             {'status': 'released to project'}, status=200)
-    assert 'date_released' not in res.json['@graph'][0]
-
-
-def test_replicate_experiment_set_update_adds_release_date_if_released(
-        testapp, replicate_experiment_set):
-    assert 'date_released' not in replicate_experiment_set
-    res = testapp.patch_json(replicate_experiment_set['@id'],
-                             {'status': 'released'}, status=200)
-    release_date = res.json['@graph'][0]['date_released']
-    assert release_date == datetime.datetime.now().strftime("%Y-%m-%d")
-
-
 # test for experiment_set_replicate _update function
 def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experiment, replicate_experiment_set):
     assert not replicate_experiment_set['experiments_in_set']
@@ -159,6 +112,7 @@ def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experi
 # test for default_embedding practice with embedded list
 # this test should change should any of the reference embeds below be altered
 def test_experiment_set_default_embedded_list(registry):
+    from snovault import TYPES
     exp_data = {
         'experiment_type': 'micro-C',
         'status': 'in review by lab'
@@ -166,17 +120,20 @@ def test_experiment_set_default_embedded_list(registry):
     # create experimentHiC obj; _update (and by extension, add_default_embeds)
     # are called automatically
     test_exp = ExperimentHiC.create(registry, None, exp_data)
+    #call reify embedded property (defined in snovault/resources.py)
     embedded = test_exp.embedded
-    experiment_set_emb = 'experiment_sets.*' in embedded
-    assert 'experiment_sets.accession' in embedded
-    if 'references.*' not in embedded:
-        assert 'references.link_id' in embedded
-        assert 'references.display_title' in embedded
-    if not experiment_set_emb:
-        assert 'experiment_sets.link_id' in embedded
-        assert 'experiment_sets.display_title' in embedded
-    else:
-        assert 'experiment_sets.*' in embedded
+    embedded_list = test_exp.embedded_list
+    type_info_embedded = registry[TYPES]['experiment_hi_c'].embedded_list
+    assert type_info_embedded == embedded_list
+    if 'produced_in_pub.*' in embedded_list:
+        assert 'produced_in_pub.*' in embedded
+        assert 'produced_in_pub.award.link_id' in embedded
+        assert 'produced_in_pub.award.display_title' in embedded
+        assert 'produced_in_pub.award.uuid' in embedded
+    assert 'experiment_sets.accession' in embedded_list
+    assert 'experiment_sets.link_id' in embedded
+    assert 'experiment_sets.display_title' in embedded
+    assert 'experiment_sets.uuid' in embedded
 
 
 # tests for the experiment_sets calculated properties

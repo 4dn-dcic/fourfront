@@ -24,6 +24,7 @@ export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
     { 'field' : 'display_title', },
     { 'field' : 'experiments_in_set.experiment_type', },
     { 'field' : 'number_of_experiments', },
+    { 'field' : 'number_of_files', },
     { 'field' : 'lab.display_title', },
     { 'field' : 'date_created',  },
     { 'field' : 'status',  }
@@ -86,7 +87,45 @@ class ResultTableContainer extends React.Component {
                 'title' : "Exp Type"
             },
             'number_of_experiments' : {
-                'title' : "Exps"
+                'title' : "Exps",
+                'render' : function(expSet, columnDefinition, props, width){
+                    var number_of_experiments = parseInt(expSet.number_of_experiments);
+                    
+                    if (isNaN(number_of_experiments) || !number_of_experiments){
+                        number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
+                    }
+                    if (!number_of_experiments){
+                        number_of_experiments = 0;
+                    }
+
+                    
+                    return <span>{ number_of_experiments }</span>;
+                }
+            },
+            'number_of_files' : {
+                'title' : "Files",
+                'render' : function(expSet, columnDefinition, props, width){
+
+                    var number_of_files = parseInt(expSet.number_of_files); // Doesn't exist yet at time of writing
+                    
+                    if (isNaN(number_of_files) || !number_of_files){
+                        var number_of_experiments = parseInt(expSet.number_of_experiments);
+                        if (isNaN(number_of_experiments) || !number_of_experiments){
+                            number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
+                        }
+                        if (number_of_experiments || Array.isArray(expSet.processed_files)){
+                            number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, true);
+                        } else {
+                            number_of_files = 0;
+                        }
+                        
+                    }
+                    if (!number_of_files){
+                        number_of_files = 0;
+                    }
+                    
+                    return <span>{ number_of_files }</span>;
+                }
             }
         },
         'constantHiddenColumns' : ['experimentset_type']
@@ -148,8 +187,8 @@ class ResultTableContainer extends React.Component {
                 'render' : (expSet, columnDefinition, props, width) => {
                     var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, props, width);
                     var newChildren = origTitleBlock.props.children.slice(0);
-                    var allFiles = expFxn.allFilesFromExperimentSet(expSet);
-                    var allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true);
+                    var allFiles = expFxn.allFilesFromExperimentSet(expSet, true);
+                    var allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true, true);
 
                     var allFilesKeyedByTriples = _.object(_.zip(allFileAccessionTriples, allFiles));
                     allFileAccessionTriples = allFileAccessionTriples.sort();
@@ -208,6 +247,7 @@ class ResultTableContainer extends React.Component {
             <div className="row">
                 { facets.length > 0 ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
+                        <div className="above-results-table-row"/>{/* <-- temporary-ish */}
                         <ReduxExpSetFiltersInterface
                             experimentSets={results}
                             expSetFilters={this.props.expSetFilters}
@@ -248,7 +288,7 @@ class ResultTableContainer extends React.Component {
                     <SearchResultTable
                         results={results}
                         columns={this.props.context.columns || {}}
-                        renderDetailPane={(result, rowNumber, containerWidth)=>
+                        renderDetailPane={(result, rowNumber, containerWidth, toggleExpandCallback)=>
                             <ExperimentSetDetailPane
                                 result={result}
                                 containerWidth={containerWidth}
@@ -256,6 +296,7 @@ class ResultTableContainer extends React.Component {
                                 selectedFiles={this.props.selectedFiles}
                                 selectFile={this.props.selectFile}
                                 unselectFile={this.props.unselectFile}
+                                toggleExpandCallback={toggleExpandCallback}
                                 paddingWidth={47}
                             />
                         }
@@ -289,7 +330,7 @@ class ControlsAndResults extends React.Component {
 
     render(){
 
-        var defaultHiddenColumns = ['lab.display_title', 'date_created', 'status'];
+        var defaultHiddenColumns = ['lab.display_title', 'date_created', 'status', 'number_of_files'];
         /*
         var hiddenColumns = [];
         // Hide columns by default which have same value for all items.
@@ -384,20 +425,32 @@ export default class BrowseView extends React.Component {
     render() {
         var context = this.props.context;
         //var fileFormats = findFormats(context['@graph']);
+        var results = context['@graph'];
+        var hrefParts = url.parse(this.props.href, true);
+        var searchBase = hrefParts.search || '';
 
         // no results found!
         if(context.total === 0 && context.notification){
-            return <div className="error-page"><h4>{context.notification}</h4></div>;
+            var seeSearchResults = null;
+            var strippedQuery = (_.omit(hrefParts.query, 'type', 'experimentset_type'));
+            if (_.keys(strippedQuery).length > 0){
+                seeSearchResults = <h4 className="text-400 mt-05"><a href={'/search/?' + object.serializeObjectToURLQuery(strippedQuery)}>Search all items</a> instead</h4>;
+            }
+            return (
+                <div className="error-page text-center">
+                    <h3 className="text-500 mb-0">{context.notification}</h3>
+                    { seeSearchResults }
+                </div>
+            );
         }
-        var results = context['@graph'];
-        var searchBase = url.parse(this.props.href).search || '';
+        
 
         // browse is only for experiment sets
-        if(searchBase.indexOf('?type=ExperimentSetReplicate') === -1){
+        if(searchBase.indexOf('type=ExperimentSetReplicate') === -1){
             return(
-                <div className="error-page">
+                <div className="error-page text-center">
                     <h4>
-                        <a href='/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0'>
+                        <a href='/browse/?type=ExperimentSetReplicate'>
                             Only experiment sets may be browsed.
                         </a>
                     </h4>
@@ -407,17 +460,12 @@ export default class BrowseView extends React.Component {
 
         return (
             <div className="browse-page-container" id="browsePageContainer">
-            {/*
-                <h1 className="page-title">Data Browser</h1>
-                <h4 className="page-subtitle">Filter & browse experiments</h4>
-            */}
                 <ControlsAndResults
                     {...this.props}
                     //fileFormats={fileFormats}
                     href={this.props.href}
                     schemas={this.props.schemas}
                 />
-
             </div>
         );
     }

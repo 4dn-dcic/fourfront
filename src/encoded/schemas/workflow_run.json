@@ -15,6 +15,7 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes"}
     ],
     "properties": {
@@ -147,6 +148,11 @@
             "type": "string",
             "linkTo": "Workflow"
         },
+        "app_name": {
+            "title": "AppName",
+            "description": "The name of the App used by the workflow.",
+            "type": "string"
+        },
         "run_status": {
             "title": "Run Status",
             "type": "string",
@@ -165,7 +171,7 @@
             "type": "string",
             "enum": [
                 "SBG",
-                "Tibanna"
+                "AWSEM"
             ]
         },
         "run_url": {
@@ -177,6 +183,9 @@
     "facets" : {
         "workflow.title": {
             "title": "Workflow"
+        },
+        "run_status": {
+            "title": "Run Status"
         }
     }
 }

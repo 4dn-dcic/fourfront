@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { compiler } from './../lib/markdown-to-jsx';
+import { compiler } from 'markdown-to-jsx';
 import TableOfContents from './table-contents';
 import { CSVMatrixView } from './components';
 import * as globals from './../globals';
@@ -50,7 +50,7 @@ export function renderSections(renderMethod, context){
         .pairs()
         .sort(function(a,b){
             a = a[1]; b = b[1];
-            return a.order - b.order;
+            return (a.order || 0) - (b.order || 0);
         })
         .map(function(contentPair){
             return renderMethod(
@@ -68,6 +68,7 @@ export function parseSectionsContent(context = this.props.context){
     return _.extend({}, context, {
         'content' : _(context.content).chain().pairs().map(function(sectionPair){ // [key, value] pairs
             var s = sectionPair[1];
+            // If Markdown, we convert 's.content' to JSX elements.
             if (s.filetype === 'md'){
                 var content = compiler(s.content, {
                     'overrides' : _(['h1','h2','h3','h4', 'h5']).chain()
@@ -82,6 +83,8 @@ export function parseSectionsContent(context = this.props.context){
                 });
                 s =  _.extend({}, s, { 'content' : content });
             }
+            // TODO: other parsing stuff based on other filetypes.
+            // Else: return the plaintext representation.
             return [sectionPair[0], s];
         }).object().value()
     });
@@ -153,16 +156,21 @@ export function correctRelativeLinks(elem, context, depth = 0){
 export const render = {
 
     base : function(){
-        var context = parseSectionsContent(this.props.context);
+        var parsedContent = parseSectionsContent(this.props.context);
+        // .toc && .toc.enabled should be exactly as were delivered from back-end.
+        var isTableOfContentsEnabled = false;
+        if (parsedContent && parsedContent.toc && parsedContent.toc.enabled){
+            isTableOfContentsEnabled = true;
+        }
         return (
             <Wrapper
-                title={context.title}
-                tableOfContents={typeof context.toc === 'undefined' || context.toc.enabled === false ? false : true}
-                context={context}
+                title={parsedContent.title}
+                tableOfContents={isTableOfContentsEnabled}
+                context={parsedContent}
                 navigate={this.props.navigate}
                 href={this.props.href}
             >
-                { renderSections(this.entryRenderFxn, context) }
+                { renderSections(this.entryRenderFxn, parsedContent) }
             </Wrapper>
         );
     },

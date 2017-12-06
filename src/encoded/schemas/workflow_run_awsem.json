@@ -15,6 +15,7 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "workflow_run.json#/properties" }
     ],
@@ -31,6 +32,10 @@
         },
         "awsem_job_id": {
             "title": "AWESM Job ID",
+            "type": "string"
+        },
+        "awsem_app_name": {
+            "title": "AWSEM App Name",
             "type": "string"
         }
     }

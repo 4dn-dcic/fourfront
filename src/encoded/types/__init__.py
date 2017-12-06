@@ -37,7 +37,7 @@ class AnalysisStep(Item):
 
     item_type = 'analysis_step'
     schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded = ['software_used.*', 'qa_stats_generated.*']
+    embedded_list = ['software_used.*', 'qa_stats_generated.*']
 
 
 @collection(
@@ -53,7 +53,7 @@ class Award(Item):
     item_type = 'award'
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
-    embedded = ['pi.*']
+    embedded_list = ['pi.*']
 
     # define some customs acls; awards can only be created/edited by admin
     ONLY_ADMIN_VIEW = [
@@ -84,6 +84,20 @@ class Award(Item):
 
 
 @collection(
+    name='badges',
+    unique_key='badge:badgename',
+    properties={
+        'title': 'Badges',
+        'description': 'Listing of badges for 4DN items',
+    })
+class Badge(Item):
+    """The Badge class that descrbes a badge that can be associated with an item."""
+
+    item_type = 'badge'
+    schema = load_schema('encoded:schemas/badge.json')
+
+
+@collection(
     name='biosample-cell-cultures',
     properties={
         'title': 'Biosample Cell Culture Information',
@@ -107,7 +121,7 @@ class Construct(Item):
 
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
-    embedded = []
+    embedded_list = []
 
 
 @collection(
@@ -121,7 +135,7 @@ class Document(ItemWithAttachment, Item):
 
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
-    embedded = []
+    embedded_list = []
 
     def display_title(self):
         if self.properties.get('attachment'):
@@ -143,7 +157,7 @@ class Enzyme(Item):
     item_type = 'enzyme'
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
-    embedded = ['enzyme_source.title']
+    embedded_list = ['enzyme_source.title']
 
 
 @collection(
@@ -157,7 +171,7 @@ class GenomicRegion(Item):
 
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
-    embedded = []
+    embedded_list = []
 
 
 @collection(
@@ -173,7 +187,7 @@ class Organism(Item):
     item_type = 'organism'
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'name'
-    embedded = []
+    embedded_list = []
 
 
 @collection(
@@ -187,7 +201,7 @@ class Protocol(Item, ItemWithAttachment):
 
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
-    embedded = []
+    embedded_list = ["award.project", "lab.title"]
 
     def display_title(self):
         if self.properties.get('attachment'):
@@ -209,4 +223,4 @@ class Sysinfo(Item):
     item_type = 'sysinfo'
     schema = load_schema('encoded:schemas/sysinfo.json')
     name_key = 'name'
-    embedded = []
+    embedded_list = []

@@ -1,0 +1,136 @@
+{
+    "title": "Page",
+    "id": "/profiles/page.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "required": ["name"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "aliases", "name"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/aliases" }
+    ],
+    "type": "object",
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "released",
+            "enum" : [
+                "released",
+                "draft",
+                "deleted"
+            ]
+        },
+		"source_uri": {
+            "title": "URI of source file",
+            "type": "string"
+		},
+        "name": {
+            "title": "Path Name",
+            "comment": "Unique route/pathname of this page.",
+            "type": "string",
+            "uniqueKey": "page:name"
+        },
+        "title": {
+            "title": "Title",
+            "comment": "Title for the Page",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "type": "string",
+            "default": ""
+        },
+        "notification": {
+            "title": "Notification",
+            "type": "string",
+            "default": ""
+        },
+        "table-of-contents": {
+            "title": "Table of Contents",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "header-depth": {
+                    "title": "Header Depth",
+                    "description": "Maximum depth for table of contents titles, 1-6",
+                    "type": "integer",
+                    "default" : 4
+                },
+                "skip-depth" : {
+                    "title": "Skip Depth",
+                    "description": "Skip header depths until this one, 0-6",
+                    "type": "integer",
+                    "default" : 1
+                },
+                "enabled" : {
+                    "title": "Enabled",
+                    "description": "Enable the table of contents or not. Defaults to false.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "list-styles": {
+                    "title": "List Styles",
+                    "description": "CSS list styles used for <li> elements.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }, 
+                "include-top-link" : {
+                    "title": "Include 'go to top' link",
+                    "description": "Show button/link to take you to top of page. Useful if no 'intro' section. Defaults to false.",
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "default" : {
+                "enabled" : false,
+                "include-top-link" : false,
+                "skip-depth" : 1,
+                "header-depth" : 4
+            }
+        },
+        "directory": {
+            "title": "Directory",
+            "description": "location of additional files needed to assemble the static page",
+            "type": "string"
+        },
+        "sections": {
+            "title": "Sections",
+            "description": "sections used to compose the static page",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "id": {
+                        "title": "section id",
+                        "type": "string"
+                    },
+                    "options": {
+                        "title": "Options",
+                        "type": "object"
+                    },
+                    "filename": {
+                        "title": "Filename",
+                        "type": "string"
+                    },
+                    "title": {
+                        "title": "Section Title",
+                        "type": "string"
+                    },
+                    "content":{
+                        "title": "content",
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

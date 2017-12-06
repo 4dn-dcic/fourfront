@@ -461,7 +461,7 @@ export class FormattedInfoBlock extends React.Component {
                         <i className={"icon " + this.props.iconClass}></i>
                     </div>
                     : null }
-                    <div className={"details-col " + (this.props.iconClass ? "col-xs-10 col-lg-11" : "col-sm-12") }>
+                    <div className={"details-col " + (this.props.iconClass ? "col-xs-10 col-lg-11" : "col-sm-12") + (!this.props.detailContent && !this.props.children ? ' no-more-details' : '')}>
                         { this.props.title ?
                         
                             this.props.titleHref ? 

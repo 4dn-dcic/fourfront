@@ -72,7 +72,7 @@ class BarSection extends React.Component {
                 ref={(r)=>{
                     if (this.props.isNew) setTimeout(function(){
                         vizUtil.requestAnimationFrame(function(){
-                            r.style.height = d.attr.height + 'px';
+                            if (r) r.style.height = d.attr.height + 'px';
                         });
                     }, 0);
                 }}
@@ -403,7 +403,7 @@ export const barPlotCursorActions = [
                 href,
                 function(){
                     // Scroll to top of browse page container after navigation is complete.
-                    setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(document.body.scrollTop - 510) * 2, 125);
+                    setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 125);
                 }
             );
 

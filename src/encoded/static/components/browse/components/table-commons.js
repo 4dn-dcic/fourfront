@@ -10,9 +10,7 @@ import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import Draggable from 'react-draggable';
-import Infinite from './../../lib/react-infinite/src/react-infinite';
 import { Sticky, StickyContainer } from 'react-sticky';
-import { getTitleStringFromContext } from './../../item-pages/item';
 import { Detail } from './../../item-pages/components';
 import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax } from './../../util';
 import * as vizUtil from './../../viz/utilities';
@@ -24,7 +22,7 @@ export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
 /**
  * Default value rendering function.
  * Uses columnDefinition field (column key) to get nested property value from result and display it.
- * 
+ *
  * @param {Object} result - JSON object representing row data.
  * @param {any} columnDefinition - Object with column definition data - field, title, widthMap, render function (self)
  * @param {any} props - Props passed down from SearchResultTable/ResultRowColumnBlock instance
@@ -53,7 +51,7 @@ export function defaultColumnBlockRenderFxn(result: Object, columnDefinition: Ob
  * Ensure we have a valid React element to render.
  * If not, try to detect if Item object, and generate link.
  * Else, let exception bubble up.
- * 
+ *
  * @static
  * @param {any} value
  */
@@ -91,7 +89,7 @@ export class TableRowToggleOpenButton extends React.Component {
     render(){
         return (
             <div className="inline-block toggle-detail-button-container">
-                <button className="toggle-detail-button" onClick={this.props.onClick}>
+                <button className="toggle-detail-button" onClick={this.props.onClick || this.props.toggleDetailOpen}>
                     <div className="icon-container">
                         <i className={"icon icon-fw icon-" + (this.props.open ? 'minus' : 'plus') }/>
                     </div>
@@ -108,15 +106,19 @@ export const defaultColumnDefinitionMap = {
         'title' : "Title",
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
-        'render' : function(result: Object, columnDefinition: Object, props: Object, width: number){
-            var title = getTitleStringFromContext(result);
-            var link = object.atIdFromObject(result);
+        'render' : function(result: Object, columnDefinition: Object, props: Object, width: number, popLink = false){
+            var title = object.itemUtil.getTitleStringFromContext(result);
+            var link = object.itemUtil.atId(result);
             var tooltip;
             if (title && (title.length > 20 || width < 100)) tooltip = title;
             if (link){
-                title = <a href={link || '#'}>{ title }</a>;
+                if (popLink){
+                    title = <a href={link || '#'} target="_blank">{ title }</a>;
+                }else{
+                    title = <a href={link || '#'}>{ title }</a>;
+                }
             }
-            
+
             return (
                 <span>
                     <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
@@ -135,10 +137,15 @@ export const defaultColumnDefinitionMap = {
     'lab.display_title' : {
         'title' : "Lab",
         'widthMap' : {'lg' : 220, 'md' : 200, 'sm' : 180},
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function(result, columnDefinition, props, width, popLink = false){
             var labItem = result.lab;
             if (!labItem) return null;
-            var labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
+            var labLink;
+            if (popLink){
+                labLink = <a href={object.atIdFromObject(labItem)} target='_blank'>{ labItem.display_title }</a>;
+            }else{
+                labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
+            }
 
             if (!result.submitted_by || !result.submitted_by.display_title){
                 return labLink;
@@ -164,11 +171,17 @@ export const defaultColumnDefinitionMap = {
     },
     'number_of_experiments' : {
         'title' : '# of Experiments',
-        'widthMap' : {'lg' : 75, 'md' : 75, 'sm' : 50},
+        'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50},
         //'render' : function(result, columnDefinition, props, width){
         //    if (!Array.isArray(result.experiments_in_set)) return null;
         //    return result.experiments_in_set.length;
         //}
+    },
+    'number_of_files' : {
+        'title' : '# of Files',
+        'widthMap' : {'lg' : 60, 'md' : 50, 'sm' : 50},
+        'noSort' : true
+
     },
     'experiments_in_set.experiment_type' : {
         'title' : 'Experiment Type',
@@ -184,7 +197,7 @@ export const defaultColumnDefinitionMap = {
 
 /**
  * Convert a map of field:title to list of column definitions, setting defaults.
- * 
+ *
  * @param {Object.<string>} columns         Map of field names to field/column titles, as returned from back-end.
  * @param {Object[]} constantDefinitions    Preset list of column definitions, each containing at least 'field' and 'title'.
  * @param {Object} defaultWidthMap          Map of responsive grid states (lg, md, sm) to pixel number sizes.
@@ -225,14 +238,14 @@ export function columnDefinitionsToScaledColumnDefinitions(columnDefinitions){
 
 /**
  * Determine the typical column width, given current browser width. Defaults to large width if server-side.
- * 
+ *
  * @param {Object} columnDefinition - JSON of column definition, should have widthMap or width or baseWidth.
  * @param {Object} columnDefinition.widthMap - Map of integer sizes to use at 'lg', 'md', or 'sm' sizes.
  * @param {boolean} [mounted=true]  - Whether component calling this function is mounted. If false, uses 'lg' to align with server-side render.
  * @returns {string|number}         - Width for div column block to be used at current screen/browser size.
  */
 export function getColumnWidthFromDefinition(columnDefinition, mounted=true){
-    
+
     var w = columnDefinition.width || columnDefinition.baseWidth || null;
     if (typeof w === 'number'){
         return w;
@@ -242,6 +255,7 @@ export function getColumnWidthFromDefinition(columnDefinition, mounted=true){
         var responsiveGridSize;
         if (!mounted || isServerSide()) responsiveGridSize = 'lg';
         else responsiveGridSize = layout.responsiveGridState();
+        if (responsiveGridSize === 'xs') responsiveGridSize = 'sm';
         return widthMap[responsiveGridSize || 'lg'];
     }
     return 250; // Fallback.
@@ -252,6 +266,8 @@ export class ResultRowColumnBlockValue extends React.Component {
 
     static defaultProps = {
         'mounted' : false,
+        'toggleDetailOpen' : function(evt){ console.warn('Triggered props.toggleDetailOpen() but no toggleDetailOpen prop passed to ResultRowColumnValue Component.'); },
+        'shouldComponentUpdateExt' : null
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -259,7 +275,9 @@ export class ResultRowColumnBlockValue extends React.Component {
             nextProps.columnNumber === 0 ||
             nextProps.columnDefinition.field !== this.props.columnDefinition.field ||
             nextProps.schemas !== this.props.schemas ||
-            object.atIdFromObject(nextProps.result) !== object.atIdFromObject(this.props.result)
+            object.atIdFromObject(nextProps.result) !== object.atIdFromObject(this.props.result) ||
+            nextProps.className !== this.props.className ||
+            (typeof nextProps.shouldComponentUpdateExt === 'function' && nextProps.shouldComponentUpdateExt(nextProps, nextState, this.props, this.state))
         ){
             return true;
         }
@@ -280,8 +298,13 @@ export class ResultRowColumnBlockValue extends React.Component {
         } else if (value === null){
             value = <small className="text-300">-</small>;
         }
+
+        var className = "inner";
+        if (typeof this.props.className === 'string'){
+            className += ' ' + this.props.className;
+        }
         return (
-            <div className="inner" data-tip={tooltip}>{ value }</div>
+            <div className={className} data-tip={tooltip}>{ value }</div>
         );
     }
 }
@@ -332,15 +355,15 @@ export class HeadersRow extends React.Component {
     }
 
     render(){
-        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset } = this.props;
+        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset, renderDetailPane } = this.props;
         var isAdjustable = this.props.headerColumnWidths && this.state.widths;
         return (
-            <div className={"search-headers-row" + (isAdjustable ? '' : ' non-adjustable') + (isSticky ? ' stickied' : '')} style={
+            <div className={"search-headers-row" + (isAdjustable ? '' : ' non-adjustable') + (isSticky ? ' stickied' : '') + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')} style={
                 isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
                 : null}
             >
-                <div className="columns clearfix" style={{ 
-                    'left'  : isSticky ? stickyStyle.left - tableLeftOffset : null,
+                <div className="columns clearfix" style={{
+                    'left'  : isSticky ? (stickyStyle.left || 0) - (tableLeftOffset || 0) : null,
                     'width' : (stickyStyle && stickyStyle.width) || null
                 }}>
                 {

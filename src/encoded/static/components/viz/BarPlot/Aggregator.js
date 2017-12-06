@@ -15,8 +15,8 @@ import * as aggregationFxn from './aggregation-functions';
  * 
  * @class
  * @type {Component}
- * @prop {Object[]} experiments - "All" experiments, passed from ChartDataController[.Provider].
- * @prop {Object[]} filteredExperiments - "Selected" experiments, if expSetFilters are set in Redux store. Passed from ChartDataController[.Provider].
+ * @prop {Object[]} experiment_sets - "All" sets, passed from ChartDataController[.Provider].
+ * @prop {Object[]} filtered_experiment_sets - "Selected" experiment_sets, if expSetFilters are set in Redux store. Passed from ChartDataController[.Provider].
  * @prop {Object[]} fields - Passed from UIControlsWrapper.
  * @prop {string} aggregateType - Passed from UIControlsWrapper.
  * @prop {string} showType - Passed from UIControlsWrapper.
@@ -37,36 +37,32 @@ export class Aggregator extends React.Component {
         if (nextProps.debug) console.log('Aggregator Do Next Props fields differ', doFieldsDiffer);
         if (
             (nextProps.showType !== pastProps.showType && nextProps.showType === 'all') ||
-            (nextProps.filteredExperiments !== pastProps.filteredExperiments && !nextProps.filteredExperiments)
+            (nextProps.filtered_experiment_sets !== pastProps.filtered_experiment_sets && !nextProps.filtered_experiment_sets)
         ){
             state.aggregatedFilteredData = null;
         } else if (
             (
-                nextProps.filteredExperiments !== pastProps.filteredExperiments ||
-                !_.isEqual(nextProps.filteredExperiments, pastProps.filteredExperiments) ||
+                nextProps.filtered_experiment_sets !== pastProps.filtered_experiment_sets ||
+                !_.isEqual(nextProps.filtered_experiment_sets, pastProps.filtered_experiment_sets) ||
                 doFieldsDiffer ||
                 (nextProps.showType !== pastProps.showType && nextProps.showType !== 'all')
-            ) && Array.isArray(nextProps.filteredExperiments)
+            ) && Array.isArray(nextProps.filtered_experiment_sets)
         ){
             state.aggregatedFilteredData = aggregationFxn.genChartData(
-                nextProps.filteredExperiments,
+                nextProps.filtered_experiment_sets,
                 nextProps.fields,
-                nextProps.aggregateType,
-                'experiments',
                 nextProps.useOnlyPopulatedFields
             );
         }
 
         if (
-            nextProps.experiments !== pastProps.experiments ||
-            !_.isEqual(nextProps.experiments, pastProps.experiments) ||
+            nextProps.experiment_sets !== pastProps.experiment_sets ||
+            !_.isEqual(nextProps.experiment_sets, pastProps.experiment_sets) ||
             doFieldsDiffer
         ){
             state.aggregatedData = aggregationFxn.genChartData(
-                nextProps.experiments,
+                nextProps.experiment_sets,
                 nextProps.fields,
-                nextProps.aggregateType,
-                'experiments',
                 nextProps.useOnlyPopulatedFields
             );
         }
@@ -93,8 +89,8 @@ export class Aggregator extends React.Component {
         if (
             nextProps.aggregateType !== this.props.aggregateType ||
             aggregationFxn.doFieldsDiffer(nextProps.fields, this.props.fields) ||
-            !_.isEqual(nextProps.filteredExperiments, this.props.filteredExperiments) ||
-            !_.isEqual(nextProps.experiments, this.props.experiments) ||
+            !_.isEqual(nextProps.filtered_experiment_sets, this.props.filtered_experiment_sets) ||
+            !_.isEqual(nextProps.experiment_sets, this.props.experiment_sets) ||
             nextProps.showType !== this.props.showType ||
             (nextProps.children && nextProps.children.props && 
             this.props.children && this.props.children.props &&
@@ -114,7 +110,7 @@ export class Aggregator extends React.Component {
     /**
      * Here we re-aggregate terms to fields and save result in own state.
      * We decide whether to re-aggregate depending on changed props.
-     * If fields, showType, filteredExperiments, or experiments change, we re-aggregate.
+     * If fields, showType, experiment_sets, or filtered_experiment_sets change, we re-aggregate.
      * Otherwise we re-use.
      * 
      * @param {Object} nextProps - The next props passed to this component.

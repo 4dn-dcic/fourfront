@@ -2,13 +2,14 @@
 
 import _ from 'underscore';
 import url from 'url';
-import { atIdFromObject } from './object';
+import React from 'react';
+import { linkFromItem } from './object';
 
 let cachedSchemas = null;
 
-/** 
+/**
  * Should be set by app.js to return app.state.schemas
- * 
+ *
  * @type {function}
  */
 export function get(){
@@ -22,28 +23,43 @@ export function set(schemas){
 
 export const itemTypeHierarchy = {
     'Experiment': [
-        'Experiment', 'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq'
+        'ExperimentHiC', 'ExperimentMic', 'ExperimentCaptureC', 'ExperimentRepliseq', 'ExperimentAtacseq', 'ExperimentDamid'
     ],
     'ExperimentSet': [
         'ExperimentSet', 'ExperimentSetReplicate'
     ],
     'File': [
-        'File', 'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference'
+        'FileCalibration', 'FileFasta', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
     ],
     'FileSet': [
-        'FileSet', 'FileSetCalibration'
+        'FileSet', 'FileSetCalibration', 'FileSetMicroscopyQc'
     ],
     'Individual': [
-        'Individual', 'IndividualHuman', 'IndividualMouse'
+        'IndividualHuman', 'IndividualMouse'
     ],
     'Treatment': [
-        'Treatment', 'TreatmentChemical', 'TreatmentRnai'
+        'TreatmentChemical', 'TreatmentRnai'
+    ],
+    'QualityMetric' : [
+        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc'
+    ],
+    'WorkflowRun' : [
+        'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
+    ],
+    'MicroscopeSetting' : [
+        'MicroscopeSettingA1', 'MicroscopeSettingA2', 'MicroscopeSettingD1', 'MicroscopeSettingD2'
     ]
 };
 
 export const Term = {
 
-    toName : function(field, term){
+    toName : function(field, term, allowJSXOutput = false, addDescriptionTipForLinkTos = true){
+
+        if (allowJSXOutput && typeof term !== 'string' && term && typeof term === 'object'){
+            // Object, probably an item.
+            return linkFromItem(term, addDescriptionTipForLinkTos);
+        }
+
         var name = null;
 
         switch (field) {
@@ -69,6 +85,7 @@ export const Term = {
         }
 
         switch (standardizedFieldKey) {
+            case 'biosource_type':
             case 'biosample.biosource.individual.organism.name':
                 name = Term.capitalize(term);
                 break;
@@ -78,7 +95,6 @@ export const Term = {
             case 'files.file_type':
             case 'files.file_classification':
             case 'files.file_type_detailed':
-            case 'biosample.biosource.biosource_type':
                 name = Term.capitalizeSentence(term);
                 break;
             case 'file_size':
@@ -142,11 +158,11 @@ export const Field = {
         'display_title' : "Title"
     },
 
-    toName : function(field, schemas, schemaOnly = false){
+    toName : function(field, schemas, schemaOnly = false, itemType = 'ExperimentSet'){
         if (!schemaOnly && Field.nameMap[field]){
             return Field.nameMap[field];
         } else {
-            var schemaProperty = Field.getSchemaProperty(field, schemas);
+            var schemaProperty = Field.getSchemaProperty(field, schemas, itemType);
             if (schemaProperty && schemaProperty.title){
                 Field.nameMap[field] = schemaProperty.title; // Cache in nameMap for faster lookups.
                 return schemaProperty.title;
@@ -164,6 +180,8 @@ export const Field = {
         if (!baseSchemaProperties) return null;
         if (field.slice(0,5) === 'audit') return null;
         var fieldParts = field.split('.');
+
+        
 
         function getNextSchemaProperties(linkToName){
 
@@ -188,7 +206,6 @@ export const Field = {
             var property = propertiesObj[fieldParts[fieldPartIndex]];
             if (fieldPartIndex >= fieldParts.length - 1) return property;
             var nextSchemaProperties = null;
-            //console.log(propertiesObj, fieldParts, fieldPartIndex);
             if (property.type === 'array' && property.items && property.items.linkTo){
                 nextSchemaProperties = getNextSchemaProperties(property.items.linkTo);
             } else if (property.type === 'array' && property.items && property.items.linkFrom){
@@ -197,6 +214,8 @@ export const Field = {
                 nextSchemaProperties = getNextSchemaProperties(property.linkTo);
             } else if (property.linkFrom) {
                 nextSchemaProperties = getNextSchemaProperties(property.linkFrom);
+            } else if (property.type === 'object'){ // Embedded
+                nextSchemaProperties = property.properties;
             }
 
             if (nextSchemaProperties) return getProperty(nextSchemaProperties, fieldPartIndex + 1);
@@ -211,7 +230,7 @@ export const Field = {
 /**
  * Converts a nested object from this form: "key" : { ..., "items" : { ..., "properties" : { "property" : { ...details... } } } }
  * To this form: "key" : { ... }, "key.property" : { ...details... }, ...
- * 
+ *
  * @param {Object} tips - Schema property object with a potentially nested 'items'->'properties' value(s).
  * @returns {Object} Object with period-delimited keys instead of nested value to represent nested schema structure.
  */
@@ -248,10 +267,16 @@ export function flattenSchemaPropertyToColumnDefinition(tips, depth = 0){
 }
 
 
-export function getAbstractTypeForType(type){
+export function getAbstractTypeForType(type, returnSelfIfAbstract = true){
     var possibleParentTypes = _.keys(itemTypeHierarchy);
     var i;
     var foundIndex;
+    if (returnSelfIfAbstract){
+        foundIndex = possibleParentTypes.indexOf(type);
+        if ( foundIndex > -1 ){
+            return possibleParentTypes[foundIndex];
+        }
+    }
     for (i = 0; i < possibleParentTypes.length; i++){
         foundIndex = itemTypeHierarchy[possibleParentTypes[i]].indexOf(type);
         if ( foundIndex > -1 ){
@@ -282,7 +307,7 @@ export function getItemType(context){
  * Returns base Item type from Item's '@type' array. This is the type right before 'Item'.
 
  * @param {Object} context - JSON representation of current Item.
- * @param {string[]} context['@type] - List of types for the Item. 
+ * @param {string[]} context['@type] - List of types for the Item.
  * @returns {string} Base Ttem type.
  */
 export function getBaseItemType(context){
@@ -317,7 +342,7 @@ export function getSchemaForItemType(itemType, schemas = null){
 
 /**
  * Lookup the title for an Item type, given the entire schemas object.
- * 
+ *
  * @param {string} atType - Item type.
  * @param {Object} [schemas=null] - Entire schemas object, e.g. as stored in App state.
  * @returns {string} Human-readable title.
@@ -343,7 +368,7 @@ export function getTitleForType(atType, schemas = null){
 
 /**
  * Get title for leaf Item type from Item's context + schemas.
- * 
+ *
  * @export
  * @param {Object} context - JSON representation of Item.
  * @param {Object} [schemas=null] - Schemas object passed down from App.
@@ -355,7 +380,7 @@ export function getItemTypeTitle(context, schemas = null){
 
 /**
  * Get title for base Item type from Item's context + schemas.
- * 
+ *
  * @export
  * @param {Object} context - JSON representation of Item.
  * @param {Object} [schemas=null] - Schemas object passed down from App.

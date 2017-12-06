@@ -11,6 +11,8 @@
         "award": "1U01CA200059-01",
         "uuid": "40041e2f-3e43-4388-8bbb-e861f209c555",
         "submitted_by": "4dndcic@gmail.com",
-        "imaging_paths":[{"imaging_path": "test:imagepath001", "channel": "ch01"}]
+        "microscope_qc": "4DNFSMICTEST",
+        "files": ["4DNFIOTESTM1", "4DNFIOTESTM2", "4DNFIOTESTM3", "4DNFIOTESTM4"],
+        "imaging_paths":[{"path": "test:imagepath001", "channel": "ch01"}]
     }
 ]

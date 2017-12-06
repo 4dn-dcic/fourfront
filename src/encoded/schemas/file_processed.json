@@ -11,6 +11,7 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/notes" },
@@ -31,22 +32,25 @@
         "file_format": {
             "title": "File Format",
             "type": "string",
-            "enum": [
+            "suggested_enum": [
                 "bam",
                 "bai",
                 "pairs",
+                "pairsam",
                 "pairs_px2",
+                "pairsam_px2",
                 "cool",
                 "hic",
                 "mcool",
                 "normvector_juicerformat",
+                "zip",
                 "other"
             ]
         },
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "enum": [
+            "suggested_enum": [
                 "read pairs",
                 "alignments",
                 "unfiltered alignments",
@@ -59,17 +63,29 @@
                 "image",
                 "other"
             ]
+        },
+         "source_experiments": {
+             "title": "Source Experiments",
+             "description": "Experiments that this file is associated with",
+             "type": "array",
+             "items": {
+                 "title": "Source Experiment",
+                 "type": "string"
+             }
         }
      },
      "file_format_file_extension": {
         "bam": ".bam",
         "bai": ".bam.bai",
         "pairs": ".pairs.gz",
+        "pairsam": ".sam.pairs.gz",
         "pairs_px2": ".pairs.gz.px2",
+        "pairsam_px2": ".sam.pairs.gz.px2",
         "cool": ".cool",
         "mcool": ".mcool",
         "hic": ".hic",
         "normvector_juicerformat": ".normvector.juicerformat.gz",
+        "zip": ".zip",
         "other": ""
     }
 }

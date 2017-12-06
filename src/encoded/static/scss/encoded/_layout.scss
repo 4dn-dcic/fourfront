@@ -59,21 +59,14 @@
 	/* margin-top: 35px; */
 }
 
-.browse-page-container {
-	margin-top: 80px;
-	&.search-page-container {
-		margin-top: 40px;
-	}
-}
 
-/* top padding for small & large screens re: fixed nav */
 #content {
-    padding-top: 0px;
 
-    @media (min-width: $navbar-fixed-breakpoint) {
-        padding-top: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
+	padding-top: 0px;
+	
+	@media (min-width: $navbar-fixed-breakpoint) {
 		padding-bottom: 20px;
-    }
+	}
 
 	> .alerts {
 		margin-top: 20px;
@@ -82,6 +75,49 @@
 		}
 	}
 
+}
+
+/* top padding for small & large screens re: fixed nav */
+#pre-content-placeholder {
+	display: none;
+	height: 0px;
+
+	@media (min-width: $navbar-fixed-breakpoint) {
+		display: block;
+		height: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
+	}
+}
+
+/****** Custom Sizing for Browse Pages *******/
+/*
+body[data-pathname="/browse/"]{ 
+
+	#content.container {
+		width: auto;
+		padding-left: 30px;
+		padding-right: 30px;
+		transition: width 0s 1s;
+	}
+
+	#top-nav>nav.navbar-main>.container {
+		width: auto;
+		padding-left: 30px;
+		padding-right: 30px;
+	}
+}
+*/
+
+
+/*************** BODY STYLES RE: FULL-SCREEN THINGS ***************/
+
+body.is-full-screen {
+	overflow: hidden;
+	&::-webkit-scrollbar { 
+		display: none; 
+	}
+	#top-nav > .test-warning {
+		display: none;
+	}
 }
 
 
@@ -100,7 +136,21 @@ h1.page-title {
 
 	&.top-of-page {
 		margin-top: 36px;
-		margin-bottom: 3px;
+		margin-bottom: 0px;
+		
+		body[data-pathname="/"] &,
+		body[data-pathname="/home"] &,
+		&.home-page-title {
+			@media screen and (min-width: $screen-sm-min){
+				height: 64px;
+				margin-bottom: -3px;
+			}
+
+			.subtitle {
+				font-size: 1.7rem;
+			}
+		}
+		
 	}
 
 	.row > & {
@@ -109,6 +159,12 @@ h1.page-title {
 
 	.row > div > & {
 		margin-top: 0px;
+	}
+
+	.title {
+		&.has-callout-title {
+			/* margin-right: 12px; */
+		}
 	}
 
 	.page-subtitle {
@@ -124,7 +180,7 @@ h1.page-title {
 			font-weight: 300;
 			font-size : 0.875em;
 			display: inline-block;
-			margin-left: 12px;
+			margin-left: 9px;
 		}
 
 	}
@@ -179,7 +235,7 @@ h3.submission-subtitle {
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
-	font-family: 'Work Sans', sans-serif;
+
 	a{
 		color: #bfbfbf;
 	}
@@ -275,6 +331,7 @@ h3.submission-subtitle {
 
 .text-normal { font-size: 1rem; } // Reset to default size.
 .text-small { font-size: 0.9rem; }
+.text-smaller { font-size: 0.75rem; }
 .text-medium { font-size: 15px; }
 .text-large { font-size: 17.5px; }
 .text-larger { font-size: 20px; line-height: 25px; }
@@ -284,7 +341,7 @@ h3.submission-subtitle {
 
 .mono-text,
 .accession {
-	font-family: consolas, monospace;
+	font-family: $font-family-monospace;
 }
 
 /** This is especially useful for elements with data-tip attribute (for React Tooltip) so that tip is positioned at center. **/
@@ -294,6 +351,10 @@ h3.submission-subtitle {
 
 .overflow-hidden {
 	overflow: hidden;
+}
+
+.clickable {
+	cursor: pointer;
 }
 
 @media screen and (max-width: $screen-xs-max){
@@ -411,6 +472,28 @@ h3.submission-subtitle {
 	}
 }
 
+/** Margin Classes, inspired by Swiss github-pages/jekyll template **/
+$margin-util-sizes: 0, 1, 2, 3, 4, 5;   // * 10px
+$margin-util-sizes-mini: 2, 3, 5, 7, 8; // * 1px
+
+@each $util-size in $margin-util-sizes {
+	.mb-#{$util-size}, * > .mb-#{$util-size}{
+		margin-bottom : $util-size * 10px !important;
+	}
+	.mt-#{$util-size}, * > .mt-#{$util-size}{
+		margin-top : $util-size * 10px !important;
+	}
+}
+
+@each $util-size in $margin-util-sizes-mini {
+	.mb-0#{$util-size}, * > .mb-0#{$util-size}{
+		margin-bottom : $util-size * 1px !important;
+	}
+	.mt-0#{$util-size}, * > .mt-0#{$util-size}{
+		margin-top : $util-size * 1px !important;
+	}
+}
+
 /** Modal Stuff **/
 
 .modal-dialog {
@@ -436,6 +519,24 @@ h3.submission-subtitle {
   }
 }
 
+// Moving caret to always right position
+.dropdown-toggle.btn {
+	position: relative;
+	padding-right: 24px;
+	padding-left: 10px;
+	span.caret {
+		position: absolute;
+		top: 50%;
+		margin-top: -2px;
+		right: 10px;
+	}
+}
+
+@mixin button-no-focus-outline {
+	&:active, &:focus, &.focus, &:focus.active, &.focus:active, &.focus:focus {
+		outline: none;
+	}
+}
 
 /**************** React Tooltips (NPM: react-tooltip) overwrite of styling *********************/
 
@@ -447,6 +548,7 @@ body .__react_component_tooltip {
 /* *********************************************************
 		CARL'S LOGIN BOX
 ********************************************************** */
+
 .login-box{
     width: inherit;
 	height: inherit;
@@ -465,7 +567,7 @@ body .__react_component_tooltip {
     text-align: center;
     font-size: 16px;
     cursor: pointer;
-	font-family: 'Work Sans', sans-serif;
+	font-family: $font-family-sans-serif;
 }
 .sexy-btn:hover, .sexy-btn:focus {
   color: #000000;
@@ -495,6 +597,7 @@ body .__react_component_tooltip {
   right: 0;
 }
 
+
 .links {
     padding-left: 0px;
 }
@@ -509,7 +612,6 @@ body .__react_component_tooltip {
 
 .fill-label{
     display: block;
-    font-family: 'Work Sans', sans-serif;
     text-align: center;
 }
 .text-box {
@@ -522,7 +624,7 @@ body .__react_component_tooltip {
     margin-left: auto;
     margin-right: auto;
     font-size: 14px;
-    font-family: 'Work Sans', sans-serif;
+	font-family: $font-family-sans-serif;
 }
 
 .text-box:hover, .text-box:focus{
@@ -532,11 +634,9 @@ body .__react_component_tooltip {
 
 .title{
     text-align: center;
-    font-family: 'Work Sans', sans-serif;
 }
-.error{
+.error {
     text-align: center;
-    font-family: 'Work Sans', sans-serif;
     color: red;
 }
 
@@ -557,7 +657,7 @@ body .__react_component_tooltip {
 }
 
 h1, h2, h3, h4, h5, h6, td, th, span {
-	font-family: 'Work Sans', sans-serif;
+	font-family: $font-family-sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6, th {
@@ -586,71 +686,4 @@ p, input {
 .impersonate-user-field{
 	width: 400px;
 	border: 2px solid #999999;
-}
-
-// SUBMISSION STUFF
-
-.submission-field-header{
-	background-color: #e7e7e7;
-	border: 1px solid #ccc;
-	border-radius: 2px;
-	span {
-		margin-left: 12px;
-	}
-	margin-bottom: 0px !important;
-}
-
-.submission-nav-tree{
-	border: 1px solid #ccc;
-	border-radius: 2px;
-	background-color: #fff;
-	> h4{
-		text-align: center;
-		font-weight: 300;
-		margin-top: 0px;
-	}
-}
-
-.submission-nav-leaf{
-	width: 100%;
-	> div > button{
-		border: none;
-		border-radius: 0px;
-		width: 20px;
-		height: 19px;
-		opacity: 1 !important;
-	}
-}
-
-.submission-pop-icon{
-	background-color: #fff;
-	padding: 1px 5px;
-	a:hover, a:active {
-		text-decoration: none !important;
-		color: #000000;
-	}
-	a{
-		padding: 3px 5px 0px 5px;
-	}
-}
-
-.submission-field-title{
-	border: none !important;
-	padding-bottom: 0px !important;
-	margin-bottom: 0px !important;
-	padding-top: 5px !important;
-}
-
-.submission-working-title{
-	display: inline;
-	font-weight: 300;
-	> .working-subtitle{
-		font-weight: 200;
-		color: #8b8b8b;
-		padding-right: 10px;
-	}
-}
-
-.submission-hidden-nav{
-	display: none;
 }

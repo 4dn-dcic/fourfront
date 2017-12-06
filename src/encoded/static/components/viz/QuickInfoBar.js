@@ -367,7 +367,7 @@ class Stat extends React.Component {
 
     static defaultProps = {
         'value' : 0,
-        'label' : 'Experiments',
+        'longLabel' : 'Experiments',
         'classNameID': 'experiments',
         'id' : null
     }
@@ -396,19 +396,21 @@ class Stat extends React.Component {
             return this.props.shortLabel;
         }
 
-        var filtersHrefChunk = this.filtersHrefChunk();
+        // Always goto Browse page for now
+        var filtersHrefChunk = Filters.expSetFiltersToURLQuery(this.props.expSetFilters); //this.filtersHrefChunk();
 
         var sep = filtersHrefChunk && filtersHrefChunk.length > 0 ? '&' : '';
 
-        var href = Stat.typesPathMap[this.props.classNameID] + sep + (filtersHrefChunk || '');
+        var href = Stat.typesPathMap['expsets'/*this.props.classNameID*/] + sep + (filtersHrefChunk || '');
 
         if (typeof this.props.href === 'string'){
             // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.
-            if (this.props.href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === href) return this.props.shortLabel;
+            if (navigate.isBrowseHref(this.props.href)) return <span>{ this.props.shortLabel }</span>; 
+            if (this.props.href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === href) return <span>{ this.props.shortLabel }</span>;
         }
         
         return (
-            <a href={href} data-tip={"View all currently-filtered " + this.props.label}>{ this.props.shortLabel }</a>
+            <a href={href}>{ this.props.shortLabel }</a>
         );
     }
 

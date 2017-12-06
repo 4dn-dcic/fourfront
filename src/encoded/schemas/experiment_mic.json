@@ -14,12 +14,14 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/documents" },
-        { "$ref": "mixins.json#/library"},
         { "$ref": "mixins.json#/sop_mapping"},
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/badges" },
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinColumns": [
@@ -54,6 +56,11 @@
                 "EM"
             ]
         },
+        "microscope_qc":{
+            "title": "Microscope QC Analysis",
+            "type": "string",
+            "linkTo": "FileSetMicroscopeQc"
+        },
         "imaging_paths": {
             "title": "Imaging Paths",
             "description": "Target to label connections in each channel",
@@ -61,6 +68,7 @@
             "items": {
                 "title": "Imaging path",
                 "type": "object",
+                "additionalProperties": false,
                 "properties":{
                     "path":{
                         "title": "Imaging Path",
@@ -75,6 +83,16 @@
                     }
                 }
             }
+        },
+        "plate_id": {
+            "title": "Plate ID",
+            "description": "Plate ID for multi-well plate experiments",
+            "type": "string"
+        },
+        "plate_well_id": {
+            "title": "Well Position",
+            "description": "Well position for experiments on multi-well plates, eg H8, B18",
+            "type": "string"
         }
     },
     "facets": {

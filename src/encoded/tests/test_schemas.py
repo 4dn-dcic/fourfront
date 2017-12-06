@@ -44,9 +44,12 @@ def pluralize(name):
     name = name.replace('_', '-')
     # deal with a few special cases explicitly
     specials = ['experiment', 'file', 'individual', 'treatment',
-                'quality-metric', 'summary-statistic', 'workflow-run']
+                'quality-metric', 'summary-statistic', 'workflow-run',
+                'microscope-setting']
     for sp in specials:
         if name.startswith(sp) and re.search('-(set|flag)', name) is None:
+            return name.replace(sp, sp + 's')
+        elif name.startswith(sp) and re.search('setting', name):
             return name.replace(sp, sp + 's')
     # otherwise just add 's'
     return name + 's'
@@ -58,6 +61,7 @@ def test_load_schema(schema, master_mixins, registry):
     from snovault import COLLECTIONS
 
     abstract = [
+        'microscope_setting.json',
         'experiment.json',
         'file.json',
         'individual.json',
@@ -111,7 +115,8 @@ def test_load_schema(schema, master_mixins, registry):
                 'status'
             ]
             no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json',
-                                       'ontology.json', 'ontology_term.json', 'sysinfo.json']
+                                       'ontology.json', 'ontology_term.json', 'sysinfo.json',
+                                       'page.json', 'badge.json']
             for prop in shared_properties:
                 if schema == 'experiment.json':
                     # currently experiment is abstract and has no mixin properties

@@ -3,37 +3,57 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { Checkbox } from 'react-bootstrap';
 import * as globals from './../globals';
-import { object, expFxn, ajax, Schemas, layout } from './../util';
-import { FormattedInfoBlock, TabbedView, FileDownloadButton, FileDownloadButtonAuto } from './components';
-import { ItemBaseView } from './DefaultItemView';
-import ExperimentsTable from './../experiments-table';
+import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
+import { ItemBaseView, OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { requestAnimationFrame } from './../viz/utilities';
+import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
+import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
+import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
 
 
 
-export default class FileView extends ItemBaseView {
+export default class FileView extends WorkflowRunTracingView {
+
+    /* TODO : Move to WorkflowRunTracingView, DRY up re: WorkflowRunTracingView.loadGraphSteps() */
+    static doesGraphExist(context){
+        return (
+            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
+        );
+    }
 
     getTabViewContents(){
 
         var initTabs = [];
+        var context = this.props.context;
 
-        //if (Array.isArray(this.props.context.experiments)){
-        initTabs.push(FileViewOverview.getTabObject(this.props.context, this.props.schemas));
-        //}
+        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
+        if (width) width -= 20;
+
+        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
+        
+        var steps = this.state.steps;
+
+        if (FileView.doesGraphExist(context)){
+            initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
+        }
 
         return initTabs.concat(this.getCommonTabs());
     }
 
 }
 
-globals.panel_views.register(FileView, 'File');
+globals.content_views.register(FileView, 'File');
 
 
 class FileViewOverview extends React.Component {
 
-    static getTabObject(context, schemas){
+    static getTabObject(context, schemas, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'experiments-info',
@@ -44,15 +64,10 @@ class FileViewOverview extends React.Component {
                         <span>Overview</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview context={context} schemas={schemas} />
+                    <FileViewOverview context={context} schemas={schemas} width={width} />
                 </div>
             )
         };
-    }
-
-    static isExperimentSetCompleteEnough(expSet){
-        // TODO
-        return false;
     }
 
     static propTypes = {
@@ -61,83 +76,35 @@ class FileViewOverview extends React.Component {
                 'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
                     'link_id' : PropTypes.string.isRequired
                 }))
-            })).isRequired
+            })),
+            'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
+                'experiments_in_set' : PropTypes.arrayOf(PropTypes.shape({
+                    'link_id' : PropTypes.string.isRequired
+                }))
+            }))
         }).isRequired
-    }
-
-    constructor(props){
-        super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-
-        // Get ExpSets from this file, check if are complete (have bio_rep_no, etc.), and use if so; otherwise, save 'this.experiment_set_uris' to be picked up by componentDidMount and fetched.
-        var experiment_sets_obj = expFxn.experimentSetsFromFile(props.context);
-        var experiment_sets = _.values(expFxn.experimentSetsFromFile(props.context));
-        var experiment_sets_for_state = null;
-
-        if (Array.isArray(experiment_sets) && experiment_sets.length > 0 && FileViewOverview.isExperimentSetCompleteEnough(experiment_sets[0])){
-            experiment_sets_for_state = experiment_sets;
-        } else {
-            this.experiment_set_uris = _.keys(experiment_sets_obj);
-        }
-
-        this.state = {
-            'experiment_sets' : experiment_sets_for_state,
-            'current_es_index' : false
-        };
-    }
-
-    componentDidMount(){
-        var newState = {};
-
-        var onFinishLoad = null;
-
-        if (Array.isArray(this.experiment_set_uris) && this.experiment_set_uris.length > 0){
-
-            onFinishLoad = _.after(this.experiment_set_uris.length, function(){
-                this.setState({ 'loading' : false });
-            }.bind(this));
-
-            newState.loading = true;
-            _.forEach(this.experiment_set_uris, (uri)=>{
-                ajax.load(uri, (r)=>{
-                    var currentExpSets = (this.state.experiment_sets || []).slice(0);
-                    currentExpSets.push(r);
-                    this.setState({ experiment_sets : currentExpSets });
-                    onFinishLoad();
-                }, 'GET', onFinishLoad);
-            });
-        }
-        
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
-    }
-
-    componentWillUnmount(){
-        delete this.experiment_set_uris;
     }
 
     render(){
         var { context } = this.props;
 
-        var expSetsTable;
-        if (this.state.loading || this.state.experiment_sets){
-            expSetsTable = (
-                <layout.WindowResizeUpdateTrigger>
-                    <FileViewExperimentSetTables
-                        loading={this.state.loading}
-                        experiment_sets={this.state.experiment_sets}
-                    />
-                </layout.WindowResizeUpdateTrigger>
-            );
+        var setsByKey;
+        var table = null;
+
+        if (context && (
+            (Array.isArray(context.experiments) && context.experiments.length > 0) || (Array.isArray(context.experiment_sets) && context.experiment_sets.length > 0)
+        )){
+            setsByKey = expFxn.experimentSetsFromFile(context);
         }
 
+        if (setsByKey && _.keys(setsByKey).length > 0){
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} defaultOpenIndices={[0]} />;
+        }
 
         return (
             <div>
                 <OverViewBody result={context} schemas={this.props.schemas} />
-                { expSetsTable }
+                { table }
             </div>
         );
 
@@ -157,7 +124,7 @@ class OverViewBody extends React.Component {
 
             return (
                 <li className="related-file">
-                    { rf.relationship_type } { object.linkFromItem(rf.file) }
+                    { rf.relationship_type } &nbsp;-&nbsp; { object.linkFromItem(rf.file) }
                 </li>
             );
         });
@@ -167,66 +134,26 @@ class OverViewBody extends React.Component {
     render(){
         var file = this.props.result;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), file);
-        console.log(tips);
+
         return (
             <div className="row">
                 <div className="col-md-9 col-xs-12">
                     <div className="row overview-blocks">
 
-                        <div className="col-sm-4 col-lg-4">
-                            <div className="inner">
-                                <object.TooltipInfoIconContainerAuto result={file} property={'file_format'} tips={tips} elementType="h5" fallbackTitle="File Format" />
-                                <div>
-                                    { Schemas.Term.toName('file_format', file.file_format) || 'Unknown/Other' }
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-sm-4 col-lg-4">
-                            <div className="inner">
-                                <object.TooltipInfoIconContainerAuto result={file} property={'file_type'} tips={tips} elementType="h5" fallbackTitle="File Type" />
-                                <div>
-                                    { Schemas.Term.toName('file_type', file.file_type) || 'Unknown/Other'}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-sm-4 col-lg-4">
-                            <div className="inner">
-                                <object.TooltipInfoIconContainerAuto result={file} property={'file_classification'} tips={tips} elementType="h5" fallbackTitle="General Classification" />
-                                <div>
-                                    { Schemas.Term.toName('file_classification', file.file_classification) }
-                                </div>
-                            </div>
-                        </div>
+                        <OverViewBodyItem tips={tips} result={file} property='file_format' fallbackTitle="File Format" wrapInColumn="col-sm-4 col-lg-4" />
 
-                        { file.notes ?
-                        <div className="col-sm-12">
-                            <div className="inner">
-                                <object.TooltipInfoIconContainerAuto result={file} property={'notes'} tips={tips} elementType="h5" fallbackTitle="Notes" />
-                                <div>
-                                    { file.notes }
-                                </div>
-                            </div>
-                        </div>
-                        : null }
+                        <OverViewBodyItem tips={tips} result={file} property='file_type' fallbackTitle="File Type" wrapInColumn="col-sm-4 col-lg-4" />
 
-                        { Array.isArray(file.related_files) && file.related_files.length > 0 ?
-                        <div className="col-sm-12">
-                            <div className="inner">
-                                <object.TooltipInfoIconContainerAuto result={file} property={'related_files'} tips={tips} elementType="h5" fallbackTitle="Related Files" />
-                                <ul>
-                                    { this.relatedFiles() }
-                                </ul>
-                            </div>
-                        </div>
-                        : null }
+                        <OverViewBodyItem tips={tips} result={file} property='file_classification' fallbackTitle="General Classification" wrapInColumn="col-sm-4 col-lg-4" />
 
+                        <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn hideIfNoValue />
 
                     </div>
-
                 </div>
+
                 <div className="col-md-3 col-xs-12">
                     <div className="file-download-container">
-                        <FileDownloadButtonAuto result={file} />
+                        <fileUtil.FileDownloadButtonAuto result={file} />
                         { file.file_size && typeof file.file_size === 'number' ?
                         <h6 className="text-400">
                             <i className="icon icon-fw icon-hdd-o" /> { Schemas.Term.toName('file_size', file.file_size) }
@@ -234,54 +161,73 @@ class OverViewBody extends React.Component {
                         : null }
                     </div>
                 </div>
+
             </div>
         );
 
     }
 }
 
+/**
+ * Reuse when showing related_files of an Item.
+ */
+export class RelatedFilesOverViewBlock extends React.Component {
 
+    static defaultProps = {
+        'wrapInColumn' : true,
+        'property' : 'related_files'
+    }
 
-
-class FileViewExperimentSetTables extends React.Component {
-
-    render(){
-        var experiment_sets = this.props.experiment_sets;
-        var loading = this.props.loading;
-
-        if (this.props.loading || !Array.isArray(experiment_sets)){
-            return (
-                <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
-                    <i className="icon icon-fw icon-spin icon-circle-o-notch"/>
-                </div>
-            );
+    relatedFiles(){
+        var { file, related_files, property } = this.props;
+        var relatedFiles;
+        if (typeof related_files === 'undefined' || related_files === null){
+            relatedFiles = file[property] || file.related_files;
+        } else {
+            relatedFiles = related_files;
         }
 
-        
+        if (!Array.isArray(relatedFiles) || relatedFiles.length === 0){
+            return null;
+        }
 
-        
-        return (
-            <div className="file-part-of-experiment-sets-container" ref="experimentSetsContainer">
-                <h3 className="tab-section-title">
-                    <span>In Experiment Sets</span>
-                </h3>
-                <hr className="tab-section-title-horiz-divider"/>
-                <ItemPageTable
-                    results={experiment_sets}
-                    renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
-                        'xs' : 0, 'sm' : 10, 'md' : 30, 'lg' : 47
-                    }} />}
-                    columns={{
-                        "number_of_experiments" : "Exps",
-                        "experiments_in_set.experiment_type": "Experiment Type",
-                        "experiments_in_set.biosample.biosource.individual.organism.name": "Organism",
-                        "experiments_in_set.biosample.biosource_summary": "Biosource Summary",
-                        "experiments_in_set.digestion_enzyme.name": "Enzyme",
-                        "experiments_in_set.biosample.modifications_summary": "Modifications",
-                        "experiments_in_set.biosample.treatments_summary": "Treatments"
-                    }}
-                />
+        return _.map(relatedFiles, function(rf, i){
+            return (<li className="related-file" key={object.itemUtil.atId(rf.file) || i}>{ rf.relationship_type } &nbsp;-&nbsp; { object.linkFromItem(rf.file) }</li>);
+        });
+
+    }
+
+    render(){
+        var { file, related_files, property, hideIfNoValue, tips, wrapInColumn } = this.props;
+        var relatedFiles;
+        if (typeof related_files === 'undefined' || related_files === null){
+            relatedFiles = file[property] || file.related_files;
+        } else {
+            relatedFiles = related_files;
+        }
+
+        var vals = this.relatedFiles();
+
+        if (hideIfNoValue && !vals){
+            return null;
+        } else {
+            vals = <li className="related-file"><em>None</em></li>;
+        }
+
+        var elem = (
+            <div className="inner">
+                <object.TooltipInfoIconContainerAuto result={file} property={property || "related_files"} tips={tips} elementType="h5" fallbackTitle="Related Files" />
+                <ul className="overview-list-elements-container">{ vals }</ul>
             </div>
         );
+
+        if (wrapInColumn){
+            return <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-sm-12"} children={elem} />;
+        } else {
+            return elem;
+        }
+
+
     }
 }
+
