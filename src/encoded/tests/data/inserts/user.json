@@ -141,6 +141,7 @@
         "last_name": "Guy",
         "status": "current",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab117227e3d",
-        "lab": "811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"
+        "lab": "811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc",
+        "submits_for": ["811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc", "812cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"]
     }
 ]
