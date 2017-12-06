@@ -159,9 +159,9 @@ class SubmissionLeaf extends React.Component{
         var fieldASchema = itemSchema.properties[fieldABase];
         var fieldBSchema = itemSchema.properties[fieldBBase];
 
-        if (fieldASchema.lookup || 750 > fieldBSchema.lookup || 750) return -1; 
+        if (fieldASchema.lookup || 750 > fieldBSchema.lookup || 750) return -1;
         if (fieldASchema.lookup || 750 < fieldBSchema.lookup || 750) return 1;
-        
+
         return 0;
 
     }
@@ -170,14 +170,14 @@ class SubmissionLeaf extends React.Component{
      * Generate placeholders in the SubmissionTree for every linkTo name and
      * create a SubmissionLeaf for each child object under its corresponding
      * placholder.
-     * 
+     *
      * @param {string} bookmark - Name of the leaf/view we're on.
      * @returns {JSX.Element} Visible leaf/branch-representing element.
      */
     generateAllPlaceholders(){
         var { keyValid, keyIdx, keyTypes, keyComplete, schemas } = this.props;
         var placeholders;
-        
+
         var fieldsWithLinkTosToShow = this.props.keyLinkBookmarks[keyIdx].sort(this.placeholderSortFxn);
 
         return _.map(fieldsWithLinkTosToShow, (field) => <SubmissionProperty {...this.props} field={field} /> );
@@ -199,7 +199,6 @@ class SubmissionLeaf extends React.Component{
         } else {
             // must be a submitted object - plot directly
             placeholders = _.keys(this.props.hierarchy[keyIdx]).map(this.generateChild);
-            console.log('TEST24543', placeholders); // Haven't hit this yet?? XX Have hit this at selecting a sub-object linkTo
         }
         var extIcon;
         var titleText = this.props.keyDisplay[keyIdx] || keyIdx;
@@ -225,7 +224,7 @@ class SubmissionLeaf extends React.Component{
                     alert('Object page popup blocked!');
                 }
             }.bind(this);
-            
+
             icon = <i className="icon icon-hdd-o indicator-icon"/>;
             tip = "Successfully submitted or pre-existing item; already exists in the database.<br>Click to view this item/dependency in new tab/window.";
             extIcon = <i className="icon icon-external-link pull-right" />;
