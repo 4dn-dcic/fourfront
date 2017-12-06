@@ -459,7 +459,7 @@ export default class BrowseView extends React.Component {
         }
 
         return (
-            <div className="browse-page-container" id="browsePageContainer">
+            <div className="browse-page-container search-page-container" id="browsePageContainer">
                 <ControlsAndResults
                     {...this.props}
                     //fileFormats={fileFormats}

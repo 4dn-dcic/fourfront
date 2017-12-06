@@ -79,14 +79,18 @@ export default class Login extends React.Component {
     }
 
     handleAuth0Login(authResult, retrying){
+        // First stage: we just have gotten JWT from Auth0 but have not auth'd it against it our own system to see if is a valid user account or some random person who just logged into their Google account.
         var idToken = authResult.idToken; //JWT
         if (!idToken) return;
 
         JWT.save(idToken); // We just got token from Auth0 so probably isn't outdated.
-        
+
+        navigate('', {'inPlace':true}); // Refresh the content of our page now that we have a JWT stored as a cookie! It will return same page but with any auth'd page actions.
+
         this.props.setIsLoadingIcon(true);
         this.lock.hide();
 
+        // Second stage: get this valid OAuth account (Google or w/e) auth'd from our end.
         Promise.race([
             ajax.fetch('/login', {
                 method: 'POST',
@@ -94,7 +98,7 @@ export default class Login extends React.Component {
                 body: JSON.stringify({id_token: idToken})
             }),
             new Promise(function(resolve, reject){
-                setTimeout(function(){ reject({ 'description' : 'timed out', 'type' : 'timed-out' }); }, 60000);
+                setTimeout(function(){ reject({ 'description' : 'timed out', 'type' : 'timed-out' }); }, 90000); /* 90 seconds */
             })
         ]).then(response => {
             // Add'l Error Check (will throw to be caught)
@@ -108,9 +112,9 @@ export default class Login extends React.Component {
             console.info('Login completed');
             this.props.setIsLoadingIcon(false);
             if (this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
-                navigate('/', {'inPlace':true});
-            }else{
-                navigate('', {'inPlace':true});
+                navigate('/', {'inPlace':true}); // Navigate home -- perhaps we should remove this and leave them on login failed page? idk
+            } else {
+                //navigate('', {'inPlace':true}); // We've done this already above.
             }
         }).catch((error)=>{
             // Handle Errors

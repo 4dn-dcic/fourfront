@@ -92,6 +92,7 @@ class AboveSearchTablePanelStaticContentPane extends React.Component {
 }
 
 
+
 export class AboveSearchTablePanel extends React.Component {
 
     static currentItemTypesFromHrefParts(urlParts){

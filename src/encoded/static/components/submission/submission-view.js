@@ -146,8 +146,8 @@ export default class SubmissionView extends React.Component{
      * @param {Object} newContext - New Context/representation for this Item to be saved.
      */
     modifyKeyContext = (objKey, newContext) => {
-        var contextCopy = _.clone(this.state.keyContext);
-        var validCopy = _.clone(this.state.keyValid);
+        var contextCopy = cloneObj(this.state.keyContext);
+        var validCopy = cloneObj(this.state.keyValid);
         contextCopy[objKey] = newContext;
         validCopy[objKey] = this.findValidationState(objKey);
         this.setState({
@@ -163,7 +163,7 @@ export default class SubmissionView extends React.Component{
      * 1 (ready to validate). Otherwise return 0 (not ready to validate)
      */
     findValidationState = (keyIdx) => {
-        var hierarchy = JSON.parse(JSON.stringify(this.state.keyHierarchy));
+        var hierarchy = cloneObj(this.state.keyHierarchy);
         var keyHierarchy = searchHierarchy(hierarchy, keyIdx);
         if (keyHierarchy === null) return 0;
         var validationReturn = 1;
@@ -236,7 +236,6 @@ export default class SubmissionView extends React.Component{
             if(!contextID || this.props.create){
                 initContext[0] = buildContext({}, schema, bookmarksList, this.props.edit, this.props.create);
                 initBookmarks[0] = bookmarksList;
-                console.log('MY BOOKMARKZ', bookmarksList);
 
                 this.setState({
                     'keyContext': initContext,
@@ -248,7 +247,8 @@ export default class SubmissionView extends React.Component{
                 });
                 this.initCreateObj(principalTypes[0], 0, 'Primary Object');
             }else{
-                ajax.promise(contextID + '?frame=object').then(response => {
+                // get the DB result to avoid any possible indexing hang-ups
+                ajax.promise(contextID + '?frame=object&datastore=database').then(response => {
                     var initObjs = [];
                     if (response['@id'] && response['@id'] === contextID){
                         initContext[0] = buildContext(response, schema, bookmarksList, this.props.edit, this.props.create, initObjs);
@@ -517,7 +517,7 @@ export default class SubmissionView extends React.Component{
         var hierarchy = this.state.keyHierarchy;
         var keyDisplay = this.state.keyDisplay;
         var bookmarksCopy = this.state.keyLinkBookmarks;
-        var linksCopy = _.clone(this.state.keyLinks);
+        var linksCopy = cloneObj(this.state.keyLinks);
         var bookmarksList = [];
         // increase key iter by 1 for a new unique key
         var keyIdx;
@@ -587,16 +587,16 @@ export default class SubmissionView extends React.Component{
      * @param {number} key - Key of item to remove.
      */
     removeObj = (key) => {
-        var contextCopy = _.clone(this.state.keyContext);
-        var validCopy = _.clone(this.state.keyValid);
-        var typesCopy = _.clone(this.state.keyTypes);
+        var contextCopy = cloneObj(this.state.keyContext);
+        var validCopy = cloneObj(this.state.keyValid);
+        var typesCopy = cloneObj(this.state.keyTypes);
         var keyDisplay = this.state.keyDisplay;
         var keyComplete = this.state.keyComplete;
         var bookmarksCopy = this.state.keyLinkBookmarks;
         var linksCopy = this.state.keyLinks;
         var roundTwoCopy = this.state.roundTwoKeys.slice();
         var hierarchy = this.state.keyHierarchy;
-        var dummyHierarchy = JSON.parse(JSON.stringify(hierarchy));
+        var dummyHierarchy = cloneObj(hierarchy);
         var hierKey = key;
 
         // the key may be a @id string and not keyIdx if already submitted
@@ -903,7 +903,7 @@ export default class SubmissionView extends React.Component{
      * with a null value.
      */
     removeNullsFromContext = (inKey) => {
-        var finalizedContext = JSON.parse(JSON.stringify(this.state.keyContext[inKey]));
+        var finalizedContext = cloneObj(this.state.keyContext[inKey]);
         var noNulls = removeNulls(finalizedContext);
         return noNulls;
     }
@@ -930,22 +930,27 @@ export default class SubmissionView extends React.Component{
     }
 
     /**
-     * Add the fields to given editContext from origContext that were removed
-     * from the sumbission process due to schema flags
-     * (exclude_from or permissions)
-     * Used when editing (this.props.edit == true) or in second-round submission,
-     * which can also be thought of as editing the submitted first round items
-     * (since fields like uuid and accession that are excluded from the
-     * creation process must be included)
+     * Used to generate a list of fields that have been removed in the submission
+     * process. This list will in turn be used to make a deleteFields string
+     * that is passed to the server with the PATCH request for editing or
+     * second round submission. Takes the patchContext, which is the submission
+     * content after removeNulls and submitObject processing, and compares it
+     * to the original content (which is passed through removeNulls). If the
+     * roundTwo flag is set to true, only operate on roundTwo submission fields.
+     * Otherwise, do not operate on roundTwo fields.
      *
-     * Use this when editing or in round two. Returns the revised context
+     * Returns a list of stirng fieldnames to delete.
      */
-    mergeEditedContext = (editContext, origContext, schema) => {
+    buildDeleteFields = (patchContext, origContext, schema) => {
+        var deleteFields = [];
+        // must remove nulls from the orig copy to sync with patchContext
+        var origCopy = cloneObj(origContext);
+        origCopy = removeNulls(origCopy);
         var userGroups = getUserGroups();
-        _.keys(origContext).forEach(function(field, index){
-            // if editContext already has a value (such as admin edited
+        _.keys(origCopy).forEach(function(field, index){
+            // if patchContext already has a value (such as admin edited
             // import_items fields), don't overwrite
-            if(editContext[field]){
+            if(patchContext[field]){
                 return;
             }
             if(schema.properties[field]){
@@ -953,27 +958,40 @@ export default class SubmissionView extends React.Component{
                 if (!fieldSchema){
                     return;
                 }
-                // skip calculated properties
+                // skip calculated properties and exclude_from fields
                 if (fieldSchema.calculatedProperty && fieldSchema.calculatedProperty === true){
                     return;
                 }
                 if (fieldSchema.exclude_from && (_.contains(fieldSchema.exclude_from,'FFedit-create') || fieldSchema.exclude_from == 'FFedit-create')){
-                    console.log('Added edit context:', field, ' -//- ', origContext[field]);
-                    editContext[field] = origContext[field];
                     return;
                 }
-                // if the user is admin, they already have these fields
-                // available; don't change unless they aren't
+                // if the user is admin, they already have these fields available;
+                // only register as removed if admin did it intentionally
                 if (fieldSchema.permission && fieldSchema.permission == "import_items"){
-                    if(!_.contains(userGroups, 'admin')){
-                        console.log('Added edit context:', field, ' _//_ ', origContext[field]);
-                        editContext[field] = origContext[field];
+                    if(_.contains(userGroups, 'admin')){
+                        deleteFields.push(field);
+                        return;
+                    }else{
                         return;
                     }
                 }
+                // check round two fields if the parameter roundTwo is set
+                if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
+                    if(this.state.roundTwo){
+                        deleteFields.push(field);
+                        return;
+                    }else{
+                        return;
+                    }
+                }
+                // if we're here, the submission field was legitimately deleted
+                if(!this.state.roundTwo){
+                    deleteFields.push(field);
+                    return;
+                }
             }
-        });
-        return editContext;
+        }.bind(this));
+        return deleteFields;
     }
 
     /** Set md5Progress in state to val. Passed as callback to getLargeMD5 */
@@ -983,7 +1001,7 @@ export default class SubmissionView extends React.Component{
 
     /**
      * Master object submission function. Takes a key index and uses ajax to
-     * POST/PATCH/PUT the json to the object collection (a new object) or to the
+     * POST/PATCH the json to the object collection (a new object) or to the
      * specific object path (a pre-existing/roundTwo object). If test=true,
      * the POST is made to the check_only=True endpoint for validation without
      * actual submission.
@@ -1050,7 +1068,6 @@ export default class SubmissionView extends React.Component{
                     if(currSchema.properties.lab && !('lab' in finalizedContext)){
                         finalizedContext.lab = object.atIdFromObject(propContext.lab);
                     }
-
                     // an admin is editing. Use the pre-existing submitted_by
                     // otherwise, permissions won't let us change this field
                     if(me_data.groups && _.contains(me_data.groups, 'admin')){
@@ -1072,24 +1089,32 @@ export default class SubmissionView extends React.Component{
                 // if testing validation, use check_only=True (see /types/base.py)
                 var destination = test ? '/' + currType + '/?check_only=True' : '/' + currType;
                 var actionMethod = 'POST';
+                // used to keep track of fields to delete with PATCH for edit/round two
+                // comma-separated string
+                var deleteFields;
                 // change actionMethod and destination based on edit/round two
                 if(!test){
                     if(this.state.roundTwo){
-                        actionMethod = 'PUT';
+                        actionMethod = 'PATCH';
                         destination = this.state.keyComplete[inKey];
                         var alreadySubmittedContext = this.state.keyContext[destination];
-                        finalizedContext = this.mergeEditedContext(finalizedContext, alreadySubmittedContext, currSchema);
+                        // roundTwo flag set to true for second round
+                        deleteFields = this.buildDeleteFields(finalizedContext, alreadySubmittedContext, currSchema);
                     }else if(this.props.edit && inKey == 0){
-                        // PUT for principal obj on edit
-                        // this is because fields cannot be deleted with PATCH
-                        actionMethod = 'PUT';
+                        // PATCH for principal obj on edit
+                        actionMethod = 'PATCH';
                         destination = propContext['@id'];
-                        finalizedContext = this.mergeEditedContext(finalizedContext, propContext, currSchema);
+                        deleteFields = this.buildDeleteFields(finalizedContext, propContext, currSchema);
                     }
 
                 }
                 var payload = JSON.stringify(finalizedContext);
-                console.log('Submission payload:', finalizedContext);
+                // add delete_fields parameter to request if necessary
+                if (deleteFields && Array.isArray(deleteFields) && deleteFields.length > 0){
+                    var deleteString = deleteFields.join();
+                    destination = destination + '?delete_fields=' + deleteString;
+                    console.log('DESTINATION:', destination);
+                }
                 ajax.promise(destination, actionMethod, {}, payload).then(response => {
                     if (response.status && response.status !== 'success'){ // error
                         keyValid[inKey] = 2;
@@ -1115,17 +1140,14 @@ export default class SubmissionView extends React.Component{
                         this.setState(stateToSet);
                     }else{
                         var responseData;
+                        var submitted_at_id;
                         if(test){
-                            console.info('OBJECT SUCCESSFULLY TESTED!');
                             keyValid[inKey] = 3;
                             this.setState(stateToSet);
                             return;
                         }else{
                             responseData = response['@graph'][0];
-                            // if not editing/not on principal, get path from new POST
-                            if(!this.props.edit || inKey !== 0){
-                                destination = responseData['@id'];
-                            }
+                            submitted_at_id = responseData['@id'];
                         }
                         // handle submission for round two
                         if(this.state.roundTwo){
@@ -1163,13 +1185,13 @@ export default class SubmissionView extends React.Component{
                             var contextCopy = this.state.keyContext;
                             var roundTwoCopy = this.state.roundTwoKeys.slice();
                             // update the state storing completed objects.
-                            keyComplete[inKey] = destination;
+                            keyComplete[inKey] = submitted_at_id;
                             // represent the submitted object with its new path
                             // rather than old keyIdx.
-                            linksCopy[destination] = linksCopy[inKey];
-                            typesCopy[destination] = currType;
-                            displayCopy[destination] = displayCopy[inKey];
-                            contextCopy[destination] = responseData;
+                            linksCopy[submitted_at_id] = linksCopy[inKey];
+                            typesCopy[submitted_at_id] = currType;
+                            displayCopy[submitted_at_id] = displayCopy[inKey];
+                            contextCopy[submitted_at_id] = responseData;
                             contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false);
                             stateToSet.keyLinks = linksCopy;
                             stateToSet.keyTypes = typesCopy;
@@ -1189,7 +1211,7 @@ export default class SubmissionView extends React.Component{
                                 if(roundTwoCopy.length === 0){
                                     // we're done!
                                     this.props.setIsSubmitting(false, ()=>{
-                                        this.props.navigate(destination);
+                                        this.props.navigate(submitted_at_id);
                                     });
                                 }else{
                                     // break this out into another fxn?
@@ -1962,8 +1984,6 @@ class IndividualObjectView extends React.Component{
         if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
             // only render file upload input if status is 'uploading' or 'upload_failed'
             // when editing a File principal object.
-            // there may be a bug where status automatically gets reset to uploading
-            // when edit is PUT, despite the file not changing. That's a wrangler issue
             var path = this.props.keyComplete[this.props.currKey];
             var completeContext = this.props.keyContext[path];
             var statusCheck = completeContext.status && (completeContext.status == 'uploading' || completeContext.status == 'upload failed');
@@ -2405,3 +2425,11 @@ var removeNulls = function myself(context){
     });
     return context;
 };
+
+
+/**
+ * Clone a given object using JSON techniques
+ */
+function cloneObj(obj){
+    return JSON.parse(JSON.stringify(obj));
+}

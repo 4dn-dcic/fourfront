@@ -370,7 +370,7 @@ export default class SearchView extends React.Component {
         });
 
         return (
-            <div className="browse-page-container search-page-container" ref="container">
+            <div className="search-page-container" ref="container">
                 <AboveSearchTablePanel href={searchBase} context={context} />
                 <ResultTableHandlersContainer {...this.props} facets={facets} searchBase={searchBase} navigate={this.props.navigate || navigate} />
             </div>
