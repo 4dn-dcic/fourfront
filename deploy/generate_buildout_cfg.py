@@ -47,7 +47,7 @@ def build_cfg_file():
     data['env_name'] = os.environ.get("ENV_NAME", "")
     # staging env points to prod buckets
     if data['env_name'] in ['fourfront-staging', 'fourfront-webprod2']:
-        data['env_name'] == 'fourfront-webprod'
+        data['env_name'] = 'fourfront-webprod'
 
     data['should_index'] = 'false'
     if os.environ.get('should_index'):

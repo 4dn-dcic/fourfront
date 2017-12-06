@@ -19,7 +19,8 @@
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/documents" },
-        { "$ref": "mixins.json#/tags" }
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/badges" }
     ],
     "properties": {
         "schema_version": {

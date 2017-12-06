@@ -426,11 +426,25 @@
             "description": "Key words that can tag an item - useful for filtering.",
             "type": "array",
             "uniqueItems": true,
-            "ff_clear": "clone",
             "items": {
                 "title": "Tag",
                 "description": "A tag for the item.",
                 "type":  "string"
+            }
+        }
+    },
+    "badges": {
+        "badges": {
+            "title": "Badges",
+            "description": "Badges that can be added to an item.",
+            "type": "array",
+            "ff_flag": "clear clone",
+            "permission": "import-items",
+            "items": {
+                "title": "Badge",
+                "description": "A badge for the item.",
+                "type":  "string",
+                "linkTo": "Badge"
             }
         }
     }
