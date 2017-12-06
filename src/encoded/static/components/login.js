@@ -113,8 +113,6 @@ export default class Login extends React.Component {
             this.props.setIsLoadingIcon(false);
             if (this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
                 navigate('/', {'inPlace':true}); // Navigate home -- perhaps we should remove this and leave them on login failed page? idk
-            } else {
-                //navigate('', {'inPlace':true}); // We've done this already above.
             }
         }).catch((error)=>{
             // Handle Errors
@@ -122,7 +120,7 @@ export default class Login extends React.Component {
             console.log(error);
 
             this.props.setIsLoadingIcon(false);
-            
+
             if (!error.code && error.type === 'timed-out'){
                 Alerts.queue(Alerts.LoginFailed);
             } else if (error.code === 403) {
@@ -133,7 +131,7 @@ export default class Login extends React.Component {
                 });
             }
             Alerts.deQueue(Alerts.LoggedOut);
-            
+
         });
 
     }
