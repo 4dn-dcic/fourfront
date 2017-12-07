@@ -147,7 +147,7 @@ def add_software_to_insert(docker_reponame, docker_version, insert_jsonfile):
     downloads a text file from a docker repo that contains software info and adds them to insert_jsonfile
     '''
     # download downloads.sh file from a docker repo
-    docker_downloads_url = 'https://github.com/' + docker_reponame + /blob/' + docker_version + '/downloads.sh'
+    docker_downloads_url = 'https://github.com/' + docker_reponame + '/blob/' + docker_version + '/downloads.sh'
     downloadsfile = urllib.URLopener()
     downloaded_file_name = 'downloads.sh'
     downloadsfile.retrieve(docker_downloads_url, downloaded_file_name)
