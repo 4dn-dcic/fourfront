@@ -75,11 +75,11 @@ export function getSearchType(facets){
 }
 
 /**
- * Provides callbacks for FacetList to filter on term click and check if a term is selected by interfacing with the 
+ * Provides callbacks for FacetList to filter on term click and check if a term is selected by interfacing with the
  * 'searchBase' or 'href' prop (treated the same) and the 'navigate' callback prop (usually utils/navigate.js).
- * 
+ *
  * Passes other props down to ControlsAndResults.
- * 
+ *
  * @export
  * @class ResultTableHandlersContainer
  * @extends {React.Component}
@@ -271,7 +271,7 @@ class ControlsAndResults extends React.Component {
                         <AboveTableControls
                             {..._.pick(this.props,
                                 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'context',
-                                'columns', 'selectedFiles', 'constantHiddenColumns'
+                                'columns', 'selectedFiles', 'constantHiddenColumns', 'submissionBase'
                             )}
                             parentForceUpdate={this.forceUpdate.bind(this)}
                             columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
