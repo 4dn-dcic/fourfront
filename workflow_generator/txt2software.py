@@ -141,3 +141,30 @@ def filter_swlist(sl, sl_exist):
             sl_new.append(sw.as_dict())
     return(sl_new)
 
+
+def add_software_to_insert(docker_reponame, docker_version, insert_jsonfile):
+    '''
+    downloads a text file from a docker repo that contains software info and adds them to insert_jsonfile
+    '''
+    # download downloads.sh file from a docker repo
+    docker_downloads_url = 'https://github.com/' + docker_reponame + /blob/' + docker_version + '/downloads.sh'
+    downloadsfile = urllib.URLopener()
+    downloaded_file_name = 'downloads.sh'
+    downloadsfile.retrieve(docker_downloads_url, downloaded_file_name)
+
+    # get a filtered list of software
+    sl1 = parser(downloaded_file_name)
+    sl2 = get_existing(insert_jsonfile)
+    sl_filtered = filter_swlist(sl1, sl2)
+
+    # overwrite insert_jsonfile
+    with open(insert_jsonfile, 'w') as fw:
+        json.dump(sl_filtered, fw)
+
+
+def add_repliseq_software():
+    '''
+    adds software info from repli-seq pipeline docker v10 to inserts and prod-inserts
+    '''
+    add_software_to_insert('4dn-dcic/docker-4dn-repliseq', 'v10', 'src/encoded/tests/data/inserts/software.json')
+    add_software_to_insert('4dn-dcic/docker-4dn-repliseq', 'v10', 'src/encoded/tests/data/prod-inserts/software.json')

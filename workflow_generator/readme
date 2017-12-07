@@ -1,0 +1,6 @@
+## If you run this, it will update the software insert file.
+```
+import workflow_generator.txt2software as ss
+ss.add_repliseq_software()
+```
+
