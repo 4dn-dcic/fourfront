@@ -150,7 +150,7 @@ def add_software_to_insert(docker_reponame, docker_version, insert_jsonfile):
     # download downloads.sh file from a docker repo
     docker_downloads_url = 'https://github.com/' + docker_reponame + '/blob/' + docker_version + '/downloads.sh'
     downloaded_file_name = 'downloads.sh'
-    urllib.retrieve(docker_downloads_url, downloaded_file_name)
+    urllib.urlretrieve(docker_downloads_url, downloaded_file_name)
 
     # get a filtered list of software
     sl1 = parser(downloaded_file_name)
