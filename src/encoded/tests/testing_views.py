@@ -173,6 +173,7 @@ class TestingPostPutPatch(Item):
     schema = {
         'required': ['required'],
         'type': 'object',
+        'additionalProperties': False,
         'properties': {
             "schema_version": {
                 "type": "string",
@@ -211,6 +212,9 @@ class TestingPostPutPatch(Item):
                 'type': 'string',
                 'linkTo': 'TestingLinkTarget',
                 'permission': 'import_items',
+            },
+            'field_no_default': {
+                'type': 'string',
             },
         }
     }
