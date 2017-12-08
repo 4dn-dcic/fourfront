@@ -381,7 +381,7 @@
         },
         "library_preparation_date":{
             "title": "Library Preparation Date",
-            "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
+            "description": "The date that the library was prepared for sequencing - submitted as YYYY-MM-DD.",
             "type": "string",
             "format": "date"
         },
