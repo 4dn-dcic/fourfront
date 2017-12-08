@@ -1,6 +1,6 @@
 import uuid
 import json
-import urllib
+import wget
 
 class Software(object):
 
@@ -10,12 +10,10 @@ class Software(object):
         self.name = None
         self.version = None
         self.commit = None
-        self.software_type = None
-        self.title = None
-        self.award = "1U01CA200059-01"
-        self.lab = "4dn-dcic-lab"
 
         self.add(uuid, name, version, commit, software_type)
+        self.award = "1U01CA200059-01"
+        self.lab = "4dn-dcic-lab"
 
 
     def add(self, uuid=None, name=None, version=None, commit=None, 
@@ -31,7 +29,6 @@ class Software(object):
             self.commit = commit
         if software_type:
             self.software_type = software_type
-        self.title = None
 
         if self.name:
             if self.version:
@@ -148,18 +145,19 @@ def add_software_to_insert(docker_reponame, docker_version, insert_jsonfile):
     downloads a text file from a docker repo that contains software info and adds them to insert_jsonfile
     '''
     # download downloads.sh file from a docker repo
-    docker_downloads_url = 'https://github.com/' + docker_reponame + '/blob/' + docker_version + '/downloads.sh'
+    url = 'https://raw.githubusercontent.com/' + docker_reponame + '/' + docker_version + '/downloads.sh'
     downloaded_file_name = 'downloads.sh'
-    urllib.urlretrieve(docker_downloads_url, downloaded_file_name)
+    wget.download(url, downloaded_file_name)
 
     # get a filtered list of software
     sl1 = parser(downloaded_file_name)
     sl2 = get_existing(insert_jsonfile)
     sl_filtered = filter_swlist(sl1, sl2)
+    sl2.extend(sl_filtered)
 
     # overwrite insert_jsonfile
     with open(insert_jsonfile, 'w') as fw:
-        json.dump(sl_filtered, fw)
+        json.dump(sl2, fw, sort_keys=True, indent=4)
 
 
 def add_repliseq_software():
