@@ -28,6 +28,8 @@ class Software(object):
         if commit:
             self.commit = commit
         if software_type:
+            if not isinstance(software_type, list):
+                software_type = software_type.split(',')
             self.software_type = software_type
 
         if self.name:
@@ -105,7 +107,7 @@ def parser(textfile):
                 startover = False
     
                 if x.startswith('##'):
-                    field, value = x.split()[1:3]
+                    field, value = x.strip('## ').split(': ')[0:2]
                     field = field.strip(':')
                     swlist[-1].add(**{map_field(field): value})
 
