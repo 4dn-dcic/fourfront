@@ -828,7 +828,6 @@ def load_test_data(app, access_key_loc=None):
     inserts = resource_filename('encoded', 'tests/data/inserts/')
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     load_all(testapp, inserts, docsdir)
-    import pdb; pdb.set_trace()
     keys = generate_access_key(testapp, access_key_loc,
                                server="https://mastertest.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
