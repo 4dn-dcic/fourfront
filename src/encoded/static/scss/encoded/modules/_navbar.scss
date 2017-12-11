@@ -675,6 +675,11 @@ $navbar-transition-easing: ease-out;
 
 // User Actions Dropwdown
 
+.navbar-acct {
+    margin-left: 15px;
+    margin-right: 0px; // Align w/ right-most container edge.
+}
+
 #user_actions_dropdown {
     max-width: 115px;
     min-width: 65px;

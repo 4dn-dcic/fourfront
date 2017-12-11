@@ -21,7 +21,8 @@ export default class SubmissionTree extends React.Component {
         'currKey'           : PropTypes.number.isRequired,
         'keyLinkBookmarks'  : PropTypes.object.isRequired,
         'keyLinks'          : PropTypes.object.isRequired,
-        'setSubmissionState': PropTypes.func.isRequired
+        'setSubmissionState': PropTypes.func.isRequired,
+        'schemas'           : PropTypes.object,
     }
 
     constructor(props){
@@ -33,25 +34,78 @@ export default class SubmissionTree extends React.Component {
     }
 
     render() {
-        var infoTip = 'This panel is for navigating between objects in the creation process. Colors correspond to the state of each object: <br>  <br> Orange: has incomplete children, cannot yet be validated <br> Blue: all children are complete, can be validated <br> Red: validation failed. Fix fields and try again <br> Light green: validation passed, ready for submission <br> Dark green: successfully submitted or pre-existing <br> White: bookmarks organizing child object types <br>  <br> Click on object titles to navigate around and edit individually.';
+        var infoTip = '<h5>This panel is for navigating between objects in the creation process</h5> Click on Item/dependency titles to navigate around and edit each individually. Dependencies must be submitted before their parent can be.';
         const{
             keyIdx,
             ...others
         } = this.props;
         return(
             <div className="submission-view-navigation-tree">
-                <h3 className="form-section-heading mb-08">
-                        Navigation
-                        <InfoIcon children={infoTip} />
-                </h3>
-                <div className="submission-nav-tree" style={{'marginTop':'10px'}}>
-                    <div>
-                        <SubmissionLeaf {...others} keyIdx={0} open={true}/>
-                    </div>
-                </div>
+                <h3 className="form-section-heading mb-08">Navigation <InfoIcon children={infoTip} /></h3>
+                <SubmissionLeaf {...others} keyIdx={0} open />
             </div>
         );
     }
+}
+
+class SubmissionProperty extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.handleToggle = _.throttle(this.handleToggle.bind(this), 500, { 'trailing' : false });
+        this.generateChild = this.generateChild.bind(this);
+        this.state = { 'open' : typeof this.props.open === 'boolean' ? this.props.open : true };
+    }
+
+    handleToggle(e){
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState({'open': !this.state.open});
+    }
+
+    generateChild(childKey){
+        if(!isNaN(childKey)) childKey = parseInt(childKey);
+
+        // replace key and hierarchy in props
+        return(
+            <SubmissionLeaf
+                {...this.props}
+                key={childKey}
+                keyIdx={childKey}
+                hierarchy={this.props.hierarchy[this.props.keyIdx]}
+                open
+                depth={this.props.depth + 1}
+            />
+        );
+    }
+
+    render(){
+        var { field, schemas, keyTypes, keyIdx, hierarchy, keyLinks, depth } = this.props;
+
+        var itemSchema = schemas[keyTypes[keyIdx]];
+        var isRequired = Array.isArray(itemSchema.required) && _.contains(itemSchema.required, field);
+        var fieldBase = field.split('.')[0];
+        var fieldSchema = itemSchema.properties[fieldBase];
+
+        var bookmark = (fieldSchema && fieldSchema.title) || delveObject(fieldSchema);
+        var children = _.map(
+            _.filter(
+                _.keys(hierarchy[keyIdx]),
+                function(childKey){ return keyLinks[childKey] === field; }
+            ),
+            this.generateChild
+        );
+        return(
+            <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + depth + (isRequired ? ' is-required' : '') + (children.length > 0 ? ' has-children' : '' )}>
+                <div className="clearfix inner-title">
+                    <i className={"icon property-expand-icon clickable icon-" + (this.state.open ? 'minus' : 'plus')} onClick={this.handleToggle}/>
+                    <span>{ children.length } { bookmark || field }</span>
+                </div>
+                { children.length > 0 ? <Collapse in={this.state.open}><div className="children-container" children={children} /></Collapse> : null }
+            </div>
+        );
+    }
+
 }
 
 /*
@@ -60,188 +114,161 @@ on, either change the currKey to that object's key if a custom object, or
 open that object's page in a new tab if a pre-existing or submitted object.
 */
 class SubmissionLeaf extends React.Component{
+
+    static defaultProps = {
+        'depth' : 0
+    }
+
     constructor(props){
         super(props);
-        this.state = {
-            'open': this.props.open || true
-        };
+        this.handleClick = _.throttle(this.handleClick.bind(this), 500, { 'trailing' : false });
+        this.generateAllPlaceholders = this.generateAllPlaceholders.bind(this);
+        this.placeholderSortFxn = this.placeholderSortFxn.bind(this);
+        this.generateChild = this.generateChild.bind(this);
+        this.state = { 'open' : typeof this.props.open === 'boolean' ? this.props.open : true };
     }
 
-    handleToggle = (e) => {
-        e.preventDefault();
-        this.setState({'open': !this.state.open});
-    }
+    generateChild(childKey){
+        if(!isNaN(childKey)) childKey = parseInt(childKey);
 
-    generateChild = (childKey) => {
-        if(!isNaN(childKey)){
-            childKey = parseInt(childKey);
-        }
         // replace key and hierarchy in props
-        const{
-            keyIdx,
-            hierarchy,
-            ...others
-        } = this.props;
         return(
             <SubmissionLeaf
+                {...this.props}
                 key={childKey}
-                {...others}
                 keyIdx={childKey}
-                open={true}
                 hierarchy={this.props.hierarchy[this.props.keyIdx]}
+                open
+                depth={this.props.depth + 1}
             />
         );
     }
 
-    /*
-    Generate placeholders in the SubmissionTree for every linkTo name and
-    create a SubmissionLeaf for each child object under its corresponding
-    placholder.
-    */
-    generatePlaceholder = (bookmark) =>{
-        var children = Object.keys(this.props.hierarchy[this.props.keyIdx]).map(function(childKey){
-            if(this.props.keyLinks[childKey] == bookmark){
-                return this.generateChild(childKey);
-            }else{
-                return null;
-            }
-        }.bind(this));
-        var style = {
-            'marginLeft': '-15px',
-            'overflow': 'hidden',
-            'whiteSpace': 'nowrap',
-            'textOverflow': 'ellipsis',
-            'fontSize': '0.8em'
-        };
-        var buttonStyle = {
-            'height': '15px',
-            'width': '15px',
-            'padding':'4px 7px 0px 3px'
-        };
-        return(
-            <div key={bookmark} className="submission-nav-leaf">
-                <div className="clearfix" style={style}>
-                    <Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" disabled/>
-                    <span>
-                        {bookmark}
-                    </span>
-                </div>
-                <div>
-                    {children}
-                </div>
-            </div>
-        );
+    placeholderSortFxn(fieldA, fieldB){
+        var itemSchema = this.props.schemas[this.props.keyTypes[this.props.keyIdx]];
+        var fieldABase = fieldA.split('.')[0];
+        var fieldBBase = fieldB.split('.')[0];
+
+        if (Array.isArray(itemSchema.required)){
+            if (_.contains(itemSchema.required, fieldA)) return -1;
+            if (_.contains(itemSchema.required, fieldB)) return 1;
+            if (_.contains(itemSchema.required, fieldABase)) return -1;
+            if (_.contains(itemSchema.required, fieldBBase)) return -1;
+        }
+
+        var fieldASchema = itemSchema.properties[fieldABase];
+        var fieldBSchema = itemSchema.properties[fieldBBase];
+
+        if (fieldASchema.lookup || 750 > fieldBSchema.lookup || 750) return -1;
+        if (fieldASchema.lookup || 750 < fieldBSchema.lookup || 750) return 1;
+
+        return 0;
+
     }
 
-    /*
-    Change the currKey of submissionView
-    */
-    callBack = (e) => {
+    /**
+     * Generate placeholders in the SubmissionTree for every linkTo name and
+     * create a SubmissionLeaf for each child object under its corresponding
+     * placholder.
+     *
+     * @param {string} bookmark - Name of the leaf/view we're on.
+     * @returns {JSX.Element} Visible leaf/branch-representing element.
+     */
+    generateAllPlaceholders(){
+        var { keyValid, keyIdx, keyTypes, keyComplete, schemas } = this.props;
+        var placeholders;
+
+        var fieldsWithLinkTosToShow = this.props.keyLinkBookmarks[keyIdx].sort(this.placeholderSortFxn);
+
+        return _.map(fieldsWithLinkTosToShow, (field) => <SubmissionProperty {...this.props} field={field} /> );
+    }
+
+    /** Change the currKey of submissionView to that of props.keyIdx */
+    handleClick(e){
         e.preventDefault();
-        var intKey = this.props.keyIdx;
-        this.props.setSubmissionState('currKey', intKey);
+        this.props.setSubmissionState('currKey', this.props.keyIdx);
     }
 
     render() {
-        var { keyValid, keyIdx, keyTypes, keyComplete } = this.props;
-        var key = keyIdx;
+        var { keyValid, keyIdx, keyTypes, keyComplete, schemas } = this.props;
+        var itemSchema = schemas[keyTypes[keyIdx]];
+
         var placeholders;
-        if(!isNaN(key)){
-            placeholders = this.props.keyLinkBookmarks[key].map((link) => this.generatePlaceholder(link));
-        }else{
+        if (!isNaN(keyIdx)) {
+            placeholders = this.generateAllPlaceholders();
+        } else {
             // must be a submitted object - plot directly
-            placeholders = _.keys(this.props.hierarchy[key]).map((child) => this.generateChild(child));
+            placeholders = _.keys(this.props.hierarchy[keyIdx]).map(this.generateChild);
         }
-        var style = {
-            'marginLeft': '-15px',
-            'overflow': 'hidden',
-            'whiteSpace': 'nowrap',
-            'textOverflow': 'ellipsis',
-            'fontSize': '0.8em',
-            'border' : '1px solid #fff'
-        };
-        var buttonStyle = {
-            'height': '15px',
-            'width': '15px',
-            'padding':'3px 6px 1px 4px'
-        };
-        var iconStyle = {
-            'fontSize': '0.8em',
-            'verticalAlign': 'super'
-        };
-        var title;
-        var leftButton;
-        var titleText = this.props.keyDisplay[key] || key;
+        var extIcon;
+        var titleText = this.props.keyDisplay[keyIdx] || keyIdx;
+        var statusClass = null;
+        var isCurrentlySelected = false;
+        var tip = null;
+
+        var clickHandler = this.handleClick;
+
         // if key is not a number (i.e. path), the object is not a custom one.
         // format the leaf as the following if pre-existing obj or submitted
         // custom object.
-        if(isNaN(key) || (keyValid[key] == 4 && keyComplete[key])){
-            // dark green bg with white text
-            style.backgroundColor = '#4c994c';
-            style.color = '#fff';
-            var popDestination;
-            if(isNaN(key)){
-                popDestination = key;
-            }else{
-                popDestination = keyComplete[key];
-            }
-            // open a new tab on click
-            title = (
-                <span style={{'padding':'1px 5px','cursor': 'pointer'}} onClick={function(e){
-                    e.preventDefault();
-                    var win = window.open(popDestination, '_blank');
-                    if(win){
-                        win.focus();
-                    }else{
-                        alert('Object page popup blocked!');
-                    }
-                }.bind(this)}>{ titleText }</span>
-            );
+        if(isNaN(keyIdx) || (keyValid[keyIdx] === 4 && keyComplete[keyIdx])){
+
+            statusClass = 'existing-item';
+            /** Open a new tab on click */
+            clickHandler = function(e){
+                e.preventDefault();
+                var win = window.open(isNaN(keyIdx) ? keyIdx : keyComplete[keyIdx], '_blank');
+                if(win){
+                    win.focus();
+                }else{
+                    alert('Object page popup blocked!');
+                }
+            }.bind(this);
+
+            icon = <i className="icon icon-hdd-o indicator-icon"/>;
+            tip = "Successfully submitted or pre-existing item; already exists in the database.<br>Click to view this item/dependency in new tab/window.";
+            extIcon = <i className="icon icon-external-link pull-right" />;
+
         }else{
-            if(keyValid[key] == 0){
-                style.backgroundColor = '#fcd19c'; // orange
-            }else if(keyValid[key] == 1){
-                style.backgroundColor = '#acd1ec'; // blue
-            }else if(keyValid[key] == 2){
-                style.backgroundColor = '#e2b6b6'; // red
-            }else if(keyValid[key] == 3){
-                style.backgroundColor = '#b7e1bb'; // light green
-            }
-            if(key === this.props.currKey){ // Current key selected
-                style.fontWeight = "bold";
-                style.border = "1px solid #000";
-                title = (<span style={{'padding':'1px 5px'}} >
-                            {titleText}
-                        </span>);
-            }else{
-                title = (<span style={{'padding':'1px 5px','cursor': 'pointer'}} onClick={this.callBack}>
-                            {titleText}
-                        </span>);
+            switch (keyValid[keyIdx]){
+                case 0:
+                    statusClass = 'not-complete';
+                    icon = <i className="icon icon-stop-circle-o indicator-icon" />;
+                    tip = "Has incomplete children, cannot yet be validated.";
+                    break;
+                case 1:
+                    statusClass = 'complete-not-validated';
+                    icon = <i className="icon icon-circle-o indicator-icon" />;
+                    tip = "All children are complete, can be validated.";
+                    break;
+                case 2:
+                    statusClass = 'failed-validation';
+                    icon = <i className="icon icon-times indicator-icon" />;
+                    tip = "Validation failed. Fix fields and try again.";
+                    break;
+                case 3:
+                    statusClass = 'validated';
+                    icon = <i className="icon icon-check indicator-icon" />;
+                    tip = "Validation passed, ready for submission.";
+                    break;
+                default:
+                    statusClass = 'status-not-determined';
+                    break;
             }
         }
-        var dummyButton = <Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" disabled></Button>;
-        if(key == 0){
-            style.marginLeft = 0;
-            leftButton = null;
-            dummyButton = null;
-        }else if (placeholders.length > 0){
-            leftButton = (<Button style={buttonStyle} bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
-                            <i style={iconStyle} className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
-                        </Button>);
-        }else{
-            leftButton = dummyButton;
+
+        var icon;
+        if (keyIdx === this.props.currKey){ // We're currently on this Item
+            isCurrentlySelected = true;
+            extIcon = <i className="icon icon-pencil pull-right" data-tip="Item which you are currently editing." />;
         }
+
         return(
-            <div className="submission-nav-leaf">
-                <div className="clearfix" style={style}>
-                    {leftButton}
-                    {title}
+            <div className={"submission-nav-leaf linked-item-title leaf-depth-" + (this.props.depth) + (isCurrentlySelected ? ' active' : '')}>
+                <div className={"clearfix inner-title " + statusClass} onClick={clickHandler} data-tip={tip} data-html>
+                    {extIcon}{icon}<span className="title-text">{titleText}</span>
                 </div>
-                <Collapse in={this.state.open}>
-                    <div style={{'paddingLeft':'15px'}}>
-                        {placeholders}
-                    </div>
-                </Collapse>
+                { placeholders && placeholders.length > 0 ? <div className="list-of-properties" children={placeholders} /> : null }
             </div>
         );
     }
@@ -260,3 +287,43 @@ class InfoIcon extends React.Component{
         );
     }
 }
+
+
+/**
+ * Function to recursively find whether a json object contains a linkTo fields
+ * anywhere in its nested structure. Returns object type if found, null otherwise.
+ */
+export const delveObject = function myself(json, getProperty=false){
+    var found_obj = null;
+    _.keys(json).forEach(function(key, index){
+        if(key === 'linkTo'){
+            found_obj = json[key];
+        }else if(json[key] !== null && typeof json[key] === 'object'){
+            var test = myself(json[key]);
+            if(test !== null){
+                found_obj = test;
+            }
+        }
+    });
+    return found_obj;
+};
+
+export const delveObjectProperty = function myself(json){
+    var jsonKeys = _.keys(json);
+    var key;
+    for (var i = 0; i < jsonKeys.length; i++){
+        key = jsonKeys[i];
+        if (key === 'linkTo') {
+            return true;
+        } else if (json[key] !== null && typeof json[key] === 'object') {
+            var test = myself(json[key]);
+            if (test === true){
+                return [key];
+            } else if (Array.isArray(test)){
+                return [key].concat(test);
+            } else {
+                continue;
+            }
+        }
+    }
+};

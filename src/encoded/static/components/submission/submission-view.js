@@ -8,10 +8,10 @@ import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../ut
 import moment from 'moment';
 import {getS3UploadUrl, s3UploadFile} from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
-import Search from './../browse/SearchView';
+import SearchView from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
-import SubmissionTree from './expandable-tree';
+import SubmissionTree, { delveObject, delveObjectProperty } from './expandable-tree';
 import BuildField, { AliasInputField, isValueNull } from './submission-fields';
 import Alerts from '../alerts';
 import { Detail } from '../item-pages/components';
@@ -39,6 +39,8 @@ import { Detail } from '../item-pages/components';
  * @prop {string} href      Current browser URL/href. If a search href, should have a 'type=' query component to infer type of Item to create.
  * @prop {Object} [context] Current resource (Item) at our current href path. Used to get '@type' from, if not a search page.
  * @prop {Object} schemas   Schemas as returned from back-end via /profiles/ endpoint. Required.
+ * @prop {boolean} create   Is this a new Item being created?
+ * @prop {boolean} edit     Is this an Item being edited?
  */
 export default class SubmissionView extends React.Component{
 
@@ -139,16 +141,19 @@ export default class SubmissionView extends React.Component{
     /**
      * Function that modifies new context and sets validation state whenever
      * a modification occurs
+     *
+     * @param {number} objKey - Key of Item being modified.
+     * @param {Object} newContext - New Context/representation for this Item to be saved.
      */
     modifyKeyContext = (objKey, newContext) => {
-        var contextCopy = this.state.keyContext;
-        var validCopy = this.state.keyValid;
+        var contextCopy = cloneObj(this.state.keyContext);
+        var validCopy = cloneObj(this.state.keyValid);
         contextCopy[objKey] = newContext;
         validCopy[objKey] = this.findValidationState(objKey);
         this.setState({
             'keyContext': contextCopy,
             'keyValid': validCopy
-        });
+        }, ReactTooltip.rebuild);
     }
 
     /**
@@ -158,11 +163,11 @@ export default class SubmissionView extends React.Component{
      * 1 (ready to validate). Otherwise return 0 (not ready to validate)
      */
     findValidationState = (keyIdx) => {
-        var hierarchy = JSON.parse(JSON.stringify(this.state.keyHierarchy));
+        var hierarchy = cloneObj(this.state.keyHierarchy);
         var keyHierarchy = searchHierarchy(hierarchy, keyIdx);
-        if(keyHierarchy === null) return 0;
+        if (keyHierarchy === null) return 0;
         var validationReturn = 1;
-        Object.keys(keyHierarchy).forEach(function(key, index){
+        _.keys(keyHierarchy).forEach(function(key, index){
             if(!isNaN(key)){
                 if(!this.state.keyComplete[key] && this.state.keyContext[key]){
                     validationReturn = 0;
@@ -170,6 +175,23 @@ export default class SubmissionView extends React.Component{
             }
         }.bind(this));
         return validationReturn;
+    }
+
+    principalTitle(context = null, itemType = null){
+        if (context === null) {
+            context = this.props.context;
+        }
+        var principalDisplay; // Name of our current Item being created.
+        if (this.props.create === true && !this.props.edit){
+            principalDisplay = 'New ' + itemType;
+        } else if (this.props.edit === true && !this.props.create){
+            if (context && typeof context.accession === 'string'){
+                principalDisplay = context.accession;
+            } else {
+                principalDisplay = itemType;
+            }
+        }
+        return principalDisplay;
     }
 
     /**
@@ -191,10 +213,9 @@ export default class SubmissionView extends React.Component{
             if (Array.isArray(typeFromHref)) typeFromHref = _.without(typeFromHref, 'Item')[0];
             if (typeFromHref && typeFromHref !== 'Item') principalTypes = [typeFromHref]; // e.g. ['ExperimentSetReplicate']
         }
-        var initType = {0: principalTypes[0]};
-        var initValid = {0: 1};
-        var principalDisplay = 'New ' + principalTypes[0];
-        var initDisplay = {0: principalDisplay};
+        var initType = { 0 : principalTypes[0] };
+        var initValid = { 0 : 1 };
+        var initDisplay = { 0 : this.principalTitle(context, principalTypes[0]) };
         var initBookmarks = {};
         var bookmarksList = [];
         var schema = schemas[principalTypes[0]];
@@ -226,10 +247,11 @@ export default class SubmissionView extends React.Component{
                 });
                 this.initCreateObj(principalTypes[0], 0, 'Primary Object');
             }else{
-                ajax.promise(contextID + '?frame=object').then(response => {
+                // get the DB result to avoid any possible indexing hang-ups
+                ajax.promise(contextID + '?frame=object&datastore=database').then(response => {
                     var initObjs = [];
                     if (response['@id'] && response['@id'] === contextID){
-                        initContext[0] = buildContext(response, schema, bookmarksList, this.props.edit, this.props.create, null, initObjs);
+                        initContext[0] = buildContext(response, schema, bookmarksList, this.props.edit, this.props.create, initObjs);
                         initBookmarks[0] = bookmarksList;
                         if(this.props.edit && response.aliases && response.aliases.length > 0){
                             // we already have an alias for editing, so use it for title
@@ -462,22 +484,15 @@ export default class SubmissionView extends React.Component{
         var currKey = this.state.currKey;
         var currAlias = keyDisplay[currKey];
         var aliases = this.state.keyContext[currKey].aliases || null;
-        // no aliases
-        if (aliases === null || (Array.isArray(aliases) && aliases.length === 0)){
-            // Try 'name' & 'title', then fallback to 'My ItemType currKey'
-            var name = this.state.keyContext[currKey].name || this.state.keyContext[currKey].title || null;
-            if (name){
-                keyDisplay[currKey] = name;
-            } else {
-                keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
-            }
-        }else if(!_.contains(aliases, currAlias)){
-            var lastAlias = aliases[aliases.length-1];
-            if(lastAlias !== null){
-                keyDisplay[currKey] = lastAlias;
-            }else{
-                keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
-            }
+
+        // Try to get 'alias' > 'name' > 'title' > then fallback to 'My ItemType currKey'
+        var name = (( Array.isArray(aliases) && aliases.length > 1 && aliases[aliases.length - 2] ) || this.state.keyContext[currKey].name || this.state.keyContext[currKey].title || null);
+        if (name) {
+            keyDisplay[currKey] = name;
+        } else if (currKey === 0) {
+            keyDisplay[currKey] = this.principalTitle(null, keyTypes[currKey]);
+        } else {
+            keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
         }
         this.setState({'keyDisplay': keyDisplay});
     }
@@ -502,7 +517,7 @@ export default class SubmissionView extends React.Component{
         var hierarchy = this.state.keyHierarchy;
         var keyDisplay = this.state.keyDisplay;
         var bookmarksCopy = this.state.keyLinkBookmarks;
-        var linksCopy = this.state.keyLinks;
+        var linksCopy = cloneObj(this.state.keyLinks);
         var bookmarksList = [];
         // increase key iter by 1 for a new unique key
         var keyIdx;
@@ -568,58 +583,62 @@ export default class SubmissionView extends React.Component{
      * it since other occurences of that object may be used in the creation
      * process and those should not be affected. Effectively, removing a pre-
      * existing object amounts to removing it from keyHierarchy.
+     *
+     * @param {number} key - Key of item to remove.
      */
     removeObj = (key) => {
-        var contextCopy = this.state.keyContext;
-        var validCopy = this.state.keyValid;
-        var typesCopy = this.state.keyTypes;
+        var contextCopy = cloneObj(this.state.keyContext);
+        var validCopy = cloneObj(this.state.keyValid);
+        var typesCopy = cloneObj(this.state.keyTypes);
         var keyDisplay = this.state.keyDisplay;
         var keyComplete = this.state.keyComplete;
         var bookmarksCopy = this.state.keyLinkBookmarks;
         var linksCopy = this.state.keyLinks;
         var roundTwoCopy = this.state.roundTwoKeys.slice();
         var hierarchy = this.state.keyHierarchy;
-        var dummyHierarchy = JSON.parse(JSON.stringify(hierarchy));
+        var dummyHierarchy = cloneObj(hierarchy);
         var hierKey = key;
+
         // the key may be a @id string and not keyIdx if already submitted
         _.keys(keyComplete).forEach(function(compKey) {
-            if (keyComplete[compKey] == key) {
+            if (keyComplete[compKey] === key) {
                 hierKey = compKey;
             }
         });
+
         // find hierachy below the object being deleted
         dummyHierarchy = searchHierarchy(dummyHierarchy, hierKey);
         if(dummyHierarchy === null){
             // occurs when keys cannot be found to delete
             return;
         }
+
         // get a list of all keys to remove
         var toDelete = flattenHierarchy(dummyHierarchy);
         toDelete.push(key); // add this key
         // trimming the hierarchy effectively removes objects from creation process
         var newHierarchy = trimHierarchy(hierarchy, hierKey);
+
         // for housekeeping, remove the keys from keyLinkBookmarks, keyLinks, and keyComplete
-        for(var i=0; i<toDelete.length; i++){
-            // only remove creation data for non-sumbitted, non-preexisiting objs
-            if(!isNaN(toDelete[i])){
-                // remove key from roundTwoKeys if necessary
-                // NOTE: submitted custom objects will NOT be removed from this
-                // after deletion. Still give user opportunity for second round edits
-                if(_.contains(roundTwoCopy, toDelete[i])){
-                    var rmIdx = roundTwoCopy.indexOf(toDelete[i]);
-                    if(rmIdx > -1){
-                        roundTwoCopy.splice(rmIdx,1);
-                    }
+        _.forEach(toDelete, (keyToDelete)=>{
+            if (isNaN(keyToDelete)) return; // only remove creation data for non-sumbitted, non-preexisiting objs
+
+            // remove key from roundTwoKeys if necessary
+            // NOTE: submitted custom objects will NOT be removed from this
+            // after deletion. Still give user opportunity for second round edits
+            if(_.contains(roundTwoCopy, keyToDelete)){
+                var rmIdx = roundTwoCopy.indexOf(keyToDelete);
+                if(rmIdx > -1){
+                    roundTwoCopy.splice(rmIdx,1);
                 }
-                delete typesCopy[toDelete[i]];
-                delete validCopy[toDelete[i]];
-                delete contextCopy[toDelete[i]];
-                delete typesCopy[toDelete[i]];
-                delete linksCopy[toDelete[i]];
-                delete bookmarksCopy[toDelete[i]];
-                delete keyComplete[toDelete[i]];
             }
-        }
+            delete typesCopy[keyToDelete];
+            delete validCopy[keyToDelete];
+            delete contextCopy[keyToDelete];
+            delete linksCopy[keyToDelete];
+            delete bookmarksCopy[keyToDelete];
+            delete keyComplete[keyToDelete];
+        });
         this.setState({
             'keyHierarchy': newHierarchy,
             'keyDisplay': keyDisplay,
@@ -704,9 +723,9 @@ export default class SubmissionView extends React.Component{
                         this.submitObject(this.state.currKey, true, true);
                     }
                     // see if newly-navigated obj is ready for validation
-                    if(keyValid[value] == 0){
+                    if(keyValid[value] === 0){
                         var validState = this.findValidationState(value);
-                        if(validState == 1){
+                        if(validState === 1){
                             keyValid[value] = 1;
                             stateToSet['keyValid'] = keyValid;
                         }
@@ -884,26 +903,84 @@ export default class SubmissionView extends React.Component{
      * with a null value.
      */
     removeNullsFromContext = (inKey) => {
-        var finalizedContext = JSON.parse(JSON.stringify(this.state.keyContext[inKey]));
+        var finalizedContext = cloneObj(this.state.keyContext[inKey]);
         var noNulls = removeNulls(finalizedContext);
         return noNulls;
     }
 
     /**
-     * Adds the accession and uuid from the already submitted context (stored in
-     * keyContext under the path of the submitted object) to the context used to
-     * patch the same object in roundTwo.
+     * Returns true if the given schema has a round two flag within it
+     * Used within the submission process to see if items will need second round submission.
      */
-    addSubmittedContext = (newContext) => {
-        var path = this.state.keyComplete[this.state.currKey];
-        if(path){
-            var alreadySubmittedContext = this.state.keyContext[path];
-            newContext.uuid = alreadySubmittedContext.uuid;
-            if(alreadySubmittedContext.accession){
-                newContext.accession = alreadySubmittedContext.accession;
+    checkRoundTwo = (schema) => {
+        var fields = schema.properties ? _.keys(schema.properties) : [];
+        for (var i=0; i<fields.length; i++){
+            if(schema.properties[fields[i]]){
+                var fieldSchema = object.getNestedProperty(schema, ['properties', fields[i]], true);
+                if (!fieldSchema){
+                    continue;
+                }
+                if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
+                    // this object needs second round submission
+                    return true;
+                }
             }
         }
-        return newContext;
+        return false;
+    }
+
+    /**
+     * Used to generate a list of fields that have been removed in the submission
+     * process. This list will in turn be used to make a deleteFields string
+     * that is passed to the server with the PATCH request for editing or
+     * second round submission. Takes the patchContext, which is the submission
+     * content after removeNulls and submitObject processing, and compares it
+     * to the original content (which is passed through removeNulls). If the
+     * roundTwo flag is set to true, only operate on roundTwo submission fields.
+     * Otherwise, do not operate on roundTwo fields.
+     *
+     * Returns a list of stirng fieldnames to delete.
+     */
+    buildDeleteFields = (patchContext, origContext, schema) => {
+        var deleteFields = [];
+        // must remove nulls from the orig copy to sync with patchContext
+        var origCopy = cloneObj(origContext);
+        origCopy = removeNulls(origCopy);
+        var userGroups = getUserGroups();
+        _.keys(origCopy).forEach(function(field, index){
+            // if patchContext already has a value (such as admin edited
+            // import_items fields), don't overwrite
+            if(patchContext[field]){
+                return;
+            }
+            if(schema.properties[field]){
+                var fieldSchema = object.getNestedProperty(schema, ['properties', field], true);
+                if (!fieldSchema){
+                    return;
+                }
+                // skip calculated properties and exclude_from fields
+                if (fieldSchema.calculatedProperty && fieldSchema.calculatedProperty === true){
+                    return;
+                }
+                if (fieldSchema.exclude_from && (_.contains(fieldSchema.exclude_from,'FFedit-create') || fieldSchema.exclude_from == 'FFedit-create')){
+                    return;
+                }
+                // if the user is admin, they already have these fields available;
+                // only register as removed if admin did it intentionally
+                if (fieldSchema.permission && fieldSchema.permission == "import_items"){
+                    if(_.contains(userGroups, 'admin')) deleteFields.push(field);
+                    return;
+                }
+                // check round two fields if the parameter roundTwo is set
+                if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
+                    if(this.state.roundTwo) deleteFields.push(field);
+                    return;
+                }
+                // if we're here, the submission field was legitimately deleted
+                if(!this.state.roundTwo) deleteFields.push(field);
+            }
+        }.bind(this));
+        return deleteFields;
     }
 
     /** Set md5Progress in state to val. Passed as callback to getLargeMD5 */
@@ -913,7 +990,7 @@ export default class SubmissionView extends React.Component{
 
     /**
      * Master object submission function. Takes a key index and uses ajax to
-     * POST/PATCH/PUT the json to the object collection (a new object) or to the
+     * POST/PATCH the json to the object collection (a new object) or to the
      * specific object path (a pre-existing/roundTwo object). If test=true,
      * the POST is made to the check_only=True endpoint for validation without
      * actual submission.
@@ -971,10 +1048,15 @@ export default class SubmissionView extends React.Component{
                 }
                 // should we really always use the first award?
                 award = lab_data.awards[0];
+
                 // if editing, use pre-existing award, lab, and submitted_by
                 if(this.props.edit && propContext.award && propContext.lab){
-                    finalizedContext.award = object.atIdFromObject(propContext.award);
-                    finalizedContext.lab = object.atIdFromObject(propContext.lab);
+                    if(currSchema.properties.award && !('award' in finalizedContext)){
+                        finalizedContext.award = object.atIdFromObject(propContext.award);
+                    }
+                    if(currSchema.properties.lab && !('lab' in finalizedContext)){
+                        finalizedContext.lab = object.atIdFromObject(propContext.lab);
+                    }
                     // an admin is editing. Use the pre-existing submitted_by
                     // otherwise, permissions won't let us change this field
                     if(me_data.groups && _.contains(me_data.groups, 'admin')){
@@ -996,26 +1078,32 @@ export default class SubmissionView extends React.Component{
                 // if testing validation, use check_only=True (see /types/base.py)
                 var destination = test ? '/' + currType + '/?check_only=True' : '/' + currType;
                 var actionMethod = 'POST';
+                // used to keep track of fields to delete with PATCH for edit/round two
+                // comma-separated string
+                var deleteFields;
                 // change actionMethod and destination based on edit/round two
                 if(!test){
                     if(this.state.roundTwo){
-                        actionMethod = 'PUT';
+                        actionMethod = 'PATCH';
                         destination = this.state.keyComplete[inKey];
-                        // add uuid and accession from submitted context
-                        finalizedContext = this.addSubmittedContext(finalizedContext);
-                    }else if(this.props.edit && inKey == 0){ // PUT for principal obj on edit
-                        actionMethod = 'PUT';
+                        var alreadySubmittedContext = this.state.keyContext[destination];
+                        // roundTwo flag set to true for second round
+                        deleteFields = this.buildDeleteFields(finalizedContext, alreadySubmittedContext, currSchema);
+                    }else if(this.props.edit && inKey == 0){
+                        // PATCH for principal obj on edit
+                        actionMethod = 'PATCH';
                         destination = propContext['@id'];
-                        // must add uuid (and accession, if available) to PUT body
-                        finalizedContext.uuid = propContext.uuid;
-                        // not all objects have accessions
-                        if(propContext.accession){
-                            finalizedContext.accession = propContext.accession;
-                        }
+                        deleteFields = this.buildDeleteFields(finalizedContext, propContext, currSchema);
                     }
 
                 }
                 var payload = JSON.stringify(finalizedContext);
+                // add delete_fields parameter to request if necessary
+                if (deleteFields && Array.isArray(deleteFields) && deleteFields.length > 0){
+                    var deleteString = deleteFields.join();
+                    destination = destination + '?delete_fields=' + deleteString;
+                    console.log('DESTINATION:', destination);
+                }
                 ajax.promise(destination, actionMethod, {}, payload).then(response => {
                     if (response.status && response.status !== 'success'){ // error
                         keyValid[inKey] = 2;
@@ -1041,17 +1129,14 @@ export default class SubmissionView extends React.Component{
                         this.setState(stateToSet);
                     }else{
                         var responseData;
+                        var submitted_at_id;
                         if(test){
-                            console.info('OBJECT SUCCESSFULLY TESTED!');
                             keyValid[inKey] = 3;
                             this.setState(stateToSet);
                             return;
                         }else{
                             responseData = response['@graph'][0];
-                            // if not editing/not on principal, get path from new POST
-                            if(!this.props.edit || inKey !== 0){
-                                destination = responseData['@id'];
-                            }
+                            submitted_at_id = responseData['@id'];
                         }
                         // handle submission for round two
                         if(this.state.roundTwo){
@@ -1089,28 +1174,25 @@ export default class SubmissionView extends React.Component{
                             var contextCopy = this.state.keyContext;
                             var roundTwoCopy = this.state.roundTwoKeys.slice();
                             // update the state storing completed objects.
-                            keyComplete[inKey] = destination;
+                            keyComplete[inKey] = submitted_at_id;
                             // represent the submitted object with its new path
                             // rather than old keyIdx.
-                            linksCopy[destination] = linksCopy[inKey];
-                            typesCopy[destination] = currType;
-                            displayCopy[destination] = displayCopy[inKey];
-                            contextCopy[destination] = responseData;
+                            linksCopy[submitted_at_id] = linksCopy[inKey];
+                            typesCopy[submitted_at_id] = currType;
+                            displayCopy[submitted_at_id] = displayCopy[inKey];
+                            contextCopy[submitted_at_id] = responseData;
+                            contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false);
                             stateToSet.keyLinks = linksCopy;
                             stateToSet.keyTypes = typesCopy;
                             stateToSet.keyComplete = keyComplete;
                             stateToSet.keyDisplay = displayCopy;
                             stateToSet.keyContext = contextCopy;
-                            var needsRoundTwo = [];
-                            // update context with response data and check if submitted object needs a round two
-                            contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false, needsRoundTwo);
                             // update roundTwoKeys if necessary
-                            if(needsRoundTwo.length > 0){
-                                if(!_.contains(roundTwoCopy, inKey)){
-                                    // was getting an error where this could be str
-                                    roundTwoCopy.push(parseInt(inKey));
-                                    stateToSet.roundTwoKeys = roundTwoCopy;
-                                }
+                            var needsRoundTwo = this.checkRoundTwo(currSchema);
+                            if(needsRoundTwo && !_.contains(roundTwoCopy, inKey)){
+                                // was getting an error where this could be str
+                                roundTwoCopy.push(parseInt(inKey));
+                                stateToSet.roundTwoKeys = roundTwoCopy;
                             }
                             // inKey is 0 for the primary object
                             if(inKey === 0){
@@ -1118,7 +1200,7 @@ export default class SubmissionView extends React.Component{
                                 if(roundTwoCopy.length === 0){
                                     // we're done!
                                     this.props.setIsSubmitting(false, ()=>{
-                                        this.props.navigate(destination);
+                                        this.props.navigate(submitted_at_id);
                                     });
                                 }else{
                                     // break this out into another fxn?
@@ -1144,7 +1226,8 @@ export default class SubmissionView extends React.Component{
             });
         }.bind(this);
 
-        if (this.state.currentSubmittingUser){ // We've already loaded user during initPrincipal().
+        if (this.state.currentSubmittingUser){
+            // We've already loaded user during initPrincipal().
             submitProcess(this.state.currentSubmittingUser);
         } else {
             ajax.promise('/me?frame=embedded').then(submitProcess);
@@ -1182,7 +1265,7 @@ export default class SubmissionView extends React.Component{
             this.props.setIsSubmitting(false, ()=>{
                 this.props.navigate(this.state.keyComplete[0]);
             });
-            
+
         }
     }
 
@@ -1282,6 +1365,7 @@ export default class SubmissionView extends React.Component{
                         <SubmissionTree
                             setSubmissionState={this.setSubmissionState}
                             hierarchy={this.state.keyHierarchy}
+                            schemas={this.props.schemas}
                             {..._.pick(this.state, 'keyValid', 'keyTypes', 'keyDisplay', 'keyComplete', 'currKey', 'keyLinkBookmarks', 'keyLinks')}
                         />
                     </div>
@@ -1298,6 +1382,7 @@ export default class SubmissionView extends React.Component{
                             setSubmissionState={this.setSubmissionState}
                             modifyAlias={this.modifyAlias}
                             updateUpload={this.updateUpload}
+                            hierarchy={this.state.keyHierarchy}
                             {..._.pick(this.state, 'keyDisplay', 'keyComplete', 'keyIter', 'currKey', 'keyContext', 'upload', 'uploadStatus', 'md5Progress', 'roundTwo', 'currentSubmittingUser')}
                         />
                     </div>
@@ -1468,7 +1553,7 @@ class TypeSelectModal extends React.Component {
     }
 
     onContainerKeyDown(enterKeyCallback, event){
-        if (event.which == 13 || event.keyCode == 13) {
+        if (event.which === 13 || event.keyCode === 13) {
             enterKeyCallback(event);
             return false;
         }
@@ -1527,7 +1612,7 @@ class AliasSelectModal extends TypeSelectModal {
         return (
             <Modal show onHide={this.onHide} className="submission-view-modal">
                 <Modal.Header closeButton>
-                    <Modal.Title>{'Give your new ' + creatingType +' an alias'}</Modal.Title>
+                    <Modal.Title>Give your new { creatingType } an alias</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <div onKeyDown={this.onContainerKeyDown.bind(this, submitAlias)}>
@@ -1553,6 +1638,50 @@ class AliasSelectModal extends TypeSelectModal {
     }
 }
 
+class SelectExistingItemModal extends React.Component {
+
+    render(){
+        var { onCancel, selectData, navigate  } = this.props;
+
+        var selecting = false;
+        if(selectData !== null){
+            selecting = true;
+        }
+
+        if (!selecting) return null;
+
+        /*
+        return (
+            <Modal bsSize="xlarge" show onHide={onCancel} className="submission-view-modal select-existing-item-modal">
+                <Modal.Header closeButton>
+                    <Modal.Title>Select an existing Item</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="text-right">
+                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
+                    </div>
+                    <SearchView
+                        {..._.pick(this.props, 'navigate', 'selectCallback', 'submissionBase')}
+                        context={selectData}
+                    />
+                </Modal.Body>
+            </Modal>
+        );
+        */
+
+        return(
+            <Fade in transitionAppear>
+                <div>
+                    <div className="text-right">
+                        <Button bsStyle="danger" onClick={onCancel}>Cancel Selection</Button>
+                    </div>
+                    <SearchView {...this.props} context={selectData}/>
+                </div>
+            </Fade>
+        );
+    }
+
+}
 
 
 /**
@@ -1574,6 +1703,7 @@ class IndividualObjectView extends React.Component{
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.modifyNewContext = this.modifyNewContext.bind(this);
         this.initiateField = this.initiateField.bind(this);
+        this.selectCancel = this.selectCancel.bind(this);
 
         /**
          * State in this component mostly has to do with selection of existing objs
@@ -1668,15 +1798,18 @@ class IndividualObjectView extends React.Component{
             prevValue = pointer[splitFieldLeaf];
             pointer[splitFieldLeaf] = value;
         }
-        // actually change value
-        this.props.modifyKeyContext(this.props.currKey, contextCopy);
-        if(fieldType === 'new linked object'){
-            // value is new key index in this case
-            this.props.initCreateObj(type, value, newLink, false, field);
-        }
-        if(fieldType === 'linked object'){
+
+        if (fieldType === 'linked object'){
             this.checkObjectRemoval(value, prevValue);
         }
+        if (fieldType === 'new linked object'){
+            // value is new key index in this case
+            this.props.initCreateObj(type, value, field, false, field);
+        } else {
+            // actually change value
+            this.props.modifyKeyContext(this.props.currKey, contextCopy);
+        }
+
         if(splitFieldLeaf === 'aliases' || splitFieldLeaf === 'name' || splitFieldLeaf === 'title'){
             this.props.modifyAlias();
         }
@@ -1718,44 +1851,6 @@ class IndividualObjectView extends React.Component{
     }
 
     /**
-     * Navigation function passed to Search so that faceting can be done in-place
-     * through ajax. If no results are returned from the search, abort.
-     */
-    inPlaceNavigate = (destination, options, callback) => {
-        if(this.state.selectQuery){
-            var dest = destination;
-            // ensure destination is formatted correctly when clearing/removing filters
-            if(destination == '/'){
-                dest = '/search/?type=' + this.state.selectType;
-            }else if(destination.slice(0,8) != '/search/' && destination.slice(0,1) == '?'){
-                dest = '/search/' + destination;
-            }
-            ajax.promise(dest).then(data => {
-                if (data && data['@graph']){
-                    this.setState({
-                        'selectData': data,
-                        'selectQuery': dest
-                    });
-                }else{
-                    this.setState({
-                        'selectType': null,
-                        'selectData': null,
-                        'selectQuery': null,
-                        'selectField': null,
-                        'selectLink': null,
-                        'selectArrayIdx': null
-                    });
-                    this.props.setSubmissionState('fullScreen', false);
-                }
-            }).then(data => {
-                if (typeof callback === 'function'){
-                    callback(data);
-                }
-            });
-        }
-    }
-
-    /**
      * Initializes the first search (with just type=<type>) and sets state
      * accordingly. Set the fullScreen state in SubmissionView to alter its render
      * and hide the object navigation tree.
@@ -1771,7 +1866,7 @@ class IndividualObjectView extends React.Component{
                         'selectData': data,
                         'selectQuery': '/search/?type=' + collection,
                         'selectField': field,
-                        'selectLink': newLink,
+                        'selectLink': field,
                         'selectArrayIdx': array
                     });
                     this.props.setSubmissionState('fullScreen', true);
@@ -1810,11 +1905,8 @@ class IndividualObjectView extends React.Component{
         this.props.setSubmissionState('fullScreen', false);
     }
 
-    /**
-     * Exit out of the selection process and clean up state
-     */
-    selectCancel = (e) => {
-        e.preventDefault();
+    /** Exit out of the selection process and clean up state */
+    selectCancel(e){
         this.modifyNewContext(this.state.selectField, null, 'existing linked object', this.state.selectLink, this.state.selectArrayIdx);
         this.setState({
             'selectType': null,
@@ -1861,17 +1953,13 @@ class IndividualObjectView extends React.Component{
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
-        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        var fieldType = BuildField.fieldTypeFromFieldSchema(fieldSchema);
         var fieldValue = this.props.currContext[field] || null;
         var enumValues = [];
         var isLinked = false;
-        // transform some types...
-        if(fieldType == 'string'){
-            fieldType = 'text';
-        }
+
         // check if this is an enum
-        if(fieldSchema.enum || fieldSchema.suggested_enum){
-            fieldType = 'enum';
+        if(fieldType === 'enum'){
             enumValues = fieldSchema.enum || fieldSchema.suggested_enum;
         }
         // check for linkTo if further down in object or array
@@ -1882,15 +1970,9 @@ class IndividualObjectView extends React.Component{
         }
         // handle a linkTo object on the the top level
         // check if any schema-specific adjustments need to made:
-        if(fieldSchema.linkTo){
-            fieldType = 'linked object';
-        }else if (fieldSchema.attachment && fieldSchema.attachment === true){
-            fieldType = 'attachment';
-        }else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
+        if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
             // only render file upload input if status is 'uploading' or 'upload_failed'
             // when editing a File principal object.
-            // there may be a bug where status automatically gets reset to uploading
-            // when edit is PUT, despite the file not changing. That's a wrangler issue
             var path = this.props.keyComplete[this.props.currKey];
             var completeContext = this.props.keyContext[path];
             var statusCheck = completeContext.status && (completeContext.status == 'uploading' || completeContext.status == 'upload failed');
@@ -1973,26 +2055,15 @@ class IndividualObjectView extends React.Component{
         }
         return(
             <div>
-                <Fade in={selecting} transitionAppear={true}>
-                    <div>
-                        <div>
-                            {selecting ?
-                                <Button bsStyle="danger" onClick={this.selectCancel}>
-                                    {'Cancel selection'}
-                                </Button>
-                                : null
-                            }
-                        </div>
-                        {selecting ?
-                            <Search {...this.props}
-                                context={this.state.selectData}
-                                navigate={this.inPlaceNavigate}
-                                selectCallback={this.selectComplete}
-                                submissionBase={this.state.selectQuery}/>
-                            : null
-                        }
-                    </div>
-                </Fade>
+                <SelectExistingItemModal
+                    {...this.props}
+                    navigate={this.inPlaceNavigate}         // Override global navigate func
+                    selectCallback={this.selectComplete}
+                    submissionBase={this.state.selectQuery} // Base HREF used, overrides props.href
+                    onCancel={this.selectCancel}
+                    selectData={this.state.selectData}
+                    selectObj={this.selectObj}
+                />
                 <Fade in={!selecting || this.state.fadeState} transitionAppear={true}>
                     <div>
                         <FormFieldsContainer children={fieldComponents} currKey={this.props.currKey}/>
@@ -2009,63 +2080,20 @@ class IndividualObjectView extends React.Component{
     }
 }
 
+
 class FormFieldsContainer extends React.Component {
+
+    static defaultProps = {
+        'title' : 'Fields & Dependencies',
+        'currKey' : 0
+    }
+
     render(){
         if(React.Children.count(this.props.children) === 0) return null;
         return(
             <div className="form-fields-container">
-                <h4 className="clearfix page-subtitle form-section-heading submission-field-header">Fields & Dependencies</h4>
-                <div>
-                    { this.props.children }
-                </div>
-            </div>
-        );
-    }
-}
-
-/**
- * Simple Component that holds open/close logic and renders the BuildFields passed
- * to it.
- */
-class FieldPanel extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            'open': this.props.open || false
-        };
-    }
-
-    componentWillReceiveProps(nextProps){
-        // scroll to top if worked-on object changes
-        if(this.props.currKey !== nextProps.currKey){
-            this.setState({'open': false});
-        }
-    }
-
-    handleToggle = (e) => {
-        e.preventDefault();
-        this.setState({'open': !this.state.open});
-    }
-
-    render(){
-        if(this.props.fields.length == 0){
-            return null;
-        }
-        return(
-            <div>
-                <h4 className="clearfix page-subtitle submission-field-header">
-                    <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
-                        <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
-                    </Button>
-                    <span>
-                        {this.props.title}
-                    </span>
-                </h4>
-                <Collapse in={this.state.open}>
-                    <div>
-                        {this.props.fields}
-                    </div>
-                </Collapse>
+                <h4 className="clearfix page-subtitle form-section-heading submission-field-header">{ this.props.title }</h4>
+                <div className="form-section-body">{ this.props.children }</div>
             </div>
         );
     }
@@ -2095,9 +2123,7 @@ class RoundTwoDetailPanel extends React.Component{
                     <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
                         <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                     </Button>
-                    <span>
-                        {'Object attributes'}
-                    </span>
+                    <span>Object Attributes</span>
                 </h4>
                 <Collapse in={this.state.open}>
                     <div className="item-page-detail">
@@ -2113,14 +2139,10 @@ class RoundTwoDetailPanel extends React.Component{
 /***** MISC. FUNCIONS *****/
 
 /**
- * Build context based off an object's and populate values from
- * pre-existing context. Empty fields are given null value.
- * All linkTo fields are added to objList.
- * If initObjs provided (edit or clone functionality), pre-existing objs will be added.
- * Also checks user info to see if user is admin, which affects which fields are displayed.
+ * Return an array of user groups the current user belongs to
+ * Based off of the current JWT
  */
-export function buildContext(context, schema, objList=null, edit=false, create=true, roundTwoSwitch=null, initObjs=null){
-    var built = {};
+function getUserGroups(){
     var userInfo = JWT.getUserInfo();
     var userGroups = [];
     if (userInfo){
@@ -2129,10 +2151,23 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
             userGroups = currGroups;
         }
     }
-    var fields = schema['properties'] ? Object.keys(schema['properties']) : [];
-    for(var i=0; i<fields.length; i++){
-        if(schema.properties[fields[i]]){
-            var fieldSchema = object.getNestedProperty(schema, ['properties', fields[i]], true);
+    return userGroups;
+}
+
+/**
+ * Build context based off an object's and populate values from
+ * pre-existing context. Empty fields are given null value.
+ * All linkTo fields are added to objList.
+ * If initObjs provided (edit or clone functionality), pre-existing objs will be added.
+ * Also checks user info to see if user is admin, which affects which fields are displayed.
+ */
+export function buildContext(context, itemSchema, objList=null, edit=false, create=true, initObjs=null){
+    var built = {};
+    var userGroups = getUserGroups();
+    var fields = itemSchema.properties ? _.keys(itemSchema.properties) : [];
+    for (var i=0; i<fields.length; i++){
+        if(itemSchema.properties[fields[i]]){
+            var fieldSchema = object.getNestedProperty(itemSchema, ['properties', fields[i]], true);
             if (!fieldSchema){
                 continue;
             }
@@ -2149,10 +2184,6 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
                 if(!_.contains(userGroups, 'admin')){
                     continue;
                 }
-            }
-            if(fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round'){
-                // register that this object will need round 2 submission
-                if(roundTwoSwitch !== null) roundTwoSwitch.push(fieldSchema);
             }
             // set value to context value if editing/cloning.
             // if creating or value not present, set to null
@@ -2171,15 +2202,24 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
             }else{
                 built[fields[i]] = null;
             }
-            if(objList !== null){
-                var linked = delveObject(fieldSchema);
+
+            if (objList !== null) {
+                var linkedProperty = delveObjectProperty(fieldSchema); // Is it a linkTo (recursively or not)?
+                //console.log('LINKEDPROPSIS', linkedProperty);
                 var roundTwoExclude = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
-                if(linked !== null && !roundTwoExclude){
-                    var listTerm = fieldSchema.title ? fieldSchema.title : linked;
-                    if(!_.contains(objList, listTerm)) objList.push(listTerm);
+                if((linkedProperty !== null && typeof linkedProperty !== 'undefined') && !roundTwoExclude){ // If linkTo, add to our list, selecting a nice name for it first.
+                    //var listTerm = fieldSchema.title ? fieldSchema.title : linked;
+                    var fieldToStore = fields[i];
+                    linkedProperty = _.reject(linkedProperty, function(p){ return p === 'items' || p === 'properties'; });
+                    if (linkedProperty.length > 0){
+                        fieldToStore += '.' + linkedProperty.join('.');
+                    }
+                    if(!_.contains(objList, fieldToStore)){
+                        objList.push(fieldToStore);
+                    }
                     // add pre-existing linkTo objects
                     if(initObjs !== null && built[fields[i]] !== null){
-                        delvePreExistingObjects(initObjs, built[fields[i]], fieldSchema, listTerm, linked);
+                        delvePreExistingObjects(initObjs, built[fields[i]], fieldSchema, fields[i]);
                     }
                 }
                 objList.sort();
@@ -2195,31 +2235,28 @@ export function buildContext(context, schema, objList=null, edit=false, create=t
  * object in an edit/clone situation. json is json content for the field,
  * schema is the individual fields schema. Recursively handles objects and arrays
  */
-var delvePreExistingObjects = function myself(initObjs, json, schema, listTerm, linked){
-    var populateInitObjs = function(initObjs, data, listTerm, linked){
-        var initData = {};
-        initData.path = data;
-        initData.display = data;
-        initData.newLink = listTerm;
-        initData.type = linked;
-        initObjs.push(initData);
-    };
+var delvePreExistingObjects = function myself(initObjs, json, fieldSchema, listTerm){
     if(Array.isArray(json)){
         for(var j=0; j < json.length; j++){
-            if(schema.items){
-                delvePreExistingObjects(initObjs, json[j], schema.items, listTerm, linked);
+            if(fieldSchema.items){
+                delvePreExistingObjects(initObjs, json[j], fieldSchema.items, listTerm);
             }
         }
     }else if (json instanceof Object && json){
-        if(schema.properties){
+        if(fieldSchema.properties){
             _.keys(json).forEach(function(key, idx){
-                if(schema.properties[key]){
-                    delvePreExistingObjects(initObjs, json[key], schema.properties[key], listTerm, linked);
+                if(fieldSchema.properties[key]){
+                    delvePreExistingObjects(initObjs, json[key], fieldSchema.properties[key], listTerm);
                 }
             });
         }
-    }else if (_.contains(_.keys(schema),'linkTo')) { // non-array, non-object field. check schema to ensure there's a linkTo
-        populateInitObjs(initObjs, json, listTerm, linked);
+    } else if (_.contains(_.keys(fieldSchema),'linkTo')) { // non-array, non-object field. check schema to ensure there's a linkTo
+        initObjs.push({
+            'path' : json,
+            'display' : json,
+            'newLink' : listTerm,
+            'type' : delveObject(fieldSchema)
+        });
     }
 };
 
@@ -2242,6 +2279,7 @@ function sortPropFields(fields){
         return 0;
     }
 
+    /** Compare by property title, alphabetically. */
     function sortTitle(a,b){
         if (typeof a.props.title === 'string' && typeof b.props.title === 'string'){
             if(a.props.title.toUpperCase() < b.props.title.toUpperCase()) return -1;
@@ -2258,29 +2296,14 @@ function sortPropFields(fields){
             optFields.push(field);
         }
     });
+
+    // Do the sorting magic - title then by schema.
     reqFields.sort(sortTitle).sort(sortSchemaLookupFunc);
     optFields.sort(sortTitle).sort(sortSchemaLookupFunc);
     return reqFields.concat(optFields);
 }
 
-/**
- * Function to recursively find whether a json object contains a linkTo fields
- * anywhere in its nested structure. Returns object type if found, null otherwise.
- */
-var delveObject = function myself(json){
-    var found_obj = null;
-    _.keys(json).forEach(function(key, index){
-        if(key == 'linkTo'){
-            found_obj = json[key];
-        }else if(json[key] !== null && typeof json[key] === 'object'){
-            var test = myself(json[key]);
-            if(test !== null){
-                found_obj = test;
-            }
-        }
-    });
-    return found_obj;
-};
+
 
 /**
  * Given the parent object key and a new object key, return a version
@@ -2387,7 +2410,15 @@ var removeNulls = function myself(context){
             context[key] = _.filter(context[key], function(v){ return !isValueNull(v); });
         } else if (context[key] instanceof Object) {
             context[key] = myself(context[key]);
-        } 
+        }
     });
     return context;
 };
+
+
+/**
+ * Clone a given object using JSON techniques
+ */
+function cloneObj(obj){
+    return JSON.parse(JSON.stringify(obj));
+}

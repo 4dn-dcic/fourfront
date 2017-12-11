@@ -275,6 +275,7 @@ export class OverViewBodyItem extends React.Component {
                     <object.TooltipInfoIconContainerAuto
                         {..._.pick(this.props, 'result', 'tips', 'schemas', 'fallbackTitle')}
                         property={propertyForLabel}
+                        title={this.props.overrideTitle}
                         elementType="h5"
                     />
                     { resultPropertyValue ? ( resultPropertyValue.length > 1 ?
@@ -287,7 +288,7 @@ export class OverViewBodyItem extends React.Component {
         } else {
             innerBlockReturned = (
                 <div className="inner" key="inner">
-                    <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" property={propertyForLabel} />
+                    <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" property={propertyForLabel} title={this.props.overrideTitle} />
                         <div key="single-value" className={"overview-single-element" + (singleItemClassName ? ' ' + singleItemClassName : '') + (!resultPropertyValue ? ' no-value' : '')}>
                             { fallbackify(resultPropertyValue) }
                         </div>
