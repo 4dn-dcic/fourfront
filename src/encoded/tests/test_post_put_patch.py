@@ -146,7 +146,6 @@ def test_patch_new_schema_version(content, root, testapp, monkeypatch):
     assert res.json['@graph'][0]['schema_version'] == '2'
     assert res.json['@graph'][0]['new_property'] == 'new'
 
-
 def test_admin_put_protected_link(link_targets, testapp):
     res = testapp.post_json(COLLECTION_URL, item_with_link[0], status=201)
     url = res.location

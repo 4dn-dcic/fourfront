@@ -9,6 +9,8 @@ import os.path
 import boto3
 import os
 from datetime import datetime
+from dcicutils import get_beanstalk_real_name
+
 
 text = type(u'')
 
@@ -766,6 +768,12 @@ def generate_access_key(testapp, store_access_key=None,
         if store_access_key == 'local':
             # for local storing we always connecting to local server
             server = 'http://localhost:8000'
+        else:
+            health = testapp.get('/health?format=json').json
+            env = health.get('beanstalk_env')
+            server = get_beanstalk_real_name(env)
+            print("server is %s" % server)
+
         akey = {'default':
                 {'secret': res['secret_access_key'],
                  'key': res['access_key_id'],
@@ -820,6 +828,7 @@ def load_test_data(app, access_key_loc=None):
     inserts = resource_filename('encoded', 'tests/data/inserts/')
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     load_all(testapp, inserts, docsdir)
+    import pdb; pdb.set_trace()
     keys = generate_access_key(testapp, access_key_loc,
                                server="https://mastertest.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
