@@ -841,7 +841,6 @@ def load_data(app, access_key_loc=None, indir='inserts',
         docsdir = [resource_filename('encoded', 'tests/data/' + docsdir)]
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc)
-    import pdb; pdb.set_trace()
     store_keys(app, access_key_loc, keys)
 
 
