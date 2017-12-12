@@ -747,7 +747,7 @@ def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None):
 
 
 def generate_access_key(testapp, store_access_key=None,
-                        server='http://localhost:8000', email='4dndcic@gmail.com'):
+                        email='4dndcic@gmail.com'):
 
     # get admin user and generate access keys
     if store_access_key:
@@ -816,8 +816,13 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_test_data(app, access_key_loc=None):
-    """smth."""
+def load_data(app, access_key_loc=None, indir='inserts',
+              docsdir=None):
+    '''
+    generic load data function
+    indir for inserts should be relative to tests/data/
+    docsdir is relative to tests/data and defaults to no docs dir
+    '''
     from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
@@ -825,48 +830,31 @@ def load_test_data(app, access_key_loc=None):
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    inserts = resource_filename('encoded', 'tests/data/inserts/')
-    docsdir = [resource_filename('encoded', 'tests/data/documents/')]
+    if not indir.endswith('/'):
+        indir += '/'
+    inserts = resource_filename('encoded', 'tests/data/' + indir)
+    if docsdir is None:
+        docsdir = []
+    else:
+        if not docsdir.endswith('/'):
+            docsdir += '/'
+        docsdir = [resource_filename('encoded', 'tests/data/' + docsdir)]
     load_all(testapp, inserts, docsdir)
-    keys = generate_access_key(testapp, access_key_loc,
-                               server="https://mastertest.4dnucleome.org")
+    keys = generate_access_key(testapp, access_key_loc)
+    import pdb; pdb.set_trace()
     store_keys(app, access_key_loc, keys)
+
+
+def load_test_data(app, access_key_loc=None):
+    load_data(app, access_key_loc, docsdir='documents')
 
 
 def load_prod_data(app, access_key_loc=None):
-    """smth."""
-    from webtest import TestApp
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
-    testapp = TestApp(app, environ)
-
-    from pkg_resources import resource_filename
-    inserts = resource_filename('encoded', 'tests/data/prod-inserts/')
-    docsdir = []
-    load_all(testapp, inserts, docsdir)
-    keys = generate_access_key(testapp, access_key_loc,
-                               server="https://data.4dnucleome.org")
-    store_keys(app, access_key_loc, keys)
+    load_data(app, access_key_loc, indir='prod-inserts')
 
 
 def load_jin_data(app, access_key_loc=None):
-    """smth."""
-    from webtest import TestApp
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
-    testapp = TestApp(app, environ)
-
-    from pkg_resources import resource_filename
-    inserts = resource_filename('encoded', 'tests/data/jin_inserts/')
-    docsdir = []
-    load_all(testapp, inserts, docsdir)
-    keys = generate_access_key(testapp, access_key_loc,
-                               server="https://mastertest.4dnucleome.org")
-    store_keys(app, access_key_loc, keys)
+    load_data(app, access_key_loc, indir='jin_inserts')
 
 
 def load_ontology_terms(app,
