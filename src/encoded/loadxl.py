@@ -9,7 +9,7 @@ import os.path
 import boto3
 import os
 from datetime import datetime
-from dcicutils import get_beanstalk_real_name
+from dcicutils.beanstalk_utils import get_beanstalk_real_url
 
 
 text = type(u'')
@@ -771,7 +771,7 @@ def generate_access_key(testapp, store_access_key=None,
         else:
             health = testapp.get('/health?format=json').json
             env = health.get('beanstalk_env')
-            server = get_beanstalk_real_name(env)
+            server = get_beanstalk_real_url(env)
             print("server is %s" % server)
 
         akey = {'default':
