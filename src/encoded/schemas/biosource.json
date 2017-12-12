@@ -39,12 +39,13 @@
             "type": "string",
             "enum" : [
               "primary cell",
+              "primary cell line",
               "immortalized cell line",
+              "stem cell",
+              "induced pluripotent stem cell",
+              "stem cell derived cell line",
               "tissue",
-              "in vitro differentiated cells",
-              "induced pluripotent stem cell line",
-              "whole organisms",
-              "stem cell"
+              "multicellular organism"
             ]
           },
           "individual": {
