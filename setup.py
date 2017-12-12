@@ -10,7 +10,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 requires = [
     'snovault',
     'Submit4DN',
-    'dcicutils>=0.1.61',
+    'dcicutils>=0.1.63',
     'Pillow',
     'PyBrowserID',
     'SQLAlchemy>=1.0.0b1',
