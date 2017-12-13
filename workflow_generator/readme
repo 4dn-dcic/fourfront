@@ -4,3 +4,10 @@ import workflow_generator.txt2software as ss
 ss.add_repliseq_software()
 ```
 
+```
+from workflow_generator.cwl2workflow import *
+cwl=create_cwl_from_file("/Users/soo/git/pipelines-cwl/cwl_awsem/repliseq/repliseq-parta.cwl")
+wf = Workflow().create_from_cwl(cwl)
+wf.as_dict()
+```
+
