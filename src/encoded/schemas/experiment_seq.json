@@ -46,7 +46,7 @@
         },
         "antibody": {
             "title": "Antibody",
-            "description": "The encode accession of the antibody used for the IP",
+            "description": "The encode accession of the antibody used for the IP (if available) - otherwise and identifying string",
             "type": "string"
         }
     },

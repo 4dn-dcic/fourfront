@@ -3,14 +3,27 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def cell_lines(GM12878_biosource, F123_biosource):
-    return [GM12878_biosource, F123_biosource]
+def GM12878_mod_biosource(testapp, lab, award, gm12878_oterm, basic_modification):
+    item = {
+        "accession": "4DNSROOOAAC1",
+        "biosource_type": "primary cell line",
+        "cell_line": gm12878_oterm['@id'],
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'modifications': [basic_modification['@id']]
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def cell_lines(GM12878_biosource, F123_biosource, GM12878_mod_biosource):
+    return [GM12878_biosource, F123_biosource, GM12878_mod_biosource]
 
 
 @pytest.fixture
 def whole_biosource(testapp, human_individual, lab, award):
     item = {
-        "biosource_type": "whole organisms",
+        "biosource_type": "multicellular organism",
         "individual": human_individual['@id'],
         'award': award['@id'],
         'lab': lab['@id']
@@ -33,9 +46,13 @@ def test_calculated_biosource_name(biosources):
             assert name == 'GM12878'
         if biotype == 'stem cell':
             assert name == 'F123-CASTx129'
+        if biotype == 'primary cell line':
+            # import pdb; pdb.set_trace()
+            # used not real type here to test modification addition to name
+            assert name == 'GM12878 Crispr'
         if biotype == 'tissue':
             assert name == 'lung'
-        if biotype == 'whole organisms':
+        if biotype == 'multicellular organism':
             assert name == 'whole human'
 
 

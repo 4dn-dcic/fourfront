@@ -1,4 +1,5 @@
 import pytest
+import copy
 
 
 @pytest.fixture
@@ -621,6 +622,89 @@ def basic_genomic_region(testapp, lab, award):
         'lab': lab['@id'],
     }
     return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def genomic_region_w_chrloc(testapp, lab, award):
+    item = {
+        "genome_assembly": "GRCh38",
+        "chromosome": "X",
+        "start_coordinate": 1,
+        "end_coordinate": 3,
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def target_w_genes(testapp, lab, award):
+    item = {
+        "targeted_genes": ["eeny", "meeny"],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def target_w_region(testapp, genomic_region_w_chrloc, lab, award):
+    item = {
+        "targeted_genome_regions": [genomic_region_w_chrloc['@id']],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def target_w_desc(testapp, lab, award):
+    item = {
+        "description": "I'm a region",
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def mod_basic_info(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'minimal modification',
+        'modification_type': 'Crispr',
+    }
+
+
+@pytest.fixture
+def basic_modification(testapp, mod_basic_info):
+    return testapp.post_json('/modification', mod_basic_info).json['@graph'][0]
+
+
+@pytest.fixture
+def mod_w_genomic_change(testapp, mod_basic_info):
+    mod = copy.deepcopy(mod_basic_info)
+    mod['description'] = 'mod with genomic change'
+    mod['genomic_change'] = "deletion"
+    return testapp.post_json('/modification', mod).json['@graph'][0]
+
+
+@pytest.fixture
+def mod_w_target(testapp, mod_basic_info, target_w_genes):
+    mod = copy.deepcopy(mod_basic_info)
+    mod['description'] = 'mod with target'
+    mod['target_of_mod'] = target_w_genes['@id']
+    return testapp.post_json('/modification', mod).json['@graph'][0]
+
+
+@pytest.fixture
+def mod_w_change_and_target(testapp, mod_basic_info, target_w_genes):
+    mod = copy.deepcopy(mod_basic_info)
+    mod['description'] = 'mod with target and genomic change'
+    mod['target_of_mod'] = target_w_genes['@id']
+    mod['genomic_change'] = "deletion"
+    return testapp.post_json('/modification', mod).json['@graph'][0]
 
 
 @pytest.fixture

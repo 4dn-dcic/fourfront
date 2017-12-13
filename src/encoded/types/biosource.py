@@ -60,17 +60,30 @@ class Biosource(Item):
         "type": "string",
     })
     def biosource_name(self, request, biosource_type, individual=None,
-                       cell_line=None, cell_line_tier=None, tissue=None):
+                       cell_line=None, cell_line_tier=None, tissue=None,
+                       modifications=None):
         self.upgrade_properties()
-        cell_line_types = ['immortalized cell line', 'primary cell', 'in vitro differentiated cells',
-                           'induced pluripotent stem cell line', 'stem cell']
+        cell_line_types = [
+            'primary cell',
+            'primary cell line',
+            'immortalized cell line',
+            'stem cell',
+            'induced pluripotent stem cell',
+            'stem cell derived cell line',
+        ]
+        mod_str = ''
+        if modifications:
+            mod_str = ' ' + '; '.join(
+                request.embed(mod, '@@object').get('modification_name_short', '')
+                for mod in modifications[:-1]) \
+                + request.embed(modifications[-1], '@@object').get('modification_name_short', '')
         if biosource_type == "tissue":
             if tissue:
                 tissue_props = request.embed(tissue, '@@object')
                 if tissue_props.get('term_name') is not None:
-                    return tissue_props.get('term_name')
+                    return tissue_props.get('term_name') + mod_str
                 else:
-                    return biosource_type
+                    return biosource_type + mod_str
         elif biosource_type in cell_line_types:
             if cell_line:
                 cell_line_props = request.embed(cell_line, '@@object')
@@ -78,17 +91,17 @@ class Biosource(Item):
                     cell_line_name = cell_line_props.get('term_name')
                     if cell_line_tier:
                         if cell_line_tier != 'Unclassified':
-                            return cell_line_name + ' (' + cell_line_tier + ')'
-                    return cell_line_name
-            return biosource_type
-        elif biosource_type == "whole organisms":
+                            return cell_line_name + ' (' + cell_line_tier + ')' + mod_str
+                    return cell_line_name + mod_str
+            return biosource_type + mod_str
+        elif biosource_type == "multicellular organism":
             if individual:
                 individual_props = request.embed(individual, '@@object')
                 organism = individual_props['organism']
                 organism_props = request.embed(organism, '@@object')
                 organism_name = organism_props['name']
-                return "whole " + organism_name
-        return biosource_type
+                return "whole " + organism_name + mod_str
+        return biosource_type + mod_str
 
     @calculated_property(schema={
         "title": "Display Title",
