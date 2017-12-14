@@ -62,7 +62,7 @@ class Step (object):
 
 class Argument (object):
     def __init__(self, workflow_argument_name=None,
-                 argument_type=None,  # "Input file", "parameter", "Output processed file", 
+                 argument_type=None,  # "Input file", "parameter", "Output processed file",
                                       # "Output QC file" or "Output report file"
                  argument_format=None):
         self.workflow_argument_name = workflow_argument_name
@@ -102,7 +102,7 @@ class Argument (object):
 
 
 class StepInput (object):
-    def __init__(self, name=None, argument_cardinality="1", 
+    def __init__(self, name=None, argument_cardinality="1",
                  argument_type="Input file",  # "Input file" or "parameter"
                  argument_format=None,
                  source_name=None,
@@ -423,7 +423,7 @@ class Cwl (object):
         for step in self.steps:
             self.sourcetarget_list.extend([_.get_sourcetarget() for _ in step.inputs])
 
-            
+ 
 class CwlFdnMeta (object):
     def __init__(self, data_types=None, category=None, workflow_type=None, description=None):
         '''
