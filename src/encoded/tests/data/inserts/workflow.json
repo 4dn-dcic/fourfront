@@ -465,8 +465,8 @@
     "cwl_main_filename" : "fastqc-0-11-4-1.cwl",
     "cwl_child_filenames" : ["fastqc-0-11-4.cwl"],
     "app_name" : "fastqc-0-11-4-1",
-    "app_version" : "dev",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "app_version" : "0.2.0",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
     "arguments": [
         {
             "workflow_argument_name": "limits_file",
@@ -2548,8 +2548,8 @@
     "cwl_main_filename" : "hi-c-processing-partb.cwl",
     "cwl_child_filenames" : ["merge-pairs.cwl","pairs2hic.cwl","cooler.cwl"],
     "app_name" : "hi-c-processing-partb",
-    "app_version" : "dev",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "app_version" : "0.2.0",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
     "uuid":"d9e9c966-56d9-47e8-ae21-47f94a1af417",
     "arguments":[
         {
@@ -3398,8 +3398,8 @@
     "cwl_main_filename" : "bwa-mem.cwl",
     "cwl_child_filenames" : [],
     "app_name" : "bwa-mem",
-    "app_version" : "dev",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "app_version" : "0.2.0",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
     "description": "Creating a lossless alignment bam file from a pair of fastq files"
 },
 {
@@ -3509,8 +3509,8 @@
     "cwl_main_filename" : "pairsam-parse-sort.cwl",
     "cwl_child_filenames" : [],
     "app_name" : "pairsam-parse-sort",
-    "app_version" : "dev",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/"
+    "app_version" : "0.2.0",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/"
 },
 {
     "title":"Merging for Hi-C using pairsamtools",
@@ -3521,8 +3521,8 @@
     "cwl_main_filename" : "pairsam-merge.cwl",
     "cwl_child_filenames" : [],
     "app_name" : "pairsam-merge",
-    "app_version" : "dev",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "app_version" : "0.2.0",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
     "uuid":"af8908bf-fdcb-40be-8bca-f1a49226bd20",
     "arguments":[
         {
@@ -3612,8 +3612,8 @@
     "cwl_main_filename" : "pairsam-markasdup.cwl",
     "cwl_child_filenames" : [],
     "app_name" : "pairsam-markasdup",
-    "app_version" : "dev",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "app_version" : "0.2.0",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
     "uuid":"a18978fa-7e78-488f-8e6b-bfb6f63b8861",
     "arguments":[
         {
@@ -3686,8 +3686,8 @@
     "cwl_main_filename" : "pairsam-filter.cwl",
     "cwl_child_filenames" : [],
     "app_name" : "pairsam-filter",
-    "app_version" : "dev",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "app_version" : "0.2.0",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
     "uuid":"3758e00c-2035-43c6-b783-bb92afe57c99",
     "arguments":[
         {
@@ -3802,8 +3802,8 @@
     "cwl_main_filename" : "addfragtopairs.cwl",
     "cwl_child_filenames" : [],
     "app_name" : "addfragtopairs",
-    "app_version" : "dev",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "app_version" : "0.2.0",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
     "uuid":"ef125750-8df2-418e-a1ee-402285f9dd93",
     "arguments":[
         {
@@ -3899,8 +3899,8 @@
     "cwl_main_filename" : "pairs-patch.cwl",
     "cwl_child_filenames" : [],
     "app_name" : "pairs-patch",
-    "app_version" : "dev",
-    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "app_version" : "0.2.0",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
     "uuid":"7e5dcad0-d8da-4286-9253-a779d5310a49",
     "arguments":[
         {
