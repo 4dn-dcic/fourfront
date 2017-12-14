@@ -381,7 +381,7 @@
         },
         "library_preparation_date":{
             "title": "Library Preparation Date",
-            "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
+            "description": "The date that the library was prepared for sequencing - submitted as YYYY-MM-DD.",
             "type": "string",
             "format": "date"
         },
@@ -426,6 +426,7 @@
             "description": "Key words that can tag an item - useful for filtering.",
             "type": "array",
             "uniqueItems": true,
+            "ff_flag": "clear clone",
             "items": {
                 "title": "Tag",
                 "description": "A tag for the item.",

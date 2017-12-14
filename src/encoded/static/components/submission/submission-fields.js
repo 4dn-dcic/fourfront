@@ -18,7 +18,29 @@ if it is a simple number/text/enum, or generates a child component for
 attachment, linked object, array, object, and file fields. Contains delete
 logic for the field as well (deleting is done by setting value to null).
 */
-export default class BuildField extends React.Component{
+export default class BuildField extends React.Component {
+
+    /**
+     * @param {{ 'type' : string }} fieldSchema - Schema definition for this property. Should be same as `app.state.schemas[CurrentItemType].properties[currentField]`.
+     */
+    static fieldTypeFromFieldSchema(fieldSchema){
+        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        // transform some types...
+        if(fieldType === 'string'){
+            fieldType = 'text';
+        }
+        // check if this is an enum
+        if(fieldSchema.enum || fieldSchema.suggested_enum){
+            fieldType = 'enum';
+        }
+        // handle a linkTo object on the the top level
+        if(fieldSchema.linkTo){
+            fieldType = 'linked object';
+        } else if (fieldSchema.attachment && fieldSchema.attachment === true){
+            fieldType = 'attachment';
+        }
+        return fieldType;
+    }
 
     constructor(props){
         super(props);
@@ -237,8 +259,8 @@ export default class BuildField extends React.Component{
             excludeRemoveButton ? null : (
                 <div className="col-xs-2 remove-button-column">
                     <Fade in={showDelete}>
-                        <div className="pull-right remove-button-container">
-                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField}><i className="icon icon-fw icon-times"/></Button>
+                        <div className={"pull-right remove-button-container" + (!showDelete ? ' hidden' : '')}>
+                            <Button tabIndex={2} bsStyle="danger" disabled={disableDelete} onClick={this.deleteField} data-tip={this.props.isArray ? 'Remove Item' : 'Clear Value'}><i className="icon icon-fw icon-times"/></Button>
                         </div>
                     </Fade>
                 </div>
@@ -247,9 +269,7 @@ export default class BuildField extends React.Component{
     }
 }
 
-/*
-Case for a linked object.
-*/
+/** Case for a linked object. */
 class LinkedObj extends React.Component{
 
     constructor(props){
@@ -282,8 +302,8 @@ class LinkedObj extends React.Component{
             if(isNaN(this.props.value)){
                 thisDisplay = keyDisplay[this.props.value] || this.props.value;
                 return(
-                    <div className="submitted-linked-object-display-container" data-tip="This Item is already in the database">
-                        <a href={this.props.value} target="_blank">
+                    <div className="submitted-linked-object-display-container">
+                        <a href={this.props.value} target="_blank" className="inline-block" data-tip="This Item is already in the database">
                             <span>{thisDisplay}</span>
                         </a>
                         &nbsp;<i style={{'marginLeft':'5px', 'fontSize' : '0.85rem'}} className="icon icon-external-link"/>
@@ -480,7 +500,7 @@ class ArrayField extends React.Component{
  * Builds a field that represents a sub-object. Essentially serves to hold
  * and coordinate BuildFields that correspond to the fields within the subfield.
  */
-class ObjectField extends React.Component{
+class ObjectField extends React.Component {
 
     constructor(props){
         super(props);
@@ -521,7 +541,7 @@ class ObjectField extends React.Component{
         if(fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
-        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        var fieldType = BuildField.fieldTypeFromFieldSchema(fieldSchema);
         var title = fieldSchema.title || field;
         var fieldValue;
         if(this.props.value){
@@ -530,23 +550,14 @@ class ObjectField extends React.Component{
             fieldValue = null;
         }
         var enumValues = [];
-        // transform some types...
-        if(fieldType == 'string'){
-            fieldType = 'text';
-        }
         // check if this is an enum
-        if(fieldSchema.enum){
-            fieldType = 'enum';
-            enumValues = fieldSchema.enum;
-        }
-        // handle a linkTo object on the the top level
-        if(fieldSchema.linkTo){
-            fieldType = 'linked object';
+        if(fieldType === 'enum'){
+            enumValues = fieldSchema.enum || fieldSchema.suggested_enum || [];
         }
         // format field as <this_field>.<next_field> so top level modification
         // happens correctly
         var nestedField = this.props.nestedField + '.' + field;
-        return(
+        return (
             <BuildField
                 value={fieldValue}
                 key={field}
@@ -577,7 +588,7 @@ class ObjectField extends React.Component{
 
     render(){
         var schema = this.props.schema;
-        var fields = schema['properties'] ? Object.keys(schema['properties']) : [];
+        var fields = schema['properties'] ? _.keys(schema['properties']) : [];
         var buildFields = [];
         for (var i=0; i<fields.length; i++){
             var fieldSchema = this.includeField(schema, fields[i]);
@@ -586,7 +597,7 @@ class ObjectField extends React.Component{
             }
         }
         return(
-            <div>
+            <div className="object-field-container">
                 {buildFields.map((field) => this.initiateField(field))}
             </div>
         );

@@ -41,7 +41,7 @@ class SelectedFilesOverview extends React.Component {
 
     render(){
         var selectedFilesCount = _.keys(this.props.selectedFiles).length;
-        
+
         return (
             <div className="pull-left box">
                 <span className="text-500">{ selectedFilesCount }</span> / { this.props.totalFilesCount } files selected.
@@ -126,7 +126,7 @@ class SelectedFilesDownloadButton extends React.Component {
                             <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
                         </Button>
                         {' '}
-                        
+
                     </form>
 
                 </Modal.Body>
@@ -199,7 +199,7 @@ class SelectAllFilesButton extends React.Component {
             } else {
                 this.props.unselectFile(expFxn.filesToAccessionTriples(allFiles, true));
             }
-            
+
             this.setState({ 'selecting' : false });
         }));
     }
@@ -311,7 +311,7 @@ class SelectedFilesFilterByContent extends React.Component {
         this.props.setFileTypeFilters(fileTypeFilters);
     }
 
-    
+
 
     render(){
         return wrapInAboveTablePanel(
@@ -365,7 +365,7 @@ class SelectedFilesControls extends React.Component {
                 }
             )
         );
-    }    
+    }
 
     render(){
         //var exps = this.props.filteredExperiments || this.props.experiments;
@@ -489,7 +489,7 @@ export class AboveTableControls extends React.Component {
             this.unsetWideLayout();
         }
     }
-    
+
     handleWindowResize(e){
         if (isServerSide() || !document || !document.body) return null;
         if (this.state.layout === 'wide'){
@@ -504,7 +504,7 @@ export class AboveTableControls extends React.Component {
     setWideLayout(){
         if (isServerSide() || !document || !document.getElementsByClassName || !document.body) return null;
         vizUtil.requestAnimationFrame(()=>{
-            var browsePageContainer = document.getElementsByClassName('browse-page-container')[0];
+            var browsePageContainer = document.getElementsByClassName('search-page-container')[0];
             var bodyWidth = document.body.offsetWidth || window.innerWidth;
             if (bodyWidth < 1200) {
                 this.handleLayoutToggle(); // Cancel
@@ -520,7 +520,7 @@ export class AboveTableControls extends React.Component {
     unsetWideLayout(){
         if (isServerSide() || !document || !document.getElementsByClassName) return null;
         vizUtil.requestAnimationFrame(()=>{
-            var browsePageContainer = document.getElementsByClassName('browse-page-container')[0];
+            var browsePageContainer = document.getElementsByClassName('search-page-container')[0];
             browsePageContainer.style.marginLeft = browsePageContainer.style.marginRight = '';
             setTimeout(this.props.parentForceUpdate, 100);
         });
@@ -633,18 +633,34 @@ export class AboveTableControls extends React.Component {
                 </ChartDataController.Provider>
             );
         }
+
+
+        // FOR NOW, we'll stick 'add' button here. -- IF NO SELECTED FILES CONTROLS
+        var addButton = null;
+        var context = this.props.context;
+        // don't show during submission search "selecting existing"
+        if (context && Array.isArray(context.actions) && !this.props.submissionBase){
+            var addAction = _.findWhere(context.actions, { 'name' : 'add' });
+            if (addAction && typeof addAction.href === 'string'){ // TODO::: WE NEED TO CHANGE THIS HREF!! to /search/?type= format.
+                addButton = (
+                    <div className="pull-left box create-add-button" style={{'paddingRight' : 10}}>
+                        <Button bsStyle="primary" href='#!add'>Create</Button>
+                    </div>
+                );
+            }
+        }
+
+        var total = null;
         if (this.props.showTotalResults) {
-            var total;
             if (typeof this.props.showTotalResults === 'number') total = this.props.showTotalResults;
             if (this.props.context && this.props.context.total) total = this.props.context.total;
-            if (!total) return null;
-            return (
+            total = (
                 <div className="pull-left box results-count">
                     <span className="text-500">{ total }</span> Results
                 </div>
             );
         }
-        return null;
+        return [addButton, total];
     }
 
     rightButtons(){

@@ -59,6 +59,12 @@
             "description": "Number of Methylation-specific PCR cycles performed",
             "type": "integer"
         },
+        "me_pcr_library_date":{
+            "title": "Methy-PCR Library Preparation Date",
+            "description": "The date that the methy-PCR library was prepared - submitted as YYYY-MM-DD.",
+            "type": "string",
+            "format": "date"
+        },
         "y_ligation_dna_input": {
             "title": "Y-adaptor ligation input amount",
             "description": "Amount of DNA (units ng) input to the Y-adaptor ligation step",

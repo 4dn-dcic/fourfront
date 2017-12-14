@@ -24,6 +24,7 @@ item_with_uuid = [
     {
         'uuid': '0f13ff76-c559-4e70-9497-a6130841df9f',
         'required': 'required value 1',
+        'field_no_default': 'test'
     },
     {
         'uuid': '6c3e444b-f290-43c4-bfb9-d20135377770',
@@ -145,7 +146,6 @@ def test_patch_new_schema_version(content, root, testapp, monkeypatch):
     res = testapp.patch_json(url, {}, status=200)
     assert res.json['@graph'][0]['schema_version'] == '2'
     assert res.json['@graph'][0]['new_property'] == 'new'
-
 
 def test_admin_put_protected_link(link_targets, testapp):
     res = testapp.post_json(COLLECTION_URL, item_with_link[0], status=201)
@@ -346,3 +346,79 @@ def test_patch_check_only(testapp, human_data, human):
     human_data['status'] = human['status']
     rest = testapp.patch_json('/organisms/human/?check_only=True', human_data).json
     assert rest['status'] == 'success'
+
+
+def test_patch_delete_fields(content, testapp):
+    url = content['@id']
+    res = testapp.get(url)
+    assert res.json['simple1'] == 'simple1 default'
+    assert res.json['simple2'] == 'simple2 default'
+    assert res.json['field_no_default'] == 'test'
+
+    res = testapp.patch_json(url, {'simple1': 'this is a test'}, status=200)
+    assert res.json['@graph'][0]['simple1'] == 'this is a test'
+
+    # delete fields with defaults resets to default, while deleting non default field
+    # completely removes them
+    res = testapp.patch_json(url + "?delete_fields=simple1,field_no_default", {}, status=200)
+    assert 'field_no_default' not in res.json['@graph'][0].keys()
+    assert res.json['@graph'][0]['simple1'] == 'simple1 default'
+
+
+def test_patch_delete_fields_non_string(content, testapp):
+    url = content['@id']
+    res = testapp.get(url)
+
+    # delete fields with defaults resets to default, while deleting non default field
+    # completely removes them
+    res = testapp.patch_json(url + "?delete_fields=schema_version", {}, status=200)
+    assert res.json['@graph'][0]['schema_version'] == '1'
+
+
+def test_patch_delete_fields_still_works_with_no_validation(content, testapp):
+    url = content['@id']
+    res = testapp.get(url)
+    assert res.json['simple1'] == 'simple1 default'
+    assert res.json['simple2'] == 'simple2 default'
+    assert res.json['field_no_default'] == 'test'
+
+    # with validate=false, then defaults are not populated so default fields are also deleted
+    res = testapp.patch_json(url + "?delete_fields=simple1,field_no_default&validate=false", {}, status=200)
+    assert 'field_no_default' not in res.json['@graph'][0].keys()
+    assert 'simple1' not in res.json['@graph'][0].keys()
+
+
+def test_patch_delete_fields_bad_param(content, testapp):
+    url = content['@id']
+    res = testapp.get(url)
+    assert res.json['simple1'] == 'simple1 default'
+    assert res.json['simple2'] == 'simple2 default'
+    assert res.json['field_no_default'] == 'test'
+    res = testapp.patch_json(url + "?delete_fields=simple1,bad_fieldname", {}, status=422)
+    assert res.json['description'] == "Failed validation"
+    assert res.json['errors'][0]['description'] == "Additional properties are not allowed ('bad_fieldname' was unexpected)"
+
+
+def test_patch_delete_fields_import_items_admin(link_targets, testapp):
+    res = testapp.post_json(COLLECTION_URL, item_with_link[0], status=201)
+    url = res.location
+    assert res.json['@graph'][0]['protected_link']
+    res = testapp.patch_json(url + "?delete_fields=protected_link", {}, status=200)
+
+
+def test_patch_delete_fields_import_items_submitter(content, submitter_testapp):
+    testapp = submitter_testapp
+    url = content['@id']
+    res = testapp.get(url)
+    assert res.json['protected']
+    res = testapp.patch_json(url + "?delete_fields=protected", {}, status=422)
+
+
+def test_patch_delete_fields_required(content, testapp):
+    url = content['@id']
+    res = testapp.get(url)
+
+    # with validate=false, then defaults are not populated so default fields are also deleted
+    res = testapp.patch_json(url + "?delete_fields=required", {}, status=422)
+    assert res.json['description'] == "Failed validation"
+    assert res.json['errors'][0]['description'] == "'required' is a required property"

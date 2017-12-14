@@ -145,7 +145,6 @@ def validate_biosource_cell_line(context, request):
         return
     term_ok = False
     cell_line = data['cell_line']
-    termuid = get_item_if_you_can(request, cell_line, 'ontology-terms').get('uuid')
     try:
         # checking to see if our context is a collection or an item to set get
         context.get('blah')
@@ -154,6 +153,7 @@ def validate_biosource_cell_line(context, request):
         getter = context.collection
     slimfor = None
     try:
+        termuid = get_item_if_you_can(request, cell_line, 'ontology-terms').get('uuid')
         term = getter.get(termuid)
         slims = term.properties.get('slim_terms', [])
         for slim in slims:

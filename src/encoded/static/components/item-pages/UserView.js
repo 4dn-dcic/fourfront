@@ -601,9 +601,9 @@ class ProfileWorkFields extends React.Component {
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
-                    <div id="lab" className="col-sm-9 value">
+                    <div id="lab" className="col-sm-9 value text-500">
                         { typeof user.lab !== 'undefined' ?
-                            FormattedInfoBlock.Lab(this.isLabFetched ? this.state.details_lab : user.lab, false, false)
+                            (object.linkFromItem(this.isLabFetched ? this.state.details_lab : user.lab))
                             :
                             <span className="not-set">No Labs</span>
                         }
@@ -621,9 +621,9 @@ class ProfileWorkFields extends React.Component {
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="submits_for">Submits For</label>
                     </div>
-                    <div className="col-sm-9 value">
+                    <div className="col-sm-9 value text-500">
                         <FormattedInfoBlock.List
-                            renderItem={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
+                            renderItem={object.linkFromItem}
                             endpoints={(user && user.submits_for && user.submits_for.map(function(o){
                                 if (typeof o === 'string') return o;
                                 if (typeof o.link_id === 'string') return o.link_id.replace(/~/g,'/');
@@ -639,10 +639,10 @@ class ProfileWorkFields extends React.Component {
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="awards">Awards</label>
                     </div>
-                    <div className="col-sm-9 value">
+                    <div className="col-sm-9 value text-500">
                         <FormattedInfoBlock.List
                             details={this.state.awards_list}
-                            renderItem={(detail) => FormattedInfoBlock.Award(detail, false, false, false) }
+                            renderItem={object.linkFromItem}
                             propertyName="awards"
                             fallbackMsg="No awards"
                             loading={this.state.awards_list === null && (

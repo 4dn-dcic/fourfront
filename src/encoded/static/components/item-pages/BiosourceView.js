@@ -29,10 +29,10 @@ globals.content_views.register(BiosourceView, 'Biosource');
 
 
 class BiosourceViewOverview extends React.Component {
-    
+
     /**
      * Get overview tab object for tabpane.
-     * 
+     *
      * @param {Object} context - Current Protocol Item being shown.
      * @param {Object} schemas - Schemas passed down from app.state.schemas (or Schemas.get()).
      */
@@ -102,7 +102,7 @@ class OverViewBody extends React.Component {
                 <div className="col-md-12 col-xs-12">
                     <div className="row overview-blocks mb-2">
 
-                        <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-6 col-md-6" listItemElement='div' listWrapperElement='div' singleItemClassName="block" property='individual' propertyForLabel='individual.organism' fallbackTitle="Individual" titleRenderFxn={function(field, val){
+                        <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-6 col-md-6" listItemElement='div' listWrapperElement='div' singleItemClassName="block" property='individual' overrideTitle="Organism - Individual" fallbackTitle="Individual" titleRenderFxn={function(field, val){
                             return <IndividualItemTitle context={val} defaultOpen />;
                         }} />
 
@@ -111,12 +111,14 @@ class OverViewBody extends React.Component {
                         <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-6 col-md-3" property='tissue' fallbackTitle="Tissue Name" hideIfNoValue />
 
                     </div>
-                    
+
                     { this.cellLineDetails(commonProps) }
-                    
-                    <h4 className="tab-section-title">
-                        <span>Other</span>
-                    </h4>
+                    { result.modifications || result.url || result.biosource_vendor ?
+                        <h4 className="tab-section-title">
+                            <span>Other</span>
+                        </h4>
+                        : null
+                    }
                     <hr className="tab-section-title-horiz-divider"/>
                     <div className="row overview-blocks">
                         <OverViewBodyItem {...commonProps} property='modifications' fallbackTitle="Modifications" hideIfNoValue />
@@ -256,7 +258,7 @@ export class IndividualItemTitle extends React.Component {
         if (indv.organism && indv.organism.name && typeof indv.organism.name === 'string' && title.indexOf(indv.organism.name) === -1){
             organism = Schemas.Term.capitalizeSentence(indv.organism.name);
         }
-        
+
         return (
             <div className="individual-organism">{ this.toggleIcon() } { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? 'mono-text' : null)}> { organism } - </span> : null }
                 <a href={href} className={object.isAccessionRegex(title) ? 'mono-text' : null}>{ title || null }</a>
@@ -265,4 +267,3 @@ export class IndividualItemTitle extends React.Component {
         );
     }
 }
-
