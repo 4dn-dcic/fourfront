@@ -4,7 +4,7 @@ import wget
 
 class Software(object):
 
-    def __init__(self, uuid=None, name=None, version=None, commit=None, 
+    def __init__(self, uuid=None, name=None, version=None, commit=None,
                  software_type=None, **kwargs):
         self.uuid = None
         self.name = None
@@ -16,7 +16,7 @@ class Software(object):
         self.lab = "4dn-dcic-lab"
 
 
-    def add(self, uuid=None, name=None, version=None, commit=None, 
+    def add(self, uuid=None, name=None, version=None, commit=None,
             software_type=None):
 
         if uuid:
@@ -122,7 +122,7 @@ def get_existing(insert_jsonfile):
     with open(insert_jsonfile, 'r') as f:
         d = json.load(f)
     swlist = [Software(**_) for _ in d]
-    return [_.as_dict() for _ in swlist]    
+    return [_.as_dict() for _ in swlist]
 
 
 def filter_swlist(sl, sl_exist):
