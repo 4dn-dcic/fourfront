@@ -122,7 +122,7 @@ class OverViewBody extends React.Component {
                     <hr className="tab-section-title-horiz-divider"/>
                     <div className="row overview-blocks">
                         <OverViewBodyItem {...commonProps} property='modifications' fallbackTitle="Modifications" hideIfNoValue />
-                        <OverViewBodyItem {...commonProps} property='url' fallbackTitle="URL" hideIfNoValue />
+                        <OverViewBodyItem {...commonProps} property='url' fallbackTitle="URL" titleRenderFxn={OverViewBodyItem.titleRenderPresets.url_string} hideIfNoValue />
                         <OverViewBodyItem {...commonProps} property='biosource_vendor' fallbackTitle="Biosource Vendor" hideIfNoValue />
                     </div>
 

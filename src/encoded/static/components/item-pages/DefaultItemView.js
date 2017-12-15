@@ -196,6 +196,10 @@ export class OverViewBodyItem extends React.Component {
                     </div>
                 </div>
             );
+        },
+        'url_string' : function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li'){
+            if (typeof value !== 'string') return null;
+            return <a href={value} style={{ 'overflowWrap' : 'break-word' }}>{value}</a>;
         }
     }
 
