@@ -39,12 +39,13 @@
             "type": "string",
             "enum" : [
               "primary cell",
+              "primary cell line",
               "immortalized cell line",
+              "stem cell",
+              "induced pluripotent stem cell",
+              "stem cell derived cell line",
               "tissue",
-              "in vitro differentiated cells",
-              "induced pluripotent stem cell line",
-              "whole organisms",
-              "stem cell"
+              "multicellular organism"
             ]
           },
           "individual": {
@@ -58,7 +59,6 @@
               "title": "Stable Genomic Modifications",
               "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
               "type": "array",
-              "default": [],
               "uniqueItems": true,
               "items": {
                   "title": "Modifications",

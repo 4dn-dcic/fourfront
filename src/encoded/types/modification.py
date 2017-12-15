@@ -21,10 +21,10 @@ class Modification(Item):
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
     embedded_list = ['constructs.construct_type',
-                'constructs.tags',
-                'constructs.designed_to_target',
-                'modified_regions.aliases',
-                'target_of_mod.target_summary']
+                     'constructs.tags',
+                     'constructs.designed_to_target',
+                     'modified_regions.aliases',
+                     'target_of_mod.target_summary']
 
     @calculated_property(schema={
         "title": "Modification name",
