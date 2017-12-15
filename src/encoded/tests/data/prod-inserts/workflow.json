@@ -580,6 +580,132 @@
     ]
 },
 {
+    "title": "PairsQC",
+    "accession": "4DNWF36CF3A1",
+    "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/pairsqc-0-11-4/0",
+    "uuid": "ae3a87cb-3fa2-469e-97c7-540fc2d0a117",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "cwl_main_filename" : "pairsqc-single.cwl",
+    "cwl_child_filenames" : [],
+    "app_name" : "pairsqc-single",
+    "app_version" : "dev",
+    "cwl_directory_url" : "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
+    "arguments": [
+        {
+            "workflow_argument_name": "input_pairs",
+            "argument_format": "pairs",
+            "argument_type": "Input file"
+        },
+        {
+            "workflow_argument_name": "chromsizes",
+            "argument_format": "chromsizes",
+            "argument_type": "Input file"
+        },
+        {
+            "workflow_argument_name": "enzyme",
+            "argument_type": "parameter"
+        },
+        {
+            "workflow_argument_name": "sample_name",
+            "argument_type": "parameter"
+        },
+        {
+            "workflow_argument_name": "report",
+            "argument_type": "Output QC file"
+        }
+    ],
+    "name": "pairsqc-single",
+    "workflow_type": "Data QC",
+    "workflow_diagram": "",
+    "description": "PairsQC quality control step for pairs files",
+    "data_types": ["Hi-C","Capture Hi-C"],
+    "category": "QC",
+    "steps": [
+        {
+            "inputs":[
+                {
+                    "name":"input_pairs",
+                    "source":[
+                        {
+                            "name":"input_pairs",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_format":"pairs",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"chromsizes",
+                    "source":[
+                        {
+                            "name":"chromsizes",
+                            "type":"Workflow Input File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Input file",
+                        "argument_format":"chromsizes",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"enzyme",
+                    "source":[
+                        {
+                            "name":"enzyme",
+                            "type":"Workflow Parameter"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Parameter",
+                        "argument_cardinality":"1"
+                    }
+                },
+                {
+                    "name":"sample_name",
+                    "source":[
+                        {
+                            "name":"sample_name",
+                            "type":"Workflow Parameter"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Parameter",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "outputs":[
+                {
+                    "name":"report",
+                    "target":[
+                        {
+                            "name":"report",
+                            "type":"Workflow Output File"
+                        }
+                    ],
+                    "meta":{
+                        "argument_type":"Output QC file",
+                        "argument_cardinality":"1"
+                    }
+                }
+            ],
+            "name":"PairsQC",
+            "meta":{
+                "description":"PairsQC QC for pairs files",
+                "software_used":"/software/15731f58-868f-44ab-b4ed-77b82ecd032b/",
+                "analysis_step_types":[
+                    "QC calculation"
+                ]
+            }
+        }
+    ]
+},
+{
     "title": "ValidateFiles",
     "accession": "4DNWF6DUSPTF",
     "uuid": "181b777a-2db7-4593-ae7f-6170a5d69ff7",
