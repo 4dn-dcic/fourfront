@@ -756,7 +756,9 @@ def post_upload(context, request):
 
 def is_file_to_download(properties, mapping, expected_filename=None):
     file_extension = mapping[properties['file_format']]
-    accession_or_external = properties.get('accession') or properties['external_accession']
+    accession_or_external = properties.get('accession') or properties.get('external_accession')
+    if not accession_or_external:
+        return False
     filename = accession_or_external + file_extension
     if expected_filename is None:
         return filename
