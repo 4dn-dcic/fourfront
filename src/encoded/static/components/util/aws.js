@@ -1,5 +1,9 @@
 var aws = require('aws-sdk');
 
+/** 
+ * Is this used? Should we put it into util/index.js exports? Rename to 'AWS' to prevent confusion with 'aws-sdk' package?
+ */
+
 // Function for generating a presigned url for front end s3 uploads.
 // uses a file input (i.e. from <input type=file...>) and an object
 // containing upload credentials (from /types/file.py)
