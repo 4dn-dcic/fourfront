@@ -26,7 +26,6 @@
             "default": "1"
         },
         "treatment_type": {
-            "exclude_from" : ["submit4dn", "FFedit-create"],
             "default": "Chemical"
         },
         "chemical": {
