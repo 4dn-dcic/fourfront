@@ -39,7 +39,6 @@
             "lookup": 1000,
             "internal_comment":"Only admins are allowed to set or update this value.",
             "exclude_from": ["submit4dn"],
-            "default": [],
             "items": {
                 "title": "Alternate Accession",
                 "description": "An accession previously assigned to an object that has been merged with this object.",
@@ -177,7 +176,6 @@
             "title": "Reference publications",
             "description": "The publications that provide more information about the object.",
             "type": "array",
-            "default": [],
             "lookup": 1000,
             "uniqueItems": true,
             "items": {
@@ -243,7 +241,6 @@
           "description": "Documents that provide additional information (not data file).",
           "comment": "See Documents sheet or collection for existing items.",
           "type": "array",
-          "default": [],
           "uniqueItems": true,
           "items": {
               "title": "Document",
@@ -344,7 +341,6 @@
             "comment": "Enter as a database name:identifier eg. HGNC:PARK2",
             "description": "Unique identifiers from external resources.",
             "type": "array",
-            "default": [],
             "ff_flag": "clear clone",
             "uniqueItems": true,
             "items": {
