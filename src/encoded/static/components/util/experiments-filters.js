@@ -1,11 +1,13 @@
 'use strict';
 
-var _ = require('underscore');
-var url = require('url');
-var ajax = require('./ajax');
 var Alerts = null; //require('./../alerts');
 var store = null;
-var object = require('./object');
+
+import _ from 'underscore';
+import url from 'url';
+import queryString from 'query-string';
+import * as ajax from './ajax';
+import * as object from './object';
 import * as Schemas from './Schemas';
 import { navigate } from './navigate';
 
@@ -25,7 +27,47 @@ export let getLimit = function(){ return 25; };
  */
 export function currentExpSetFilters(){
     if (!store) store = require('./../../store');
-    return store.getState().expSetFilters;
+    return hrefToFilters(store.getState().href);
+}
+
+/** If the given term is selected, return the href for the term */
+export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
+    for (var filter in filters) {
+        if (filters[filter]['field'] == field && filters[filter]['term'] == term) {
+            return url.parse(filters[filter]['remove']).search;
+        }
+    }
+    return null;
+}
+
+/**
+ * @param {string} unselectHref - Returned from unselectHrefIfSelected, if used.
+ * @param {string} field - What field to build for.
+ * @param {string} term - What term to build for.
+ * @param {string} searchBase - Original href or search base of current page.
+ */
+export function buildSearchHref(unselectHref, field, term, searchBase){
+    var href;
+    if (unselectHref) {
+        href = unselectHref;
+    } else {
+        var parts = url.parse(searchBase, true);
+        var query = _.clone(parts.query);
+        // format multiple filters on the same field
+        if(field in query){
+            if(Array.isArray(query[field])){
+                query[field] = query[field].concat(term);
+            }else{
+                query[field] = [query[field]].concat(term);
+            }
+        }else{
+            query[field] = term;
+        }
+        query = queryString.stringify(query);
+        parts.search = query && query.length > 0 ? ('?' + query) : '';
+        href = url.format(parts);
+    }
+    return href;
 }
 
 
@@ -56,10 +98,10 @@ export function changeFilter(
     if (!expSetFilters){
         if (!store) store = require('./../../store');
         var storeState = store.getState();
-        expSetFilters = storeState.expSetFilters;
         if (!href) {
             href = storeState.href;
         }
+        expSetFilters = hrefToFilters(href);
     }
 
     // store currently selected filters as a dict of sets
@@ -94,7 +136,7 @@ export function changeFilter(
 
 
 /**
- * Update expSetFilters in redux store and, if using AJAX, update context and href as well after fetching.
+ * Update expSetFilters by generating new href from supplied expSetFilters and fetching/navigating to copy of current href/URL with updated query.
  * Before calling, make sure expSetFilters is a new or cloned object (not props.expSetFilters) for Redux to recognize that it has changed.
  *
  * @param {Object}  expSetFilters   A new or cloned expSetFilters object to save. Can be empty (to clear all filters).
@@ -106,9 +148,9 @@ export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, ca
     if (!store)   store = require('./../../store');
     if (!Alerts) Alerts = require('../alerts').default;
     if (!useAjax) {
-        store.dispatch({
-            type : {'expSetFilters' : newExpSetFilters}
-        });
+    //    store.dispatch({
+    //        type : {'expSetFilters' : newExpSetFilters}
+    //    });
         if (typeof callback === 'function') setTimeout(callback, 0);
         return true;
     }
@@ -120,7 +162,6 @@ export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, ca
         href = originalReduxState.href;
     }
 
-    // Else we fetch new experiment_sets (i.e. (props.)context['@graph'] ) via AJAX.
     if (typeof href !== 'string') throw new Error("No valid href (3rd arg) supplied to saveChangedFilters: " + href);
 
     var newHref = filtersToHref(newExpSetFilters, href);
@@ -129,23 +170,11 @@ export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, ca
         typeof navigate === 'function' ? navigate : null
     );
 
-    store.dispatch({
-        type: {
-            'expSetFilters' : newExpSetFilters,
-        }
-    });
-
     if (navigateFxn){
         navigateFxn(newHref, { replace : true, skipConfirmCheck: true }, (result)=>{
             if (result && result.total === 0){
                 // No results, unset new filters.
                 Alerts.queue(Alerts.NoFilterResults); // Present an alert box informing user that their new selection is now being UNSELECTED because it returned no results.
-                store.dispatch({
-                    type : {
-                        'expSetFilters' : originalReduxState.expSetFilters,
-                        'context' : originalReduxState.context
-                    }
-                });
                 navigateFxn(originalReduxState.href, { skipRequest : true });
             } else {
                 // Success. Remove any no result alerts.
@@ -164,7 +193,6 @@ export function saveChangedFilters(newExpSetFilters, useAjax=true, href=null, ca
             store.dispatch({
                 type: {
                     'context'       : newContext,
-                    //'expSetFilters' : newExpSetFilters,
                     'href'          : newHref
                 }
             });
@@ -184,7 +212,7 @@ export function isTermSelectedAccordingToExpSetFilters(term, field, expSetFilter
     if (!expSetFilters){
         if (!store) store = require('./../../store');
         var storeState = store.getState();
-        expSetFilters = storeState.expSetFilters;
+        expSetFilters = hrefToFilters(storeState.href);
     }
 
     if (typeof expSetFilters[field] !== 'undefined'){
@@ -289,7 +317,11 @@ export function filtersToHref(expSetFilters, currentHref, page = null, sortColum
     return urlString;
 }
 
-export const NON_FILTER_URL_PARAMS = [ // Taken from search.py
+/**
+ * Hardcoded URL query params which are _definitely_ not filters.
+ * Taken from search.py
+ */
+export const NON_FILTER_URL_PARAMS = [
     'limit', 'y.limit', 'x.limit', 'mode',
     'format', 'frame', 'datastore', 'field', 'region', 'genome',
     'sort', 'from', 'referrer', 'q', 'before', 'after'
@@ -311,9 +343,17 @@ export function hrefToFilters(href, contextFilters = null, checkContextFilters =
         _.filter(
             _.pairs(url.parse(href, true).query),
             function(queryPair){
+
                 if (NON_FILTER_URL_PARAMS.indexOf(queryPair[0]) > -1) return false;
+
                 if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
                 
+                if (checkContextFilters && !contextFilters){ // Grab context.filters from Redux store
+                    if (!store) store = require('./../../store');
+                    var storeState = store.getState();
+                    contextFilters = (storeState && storeState.context && storeState.context.filters) || null;
+                }
+
                 if (Array.isArray(contextFilters) && typeof _.findWhere(contextFilters,  {'field' : queryPair[0]}) !== 'undefined'){
                     return true; // See if in context.filters, if is available.
                 }
@@ -344,6 +384,24 @@ export function expSetFiltersToURLQuery(expSetFilters = null){
             return field + '=' + encodeURIComponent(t);
         }).join('&');
     }).join('&');
+}
+
+
+export function compareExpSetFilters(expSetFiltersA, expSetFiltersB){
+    if ((expSetFiltersA && !expSetFiltersB) || (!expSetFiltersA && expSetFiltersB)) return false;
+    var keysA = _.keys(expSetFiltersA);
+    var keysB = _.keys(expSetFiltersB);
+    if (keysA.length !== keysB.length) return false;
+    for (var i = 0; i < keysA.length; i++){
+        if (typeof expSetFiltersB[keysA[i]] === 'undefined') return false;
+        if (expSetFiltersA[keysA[i]] instanceof Set && expSetFiltersB[keysA[i]] instanceof Set){
+            if (expSetFiltersA[keysA[i]].size !== expSetFiltersB[keysA[i]].size) return false;
+            for (var termFromSetA of expSetFiltersA[keysA[i]]){
+                if (!expSetFiltersB[keysA[i]].has(termFromSetA)) return false;
+            }
+        }
+    }
+    return true;
 }
 
 

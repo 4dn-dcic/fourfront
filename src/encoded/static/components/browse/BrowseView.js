@@ -14,7 +14,7 @@ import { isServerSide, expFxn, Filters, navigate, object, layout } from './../ut
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
     SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
-    FacetList, ReduxExpSetFiltersInterface
+    FacetList, onFilterHandlerMixin, ReduxExpSetFiltersInterface
 } from './components';
 
 
@@ -135,6 +135,7 @@ class ResultTableContainer extends React.Component {
         super(props);
         this.colDefOverrides = this.colDefOverrides.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
+        this.onFilter = onFilterHandlerMixin.bind(this);
         this.hiddenColumns = this.hiddenColumns.bind(this);
         this.render = this.render.bind(this);
     }
@@ -154,15 +155,8 @@ class ResultTableContainer extends React.Component {
     }
     */
 
-    isTermSelected(termKey, facetField, expsOrSets = 'sets'){
-        var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
-        if (
-            this.props.expSetFilters[standardizedFieldKey] &&
-            this.props.expSetFilters[standardizedFieldKey].has(termKey)
-        ){
-            return true;
-        }
-        return false;
+    isTermSelected(term, facet){
+        return !!(Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
     }
 
     colDefOverrides(){
@@ -240,32 +234,44 @@ class ResultTableContainer extends React.Component {
     }
 
     render() {
-        var facets = this.props.context.facets;
-        var results = this.props.context['@graph'];
+        var context = this.props.context;
+        var facets = context.facets;
+        var results = context['@graph'];
         
         return (
             <div className="row">
                 { facets.length > 0 ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
-                        <ReduxExpSetFiltersInterface
-                            experimentSets={results}
-                            expSetFilters={this.props.expSetFilters}
+                        <FacetList
+                            orientation="vertical"
                             facets={facets}
-                            href={this.props.href}
-                            schemas={this.props.schemas}
+                            filters={context.filters}
+                            className="with-header-bg"
+                            isTermSelected={this.isTermSelected}
+                            onFilter={this.onFilter}
+                            itemTypeForSchemas="ExperimentSetReplicates"
                             session={this.props.session}
-                        >
-                            <FacetList
-                                orientation="vertical"
-                                browseFilters={{
-                                    filters : this.props.context.filters || null,
-                                    clear_filters : this.props.context.clear_filters || null
-                                }}
-                                className="with-header-bg"
-                                isTermSelected={this.isTermSelected}
-                            />
-                        </ReduxExpSetFiltersInterface>
+                            href={this.props.href || this.props.searchBase}
+                            schemas={this.props.schemas}
+                            showClearFiltersButton={(()=>{
+                                var urlParts = url.parse(this.props.href, true);
+                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+                                var urlPartQueryCorrectedForType = _.clone(urlParts.query);
+                                if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
+                                return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
+                            })()}
+                            onClearFilters={(evt)=>{
+                                evt.preventDefault();
+                                evt.stopPropagation();
+                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+                                if (!clearFiltersURL) {
+                                    console.error("No Clear Filters URL");
+                                    return;
+                                }
+                                this.props.navigate(clearFiltersURL, {});
+                            }}
+                        />
                     </div>
                     :
                     null
@@ -292,7 +298,7 @@ class ResultTableContainer extends React.Component {
                             <ExperimentSetDetailPane
                                 result={result}
                                 containerWidth={containerWidth}
-                                expSetFilters={this.props.expSetFilters}
+                                href={this.props.href || this.props.searchBase}
                                 selectedFiles={this.props.selectedFiles}
                                 selectFile={this.props.selectFile}
                                 unselectFile={this.props.unselectFile}
@@ -387,7 +393,6 @@ class ControlsAndResults extends React.Component {
                     <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
                         <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer
-                                expSetFilters={this.props.expSetFilters}
                                 session={this.props.session}
                                 schemas={this.props.schemas}
                             />
@@ -407,7 +412,6 @@ export default class BrowseView extends React.Component {
 
     static propTypes = {
         'context' : PropTypes.object.isRequired,
-        'expSetFilters' : PropTypes.object,
         'session' : PropTypes.bool,
         'schemas' : PropTypes.object,
         'href' : PropTypes.string.isRequired
@@ -415,9 +419,8 @@ export default class BrowseView extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState){
         if (this.props.context !== nextProps.context) return true;
-        if (this.props.expSetFilters !== nextProps.expSetFilters) return true;
         if (this.props.session !== nextProps.session) return true;
-        if (this.props.href !== nextProps.href) return true;
+        if (this.props.href !== nextProps.href) return true; // Includes expSetFilters check as expSetFilters is now read from href.
         if (this.props.schemas !== nextProps.schemas) return true;
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     }

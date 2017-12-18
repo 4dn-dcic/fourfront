@@ -31,11 +31,10 @@ let state = null;
  * @see getTrackingID()
  * @param {string} [trackingID] - Google Analytics ID.
  * @param {Object} [context] - Current page content / JSON, to get details about Item, etc.
- * @param {Object} [currentExpSetFilters] - Currently-set expSetFilters, e.g. from Redux. For tracking browse page and how an Item was found.
  * @param {Object} [options] - Extra options.
  * @returns {boolean} true if initialized.
  */
-export function initializeGoogleAnalytics(trackingID = null, context = {}, currentExpSetFilters = {}, options = {}){
+export function initializeGoogleAnalytics(trackingID = null, context = {}, options = {}){
 
     if (trackingID === null){
         trackingID = getTrackingId();
@@ -69,7 +68,7 @@ export function initializeGoogleAnalytics(trackingID = null, context = {}, curre
         console.info("Initialized google analytics : Enhanced ECommerce Plugin");
     }
 
-    registerPageView(null, context, currentExpSetFilters);
+    registerPageView(null, context);
     return true;
 }
 
@@ -81,10 +80,9 @@ export function initializeGoogleAnalytics(trackingID = null, context = {}, curre
  * @export
  * @param {string} [href=null] - Page href, defaults to window.location.href.
  * @param {Object} [context={}] - The context prop; JSON representation of page.
- * @param {Object} [currentExpSetFilters={}] - Currently set expSetFilters.
  * @returns {boolean} True if success.
  */
-export function registerPageView(href = null, context = {}, currentExpSetFilters = {}){
+export function registerPageView(href = null, context = {}){
 
     if (!shouldTrack()) return false;
 
@@ -165,27 +163,27 @@ export function registerPageView(href = null, context = {}, currentExpSetFilters
         if (Array.isArray(context['@graph'])){ // We have a results page of some kind. Likely, browse, search, or collection.
             // If browse page, get current filters and add to pageview event for 'dimension1'.
             opts[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(
-                origHref || currentExpSetFilters,
+                origHref,
                 (context && context.filters) || null
             );
             if (context['@graph'].length > 0){
                 // We have some results, lets impression them as product list views.
                 if (navigate.isBrowseHref(href)){
-                    return impressionListOfItems(context['@graph'], origHref, currentExpSetFilters, 'Browse Results', context);
+                    return impressionListOfItems(context['@graph'], origHref, 'Browse Results', context);
                 } else if (navigate.isSearchHref(href)){
-                    return impressionListOfItems(context['@graph'], origHref, null, 'Search Results', context);
+                    return impressionListOfItems(context['@graph'], origHref, 'Search Results', context);
                 } else {
                     // Probably a collection page
-                    return impressionListOfItems(context['@graph'], origHref, null, 'Collection View', context);
+                    return impressionListOfItems(context['@graph'], origHref, 'Collection View', context);
                 }
             }
             return false;
         } else if (typeof context.accession === 'string'){ // We got an Item view, lets track some details about it.
             var productObj = createProductObjectFromItem(context);
             console.info("Item with an accession. Will track as product:", productObj);
-            if (currentExpSetFilters && typeof currentExpSetFilters === 'object'){
-                opts[GADimensionMap.currentFilters] = productObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(currentExpSetFilters);
-            }
+            //if (currentExpSetFilters && typeof currentExpSetFilters === 'object'){
+            //    opts[GADimensionMap.currentFilters] = productObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(currentExpSetFilters);
+            //}
 
             ga('ec:addProduct', productObj);
             ga('ec:setAction', 'detail', productObj);
@@ -282,7 +280,7 @@ export function eventLabelFromChartNodes(nodes){
 export function getStringifiedCurrentFilters(filters, contextFilters = null){
     if (typeof filters === 'string'){
         filters = Filters.hrefToFilters(filters, contextFilters);
-    } else if (typeof filters === 'undefined'){ // Allow filters to be blank.
+    } else if (typeof filters === 'undefined' || !filters){ // Allow filters to be blank.
         filters = Filters.currentExpSetFilters();
     }
     return JSON.stringify(filters, _.keys(filters).sort());
@@ -359,7 +357,7 @@ function shouldTrack(){
  * @private
  * @returns {Object[]} Representation of what was sent.
  */
-function impressionListOfItems(itemList, origHref = null, currentExpSetFilters = null, listName = null, context = null){
+function impressionListOfItems(itemList, origHref = null, listName = null, context = null){
     var from = 0;
     if (typeof origHref === 'string'){
         var urlParts = url.parse(origHref, true);
@@ -369,7 +367,7 @@ function impressionListOfItems(itemList, origHref = null, currentExpSetFilters =
     return itemList.map(function(expSet, i){
         var pObj = createProductObjectFromItem(expSet);
         pObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(
-            currentExpSetFilters || origHref || {},
+            origHref || {},
             (context && context.filters) || null
         );
         if (typeof listName === 'string'){

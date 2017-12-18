@@ -355,14 +355,14 @@ export const ChartDataController = {
 
         // Subscribe to Redux store updates to listen for changed expSetFilters.
         reduxSubscription = refs.store.subscribe(function(){
-            var prevExpSetFilters = refs.expSetFilters;
-            var prevHref = refs.href; // TODO: MAYBE REMOVE REFS.HREF WHEN SWITCH SEARCH FROM /BROWSE/
+            var prevHref = refs.href;
+            var prevExpSetFilters = Filters.hrefToFilters(prevHref); //refs.expSetFilters;
             var reduxStoreState = refs.store.getState();
             refs.href = reduxStoreState.href;
-            refs.expSetFilters = reduxStoreState.expSetFilters;
+            refs.expSetFilters = Filters.hrefToFilters(refs.href);
 
             // TODO: MAYBE REMOVE SEARCHQUERY WHEN SWITCH SEARCH FROM /BROWSE/
-            if ((prevExpSetFilters !== refs.expSetFilters || !_.isEqual(refs.expSetFilters, prevExpSetFilters)) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== Filters.searchQueryStringFromHref(refs.href))){
+            if (!Filters.compareExpSetFilters(refs.expSetFilters, prevExpSetFilters) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== Filters.searchQueryStringFromHref(refs.href))){
                 ChartDataController.handleUpdatedFilters(
                     refs.expSetFilters,
                     notifyUpdateCallbacks,
@@ -661,16 +661,16 @@ export const ChartDataController = {
      * @returns {void} Nothing
      */
     fetchUnfilteredAndFilteredExperimentSets : function(reduxStoreState = null, callback = null, opts = {}){
-        if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
+        if (!reduxStoreState || !reduxStoreState.href){
             reduxStoreState = refs.store.getState();
         }
 
         // Set refs.expSetFilters if is null (e.g. if called from initialize() and not triggered Redux store filter change).
         if (refs.expSetFilters === null){
-            refs.expSetFilters = reduxStoreState.expSetFilters;
+            refs.expSetFilters = Filters.hrefToFilters(reduxStoreState.href);
         }
 
-        var filtersSet = (_.keys(reduxStoreState.expSetFilters).length > 0) || (opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href));
+        var filtersSet = (_.keys(refs.expSetFilters).length > 0) || (opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href));
         var experiment_sets = null,
             filtered_experiment_sets = null;
 
@@ -684,7 +684,7 @@ export const ChartDataController = {
 
         var allExpsHref = refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart();
         var filteredExpsHref = ChartDataController.getFilteredContextHref(
-            reduxStoreState.expSetFilters, reduxStoreState.href, opts
+            refs.expSetFilters, reduxStoreState.href, opts
         ) + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart();
 
         notifyLoadStartCallbacks();
@@ -760,6 +760,7 @@ export const ChartDataController = {
      */
     fetchAndSetFilteredExperimentSets : function(callback = null, opts = {}){
         notifyLoadStartCallbacks();
+        console.log('TESTING URL', ChartDataController.getFilteredContextHref(null, null, opts));
         ajax.load(
             ChartDataController.getFilteredContextHref(null, null, opts) + '&limit=all' + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(filteredContext){
@@ -804,9 +805,10 @@ export const ChartDataController = {
     getFilteredContextHref : function(expSetFilters, href, opts){
         if (!expSetFilters || !href){
             var storeState = refs.store.getState();
-            if (!expSetFilters) expSetFilters = storeState.expSetFilters;
             if (!href)          href = storeState.href;
+            if (!expSetFilters) expSetFilters = Filters.hrefToFilters(href);
         }
+        console.log('TESTING URL2', href, expSetFilters);
         // TODO: MAYBE REMOVE SEARCHQUERY WHEN SWITCH SEARCH FROM /BROWSE/
         var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(href);
         return Filters.filtersToHref(expSetFilters, href, 0, 'experiments_in_set.accession', false, '/browse/') + (searchQuery ? '&q=' + searchQuery : '');

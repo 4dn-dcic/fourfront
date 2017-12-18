@@ -9,43 +9,7 @@ import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
 import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, AboveSearchTablePanel } from './components';
-
-
-
-// If the given term is selected, return the href for the term
-export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters) {
-    for (var filter in filters) {
-        if (filters[filter]['field'] == field && filters[filter]['term'] == term) {
-            return url.parse(filters[filter]['remove']).search;
-        }
-    }
-    return null;
-}
-
-function buildSearchHref(unselectHref, field, term, searchBase){
-    var href;
-    if (unselectHref) {
-        href = unselectHref;
-    } else {
-        var parts = url.parse(searchBase, true);
-        var query = _.clone(parts.query);
-        // format multiple filters on the same field
-        if(field in query){
-            if(Array.isArray(query[field])){
-                query[field] = query[field].concat(term);
-            }else{
-                query[field] = [query[field]].concat(term);
-            }
-        }else{
-            query[field] = term;
-        }
-        query = queryString.stringify(query);
-        parts.search = query && query.length > 0 ? ('?' + query) : '';
-        href = url.format(parts);
-    }
-    return href;
-}
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin, AboveSearchTablePanel } from './components';
 
 class InfoIcon extends React.Component{
     render() {
@@ -94,43 +58,13 @@ export class ResultTableHandlersContainer extends React.Component {
 
     constructor(props){
         super(props);
-        this.onFilter = this.onFilter.bind(this);
+        this.onFilter = onFilterHandlerMixin.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
         this.render = this.render.bind(this);
     }
 
-    onFilter(field, term, callback) {
-        var unselectHrefIfSelected = getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters);
-
-        var targetSearchHref = buildSearchHref(
-            unselectHrefIfSelected,
-            field, term, this.props.searchBase,
-        );
-
-        // Ensure only 1 type filter is selected at once. Unselect any other type= filters if setting new one.
-        if (field === 'type'){
-            if (!(unselectHrefIfSelected)){
-                var parts = url.parse(targetSearchHref, true);
-                if (Array.isArray(parts.query.type)){
-                    var types = parts.query.type;
-                    if (types.length > 1){
-                        var queryParts = _.clone(parts.query);
-                        delete queryParts[""]; // Safety
-                        queryParts.type = encodeURIComponent(term); // Only 1 Item type selected at once.
-                        var searchString = queryString.stringify(queryParts);
-                        parts.search = searchString && searchString.length > 0 ? ('?' + searchString) : '';
-                        targetSearchHref = url.format(parts);
-                    }
-                }
-            }
-        }
-
-        this.props.navigate(targetSearchHref, {});
-        setTimeout(callback, 100);
-    }
-
     isTermSelected(term, facet){
-        return !!(getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
+        return !!(Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
     }
 
     render(){

@@ -97,9 +97,6 @@ var BannerEntry = module.exports.BannerEntry = createReactClass({
             var objSet = new Set();
             objSet.add(this.props.defaultFilter);
             newObj['experiments_in_set.award.project'] = objSet;
-            store.dispatch({
-                type: {'expSetFilters': newObj}
-            });
         }
     },
 

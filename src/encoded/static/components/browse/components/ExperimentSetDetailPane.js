@@ -17,7 +17,6 @@ export class ExperimentSetDetailPane extends React.Component {
     static allFileIDs(expSet: Object){ return _.pluck(  expFxn.allFilesFromExperimentSet(expSet)  , 'uuid'); }
 
     static propTypes = {
-        'expSetFilters' : PropTypes.object,
         'selectAllFilesInitially' : PropTypes.bool,
         'result' : PropTypes.object.isRequired,
         'containerWidth' : PropTypes.number,

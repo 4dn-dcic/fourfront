@@ -247,8 +247,6 @@ export default class QuickInfoBar extends React.Component {
         if (this.state.show !== false) className += ' showing';
         if (this.state.show === 'activeFilters') className += ' showing-filters';
         if (this.state.show === 'mosaicCharts') className += ' showing-charts';
-        var expSetFilters = this.props.expSetFilters || store.getState().expSetFilters;
-        var expFiltersHrefChunk = Filters.expSetFiltersToURLQuery(store.getState().expSetFilters);
         return (
             <div className={className} onMouseLeave={()=>{
                 this.setState({ show : false });
@@ -262,8 +260,7 @@ export default class QuickInfoBar extends React.Component {
                         classNameID="expsets"
                         value={stats.experiment_sets}
                         key={0}
-                        expSetFilters={expSetFilters}
-                        expFiltersHrefChunk={expFiltersHrefChunk}
+                        expSetFilters={this.props.expSetFilters}
                         href={this.props.href}
                     />
                     <Stat
@@ -273,8 +270,7 @@ export default class QuickInfoBar extends React.Component {
                         classNameID="experiments"
                         value={stats.experiments}
                         key={1}
-                        expSetFilters={expSetFilters}
-                        expFiltersHrefChunk={expFiltersHrefChunk}
+                        expSetFilters={this.props.expSetFilters}
                         href={this.props.href}
                     />
                     <Stat
@@ -284,8 +280,7 @@ export default class QuickInfoBar extends React.Component {
                         classNameID="files"
                         value={stats.files}
                         key={2}
-                        expSetFilters={expSetFilters}
-                        expFiltersHrefChunk={expFiltersHrefChunk}
+                        expSetFilters={this.props.expSetFilters}
                         href={this.props.href}
                     />
                     <div

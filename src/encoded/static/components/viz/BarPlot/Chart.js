@@ -161,8 +161,10 @@ export class Chart extends React.Component {
         return !!(
             pastProps.showType !== nextProps.showType ||
             !_.isEqual(pastProps.experiment_sets, nextProps.experiment_sets) ||
+            (pastProps.experiment_sets && nextProps.experiment_sets && pastProps.experiment_sets.length !== nextProps.experiment_sets.length) ||
             pastProps.height !== nextProps.height ||
-            !_.isEqual(pastProps.filtered_experiment_sets, nextProps.filtered_experiment_sets)
+            !_.isEqual(pastProps.filtered_experiment_sets, nextProps.filtered_experiment_sets) ||
+            (pastProps.filtered_experiment_sets && nextProps.filtered_experiment_sets && pastProps.filtered_experiment_sets.length !== nextProps.filtered_experiment_sets.length)
         );
     }
 

@@ -7,7 +7,7 @@ import queryString from 'query-string';
 import _ from 'underscore';
 import * as store from './../../../store';
 import { Collapse, Fade } from 'react-bootstrap';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, analytics, JWT } from './../../util';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, analytics, JWT, navigate } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { PartialList } from './../../item-pages/components';
 import ReactTooltip from 'react-tooltip';
@@ -103,9 +103,10 @@ class Term extends React.Component {
 
     handleClick(e) {
         e.preventDefault();
+        /*
         var existingFilters;
         if (this.props.expSetFilters) existingFilters = _.clone(this.props.expSetFilters);
-
+        */
         this.setState(
             { filtering : true },
             () => {
@@ -114,7 +115,7 @@ class Term extends React.Component {
                     this.props.term.key,
                     () => this.setState({ filtering : false })
                 );
-
+                /*
                 if (this.props.expSetFilters){
                     var isUnset = false;
                     if (
@@ -127,6 +128,7 @@ class Term extends React.Component {
                         'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
                     });
                 }
+                */
             }
         );
     }
@@ -370,7 +372,7 @@ class Facet extends React.Component {
     handleStaticClick(e) {
         e.preventDefault();
         if (!this.isStatic()) return false;
-        if (this.props.expSetFilters) var existingFilters = _.clone(this.props.expSetFilters);
+        //if (this.props.expSetFilters) var existingFilters = _.clone(this.props.expSetFilters);
         this.setState(
             { filtering : true },
             () => {
@@ -379,6 +381,7 @@ class Facet extends React.Component {
                     this.props.facet.terms[0].key,
                     ()=> {
                         this.setState({ filtering : false });
+                        /*
                         if (this.props.expSetFilters){
                             var isUnset = false;
                             if (
@@ -391,6 +394,7 @@ class Facet extends React.Component {
                                 'dimension1' : analytics.getStringifiedCurrentFilters(existingFilters)
                             });
                         }
+                        */
                     }
                 );
             }
@@ -480,184 +484,43 @@ class Facet extends React.Component {
 
 
 
-let cachedEmptyFacets = null;
+/**
+ * Use this function as part of SearchView and BrowseView to be passed down to FacetList.
+ * Should be bound to a component instance, with `this` providing 'href', 'context' (with 'filters' property), and 'navigate'.
+ * 
+ * @param {string} field - Field for which a Facet term was clicked on. 
+ * @param {string} term - Term clicked on.
+ * @param {function} callback - Any function to execute afterwards.
+ */
+export function onFilterHandlerMixin(field, term, callback){
 
-export class ReduxExpSetFiltersInterface extends React.Component {
+    var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, field, this.props.context.filters);
 
-    static getFacets(props){
-        if (Array.isArray(props.facets) && props.facets.length > 0) return props.facets;
-        if (!cachedEmptyFacets) return [];
-        var facets = cachedEmptyFacets.slice(0);
-        if (facets.length > 0){
-            return ReduxExpSetFiltersInterface.fillFacetTermsAndCountFromExps(
-                facets,
-                props.experimentSets
-            );
-        }
-        return [];
-    }
+    var targetSearchHref = Filters.buildSearchHref(
+        unselectHrefIfSelected,
+        field, term, this.props.searchBase || this.props.href
+    );
 
-    /**
-     * For client-side filtering of experiments only.
-     * Fills facet objects with 'terms' and 'total' properties, as well as terms' counts.
-     * Modifies incompleteFacets param in place to turn the array of object into "complete" facets.
-     *
-     * @param {Object[]} incompleteFacets - Array of facet objects. Each should have field and title keys/values.
-     * @param {Object[]} exps - Array of experiment objects, obtained from @graph or experiments_in_set property on context.
-     */
-    static fillFacetTermsAndCountFromExps(incompleteFacets, exps){
-
-        var facets = incompleteFacets.slice(0);
-        facets.forEach(function(facet, facetIndex){
-
-            var fieldHierarchyLevels = facet.field.replace('experiments_in_set.', '').split('.'); // E.g. [biosample, biosource, individual,..]
-            var termCounts = {};
-
-            // Loop through experiments to find all terms and counts per term.
-            for (var i = 0; i < exps.length; i++){
-
-                var facetTerm = object.getNestedProperty(exps[i], fieldHierarchyLevels);
-
-                if (Array.isArray(facetTerm)) {
-                    for (var j = 0; j < facetTerm.length; j++){
-                        if (!termCounts.hasOwnProperty(facetTerm[j])) termCounts[facetTerm[j]] = 0;
-                        termCounts[facetTerm[j]]++;
-                    }
-                } else {
-                    if (!termCounts.hasOwnProperty(facetTerm)) termCounts[facetTerm] = 0;
-                    termCounts[facetTerm]++;
+    // Ensure only 1 type filter is selected at once. Unselect any other type= filters if setting new one.
+    if (field === 'type'){
+        if (!(unselectHrefIfSelected)){
+            var parts = url.parse(targetSearchHref, true);
+            if (Array.isArray(parts.query.type)){
+                var types = parts.query.type;
+                if (types.length > 1){
+                    var queryParts = _.clone(parts.query);
+                    delete queryParts[""]; // Safety
+                    queryParts.type = encodeURIComponent(term); // Only 1 Item type selected at once.
+                    var searchString = queryString.stringify(queryParts);
+                    parts.search = searchString && searchString.length > 0 ? ('?' + searchString) : '';
+                    targetSearchHref = url.format(parts);
                 }
-
             }
-
-            facet.total = 0;
-            facet.terms = Object.keys(termCounts).map(function(term,i,a){
-                facet.total += termCounts[term];
-                return {
-                    'key' : term,
-                    'doc_count' : termCounts[term]
-                };
-            });
-
-        }, this);
-
-        return facets; // Now complete.
-
-    }
-
-
-
-    static propTypes = {
-        'facets' : PropTypes.array,
-        'experimentsOrSets' : PropTypes.oneOf([ 'sets', 'experiments' ]),
-        'expSetFilters' : PropTypes.object,
-        'href' : PropTypes.string.isRequired,
-        'experimentSets' : PropTypes.array, // Required if no facets supplied.
-        'filterOnClientSide' : PropTypes.bool
-    }
-
-    static defaultProps = {
-        'facets' : null,
-        'experimentsOrSets' : 'sets',
-        'filterOnClientSide' : false
-    }
-
-    constructor(props){
-        super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.loadFacets = this.loadFacets.bind(this);
-        this.changeFilter = this.changeFilter.bind(this);
-        this.clearFilters = this.clearFilters.bind(this);
-        this.render = this.render.bind(this);
-    }
-
-    /**
-     * If not using props passed in through props, and incomplete facets not available (yet) in redux store,
-     * AJAX them in, save to redux store, then fill up w/ terms.
-     *
-     * @see FacetList.constructor()
-     */
-    componentDidMount(){
-
-        if (this.props.debug) console.log(
-            'Mounted FacetList/ReduxExpSetFiltersInterface on ' + (this.props.href || 'unknown page.'),
-            '\nFacets Provided: ' + this.props.facets,
-            'Facets Loaded: ' + Array.isArray(cachedEmptyFacets)
-        );
-
-        if (!this.props.facets && !isServerSide() && !Array.isArray(cachedEmptyFacets)){
-            this.loadFacets((facets) => {
-
-                cachedEmptyFacets = facets.map((f)=>{
-                    return _.extend({}, f, { 'field' : Filters.standardizeFieldKey(f.field, this.props.experimentsOrSets, false) });
-                });
-                facets = ReduxExpSetFiltersInterface.fillFacetTermsAndCountFromExps(
-                    cachedEmptyFacets,
-                    this.props.experimentSets
-                );
-                if (Array.isArray(facets) && facets.length > 0){
-                    this.setState({ 'facets' : facets, 'facetsLoaded' : true, 'mounted' : true }, function(){
-                        ReactTooltip.rebuild();
-                    });
-                }
-            });
-        } else {
-            // @see getInitialState
-            this.setState({ 'mounted' : true });
         }
     }
 
-    /** Load list of available facets via AJAX once & reuse via redux store. */
-    loadFacets(callback = null){
-        var facetType = (this.props.itemTypes && Array.isArray(this.props.itemTypes) && this.props.itemTypes[0]) ||
-            (this.props.experimentsOrSets === 'sets' ? 'ExperimentSet' : 'Experiment');
-
-        ajax.load('/facets?type=' + facetType, (resultFacets) => {
-            if (this.props.debug) console.log('Loaded Facet List via AJAX.', resultFacets);
-            if (typeof callback == 'function') callback(resultFacets);
-        });
-    }
-
-    changeFilter(field, term, callback) {
-
-        var filtrationArgs = [
-            field,
-            term,
-            this.props.experimentsOrSets,
-            this.props.expSetFilters,
-            callback,
-            false,
-            this.props.filterOnClientSide ? false : true,
-            this.props.href
-        ];
-
-        return Filters.changeFilter.apply(Filters.changeFilter, filtrationArgs);
-    }
-
-    clearFilters(e) {
-        e.preventDefault();
-        setTimeout(()=> Filters.saveChangedFilters({}, !(this.props.filterOnClientSide), this.props.href) , 0);
-    }
-
-    render(){
-        var oldChildProps = this.props.children.props;
-        var newChildProps = {
-            'facets' : ReduxExpSetFiltersInterface.getFacets(this.props),
-            'onFilter' : this.changeFilter,
-            'onClearFilters' : this.clearFilters
-        };
-        newChildProps.experimentsOrSets = oldChildProps.experimentsOrSets || this.props.experimentsOrSets;
-        newChildProps.experimentSets = oldChildProps.experimentSets || this.props.experimentSets;
-        newChildProps.title = oldChildProps.title || this.props.title;
-        newChildProps.filterFacetsFxn = oldChildProps.filterFacetsFxn || this.props.filterFacetsFxn;
-        newChildProps.href = oldChildProps.href || this.props.href;
-        newChildProps.schemas = oldChildProps.schemas || this.props.schemas;
-        newChildProps.expSetFilters = oldChildProps.expSetFilters || this.props.expSetFilters;
-        newChildProps.showClearFiltersButton = newChildProps.expSetFilters && !_.isEmpty(newChildProps.expSetFilters) ? true : false;
-        newChildProps.session = oldChildProps.session || this.props.session;
-        return React.cloneElement(this.props.children, newChildProps);
-    }
-
+    (this.props.navigate || navigate)(targetSearchHref, {});
+    setTimeout(callback, 100);
 }
 
 export class FacetList extends React.Component {
@@ -689,6 +552,8 @@ export class FacetList extends React.Component {
         }
         return true;
     }
+
+    static onFilterHandlerMixin = onFilterHandlerMixin
 
     static propTypes = {
         'facets' : PropTypes.arrayOf(PropTypes.shape({

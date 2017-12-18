@@ -300,10 +300,19 @@ export class OverViewBodyItem extends React.Component {
             );
         }
 
-        if (wrapInColumn) return (
-            <div className={(typeof wrapInColumn === 'string' ? wrapInColumn : "col-xs-6 col-md-4") + (columnExtraClassName ? ' ' + columnExtraClassName : '')} key="outer" children={innerBlockReturned} />
-        );
-        else return innerBlockReturned;
+        if (wrapInColumn){
+            var outerClassName = (columnExtraClassName ? columnExtraClassName : '');
+            if (typeof wrapInColumn === 'string'){
+                // MAYBE TODO-REMOVE / ANTI-PATTERN
+                if (wrapInColumn === 'auto' && this._reactInternalInstance && this._reactInternalInstance._hostParent && this._reactInternalInstance._hostParent._currentElement && this._reactInternalInstance._hostParent._currentElement.props && Array.isArray(this._reactInternalInstance._hostParent._currentElement.props.children)){
+                    var rowCountItems = React.Children.count(this._reactInternalInstance._hostParent._currentElement.props.children);
+                    outerClassName += ' col-md-' + (12 / rowCountItems) + ' col-xs-6';
+                } else outerClassName += ' ' + wrapInColumn;
+            } else {
+                outerClassName += " col-xs-6 col-md-4"; // Default column sizing
+            }
+            return <div className={outerClassName} key="outer" children={innerBlockReturned} />;
+        } else return innerBlockReturned;
 
     }
 }

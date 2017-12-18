@@ -588,8 +588,6 @@ class ProfileWorkFields extends React.Component {
             var submits_for = user.submits_for;
         }
 
-        console.log(this.state.awards_list);
-
         // THESE FIELDS ARE NOT EDITABLE.
         // To be modified by admins, potentially w/ exception of 'Primary Lab' (e.g. select from submits_for list).
         return (

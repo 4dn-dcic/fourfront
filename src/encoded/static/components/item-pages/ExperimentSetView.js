@@ -33,8 +33,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     static propTypes = {
         schemas : PropTypes.object,
         context : PropTypes.object,
-        expSetFilters : PropTypes.object.isRequired,     // Set via app.js <ContentView...>
-        expIncompleteFacets : PropTypes.array,
         facets : PropTypes.array
     }
 
@@ -61,7 +59,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             _.extend(this.state, state);
         }
     }
-
+    
+    /*
     componentWillReceiveProps(nextProps) {
 
         // Make sure state is updated upon filtering
@@ -72,6 +71,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             });
         }
     }
+    */
 
     getTabViewContents(){
 
@@ -213,6 +213,10 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
 }
 
+// Register ExperimentSetView to be the view for these @types.
+globals.content_views.register(ExperimentSetView, 'ExperimentSet');
+globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
+
 
 /**
  * Renders ItemHeader parts wrapped in ItemHeader.Wrapper, with appropriate values.
@@ -312,6 +316,4 @@ export class ProcessedFilesStackedTableSection extends React.Component {
 }
 
 
-// Register ExperimentSetView to be the view for these @types.
-globals.content_views.register(ExperimentSetView, 'ExperimentSet');
-globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
+

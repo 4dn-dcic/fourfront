@@ -43,6 +43,12 @@ export function getWindowLocation(mounted){
     if (this && this.props && this.props.href) {
         return url.parse(this.props.href);
     }
+    if (store && typeof store.getState === 'function'){
+        var storeState = store.getState();
+        if (typeof storeState.href === 'string' && storeState.href){
+            return url.parse(storeState.href); 
+        }
+    }
     if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
         return window.location;
     }
@@ -238,6 +244,8 @@ export default class Navigation extends React.Component {
             navClass += " scrolled-at-top";
         }
 
+        var expSetFilters = Filters.hrefToFilters(this.props.href, (this.props.context && this.props.context.filters) || null, true);
+
         return (
             <div className={navClass}>
                 <div id="top-nav" className="navbar-fixed-top">
@@ -257,13 +265,7 @@ export default class Navigation extends React.Component {
                             </Navbar.Toggle>
                         </Navbar.Header>
                         <Navbar.Collapse>
-                            <Nav>
-                            {
-                                this.props.listActionsFor('global_sections').map((a)=>
-                                    Navigation.buildDropdownMenu.call(this, a, this.state.mounted)
-                                )
-                            }
-                            </Nav>
+                            <Nav children={_.map(this.props.listActionsFor('global_sections'), (a) => Navigation.buildDropdownMenu.call(this, a, this.state.mounted) )} />
                             <UserActions
                                 mounted={this.state.mounted} // boolean
                                 closeMobileMenu={this.closeMobileMenu} // function
@@ -275,7 +277,7 @@ export default class Navigation extends React.Component {
                         <SearchBar href={this.props.href} />
                         </Navbar.Collapse>
                     </Navbar>
-                    <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={this.props.expSetFilters} schemas={this.props.schemas} />
+                    <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={expSetFilters} schemas={this.props.schemas} />
                 </div>
             </div>
         );
