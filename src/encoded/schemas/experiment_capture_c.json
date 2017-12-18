@@ -57,6 +57,7 @@
             "items": {
                 "description": "A region targeted for capture.",
                 "title": "Target Region",
+                "required": ["target"],
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {

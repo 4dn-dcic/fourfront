@@ -67,6 +67,7 @@
             "items": {
                 "title": "Experiment relation",
                 "type": "object",
+                "required": ["relationship_type", "experiment"],
                 "additionalProperties": false,
                 "properties": {
                     "relationship_type": {
