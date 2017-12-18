@@ -25,8 +25,14 @@
         "schema_version": {
             "default": "1"
         },
+        "title":{
+            "title": "Title",
+            "type": "string",
+            "exclude_from" : ["submit4dn", "FFedit-create"]
+        },
         "treatment_type": {
-            "default": "RNAi"
+            "default": "RNAi",
+            "exclude_from" : ["submit4dn", "FFedit-create"]
         },
         "rnai_type": {
             "title": "Type of RNAi",
