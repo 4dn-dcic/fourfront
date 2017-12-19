@@ -8,7 +8,8 @@ from snovault import (
 )
 from .base import (
     Item,
-    paths_filtered_by_status
+    paths_filtered_by_status,
+    get_item_if_you_can
 )
 
 
@@ -113,7 +114,7 @@ class Experiment(Item):
         if 'sop_mapping' in properties.keys():
             # check if the SopMap has bad Status
             currmap = properties['sop_mapping'].get('sopmap')
-            currmap = self.get_item_if_you_can(self.request, currmap, 'SopMap')
+            currmap = get_item_if_you_can(self.request, currmap, 'SopMap')
             if currmap:
                 try:
                     if self.has_bad_status(currmap['status']):
