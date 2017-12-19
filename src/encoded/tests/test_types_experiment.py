@@ -100,7 +100,7 @@ def test_experiment_update_hic_sop_mapping_has_map_is_no(testapp, experiment_dat
 def test_experiment_update_hic_sop_mapping_has_sop2no_when_only_sopmap_deleted(
         testapp, experiment_data, sop_map_data):
     sop_map_data['status'] = 'deleted'
-    res_sop = testapp.post_json('/sop_map', sop_map_data, status=201)
+    testapp.post_json('/sop_map', sop_map_data, status=201)
     res_exp = testapp.post_json('/experiment_hi_c', experiment_data)
     assert 'sop_mapping' in res_exp.json['@graph'][0]
     assert res_exp.json['@graph'][0]['sop_mapping']['has_sop'] == "No"
