@@ -433,7 +433,7 @@ def rnai(testapp, lab, award):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
-        'rnai_sequence': 'TATATGGGGAA',
+        'target_sequence': 'TATATGGGGAA',
         'rnai_type': 'shRNA',
     }
     return testapp.post_json('/treatment_rnai', item).json['@graph'][0]
