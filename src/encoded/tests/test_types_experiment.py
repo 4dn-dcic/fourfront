@@ -56,6 +56,20 @@ def sop_map_data(protocol, lab, award):
     }
 
 
+@pytest.fixture
+def sop_map_data_2(lab, award):
+        return {
+            "sop_name": "Second in situ hic map",
+            "sop_version": 2,
+            'lab': lab['@id'],
+            'award': award['@id'],
+            "associated_item_type": "ExperimentHiC",
+            "id_values": ["micro-C"],
+            "notes": "This is a dummy second version of map",
+            "description": "Second",
+        }
+
+
 def test_experiment_update_experiment_relation(testapp, base_experiment, experiment):
     relation = [{'relationship_type': 'controlled by',
                  'experiment': experiment['@id']}]
@@ -81,6 +95,36 @@ def test_experiment_update_hic_sop_mapping_has_map_is_no(testapp, experiment_dat
     res_exp = testapp.post_json('/experiment_hi_c', experiment_data)
     assert 'sop_mapping' in res_exp.json['@graph'][0]
     assert res_exp.json['@graph'][0]['sop_mapping']['has_sop'] == "No"
+
+
+def test_experiment_update_hic_sop_mapping_has_sop2no_when_only_sopmap_deleted(
+        testapp, experiment_data, sop_map_data):
+    sop_map_data['status'] = 'deleted'
+    res_sop = testapp.post_json('/sop_map', sop_map_data, status=201)
+    res_exp = testapp.post_json('/experiment_hi_c', experiment_data)
+    assert 'sop_mapping' in res_exp.json['@graph'][0]
+    assert res_exp.json['@graph'][0]['sop_mapping']['has_sop'] == "No"
+
+
+def test_experiment_update_hic_sop_mapping_to_v2_when_2_versions(
+        testapp, experiment_data, sop_map_data, sop_map_data_2):
+    testapp.post_json('/sop_map', sop_map_data, status=201)
+    res2chk = testapp.post_json('/sop_map', sop_map_data_2, status=201)
+    res_exp = testapp.post_json('/experiment_hi_c', experiment_data)
+    assert 'sop_mapping' in res_exp.json['@graph'][0]
+    assert res_exp.json['@graph'][0]['sop_mapping']['has_sop'] == "Yes"
+    assert res_exp.json['@graph'][0]['sop_mapping']['sop_map'] == res2chk.json['@graph'][0]['@id']
+
+
+def test_experiment_update_hic_sop_mapping_to_v1_when_v2_deleted(
+        testapp, experiment_data, sop_map_data, sop_map_data_2):
+    res2chk = testapp.post_json('/sop_map', sop_map_data, status=201)
+    sop_map_data_2['status'] = 'deleted'
+    testapp.post_json('/sop_map', sop_map_data_2, status=201)
+    res_exp = testapp.post_json('/experiment_hi_c', experiment_data)
+    assert 'sop_mapping' in res_exp.json['@graph'][0]
+    assert res_exp.json['@graph'][0]['sop_mapping']['has_sop'] == "Yes"
+    assert res_exp.json['@graph'][0]['sop_mapping']['sop_map'] == res2chk.json['@graph'][0]['@id']
 
 
 def test_experiment_update_hic_sop_map_not_added_when_already_present(testapp, experiment_data):
