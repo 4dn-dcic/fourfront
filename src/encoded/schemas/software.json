@@ -144,6 +144,7 @@
                   "title": "Related Software",
                   "type": "object",
                   "additionalProperties": false,
+                  "required": ["relationship_type", "software"],
                   "properties": {
                       "relationship_type": {
                           "type": "string",

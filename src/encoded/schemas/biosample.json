@@ -101,6 +101,7 @@
             "ff_flag": "second round",
             "items": {
                 "title": "Biosample relation",
+                "required": ["relationship_type", "biosample"],
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
