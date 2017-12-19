@@ -84,11 +84,10 @@ class Experiment(Item):
         bad_statuses = ["revoked", "deleted", "obsolete", "replaced"]
         return status in bad_statuses
 
-    def find_current_sop_map(self, experiment_type):
+    def find_current_sop_map(self, experiment_type, sop_coll=None):
         maps = []
         suffnum = 1
         mapid = self.generate_mapid(experiment_type, suffnum)
-        sop_coll = self.registry['collections']['SopMap']
         if sop_coll is not None:
             while(True):
                 m = sop_coll.get(mapid)
@@ -110,14 +109,14 @@ class Experiment(Item):
         return None
 
     def _update(self, properties, sheets=None):
-        # import pdb; pdb.set_trace()
+        sop_coll = None
         if 'sop_mapping' in properties.keys():
             # check if the SopMap has bad Status
+            sop_coll = self.registry['collections']['SopMap']
             currmap = properties['sop_mapping'].get('sopmap')
-            currmap = get_item_if_you_can(self.request, currmap, 'SopMap')
             if currmap:
                 try:
-                    if self.has_bad_status(currmap['status']):
+                    if self.has_bad_status(sop_coll.get(currmap)['status']):
                         # delete mapping from properties
                         del properties['sop_mapping']
                 except AttributeError:
@@ -125,8 +124,10 @@ class Experiment(Item):
                     print("CHECK STATUS OF SOP MAP")
 
         if 'sop_mapping' not in properties.keys():
+            if sop_coll is None:
+                sop_coll = self.registry['collections']['SopMap']
             # if sop_mapping field not present see if it should be
-            sopmap = self.find_current_sop_map(properties['experiment_type'])
+            sopmap = self.find_current_sop_map(properties['experiment_type'], sop_coll)
             properties['sop_mapping'] = {}
             if sopmap is not None:
                 sop_mapping = str(sopmap.uuid)
