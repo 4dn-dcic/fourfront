@@ -84,6 +84,7 @@
             "items": {
                 "title": "Flowcell details",
                 "type": "object",
+                "required": ["machine"],
                 "additionalProperties": false,
                 "properties": {
                     "machine": {

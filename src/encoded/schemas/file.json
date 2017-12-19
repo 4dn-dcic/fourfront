@@ -108,6 +108,7 @@
             "items": {
                 "title": "Related File",
                 "type": "object",
+                "required": ["relationship_type", "file"],
                 "additionalProperties": false,
                 "properties": {
                     "relationship_type": {

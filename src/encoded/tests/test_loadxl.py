@@ -2,7 +2,6 @@ import pytest
 from encoded import loadxl
 import json
 from unittest import mock
-from webtest.response import TestResponse
 
 pytestmark = pytest.mark.working
 
@@ -21,6 +20,7 @@ def test_gen_access_keys_on_server(testapp, admin):
     old_get = testapp.get
 
     def side_effect(path):
+        from webtest.response import TestResponse
         if path == '/health?format=json':
             tr = TestResponse()
             tr.json_body = {"beanstalk_env": "fourfront-webprod"}

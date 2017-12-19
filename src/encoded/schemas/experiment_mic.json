@@ -69,6 +69,7 @@
                 "title": "Imaging path",
                 "type": "object",
                 "additionalProperties": false,
+                "required": ["path", "channel"],
                 "properties":{
                     "path":{
                         "title": "Imaging Path",
