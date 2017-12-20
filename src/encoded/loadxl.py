@@ -49,6 +49,7 @@ ORDER = [
     'quality_metric_fastqc',
     'quality_metric_bamqc',
     'quality_metric_pairsqc',
+    'quality_metric_dedupqc_repliseq',
     'microscope_setting_d1',
     'microscope_setting_d2',
     'microscope_setting_a1',

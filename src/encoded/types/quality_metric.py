@@ -80,3 +80,17 @@ class QualityMetricPairsqc(QualityMetric):
     item_type = 'quality_metric_pairsqc'
     schema = load_schema('encoded:schemas/quality_metric_pairsqc.json')
     embedded_list = QualityMetric.embedded_list
+
+@collection(
+    name='quality-metrics-dedupqc-repliseq',
+    properties={
+        'title': 'Dedup QC Quality Metrics for Repli-seq',
+        'description': 'Listing of Dedup QC Quality Metrics for Repli-seq',
+    })
+class QualityMetricDedupqcRepliseq(QualityMetric):
+    """Subclass of quality matrics for repli-seq dedup."""
+
+    item_type = 'quality_metric_dedupqc_repliseq'
+    schema = load_schema('encoded:schemas/quality_metric_dedupqc_repliseq.json')
+    embedded_list = QualityMetric.embedded_list
+
